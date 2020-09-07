@@ -1,0 +1,54 @@
+//=================================================================================================
+//
+// Hell score pillar
+//
+//=================================================================================================
+
+ACTOR HellScorePillar 5020
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 40
+	+SOLID
+	+BUMPSPECIAL
+	+SCOREPILLAR
+	States
+	{
+	Spawn:
+		HLSP A -1
+		Stop
+	TagBlueSkull:
+		HLSP B 35
+		HLSP C 140
+		Goto Spawn
+	TagRedSkull:
+		HLSP D 35
+		HLSP E 140
+		Goto Spawn
+	}
+}
+
+//=================================================================================================
+//
+// Heretic Skulls for Skulltag
+//
+//=================================================================================================
+
+
+actor hereticredskull : redskull 5025
+{
+  game heretic
+  game hexen
+  game strife
+  game doom
+}
+
+actor hereticblueskull : blueskull 5026
+{
+  game heretic
+  game hexen
+  game strife
+  game doom
+}

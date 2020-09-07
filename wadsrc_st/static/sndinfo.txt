@@ -1,0 +1,40 @@
+$ifdoom
+//minigun
+weapons/minigun			dsminign
+
+// [BC] Some new sounds for Skulltag.
+//grenade launcher/missile
+weapons/grbnce			dsbounce
+weapons/grenlx			dsgrnexp
+weapons/grenlf			dsglaunc
+
+//bfg10k
+weapons/bfg10kf			dsbfg10k
+weapons/bfg10kx                 dsbarexp
+weapons/bfg10kcool		ds10kcdn
+weapons/bfg10kidle		ds10kidl
+
+// [BC] Don't limit the number of BFG10K explosions we can hear.
+$limit weapons/bfg10kx 0
+// [Dusk] Neither do limit the grenade launcher explosions
+$limit weapons/grenlx 0
+
+// [BC] Super Shotgun Guy
+ssgguy/attack                   dssggatk
+
+/***************************************************************************/
+/*									   */
+/* ADDITIONAL SOUNDS FROM TCTF.WAD FOR SKULLTAG				   */
+/*									   */
+/***************************************************************************/
+
+WindSound            wind
+Thunder	             thndr1
+WaterFallSound       waters1
+door1_start	         d1_start
+door1_mid            d1_mid
+door1_end            d1_end
+
+$ambient 1 WindSound POINT CONTINUOUS 1.0
+$ambient 2 WaterFallSound POINT CONTINUOUS 1.0
+$endif	// ifdoom

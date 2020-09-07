@@ -1,0 +1,438 @@
+//Acolytes
+
+actor AcolyteSpot : CustomMonsterInvasionSpot 5600
+{
+dropitem "Acolyte"
+}
+
+actor TanAcolyteSpot : CustomMonsterInvasionSpot 5601
+{
+dropitem "AcolyteTan"
+}
+
+actor RedAcolyteSpot : CustomMonsterInvasionSpot 5602
+{
+dropitem "AcolyteRed"
+}
+
+actor RustAcolyteSpot : CustomMonsterInvasionSpot 5603
+{
+dropitem "AcolyteRust"
+}
+
+actor GrayAcolyteSpot : CustomMonsterInvasionSpot 5604
+{
+dropitem "AcolyteGray"
+}
+
+actor DGAcolyteSpot : CustomMonsterInvasionSpot 5605
+{
+dropitem "AcolyteDGreen"
+}
+
+actor GoldAcolyteSpot : CustomMonsterInvasionSpot 5606
+{
+dropitem "AcolyteGold"
+}
+
+actor LGAcolyteSpot : CustomMonsterInvasionSpot 5607
+{
+dropitem "AcolyteLGreen"
+}
+
+actor BlueAcolyteSpot : CustomMonsterInvasionSpot 5608
+{
+dropitem "AcolyteBlue"
+}
+
+actor ShadowAcolyteSpot : CustomMonsterInvasionSpot 5609
+{
+dropitem "AcolyteShadow"
+}
+
+actor RandAcolyteSpot : CustomMonsterInvasionSpot 5610
+{
+dropitem "Acolyte"
+dropitem "AcolyteShadow"
+dropitem "AcolyteBlue"
+dropitem "AcolyteLGreen"
+dropitem "AcolyteGold"
+dropitem "AcolyteDGreen"
+dropitem "AcolyteGray"
+dropitem "AcolyteRust"
+dropitem "AcolyteRed"
+dropitem "AcolyteTan"
+}
+
+//Robots
+
+actor SentinelSpot : CustomMonsterInvasionSpot 5611
+{
+dropitem "Sentinel"
+}
+
+actor CrusaderSpot : CustomMonsterInvasionSpot 5612
+{
+dropitem "Crusader"
+}
+
+actor InquisitorSpot : CustomMonsterInvasionSpot 5613
+{
+dropitem "Inquisitor"
+}
+
+actor StalkerSpot : CustomMonsterInvasionSpot 5614
+{
+dropitem "Stalker"
+}
+
+actor CeilingTurretSpot : CustomMonsterInvasionSpot 5615
+{
+dropitem "CeilingTurret"
+}
+
+actor TemplarSpot : CustomMonsterInvasionSpot 5616
+{
+dropitem "Templar"
+}
+
+actor ReaverSpot : CustomMonsterInvasionSpot 5617
+{
+dropitem "Reaver"
+}
+
+actor RandSmallRobSpot : CustomMonsterInvasionSpot 5618
+{
+dropitem "Sentinel"
+dropitem "Stalker"
+}
+
+actor RandMedRobSpot : CustomMonsterInvasionSpot 5619
+{
+dropitem "Templar"
+dropitem "Crusader"
+dropitem "Reaver"
+}
+
+actor RandRobotSpot : CustomMonsterInvasionSpot 5620
+{
+dropitem "Templar"
+dropitem "Crusader"
+dropitem "Reaver"
+dropitem "Sentinel"
+dropitem "Stalker"
+dropitem "Inquisitor"
+}
+
+//Bosses
+
+actor SBishopSpot : CustomMonsterInvasionSpot 5621
+{
+dropitem "StrifeBishop"
+}
+
+actor ProgSpot : CustomMonsterInvasionSpot 5622
+{
+dropitem "Programmer"
+}
+
+actor LMasterSpot : CustomMonsterInvasionSpot 5623
+{
+dropitem "LoreMaster"
+}
+
+actor EntitySpot : CustomMonsterInvasionSpot 5624
+{
+dropitem "EntityBoss"
+}
+
+actor SubEntSpot : CustomMonsterInvasionSpot 5625
+{
+dropitem "EntitySecond"
+}
+
+actor Spec1Spot : CustomMonsterInvasionSpot 5626
+{
+dropitem "AlienSpectre1"
+}
+
+actor Spec2Spot : CustomMonsterInvasionSpot 5627
+{
+dropitem "AlienSpectre2"
+}
+
+actor Spec3Spot : CustomMonsterInvasionSpot 5628
+{
+dropitem "AlienSpectre3"
+}
+
+actor Spec4Spot : CustomMonsterInvasionSpot 5629
+{
+dropitem "AlienSpectre4"
+}
+
+actor Spec5Spot : CustomMonsterInvasionSpot 5630
+{
+dropitem "AlienSpectre5"
+}
+
+actor AlienSpectreSpot : CustomMonsterInvasionSpot 5631
+{
+dropitem "AlienSpectre1"
+dropitem "AlienSpectre2"
+dropitem "AlienSpectre3"
+dropitem "AlienSpectre4"
+dropitem "AlienSpectre5"
+}
+
+//Weapons
+
+actor StrifeCBowSpot : CustomPickupInvasionSpot 5632
+{
+dropitem "StrifeCrossbow"
+}
+
+actor AssaultGunSpot : CustomPickupInvasionSpot 5633
+{
+dropitem "AssaultGun"
+}
+
+actor AGSSpot : CustomPickupInvasionSpot 5634
+{
+dropitem "AssaultGunStanding"
+}
+
+actor RandAGSpot : CustomPickupInvasionSpot 5635
+{
+dropitem "AssaultGun"
+dropitem "AssaultGunStanding"
+}
+
+actor MMLaunchSpot : CustomPickupInvasionSpot 5636
+{
+dropitem "MiniMissileLauncher"
+}
+
+actor FlameThrowerSpot : CustomPickupInvasionSpot 5637
+{
+dropitem "FlameThrower"
+}
+
+actor MaulerSpot : CustomPickupInvasionSpot 5638
+{
+dropitem "Mauler"
+}
+
+actor StrifeGLSpot : CustomPickupInvasionSpot 5639
+{
+dropitem "StrifeGrenadeLauncher"
+}
+
+actor Sig1Spot : CustomPickupInvasionSpot 5640
+{
+dropitem "Sigil1"
+}
+
+actor Sig2Spot : CustomPickupInvasionSpot 5641
+{
+dropitem "Sigil2"
+}
+
+actor Sig3Spot : CustomPickupInvasionSpot 5642
+{
+dropitem "Sigil3"
+}
+
+actor Sig4Spot : CustomPickupInvasionSpot 5643
+{
+dropitem "Sigil4"
+}
+
+actor Sig5Spot : CustomPickupInvasionSpot 5644
+{
+dropitem "Sigil5"
+}
+
+actor SigilSpot : CustomPickupInvasionSpot 5645
+{
+dropitem "Sigil1"
+dropitem "Sigil2"
+dropitem "Sigil3"
+dropitem "Sigil4"
+dropitem "Sigil5"
+}
+
+//Ammo pickups
+
+actor HEGRoundsSpot : CustomPickupInvasionSpot 5646
+{
+dropitem "HEGrenadeRounds"
+}
+
+actor PGRoundsSpot : CustomPickupInvasionSpot 5647
+{
+dropitem "PhosphorusGrenadeRounds"
+}
+
+actor RandGrenadeRoundsSpot : CustomPickupInvasionSpot 5648
+{
+dropitem "PhosphorusGrenadeRounds"
+dropitem "HEGrenadeRounds"
+}
+
+actor StrifeBulletClipSpot : CustomPickupInvasionSpot 5649
+{
+dropitem "ClipOfBullets"
+}
+
+actor StrifeBulletBoxSpot : CustomPickupInvasionSpot 5650
+{
+dropitem "BoxOfBullets"
+}
+
+actor StrifeBulletSpot : CustomPickupInvasionSpot 5651
+{
+dropitem "BoxOfBullets"
+dropitem "ClipOfBullets"
+}
+
+actor MMissilesSpot : CustomPickupInvasionSpot 5652
+{
+dropitem "MiniMissiles"
+}
+
+actor CrateMissilesSpot : CustomPickupInvasionSpot 5653
+{
+dropitem "CrateOfMissiles"
+}
+
+actor RandStrifeMissilesSpot : CustomPickupInvasionSpot 5654
+{
+dropitem "CrateOfMissiles"
+dropitem "MiniMissiles"
+}
+
+actor StrifeEPodSpot : CustomPickupInvasionSpot 5655
+{
+dropitem "EnergyPod"
+}
+
+actor StrifeEPackSpot : CustomPickupInvasionSpot 5656
+{
+dropitem "EnergyPack"
+}
+
+actor RandStrifeEnergySpot : CustomPickupInvasionSpot 5657
+{
+dropitem "EnergyPod"
+dropitem "EnergyPack"
+}
+
+actor StrifePBoltsSpot : CustomPickupInvasionSpot 5658
+{
+dropitem "PoisonBolts"
+}
+
+actor StrifeEBoltsSpot : CustomPickupInvasionSpot 5659
+{
+dropitem "ElectricBolts"
+}
+
+actor RandStrifeBoltsSpot : CustomPickupInvasionSpot 5660
+{
+dropitem "ElectricBolts"
+dropitem "PoisonBolts"
+}
+
+actor StrifeBackpackSpot : CustomPickupInvasionSpot 5661
+{
+dropitem "AmmoSatchel"
+}
+
+actor StrifeLargeRareAmmoSpot : CustomPickupInvasionSpot 5662
+{
+dropitem "PoisonBolts"
+dropitem "EnergyPack"
+dropitem "CrateOfMissiles"
+dropitem "BoxOfBullets"
+dropitem "PhosphorusGrenadeRounds"
+}
+
+actor StrifeSmallCommonAmmoSpot : CustomPickupInvasionSpot 5663
+{
+dropitem "ElectricBolts"
+dropitem "EnergyPod"
+dropitem "MiniMissiles"
+dropitem "ClipOfBullets"
+dropitem "HEGrenadeRounds"
+}
+
+//Inventory Items, Health, And Armor
+
+actor MetalArmorSpot : CustomPickupInvasionSpot 5664
+{
+dropitem "MetalArmor"
+}
+
+actor LeatherArmorSpot : CustomPickupInvasionSpot 5665
+{
+dropitem "LeatherArmor"
+}
+
+actor TBeaconSpot : CustomPickupInvasionSpot 5666
+{
+dropitem "TeleporterBeacon"
+}
+
+actor MedPatchSmallSpot : CustomPickupInvasionSpot 5667
+{
+dropitem "MedPatch"
+}
+
+actor MedkitMediumSpot : CustomPickupInvasionSpot 5668
+{
+dropitem "MedicalKit"
+}
+
+actor SurgKitLargeSpot : CustomPickupInvasionSpot 5669
+{
+dropitem "SurgeryKit"
+}
+
+actor StrifeMapSpot : CustomPickupInvasionSpot 5670
+{
+dropitem "StrifeMap"
+}
+
+actor ShadowArmorSpot : CustomPickupInvasionSpot 5671
+{
+dropitem "ShadowArmor"
+}
+
+actor StrifeSuitSpot : CustomPickupInvasionSpot 5672
+{
+dropitem "EnvironmentalSuit"
+}
+
+actor TargeterSpot : CustomPickupInvasionSpot 5673
+{
+dropitem "Targeter"
+}
+
+actor ScannerSpot : CustomPickupInvasionSpot 5674
+{
+dropitem "Scanner"
+}
+
+actor StrifeRandHealthSpot : CustomPickupInvasionSpot 5675
+{
+dropitem "MedPatch"
+dropitem "MedicalKit"
+dropitem "SurgeryKit"
+}
+
+actor StrifeRandArmorSpot : CustomPickupInvasionSpot 5676
+{
+dropitem "MetalArmor"
+dropitem "LeatherArmor"
+}

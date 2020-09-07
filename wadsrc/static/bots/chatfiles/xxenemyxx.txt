@@ -1,0 +1,36 @@
+[IntroStrings]
+"Hello fags. FAGS WHO SUCK COCKS!"
+
+[FragStrings]
+"HAHA! You suck!"
+"God you're gay."
+"HAHA! Suck my ass cheese, bitch!"
+"God, you're so gay."
+"I'll bet you woulda rather taken that one up the ass. HAHA YOU ARE SO DAMN GAY!!!"
+"SUCK IT DOWN, COCKASS!"
+"You stupid fucker, you suck so much."
+"God you suck ass. HAHA! YOU SUCK ASS! YER GAY YOU BIG GAY FAG!!!"
+"haha $player_killed's a fag!"
+
+[KilledStrings]
+"I hate you. You suck. YOU SUCK YOU BIG GAY FAG!!!"
+"I HATE YOU!"
+"YOU SUCK!"
+"This is such a stupid game."
+"STOP IT YOU BIG FAG!"
+"God you're so gay. I HATE YOU!!!"
+"What a fucking lame attack."
+
+[RoamingStrings]
+"Where are you? COME OUT AND FIGHT ME YOU BIG ASS PUCK!"
+"STOP SPANKING IN THE EXIT ROOM!"
+"You know what I hate? You. YOU SUCK!!! I HATE YOU!!!"
+"THIS LEVEL IS SHAPED LIKE A BIG GAY COCK!"
+"Doom is such a gay ass game. And you're playing it. YOU BIG GAY FAG!!!"
+"Hahaha, $player_lastplace fucking sucks!"
+
+[LosingRoamingStrings]
+"Man, $player_inlead is a fucking cheater! STOP CHEATING YOU MOTHER FUCKER!"
+
+[EnragedStrings]
+"I CAN'T GET ANY MORE PISSED OFF!"

@@ -1,0 +1,431 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>GetWAD Programmer's Reference</title>
+<style type="text/css">
+TABLE { font-size:10pt;color:black;font-family:Verdana,Helvetica; }
+P { font-size:10pt;color:black;font-family:Verdana,Helvetica; }
+UL { font-size:10pt;color:black;font-family:Verdana,Helvetica; }
+OL { font-size:10pt;color:black;font-family:Verdana,Helvetica; }
+BODY { font-size:10pt;color:black;font-family:Verdana,Helvetica; }
+a:link    { color:#1841b5; }
+a:visited { color:#1841b5; }
+a:hover   { color:#a50400; }
+h2 { font-size:22pt;margin-bottom:2pt;font-weight:bold;color:#008000;font-family:Times New Roman,Times; }
+h3 { font-size:13pt;margin-bottom:2pt;font-weight:bold;color:#0000c0;font-family:Verdana,Helvetica; }
+h4 { font-size:11pt;margin-bottom:1pt;font-weight:bold;color:#0000c0;font-family:Verdana,Helvetica; }
+pre { margin-top:4pt; margin-bottom:4pt;font-family:"Andale Mono","Courier New",Courier; }
+</style>
+</head>
+<body background=bg.jpg>
+<center><h2>GetWAD</h2><br>
+<b>Programmer's Reference</b><br>
+<b>Version 2.1<br>
+December 7, 2003</b></center>
+
+<h4>1. Description</h4>
+<p>
+
+The GetWAD library consists of a single DLL file which depends
+on standard Windows libraries as well as the WININET library.
+This means that GetWAD is compatible with any 32-bit version
+of Windows (Win95 and later) provided that Internet Explorer
+(4.0 or later) is installed. The DLL is multi-threaded and can
+be called from either single- or multi-threaded programs (or 
+DLLs), but it must not be called <b>concurrently</b> from multiple
+threads of the same program (ie., it's not reentrant); this
+should not matter for the intended use. It should be able to
+be used from practically any language that supports DLLs.
+
+<p>
+<h4>2. Interface</h4>
+<p>
+
+The library interface is minimal in order to facilitate its
+use from various programs. The interface consists of two
+groups of two functions each; each application using the
+library should select one of these groups.
+<ol>
+<li> <b>The version 1.x API</b>: it uses a built-in search
+     list and does not contact the GetWAD master servers.
+     <p>
+	<ul>
+	<li> The "<b>getwad_setup()</b>" function presents a dialog
+	     that lets the user specify various searching parameters,
+	     such as the pages to be searched for the WADs, enabling /
+	     disabling of the FTP protocol and the directory where it
+	     will deposit the WADs. This function should be rarely
+	     used, as the program defaults to some reasonable values.
+	     The various search parameters are stored in an INI file
+	     and they are used from the next function. This also means
+	     that a client program can generate the INI file using its
+	     own dialogs, so it may not have to call this function at
+	     all.
+	<li> The "<b>getwad_fetch()</b>" function does the actual work
+	     of locating, downloading and unzipping the WAD files. It
+	     reads the parameters stored in the INI file by the previous
+	     function and tries to locate the desired file. Once the
+	     file is located, it is downloaded, unzipped (since all
+	     WADs are stored inside ZIP files) and copied to the
+	     appropriate directory.
+	</ul>
+<p>	
+<li> <b>The version 2.x API</b>: it contacts the GetWAD master
+     servers to obtain the current search list at the beginning
+     of each search. 
+     <p>
+	<ul>
+	<li> The "<b>getwad2_setup()</b>" function is completely
+		analogous to the getwad_setup() function of the 1.x API,
+		but instead of defining the search pages, it defines
+		a set of user-defined pages which will be used in addition
+		to the ones downloaded from the master server.
+	<li> The "<b>getwad2_fetch()</b>" function is analogous to
+		to the getwad_fetch() function of the 1.x API; the
+		difference is that it contacts the GetWAD master servers
+		in order to obtain the current search list. It also
+		accepts an extra URL to search; this is convenient as
+		many server admins provide a page with pointers to WADs
+		played on their servers.
+	</ul>
+
+</ol>
+The 1.x API exists only for compatibility purposes with
+software interfacing to the older version of GetWAD; the version
+2.x API is vastly more convenient for the end users, so it should be
+preferred.
+
+<h4>3. Function Reference</h4>
+<p>
+<table border=0 cellpadding=5 width=100% >
+<tr bgcolor=#90dFFF><td colspan=2>
+<b>void WINAPI	getwad_setup(HWND hwnd, BOOL allow_dest_spec,
+			LPSTR ini_name,LPSTR ini_section);</b>			
+</td></tr>
+<tr valign=top>
+<td><b>Purpose:</b></td>
+<td>Presents a configuration dialog. The user can select
+which pages and search engines it should consult,
+whether to enable the FTP protocol or not,
+and where to deposit the downloaded WAD files.
+</td>
+</tr>
+
+<tr valign=top>
+<td><b>Parameters:</b></td>
+<td>
+<b>hwnd</b>: Handle to a window in the calling application.
+The configuration dialog will be a child of the specified window.
+It can be zero but it is strongly discouraged, as the user will then
+be able to switch to the calling application before closing the
+configuration dialog.
+<p>
+<b>allow_dest_spec</b>: Boolean flag indicating if we want to allow
+the user to select the destination directory. If set to "TRUE" (ie.,
+any integer value different from zero), the user will be able to
+select the WAD destination directory. If set to "FALSE" (ie., zero),
+the WAD destination directory will not be displayed. This can be useful
+since Doom launchers normally provide for a means to specify the WAD
+directory. 
+<p>
+<b>ini_name</b>: Specifies the INI file to be used for storing the
+configuration parameters. If it is NULL or empty, GetWAD uses the
+default file "getwad.ini". If you don't specify any path component,
+the file is assumed to be in the WINDOWS directory. If this is not
+true, you must specify the full pathname of the INI file.
+<p>
+<b>ini_section</b>: Specifies the section inside the INI file that
+will be used for storing the configuration parameters. If it is NULL
+or empty, GetWAD uses the default section "Options".
+</td>
+</tr>
+
+<tr valign=top>
+<td><b>Return&nbsp;value:</b></td>
+<td>None</td>
+</tr>
+
+</table>
+<p>
+<table border=0 cellpadding=5 width=100% >
+<tr bgcolor=#90dFFF><td colspan=2>
+<b>
+int WINAPI	getwad_fetch(HWND hwnd,LPSTR wadnames,LPSTR waddir,
+			BOOL dont_wait_upon_success,
+			LPSTR ini_name, LPSTR ini_section);
+</b>			
+</td></tr>
+<tr valign=top>
+<td><b>Purpose:</b></td>
+<td>
+Locates, downloads and installs the specified WAD file.
+</td>
+</tr>
+
+<tr valign=top>
+<td><b>Parameters:</b></td>
+<td>
+<b>hwnd</b>: Handle to a window in the calling application.
+The function will display a dialog indicating the progress
+of the downloading process. That dialog will be a child of
+the specified window. It can be zero but it is strongly
+discouraged, as the user will then be able to switch to
+the calling application before returning from this function.
+<p>
+<b>wadnames</b>: Names of the WAD files to be fetched; it
+consists of one or more names of WAD files separated by one
+or more spaces. Each name may have a ".wad" or ".zip" extension,
+but it is not necessary. If for example you want to download the
+file "brit11.wad", then you could set wadnames either to "brit11.wad",
+"brit11.zip", or "brit11". If you want to fetch the files "exec.wad"
+and "dweller2.wad", you could set wadnames to "exec dweller2", or 
+"exec.wad dweller2.wad", etc. If this parameter is NULL or empty,
+GetWAD will prompt the user for the WAD to fetch.
+<p>
+<b>waddir</b>: Name of the directory where you want to deposit
+the downloaded WAD. This parameter takes precedence over the
+parameter specified in the GetWAD INI file. This can be convenient
+when you don't want to bother calling "getwad_setup()" or 
+constructing the INI file; in that case, you can simply pass
+the destination directory here; the default GetWAD values will
+normally be sufficient for the rest of the configuration. If
+waddir is NULL or empty, then GetWAD will use the value specified
+in the INI file.
+<p>
+<b>dont_wait_upon_sucess</b>: Boolean flag indicating if GetWAD
+should close the dialog automatically when the requested file
+is successfully installed. If set the "TRUE" (ie., any integer
+value different from zero), GetWAD will close its dialog automatically
+and will return to the caller. If set to "FALSE" (ie., a value
+of zero), GetWAD will wait until the user presses the "Close"
+button.
+<p>
+<b>ini_name</b>: Specifies the INI file to be used for storing the
+configuration parameters. If it is NULL or empty, GetWAD uses the
+default file "getwad.ini". If you don't specify any path component,
+the file is assumed to be in the WINDOWS directory. If this is not
+true, you must specify the full pathname of the INI file.
+<p>
+<b>ini_section</b>: Specifies the section inside the INI file that
+will be used for storing the configuration parameters. If it is NULL
+or empty, GetWAD uses the default section "Options".
+</td>
+</tr>
+
+<tr valign=top>
+<td><b>Return&nbsp;value:</b></td>
+<td>
+Returns 1 upon success, 0 upon failure (ie., the files cannot be
+located or the network is down, or whatever), or -1 if the INI
+file has not been properly created (you can avoid using the INI
+file, <b>if</b> you specify the WAD directory; otherwise, the
+INI file must exist and it must contain a WAD directory specification).
+</td>
+</tr>
+
+</table>
+<p>
+<p>
+<table border=0 cellpadding=5 width=100% >
+<tr bgcolor=#90dFFF><td colspan=2>
+<b>void WINAPI	getwad2_setup(HWND hwnd, BOOL allow_dest_spec,
+			LPSTR ini_name,LPSTR ini_section);</b>			
+</td></tr>
+<tr valign=top>
+<td><b>Purpose:</b></td>
+<td>Presents a configuration dialog. The user can specify a
+set of extra search pages that will be used in addition to
+the ones fetched by the GetWAD master servers. These pages
+take precedence over the ones fetched from the net.
+In the dialog you can also specify whether to enable the FTP
+protocol or not, and where to deposit the downloaded WAD files.
+</td>
+</tr>
+
+<tr valign=top>
+<td><b>Parameters:</b></td>
+<td>
+<b>hwnd</b>: Handle to a window in the calling application.
+The configuration dialog will be a child of the specified window.
+It can be zero but it is strongly discouraged, as the user will then
+be able to switch to the calling application before closing the
+configuration dialog.
+<p>
+<b>allow_dest_spec</b>: Boolean flag indicating if we want to allow
+the user to select the destination directory. If set to "TRUE" (ie.,
+any integer value different from zero), the user will be able to
+select the WAD destination directory. If set to "FALSE" (ie., zero),
+the WAD destination directory will not be displayed. This can be useful
+since Doom launchers normally provide for a means to specify the WAD
+directory. 
+<p>
+<b>ini_name</b>: Specifies the INI file to be used for storing the
+configuration parameters. If it is NULL or empty, GetWAD uses the
+default file "getwad.ini". If you don't specify any path component,
+the file is assumed to be in the WINDOWS directory. If this is not
+true, you must specify the full pathname of the INI file.
+<p>
+<b>ini_section</b>: Specifies the section inside the INI file that
+will be used for storing the configuration parameters. If it is NULL
+or empty, GetWAD uses the default section "Options".
+</td>
+</tr>
+
+<tr valign=top>
+<td><b>Return&nbsp;value:</b></td>
+<td>None</td>
+</tr>
+
+</table>
+<p>
+<table border=0 cellpadding=5 width=100% >
+<tr bgcolor=#90dFFF><td colspan=2>
+<b>
+int WINAPI	getwad2_fetch(HWND hwnd,LPSTR wadnames,LPSTR waddir,
+			BOOL dont_wait_upon_success,
+			LPSTR ini_name, LPSTR ini_section,
+			LPSTR server_search);
+</b>			
+</td></tr>
+<tr valign=top>
+<td><b>Purpose:</b></td>
+<td>
+Locates, downloads and installs the specified WAD file. It 
+contacts the GetWAD master servers to obtain an updated
+search list.
+</td>
+</tr>
+
+<tr valign=top>
+<td><b>Parameters:</b></td>
+<td>
+<b>hwnd</b>: Handle to a window in the calling application.
+The function will display a dialog indicating the progress
+of the downloading process. That dialog will be a child of
+the specified window. It can be zero but it is strongly
+discouraged, as the user will then be able to switch to
+the calling application before returning from this function.
+<p>
+<b>wadnames</b>: Names of the WAD files to be fetched; it
+consists of one or more names of WAD files separated by one
+or more spaces. Each name may have a ".wad" or ".zip" extension,
+but it is not necessary. If for example you want to download the
+file "brit11.wad", then you could set wadnames either to "brit11.wad",
+"brit11.zip", or "brit11". If you want to fetch the files "exec.wad"
+and "dweller2.wad", you could set wadnames to "exec dweller2", or 
+"exec.wad dweller2.wad", etc. If this parameter is NULL or empty,
+GetWAD will prompt the user for the WAD to fetch.
+<p>
+<b>waddir</b>: Name of the directory where you want to deposit
+the downloaded WAD. This parameter takes precedence over the
+parameter specified in the GetWAD INI file. This can be convenient
+when you don't want to bother calling "getwad_setup()" or 
+constructing the INI file; in that case, you can simply pass
+the destination directory here; the default GetWAD values will
+normally be sufficient for the rest of the configuration. If
+waddir is NULL or empty, then GetWAD will use the value specified
+in the INI file.
+<p>
+<b>dont_wait_upon_sucess</b>: Boolean flag indicating if GetWAD
+should close the dialog automatically when the requested file
+is successfully installed. If set the "TRUE" (ie., any integer
+value different from zero), GetWAD will close its dialog automatically
+and will return to the caller. If set to "FALSE" (ie., a value
+of zero), GetWAD will wait until the user presses the "Close"
+button.
+<p>
+<b>ini_name</b>: Specifies the INI file to be used for storing the
+configuration parameters. If it is NULL or empty, GetWAD uses the
+default file "getwad.ini". If you don't specify any path component,
+the file is assumed to be in the WINDOWS directory. If this is not
+true, you must specify the full pathname of the INI file.
+<p>
+<b>ini_section</b>: Specifies the section inside the INI file that
+will be used for storing the configuration parameters. If it is NULL
+or empty, GetWAD uses the default section "Options".
+<p>
+<b>server_search</b>: Specifies an extra search page that will be
+used after the user-specified pages and before the ones fetched
+from the master servers. It will be ignored if it is NULL or empty.
+This parameter can be convenient, as server administrators often
+set up pages containing links to WADs played on their servers.
+</td>
+</tr>
+
+<tr valign=top>
+<td><b>Return&nbsp;value:</b></td>
+<td>
+Returns 1 upon success, 0 upon failure (ie., the files cannot be
+located or the network is down, or whatever), or -1 if the INI
+file has not been properly created (you can avoid using the INI
+file, <b>if</b> you specify the WAD directory; otherwise, the
+INI file must exist and it must contain a WAD directory specification).
+</td>
+</tr>
+
+</table>
+<p>
+<h4>4. INI File Format</h4>
+<p>
+As mentioneed above, GetWAD uses an INI file to store its configuration.
+The INI file name defaults to "getwad.ini" and the section inside the
+INI file defaults to "Options", but both can be modified by the calling
+program. There are cases where the calling program may prefer to use its own
+configuration dialog rather than the one provided by "getwad_setup()". In
+that case, the calling program will probably want to construct the
+INI file on its own instead of relying on the default GetWAD options. For
+this reason, we describe here the format of the INI file. Such a sample file
+looks like:
+<p>
+<table align=center bgcolor=#ffefd0 cellpadding=10 border=0>
+<tr><td><pre>[Options]
+use_google=1
+enable_ftp=1
+wad_dir=C:\INETDOOM\wads
+npredef=5
+predef000=http://www.freewebs.com/lap-clan/
+predef001=http://www.getsomewhere.net/?dep=doom&pg=files
+predef002=http://raider.dnsalias.com:8000/doom/wads/
+predef003=http://www.rarefiles.com/download/
+predef004=http://www.doomsearch.com/search.shtml?search=%s
+</pre>
+</td></tr></table>
+<p>
+The various parameters correspond to the options in the Setup dialog. 
+The "npredef" and "predefNNN" parameters are used only by the 1.x
+API: "npredef" is the number of the predefined locations that will
+be searched by the program, and "predefNNN" are the URLs of these
+locations. Make sure that the number of such locations is correctly
+indicated by the "npredef" parameter.
+
+<h4>5. License</h4>
+<p>
+The GetWAD program (binaries and source code) is covered by a
+ZLIB-like license which is the most liberal license I can think of.
+<p>
+Copyright (C) 2003 Hippocrates Sendoukas.
+<p>
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the author be held liable for any damages
+arising from the use of this software.
+<p>
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+<ol>
+<li> The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+<li> Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+<li> This notice may not be removed or altered from any source distribution.
+</ol>
+
+<hr>
+<address>
+<a href="mailto:hsendoukas@hotmail.com">Hippocrates Sendoukas (aka Kilgore)</a>
+</address>
+</body>
+</html>

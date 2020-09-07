@@ -1,0 +1,37 @@
+//=================================================================================================
+//
+// MaxHealth
+//
+//=================================================================================================
+
+ACTOR MaxHealth : Health native
+{
+	Inventory.MaxAmount 50
+	Inventory.PickupSound "misc/health_pkup"
+}
+
+//=================================================================================================
+//
+// Max. health bonus
+//
+//=================================================================================================
+
+ACTOR MaxHealthBonus : MaxHealth 5090
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 166
+	+COUNTITEM
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.Amount 1
+	Inventory.MaxAmount 50
+	Health 200
+	Inventory.PickupMessage "$PICKUP_MAXHEALTHBONUS"
+	States
+	{
+	Spawn:
+		BON3 ABCDCB 6
+		Loop
+	}
+}

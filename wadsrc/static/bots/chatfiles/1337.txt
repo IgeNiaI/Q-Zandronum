@@ -1,0 +1,44 @@
+[IntroStrings]
+"th1s lvl ph33rs m3!"
+"prepare to ph33r!"
+
+[RareRoamingStrings]
+"AOL rocks me down"
+"ph33r my 14.4 c0nn3c710n!"
+"my 1337455 h4x0r pr0ggs w1ll 0wn j00!"
+
+[FragStrings]
+"3y3 w1ll 0wn. j00 w1ll ph33r."
+"j00 n00b13 ll4m4s c4n7 74k3 m3!"
+"ph33r my 1337n355!"
+"3y3 4m 7h3 1337357!"
+"ph34r me!"
+"haha ur gay!"
+"i 0wn ur llama ass!"
+"0wn3d!"
+"h4x0r3d!"
+"haha, fucking llama!"
+"j00 got sch00l3d!"
+"ph33r"
+"0wn4ge!"
+"r00t3d!"
+"j00 4r3 n0t 1337 3n0ugh 4 m3!"
+
+[KilledStrings]
+"id do better, but AOL makes my connection suck!"
+"ur st1ll n0t 1337 1ik3 m3! hahaha"
+"this g4m3 iz 4 fags neway!!"
+
+[RoamingStrings]
+"jeffk is my hero!"
+"3y3 am an 31337 h4x0r"
+
+[LosingRoamingStrings]
+"wtf"
+
+[WinStrings]
+"ph33r!"
+"1 r v1c70r!"
+
+[LoseStrings]
+"noes!!!!!11"

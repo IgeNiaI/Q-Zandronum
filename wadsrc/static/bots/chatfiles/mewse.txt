@@ -1,0 +1,37 @@
+[IntroStrings]
+"caco, ph33r my entrance"
+"hello, i am here for your cookies. and beer."
+
+[FragStrings]
+"you're easier to frag than linguica"
+"that deserves another drink"
+"caco ph33r my sk1llz"
+"I KILL YOU"
+"booyaka!"
+"/me runs around in circles"
+
+[KilledStrings]
+"TAKE OFF, EH?!"
+"damnit $player_killedby"
+"how amewsing"
+"you better hope i don't evolve into mewsetwo"
+
+[RoamingStrings]
+"i propose a toast to this level design"
+"where am i, where's my sandwich"
+"i wish i knew how to use this grenade launcher thing"
+"i bet this is more fun after a few beers"
+"i think i need to go mow the lawn in 15 minutes"
+"did you hear the one about two pies in an oven?"
+"/me it up!"
+"i wonder if tom hall has done any wacky things lately.."
+"i'd be the king of skulltag if i didn't suck so much"
+"free hissy!"
+"where are the limeys damnit"
+"would ants in my keyboard improve performance? must ask prower"
+
+[EnragedStrings]
+"NOW I AM ANGRY, PH33R MY KICKBAN SK1LLZ"
+
+[DemoralizedStrings]
+"God damnit, I didn't even want to play this in the first place."

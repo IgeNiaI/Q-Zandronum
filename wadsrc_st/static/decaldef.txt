@@ -1,0 +1,9 @@
+generator Minigun               BulletChip
+generator BFG10K                BFGLightning
+generator Railgun               RailScorch
+
+generator SuperShotgunGuy       BulletChip
+generator BelphegorBall         BaronScorch
+generator CacolanternBall       CacoScorch
+generator DarkImpBall           DoomImpScorch
+generator HectShot              Scorch

@@ -1,0 +1,16 @@
+[IntroStrings]
+"Meep meep!"
+
+[FragStrings]
+"YEAH!"
+"MEEPY LIKE THIS!"
+"YOU KILLED BY MEEPY! HEHE!"
+"HEHEHE!"
+
+[RoamingStrings]
+"MEEP"
+
+[PissedStrings]
+"MEEPY SHIT HIS PANTS!!!"
+"MEEPY GOING TO KICK YOUR ASS!"
+"NO FUCK WITH MEEPY!"

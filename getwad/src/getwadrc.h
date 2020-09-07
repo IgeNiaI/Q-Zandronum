@@ -1,0 +1,19 @@
+#define IDD_PB		101
+#define IDD_ST		102
+#define IDD_STARTBACK	103
+#define IDD_FINISHED	104
+#define IDD_DO_WAD	105
+
+#define IDD_PREDEF	200
+#define IDD_USEGOOGLE	201
+#define IDD_UP		202
+#define IDD_DOWN	203
+#define IDD_DEL		204
+#define IDD_EDIT	205
+#define IDD_ADD		206
+#define IDD_WADDIR	207
+#define IDD_DIRBR	208
+#define IDD_ENABLEFTP	209
+#define IDD_LBLABEL	210
+#define IDD_DESTLBL	211
+#define IDD_REVERT	212

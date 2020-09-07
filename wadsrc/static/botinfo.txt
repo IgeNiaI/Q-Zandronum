@@ -1,0 +1,1112 @@
+// -2 = VERYPOOR
+// -1 = POOR
+// 0 = LOW
+// 1 = MEDIUM
+// 2 = HIGH
+// 3 = EXCELLENT
+// 4 = SUPREME
+// 5 = GODLIKE
+// 6 = PERFECT
+
+// HUMANS ----------------------------------------------------------------------
+
+{
+	name = "Chubbs"
+	accuracy = 0
+	intellect = 0
+	evade = 0
+	anticipation = -1
+	reactiontime = 0
+	perception = 0
+	favoriteweapon = "supershotgun"
+	color = "00 BF 00"
+	gender = "male"
+	skin = "big fat doomguy"
+	class = "fighter"
+	railcolor = blue
+	chatfrequency = 75
+	revealed = true
+	script = "fatbot"
+	chatlump = "bots/chatfiles/chubbs.txt"
+}
+
+{
+	name = "Deimos"
+	accuracy = 1
+	intellect = 2
+	evade = 1
+	anticipation = 2
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "supershotgun"
+	color = "5F BF C0"
+	gender = "male"
+	class = "cleric"
+	railcolor = white
+	chatfrequency = 33
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/soldier.txt"
+}
+
+{
+	name = "Aldebaran"
+	accuracy = 1
+	intellect = 2
+	evade = 2
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "rocketlauncher"
+	color = "FF 60 00"
+	gender = "male"
+	skin = "phobos"
+	class = "cleric"
+	railcolor = orange
+	chatfrequency = 33
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/soldier.txt"
+}
+
+{
+	name = "Crash"
+	accuracy = 0
+	intellect = 0
+	evade = 1
+	anticipation = 0
+	reactiontime = 0
+	perception = 0
+	favoriteweapon = "grenadelauncher"
+	color = "00 00 BF"
+	gender = "female"
+	skin = "crash"
+	class = "mage"
+	railcolor = purple
+	chatfrequency = 90
+	revealed = true
+	script = "crashbot"
+	chatlump = "bots/chatfiles/crash.txt"
+}
+
+{
+	name = "Procyon"
+	accuracy = 1
+	intellect = 2
+	evade = 2
+	anticipation = 3
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "minigun"
+	color = "9F 6F 3F"
+	gender = "male"
+	skin = "procyon"
+	class = "cleric"
+	railcolor = red
+	chatfrequency = 33
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/soldier.txt"
+}
+
+{
+	name = "Sirius"
+	accuracy = 1
+	intellect = 3
+	evade = 3
+	anticipation = 3
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "rocketlauncher"
+	color = "90 90 FF"
+	gender = "male"
+	skin = "Base II"
+	class = "cleric"
+	railcolor = red
+	chatfrequency = 33
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/soldier.txt"
+}
+
+{
+	name = "Rigel"
+	accuracy = 1
+	intellect = 3
+	evade = 2
+	anticipation = 3
+	reactiontime = 1
+	perception = 2
+	favoriteweapon = "rocketlauncher"
+	color = "00 00 FF"
+	gender = "male"
+	skin = "Base II"
+	class = "cleric"
+	railcolor = red
+	chatfrequency = 33
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/soldier.txt"
+}
+
+{
+	name = "Seenas"
+	accuracy = 1
+	intellect = 2
+	evade = 1
+	anticipation = 2
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "rocketlauncher"
+	color = "B0 AF 4F"
+	gender = "male"
+	skin = "seenas"
+	class = "cleric"
+	railcolor = red
+	chatfrequency = 50
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/soldier.txt"
+}
+
+{
+	name = "Synas"
+	accuracy = 2
+	intellect = 3
+	evade = 3
+	anticipation = 3
+	reactiontime = 2
+	perception = 2
+	favoriteweapon = "grenadelauncher"
+	color = "8F 00 00"
+	gender = "male"
+	skin = "synas"
+	class = "fighter"
+	railcolor = red
+	chatfrequency = 33
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/soldier.txt"
+}
+
+{
+	name = "Cygnus"
+	accuracy = 4
+	intellect = 4
+	evade = 4
+	anticipation = 4
+	reactiontime = -1
+	perception = -1
+	favoriteweapon = "supershotgun"
+	color = "C0 BF 6F"
+	gender = "male"
+	skin = "cynus"
+	class = "fighter"
+	railcolor = silver
+	chatfrequency = 15
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/cygnus.txt"
+}
+
+// ROBOTS ----------------------------------------------------------------------
+
+{
+	name = "Alphus"
+	accuracy = 2
+	intellect = 3
+	evade = 3
+	anticipation = 1
+	reactiontime = -2
+	perception = -2
+	favoriteweapon = "supershotgun"
+	color = "C0 BF 6F"
+	gender = "male"
+	skin = "gamma"
+	class = "fighter"
+	railcolor = silver
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Protos"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "supershotgun"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "fighter"
+	railcolor = yellow
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Betus"
+	accuracy = 2
+	intellect = 3
+	evade = 3
+	anticipation = 1
+	reactiontime = -2
+	perception = -2
+	favoriteweapon = "supershotgun"
+	color = "C0 BF 6F"
+	gender = "male"
+	skin = "gamma"
+	class = "fighter"
+	railcolor = silver
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Scyon"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "rocketlauncher"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "random"
+	railcolor = red
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Gamma"
+	accuracy = 2
+	intellect = 3
+	evade = 3
+	anticipation = 1
+	reactiontime = -2
+	perception = -2
+	favoriteweapon = "supershotgun"
+	color = "C0 BF 6F"
+	gender = "male"
+	skin = "gamma"
+	class = "fighter"
+	railcolor = silver
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Scythe"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "grenadelauncher"
+	color = "00 00 00"
+	gender = "female"
+	skin = "base"
+	class = "random"
+	railcolor = blue
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Electra"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "DF 00 DF"
+	gender = "female"
+	skin = "base"
+	class = "mage"
+	railcolor = purple
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Omicron"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "grenadelauncher"
+	color = "00 00 00"
+	gender = "female"
+	skin = "base"
+	class = "random"
+	railcolor = blue
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Cryon"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "fighter"
+	railcolor = black
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+{
+	name = "Omega"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "fighter"
+	railcolor = black
+	chatfrequency = 20
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/robot.txt"
+}
+
+// INSECT BOSSES ---------------------------------------------------------------
+
+{
+	name = "Prey"
+	accuracy = 0
+	intellect = 1
+	evade = 4
+	anticipation = 0
+	reactiontime = 3
+	perception = 3
+	favoriteweapon = "railgun"
+	color = "00 5F 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "mage"
+	railcolor = green
+	chatfrequency = 50
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/insect.txt"
+}
+
+{
+	name = "Manek"
+	accuracy = 0
+	intellect = 4
+	evade = 3
+	anticipation = 1
+	reactiontime = 2
+	perception = 2
+	favoriteweapon = "railgun"
+	color = "5F 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "mage"
+	railcolor = green
+	chatfrequency = 50
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/insect.txt"
+}
+
+// DEMONS ----------------------------------------------------------------------
+
+{
+	name = "Linguica"
+	accuracy = 3
+	intellect = 4
+	evade = 3
+	anticipation = 2
+	reactiontime = 2
+	perception = 2
+	favoriteweapon = "plasmarifle"
+	color = "FF 00 00"
+	gender = "male"
+	skin = "hissy hogger"
+	class = "random"
+	railcolor = green
+	chatfrequency = 75
+	revealed = true
+	script = "sausgbot"
+	chatlump = "bots/chatfiles/linguica.txt"
+}
+
+{
+	name = "Torrent"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "fighter"
+	railcolor = red
+	chatfrequency = 10
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/demon.txt"
+}
+
+{
+	name = "Cataclysm"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "fighter"
+	railcolor = red
+	chatfrequency = 10
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/demon.txt"
+}
+
+{
+	name = "Vex"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "fighter"
+	railcolor = red
+	chatfrequency = 10
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/demon.txt"
+}
+
+{
+	name = "Obelisk"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "fighter"
+	railcolor = red
+	chatfrequency = 10
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/demon.txt"
+}
+
+{
+	name = "Daemos"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "supershotgun"
+	color = "5F BF C0"
+	gender = "male"
+	skin = "base"
+	class = "cleric"
+	railcolor = black
+	chatfrequency = 10
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/demon.txt"
+}
+
+{
+	name = "Maabus"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "BF BF 00"
+	gender = "male"
+	skin = "base"
+	class = "random"
+	railcolor = gold
+	chatfrequency = 10
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/demon.txt"
+}
+
+{
+	name = "Slyor"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "8F 8F 00"
+	gender = "male"
+	skin = "slyor"
+	class = "random"
+	railcolor = gold
+	chatfrequency = 10
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/demon.txt"
+}
+
+// FINAL BOSSES ----------------------------------------------------------------
+
+{
+	name = "Orion"
+	accuracy = 4
+	intellect = 4
+	evade = 3
+	anticipation = 4
+	reactiontime = 2
+	perception = 2
+	favoriteweapon = "railgun"
+	color = "BF BF 00"
+	gender = "male"
+	skin = "orion"
+	class = "fighter"
+	railcolor = gold
+	chatfrequency = 33
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/orion.txt"
+}
+
+{
+	name = "Ultimus"
+	accuracy = 6
+	intellect = 6
+	evade = 6
+	anticipation = 6
+	reactiontime = 6
+	perception = 6
+	favoriteweapon = "railgun"
+	color = "C0 8F 60"
+	gender = "cyborg"
+	skin = "ultimus"
+	class = "fighter"
+	railcolor = black
+	chatfrequency = 25
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/ultimus.txt"
+}
+
+// EXTRA BOTS ------------------------------------------------------------------
+
+{
+	name = "Romero"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "7F 80 3F"
+	gender = "male"
+	skin = "john romero"
+	class = "mage"
+	railcolor = rainbow
+	chatfrequency = 50
+	revealed = false
+	script = "humanbot"
+	chatlump = "bots/chatfiles/romero.txt"
+}
+
+{
+	name = "h4x0r"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "BF BF 60"
+	gender = "male"
+	skin = "base"
+	class = "random"
+	railcolor = purple
+	chatfrequency = 75
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/1337.txt"
+}
+
+{
+	name = "frad"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 00 00"
+	gender = "male"
+	skin = "base"
+	class = "random"
+	railcolor = red
+	chatfrequency = 70
+	revealed = false
+	script = "humanbot"
+	chatlump = "bots/chatfiles/frad.txt"
+}
+
+{
+	name = "mewse"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 00 00"
+	gender = "cyborg"
+	skin = "base"
+	class = "random"
+	railcolor = rainbow
+	chatfrequency = 75
+	revealed = false
+	script = "humanbot"
+	chatlump = "bots/chatfiles/mewse.txt"
+}
+
+{
+	name = "Hissy"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "railgun"
+	color = "00 FF 00"
+	gender = "male"
+	skin = "hissy"
+	class = "mage"
+	railcolor = rainbow
+	chatfrequency = 65
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/hissy.txt"
+}
+
+{
+	name = "Massmouth"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "00 B0 00"
+	gender = "male"
+	skin = "Massmouth 2"
+	class = "random"
+	railcolor = white
+	chatfrequency = 65
+	revealed = true
+	script = "humanbot"
+	chatlump = "bots/chatfiles/massmouth.txt"
+}
+
+{
+	name = "Doomcrate"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "EF C0 80"
+	gender = "male"
+	skin = "doomcrate"
+	class = "random"
+	railcolor = silver
+	chatfrequency = 10
+	revealed = true
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/doomcrate.txt"
+}
+
+{
+	name = "Zombieman"
+	accuracy = 0
+	intellect = 0
+	evade = 0
+	anticipation = 0
+	reactiontime = 0
+	perception = 0
+	favoriteweapon = "chaingun"
+	color = "BF 8F 5F"
+	gender = "male"
+	skin = "zombieman"
+	class = "random"
+	railcolor = blue
+	chatfrequency = 0
+	revealed = true
+	script = "dfultbot"
+}
+
+{
+	name = "Shotgunner"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "shotgun"
+	color = "DF 20 20"
+	gender = "male"
+	skin = "shotgun guy"
+	class = "fighter"
+	railcolor = blue
+	chatfrequency = 0
+	revealed = true
+	script = "dfultbot"
+}
+
+{
+	name = "Chaingunner"
+	accuracy = 2
+	intellect = 2
+	evade = 2
+	anticipation = 2
+	reactiontime = 2
+	perception = 2
+	favoriteweapon = "chaingun"
+	color = "EF 00 00"
+	gender = "male"
+	skin = "big chaingun guy"
+	class = "fighter"
+	railcolor = blue
+	chatfrequency = 0
+	revealed = true
+	script = "dfultbot"
+}
+
+{
+	name = "Super Shotgunner"
+	accuracy = 3
+	intellect = 3
+	evade = 3
+	anticipation = 3
+	reactiontime = 3
+	perception = 3
+	favoriteweapon = "supershotgun"
+	color = "00 FF 00"
+	gender = "male"
+	skin = "super shotgun guy"
+	class = "fighter"
+	railcolor = green
+	chatfrequency = 0
+	revealed = true
+	script = "dfultbot"
+}
+
+{
+	name = "SS Nazi"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "shotgun"
+	color = "00 00 FF"
+	gender = "male"
+	skin = "SS Nazi"
+	class = "fighter"
+	railcolor = blue
+	chatfrequency = 0
+	revealed = true
+	script = "dfultbot"
+}
+
+{
+	name = "Nazi Guard"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "shotgun"
+	color = "B0 B0 B0"
+	gender = "male"
+	skin = "Nazi Guard"
+	class = "fighter"
+	railcolor = blue
+	chatfrequency = 0
+	revealed = true
+	script = "dfultbot"
+}
+
+{
+	name = "Nazi Chaingunner"
+	accuracy = 2
+	intellect = 2
+	evade = 2
+	anticipation = 2
+	reactiontime = 2
+	perception = 2
+	favoriteweapon = "shotgun"
+	color = "00 00 EF"
+	gender = "male"
+	skin = "Nazi Chaingunner"
+	class = "fighter"
+	railcolor = blue
+	chatfrequency = 0
+	revealed = true
+	script = "dfultbot"
+}
+
+{
+	name = "Strife Guy"
+	accuracy = 2
+	intellect = 2
+	evade = 2
+	anticipation = 2
+	reactiontime = 2
+	perception = 2
+	favoriteweapon = "shotgun"
+	color = "BF 8F 5F"
+	gender = "male"
+	skin = "Strife Guy"
+	class = "fighter"
+	railcolor = blue
+	chatfrequency = 0
+	revealed = true
+	script = "dfultbot"
+}
+
+{
+	name = "xxEnemyxx"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "7F 80 3F"
+	gender = "male"
+	skin = "base"
+	class = "random"
+	railcolor = red
+	chatfrequency = 80
+	revealed = false
+	script = "humanbot"
+	chatlump = "bots/chatfiles/xxenemyxx.txt"
+}
+
+{
+	name = "King REoL"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "7F 80 3F"
+	gender = "male"
+	skin = "base"
+	class = "mage"
+	railcolor = purple
+	chatfrequency = 65
+	revealed = false
+	script = "humanbot"
+	chatlump = "bots/chatfiles/reol.txt"
+}
+
+{
+	name = "Meepy"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "7F 80 3F"
+	gender = "male"
+	skin = "meepy"
+	class = "mage"
+	railcolor = blue
+	chatfrequency = 33
+	revealed = false
+	script = "humanbot"
+	chatlump = "bots/chatfiles/meepy.txt"
+}
+
+{
+	name = "Chexman"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "7F 80 3F"
+	gender = "male"
+	skin = "chexman"
+	class = "cleric"
+	railcolor = yellow
+	chatfrequency = 33
+	revealed = false
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/chexman.txt"
+}
+
+{
+	name = "Daisy"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "7F 80 3F"
+	gender = "male"
+	skin = "daisy"
+	class = "cleric"
+	railcolor = rainbow
+	chatfrequency = 50
+	revealed = false
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/daisy.txt"
+}
+
+{
+	name = "\cgL\ciI\cfN \cdM\cfe\chn\cgg\ccj\ciu"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "shotgun"
+	color = "8F 5F 2F"
+	gender = "male"
+	skin = "base"
+	class = "cleric"
+	railcolor = red
+	chatfrequency = 80
+	revealed = false
+	script = "humanbot"
+	chatlump = "bots/chatfiles/fob.txt"
+}
+
+{
+	name = "Golden Fattie"
+	accuracy = 4
+	intellect = 4
+	evade = 4
+	anticipation = 4
+	reactiontime = 4
+	perception = 4
+	favoriteweapon = "minigun"
+	color = "A0 A0 00"
+	gender = "male"
+	skin = "big fat doomguy"
+	class = "cleric"
+	railcolor = gold
+	chatfrequency = 33
+	revealed = false
+	script = "fatbot"
+	chatlump = "bots/chatfiles/chubbs.txt"
+}
+
+{
+	name = "Quotebot"
+	accuracy = 1
+	intellect = 1
+	evade = 1
+	anticipation = 1
+	reactiontime = 1
+	perception = 1
+	favoriteweapon = "chaingun"
+	color = "EF C0 80"
+	gender = "male"
+	skin = "doomcrate"
+	class = "random"
+	railcolor = blue
+	chatfrequency = 95
+	revealed = false
+	script = "dfultbot"
+	chatlump = "bots/chatfiles/quotebot.txt"
+}

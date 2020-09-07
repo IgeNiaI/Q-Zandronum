@@ -1,0 +1,444 @@
+//=================================================================================================
+//
+// DarkImp
+//
+//=================================================================================================
+
+actor DarkImp : DoomImp 5003 // [RT] Inherits from the DoomImp for convenience
+{
+  game Doom
+  spawnid 155 // [RT] I think this is the right Spawnid, change if it isn't
+  obituary "$OB_DARKIMP"
+  hitobituary "$OB_DARKIMP_MELEE"
+  health 120
+  missiletype DarkImpBall
+  meleedamage 3
+  meleesound "imp/melee"
+  states
+  {
+  Spawn:
+    DIMP AB 10 A_Look
+    loop
+  See:
+    DIMP AABBCCDD 3 A_Chase
+    loop
+  Melee:
+  Missile:
+    DIMP EF 8 A_FaceTarget
+    DIMP G 6 A_ComboAttack  // See DarkImpBall
+    goto See
+  Pain:
+    DIMP H 2
+    DIMP H 2 A_Pain
+    goto See
+  Death:
+    DIMP I 8
+    DIMP J 8 A_Scream
+    DIMP K 6
+    DIMP L 6 A_NoBlocking
+    DIMP M -1
+    stop
+  XDeath:
+    DIMP N 5
+    DIMP O 5 A_XScream
+    DIMP P 5
+    DIMP Q 5 A_NoBlocking
+    DIMP RST 5
+    DIMP U -1
+    stop
+  Raise:
+    DIMP ML 8
+    DIMP KJI 6
+    goto See
+  }
+}
+
+actor DarkImpBall : DoomImpBall // [RT] Inherits from DoomImpBall for convenience.
+{
+  game Doom
+  spawnid 218
+  Speed 20
+  damage 3 // [RT] I think this is right, change if neccesary.
+  states
+  {
+  Spawn:
+    BAL4 AB 4 bright
+    loop
+  Death:
+    BAL4 CDE 6 bright
+    stop
+  }
+}
+
+//=================================================================================================
+//
+// Cacolantern
+//
+//=================================================================================================
+
+ACTOR Cacolantern : Cacodemon 5006
+{
+	SpawnID 159
+	Health 800
+	Obituary "$OB_CACOLANTERN"
+	HitObituary "$OB_CACOLANTERN_MELEE"
+	States
+	{
+	Spawn:
+		HED2 A 10 A_Look
+		Loop
+	See:
+		HED2 A 3 A_Chase
+		Loop
+	Pain:
+		HED2 E 3
+		HED2 E 3 A_Pain
+		HED2 F 6
+		Goto See
+	Missile:
+		HED2 BC 5 A_FaceTarget
+		HED2 D 5 BRIGHT A_BasicAttack (8, "None", "CacolanternBall", 32)
+		Goto See
+	Death:
+		HED2 G 8 A_NoBlocking
+		HED2 H 8 A_Scream
+		HED2 IJK 8
+		HED2 L -1 A_SetFloorClip
+		Stop
+	Raise:
+		HED2 L 8 A_UnsetFloorClip
+		HED2 KJIHG 8
+		Goto See
+	}
+}
+
+ACTOR CacolanternBall
+{
+	SpawnID 219
+	Radius 6
+	Height 8
+	Speed 20
+	Damage 5
+	Projectile
+	+RANDOMIZE
+	RenderStyle Add
+	SeeSound "caco/attack"
+	DeathSound "caco/shotx"
+	States
+	{
+	Spawn:
+		BAL8 AB 4 BRIGHT
+		Loop
+	Death:
+		BAL8 CDE 6 BRIGHT
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Abaddon
+//
+//=================================================================================================
+
+ACTOR Abaddon : Cacolantern 5015
+{
+	SpawnID 220
+	Health 1200
+	Speed 12
+	PainChance 40
+	Obituary "$OB_ABADDON"
+	HitObituary "$OB_ABADDON_MELEE"
+	States
+	{
+	Spawn:
+		HED3 A 10 A_Look
+		Loop
+	See:
+		HED3 A 3 A_Chase
+		Loop
+	Pain:
+		HED3 E 3
+		HED3 E 3 A_Pain
+		HED3 F 6
+		Goto See
+	Missile:
+		HED3 BC 5 A_FaceTarget
+		HED3 D 5 BRIGHT A_BasicAttack (8, "None", "AbaddonBall", 32)
+		HED3 BC 5 A_FaceTarget
+		HED3 D 5 BRIGHT A_BasicAttack (8, "None", "AbaddonBall", 32)
+		Goto See
+	Death:
+		HED3 G 8 A_NoBlocking
+		HED3 H 8 A_Scream
+		HED3 IJK 8
+		HED3 L -1 A_SetFloorClip
+		Stop
+	Raise:
+		HED3 L 8 A_UnSetFloorClip
+		HED3 KJIHG 8
+		Goto See
+	}
+}
+
+ACTOR AbaddonBall
+{
+	SpawnID 221
+	Radius 6
+	Height 8
+	Speed 20
+	Damage 10
+	Projectile
+	+RANDOMIZE
+	RenderStyle Add
+	SeeSound "caco/attack"
+	DeathSound "caco/shotx"
+	States
+	{
+	Spawn:
+		BAL3 AB 4 BRIGHT
+		Loop
+	Death:
+		BAL3 CDE 6 BRIGHT
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Belphegor
+//
+//=================================================================================================
+
+ACTOR Belphegor : HellKnight 5008
+{
+	SpawnID 215
+	Health 1500
+	PainChance 25
+	SeeSound "baron/sight"
+	PainSound "baron/pain"
+	DeathSound "baron/death"
+	ActiveSound "baron/active"
+	Obituary "$OB_BELPHEGOR"
+	HitObituary "$OB_BELPHEGOR_MELEE"
+	States
+	{
+	Spawn:
+		BOS3 AB 10 A_Look
+		Loop
+	See:
+		BOS3 AABBCCDD 3 A_Chase
+		Loop
+	Pain:
+		BOS3 H 2
+		BOS3 H 2 A_Pain
+		Goto See
+	Melee:
+	Missile:
+		BOS3 EF 6 A_FaceTarget
+		BOS3 G 6 A_BasicAttack (10, "baron/melee", "BelphegorBall", 32)
+		BOS3 EF 6 A_FaceTarget
+		BOS3 G 6 A_BasicAttack (10, "baron/melee", "BelphegorBall", 32)
+		BOS3 EF 6 A_FaceTarget
+		BOS3 G 6 A_BasicAttack (10, "baron/melee", "BelphegorBall", 32)
+		Goto See
+	Death:
+		BOS3 I 8
+		BOS3 J 8 A_Scream
+		BOS3 K 8
+		BOS3 L 8 A_NoBlocking
+		BOS3 MN 8
+		BOS3 O -1 A_BossDeath
+		Stop
+	Raise:
+		BOS3 ONMLKJI 8
+		Goto See
+	}
+}
+
+ACTOR BelphegorBall : BaronBall
+{
+	SpawnID 222
+	Speed 20
+}
+
+//=================================================================================================
+//
+// BloodDemon
+//
+//=================================================================================================
+
+ACTOR BloodDemon : Demon 5004
+{
+	SpawnID 156
+	Health 300
+	Obituary "$OB_BLOODDEMON_MELEE"
+	States
+	{
+	Spawn:
+		SRG2 AB 10 A_Look
+		Loop
+	See:
+		SRG2 AABBCCDD 2 A_Chase
+		Loop
+	Pain:
+		SRG2 H 2
+		SRG2 H 2 A_Pain
+		Goto See
+	Melee:
+		SRG2 EF 8 A_FaceTarget
+		SRG2 G 8 A_SargAttack
+		Goto See
+	Death:
+		SRG2 I 8
+		SRG2 J 8 A_Scream
+		SRG2 K 4
+		SRG2 L 4 A_NoBlocking
+		SRG2 M 4
+		SRG2 N -1
+		Stop
+	Raise:
+		SRG2 NMLKJI 5
+		Goto See
+	}
+}
+
+//=================================================================================================
+//
+// Hectebus
+//
+//=================================================================================================
+
+ACTOR Hectebus : Fatso 5007
+{
+   SpawnID 158
+   Health 1200
+   PainChance 20
+   Obituary "$OB_HECTEBUS"
+   States
+   {
+   Spawn:
+      HECT AB 15 A_Look
+      Loop
+   See:
+      HECT AABBCCDDEEFF 4 A_Chase
+      Loop
+   Pain:
+      HECT J 3
+      HECT J 3 A_Pain
+      Goto See
+   Missile:
+      //These Next 2 states replace A_FatRaise and A_HectRaise
+      HECT G 0 A_PlaySound("fatso/raiseguns")
+      HECT G 20 A_FaceTarget
+      HECT H 0 A_CustomMissile("HectShot",28,0,0,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,5.625,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,11.25,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,16.875,1)
+      HECT H 10 BRIGHT
+      HECT IG 5 A_FaceTarget
+      HECT H 0 A_CustomMissile("HectShot",28,0,0,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,-5.625,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,-11.25,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,-16.875,1)
+      HECT H 10 BRIGHT
+      HECT IG 5 A_FaceTarget
+      HECT H 0 A_CustomMissile("HectShot",28,0,-11.25,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,-5.625,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,0,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,5.625,1)
+      HECT H 0 A_CustomMissile("HectShot",28,0,11.25,1)
+      HECT H 10 BRIGHT
+      HECT IG 5 A_FaceTarget
+      Goto See
+   Death:
+      HECT K 6
+      HECT L 6 A_Scream
+      HECT M 6 A_NoBlocking
+      HECT NOPQRS 6
+      HECT T -1
+      Stop
+   Raise:
+      HECT RQPONMLK 5
+      Goto See
+   }
+}
+
+ACTOR HectShot : FatShot
+{
+   Speed 22
+   Damage 12
+   States
+   {
+   Spawn:
+      HECF AB 4 BRIGHT
+      Loop
+   Death:
+      HECF C 8 BRIGHT
+      HECF D 6 BRIGHT
+      HECF E 4 BRIGHT
+      Stop
+   }
+}
+
+//=================================================================================================
+//
+// SuperShotgunGuy
+//
+//=================================================================================================
+
+ACTOR SuperShotgunGuy 5005
+{
+   Game Doom
+   SpawnID 157
+   Health 120
+   Radius 20
+   Height 56
+   Mass 100
+   Speed 8
+   PainChance 170
+   SeeSound "chainguy/sight"
+   PainSound "chainguy/pain"
+   DeathSound "chainguy/death"
+   ActiveSound "chainguy/active"
+   AttackSound "ssgguy/attack"
+   MONSTER
+   +FLOORCLIP
+   Obituary "$OB_SSGGUY"
+   DropItem "SuperShotgun"
+   States
+   {
+      Spawn:
+         GPOS AB 10 A_Look
+         Loop
+      See:
+         GPOS AABBCCDD 4 A_Chase
+         Loop
+      Missile:
+         GPOS E 10 A_FaceTarget
+         GPOS F 8 Bright A_CustomBulletAttack(8, 7, 7, 5, "BulletPuff")
+         GPOS E 8
+         Goto See
+      Pain:
+         GPOS G 3
+         GPOS G 3 A_Pain
+         Goto See
+      Death:
+         GPOS H 5
+         GPOS I 5 A_Scream
+         GPOS J 5 A_NoBlocking
+         GPOS KLM 5
+         GPOS N -1
+         Stop
+      XDeath:
+         GPOS O 5
+         GPOS P 5 A_XScream
+         GPOS Q 5 A_NoBlocking
+         GPOS RS 5
+         GPOS T -1
+         Stop
+      Raise:
+         GPOS LKJIH 5
+         Goto See
+   }
+}

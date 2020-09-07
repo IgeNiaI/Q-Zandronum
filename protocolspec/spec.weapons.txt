@@ -1,0 +1,60 @@
+Command SpawnMissile
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Fixed velX
+	Fixed velY
+	Fixed velZ
+	Class<AActor> missileType
+	Short netID
+	Short targetNetID
+EndCommand
+
+Command SpawnMissileExact
+	Fixed x
+	Fixed y
+	Fixed z
+	Fixed velX
+	Fixed velY
+	Fixed velZ
+	Class<AActor> missileType
+	Short netID
+	Short targetNetID
+EndCommand
+
+Command MissileExplode
+	Actor missile
+	Short lineId
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+EndCommand
+
+Command WeaponSound
+	Player player with MoTest
+	String sound
+EndCommand
+
+Command WeaponChange
+	Player player with MoTest
+	Class<AWeapon> weaponType
+EndCommand
+
+Command WeaponRailgun
+	Actor source
+	Vector3 start
+	Vector3 end
+	Long color1
+	Long color2
+	Float maxdiff
+	ShortByte<7> flags
+	Bool extended
+	If (extended)
+		Long angleoffset
+		Class spawnclass with NullAllowed
+		# Let's play safe and send this as a short
+		Short duration
+		Float sparsity
+		Float drift
+	EndIf
+EndCommand

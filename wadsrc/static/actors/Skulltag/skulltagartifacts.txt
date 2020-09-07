@@ -1,0 +1,285 @@
+//=================================================================================================
+//
+// Turbosphere
+//
+//=================================================================================================
+
+// [BB] This shows a HUD icon while the Turbosphere is active.
+ACTOR PowerTurbo : PowerSpeed
+{
+	Inventory.Icon "ARTITU1"
+}
+
+ACTOR Turbosphere : PowerupGiver 5030
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 169
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.MaxAmount 0
+	Powerup.Type Turbo
+	Powerup.Duration 1050
+	Inventory.PickupMessage "$PICKUP_TURBOSPHERE"
+	Inventory.PickupAnnouncerEntry "turbosphere"
+	States
+	{
+	Spawn:
+		TURB ABCD 3 Bright
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Time freeze sphere
+//
+//=================================================================================================
+
+ACTOR TimeFreezeSphere : PowerupGiver 5032
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 171
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.MaxAmount 0
+	Powerup.Type TimeFreezer
+	Powerup.Color GoldMap
+	Inventory.PickupMessage "$PICKUP_TIMEFREEZER"
+	Inventory.PickupAnnouncerEntry "timefreeze"
+	States
+	{
+	Spawn:
+		TIME ABCD 6 Bright
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Skulltag's invisibility sphere. It's a little different in that it alters your alpha.
+//
+//=================================================================================================
+
+ACTOR InvisibilitySphere : PowerupGiver 5035
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 174
+	+COUNTITEM
+	+NOGRAVITY
+	+VISIBILITYPULSE
+	+INVENTORY.AUTOACTIVATE
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.MaxAmount 0
+	Powerup.Type Translucency
+	RenderStyle Translucent
+	Inventory.PickupMessage "$PICKUP_INVISIBILITY"
+	Inventory.PickupAnnouncerEntry "invisibility"
+	States
+	{
+	Spawn:
+		SINV ABCD 6 Bright
+		Loop
+	}
+}	
+
+//=================================================================================================
+//
+// Doomsphere
+//
+//=================================================================================================
+
+ACTOR PowerQuadDamage : PowerDamage
+{
+	Damagefactor "normal", 4
+}
+
+ACTOR Doomsphere : PowerupGiver 5036
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 175
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.MaxAmount 0
+	Powerup.Type QuadDamage
+	Powerup.Color RedMap
+	Inventory.PickupMessage "$PICKUP_DOOMSPHERE"
+	Inventory.PickupAnnouncerEntry "doomsphere"
+	States
+	{
+	Spawn:
+		DOOM A 10 Bright
+		DOOM B 15 Bright
+		DOOM C 8 Bright
+		DOOM D 6 Bright
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Guardsphere
+//
+//=================================================================================================
+
+ACTOR PowerQuarterDamage: PowerProtection
+{
+	Damagefactor "normal", 0.25
+}
+
+ACTOR Guardsphere : PowerupGiver 5037
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 0
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.MaxAmount 0
+	Powerup.Type QuarterDamage
+	Powerup.Color GreenMap
+	Inventory.PickupMessage "$PICKUP_GUARDSPHERE"
+	Inventory.PickupAnnouncerEntry "guardsphere"
+	States
+	{
+	Spawn:
+		GARD ABCD 6 Bright
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// PowerTerminatorArtifact
+//
+//=================================================================================================
+
+ACTOR PowerTerminatorArtifact : Powerup native
+{
+	Powerup.Duration 0
+}
+
+//=================================================================================================
+//
+// [BB] ReturningPowerupGiver - Handles auto return of Terminator and PossessionStone
+//
+//=================================================================================================
+
+ACTOR ReturningPowerupGiver : PowerupGiver native
+{
+}
+
+//=================================================================================================
+//
+// Terminator
+//
+//=================================================================================================
+
+ACTOR Terminator : ReturningPowerupGiver -1
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 0
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.MaxAmount 0
+	Powerup.Type TerminatorArtifact
+	Inventory.PickupMessage "$PICKUP_TERMINATOR"
+	Inventory.PickupAnnouncerEntry "terminator"
+	States
+	{
+	Spawn:
+		ARNO ABCD 6 Bright
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// PowerPossessionArtifact 
+//
+//=================================================================================================
+
+ACTOR PowerPossessionArtifact : Powerup native
+{
+	Powerup.Duration 0
+}
+
+//=================================================================================================
+//
+// Possession stone
+//
+//=================================================================================================
+
+ACTOR PossessionStone : ReturningPowerupGiver -1
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 0
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.MaxAmount 0
+	Powerup.Type PossessionArtifact
+	Inventory.PickupMessage "$PICKUP_POSSESSIONSTONE"
+	States
+	{
+	Spawn:
+		PPOS ABCDEF 6 Bright
+		Loop
+	}
+}
+
+
+//=================================================================================================
+//
+// RandomPowerup
+//
+//=================================================================================================
+
+ACTOR RandomPowerup : Inventory 5039 native
+{
+	Game Doom
+	SpawnID 176
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	+INVENTORY.ALWAYSPICKUP
+	Inventory.MaxAmount 0
+
+	action native A_RandomPowerupFrame ();
+
+	States
+	{
+	Spawn:
+		MEGA A 6 Bright A_RandomPowerupFrame
+		SOUL A 6 Bright A_RandomPowerupFrame
+		GARD A 6 Bright A_RandomPowerupFrame
+		PINS A 6 Bright A_RandomPowerupFrame
+		TIME A 6 Bright A_RandomPowerupFrame
+		SINV A 6 Bright A_RandomPowerupFrame
+		DOOM A 6 Bright A_RandomPowerupFrame
+		TURB A 6 Bright A_RandomPowerupFrame
+		Loop
+	}
+}

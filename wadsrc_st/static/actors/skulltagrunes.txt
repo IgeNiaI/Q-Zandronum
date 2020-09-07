@@ -1,0 +1,336 @@
+//=================================================================================================
+//
+// Rune
+//
+//=================================================================================================
+
+ACTOR Rune : Powerup
+{
+}
+
+ACTOR RuneDoubleDamage : PowerDamage
+{
+	Damagefactor normal, 2.0
+}
+
+ACTOR RuneDoubleFiringSpeed : PowerDoubleFiringSpeed
+{
+}
+
+ACTOR RuneDrain : PowerDrain
+{
+}
+
+ACTOR RuneSpread : PowerSpread
+{
+}
+
+ACTOR RuneHalfDamage : PowerProtection
+{
+	Damagefactor normal, 0.5
+}
+
+ACTOR RuneRegeneration : PowerRegeneration
+{
+}
+
+ACTOR RuneProsperity : PowerProsperity
+{
+}
+
+ACTOR RuneReflection : PowerReflection
+{
+}
+
+ACTOR RuneHighJump : PowerHighJump
+{
+}
+
+ACTOR RuneSpeed25 : PowerSpeed
+{
+	Speed 1.25
+}
+
+//=================================================================================================
+//
+// Strength rune
+//
+//=================================================================================================
+
+ACTOR StrengthRune : RuneGiver 5100
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 180
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon STRRA0
+	Inventory.MaxAmount 0
+	Rune.Type DoubleDamage
+	Inventory.PickupMessage "$PICKUP_STRENGTH"
+	Inventory.PickupAnnouncerEntry "strength"
+	States
+	{
+	Spawn:
+		STRR ABCD 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Rage rune
+//
+//=================================================================================================
+
+ACTOR RageRune : RuneGiver 5101
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 181
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon RAGRA0
+	Inventory.MaxAmount 0
+	Rune.Type DoubleFiringSpeed
+	Inventory.PickupMessage "$PICKUP_RAGE"
+	Inventory.PickupAnnouncerEntry "rage"
+	States
+	{
+	Spawn:
+		RAGR ABCDEFGH 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Drain rune
+//
+//=================================================================================================
+
+ACTOR DrainRune : RuneGiver 5102
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 182
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon DRARA0
+	Inventory.MaxAmount 0
+	Rune.Type Drain
+	Inventory.PickupMessage "$PICKUP_DRAIN"
+	Inventory.PickupAnnouncerEntry "drain"
+	States
+	{
+	Spawn:
+		DRAR ABCD 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Spread rune
+//
+//=================================================================================================
+
+ACTOR SpreadRune : RuneGiver 5103
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 183
+	+COUNTITEM
+	+NOGRAVITY
+	+FLOATBOB
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon SPRRA0
+	Inventory.MaxAmount 0
+	Rune.Type Spread
+	Inventory.PickupMessage "$PICKUP_SPREAD"
+	Inventory.PickupAnnouncerEntry "spread"
+	States
+	{
+	Spawn:
+		SPRR ABCD 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Resistance rune
+//
+//=================================================================================================
+
+ACTOR ResistanceRune : RuneGiver 5104
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 184
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon RESRA0
+	Inventory.MaxAmount 0
+	Rune.Type HalfDamage
+	Inventory.PickupMessage "$PICKUP_RESISTANCE"
+	Inventory.PickupAnnouncerEntry "resistance"
+	States
+	{
+	Spawn:
+		RESR ABCDEFGH 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Regeneration rune
+//
+//=================================================================================================
+
+ACTOR RegenerationRune : RuneGiver 5105
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 185
+	+COUNTITEM
+	+NOGRAVITY
+	+FLOATBOB
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon REGRA0
+	Inventory.MaxAmount 0
+	Rune.Type Regeneration
+	Inventory.PickupMessage "$PICKUP_REGENERATION"
+	Inventory.PickupAnnouncerEntry "regeneration"
+	States
+	{
+	Spawn:
+		REGR AB 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Prosperity rune
+//
+//=================================================================================================
+
+ACTOR ProsperityRune : RuneGiver 5106
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 186
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon PRSRA0
+	Inventory.MaxAmount 0
+	Rune.Type Prosperity
+	Inventory.PickupMessage "$PICKUP_PROSPERITY"
+	Inventory.PickupAnnouncerEntry "prosperity"
+	States
+	{
+	Spawn:
+		PRSR ABCD 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Reflection rune
+//
+//=================================================================================================
+
+ACTOR ReflectionRune : RuneGiver 5107
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 187
+	+COUNTITEM
+	+NOGRAVITY
+	+FLOATBOB
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon REFRA0
+	Inventory.MaxAmount 0
+	Rune.Type Reflection
+	Inventory.PickupMessage "$PICKUP_REFLECTION"
+	Inventory.PickupAnnouncerEntry "reflection"
+	States
+	{
+	Spawn:
+		REFR BA 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// High jump rune
+//
+//=================================================================================================
+
+ACTOR HighJumpRune : RuneGiver 5108
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 188
+	+COUNTITEM
+	+NOGRAVITY
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon HIJRA0
+	Inventory.MaxAmount 0
+	Rune.Type HighJump
+	Inventory.PickupMessage "$PICKUP_HIGHJUMP"
+	Inventory.PickupAnnouncerEntry "highjump"
+	States
+	{
+	Spawn:
+		HIJR ABCD 6
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Haste rune
+//
+//=================================================================================================
+
+ACTOR HasteRune : RuneGiver 5109
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	SpawnID 189
+	+COUNTITEM
+	+NOGRAVITY
+	+FLOATBOB
+	+INVENTORY.AUTOACTIVATE
+	Inventory.Icon HASRA0
+	Inventory.MaxAmount 0
+	Rune.Type Speed25
+	Inventory.PickupMessage "$PICKUP_HASTE"
+	Inventory.PickupAnnouncerEntry "haste"
+	States
+	{
+	Spawn:
+		HASR ABCD 6
+		Loop
+	}
+}

@@ -1,0 +1,219 @@
+[enu default]
+//Weapons
+//minigun
+PICKUP_MINIGUN = "You got the minigun!";
+OB_MINIGUN = "%o was drilled by %k's minigun.";
+OB_MINIGUN_2 = "%o was pelted by %k's minigun.";
+
+//grenade launcher
+PICKUP_GRENADELAUNCHER = "You got the grenade launcher!";
+
+//railgun
+PICKUP_RAILGUN = "You got the railgun!";
+
+//bfg10k
+PICKUP_BFG10K = "You got the BFG10000!  Hell, yes!";
+OB_BFG10K = "%o was blasted by %k's BFG10K.";
+OB_BFG10K_RARE = "%o got a blast in the ass from %k's BFG10K.";
+OB_BFG10K_SELF = "%o got reckless with %p BFG10K.";
+
+
+//Monsters
+//obituaries
+OB_CACODEMON_MELEE_RARE = "%o tried to get friendly with a cacodemon.";
+OB_BARON_MELEE_RARE = "%o was bitchslapped by a Baron of Hell.";
+OB_DARKIMP_MELEE = "%o was slashed by a dark imp.";
+OB_DARKIMP = "%o was burned by a dark imp.";
+OB_BLOODDEMON_MELEE = "%o was chomped on by a blood demon.";
+OB_SSGGUY = "%o was jacked by a super shotgun guy.";
+OB_BELPHEGOR_MELEE = "%o was slain by a Belphegor.";
+OB_BELPHEGOR = "%o was slain by a Belphegor.";
+OB_CACOLANTERN_MELEE = "%o got too close to a cacolantern.";
+OB_CACOLANTERN = "%o was smitten by a cacolantern.";
+OB_ABADDON_MELEE = "%o became food for an abaddon.";
+OB_ABADDON = "%o was smitten by an abaddon.";
+OB_HECTEBUS = "%o was cremated by a hectebus.";
+
+//cast call
+CC_SSGGUY = "SUPER SHOTGUN GUY";
+CC_DARKIMP = "DARK IMP";
+CC_BLOODDEMON = "BLOOD DEMON";
+CC_CACOLANTERN = "CACOLANTERN";
+CC_HECTEBUS = "HECTEBUS";
+
+
+//Items
+PICKUP_REDARMOR = "Picked up the red armor!";
+
+
+//Episodes
+//cluster strings.
+DM1TEXT =
+		"CONGRATULATIONS, YOU'VE FOUND WHAT NO\n"
+		"ONE PROBABLY WOULD HAVE EVER SUSPECTED:\n"
+		"THE SECRET DEATHMATCH LEVEL! PAT YOURSELF\n"
+		"ON THE BACK AND GET READY... IT'S FIGHTIN'\n"
+		"TIME!";
+DM2TEXT =
+		"THE GREATEST EVIL THE WORLD HAS EVER\n"
+		"KNOWN HAS FINALLY BEEN SLAIN. LINGUICA,\n"
+		"THE \"SAUSAGE OF DEATH\", WILL HOLD PLUSH\n"
+		"CACODEMONS CAPTIVE NO LONGER. YOU WATCH\n"
+		"FROM AFAR AS LINGUICA'S LAIR, WHICH SERVED\n"
+		"AS HISSY'S PRISON, CRUMBLES TO THE GROUND.\n"
+		"\n"
+		"HISSY IS FREE! YOU WATCH WITH DELIGHT\n"
+		"AS THE PLUSH CACODEMON KNOWN AS HISSY\n"
+		"EMERGES FROM THE RUBBLE, GIVES YOU A\n"
+		"\"HISS\" GOODBYE, AND FLOATS AWAY HAPPILY.\n"
+		"YOU BREATHE A SIGH OF RELIEF, KNOWING THAT\n"
+		"HISSY, AND ALL OTHER PLUSH CACODEMONS,\n"
+		"CAN ROAM FREE ONCE AGAIN.";
+
+//	{ str_notchanged, "STSTR_HISSYON", "Fearless Rage Mode ON", NULL },
+//	{ str_notchanged, "STSTR_HISSYOFF", "Fearless Rage Mode OFF", NULL },
+
+// Level names.
+LEVEL_SP_PRE_1 = "level 1";
+LEVEL_SP_PRE_2 = "level 2";
+LEVEL_SP_PRE_3 = "level 3";
+LEVEL_SP_PRE_4 = "level 4";
+LEVEL_SP_PRE_5 = "level 5";
+LEVEL_SP_PRE_6 = "level 6";
+LEVEL_SP_PRE_7 = "level 7";
+LEVEL_SP_PRE_8 = "level 8";
+LEVEL_SP_PRE_9 = "level 9";
+LEVEL_SP_PRE_10 = "level 10";
+LEVEL_SP_PRE_11 = "level 11";
+LEVEL_SP_PRE_12 = "level 12";
+LEVEL_SP_PRE_13 = "level 13";
+LEVEL_SP_PRE_14 = "level 14";
+LEVEL_SP_PRE_15 = "level 15";
+LEVEL_SP_PRE_16 = "level 16";
+LEVEL_SP_PRE_17 = "level 17";
+LEVEL_SP_PRE_18 = "level 18";
+LEVEL_SP_PRE_19 = "level 19";
+LEVEL_SP_PRE_20 = "level 20";
+LEVEL_SP_PRE_21 = "level 21";
+LEVEL_SP_PRE_22 = "level 22";
+LEVEL_SP_PRE_23 = "level 23";
+LEVEL_SP_PRE_24 = "level 24";
+LEVEL_SP_PRE_25 = "level 25";
+LEVEL_SP_PRE_26 = "level 26";
+LEVEL_SP_PRE_27 = "level 27";
+LEVEL_SP_PRE_28 = "level 28";
+LEVEL_SP_PRE_29 = "level 29";
+LEVEL_SP_PRE_30 = "level 30";
+LEVEL_SP_PRE_31 = "level 31";
+LEVEL_SP_PRE_32 = "level 32";
+
+
+
+[ita]
+//Weapons
+//minigun
+PICKUP_MINIGUN = "Hai trovato un minigun!";
+OB_MINIGUN = "%o e' stato trapanato dal minigun di %k.";
+OB_MINIGUN_2 = "%o e' stato colpito dal minigun di %k.";
+
+//grenade launcher
+PICKUP_GRENADELAUNCHER = "Hai trovato un lancia granate!!";
+
+//railgun
+PICKUP_RAILGUN = "Hai trovato un railgun!";
+
+//bfg10k
+PICKUP_BFG10K = "Hai trovato il BFG10000!  Oh, si!";
+OB_BFG10K = "%o e' stato annientato dal BFG10K di %k.";
+OB_BFG10K_RARE = "%o e' stato inculato dal BFG10K di %k.";
+OB_BFG10K_SELF = "%o si e' ucciso col suo BFG10K.";
+
+
+//Monsters
+//obituaries
+OB_CACODEMON_MELEE_RARE = "%o ha provato a fare amicizia con un cacodemone.";
+OB_BARON_MELEE_RARE = "%o e' stato colpito da un barone dell'inferno.";
+OB_DARKIMP_MELEE = "%o e' stato squarciato da un imp oscuro.";
+OB_DARKIMP = "%o e' stato bruciato da un imp oscuro.";
+OB_BLOODDEMON_MELEE = "%o e' stato mangiato da un demone di sangue.";
+OB_SSGGUY = "%o e' stato smembrato da uno zombie con doppietta.";
+OB_BELPHEGOR_MELEE = "%o e' stato assassinato da un Belphegor.";
+OB_BELPHEGOR = "%o e' stato assassinato da un Belphegor.";
+OB_CACOLANTERN_MELEE = "%o si e' avvicinato troppo a un caco-lanterna.";
+OB_CACOLANTERN = "%o e' stato abbattuto da un caco-lanterna.";
+OB_ABADDON_MELEE = "%o e' diventato cibo per un abaddon.";
+OB_ABADDON = "%o e' stato abbattuto da un abaddon.";
+OB_HECTEBUS = "%o e' stato cremato da un hectebus.";
+
+//cast call
+CC_SSGGUY = "ZOMBIE CON DOPPIETTA";
+CC_DARKIMP = "IMP OSCURO";
+CC_BLOODDEMON = "DEMONE DI SANGUE";
+CC_CACOLANTERN = "CACO-LANTERNA";
+CC_HECTEBUS = "HECTEBUS";
+
+
+//Items
+PICKUP_REDARMOR = "Hai trovato un'armatura rossa!";
+
+
+//Episodes
+//Cluster strings.
+DM1TEXT =
+		"Congratulazioni, Hai trovato qualcosa che\n"
+		"nessuno avrebbe probabilente mai sospettato:\n"
+		"IL LIVELLO DEATHMATCH SEGRETO! datti un colpo\n"
+		"nel di dietro e tieniti pronto... E' tempo di\n"
+		"combattere!";
+DM2TEXT =
+		"Il piu' grande male che il mondo abbia\n"
+		"conosciuto e' stato finalmente ucciso. \n"
+		"Linguica, la \"salsiccia della morte\", non\n"
+		"terra' mai piu' in prigione cacodemoni di lusso.\n"
+		"guardi da lontano la tana di Linguica, che serviva\n"
+		"come prigione di hissy, sbriciolarsi.\n"
+		"\n"
+		"HISSY E' LIBERO! guardi con delizia\n"
+		"il lussuoso cacodemone conosciuto come hissy\n"
+		"che emerge dalle macerie, e da a te un\n"
+		"\"HISS\" ADDIO, e galleggia via contento.\n"
+		"fai un respiro di sollievo, sapendo che\n"
+		"HISSY, e tutti gli altri lussuosi cacodemoni,\n"
+		"possono vagabondare liberi di nuovo.";
+
+//	{ str_notchanged, "STSTR_HISSYON", "Modalita' Rabbia senza Paura Attiva", NULL },
+//	{ str_notchanged, "STSTR_HISSYOFF", "Modalita' Rabbia senza Paura Disattiva", NULL },
+
+// Level names.
+LEVEL_SP_PRE_1 = "livello 1";
+LEVEL_SP_PRE_2 = "livello 2";
+LEVEL_SP_PRE_3 = "livello 3";
+LEVEL_SP_PRE_4 = "livello 4";
+LEVEL_SP_PRE_5 = "livello 5";
+LEVEL_SP_PRE_6 = "livello 6";
+LEVEL_SP_PRE_7 = "livello 7";
+LEVEL_SP_PRE_8 = "livello 8";
+LEVEL_SP_PRE_9 = "livello 9";
+LEVEL_SP_PRE_10 = "livello 10";
+LEVEL_SP_PRE_11 = "livello 11";
+LEVEL_SP_PRE_12 = "livello 12";
+LEVEL_SP_PRE_13 = "livello 13";
+LEVEL_SP_PRE_14 = "livello 14";
+LEVEL_SP_PRE_15 = "livello 15";
+LEVEL_SP_PRE_16 = "livello 16";
+LEVEL_SP_PRE_17 = "livello 17";
+LEVEL_SP_PRE_18 = "livello 18";
+LEVEL_SP_PRE_19 = "livello 19";
+LEVEL_SP_PRE_20 = "livello 20";
+LEVEL_SP_PRE_21 = "livello 21";
+LEVEL_SP_PRE_22 = "livello 22";
+LEVEL_SP_PRE_23 = "livello 23";
+LEVEL_SP_PRE_24 = "livello 24";
+LEVEL_SP_PRE_25 = "livello 25";
+LEVEL_SP_PRE_26 = "livello 26";
+LEVEL_SP_PRE_27 = "livello 27";
+LEVEL_SP_PRE_28 = "livello 28";
+LEVEL_SP_PRE_29 = "livello 29";
+LEVEL_SP_PRE_30 = "livello 30";
+LEVEL_SP_PRE_31 = "livello 31";
+LEVEL_SP_PRE_32 = "livello 32";

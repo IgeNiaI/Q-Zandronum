@@ -1,0 +1,162 @@
+#
+# Zandronum protocol specification
+#
+# OVERVIEW
+# ────────
+#
+# This file, and the files it includes, provides the specification for the protocol the server uses to update
+# the gamestate to the client. It is composed of commands, and the parameters for each command.
+#
+# A code generator reads this file, and the files it includes, to produce code to handle I/O for server commands.
+#
+# The general syntax is:
+# Command CommandName
+#     [ExtendedCommand]
+#     [UnreliableCommand]
+#     Type<Specialization> Name[Attributes]
+#     Type<Specialization> Name[Attributes]
+#     Type<Specialization> Name[Attributes]
+#     ...
+#
+# The syntax supports If-EndIf statements. The code generator writes the condition of this block as a const method of
+# the command structure, which means the statement should consist of operations on the value of the parameter, any
+# constants and possibly function calls. The value naturally cannot be modified. These cannot be nested.
+#
+# If the ExtendedCommand keyword is provided, the command is filed under SVC_EXTENDEDCOMMAND with a SVC2_* enum name.
+#
+# Commands may be declared as unreliable commands with the UnreliableCommand keyword, which goes inside the command
+# definition. This causes the generated code to call setUnreliable( true ) on the NetCommand.
+#
+# PARAMETER TYPES
+# ───────────────
+#
+# Possible parameter types are:
+#
+# ╔════════════════════╤═══════════════╤══════════════════════╤═══════════════════════════════════════════════╗
+# ║    Type name       │ C++ type name │       Length         │        Description                            ║
+# ╠════════════════════╪═══════════════╪══════════════════════╪═══════════════════════════════════════════════╣
+# ║ Byte               │      int      │          1           │ an 8-bit unsigned integer                     ║
+# ║ SByte              │      int      │          1           │ an 8-bit signed integer                       ║
+# ║ Short              │      int      │          2           │ a 16-bit signed integer                       ║
+# ║ UShort             │      int      │          2           │ a 16-bit unsigned integer                     ║
+# ║ Long               │      int      │          4           │ a 32-bit signed integer                       ║
+# ║ ULong              │      int      │          4           │ a 32-bit unsigned integer                     ║
+# ║ Float              │     float     │          4           │ a single-precision floating point number      ║
+# ║ String             │    FString    │       |x| + 1        │ a null-terminated string                      ║
+# ║ Fixed              │    fixed_t    │          4           │ a 16:16 fixed point number (fixed_t)          ║
+# ║ Angle              │    angle_t    │          4           │ a 32bit binary angle (angle_t)                ║
+# ║ AproxFixed         │    fixed_t    │          2           │ the 16 most significant bits of a fixed_t     ║
+# ║ AproxAngle         │    angle_t    │          2           │ the 16 most significant bits of a angle_t     ║
+# ║ Bool               │     bool      │        1 bit         │ boolean value stored as 1 bit                 ║
+# ║ ShortByte<N>       │      int      │       N bits         │ an integer value of N bits, 1 ≤ N ≤ 8         ║
+# ║ Variable           │      int      │   At least 2 bits,   │ a 32-bit integer sent with as few bytes as    ║
+# ║                    │               │  at most 4 + 2 bits  │ possible, with 2 bits used to indicate length ║
+# ║ Actor<T>           │    AActor*    │          2           │ a game actor, sent with its net ID            ║
+# ║ Class<T>           │ const PClass* │          2           │ an object class, sent by its ID               ║
+# ║ Player             │   player_t*   │          1           │ a player index, sent as a player number       ║
+# ║ Sector             │   sector_t*   │          2           │ a sector, sent as a 2-byte sector number      ║
+# ║ Line               │    line_t*    │          2           │ a line, sent as a 2-byte line number          ║
+# ║ Side               │    side_t*    │          2           │ a side, sent as a 2-byte side number          ║
+# ║ Struct             │    struct     │          ∑           │ all members of the structure                  ║
+# ╚════════════════════╧═══════════════╧══════════════════════╧═══════════════════════════════════════════════╝
+#
+# BIT PACKING
+# ───────────
+#
+# The Bool, ShortByte and Variable types use bit packing to provide finer control over the command packet. Each bit is
+# written into a control byte. The first bit written will allocate a byte for it and consequent bits, with the next bits
+# bitshifted into the same byte as long as there is enough room in the byte for the bits. If the control byte is full
+# and a new bit needs to be written, a new byte is allocated for it and subsequent bits.
+#
+# The ShortByte is written into the control byte. If the control byte does not have enough room for the integer (i.e.
+# there is less than N bits left in the byte), a new control byte is allocated and the integer is written into it. The
+# remaining bits in the control byte can be used to write more bits or short bytes. For instance, four ShortByte<2>
+# parameters fit into one byte, i.e. four 2-bit integers ranging from 0…3.
+#
+# The Variable class calculates the amount of bytes needed for the integer that it sends. It uses 2 bits to indicate
+# the length of the integer, and the limits for the lengths are as follows:
+#
+# ⎧ 0 bytes,            x = 0
+# ⎪ 1 byte,      -128 ≤ x ≤ 127
+# ⎨ 2 bytes,  -32,768 ≤ x ≤ 32,767
+# ⎩ 4 bytes otherwise.
+#
+# Thus, for example, if x = 600, then 2 bits are used to indicate that the value is being sent as a Short, and 2 bytes
+# are used to transmit the value. It is useful when the value sent is usually within Short range, but can also be in
+# the Long range, and scales well when multiple Variable values are written, as only 1 extra byte used to transmit up to
+# 4 variable-length integers.
+#
+# CODE GENERATOR
+# ──────────────
+#
+# A code generator reads these specifications to produce I/O code for server commands. The code generator writes a
+# single header file, and a single source file.
+#
+# The header file contains the ServerCommands namespace, which contains one class definition for each command defined
+# here. The source file contains the I/O operations that the class definitions provide an interface to.
+#
+# SPECIALIZATION
+# ──────────────
+#
+# The code generator allows actors and classes to be specialized to their subclasses. The code generator will attempt
+# to perform downcasting on the actor class to its specified subclass. If the downcasting is not successful, the
+# provided pointer becomes NULL. So it works like dynamic_cast.
+#
+# For actors, the downcasted pointer is provided. For classes, the downcasting is only used as test.
+#
+# TESTS
+# ─────
+#
+# The code generator writes tests for some of its parameter types.
+#
+# For actors, it tests that the pointer that is provided is not NULL. This check can be disabled by providing the
+# allowNull attribute. For example:
+#
+#     Actor activator[allowNull]
+#
+# This defines an actor pointer to an activator, which can be NULL. A similar NULL check is done for all Class
+# parameters as well.
+#
+# For players, the code generator does a PLAYER_IsValidPlayer test, unless the numberTest attribute is provided, in
+# which case the code only tests whether or not the player number is valid. In any case, the player_t* pointer is
+# provided, that points to an element in the `players` array.
+#
+# An additional test for players can be requested with the needBody attribute. This checks that the player has a valid
+# `mo` member.
+#
+#
+# In addition, the code generator provides a test for packet length. If the command was truncated, i.e. the packet
+# ended before all the parameters could be read in, the test fails.
+#
+# If any of the tests fail, a client warning is printed and the command is not executed.
+#
+# For serverside code, equivalent tests are not (yet) present. However, the code generator does write a check to ensure
+# that each of the parameters were initialized. If a parameter was not initialized, a warning is printed, regardless
+# of sv_showwarnings.
+#
+# EXECUTION
+# ─────────
+#
+# After all the tests pass, the command structure's Execute method is called. This method is left to the user to
+# implement, and should make the command take effect. The Execute method should be defined as follows:
+#
+#    void ServerCommands::<CommandName>::Execute()
+#    {
+#         ...
+#    }
+#
+# where <CommandName> is to be replaced with the name of the command. This method is only called if all the tests
+# mentioned before pass.
+#
+
+Protocol GameServerToClient
+	Include "spec.protocol.txt"
+	Include "spec.map.txt"
+	Include "spec.players.txt"
+	Include "spec.print.txt"
+	Include "spec.things.txt"
+	Include "spec.sectors.txt"
+	Include "spec.sounds.txt"
+	Include "spec.weapons.txt"
+	Include "spec.misc.txt"
+EndProtocol

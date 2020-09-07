@@ -1,0 +1,66 @@
+Command MapLoad
+	String mapName
+EndCommand
+
+Command MapNew
+	String mapName
+EndCommand
+
+Command MapExit
+	Byte position
+	String nextMap
+EndCommand
+
+Command MapAuthenticate
+	String mapName
+EndCommand
+
+Command SetMapTime
+	Long time
+EndCommand
+
+Command SetMapNumKilledMonsters
+	Short killedMonsters
+EndCommand
+
+Command SetMapNumFoundItems
+	Short foundItems
+EndCommand
+
+Command SetMapNumFoundSecrets
+	Short foundSecrets
+EndCommand
+
+Command SetMapNumTotalMonsters
+	Short totalMonsters
+EndCommand
+
+Command SetMapNumTotalItems
+	Short totalItems
+EndCommand
+
+Command SetMapNumTotalSecrets
+	ExtendedCommand
+	Short totalSecrets
+EndCommand
+
+Command SetMapMusic
+	String music
+	Byte order
+EndCommand
+
+Command SetMapSky
+	String sky1
+	String sky2
+EndCommand
+
+Command SecretFound
+	ExtendedCommand
+	Actor actor
+	Byte secretFlags
+EndCommand
+
+Command SecretMarkSectorFound
+	ExtendedCommand
+	Sector sector
+EndCommand

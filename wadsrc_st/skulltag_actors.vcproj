@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="8,00"
+	Name="wadsrc_st"
+	ProjectGUID="{1CFA980F-BBBF-4D40-A9BD-795F6FB407AE}"
+	RootNamespace="wadsrc_st"
+	Keyword="MakeFileProj"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+		<Platform
+			Name="x64"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="Debug"
+			IntermediateDirectory="Debug"
+			ConfigurationType="10"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Checking skulltag_actors.pk3..."
+				CommandLine="&quot;$(SolutionDir)tools\zipdir\zipdir.exe&quot; &quot;$(InputDir)skulltag_actors.pk3&quot; &quot;$(InputDir)static&quot;&#x0D;&#x0A;copy &quot;$(InputDir)skulltag_actors.pk3&quot; &quot;$(SolutionDir)..\skulltag_actors.pk3&quot;&#x0D;&#x0A;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="Release"
+			IntermediateDirectory="Release"
+			ConfigurationType="10"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Checking skulltag_actors.pk3..."
+				CommandLine="&quot;$(SolutionDir)tools\zipdir\zipdir.exe&quot; &quot;$(InputDir)skulltag_actors.pk3&quot; &quot;$(InputDir)static&quot;&#x0D;&#x0A;copy &quot;$(InputDir)skulltag_actors.pk3&quot; &quot;$(SolutionDir)..\skulltag_actors.pk3&quot;&#x0D;&#x0A;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="10"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Checking skulltag_actors.pk3..."
+				CommandLine="&quot;$(SolutionDir)tools\zipdir\zipdir.exe&quot; &quot;$(InputDir)skulltag_actors.pk3&quot; &quot;$(InputDir)static&quot; &#x0D;&#x0A;copy &quot;$(InputDir)skulltag_actors.pk3&quot; &quot;$(SolutionDir)..\skulltag_actors.pk3&quot;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="10"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Checking skulltag_actors.pk3..."
+				CommandLine="&quot;$(SolutionDir)tools\zipdir\zipdir.exe&quot; &quot;$(InputDir)skulltag_actors.pk3&quot; &quot;$(InputDir)static&quot; &#x0D;&#x0A;copy &quot;$(InputDir)skulltag_actors.pk3&quot; &quot;$(SolutionDir)..\skulltag_actors.pk3&quot;"
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<File
+			RelativePath=".\CMakeLists.txt"
+			>
+		</File>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

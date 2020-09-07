@@ -1,0 +1,606 @@
+// MAPINFO for Strife (full version and teaser)
+include "mapinfo/common.txt"
+
+gameinfo
+{
+	titlepage = "TITLEPIC"
+	creditpage = "CREDIT"
+	titlemusic = "D_LOGO"
+	titletime = 8
+	advisorytime = 0
+	pagetime = 5
+	chatsound = "misc/chat"
+	finalemusic = "d_intro"
+	finaleflat = "-NOFLAT-"
+	finalepage = "CREDIT"
+	infopage = "HELP1", "HELP2", "HELP3"
+	quitsound = ""
+	borderflat = "F_PAVE01"
+	border = StrifeBorder
+	telefogheight = 0
+	defkickback = 150
+	skyflatname = "F_SKY001"
+	translator = "xlat/strife.txt"
+	defaultbloodcolor = "68 00 00"
+	defaultbloodparticlecolor = "ff 00 00"
+	backpacktype = "AmmoSatchel"
+	armoricons = "I_ARM2", 0.5, "I_ARM1"
+	statusbar = ""
+	intermissionmusic = "d_slide"
+	intermissioncounter = false
+	weaponslot = 1, "PunchDagger"
+	weaponslot = 2, "StrifeCrossbow2", "StrifeCrossbow"
+	weaponslot = 3, "AssaultGun"
+	weaponslot = 4, "MiniMissileLauncher"
+	weaponslot = 5, "StrifeGrenadeLauncher2", "StrifeGrenadeLauncher"
+	weaponslot = 6, "FlameThrower"
+	weaponslot = 7, "Mauler2", "Mauler"
+	weaponslot = 8, "Sigil"
+	dimcolor = "ff d7 00"
+	dimamount = 0.2
+	definventorymaxamount = 25
+	defaultrespawntime = 16
+	defaultdropstyle = 2
+	endoom = "ENDSTRF"
+	player5start = 5
+	pickupcolor = "d7 ba 45"
+	quitmessages = "$QUITMSG", "$QUITMSG15", "$QUITMSG16", "$QUITMSG17", "$QUITMSG18", "$QUITMSG19", "$QUITMSG20", "$QUITMSG21", "$QUITMSG22"
+	menufontcolor_title = "UNTRANSLATED"
+	menufontcolor_label = "UNTRANSLATED"
+	menufontcolor_value = "GRAY"
+	menufontcolor_action = "GRAY"
+	menufontcolor_header = "RED"
+	menufontcolor_highlight = "GREEN"
+	menufontcolor_selection = "GOLD"
+	menubackbutton = "M_BACK_S"
+	PlayerClasses = "StrifePlayer"
+	pausesign = "M_PAUSE"
+	gibfactor = 0.5
+	cursorpic = "strfcurs"
+	textscreenx = 10
+	textscreeny = 10
+	defaultendsequence = "Inter_Strife"
+	maparrow = "maparrows/arrow.txt", "maparrows/ddtarrow.txt"
+	statscreen_mapnamefont = "BigFont"
+	statscreen_finishedfont = "BigFont", "white"
+	statscreen_enteringfont = "BigFont", "white"
+}
+
+Intermission Inter_Strife_Good
+{
+	Image
+	{
+		Music = "D_HAPPY"
+		Background = "SS4F1"
+		Sound = "svox/rie01"
+		Time = 13
+	}
+	Image
+	{
+		Background = "SS4F2"
+		Sound = "svox/bbx01"
+		Time = 11
+	}
+	Image
+	{
+		Background = "SS4F3"
+		Sound = "svox/bbx02"
+		Time = 14
+	}
+	Image
+	{
+		Background = "SS4F4"
+		Time = 28
+	}
+	Wiper
+	{
+		WipeType = Crossfade
+	}
+	Image
+	{
+		Music = "D_FAST"
+		Background = "CREDIT"
+	}
+}
+
+
+Intermission Inter_Strife_Sad
+{
+	Image
+	{
+		Music = "D_SAD"
+		Background = "SS6F1"
+		Sound = "svox/ss601a"
+		Time = 8
+	}
+	Image
+	{
+		Background = "SS6F2"
+		Sound = "svox/ss602a"
+		Time = 8
+	}
+	Image
+	{
+		Background = "SS6F3"
+		Sound = "svox/ss603a"
+		Time = 9
+	}
+	Wiper
+	{
+		WipeType = Crossfade
+	}
+	Image
+	{
+		Music = "D_FAST"
+		Background = "CREDIT"
+	}
+}
+
+Intermission Inter_Strife_Lose
+{
+	Image
+	{
+		Music = "D_SAD"
+		Background = "SS5F1"
+		Sound = "svox/ss501b"
+		Time = 11
+	}
+	Image
+	{
+		Background = "SS5F2"
+		Sound = "svox/ss502b"
+		Time = 10
+	}
+	Image
+	{
+		Background = "SS5F3"
+		Sound = "svox/ss503b"
+		Time = 11
+	}
+	Wiper
+	{
+		WipeType = Crossfade
+	}
+	Image
+	{
+		Music = "D_FAST"
+		Background = "CREDIT"
+	}
+}
+
+/* later
+Intermission Inter_Strife_Intro
+{
+}
+*/
+
+Intermission Inter_Strife_MAP03
+{
+	Image
+	{
+		Music = "D_DARK"
+		Background = "SS2F1"
+		Sound = "svox/mac10"
+		Time = 9
+	}
+	Image
+	{
+		Background = "SS2F2"
+		Sound = "svox/mac11"
+		Time = 10
+	}
+	Image
+	{
+		Background = "SS2F3"
+		Sound = "svox/mac12"
+		Time = 12
+	}
+	Image
+	{
+		Background = "SS2F4"
+		Sound = "svox/mac13"
+		Time = 17
+	}
+}
+
+Intermission Inter_Strife_MAP10
+{
+	Image
+	{
+		Music = "D_DARK"
+		Background = "SS3F1"
+		Sound = "svox/mac16"
+		Time = 10
+	}
+	Image
+	{
+		Background = "SS3F2"
+		Sound = "svox/mac17"
+		Time = 12
+	}
+	Image
+	{
+		Background = "SS3F3"
+		Sound = "svox/mac18"
+		Time = 12
+	}
+	Image
+	{
+		Background = "SS3F4"
+		Sound = "svox/mac19"
+		Time = 11
+	}
+}
+
+skill baby
+{
+	AutoUseHealth
+	AmmoFactor = 2
+	DamageFactor = 0.5
+	EasyBossBrain
+	SlowMonsters
+	SpawnFilter = Baby
+	PicName = "M_JKILL"
+	Name = "$SSKILL_BABY"
+	Key = "t"
+}
+
+skill easy
+{
+	SpawnFilter = Easy
+	PicName = "M_ROUGH"
+	Name = "$SSKILL_EASY"
+	Key = "r"
+}
+
+skill normal
+{
+	SpawnFilter = Normal
+	PicName = "M_HURT"
+	Name = "$SSKILL_NORMAL"
+	Key = "v"
+	DefaultSkill
+}
+
+skill hard
+{
+	SpawnFilter = Hard
+	PicName = "M_ULTRA"
+	Name = "$SSKILL_HARD"
+	Key = "e"
+}
+
+skill nightmare
+{
+	AmmoFactor = 2
+	FastMonsters
+	DisableCheats
+	RespawnTime = 16
+	SpawnFilter = Nightmare
+	PicName = "M_NMARE"
+	Name = "$SSKILL_NIGHTMARE"
+	Key = "b"
+}
+
+gamedefaults
+{
+	forcenoskystretch
+	strifefallingdamage
+	nointermission
+	clipmidtextures
+	noinfighting
+}
+
+map MAP01 "AREA 1: sanctuary"
+{
+	next = "MAP02"
+	sky1 = "SKYMNT02"
+	music = "D_ACTION"
+	cluster = 1
+}
+
+map MAP02 "AREA 2: town"
+{
+	next = "MAP03"
+	sky1 = "SKYMNT02"
+	music = "D_TAVERN"
+	cluster = 1
+}
+
+map MAP03 "AREA 3: front base"
+{
+	next = "MAP04"
+	sky1 = "SKYMNT02"
+	music = "D_DANGER"
+	cluster = 1
+	noallies
+	redirect = "Sigil", "map30"
+	slideshow = "Inter_Strife_MAP03"
+}
+
+map MAP04 "AREA 4: power station"
+{
+	next = "MAP05"
+	sky1 = "SKYMNT02"
+	music = "D_FAST"
+	cluster = 1
+}
+
+map MAP05 "AREA 5: prison"
+{
+	next = "MAP06"
+	sky1 = "SKYMNT02"
+	music = "D_INTRO"
+	cluster = 1
+}
+
+map MAP06 "AREA 6: sewers"
+{
+	next = "MAP07"
+	sky1 = "SKYMNT02"
+	music = "D_DARKER"
+	cluster = 1
+}
+
+map MAP07 "AREA 7: castle"
+{
+	next = "MAP08"
+	sky1 = "SKYMNT02"
+	music = "D_STRIKE"
+	cluster = 1
+	redirect = "Sigil", "map10"
+}
+
+map MAP08 "AREA 8: Audience Chamber"
+{
+	next = "MAP09"
+	sky1 = "SKYMNT02"
+	music = "D_SLIDE"
+	cluster = 1
+}
+
+map MAP09 "AREA 9: Castle: Programmer's Keep"
+{
+	next = "MAP10"
+	sky1 = "SKYMNT02"
+	music = "D_TRIBAL"
+	cluster = 1
+
+	// These are the sky changes for the first 8 maps
+
+	specialaction = "Programmer", "ACS_Execute", 0, 1, 256
+	specialaction = "Programmer", "ACS_Execute", 0, 2, 256
+	specialaction = "Programmer", "ACS_Execute", 0, 3, 256
+	specialaction = "Programmer", "ACS_Execute", 0, 4, 256
+	specialaction = "Programmer", "ACS_Execute", 0, 5, 256
+	specialaction = "Programmer", "ACS_Execute", 0, 6, 256
+	specialaction = "Programmer", "ACS_Execute", 0, 7, 256
+	specialaction = "Programmer", "ACS_Execute", 0, 8, 256
+	
+	// It seems that Strife was originally going to print the text
+	// from the C1TEXT lump when you move from map 9 to map 10, but
+	// that idea apparently got scrapped as the game developed. 
+}
+
+map MAP10 "AREA 10: New Front Base"
+{
+	next = "MAP11"
+	sky1 = "SKYMNT01"
+	music = "D_MARCH"
+	cluster = 1
+	slideshow = "Inter_Strife_MAP10"
+}
+
+map MAP11 "AREA 11: Borderlands"
+{
+	next = "MAP12"
+	sky1 = "SKYMNT01"
+	music = "D_DANGER"
+	cluster = 1
+}
+
+map MAP12 "AREA 12: the temple of the oracle"
+{
+	next = "MAP13"
+	sky1 = "SKYMNT01"
+	music = "D_MOOD"
+	cluster = 1
+}
+
+map MAP13 "AREA 13: Catacombs"
+{
+	next = "MAP14"
+	sky1 = "SKYMNT01"
+	music = "D_CASTLE"
+	cluster = 1
+}
+
+map MAP14 "AREA 14: mines"
+{
+	next = "MAP15"
+	sky1 = "SKYMNT01"
+	music = "D_DARKER"
+	cluster = 1
+}
+
+map MAP15 "AREA 15: Fortress: Administration"
+{
+	next = "MAP16"
+	sky1 = "SKYMNT01"
+	music = "D_ACTION"
+	cluster = 1
+}
+
+map MAP16 "AREA 16: Fortress: Bishop's Tower"
+{
+	next = "MAP17"
+	sky1 = "SKYMNT01"
+	music = "D_FIGHT"
+	cluster = 1
+}
+
+map MAP17 "AREA 17: Fortress: The Bailey"
+{
+	next = "MAP18"
+	sky1 = "SKYMNT01"
+	music = "D_SPENSE"
+	cluster = 1
+}
+
+map MAP18 "AREA 18: Fortress: Stores"
+{
+	next = "MAP19"
+	sky1 = "SKYMNT01"
+	music = "D_SLIDE"
+	cluster = 1
+}
+
+map MAP19 "AREA 19: Fortress: Security Complex"
+{
+	next = "MAP20"
+	sky1 = "SKYMNT01"
+	music = "D_STRIKE"
+	cluster = 1
+}
+
+map MAP20 "AREA 20: Factory: Receiving"
+{
+	next = "MAP21"
+	sky1 = "SKYMNT01"
+	music = "D_DARK"
+	cluster = 1
+}
+
+map MAP21 "AREA 21: Factory: Manufacturing"
+{
+	next = "MAP22"
+	sky1 = "SKYMNT01"
+	music = "D_TECH"
+	cluster = 1
+}
+
+map MAP22 "AREA 22: Factory: Forge"
+{
+	next = "MAP23"
+	sky1 = "SKYMNT01"
+	music = "D_SLIDE"
+	cluster = 1
+}
+
+map MAP23 "AREA 23: Order Commons"
+{
+	next = "MAP24"
+	sky1 = "SKYMNT01"
+	music = "D_DRONE"
+	cluster = 1
+}
+
+map MAP24 "AREA 24: Factory: Conversion Chapel"
+{
+	next = "MAP25"
+	sky1 = "SKYMNT01"
+	music = "D_PANTHR"
+	cluster = 1
+}
+
+map MAP25 "AREA 25: Catacombs: Ruined Temple"
+{
+	next = "MAP26"
+	sky1 = "SKYMNT01"
+	music = "D_SAD"
+	cluster = 1
+}
+
+map MAP26 "AREA 26: proving grounds"
+{
+	next = "MAP27"
+	sky1 = "SKYMNT01"
+	music = "D_INSTRY"
+	cluster = 1
+}
+
+map MAP27 "AREA 27: The Lab"
+{
+	next = "MAP28"
+	sky1 = "SKYMNT01"
+	music = "D_TECH"
+	cluster = 1
+}
+
+map MAP28 "AREA 28: Alien Ship"
+{
+	next = "MAP29"
+	sky1 = "SKYMNT01"
+	music = "D_ACTION"
+	cluster = 1
+}
+
+map MAP29 "AREA 29: Entity's Lair"
+{
+	next = "EndGameS"
+	sky1 = "SKYMNT01"
+	music = "D_INSTRY"
+	cluster = 1
+	deathsequence = "Inter_Strife_Lose"
+}
+
+map MAP30 "AREA 30: Abandoned Front Base"
+{
+	next = "MAP31"
+	sky1 = "SKYMNT01"
+	music = "D_DRONE"
+	cluster = 1
+}
+
+map MAP31 "AREA 31: Training Facility"
+{
+	next = "MAP01"
+	sky1 = "SKYMNT01"
+	music = "D_FIGHT"
+	cluster = 1
+}
+
+map MAP32 "AREA 1: Sanctuary"
+{
+	next = "MAP33"
+	sky1 = "SKYMNT02"
+	music = "D_MAP1"
+	cluster = 2
+}
+
+map MAP33 "AREA 2: Town"
+{
+	next = "MAP34"
+	sky1 = "SKYMNT02"
+	music = "D_MAP2"
+	cluster = 2
+}
+
+map MAP34 "AREA 3: Movement Base"
+{
+	next = "EndBuyStrife"
+	sky1 = "SKYMNT02"
+	music = "D_MAP3"
+	cluster = 2
+	noallies
+}
+
+cluster 1
+{
+	hub
+}
+
+cluster 2
+{
+	hub
+	exittext = "T1TEXT"
+	music = "d_fmfast"
+	pic = "PANEL7"
+	exittextislump
+}
+
+clearepisodes
+episode MAP02 teaser MAP33
+{
+	name = "Quest for the Sigil"
+}

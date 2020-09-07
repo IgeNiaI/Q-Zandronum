@@ -1,0 +1,11 @@
+ACTOR WaterZone 9045 native
+{
+	+NOSECTOR
+	+NOBLOCKMAP
+	+NOGRAVITY
+	+DONTSPLASH
+	// [BB] This fixes jerky movement in a WaterZone online.
+	// Client side drowning damage handling has to deactivated in P_PlayerThink.
+	// I'm not sure, if it has more undesired side effects.
+	+ALLOWCLIENTSPAWN
+}

@@ -1,0 +1,380 @@
+Command SpawnThing
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Class type
+	Short id
+EndCommand
+
+Command SpawnThingNoNetID
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Class type
+EndCommand
+
+Command SpawnThingExact
+	Fixed x
+	Fixed y
+	Fixed z
+	Class type
+	Short id
+EndCommand
+
+Command SpawnThingExactNoNetID
+	Fixed x
+	Fixed y
+	Fixed z
+	Class type
+EndCommand
+
+Command LevelSpawnThing
+	ExtendedCommand
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Class type
+	Short id
+EndCommand
+
+Command LevelSpawnThingNoNetID
+	ExtendedCommand
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Class type
+EndCommand
+
+Command MoveThing
+	Actor actor
+	Short bits
+
+	If (bits & CM_X)
+		AproxFixed newX
+	EndIf
+
+	If (bits & CM_Y)
+		AproxFixed newY
+	EndIf
+
+	If (bits & CM_Z)
+		AproxFixed newZ
+	EndIf
+
+	If (bits & CM_LAST_X)
+		AproxFixed lastX
+	EndIf
+
+	If (bits & CM_LAST_Y)
+		AproxFixed lastY
+	EndIf
+
+	If (bits & CM_LAST_Z)
+		AproxFixed lastZ
+	EndIf
+
+	If (bits & CM_ANGLE)
+		Angle angle
+	EndIf
+
+	If (bits & CM_VELX)
+		AproxFixed velX
+	EndIf
+
+	If (bits & CM_VELY)
+		AproxFixed velY
+	EndIf
+
+	If (bits & CM_VELZ)
+		AproxFixed velZ
+	EndIf
+
+	If (bits & CM_PITCH)
+		Long pitch
+	EndIf
+
+	If (bits & CM_MOVEDIR)
+		Byte movedir
+	EndIf
+EndCommand
+
+Command MoveThingExact
+	Actor actor
+	Short bits
+
+	If (bits & CM_X)
+		Fixed newX
+	EndIf
+
+	If (bits & CM_Y)
+		Fixed newY
+	EndIf
+
+	If (bits & CM_Z)
+		Fixed newZ
+	EndIf
+
+	If (bits & CM_LAST_X)
+		Fixed lastX
+	EndIf
+
+	If (bits & CM_LAST_Y)
+		Fixed lastY
+	EndIf
+
+	If (bits & CM_LAST_Z)
+		Fixed lastZ
+	EndIf
+
+	If (bits & CM_ANGLE)
+		Angle angle
+	EndIf
+
+	If (bits & CM_VELX)
+		Fixed velX
+	EndIf
+
+	If (bits & CM_VELY)
+		Fixed velY
+	EndIf
+
+	If (bits & CM_VELZ)
+		Fixed velZ
+	EndIf
+
+	If (bits & CM_PITCH)
+		Long pitch
+	EndIf
+
+	If (bits & CM_MOVEDIR)
+		Byte movedir
+	EndIf
+EndCommand
+
+Command KillThing
+	Actor victim
+	Short health
+	String<Name> damageType
+	Actor source with NullAllowed
+	Actor inflictor with NullAllowed
+EndCommand
+
+Command SetThingState
+	Actor actor
+	Byte state
+EndCommand
+
+Command SetThingTarget
+	Actor actor
+	Actor target
+EndCommand
+
+Command DestroyThing
+	Actor actor
+EndCommand
+
+Command SetThingAngle
+	Actor actor
+	AproxAngle angle
+EndCommand
+
+Command SetThingAngleExact
+	Actor actor
+	Angle angle
+EndCommand
+
+Command SetThingWaterLevel
+	Actor actor
+	Byte waterlevel
+EndCommand
+
+Command SetThingFlags
+	Actor actor
+	Byte flagset
+	ULong flags
+EndCommand
+
+Command SetThingArguments
+	Actor actor
+	Long arg0
+	Long arg1
+	Long arg2
+	Long arg3
+	Long arg4
+EndCommand
+
+Command SetThingTranslation
+	Actor actor
+	Long translation
+EndCommand
+
+Command SetThingProperty
+	Actor actor
+	Byte property
+	Long value
+EndCommand
+
+Command SetThingSound
+	Actor actor
+	Byte soundType
+	String sound
+EndCommand
+
+Command SetThingSpawnPoint
+	Actor actor
+	Fixed spawnPointX
+	Fixed spawnPointY
+	Fixed spawnPointZ
+EndCommand
+
+Command SetThingSpecial1
+	Actor actor
+	Short special1
+EndCommand
+
+Command SetThingSpecial2
+	Actor actor
+	Short special2
+EndCommand
+
+Command SetThingTics
+	Actor actor
+	Short tics
+EndCommand
+
+Command SetThingTID
+	Actor actor
+	Long tid
+EndCommand
+
+Command SetThingReactionTime
+	ExtendedCommand
+	Actor actor
+	Short reactiontime
+EndCommand
+
+Command SetThingGravity
+	Actor actor
+	Long gravity
+EndCommand
+
+Command SetThingFrame
+	Actor actor
+	Class<AActor> stateOwner
+	Short offset
+EndCommand
+
+Command SetThingFrameNF
+	Actor actor
+	Class<AActor> stateOwner
+	Short offset
+EndCommand
+
+Command SetWeaponAmmoGive
+	Actor<AWeapon> weapon
+	Short ammoGive1
+	Short ammoGive2
+EndCommand
+
+Command SetThingScale
+	ExtendedCommand
+	Actor actor
+	Byte scaleflags
+
+	If (scaleflags & ACTORSCALE_X)
+		Long scaleX
+	EndIf
+
+	If (scaleflags & ACTORSCALE_Y)
+		Long scaleY
+	EndIf
+EndCommand
+
+Command ThingIsCorpse
+	Actor actor
+	# [TP] TODO: Does this really need to be sent? The client should be able to deduce this.
+	Bool isMonster
+EndCommand
+
+Command HideThing
+	# [BB] You can call HideIndefinitely only on AInventory and descendants.
+	Actor<AInventory> item
+EndCommand
+
+Command TeleportThing
+	Actor actor
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	AproxFixed momx
+	AproxFixed momy
+	AproxFixed momz
+	Short reactiontime
+	Angle angle
+	Bool sourcefog
+	Bool destfog
+	Bool teleportzoom
+EndCommand
+
+Command ThingActivate
+	Actor actor
+	Actor activator with NullAllowed
+EndCommand
+
+Command ThingDeactivate
+	Actor actor
+	Actor activator with NullAllowed
+EndCommand
+
+Command RespawnDoomThing
+	Actor actor
+	Bool fog
+EndCommand
+
+Command RespawnRavenThing
+	Actor actor
+EndCommand
+
+Command SpawnBlood
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	AproxAngle dir
+	Byte damage
+	Actor originator
+EndCommand
+
+Command SpawnBloodSplatter
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Actor originator
+EndCommand
+
+Command SpawnBloodSplatter2
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Actor originator
+EndCommand
+
+Command SpawnPuff
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Class pufftype
+	Short id
+EndCommand
+
+Command SpawnPuffNoNetID
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Class pufftype
+	Byte stateid
+	Bool receiveTranslation
+
+	If (receiveTranslation)
+		Long translation
+	EndIf
+EndCommand

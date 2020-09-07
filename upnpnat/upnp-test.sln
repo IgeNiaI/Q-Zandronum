@@ -1,0 +1,28 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C++ Express 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "upnp-test", "upnp-test.vcproj", "{E762C353-F7DC-47B6-B21A-526F849F7019}"
+	ProjectSection(ProjectDependencies) = postProject
+		{93A50857-B96E-4FCD-BC07-BB39332083BC} = {93A50857-B96E-4FCD-BC07-BB39332083BC}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "upnpnat", "upnpnat.vcproj", "{93A50857-B96E-4FCD-BC07-BB39332083BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E762C353-F7DC-47B6-B21A-526F849F7019}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E762C353-F7DC-47B6-B21A-526F849F7019}.Debug|Win32.Build.0 = Debug|Win32
+		{E762C353-F7DC-47B6-B21A-526F849F7019}.Release|Win32.ActiveCfg = Release|Win32
+		{E762C353-F7DC-47B6-B21A-526F849F7019}.Release|Win32.Build.0 = Release|Win32
+		{93A50857-B96E-4FCD-BC07-BB39332083BC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{93A50857-B96E-4FCD-BC07-BB39332083BC}.Debug|Win32.Build.0 = Debug|Win32
+		{93A50857-B96E-4FCD-BC07-BB39332083BC}.Release|Win32.ActiveCfg = Release|Win32
+		{93A50857-B96E-4FCD-BC07-BB39332083BC}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

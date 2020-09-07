@@ -1,0 +1,45 @@
+===============================================================================================================
+= SKULLTAG STATS MAKER - Version History
+===============================================================================================================
+=
+= *+   Major new feature, or major overhaul to an area.
+= *-   Major bug fix or removal.
+= +    Added feature, or noticeable improvement.
+= -    Bug fix, or something removed.
+= !    Something has changed, or just general information.
+=
+===============================================================================================================
+
+[1024] ~ 11/23/2007, by Rivecoder
+---------------------------------------------------
++ - Added tabs to statsmaker!
+- - Each port now has a reference to its hDlg tab.
+- - Added a modular function to update each tab of statistics.
+- - Removed the old VC 6 workspace/project; Statsmaker must be built with Skulltag.
+
+[1001] ~ 11/17/2007, by Carnevil
+---------------------------------------------------
++ - Updated the stats maker to include the framework ZDaemon stats.
+
+[629] ~ 8/19/2007, by Rivecoder
+---------------------------------------------------
++	- Statsmaker now has a manifest so it looks pretty under Windows XP/Vista.
++	- Added the version history.
+-	- Fixed a few typos.
+
+[550] ~ 8/6/2007, by Torr Samaho
+---------------------------------------------------
+-	- Fixed: statsmaker didn't link in release mode.
+
+[549] ~ 8/5/2007, by Rivecoder
+---------------------------------------------------
++	- Added system tray support.
+!	- Tahoma is now the main font.
+
+[511] ~ 8/3/2007, by Torr Samaho
+---------------------------------------------------
+*-	- Fixed: Skulltag Stats Maker didn't link.
+
+---------------------------------------------------
+Original SVN Release (fully by Carnevil) ~ 8/2/2007
+---------------------------------------------------

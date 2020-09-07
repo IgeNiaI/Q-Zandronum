@@ -1,0 +1,20 @@
+===============================================================================
+
+	Skulltag Stats Maker - "To Do" List
+	
+===============================================================================
+
+- Functionality
+	- Gather stats for ZDaemon/Odamex
+	- Monthly reports
+	- Export stats
+		- CSV exports [RC]
+	- Read partial stats file
+	- Memory leak detection
+	- MAIN_Destruct
+		- Release memory
+		- Export stats
+		- Happens ANY time the program is closed!
+	- More types of stats
+		- Common gamemodes
+		- Common WADs

@@ -1,0 +1,70 @@
+Command Print
+	Byte printlevel
+	String message
+EndCommand
+
+Command PrintMid
+	String message
+	Bool bold
+EndCommand
+
+Command PrintMOTD
+	String motd
+EndCommand
+
+Command PrintHUDMessage
+	String message
+	Float x
+	Float y
+	Short hudWidth
+	Short hudHeight
+	Byte color
+	Float holdTime
+	String fontName
+	Bool log
+	Long id
+EndCommand
+
+Command PrintHUDMessageFadeOut
+	String message
+	Float x
+	Float y
+	Short hudWidth
+	Short hudHeight
+	Byte color
+	Float holdTime
+	Float fadeOutTime
+	String fontName
+	Bool log
+	Long id
+EndCommand
+
+Command PrintHUDMessageFadeInOut
+	String message
+	Float x
+	Float y
+	Short hudWidth
+	Short hudHeight
+	Byte color
+	Float holdTime
+	Float fadeInTime
+	Float fadeOutTime
+	String fontName
+	Bool log
+	Long id
+EndCommand
+
+Command PrintHUDMessageTypeOnFadeOut
+	String message
+	Float x
+	Float y
+	Short hudWidth
+	Short hudHeight
+	Byte color
+	Float typeOnTime
+	Float holdTime
+	Float fadeOutTime
+	String fontName
+	Bool log
+	Long id
+EndCommand

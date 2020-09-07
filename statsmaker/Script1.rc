@@ -1,0 +1,167 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "../src/win32/afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAINDIALOG DIALOGEX 0, 0, 284, 199
+STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_STATICEDGE
+CAPTION "Zanstats"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TABC,"SysTabControl32",0x0,7,7,268,186
+END
+
+IDD_OVERVIEW DIALOGEX 0, 0, 249, 156
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_VISIBLE | WS_BORDER
+FONT 8, "Tahoma", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_CONSOLEBOX,7,89,250,68,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
+    GROUPBOX        "Now",IDC_STATIC,7,7,110,70
+	LTEXT           "On top:",IDC_ONTOPNOW,50,59,30,8
+	ICON            IDI_ICONZA,IDC_ONTOPNOW_ZA,80,53,32,32
+	ICON            IDI_ICONZD,IDC_ONTOPNOW_ZD,80,53,32,32
+	GROUPBOX        "Today",IDC_STATIC,140,7,110,70
+	ICON            IDI_ICONZA,IDC_ONTOPTODAY_ZA,217,53,32,32
+	ICON            IDI_ICONZD,IDC_ONTOPTODAY_ZD,217,53,32,32
+	LTEXT           "On top:",IDC_ONTOPTODAY,187,59,30,8
+    LTEXT           "",IDC_OVERVIEW_ZAPLAYERS_NOW,20,19,90,8
+    LTEXT           "",IDC_OVERVIEW_ZDPLAYERS_NOW,20,28,90,8
+    LTEXT           "",IDC_OVERVIEW_ODPLAYERS_NOW,20,37,90,8
+    LTEXT           "",IDC_OVERVIEW_ZAPLAYERS_TOD,153,19,90,8
+    LTEXT           "",IDC_OVERVIEW_ZDPLAYERS_TOD,153,28,90,8
+    LTEXT           "",IDC_OVERVIEW_ODPLAYERS_TOD,153,37,90,8
+	LTEXT           "",IDC_OVERVIEW_WRITING,7,160,120,8
+END
+
+IDD_ZANDRONUM DIALOGEX 0, 0, 249, 126
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_BORDER
+FONT 8, "Tahoma", 400, 0, 0x1
+BEGIN
+    LTEXT           "Average players:",IDC_AVERAGEPLAYERS,6,34,96,8
+    LTEXT           "Average servers:",IDC_AVERAGESERVERS,6,42,96,8
+    LTEXT           "Max. players:",IDC_MAXPLAYERS,146,34,96,8
+    LTEXT           "Max. servers:",IDC_MAXSERVERS,146,42,96,8
+    LTEXT           "Current players:",IDC_CURRENTPLAYERS,83,9,96,8
+    LTEXT           "Current servers:",IDC_CURRENTSERVERS,83,18,96,8
+    LTEXT           "Number of queries:",IDC_NUMQUERIES,84,54,96,8
+END
+
+IDD_ZDAEMON DIALOGEX 0, 0, 249, 126
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_BORDER
+FONT 8, "Tahoma", 400, 0, 0x1
+BEGIN
+    LTEXT           "Average players:",IDC_AVERAGEPLAYERS,6,34,96,8
+    LTEXT           "Average servers:",IDC_AVERAGESERVERS,6,42,96,8
+    LTEXT           "Max. players:",IDC_MAXPLAYERS,146,34,96,8
+    LTEXT           "Max. servers:",IDC_MAXSERVERS,146,42,96,8
+    LTEXT           "Current players:",IDC_CURRENTPLAYERS,83,9,96,8
+    LTEXT           "Current servers:",IDC_CURRENTSERVERS,83,18,96,8
+    LTEXT           "Number of queries:",IDC_NUMQUERIES,84,54,96,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON                ICON                    "tray_icon.ico"
+
+IDI_ICONZA              ICON					"../src/win32/zandronum.ico"
+IDI_ICONZD              ICON					"ico_zdaemon.ico"
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_MAINDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 275
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_OVERVIEW, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 119
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,167 @@
+//=================================================================================================
+//
+// FloatyIcon
+//
+//=================================================================================================
+
+ACTOR FloatyIcon native
+{
+	Height 8
+	+NOBLOCKMAP
+	+NOGRAVITY
+	States
+	{
+	Spawn:
+	TERMINATORARTIFACT:
+		ARNO ABCD 6 bright
+		loop
+	CHAT:
+		TALK A -1 bright
+		loop
+	INCONSOLE:
+		CNSL AB 9 bright
+		loop
+	ALLY:
+		ALLY A -1
+		loop
+	WHITEFLAG:
+		WFLS ABC 3
+		WFLS DEF 3 bright
+		loop
+	EXCELLENT:
+		EXCL A -1
+		loop
+	INCREDIBLE:
+		INCR A -1
+		loop
+	IMPRESSIVE:
+		IMPR A -1
+		loop
+	MOST_IMPRESSIVE:
+		MIMP A -1
+		loop
+	DOMINATION:
+		DOMN A -1
+		loop
+	TOTAL_DOMINATION:
+		TDOM A -1
+		loop
+	ACCURACY:
+		ACCU A -1
+		loop
+	PRECISION:
+		PREC A -1
+		loop
+	VICTORY:
+		VICT A -1
+		loop
+	PERFECT:
+		PFCT A -1
+		loop
+	FIRSTFRAG:
+		FFRG A -1
+		loop
+	TERMINATION:
+		TRMA A -1
+		loop
+	CAPTURE:
+		CAPT A -1
+		loop
+	TAG:
+		STAG A -1
+		loop
+	ASSIST:
+		ASST A -1
+		loop
+	DEFENSE:
+		DFNS A -1
+		loop
+	LLAMA:
+		LLAM A -1
+		loop
+	YOUFAILIT:
+		FAIL A -1
+		loop
+	YOURSKILLISNOTENOUGH:
+		SKIL A -1
+		loop
+	LAG:
+		LAGG A -1
+		loop
+	FISTING:
+		FIST A -1
+		loop
+	SPAM:
+		SPAM A -1
+		loop
+	POSSESSIONARTIFACT:
+		PPOS ABCDEF 6 bright
+		loop
+	}
+}
+
+//=================================================================================================
+//
+// PathNode
+//
+//=================================================================================================
+
+ACTOR PathNode
+{
+	SpawnId 0
+	Radius 8
+	Height 8
+	+NOBLOCKMAP
+	States
+	{
+	Spawn:
+		// Frame 0: This is a node in the open list.
+		NODE A 6 bright
+		loop
+		// Frame 1: This is the node just popped off the open list.
+		NODE B 6 bright
+		loop
+		// Frame 2: This is a node in the closed list.
+		NODE C 6 bright
+		loop
+		// Frame 3: This is a node on the path.
+		NODE D 6 bright
+		loop
+		APBX D 6 bright
+		loop
+
+	}
+}
+
+
+//=================================================================================================
+//
+// ReturnZone
+//
+//=================================================================================================
+
+
+ACTOR ReturnZone 5067 native
+{
+	+NOBLOCKMAP
+	+NOSECTOR
+	+NOGRAVITY
+	+DONTSPLASH
+}
+
+//=================================================================================================
+//
+// SpringPadZone
+//
+//=================================================================================================
+
+ACTOR SpringPadZone 5068 native
+{
+	+NOBLOCKMAP
+	+NOSECTOR
+	+NOGRAVITY
+	+DONTSPLASH
+	+ALLOWCLIENTSPAWN
+}
+
+

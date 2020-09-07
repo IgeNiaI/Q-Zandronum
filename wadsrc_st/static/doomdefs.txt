@@ -1,0 +1,477 @@
+// ------------------
+// -- Items --
+// ------------------
+
+// Red armor
+pointlight REDARMOR1
+{
+    color 0.6 0.0 0.0
+    size 48
+}
+
+pointlight REDARMOR2
+{
+    color 0.6 0.0 0.0
+    size 32
+}
+
+object RedArmor
+{
+    frame ARM3A0 { light REDARMOR1 }
+    frame ARM3B0 { light REDARMOR2 }
+}
+
+
+// ------------------
+// -- Weapons --
+// ------------------
+
+// BFG10K
+pointlight BFG10kShot
+{
+    color 0.0 1.0 0.0
+    size 80
+}
+
+flickerlight BFG10KSHOT_X1
+{
+    color 0.0 1.0 0.0
+    size 80
+    secondarySize 88
+    chance 0.3
+}
+
+flickerlight BFG10KSHOT_X2
+{
+    color 0.0 1.0 0.0
+    size 104
+    secondarySize 112
+    chance 0.3
+}
+
+flickerlight BFG10KSHOT_X3
+{
+    color 0.0 1.0 0.0
+    size 120
+    secondarySize 128
+    chance 0.3
+}
+
+object BFG10kShot
+{
+    frame BFE1A0 { light BFG10KSHOT }
+    frame BFE1B0 { light BFG10KSHOT }
+
+    frame BFE1C0 { light BFG10KSHOT_X1 }
+    frame BFE1D0 { light BFG10KSHOT_X2 }
+    frame BFE1E0 { light BFG10KSHOT_X3 }
+}
+
+
+// ------------------
+// -- Monsters --
+// ------------------
+
+// Cacolantern fireball
+flickerlight CACOLANTERNBALL
+{
+    color 0.0 0.0 1.0
+    size 56
+    secondarySize 64
+    chance 0.25
+}
+
+flickerlight CACOLANTERNBALL_X1
+{
+    color 0.0 0.0 0.9
+    size 72
+    secondarySize 80
+    chance 0.25
+}
+
+flickerlight CACOLANTERNBALL_X2
+{
+    color 0.0 0.0 0.8
+    size 88
+    secondarySize 96
+    chance 0.25
+}
+
+flickerlight CACOLANTERNBALL_X3
+{
+    color 0.0 0.0 0.7
+    size 104
+    secondarySize 112
+    chance 0.25
+}
+
+object CacolanternBall
+{
+    frame BAL8A0 { light CACOLANTERNBALL }
+    frame BAL8B0 { light CACOLANTERNBALL }
+
+    frame BAL8C0 { light CACOLANTERNBALL_X1 }
+    frame BAL8D0 { light CACOLANTERNBALL_X2 }
+    frame BAL8E0 { light CACOLANTERNBALL_X3 }
+}
+
+// Abaddon fireball
+flickerlight ABADBALL
+{
+    color 1.0 0.3 0.0
+    size 56
+    secondarySize 64
+    chance 0.5
+}
+
+flickerlight ABADBALL_X1
+{
+    color 1.0 0.3 0.0
+    size 72
+    secondarySize 80
+    chance 0.25
+}
+
+flickerlight ABADBALL_X2
+{
+    color 1.0 0.3 0.0
+    size 88
+    secondarySize 96
+    chance 0.25
+}
+
+flickerlight ABADBALL_X3
+{
+    color 1.0 0.3 0.0
+    size 104
+    secondarySize 112
+    chance 0.25
+}
+
+object AbaddonBall
+{
+    frame BAL3A0 { light ABADBALL }
+    frame BAL3B0 { light ABADBALL }
+
+    frame BAL3C0 { light ABADBALL_X1 }
+    frame BAL3D0 { light ABADBALL_X2 }
+    frame BAL3E0 { light ABADBALL_X3 }
+}
+
+// Dark Imp Fireball
+pointlight DIBALL
+{
+    color 0.5 0.0 1.2
+    size 64
+}
+
+// Dark imp fireball explosion
+flickerlight DIBALL_X1
+{
+    color 0.5 0.0 1.2
+    size 80
+    secondarySize 88
+    chance 0.25
+}
+
+flickerlight DIBALL_X2
+{
+    color 0.3 0.0 0.9
+    size 96
+    secondarySize 104
+    chance 0.25
+}
+
+flickerlight DIBALL_X3
+{
+    color 0.1 0.0 0.5
+    size 112
+    secondarySize 120
+    chance 0.25
+}
+
+object DarkImpBall
+{
+    frame BAL4A0 { light DIBALL }
+    frame BAL4B0 { light DIBALL }
+
+    frame BAL4C0 { light DIBALL_X1 }
+    frame BAL4D0 { light DIBALL_X2 }
+    frame BAL4E0 { light DIBALL_X3 }
+}
+
+// Hectebus Fireball
+pointlight HECTSHOT
+{
+    color 0.0 1.0 0.0
+    size 48
+}
+flickerlight HECTSHOT_X1
+{
+    color 0.0 1.0 0.0
+    size 48
+    secondarySize 56
+    chance 0.3
+}
+
+flickerlight HECTSHOT_X2
+{
+    color 0.0 0.5 0.0
+    size 64
+    secondarySize 72
+    chance 0.3
+}
+
+flickerlight HECTSHOT_X3
+{
+    color 0.0 0.3 0.0
+    size 80
+    secondarySize 88
+    chance 0.3
+}
+
+object HectShot
+{
+    frame HECFA { light HECTSHOT }
+    frame HECFB { light HECTSHOT }
+
+    frame HECFC { light HECTSHOT_X1 }
+    frame HECFD { light HECTSHOT_X2 }
+    frame HECFE { light HECTSHOT_X3 }
+}
+
+// Belphegor Ball
+pointlight BELPHEGORBALL
+{
+    color 0.0 1.0 0.0
+    size 64
+}
+
+flickerlight BELPHEGORBALL_X1
+{
+    color 0.0 1.0 0.0
+    size 80
+    secondarySize 88
+    chance 0.25
+}
+
+flickerlight BELPHEGORBALL_X2
+{
+    color 0.0 0.7 0.0
+    size 96
+    secondarySize 104
+    chance 0.25
+}
+
+flickerlight BELPHEGORBALL_X3
+{
+    color 0.0 0.5 0.0
+    size 112
+    secondarySize 120
+    chance 0.25
+}
+
+object BelphegorBall
+{
+    frame BAL7A { light BELPHEGORBALL }
+    frame BAL7B { light BELPHEGORBALL }
+
+    frame BAL7C { light BELPHEGORBALL_X1 }
+    frame BAL7D { light BELPHEGORBALL_X2 }
+    frame BAL7E { light BELPHEGORBALL_X3 }
+}
+
+object SuperShotgunGuy
+{
+    frame GPOSF { light ZOMBIEATK }
+}
+
+
+// ------------------
+// -- Lights --
+// ------------------
+
+// Small white torch
+flickerlight2 SMALLWHITETORCH
+{
+    color 1.0 1.0 1.0
+    size 48
+    secondarySize 54
+    interval 0.1
+    offset 0 35 0
+}
+
+object ShortWhiteTorch
+{
+    frame SMWT { light SMALLWHITETORCH }
+}
+
+// Small yellow torch
+flickerlight2 SMALLYELLOWTORCH
+{
+    color 1.0 1.0 0.0
+    size 48
+    secondarySize 54
+    interval 0.1
+    offset 0 35 0
+}
+
+object ShortYellowTorch
+{
+    frame SMYT { light SMALLYELLOWTORCH }
+}
+
+// Tall white torch
+flickerlight2 BIGWHITETORCH
+{
+    color 1.0 1.0 1.0
+    size 64
+    secondarySize 72
+    interval 0.1
+    offset 0 60 0
+}
+
+object WhiteTorch
+{
+    frame TWHI { light BIGWHITETORCH }
+}
+
+// Tall yellow torch
+flickerlight2 BIGYELLOWTORCH
+{
+    color 1.0 1.0 0.0
+    size 64
+    secondarySize 72
+    interval 0.1
+    offset 0 60 0
+}
+
+object YellowTorch
+{
+    frame TYEL { light BIGYELLOWTORCH }
+}
+
+
+// ------------------
+// -- Decor --
+// ------------------
+
+// Evil Eye Red
+flickerlight2 RedEvilEye
+{
+    color 1.0 0.0 0.0
+    size 30
+    secondarySize 50
+    interval 0.1
+    offset 0 60 0
+}
+
+object RedEvilEye
+{
+    frame CEYR { light RedEvilEye }
+}
+
+// Evil Eye Blue
+flickerlight2 BlueEvilEye
+{
+    color 0.0 0.0 1.0
+    size 30
+    secondarySize 50
+    interval 0.1
+    offset 0 60 0
+}
+
+object BlueEvilEye
+{
+    frame CEYB { light BlueEvilEye }
+}
+
+// Red Candle Stick
+flickerlight2 RedCandleStick
+{
+    color 1.0 0.0 0.0
+    size 40
+    secondarySize 60
+    interval 0.1
+    offset 0 60 0
+}
+
+object RedCandleStick
+{
+    frame CANR { light RedCandleStick }
+}
+
+// Blue Candle Stick
+flickerlight2 BlueCandleStick
+{
+    color 0.0 0.0 1.0
+    size 40
+    secondarySize 60
+    interval 0.1
+    offset 0 60 0
+}
+
+object BlueCandleStick
+{
+    frame CANB { light BlueCandleStick }
+}
+
+// Red Tech Lamp
+flickerlight2 RedTechLamp
+{
+    color 1.0 0.0 0.0
+    size 48
+    secondarySize 64
+    interval 0.1
+    offset 0 60 0
+}
+
+object RedTechLamp
+{
+    frame TLP3 { light RedTechLamp }
+}
+
+// Red Tech Lamp 2
+flickerlight2 RedTechLamp2
+{
+    color 1.0 0.0 0.0
+    size 48
+    secondarySize 64
+    interval 0.1
+    offset 0 60 0
+}
+
+object RedTechLamp2
+{
+    frame TLP4 { light RedTechLamp2 }
+}
+
+// Red Column
+flickerlight2 RedColumn
+{
+    color 1.0 0.0 0.0
+    size 48
+    secondarySize 64
+    interval 0.1
+    offset 0 60 0
+}
+
+object RedColumn
+{
+    frame RCOL { light RedColumn }
+}
+
+// Blue Column
+flickerlight2 BlueColumn
+{
+    color 0.0 0.0 1.0
+    size 48
+    secondarySize 64
+    interval 0.1
+    offset 0 60 0
+}
+
+object BlueColumn
+{
+    frame BCOL { light BlueColumn }
+}

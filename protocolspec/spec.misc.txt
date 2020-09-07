@@ -1,0 +1,28 @@
+Command ACSScriptExecute
+	Short netid
+	Actor activator with NullAllowed
+	Short lineid
+	Byte levelnum
+	Variable arg0
+	Variable arg1
+	Variable arg2
+	Variable arg3
+	Bool backSide
+	Bool always
+EndCommand
+
+Struct JoinSlot
+	Byte player
+	Byte team
+EndStruct
+
+Command SyncJoinQueue
+	ExtendedCommand
+	Struct<JoinSlot>[] slots
+EndCommand
+
+Command ReplaceTextures
+	String fromTexture
+	String toTexture
+	Byte textureFlags
+EndCommand

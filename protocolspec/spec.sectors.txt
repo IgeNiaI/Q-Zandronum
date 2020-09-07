@@ -1,0 +1,224 @@
+Command SetSectorFloorPlane
+	Sector sector
+	AproxFixed height
+EndCommand
+
+Command SetSectorCeilingPlane
+	Sector sector
+	AproxFixed height
+EndCommand
+
+Command SetSectorFloorPlaneSlope
+	Sector sector
+	AproxFixed a
+	AproxFixed b
+	AproxFixed c
+EndCommand
+
+Command SetSectorCeilingPlaneSlope
+	Sector sector
+	AproxFixed a
+	AproxFixed b
+	AproxFixed c
+EndCommand
+
+Command SetSectorLightLevel
+	Sector sector
+	Short lightLevel
+EndCommand
+
+Command SetSectorColor
+	Sector sector
+	Byte red
+	Byte green
+	Byte blue
+	Byte desaturate
+EndCommand
+
+Command SetSectorColorByTag
+	Short tag
+	Byte red
+	Byte green
+	Byte blue
+	Byte desaturate
+EndCommand
+
+Command SetSectorFade
+	Sector sector
+	Byte red
+	Byte green
+	Byte blue
+EndCommand
+
+Command SetSectorFadeByTag
+	Short tag
+	Byte red
+	Byte green
+	Byte blue
+EndCommand
+
+Command SetSectorFlat
+	Sector sector
+	String ceilingFlatName
+	String floorFlatName
+EndCommand
+
+Command SetSectorPanning
+	Sector sector
+	Fixed ceilingXOffset
+	Fixed ceilingYOffset
+	Fixed floorXOffset
+	Fixed floorYOffset
+EndCommand
+
+Command SetSectorRotation
+	Sector sector
+	# The angle here is sent in degrees.
+	Short ceilingRotation
+	Short floorRotation
+EndCommand
+
+Command SetSectorRotationByTag
+	Short tag
+	# The angle here is sent in degrees.
+	Short ceilingRotation
+	Short floorRotation
+EndCommand
+
+Command SetSectorScale
+	Sector sector
+	Fixed ceilingXScale
+	Fixed ceilingYScale
+	Fixed floorXScale
+	Fixed floorYScale
+EndCommand
+
+Command SetSectorSpecial
+	Sector sector
+	Short special
+EndCommand
+
+Command SetSectorFriction
+	Sector sector
+	Fixed friction
+	Fixed moveFactor
+EndCommand
+
+Command SetSectorAngleYOffset
+	Sector sector
+	Fixed ceilingBaseAngle
+	Fixed ceilingBaseYOffset
+	Fixed floorBaseAngle
+	Fixed floorBaseYOffset
+EndCommand
+
+Command SetSectorGravity
+	Sector sector
+	Float gravity
+EndCommand
+
+Command SetSectorReflection
+	Sector sector
+	Float ceilingReflection
+	Float floorReflection
+EndCommand
+
+Command SetSectorLink
+	Sector sector
+	Short tag
+	Byte ceiling
+	Byte moveType
+EndCommand
+
+Command StopSectorLightEffect
+	Sector sector
+EndCommand
+
+Command DestroyAllSectorMovers
+EndCommand
+
+Command StartSectorSequence
+	Sector sector
+	Byte channel
+	String sequence
+	Byte modeNum
+EndCommand
+
+Command StopSectorSequence
+	Sector sector
+EndCommand
+
+Command DoSectorLightFireFlicker
+	Sector sector
+	Short maxLight
+	Short minLight
+EndCommand
+
+Command DoSectorLightFlicker
+	Sector sector
+	Short maxLight
+	Short minLight
+EndCommand
+
+Command DoSectorLightLightFlash
+	Sector sector
+	Short maxLight
+	Short minLight
+EndCommand
+
+Command DoSectorLightStrobe
+	Sector sector
+	Short darkTime
+	Short brightTime
+	Short maxLight
+	Short minLight
+	Byte count
+EndCommand
+
+Command DoSectorLightGlow
+	Sector sector
+EndCommand
+
+Command DoSectorLightGlow2
+	Sector sector
+	Short startLight
+	Short endLight
+	Short tics
+	Short maxTics
+	Bool oneShot
+EndCommand
+
+Command DoSectorLightPhased
+	Sector sector
+	Short baseLevel
+	Byte phase
+EndCommand
+
+Command SetLineAlpha
+	Line line
+	Fixed alpha
+EndCommand
+
+Command SetLineTexture
+	Line line
+	String textureName
+	Bool side
+	Byte position
+EndCommand
+
+Command SetLineTextureByID
+	Short lineID
+	String textureName
+	Bool side
+	Byte position
+EndCommand
+
+Command SetSomeLineFlags
+	Line line
+	Long blockFlags
+EndCommand
+
+Command SetSideFlags
+	Side side
+	Byte flags
+EndCommand

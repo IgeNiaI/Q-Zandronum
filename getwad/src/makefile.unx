@@ -1,0 +1,35 @@
+#
+# Makefile for Unix systems
+#
+CC	= cc
+CFLAGS	= -O -Wall
+OBJS	= getwade.o getwad.o inet.o base64.o unzip.o misc.o
+
+getwad: $(OBJS)
+	$(CC) $(CFLAGS) -ogetwad $(OBJS) -lz -lpthread
+	chmod go+rx getwad
+	@rm $(OBJS)
+	@echo
+	@echo Finished! Now put the "getwad" program in /usr/local/bin, set
+	@echo its permissions, put the "getwad.ini" file in /usr/local/etc
+	@echo and also set its permissions. Finally edit getwad.ini to
+	@echo specify the WAD directory and you\'re all set.
+	@echo
+
+base64.o: base64.c base64.h
+	$(CC) $(CFLAGS) -c base64.c
+
+unzip.o: unzip.c unzip.h
+	$(CC) $(CFLAGS) -c unzip.c
+
+misc.o: misc.c misc.h
+	$(CC) $(CFLAGS) -c misc.c
+
+inet.o: inet.c inet.h base64.h
+	$(CC) $(CFLAGS) -c inet.c
+
+getwad.o: getwad.c getwad.h inet.h unzip.h misc.h
+	$(CC) $(CFLAGS) -c getwad.c
+
+getwade.o: getwade.c getwad.h misc.h
+	$(CC) $(CFLAGS) -c getwade.c

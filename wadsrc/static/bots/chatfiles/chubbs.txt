@@ -1,0 +1,59 @@
+[IntroStrings]
+"Man, this level looks pretty big..."
+
+[RareRoamingStrings]
+"Do these pants make my ass look big?"
+"These pants work wonders for my ass cleavage."
+
+[FragStrings]
+"Eat that! Mmm... eat..."
+"Could've used a little salt."
+"Tastes like chicken!"
+"Oh yeah! Easy as pie!"
+"Piece of cake!"
+"Like taking candy from a baby!"
+"I'll take fries with that!"
+
+[KilledStrings]
+"I'll never get out of this place!"
+"I really need to get in shape."
+"Ugh, I had too much pizza last night..."
+"Hmm, maybe I shouldn't have had those three cheeseburgers before fighting."
+"That's it, tofu and salad from now on!"
+"Damn, that hurt!"
+"Nothing a couple twinkies won't fix!"
+
+[RoamingStrings]
+"I wonder what Crash's doing tonight..."
+"Do you think Crash would go out with me?"
+"Crash... she's pretty..."
+"Man, I wish this level was smaller so I didn't have to run so much."
+"All this running around is making me hungry."
+"Man, I haven't seen my feet in SO long."
+"Hey, you guys wanna go get something to eat after this?"
+"All this running... it's like gym class all over again!!"
+"Man, this suit is chafing my legs."
+"Having man boobies sucks."
+
+[LosingRoamingStrings]
+"Man, I'm losing! Must be all the saturated fat..."
+"This is really wearing me out!"
+"I'm exhausted!"
+"I need a pick-me-up! Now where did I put my Snickers bar..."
+"Man, my back really hurts. I need to start wearing a girdle."
+
+[EnragedStrings]
+"Dammit, I will crush you!"
+"Stop it, or I will EAT YOUR CHILDREN!!!"
+
+[DemoralizedStrings]
+"Oh man... I didn't think I was this bad..."
+
+[WinStrings]
+"Wow, I won! Burgers on the house!"
+"Alright! What do you say we order a pizza?"
+"I won! This is sweet... like CANDY!"
+"Now that's what I call 'well-done'!"
+
+[LoseStrings]
+"I better hit the treadmill! But first... DOUGHNUTS!"

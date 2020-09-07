@@ -1,0 +1,51 @@
+[IntroStrings]
+"I hope my lack of depth preception won't backfire on me here."
+"I'm ready to kick some human ass!"
+"Prepare to die ya weird freak of nature!"
+"You weirdos are going down like like a space-hooker from the third planet of Delta Star System 8."
+
+[RareRoamingStrings]
+"My dixie wrecked."
+
+[FragStrings]
+"Haha, you're dumber than a microscopic Andromedia Worm!"
+"Damn, you're slower than an Denebolain Sea Slug!"
+"You dropped your gun, freak."
+"Oh I'm sorry, did I just splatter you all over the place?"
+"I'm smiling because you make a pretty stain."
+"You just got killed by someone with no depth perception, SUCKS TO BE YOU!"
+
+[KilledStrings]
+"Damn, that hurt more that the time I stepped on that particle disruptor."
+"Oh, you'll pay for that you freak!"
+"AHHH!  MY SECOND HEART EXPLODED!!"
+"Umm...ow..."
+"DAMNIT I HAVE NO DEPTH PERCEPTION!!"
+"Well spank my ass and call me King Zephliod of the third star system of the fifth Omega galaxy."
+
+[RoamingStrings]
+"Damnit, where the hell are the freaks?"
+"Yoooou whoooo, where are yoooou?  I must kill you now! Helloooo?"
+"Come out and fight me you damn freak!"
+"99 bottles of taridum sludge on the wall, 99 bottles of taridum sludge..."
+
+[LosingRoamingString]
+"Come on guys, I have dust in my eye."
+"I didn't get enough sleep last night... my eye is bloodshot."
+
+[EnragedStrings]
+"I shall now pop a cap in your freak ass."
+"Okay, I am NOT a happy Zebloid."
+
+[DemoralizedStrings]
+"WHY WON'T YOU DIE?!"
+"I DON'T HAVE DEPTH PERCEPTION!! DO OVER!!"
+
+[WinStrings]
+"Wow, I beat you guys worse than an Rigelian Death-Beetle beats its mate after copulation."
+"Man you freaks really suck if you can't even beat a guy with no depth perception."
+
+[LoseStrings]
+"Beaten like a red-eyed step child."
+"Not bad for a guy with one eye I guess."
+"Not fair, my energy ray gun was gummed up with space-dust..."

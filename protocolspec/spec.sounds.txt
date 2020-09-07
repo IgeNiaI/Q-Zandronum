@@ -1,0 +1,40 @@
+Command Sound
+	Byte channel
+	String sound
+	Byte volume
+	Byte attenuation
+EndCommand
+
+Command SoundActor
+	Actor actor
+	Short channel
+	String sound
+	Byte volume
+	Byte attenuation
+EndCommand
+
+Command SoundActorIfNotPlaying : SoundActor
+EndCommand
+
+Command SoundSector
+	ExtendedCommand
+	Sector sector
+	Short channel
+	String sound
+	Byte volume
+	Byte attenuation
+EndCommand
+
+Command SoundPoint
+	AproxFixed x
+	AproxFixed y
+	AproxFixed z
+	Byte channel
+	String sound
+	Byte volume
+	Byte attenuation
+EndCommand
+
+Command AnnouncerSound
+	String sound
+EndCommand

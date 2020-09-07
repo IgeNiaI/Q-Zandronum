@@ -1,0 +1,27 @@
+//=================================================================================================
+//
+// Red Armor
+//
+//=================================================================================================
+
+ACTOR RedArmor : BasicArmorPickup 5040
+{
+	Game Doom
+	SpawnID 168
+	Radius 20
+	Height 16
+	Armor.Savepercent 66.66666
+	Armor.Saveamount 200
+	Inventory.Icon "ARM3A0"
+	Inventory.Pickupmessage "$PICKUP_REDARMOR"
+	DamageFactor "Fire", 0.125
+	DamageFactor "Rocket", 0.125
+	DamageFactor "Grenade", 0.125
+	States
+	{
+	Spawn:
+		ARM3 A 6
+		ARM3 B 6 bright
+		goto Spawn
+	}
+}

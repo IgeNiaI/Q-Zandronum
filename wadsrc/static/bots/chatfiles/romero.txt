@@ -1,0 +1,31 @@
+[IntroStrings]
+"To win the game, you must beat me, John Romero!"
+"Design is law!"
+"You must defeat me. Only then will you be a Jedi map designer"
+"Beware my head on a pointed stick!"
+
+[KilledStrings]
+"The F40 got hit. Carma."
+"Design is law!"
+"You can't kill me! I *made* this game!"
+
+[FragStrings]
+"Suck it down!"
+"More gibs! More blood! Double-barrel right in the mouth! BOOM"
+"sorry if i offended your tender sensibilities by telling you i'm gonna make you my bitch. :)"
+"GIBFEST!"
+"Design is law!"
+"You just got killed by a head on a stick."
+
+[RoamingStrings]
+"I have Satan imprisoned in my hair."
+"Long live DOOM!"
+"After GLDOOM is completed, people will once again inhabit the world of DOOM on the latest 3D video hardware"
+"Happy Birthdy, DOOM!"
+"I gave this stick head"
+
+[RareRoamingstrings]
+"I move my anus around."
+
+[EnragedStrings]
+"!! Beware The Romero Factor !!"

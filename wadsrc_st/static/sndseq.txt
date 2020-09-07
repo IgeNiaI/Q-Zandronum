@@ -1,0 +1,16 @@
+// [BC] And here's a sound sequence for the polyobject
+// doors on D2CTF4.
+
+:Door1
+	door		1
+	playuntildone	door1_start
+	playrepeat	door1_mid
+	stopsound	door1_end
+end
+
+// [BC] Another new one for D2INV5.
+
+:Door2
+	door		2
+	playrepeat	plats/pt1_mid
+end

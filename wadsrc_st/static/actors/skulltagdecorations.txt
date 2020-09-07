@@ -1,0 +1,717 @@
+//=================================================================================================
+//
+// Short grey column
+//
+//=================================================================================================
+
+ACTOR GreyColumn 5051
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 40
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		COL8 A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Tall grey column
+//
+//=================================================================================================
+
+ACTOR TallGreyColumn 5052
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 52
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		COL7 A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Grey heart column
+//
+//=================================================================================================
+
+ACTOR GreyHeartColumn 5053
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 40
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		COL9 AB 14
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Tall gothic column
+//
+//=================================================================================================
+
+ACTOR TallGothicColumn 5054
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 52
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		GCOL A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Revenant hand
+//
+//=================================================================================================
+
+ACTOR RevenantHand 5055
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 16
+	+SOLID
+	States
+	{
+	Spawn:
+		SGRB AB 14
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Imp head
+//
+//=================================================================================================
+
+ACTOR ImpHead 5056
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 8
+	Height 32
+	+SOLID
+	States
+	{
+	Spawn:
+		IHED A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// NEEEEEEEEEDS MOOOOOORE...
+//
+//=================================================================================================
+
+ACTOR Impse 5058
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 20
+	Height 48
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		IMPS ABC 4
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Floating skull (bobs)
+//
+//=================================================================================================
+
+ACTOR FloatingBobbingSkull : FloatingSkull 5009
+{
+	+FLOATBOB
+}
+
+//=================================================================================================
+//
+// Impaling spike
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike 5120
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 64
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POL7 A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (chaingunner head)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike2 5121
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 56
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POL8 A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (zombieman head)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike3 5122
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 56
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POL9 A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// White torch
+//
+//=================================================================================================
+
+ACTOR WhiteTorch 5150
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 68
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		TWHI ABCD 4 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Short white torch
+//
+//=================================================================================================
+
+ACTOR ShortWhiteTorch 5151
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 37
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		SMWT ABCD 4 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Yellow torch
+//
+//=================================================================================================
+
+ACTOR YellowTorch 5152
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 68
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		TYEL ABCD 4 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Short yellow torch
+//
+//=================================================================================================
+
+ACTOR ShortYellowTorch 5153
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 37
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		SMYT ABCD 4 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Evil eye (red)
+//
+//=================================================================================================
+
+ACTOR RedEvilEye 5059
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 54
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		CEYR ABCB 6 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Evil eye (blue)
+//
+//=================================================================================================
+
+ACTOR BlueEvilEye 5060
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 54
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		CEYB ABCB 6 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Candle stick (red)
+//
+//=================================================================================================
+
+ACTOR RedCandleStick 5156
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 20
+	Height 14
+	States
+	{
+	Spawn:
+		CANR A -1 BRIGHT
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Candle stick (blue)
+//
+//=================================================================================================
+
+ACTOR BlueCandleStick 5157
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 20
+	Height 14
+	States
+	{
+	Spawn:
+		CANB A -1 BRIGHT
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Tech lamp (red)
+//
+//=================================================================================================
+
+ACTOR RedTechLamp 5154
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 80
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		TLP3 ABCD 4 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Tech lamp 2 (red)
+//
+//=================================================================================================
+
+ACTOR RedTechLamp2 5155
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 60
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		TLP4 ABCD 4 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Column (red)
+//
+//=================================================================================================
+
+ACTOR RedColumn 5158
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 48
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		RCOL A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Column (blue)
+//
+//=================================================================================================
+
+ACTOR BlueColumn 5159
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 48
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		BCOL A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (doomguy head)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike4 5320
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 56
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POLA A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (3 doomguy heads)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike5 5321
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 64
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POLB A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (3 doomguy heads, short)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike6 5322
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 45
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POLC A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (doomguy torso, one arm)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike7 5323
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 54
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POLD A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (doomguy torso, two arms)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike8 5324
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 54
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POLE A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (doomguy skewered, twitching)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike9 5325
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 64
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POLF A 6
+		POLF B 8
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (doomguy skewered, long arm)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike10 5326
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 64
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POLG A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Impaling spike (doomguy skewered, short arm)
+//
+//=================================================================================================
+
+ACTOR ImpalingSpike11 5327
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 64
+	+SOLID
+	+USESPECIAL
+	States
+	{
+	Spawn:
+		POLH A -1
+		Stop
+	}
+}
+
+//=================================================================================================
+//
+// Gibs with marine helmet
+//
+//=================================================================================================
+
+ACTOR MarineHelmetGibs 5328
+{
+	Game Doom
+	Game Heretic
+	Game Hexen
+	Radius 16
+	Height 64
+	States
+	{
+	Spawn:
+		GIB1 A -1
+		Stop
+	}
+}
+

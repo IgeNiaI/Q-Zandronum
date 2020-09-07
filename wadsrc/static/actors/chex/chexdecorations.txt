@@ -1,0 +1,140 @@
+// Doom items renamed with height changes
+
+// Civilians ------------------------------------------------------------------
+
+actor ChexCivilian1 : GreenTorch 45
+{
+	game Chex
+	height 54
+}
+
+actor ChexCivilian2 : ShortGreenTorch 56
+{
+	game Chex
+	height 54
+}
+
+actor ChexCivilian3 : ShortRedTorch 57
+{
+	game Chex
+	height 48
+}
+
+// Landing Zone ---------------------------------------------------------------
+
+actor ChexLandingLight : Column 2028
+{
+	game Chex
+	height 35
+}
+
+actor ChexSpaceship : TechPillar 48
+{
+	game Chex
+	height 52
+}
+
+// Trees and Plants -----------------------------------------------------------
+
+actor ChexAppleTree : Stalagtite 47
+{
+	game Chex
+	height 92
+}
+
+actor ChexBananaTree : BigTree 54
+{
+	game Chex
+	height 108
+}
+
+actor ChexOrangeTree : TorchTree 43
+{
+	game Chex
+	height 92
+}
+
+actor ChexSubmergedPlant : ShortGreenColumn 31
+{
+	game Chex
+	height 42
+}
+
+actor ChexTallFlower : HeadsOnAStick 28
+{
+	game Chex
+	height 25
+}
+
+actor ChexTallFlower2 : DeadStick 25
+{
+	game Chex
+	height 25
+}
+
+// Slime Fountain -------------------------------------------------------------
+
+actor ChexSlimeFountain : BlueTorch 44
+{
+	game Chex
+	height 48
+	States
+	{
+	Spawn:
+		TBLU ABCD 4
+		Loop
+	}
+}
+
+// Cavern Decorations ---------------------------------------------------------
+
+actor ChexCavernColumn : TallRedColumn 32
+{
+	game Chex
+	height 128
+}
+
+actor ChexCavernStalagmite : TallGreenColumn 30
+{
+	game Chex
+	height 60
+}
+
+// Misc. Props ----------------------------------------------------------------
+
+actor ChexChemicalBurner : EvilEye 41
+{
+	game Chex
+	height 25
+}
+
+actor ChexChemicalFlask : Candlestick 34
+{
+	game Chex
+	renderstyle translucent
+	alpha 0.75
+}
+
+actor ChexFlagOnPole : SkullColumn 37
+{
+	game Chex
+	height 128
+}
+
+actor ChexGasTank : Candelabra 35
+{
+	game Chex
+	height 36
+}
+
+actor ChexLightColumn : ShortBlueTorch 55
+{
+	game Chex
+	height 86
+}
+
+actor ChexMineCart : ShortRedColumn 33
+{
+	game Chex
+	height 30
+}

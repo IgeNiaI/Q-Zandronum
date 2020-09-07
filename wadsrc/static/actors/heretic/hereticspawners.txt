@@ -1,0 +1,693 @@
+//=================================================================================================
+//
+// Heretic imp spawner
+//
+//=================================================================================================
+
+ACTOR HereticImpSpot : CustomMonsterInvasionSpot 5400
+{
+	Game Heretic
+	DropItem "HereticImp"
+}
+
+//=================================================================================================
+//
+// Heretic imp leader spawner
+//
+//=================================================================================================
+
+ACTOR HereticImpLeaderSpot : CustomMonsterInvasionSpot 5401
+{
+	Game Heretic
+	DropItem "HereticImpLeader"
+}
+
+//=================================================================================================
+//
+// Mummy spawner
+//
+//=================================================================================================
+
+ACTOR MummySpot : CustomMonsterInvasionSpot 5402
+{
+	Game Heretic
+	DropItem "Mummy"
+}
+
+//=================================================================================================
+//
+// Mummy leader spawner
+//
+//=================================================================================================
+
+ACTOR MummyLeaderSpot : CustomMonsterInvasionSpot 5403
+{
+	Game Heretic
+	DropItem "MummyLeader"
+}
+
+//=================================================================================================
+//
+// Mummy ghost spawner
+//
+//=================================================================================================
+
+ACTOR MummyGhostSpot : CustomMonsterInvasionSpot 5404
+{
+	Game Heretic
+	DropItem "MummyGhost"
+}
+
+//=================================================================================================
+//
+// Mummy leader ghost spawner
+//
+//=================================================================================================
+
+ACTOR MummyLeaderGhostSpot : CustomMonsterInvasionSpot 5405
+{
+	Game Heretic
+	DropItem "MummyLeaderGhost"
+}
+
+//=================================================================================================
+//
+// Beast spawner
+//
+//=================================================================================================
+
+ACTOR BeastSpot : CustomMonsterInvasionSpot 5406
+{
+	Game Heretic
+	DropItem "Beast"
+}
+
+//=================================================================================================
+//
+// Chicken spawner
+//
+//=================================================================================================
+
+ACTOR ChickenSpot : CustomMonsterInvasionSpot 5407
+{
+	Game Heretic
+	DropItem "Chicken"
+}
+
+//=================================================================================================
+//
+// Clink spawner
+//
+//=================================================================================================
+
+ACTOR ClinkSpot : CustomMonsterInvasionSpot 5408
+{
+	Game Heretic
+	DropItem "Clink"
+}
+
+//=================================================================================================
+//
+// Iron lich spawner
+//
+//=================================================================================================
+
+ACTOR IronLichSpot : CustomMonsterInvasionSpot 5409
+{
+	Game Heretic
+	DropItem "IronLich"
+}
+
+//=================================================================================================
+//
+// Knight spawner
+//
+//=================================================================================================
+
+ACTOR KnightSpot : CustomMonsterInvasionSpot 5410
+{
+	Game Heretic
+	DropItem "Knight"
+}
+
+//=================================================================================================
+//
+// Knight ghost spawner
+//
+//=================================================================================================
+
+ACTOR KnightGhostSpot : CustomMonsterInvasionSpot 5411
+{
+	Game Heretic
+	DropItem "KnightGhost"
+}
+
+//=================================================================================================
+//
+// Minotaur spawner
+//
+//=================================================================================================
+
+ACTOR MinotaurSpot : CustomMonsterInvasionSpot 5412
+{
+	Game Heretic
+	DropItem "Minotaur"
+}
+
+//=================================================================================================
+//
+// Snake spawner
+//
+//=================================================================================================
+
+ACTOR SnakeSpot : CustomMonsterInvasionSpot 5413
+{
+	Game Heretic
+	DropItem "Snake"
+}
+
+//=================================================================================================
+//
+// Sorcerer1 spawner
+//
+//=================================================================================================
+
+ACTOR Sorcerer1Spot : CustomMonsterInvasionSpot 5414
+{
+	Game Heretic
+	DropItem "Sorcerer1"
+}
+
+//=================================================================================================
+//
+// Sorcerer2 spawner
+//
+//=================================================================================================
+
+ACTOR Sorcerer2Spot : CustomMonsterInvasionSpot 5415
+{
+	Game Heretic
+	DropItem "Sorcerer2"
+}
+
+//=================================================================================================
+//
+// Wizard spawner
+//
+//=================================================================================================
+
+ACTOR WizardSpot : CustomMonsterInvasionSpot 5416
+{
+	Game Heretic
+	DropItem "Wizard"
+}
+
+//=================================================================================================
+//
+// Blaster spawner
+//
+//=================================================================================================
+
+ACTOR BlasterSpot : CustomWeaponInvasionSpot 5417
+{
+	Game Heretic
+	DropItem "Blaster"
+}
+
+//=================================================================================================
+//
+// Crossbow spawner
+//
+//=================================================================================================
+
+ACTOR CrossbowSpot : CustomWeaponInvasionSpot 5418
+{
+	Game Heretic
+	DropItem "Crossbow"
+}
+
+//=================================================================================================
+//
+// Gauntlets spawner
+//
+//=================================================================================================
+
+ACTOR GauntletsSpot : CustomWeaponInvasionSpot 5419
+{
+	Game Heretic
+	DropItem "Gauntlets"
+}
+
+//=================================================================================================
+//
+// Mace spawner
+//
+//=================================================================================================
+
+ACTOR MaceSpot : CustomWeaponInvasionSpot 5420
+{
+	Game Heretic
+	DropItem "Mace"
+}
+
+//=================================================================================================
+//
+// Phoenix rod spawner
+//
+//=================================================================================================
+
+ACTOR PhoenixRodSpot : CustomWeaponInvasionSpot 5421
+{
+	Game Heretic
+	DropItem "PhoenixRod"
+}
+
+//=================================================================================================
+//
+// Skull rod spawner
+//
+//=================================================================================================
+
+ACTOR SkullRodSpot : CustomWeaponInvasionSpot 5422
+{
+	Game Heretic
+	DropItem "SkullRod"
+}
+
+//=================================================================================================
+//
+// Blaster ammo spawner
+//
+//=================================================================================================
+
+ACTOR BlasterAmmoSpot : CustomPickupInvasionSpot 5423
+{
+	Game Heretic
+	DropItem "BlasterAmmo"
+}
+
+//=================================================================================================
+//
+// BlasterHefty spawner
+//
+//=================================================================================================
+
+ACTOR BlasterHeftySpot : CustomPickupInvasionSpot 5424
+{
+	Game Heretic
+	DropItem "BlasterHefty"
+}
+
+//=================================================================================================
+//
+// Crossbow ammo spawner
+//
+//=================================================================================================
+
+ACTOR CrossbowAmmoSpot : CustomPickupInvasionSpot 5425
+{
+	Game Heretic
+	DropItem "CrossbowAmmo"
+}
+
+//=================================================================================================
+//
+// Crossbow hefty spawner
+//
+//=================================================================================================
+
+ACTOR CrossbowHeftySpot : CustomPickupInvasionSpot 5426
+{
+	Game Heretic
+	DropItem "CrossbowHefty"
+}
+
+//=================================================================================================
+//
+// Mace ammo spawner
+//
+//=================================================================================================
+
+ACTOR MaceAmmoSpot : CustomPickupInvasionSpot 5427
+{
+	Game Heretic
+	DropItem "MaceAmmo"
+}
+
+//=================================================================================================
+//
+// Mace hefty spawner
+//
+//=================================================================================================
+
+ACTOR MaceHeftySpot : CustomPickupInvasionSpot 5428
+{
+	Game Heretic
+	DropItem "MaceHefty"
+}
+
+//=================================================================================================
+//
+// Phoenix rod ammo spawner
+//
+//=================================================================================================
+
+ACTOR PhoenixRodAmmoSpot : CustomPickupInvasionSpot 5429
+{
+	Game Heretic
+	DropItem "PhoenixRodAmmo"
+}
+
+//=================================================================================================
+//
+// Phoenix rod hefty spawner
+//
+//=================================================================================================
+
+ACTOR PhoenixRodHeftySpot : CustomPickupInvasionSpot 5430
+{
+	Game Heretic
+	DropItem "PhoenixRodHefty"
+}
+
+//=================================================================================================
+//
+// Skull rod ammo spawner
+//
+//=================================================================================================
+
+ACTOR SkullRodAmmoSpot : CustomPickupInvasionSpot 5431
+{
+	Game Heretic
+	DropItem "SkullRodAmmo"
+}
+
+//=================================================================================================
+//
+// Skull rod hefty spawner
+//
+//=================================================================================================
+
+ACTOR SkullRodHeftySpot : CustomPickupInvasionSpot 5432
+{
+	Game Heretic
+	DropItem "SkullRodHefty"
+}
+
+//=================================================================================================
+//
+// Gold wand ammo spawner
+//
+//=================================================================================================
+
+ACTOR GoldWandAmmoSpot : CustomPickupInvasionSpot 5433
+{
+	Game Heretic
+	DropItem "GoldWandAmmo"
+}
+
+//=================================================================================================
+//
+// Gold wand hefty spawner
+//
+//=================================================================================================
+
+ACTOR GoldWandHeftySpot : CustomPickupInvasionSpot 5434
+{
+	Game Heretic
+	DropItem "GoldWandHefty"
+}
+
+//=================================================================================================
+//
+// Bag of holding spawner
+//
+//=================================================================================================
+
+ACTOR BagOfHoldingSpot : CustomPickupInvasionSpot 5435
+{
+	Game Heretic
+	DropItem "BagOfHolding"
+}
+
+//=================================================================================================
+//
+// Super map spawner
+//
+//=================================================================================================
+
+ACTOR SuperMapSpot : CustomPickupInvasionSpot 5436
+{
+	Game Heretic
+	DropItem "SuperMap"
+}
+
+//=================================================================================================
+//
+// Silver shield spawner
+//
+//=================================================================================================
+
+ACTOR SilverShieldSpot : CustomPickupInvasionSpot 5437
+{
+	Game Heretic
+	DropItem "SilverShield"
+}
+
+//=================================================================================================
+//
+// Enchanted shield spawner
+//
+//=================================================================================================
+
+ACTOR EnchantedShieldSpot : CustomPickupInvasionSpot 5438
+{
+	Game Heretic
+	DropItem "EnchantedShield"
+}
+
+//=================================================================================================
+//
+// Crystal vial spawner
+//
+//=================================================================================================
+
+ACTOR CrystalVialSpot : CustomPickupInvasionSpot 5439
+{
+	Game Heretic
+	Game Hexen
+	DropItem "CrystalVial"
+}
+
+//=================================================================================================
+//
+// ArtiEgg spawner
+//
+//=================================================================================================
+
+ACTOR ArtiEggSpot : CustomPickupInvasionSpot 5440
+{
+	Game Heretic
+	DropItem "ArtiEgg"
+}
+
+//=================================================================================================
+//
+// ArtiFly spawner
+//
+//=================================================================================================
+
+ACTOR ArtiFlySpot : CustomPickupInvasionSpot 5441
+{
+	Game Heretic
+	Game Hexen
+	DropItem "ArtiFly"
+}
+
+//=================================================================================================
+//
+// ArtiHealth spawner
+//
+//=================================================================================================
+
+ACTOR ArtiHealthSpot : CustomPickupInvasionSpot 5442
+{
+	Game Heretic
+	Game Hexen
+	DropItem "ArtiHealth"
+}
+
+//=================================================================================================
+//
+// ArtiInvisibility spawner
+//
+//=================================================================================================
+
+ACTOR ArtiInvisibilitySpot : CustomPickupInvasionSpot 5443
+{
+	Game Heretic
+	DropItem "ArtiInvisibility"
+}
+
+//=================================================================================================
+//
+// ArtiInvulnerability spawner
+//
+//=================================================================================================
+
+ACTOR ArtiInvulnerabilitySpot : CustomPickupInvasionSpot 5444
+{
+	Game Heretic
+	DropItem "ArtiInvulnerability"
+}
+
+//=================================================================================================
+//
+// ArtiSuperHealth spawner
+//
+//=================================================================================================
+
+ACTOR ArtiSuperHealthSpot : CustomPickupInvasionSpot 5445
+{
+	Game Heretic
+	Game Hexen
+	DropItem "ArtiSuperHealth"
+}
+
+//=================================================================================================
+//
+// ArtiTeleport spawner
+//
+//=================================================================================================
+
+ACTOR ArtiTeleportSpot : CustomPickupInvasionSpot 5446
+{
+	Game Heretic
+	Game Hexen
+	DropItem "ArtiTeleport"
+}
+
+//=================================================================================================
+//
+// ArtiTimeBomb spawner
+//
+//=================================================================================================
+
+ACTOR ArtiTimeBombSpot : CustomPickupInvasionSpot 5447
+{
+	Game Heretic
+	DropItem "ArtiTimeBomb"
+}
+
+//=================================================================================================
+//
+// ArtiTomeOfPower spawner
+//
+//=================================================================================================
+
+ACTOR ArtiTomeOfPowerSpot : CustomPickupInvasionSpot 5448
+{
+	Game Heretic
+	DropItem "ArtiTomeOfPower"
+}
+
+//=================================================================================================
+//
+// ArtiTorch spawner
+//
+//=================================================================================================
+
+ACTOR ArtiTorchSpot : CustomPickupInvasionSpot 5449
+{
+	Game Heretic
+	Game Hexen
+	DropItem "ArtiTorch"
+}
+
+//=================================================================================================
+//
+// Random Artifact spawner
+//
+//=================================================================================================
+
+ACTOR RandomHereticArtifactSpot : CustomPickupInvasionSpot 5450
+{
+	Game Heretic
+	DropItem "ArtiFly"
+	DropItem "ArtiEgg"
+	DropItem "ArtiHealth"
+	DropItem "ArtiInvisibility"
+	DropItem "ArtiInvulnerability"
+	DropItem "ArtiSuperHealth"
+	DropItem "ArtiTeleport"
+	DropItem "ArtiTimeBomb"
+	DropItem "ArtiTomeOfPower"
+	DropItem "ArtiTorch"
+	DropItem "CrystalVial"
+}
+
+//=================================================================================================
+//
+// Mook / Weak Monster spawner
+//
+//=================================================================================================
+
+ACTOR HereticMookSpot : CustomMonsterInvasionSpot 5451
+{
+	Game Heretic
+	DropItem "HereticImp"
+	DropItem "HereticImpLeader"
+	DropItem "Mummy"
+	DropItem "MummyLeader"
+	DropItem "MummyGhost"
+	DropItem "Knight"
+}
+
+//=================================================================================================
+//
+// Tough / Powerful Monster spawner
+//
+//=================================================================================================
+
+ACTOR HereticToughSpot : CustomMonsterInvasionSpot 5452
+{
+	Game Heretic
+	DropItem "MummyLeaderGhost"
+	DropItem "Beast"
+	DropItem "Clink"
+	DropItem "IronLich"
+	DropItem "KnightGhost"
+	DropItem "Snake"
+	DropItem "Wizard"
+}
+//=================================================================================================
+//
+// Random Monster spawner (but no boss nor chicken)
+//
+//=================================================================================================
+
+ACTOR HereticMonsterSpot : CustomMonsterInvasionSpot 5453
+{
+	Game Heretic
+	DropItem "HereticImp"
+	DropItem "HereticImpLeader"
+	DropItem "Mummy"
+	DropItem "MummyLeader"
+	DropItem "MummyGhost"
+	DropItem "MummyLeaderGhost"
+	DropItem "Beast"
+	DropItem "Clink"
+	DropItem "IronLich"
+	DropItem "Knight"
+	DropItem "KnightGhost"
+	DropItem "Snake"
+	DropItem "Wizard"
+}
+
+ACTOR HereticGhostSpot : CustomMonsterInvasionSpot 5454
+{
+	Game Heretic
+	DropItem "MummyGhost"
+	DropItem "MummyLeaderGhost"
+	DropItem "KnightGhost"
+}

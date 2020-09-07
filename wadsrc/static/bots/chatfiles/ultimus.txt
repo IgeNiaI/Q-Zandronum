@@ -1,0 +1,64 @@
+[IntroStrings]
+"Enjoy your last precious moments of life!"
+"This place will soon be your graveyard!"
+"Savor this battle, for it shall be your last!"
+"Welcome to the end!"
+"Your pathetic existance will soon come to its end!"
+"Prepare to witness perfection!"
+
+[RareRoamingStrings]
+"If you strike me down, I will become more powerful than you can possibly imagine."
+"To win the game, you must beat me, Ultimus."
+"I am your father."
+
+[FragStrings]
+"You are no match for me."
+"You are a fool to think you can beat me."
+"I've never been defeated, and I never will be."
+"I hope you can do better than that."
+"Weak."
+"You make this too easy."
+"This fight shall be your last."
+"You might as well forget about ever seeing the light of day again."
+"You were never any match for me."
+"If this is the best the humans can offer, then what a truly sad race they are."
+"Pathetic."
+"You don't know what you're up against."
+"Worthless."
+"Any last requests?"
+"You make for very little sport."
+
+[KilledStrings]
+"At last you've made this interesting."
+"You may be lucky, but you'll never defeat what I am."
+"Savor your brief moment of victory."
+"Don't get your hopes up."
+
+[RoamingStrings]
+"You can't hide forever."
+"Where are you? I'm not done with you yet."
+"You can run, but you can't hide."
+"Your people will soon perish at my hands."
+"The last thing you see before you die will be my face."
+"You can't avoid your fate."
+"Meet your doom."
+
+[PissedStrings]
+"Now yer mine!"
+"The end is at hand!"
+"This ends NOW!!"
+"I'll destroy you and this planet before I let you defeat me!!"
+"Your weaknesses will soon become apparent."
+
+[FrustratedStrings]
+"..."
+"WHAT ARE YOU?!"
+"WHY DON'T YOU DIE?!"
+
+[WinStrings]
+"Typical."
+"HA HA HA!"
+
+[LoseStrings]
+"Impossible..."
+"This cannot be!"

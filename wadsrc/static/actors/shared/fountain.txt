@@ -1,0 +1,42 @@
+ACTOR ParticleFountain native
+{
+	Height 0
+	+NOBLOCKMAP
+	+NOGRAVITY
+	+INVISIBLE
+}
+
+ACTOR RedParticleFountain : ParticleFountain 9027
+{
+	Health 1
+}
+
+ACTOR GreenParticleFountain : ParticleFountain 9028
+{
+	Health 2
+}
+
+ACTOR BlueParticleFountain : ParticleFountain 9029
+{
+	Health 3
+}
+
+ACTOR YellowParticleFountain : ParticleFountain 9030
+{
+	Health 4
+}
+
+ACTOR PurpleParticleFountain : ParticleFountain 9031
+{
+	Health 5
+}
+
+ACTOR BlackParticleFountain : ParticleFountain 9032
+{
+	Health 6
+}
+
+ACTOR WhiteParticleFountain : ParticleFountain 9033
+{
+	Health 7
+}

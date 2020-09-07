@@ -1,0 +1,256 @@
+==============================================================================
+
+  ZANDRONUM Launcher Protocol
+  ==========================
+
+  v0.61
+
+  Version history:
+    - v0.61: SQF_ALL_DMFLAGS now includes compatflags2 inherited from ZDoom [Zalewa]
+    - v0.60: Renamed dmflags3 to zadmflags [Torr Samaho]
+    - v0.59: Renamed compatflags2 to zacompatflags [Torr Samaho]
+    - v0.58: Added SQF_SECURITY_SETTINGS [Torr Samaho]
+    - v0.57: Added SQF_ALL_DMFLAGS [Torr Samaho]
+    - v0.56: Fine tuned the altered master server protocol [Torr Samaho]
+    - v0.55: Altered master server protocol (sending servers in blocks, supporting master server protocol version) [Torr Samaho]
+    - v0.54: Formatted for wiki. Some tweaks. [Rivecoder]
+    - v0.53: Added SQF_DATA_MD5SUM [Torr Samaho]
+    - v0.52: Added SQF_TESTING_SERVER [Torr Samaho]
+    - v0.51: Added the revision number to the version string. [Torr Samaho]
+    - v0.5: Support for TEAMINFO [Karate Chris, Torr Samaho]
+    - v0.4: Fixes to huffman.cpp [Rivecoder]
+    - v0.3: Improved style and phrasing [Rivecoder]
+            Fixed mistake with the time left under SQF_LIMITS
+    - v0.2: Misc. fixes  [Rivecoder]
+    - v0.1: Initial release [Rivecoder]
+
+===============================================================================
+
+== The basics ==
+
+All Skulltag servers use '''UDP''' as their network protocol.
+Additionally, all traffic is compressed using the Huffman algorithm to save bandwidth. Therefore, you'll need [http://skulltag.com/download/huffman.zip a copy of huffman.cpp or huffman.java] to encode and decode your traffic appropriately.
+
+Definition of data types used in this article:
+  Byte: 8 bit integer
+  Short: 16 bit integer
+  Long: 32 bit integer
+  Float: Long representation of a float
+  String: null-terminated series of Bytes
+
+== Getting the list of servers ==
+
+This is very easy, accomplished by sending a long and a short to the master server:
+
+  Type    Value       Description
+  -------------------------------
+  Long    5660028     LAUNCHER_MASTER_CHALLENGE
+  Short   2           MASTER_SERVER_VERSION
+
+If your request is denied, the server will respond with one of the following:
+
+  Type    Value       Description
+  -------------------------------
+  Long    3           Denied; your IP is banned (MSC_IPISBANNED)
+  Long    4           Denied; your IP has made a request in the past 10 seconds (MSC_REQUESTIGNORED)
+  Long    5           Denied; you're using an older version of the master protocol (MSC_WRONGVERSION)
+
+If you are accepted, you will receive multiple packets, each starting with:
+
+  Type    Value       Description
+  -------------------------------
+  Long    6           Beginning of list (MSC_BEGINSERVERLISTPART)
+  Byte    0-255       Packet number (starting with 0)
+  Byte    8           Beginning of server block (MSC_SERVERBLOCK)
+
+Then you will get this next block, which is repeated for every IP with servers on it.
+
+  Type    Value       Description
+  -------------------------------
+  Byte    0-255       n = Number of servers in this IP
+  Byte    0-255       IP octet
+  Byte    0-255       IP octet
+  Byte    0-255       IP octet
+  Byte    0-255       IP octet
+  n Short 0-65535     IP port
+
+Once the packet is full or all servers are transferred, you will receive 0 as number of servers on the next IP.
+
+  Type    Value       Description
+  -------------------------------
+  Byte    0           There are no ports for the next server, i.e. no more servers in this packet.
+
+
+Finally, the response should end with either
+
+  Type    Value       Description
+  -------------------------------
+  Byte    2           End of list, you got the full server list now (MSC_ENDSERVERLIST)
+
+or
+
+  Type    Value       Description
+  -------------------------------
+  Byte    7           End of current part of the list, you'll get more packets (MSC_ENDSERVERLISTPART)
+
+== Querying individual servers ==
+
+As with the master, you begin with the challenge long.
+
+  Type    Value       Description
+  -------------------------------
+  Long    199         Launcher challenge
+
+Next you need to choose what data you'd like. To do so, bitshift the combination of flags with a boolean OR.
+
+The flags are:
+<pre>
+	SQF_NAME				0x00000001
+	SQF_URL					0x00000002
+	SQF_EMAIL				0x00000004
+	SQF_MAPNAME				0x00000008
+	SQF_MAXCLIENTS				0x00000010
+	SQF_MAXPLAYERS				0x00000020
+	SQF_PWADS				0x00000040
+	SQF_GAMETYPE				0x00000080
+	SQF_GAMENAME				0x00000100
+	SQF_IWAD				0x00000200
+	SQF_FORCEPASSWORD			0x00000400
+	SQF_FORCEJOINPASSWORD	                0x00000800
+	SQF_GAMESKILL				0x00001000
+	SQF_BOTSKILL				0x00002000
+	SQF_DMFLAGS				0x00004000 // Deprecated
+	SQF_LIMITS				0x00010000
+	SQF_TEAMDAMAGE				0x00020000
+	SQF_TEAMSCORES				0x00040000 // Deprecated
+	SQF_NUMPLAYERS				0x00080000
+	SQF_PLAYERDATA				0x00100000
+	SQF_TEAMINFO_NUMBER			0x00200000
+	SQF_TEAMINFO_NAME			0x00400000
+	SQF_TEAMINFO_COLOR			0x00800000
+	SQF_TEAMINFO_SCORE			0x01000000
+	SQF_TESTING_SERVER			0x02000000
+	SQF_DATA_MD5SUM				0x04000000
+	SQF_ALL_DMFLAGS				0x08000000
+	SQF_SECURITY_SETTINGS		0x10000000
+</pre>
+For example, to get the server's name and player count, you'd use (SQF_NAME|SQF_NUMPLAYERS). Use these flags appropriately; doing so saves your users' and server hosters' bandwidth.
+
+  Type    Value       Description
+  -------------------------------
+  Long    Flags       Desired information
+
+Next you send the time. This will be sent back to you so you can determine ping.
+
+  Type    Value       Description
+  -------------------------------
+  Long    Time        The current time
+
+The server will respond with one of the following:
+
+  Type    Value       Description
+  ----------------------------------------------------------------
+  Long    5660023     Beginning of data
+  Long    5660024     Denied; your IP has made a request in the past 10 seconds
+  Long    5660025     Denied; your IP is banned
+
+Regardless of this message, you'll also get:
+
+  Type    Value       Description
+  ----------------------------------------------------------------
+  Long    Time        The time you sent to the server
+
+Next, assuming you were accepted, you'll get:
+
+  Type    Value     Description
+  ----------------------------------------------------------------
+  String  Version   Server version string with revision number.
+  Long    Flags     The info you'll be receiving. (Possibly corrected - see below)
+
+'''Note:''' The server will automatically correct your request if you made a mistake (like request team scores in cooperative games), so always use the flags it sends back to you when reading your data.
+
+Followed by:
+
+  Type    Request flag          Description
+  ----------------------------------------------------------------
+  String  SQF_NAME              The server's name (sv_hostname)
+  String  SQF_URL               The server's WAD URL (sv_website)
+  String  SQF_EMAIL             The server host's e-mail (sv_hostemail)
+  String  SQF_MAPNAME           The current map's name
+  Byte    SQF_MAXCLIENTS        The max number of clients (sv_maxclients)
+  Byte    SQF_MAXPLAYERS        The max number of players (sv_maxplayers)
+  Byte    SQF_PWADS             The number of PWADs loaded
+  String  SQF_PWADS             The PWAD's name (Sent for each PWAD)
+  Byte    SQF_GAMETYPE          The current game mode. See below.
+  Byte    SQF_GAMETYPE          Instagib - true (1) / false (0)
+  Byte    SQF_GAMETYPE          Buckshot - true (1) / false (0)
+  String  SQF_GAMENAME          The base game's name
+                                    ("DOOM", "DOOM II", "HERETIC", "HEXEN", "ERROR!")
+  String  SQF_IWAD              The IWAD's name
+  Byte    SQF_FORCEPASSWORD     Whether a password is required to join the server
+                                    (sv_forcepassword)
+  Byte    SQF_FORCEJOINPASSWORD Whether a password is required to join the game 
+                                    (sv_forcejoinpassword)
+  Byte    SQF_GAMESKILL         The game's difficulty (skill)
+  Byte    SQF_BOTSKILL          The bot difficulty (botskill)
+  Long    SQF_DMFLAGS           DMFlags
+  Long    SQF_DMFLAGS           DMFlags2
+  Long    SQF_DMFLAGS           Compatflags
+  Short   SQF_LIMITS            fraglimit
+  Short   SQF_LIMITS            timelimit
+  Short   SQF_LIMITS            time left (minutes), if timelimit > 0
+  Short   SQF_LIMITS            duellimit
+  Short   SQF_LIMITS            pointlimit
+  Short   SQF_LIMITS            winlimit
+  Float   SQF_TEAMDAMAGE        The team damage scalar (teamdamage)
+  Short   SQF_TEAMSCORES        [Deprecated] This team's fragcount/wincount/score
+                                    (Repeated for each team (blue, then red))
+  Byte    SQF_NUMPLAYERS        The number of players in the server
+  String  SQF_PLAYERDATA        This player's name
+  Short   SQF_PLAYERDATA        This player's pointcount/fragcount/killcount
+  Short   SQF_PLAYERDATA        This player's ping
+  Byte    SQF_PLAYERDATA        Whether this player is spectating - true (1) / false (0)
+  Byte    SQF_PLAYERDATA        Whether this player is a bot - true (1) / false (0)
+  Byte    SQF_PLAYERDATA        Which team this player is on (in teamgames). 255 if no team.
+  Byte    SQF_PLAYERDATA        Time, in seconds, that this player has been in the server.
+  Byte    SQF_TEAMINFO_NUMBER   The number of teams used.
+  String  SQF_TEAMINFO_NAME     The team's name. (Sent for each team.)
+  Long    SQF_TEAMINFO_COLOR    The team's color. (Sent for each team.)
+  Short   SQF_TEAMINFO_SCORE    The team's score. (Sent for each team.)
+  Byte    SQF_TESTING_SERVER    Whether this server is running a testing binary 
+                                    - true (1) / false (0)
+  String  SQF_TESTING_SERVER    An empty string in case the server is running a stable
+                                    binary, otherwise name of the testing binary
+                                    archive found in http://skulltag.com/testing/files/
+  String  SQF_DATA_MD5SUM       A string with the MD5 sum of the main data file
+                                    (skulltag.wad/skulltag_data.pk3) the server uses.
+  Byte    SQF_ALL_DMFLAGS       The number of flags that will be sent.
+  Long    SQF_ALL_DMFLAGS       The value of the flags (Sent for each flag in the order
+                                    dmflags, dmflags2, zadmflags, compatflags, zacompatflags, compatflags2)
+  Byte    SQF_SECURITY_SETTINGS Whether the server is enforcing the master ban list - true (1) / false (0)
+                                    The other bits of this byte may be used to transfer other 
+                                    security related settings in the future.
+
+And that's it!
+
+== Notes ==
+
+'''Game modes:''' Game modes are defined as:
+    0   GAMEMODE_COOPERATIVE
+    1   GAMEMODE_SURVIVAL
+    2   GAMEMODE_INVASION
+    3   GAMEMODE_DEATHMATCH
+    4   GAMEMODE_TEAMPLAY
+    5   GAMEMODE_DUEL
+    6   GAMEMODE_TERMINATOR
+    7   GAMEMODE_LASTMANSTANDING
+    8   GAMEMODE_TEAMLMS
+    9   GAMEMODE_POSSESSION
+    10  GAMEMODE_TEAMPOSSESSION
+    11  GAMEMODE_TEAMGAME
+    12  GAMEMODE_CTF
+    13  GAMEMODE_ONEFLAGCTF
+    14  GAMEMODE_SKULLTAG
+    15  GAMEMODE_DOMINATION
+
+Happy coding!

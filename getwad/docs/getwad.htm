@@ -1,0 +1,194 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>GetWAD User's Manual</title>
+<style type="text/css">
+TABLE { font-size:10pt;color:black;font-family:Verdana; }
+P { font-size:10pt;color:black;font-family:Verdana; }
+UL { font-size:10pt;color:black;font-family:Verdana; }
+OL { font-size:10pt;color:black;font-family:Verdana; }
+BODY { font-size:10pt;color:black;font-family:Verdana; }
+a:link    { color:#1841b5; }
+a:visited { color:#1841b5; }
+a:hover   { color:#a50400; }
+h2 { font-size:22pt;margin-bottom:2pt;font-weight:bold;color:#008000;font-family:Times New Roman; }
+h3 { font-size:13pt;margin-bottom:2pt;font-weight:bold;color:#0000c0;font-family:Verdana; }
+h4 { font-size:11pt;margin-bottom:1pt;font-weight:bold;color:#0000c0;font-family:Verdana; }
+pre { margin-top:4pt; margin-bottom:4pt;font-family:"Andale Mono",Courier New; }
+</style>
+</head>
+<body background=bg.jpg>
+<center><h2>GetWAD</h2><br>
+<b>Version 2.1<br>
+December 7, 2003</b></center>
+
+
+<h4>1. Description</h4>
+<p>
+
+GetWAD is a library and a sample program to locate, download,
+unpack and install WAD files automatically. Its primary purpose
+is to simplify the WAD handling for Doom players.
+<p>
+
+On a first level, the sample program (getwad.exe) can be used by
+end users to fetch the desired WADs. Even though this is not perfectly
+automatic (the user has to specify the WAD name), it is still the
+easiest way that I know to find and install WADs.
+<p>
+
+On a second and more important level, the library (getwad.dll) can
+be used directly by other Doom-related programs (eg., launchers)
+to automate the procedure even more (eg., they would simply ask
+for permission to find the file and the user would not have to
+specify anything else). For this reason, the DLL interface is
+fully documented; any interested developer can download the
+developer's documentation and source code of the program from the
+<a target=_blank href="http://getwad.keystone.gr/">GetWAD home page</a>. I've tried
+to simplify the usage of the library from the main application's
+perspective; as far as I can tell, it should be almost trivial to
+embed the library in any Doom-related program.
+<p>
+
+<h4>2. Usage</h4>
+<p>
+
+The sample program can be invoked in two ways:
+<ul>
+<li> The "<b>Setup</b>" mode: it displays a configuration dialog
+     where you can modify the various searching parameters (eg.,
+     which pages and search engines it should consult, where to
+     deposit the WAD files, etc.). <b>You have to use this mode
+     first in order to specify the location of the WAD directory</b>;
+     ideally, you will not have to use it after that. You can enter 
+     this mode by clicking on the "GetWAD Setup" entry in the GetWad
+     program group.
+     <p>
+<li> The "<b>Search</b>" mode: it simply asks for the name
+     of the WAD file (with or without the .wad extension),
+     searches for it on the Web, downloads it, unpacks it and
+     installs it in the WAD directory. You enter this mode
+     by clicking on the "GetWAD" entry in the GetWAD program group.
+	<p>
+	Another way to invoke the search mode would be to run the program
+	from the command line using the following syntax:
+	<center>
+	<pre>getwad [-d "wad_directory"] wad_name_1 [wad_name_2 ...]</pre>
+	</center>
+	The "-d" option specifies the directory where the WAD files will be
+	deposited, and "wad_name_1", "wad_name_2", etc. specify the desired
+	WAD files. This mode can be useful when GetWAD is called from another
+	program or script.
+</ul>
+<p>
+
+<h4>3. Other Characteristics</h4>
+<p>
+
+<ul>
+<li> It can use the HTTP and FTP protocols.
+<li> The program uses the passive mode of the FTP protocol; you can
+     optionally disable FTP for some special cases (eg., if you are
+     behind a misconfigured firewall).
+<li> The program works fine behind properly configured firewalls.
+<li> The program obeys the HTTP proxy settings specified in the
+     Internet Explorer options.
+<li> You can specify up to 100 pages containing links to WAD files;
+     these pages will be searched first.
+<li> At the beginning of a search, the program contacts one of the
+     "master" GetWAD servers to obtain an updated search list of
+     URLs to be searched for WAD files; this eliminates any maintainance
+     required by the end users, as the master search list will get
+     updated as the various web pages change. There are currently 2
+     such servers in operation for redundancy purposes (one at
+     getwad.keystone.gr and another at zdaemon.org). If for
+     some reason the program cannot contact any of them, it uses
+     the last search list that has been downloaded; if no such list
+     has ever been downloaded, it uses a built-in list (which will
+     probably get outdated as time goes by).
+<li> The program enforces a network timeout of 60 seconds; that is,
+     if a file transfer has stopped for more than 60 seconds, then it
+     is assumed dead and the program will cancel it and keep searching.
+<li> The program should work on any 32-bit version of Windows provided
+     that you have Internet Explorer 4.0 (or later) installed.
+<li> The specification of a search page may contain the special sequence
+     <b>%s</b> which will be replaced by the name of the file being
+     searched. This is useful for specifying search engine URLs. A
+     consequence of this capability is that you have to be careful with
+     the percent (<b>%</b>) signs; if the URL actually contains a percent
+     character (which is rather unlikely), you have to specify it twice
+     (i.e., use <b>%%</b> rather than <b>%</b>).
+</ul>
+
+<h4>4. Release History</h4>
+<p>
+<ul>
+<li> <b>Version 2.1 (December 7, 2003)</b>: Bug fixing.
+<li> <b>Version 2.0 (December 3, 2003)</b>: Automatic fetching of search
+     list from master server, searching enhancements.
+<li> <b>Version 1.5 (September 18, 2003)</b>: Google searching improvements.
+<li> <b>Version 1.4 (August 26, 2003)</b>: Bug fixing.
+<li> <b>Version 1.3 (August 24, 2003)</b>: Fixed a problem with one
+     of the predefined search pages (SUNet changed its address lately),
+     and added support for a command line version of the program under
+     Unix (it has been tested under Linux, but it's not very system-specific:
+     it should work on other Unices as well).
+<li> <b>Version 1.2 (August 2, 2003)</b>: Extended the command line
+     syntax to simplify the interface to other programs and allow the
+     fetching of multiple wad files with a single call.
+<li> <b>Version 1.1 (July 1, 2003)</b>: Extended the specification of
+     search pages to accomodate the <b>%s</b> sequence.
+<li> <b>Version 1.0 (June 25, 2003)</b>: First public release of the
+     program.
+</ul>
+
+
+<h4>5. Acknowledgements</h4>
+<p>
+This software uses the ZLIB library library by Jean-loup Gailly and 
+Mark Adler, as well as the UNZIP code by Gilles Vollant. Their
+software has contributed significantly to the development of
+countless projects.
+<p>
+I would also like to offer a big thank you to Eugene Bondarchenko (aka Bond, the 
+creator of IDE) for precious help in improving and testing the program.
+<p>
+Finally, I am indebted to the kind folks who set up and maintain the various
+link pages and search engines that provide easy access to the
+WAD files and other net resources. The default link pages
+searched by GetWAD are the ones administered by
+[L@P] dA_g0dFad3R, Lyfe, Raider and Falconer; I owe them
+a big thank you.
+<p>
+
+
+
+<h4>6. License</h4>
+<p>
+Copyright (C) 2003 Hippocrates Sendoukas.
+<p>
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the author be held liable for any damages
+arising from the use of this software.
+<p>
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+<ol>
+<li> The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+<li> Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+<li> This notice may not be removed or altered from any source distribution.
+</ol>
+
+<p>
+<hr>
+<address>
+<a href="mailto:hsendoukas@hotmail.com">Hippocrates Sendoukas (aka Kilgore)</a>
+</address>
+</body>
+</html>

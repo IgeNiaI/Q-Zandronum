@@ -1,0 +1,15 @@
+[OPTIONS]
+Binary Index=No
+Compatibility=1.0
+Compiled file=getwad.chm
+Default topic=getwad.htm
+Display compile progress=Yes
+Language=0x409 English (United States)
+Title=GetWAD User's Manual
+
+
+[FILES]
+getwad.htm
+
+[INFOTYPES]
+

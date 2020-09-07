@@ -1,0 +1,49 @@
+[IntroStrings]
+"Hey guys ;)"
+
+[RareRoamingStrings]
+"So, are you guys into hot, wild sex?"
+"And this one time, at boot camp, I stuck a gun up my pussy."
+"My favorite weapon is the grenade launcher."
+"Oh my God, I am SOOOO horny right now!"
+"Can someone rub my nipples?"
+
+[FragStrings]
+"Take that, you big meanie!"
+"Haha! I fragged ya! ;)"
+
+[KilledStrings]
+"Aww!"
+"Ow, that hurt :("
+"That wasn't very nice!"
+"Aww, hey!"
+"No! I just broke a nail!"
+
+[RoamingStrings]
+"I wonder what Orion's doing tonight..."
+"Is Orion seeing anyone?"
+"Most of the girls in my squad are sluts."
+"Lara Croft's are so fake."
+"Cygnus freaks me out."
+"Hey cutie ;)"
+"So what are you guys doing tonight?"
+"My commander's really hot."
+
+[EnragedStrings]
+"DON'T FUCK WITH ME!!!"
+"I SWEAR I'LL RIP YOUR FUCKING BALLS OFF!!"
+"GODDAMMIT YOU ARE FUCKING DEAD!"
+"YOU DON'T FUCKING DO THINGS LIKE THAT!!"
+"YOU SON OF A BITCH I'LL FUCKING KILL YOU!!!"
+
+[DemoralizedStrings]
+"Why are you being so mean to me??"
+"You're gonna make me cry!"
+"You're so mean!"
+
+[WinStrings]
+"Yay! I won ;)"
+"Oh yeah! Go me!"
+
+[LoseStrings]
+"Oh well!"

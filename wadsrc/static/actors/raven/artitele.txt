@@ -1,0 +1,27 @@
+
+// Teleport (self) ----------------------------------------------------------
+
+ACTOR ArtiTeleport : Inventory 36 native
+{
+	Game Raven
+	SpawnID 18
+	+COUNTITEM
+	+FLOATBOB
+	+NOGRAVITY
+	+INVENTORY.INVBAR
+	+INVENTORY.PICKUPFLASH
+	+INVENTORY.FANCYPICKUPSOUND
+	Inventory.DefMaxAmount
+	Inventory.Icon "ARTIATLP"
+	Inventory.PickupSound "misc/p_pkup"
+	Inventory.PickupMessage "$TXT_ARTITELEPORT"
+	Tag "$TAG_ARTITELEPORT"
+	States
+	{
+	Spawn:
+		ATLP ABCB 4
+		Loop
+	}
+}
+
+

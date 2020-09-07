@@ -1,0 +1,256 @@
+// ============================================================================
+// [Dusk] Red armor
+sprite arm3a0, 31, 17 {
+	patch "arm1a0", 0, 0 {
+		translation "113:124=176:191", "125:125=2:2", "126:127=247:247"
+	}
+	offset 15, 17
+}
+
+sprite arm3b0, 31, 17 {
+	patch "arm1b0", 0, 0 {
+		translation "113:124=176:191", "125:125=2:2", "126:127=247:247"
+	}
+	offset 15, 17
+}
+
+// ============================================================================
+// [Dusk] Max health bonus
+sprite bon3a0, 14, 18 {
+	patch "bon1a0", 0, 0 {
+		translation "201:207=180:187", "197:200=173:179", "240:246=188:191",
+			"244:246=191:191", "6:6=191:191", "247:247=190:190", "9:12=1:2"
+	}
+	offset 7, 14
+}
+
+sprite bon3b0, 14, 18 {
+	patch "bon1b0", 0, 0 {
+		translation "201:207=180:187", "197:200=173:179", "240:246=188:191",
+			"244:246=191:191", "6:6=191:191", "247:247=190:190", "9:12=1:2"
+	}
+	offset 7, 14
+}
+
+sprite bon3c0, 14, 18 {
+	patch "bon1c0", 0, 0 {
+		translation "201:207=180:187", "197:200=173:179", "240:246=188:191",
+			"244:246=191:191", "6:6=191:191", "247:247=190:190", "9:12=1:2"
+	}
+	offset 7, 14
+}
+
+sprite bon3d0, 14, 18 {
+	patch "bon1d0", 0, 0 {
+		translation "201:207=180:187", "197:200=173:179", "240:246=188:191",
+			"244:246=191:191", "6:6=191:191", "247:247=190:190", "9:12=1:2"
+	}
+	offset 7, 14
+}
+
+// ============================================================================
+// [Dusk] Max armor bonus
+sprite bon4a0, 16, 15 {
+	patch "bon2a0", 0, 0 {
+		translation "117:122=200:207", "123:127=241:247"
+	}
+	offset 7, 13
+}
+
+sprite bon4b0, 16, 15 {
+	patch "bon2b0", 0, 0 {
+		translation "117:122=200:207", "123:127=241:247"
+	}
+	offset 7, 13
+}
+
+sprite bon4c0, 16, 15 {
+	patch "bon2c0", 0, 0 {
+		translation "117:122=200:207", "123:127=241:247"
+	}
+	offset 7, 13
+}
+
+sprite bon4d0, 16, 15 {
+	patch "bon2d0", 0, 0 {
+		translation "117:122=200:207", "123:127=241:247"
+	}
+	offset 7, 13
+}
+
+// ============================================================================
+// [Dusk] Red tech lamps
+sprite tlp3a0, 23, 80 {
+	patch "tlmpa0", 0, 0 {
+		translation "192:200=168:178"
+	}
+	offset 11, 77
+}
+
+sprite tlp3b0, 23, 80 {
+	patch "tlmpb0", 0, 0 {
+		translation "192:200=168:178"
+	}
+	offset 11, 77
+}
+
+sprite tlp3c0, 23, 80 {
+	patch "tlmpc0", 0, 0 {
+		translation "192:200=168:178"
+	}
+	offset 11, 77
+}
+
+sprite tlp3d0, 23, 80 {
+	patch "tlmpd0", 0, 0 {
+		translation "192:200=168:178"
+	}
+	offset 11, 77
+}
+
+// [Dusk] Short version
+sprite tlp4a0, 21, 60 {
+	patch "tlp2a0", 0, 0 {
+		translation "192:200=168:178", "201:207=179:191"
+	}
+	offset 10, 57
+}
+
+sprite tlp4b0, 21, 60 {
+	patch "tlp2b0", 0, 0 {
+		translation "192:200=168:178", "201:207=179:191"
+	}
+	offset 10, 57
+}
+
+sprite tlp4c0, 21, 60 {
+	patch "tlp2c0", 0, 0 {
+		translation "192:200=168:178", "201:207=179:191"
+	}
+	offset 10, 57
+}
+
+sprite tlp4d0, 21, 60 {
+	patch "tlp2d0", 0, 0 {
+		translation "192:200=168:178", "201:207=179:191"
+	}
+	offset 10, 57
+}
+
+// ============================================================================
+// [Dusk] Recolored torches
+// White, large
+sprite twhia0, 26, 96 {
+	patch "tgrna0", 0, 0 {
+		translation "112:127=80:111"
+	}
+	offset 14, 92
+}
+
+sprite twhib0, 26, 91 {
+	patch "tgrnb0", 0, 0 {
+		translation "112:127=80:111"
+	}
+	offset 14, 87
+}
+
+sprite twhic0, 26, 91 {
+	patch "tgrnc0", 0, 0 {
+		translation "112:127=80:111"
+	}
+	offset 14, 87
+}
+
+sprite twhid0, 26, 97 {
+	patch "tgrnd0", 0, 0 {
+		translation "112:127=80:111"
+	}
+	offset 14, 93
+}
+
+// [Dusk] Yellow, large
+sprite tyela0, 26, 96 {
+	patch "tgrna0", 0, 0 {
+		translation "112:127=160:167"
+	}
+	offset 14, 92
+}
+
+sprite tyelb0, 26, 91 {
+	patch "tgrnb0", 0, 0 {
+		translation "112:127=160:167"
+	}
+	offset 14, 87
+}
+
+sprite tyelc0, 26, 91 {
+	patch "tgrnc0", 0, 0 {
+		translation "112:127=160:167"
+	}
+	offset 14, 87
+}
+
+sprite tyeld0, 26, 97 {
+	patch "tgrnd0", 0, 0 {
+		translation "112:127=160:167"
+	}
+	offset 14, 93
+}
+
+// [Dusk] White, small
+sprite smwta0, 17, 73 {
+	patch "smgta0", 0, 0 {
+		translation "112:127=80:111"
+	}
+	offset 10, 72
+}
+
+sprite smwtb0, 17, 68 {
+	patch "smgtb0", 0, 0 {
+		translation "112:127=80:111"
+	}
+	offset 10, 67
+}
+
+sprite smwtc0, 17, 67 {
+	patch "smgtc0", 0, 0 {
+		translation "112:127=80:111"
+	}
+	offset 10, 67
+}
+
+sprite smwtd0, 17, 74 {
+	patch "smgtd0", 0, 0 {
+		translation "112:127=80:111"
+	}
+	offset 10, 73
+}
+
+// [Dusk] Yellow, small
+sprite smyta0, 17, 73 {
+	patch "smgta0", 0, 0 {
+		translation "112:127=160:167"
+	}
+	offset 10, 72
+}
+
+sprite smytb0, 17, 68 {
+	patch "smgtb0", 0, 0 {
+		translation "112:127=160:167"
+	}
+	offset 10, 67
+}
+
+sprite smytc0, 17, 67 {
+	patch "smgtc0", 0, 0 {
+		translation "112:127=160:167"
+	}
+	offset 10, 67
+}
+
+sprite smytd0, 17, 74 {
+	patch "smgtd0", 0, 0 {
+		translation "112:127=160:167"
+	}
+	offset 10, 73
+}

@@ -1,0 +1,18 @@
+Command Header
+	Long sequence
+EndCommand
+
+Command Ping
+	UnreliableCommand
+	Long time
+EndCommand
+
+Command BeginSnapshot
+EndCommand
+
+Command EndSnapshot
+EndCommand
+
+Command FullUpdateCompleted
+	ExtendedCommand
+EndCommand

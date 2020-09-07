@@ -1,0 +1,68 @@
+[IntroStrings]
+"Here we go!"
+"Hey, good luck."
+"This is it!"
+"What's up guys?"
+"Awwwwwwwwww yeah!"
+"Are you all ready for this?"
+"Watch and learn!"
+
+[FragStrings]
+"Oh yeah!"
+"Score!"
+"Oh man!"
+"Sweet!"
+"Tight!"
+"Damn straight!"
+"Rocked!"
+
+[KilledStrings]
+"I'm impressed."
+"Nice shot."
+"Hah, lucky shot!"
+"Hah, no way you deserved that one!"
+"Somebody's been training!"
+"Awesome shot, squirt"
+"Oh BITCH!"
+
+[RareRoamingStrings]
+"So one time I got so drunk I tried to fuck a pinata..."
+"A lot of people say I look like a porn star."
+
+[RoamingStrings]
+"Is Crash still stalking me?"
+"If you see Crash, tell her I have a girlfriend or something."
+"So who wants to hit the bars after this?"
+"Have I told you any of my drinking stories?"
+"I'm on a strict diet of vodka and Red Bull"
+"Man, I get so horny after I get a few beers in me"
+"I'm even better when I'm drunk"
+"So what do you think of Chubbs's man-boobies?"
+
+[EnragedStrings]
+"Oh that's it... now you die!"
+"Okay, now I'm pissed..."
+"Time to die, bitch!"
+"No... I will NOT lose!"
+"It's on now!"
+"You'll be a grease spot when I'm through with you!"
+"Get back here, dweeb!"
+
+[DemoralizedStrings]
+"I can't believe this!"
+"What the... ?!"
+"This can't be happening!"
+"Fuck a duck!"
+"Wow, I need a drink..."
+
+[WinStrings]
+"That's how we do it!"
+"Oh yeah, who's the man?"
+"Score one for party boy!"
+"Let's go to my place, I've got drinks for the winner"
+"Damn I'm good!"
+
+[LoseStrings]
+"Hey, it could be worse!"
+"Oh well, nothing a few drinks won't cure!"
+"Yeah, okay. Whatever."

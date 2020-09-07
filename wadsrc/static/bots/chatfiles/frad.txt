@@ -1,0 +1,40 @@
+[IntroStrings]
+"Rip and tear!"
+
+[IntermissionStrings]
+"fuck this, i need to spank"
+
+[FragStrings]
+"spankage!"
+"you suck, just like yer mom. Ooooooooh!"
+"/me spanks"
+"that was easier than fucking yer mom. Ooooooh!"
+"upstairs, Caco!"
+"yyou sad basrad!"
+"/me it up!"
+"that r0x0r my c0x0r"
+"yes! my days of fucking frozen goats are over!"
+"caco ph33r"
+"caco upstairs!"
+"booyaka!"
+"caco ph33r my frag"
+"rooted!"
+"caco ph33r my leetness"
+
+[KilledStrings]
+"heh"
+"/me ph33rs"
+"damnit"
+"you limey"
+"/me spanks"
+
+[RoamingStrings]
+"heh"
+"Connie, have you seen my incredibly long and supple cock? Of course not, it's in Manc's girlfriend"
+"/me spanks mewse"
+"caco seen menaked"
+"caco doom"
+"caco sing fraggle"
+"/me hands caco a cookie"
+"caco sing slipknot"
+"caco have you seen my porno mag. I'm too busy masturbating"

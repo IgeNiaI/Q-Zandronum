@@ -1,0 +1,31 @@
+[IntroStrings]
+"I won't be beaten easily."
+"You really don't stand a chance against me."
+"I'll soon show you what I can still do."
+"Don't underestimate me."
+
+[FragStrngs]
+"You should go back to the training center with that fat kid."
+"You're not good enough."
+"Don't waste my time, boy."
+"You just got fragged by a cripple. What's that say about you?"
+
+[KilledStrings]
+"Whatever."
+
+[RoamingStrings]
+"Come on out, fool."
+
+[PissedStrings]
+"ORION!!!"
+"That bastard Orion... he'll pay..."
+"Time to die, bitch!"
+"No... I will NOT lose!"
+"You son of a bitch..."
+
+[FrustratedStrings]
+"I can't believe this!"
+"What the... ?!"
+"This can't be happening!"
+"There's no way!"
+"This can't be!"

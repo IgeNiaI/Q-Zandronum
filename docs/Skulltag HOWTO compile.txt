@@ -1,0 +1,60 @@
+Building Skulltag under Linux/FreeBSD:
+
+Note: Under FreeBSD use gmake instead of make in the steps below.
+
+1. Create a new check out.
+2. In makefile.linux replace
+
+     CXX = apg++
+     CC = apgcc
+
+   with
+
+     CXX = g++
+     CC = gcc
+
+3. go to the main directory (containing makefile.linux) and execute
+
+     make SERVERONLY=1
+
+   This builds the server binary.
+
+4. Now execute 
+
+     make
+
+   This builds the client (does not work under FreeBSD).
+
+The above steps assume that you have all necessary libraries installed. Under FreeBSD you need to install:
+
+  nasm
+  subversion
+  gmake
+  sdl
+  mc
+  jpeg
+  cmake
+
+Other useful packages are
+
+  joe
+
+You can install a package with
+
+  pkg_add -r packagename
+
+After installing update the path variables with
+
+  rehash
+
+------------------------------------------------------------
+Building the latestzdoom branch:
+
+cmake commands:
+
+- Release client
+cmake -DCMAKE_BUILD_TYPE=Release ..
+- Release server
+cmake -DCMAKE_BUILD_TYPE=Release -DSERVERONLY=1 ..
+- Debug server
+cmake -DCMAKE_BUILD_TYPE=Debug -DSERVERONLY=1 ..

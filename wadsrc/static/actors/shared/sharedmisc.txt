@@ -1,0 +1,215 @@
+
+// Default actor for unregistered doomednums -------------------------------
+
+ACTOR Unknown
+{
+	Radius 32
+	Height 56
+	+NOGRAVITY
+	+NOBLOCKMAP
+	+DONTSPLASH
+	States
+	{
+	Spawn:
+		UNKN A -1
+		Stop
+	}
+}
+
+// Route node for monster patrols -------------------------------------------
+
+ACTOR PatrolPoint 9024
+{
+	Radius 8
+	Height 8
+	Mass 10
+	+NOGRAVITY
+	+NOBLOCKMAP
+	+DONTSPLASH
+	RenderStyle None
+}	
+
+// A special to execute when a monster reaches a matching patrol point ------
+
+ACTOR PatrolSpecial 9047
+{
+	Radius 8
+	Height 8
+	Mass 10
+	+NOGRAVITY
+	+NOBLOCKMAP
+	+DONTSPLASH
+	RenderStyle None
+}	
+
+// Map spot ----------------------------------------------------------------
+
+ACTOR MapSpot 9001
+{
+	+NOBLOCKMAP
+	+NOSECTOR
+	+NOGRAVITY
+	+DONTSPLASH
+	RenderStyle None
+}	
+
+// same with different editor number for Legacy maps -----------------------
+
+ACTOR FS_Mapspot : Mapspot 5004
+{
+}
+
+// Map spot with gravity ---------------------------------------------------
+
+ACTOR MapSpotGravity : MapSpot 9013
+{
+	-NOBLOCKMAP
+	-NOSECTOR
+	-NOGRAVITY
+}
+
+// Point Pushers -----------------------------------------------------------
+
+ACTOR PointPusher 5001
+{
+	+NOBLOCKMAP
+	+INVISIBLE
+}
+
+ACTOR PointPuller 5002
+{
+	+NOBLOCKMAP
+	+INVISIBLE
+}
+
+// Bloody gibs -------------------------------------------------------------
+
+ACTOR RealGibs
+{
+	+DROPOFF
+	+CORPSE
+	+NOTELEPORT
+	+DONTGIB
+	States
+	{
+	Spawn:
+		goto GenericCrush
+	}
+}
+
+// Gibs that can be placed on a map. ---------------------------------------
+//
+// These need to be a separate class from the above, in case someone uses
+// a deh patch to change the gibs, since ZDoom actually creates a gib actor
+// for actors that get crushed instead of changing their state as Doom did.
+
+ACTOR Gibs : RealGibs 24
+{
+	Game Doom
+	SpawnID 146
+	ClearFlags
+}
+
+// Needed for loading Build maps -------------------------------------------
+
+ACTOR CustomSprite 9988 native
+{
+	+NOBLOCKMAP
+	+NOGRAVITY
+	States
+	{
+	Spawn:
+		TNT1 A -1
+		Stop
+	}
+}
+
+// SwitchableDecoration: Activate and Deactivate change state --------------
+
+ACTOR SwitchableDecoration native
+{
+}
+
+
+ACTOR SwitchingDecoration : SwitchableDecoration native
+{
+}
+
+// Random spawner ----------------------------------------------------------
+
+ACTOR RandomSpawner native
+{
+	+NOBLOCKMAP
+	+NOSECTOR
+	+NOGRAVITY
+	+THRUACTORS
+}
+
+// Fast projectiles --------------------------------------------------------
+
+ACTOR FastProjectile native
+{
+	Projectile
+}
+
+// Sector flag setter ------------------------------------------------------
+
+ACTOR SectorFlagSetter 9041 native
+{
+	+NOBLOCKMAP
+	+NOGRAVITY
+	+DONTSPLASH
+	RenderStyle None
+}
+
+// Marker for sounds -------------------------------------------------------
+
+ACTOR SpeakerIcon : Unknown
+{
+	States
+	{
+	Spawn:
+		SPKR A -1 BRIGHT
+		Stop
+	}
+	Scale 0.125
+}
+
+// [BB] Some native base classes for the invasion spawners.
+ACTOR BaseMonsterInvasionSpot native
+{
+	+NOBLOCKMAP
+	+NOSECTOR
+	+NOGRAVITY
+	RenderStyle None
+}
+
+ACTOR CustomMonsterInvasionSpot : BaseMonsterInvasionSpot native
+{
+}
+
+ACTOR BasePickupInvasionSpot native
+{
+	+NOBLOCKMAP
+	+NOSECTOR
+	+NOGRAVITY
+	RenderStyle None
+}
+
+
+ACTOR CustomPickupInvasionSpot: BasePickupInvasionSpot native
+{
+}
+
+
+ACTOR BaseWeaponInvasionSpot native
+{
+	+NOBLOCKMAP
+	+NOSECTOR
+	+NOGRAVITY
+	RenderStyle None
+}
+
+ACTOR CustomWeaponInvasionSpot : BaseWeaponInvasionSpot native
+{
+}

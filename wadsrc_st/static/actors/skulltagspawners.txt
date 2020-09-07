@@ -1,0 +1,253 @@
+//=================================================================================================
+//
+// Items
+//
+//=================================================================================================
+
+//=================================================================================================
+//
+// Red armor spawner
+//
+//=================================================================================================
+
+ACTOR RedArmorSpot : CustomPickupInvasionSpot 5237
+{
+	Game Doom
+	DropItem "RedArmor"
+}
+
+
+//=================================================================================================
+//
+// Monsters
+//
+//=================================================================================================
+
+//=================================================================================================
+//
+// Weak monster spawner
+//
+//=================================================================================================
+
+ACTOR WeakMonsterSpot : CustomMonsterInvasionSpot replaces WeakDoomMonsterSpot
+{
+	Game Doom
+	DropItem "ZombieMan"
+	DropItem "ShotgunGuy"
+	DropItem "DoomImp"
+	DropItem "DarkImp"
+	DropItem "Demon"
+	DropItem "BloodDemon"
+	DropItem "LostSoul"
+}
+
+//=================================================================================================
+//
+// Powerful monster spawner
+//
+//=================================================================================================
+
+ACTOR PowerfulMonsterSpot : CustomMonsterInvasionSpot replaces PowerfulDoomMonsterSpot
+{
+	Game Doom
+	DropItem "ChaingunGuy"
+	DropItem "SuperShotgunGuy"
+	DropItem "Cacodemon"
+	DropItem "Cacolantern"
+	DropItem "Revenant"
+	DropItem "HellKnight"
+	DropItem "BaronOfHell"
+	DropItem "Arachnotron"
+	DropItem "Fatso"
+	DropItem "PainElemental"
+}
+
+//=================================================================================================
+//
+// Very powerful monster spawner
+//
+//=================================================================================================
+
+ACTOR VeryPowerfulMonsterSpot : CustomMonsterInvasionSpot replaces VeryPowerfulDoomMonsterSpot
+{
+	Game Doom
+	DropItem "Abaddon"
+	DropItem "Hectebus"
+	DropItem "Belphegor"
+	DropItem "Archvile"
+}
+
+//=================================================================================================
+//
+// Any monster spawner
+//
+//=================================================================================================
+
+ACTOR AnyMonsterSpot : CustomMonsterInvasionSpot replaces AnyDoomMonsterSpot
+{
+	Game Doom
+	DropItem "DoomImp"
+	DropItem "DarkImp"
+	DropItem "Demon"
+	DropItem "Spectre"
+	DropItem "BloodDemon"
+	DropItem "ZombieMan"
+	DropItem "ShotgunGuy"
+	DropItem "ChaingunGuy"
+	DropItem "SuperShotgunGuy"
+	DropItem "Cacodemon"
+	DropItem "Cacolantern"
+	DropItem "Abaddon"
+	DropItem "Revenant"
+	DropItem "Fatso"
+	DropItem "Hectebus"
+	DropItem "Arachnotron"
+	DropItem "HellKnight"
+	DropItem "BaronOfHell"
+	DropItem "Belphegor"
+	DropItem "LostSoul"
+	DropItem "PainElemental"
+	DropItem "Cyberdemon"
+	DropItem "SpiderMastermind"
+	DropItem "Archvile"
+}
+
+//=================================================================================================
+//
+// Dark imp spawner
+//
+//=================================================================================================
+
+ACTOR DarkImpSpot : CustomMonsterInvasionSpot 5206
+{
+	Game Doom
+	DropItem "DarkImp"
+}
+
+//=================================================================================================
+//
+// Blood demon spawner
+//
+//=================================================================================================
+
+ACTOR BloodDemonSpot : CustomMonsterInvasionSpot 5209
+{
+	Game Doom
+	DropItem "BloodDemon"
+}
+
+//=================================================================================================
+//
+// Super shotgun guy spawner
+//
+//=================================================================================================
+
+ACTOR SuperShotgunGuySpot : CustomMonsterInvasionSpot 5213
+{
+	Game Doom
+	DropItem "SuperShotgunGuy"
+}
+
+//=================================================================================================
+//
+// Cacolantern spawner
+//
+//=================================================================================================
+
+ACTOR CacolanternSpot : CustomMonsterInvasionSpot 5215
+{
+	Game Doom
+	DropItem "Cacolantern"
+}
+
+//=================================================================================================
+//
+// Abaddon spawner
+//
+//=================================================================================================
+
+ACTOR AbaddonSpot : CustomMonsterInvasionSpot 5216
+{
+	Game Doom
+	DropItem "Abaddon"
+}
+
+//=================================================================================================
+//
+// Hectebus spawner
+//
+//=================================================================================================
+
+ACTOR HectebusSpot : CustomMonsterInvasionSpot 5219
+{
+	Game Doom
+	DropItem "Hectebus"
+}
+
+//=================================================================================================
+//
+// Belphegor spawner
+//
+//=================================================================================================
+
+ACTOR BelphegorSpot : CustomMonsterInvasionSpot 5223
+{
+	Game Doom
+	DropItem "Belphegor"
+}
+
+
+//=================================================================================================
+//
+// Weapons
+//
+//=================================================================================================
+
+//=================================================================================================
+//
+// Minigun spawner
+//
+//=================================================================================================
+
+ACTOR MinigunSpot : CustomWeaponInvasionSpot 5271
+{
+	Game Doom
+	DropItem "Minigun"
+}
+
+//=================================================================================================
+//
+// Grenade launcher spawner
+//
+//=================================================================================================
+
+ACTOR GrenadeLauncherSpot : CustomWeaponInvasionSpot 5273
+{
+	Game Doom
+	DropItem "GrenadeLauncher"
+}
+
+//=================================================================================================
+//
+// Railgun spawner
+//
+//=================================================================================================
+
+ACTOR RailgunSpot : CustomWeaponInvasionSpot 5275
+{
+	Game Doom
+	DropItem "Railgun"
+}
+
+//=================================================================================================
+//
+// BFG10K spawner
+//
+//=================================================================================================
+
+ACTOR BFG10KSpot : CustomWeaponInvasionSpot 5277
+{
+	Game Doom
+	DropItem "BFG10K"
+}
+

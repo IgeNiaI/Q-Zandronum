@@ -1,0 +1,5 @@
+- Either adapt P_UseItems to the latest ZDoom changes or remove it. Currently it's just disabled.
+- Make the botpath code use the new ZDoom iterators instead of the old copies of P_BoxOnLineSide, P_BlockLinesIterator and P_BlockThingsIterator
+
+Code refactoring:
+- Globally replace GAMEMODE_GetFlags( GAMEMODE_GetCurrentMode( )) with GAMEMODE_GetCurrentFlags( ).

@@ -1,0 +1,935 @@
+//=================================================================================================
+//
+// Dark Servant / Friendly Minotaur spawner. Can be used in both Heretic and Hexen. Why not?
+// Shouldn't count as a monster for invasion's purpose, so it can be used to have allies more
+// efficient than those dumb bots that don't attack the monsters.
+//
+//=================================================================================================
+
+ACTOR MinotaurFriendSpot : CustomMonsterInvasionSpot 5500
+{
+	Game Heretic
+	Game Hexen
+	DropItem "MinotaurFriend"
+}
+
+//=================================================================================================
+//
+// Ettin spawner
+//
+//=================================================================================================
+
+ACTOR EttinSpot : CustomMonsterInvasionSpot 5501
+{
+	Game Hexen
+	DropItem "Ettin"
+}
+
+//=================================================================================================
+//
+// Translucent Ettin spawner
+//
+//=================================================================================================
+
+ACTOR EttinGhostSpot : CustomMonsterInvasionSpot 5502
+{
+	Game Hexen
+	DropItem "EttinMash"
+}
+
+//=================================================================================================
+//
+// Centaur spawner
+//
+//=================================================================================================
+
+ACTOR CentaurSpot : CustomMonsterInvasionSpot 5503
+{
+	Game Hexen
+	DropItem "Centaur"
+}
+
+//=================================================================================================
+//
+// Centaur ghost spawner
+//
+//=================================================================================================
+
+ACTOR CentaurGhostSpot : CustomMonsterInvasionSpot 5504
+{
+	Game Hexen
+	DropItem "CentaurMash"
+}
+
+//=================================================================================================
+//
+// Slaughtaur spawner
+//
+//=================================================================================================
+
+ACTOR CentaurSlaughtaurSpot : CustomMonsterInvasionSpot 5505
+{
+	Game Hexen
+	DropItem "CentaurLeader"
+}
+
+//=================================================================================================
+//
+// Fire Demon/Afrit spawner
+//
+//=================================================================================================
+
+ACTOR AfritSpot : CustomMonsterInvasionSpot 5506
+{
+	Game Hexen
+	DropItem "FireDemon"
+}
+
+//=================================================================================================
+//
+// Bishop spawner
+//
+//=================================================================================================
+
+ACTOR BishopSpot : CustomMonsterInvasionSpot 5507
+{
+	Game Hexen
+	DropItem "Bishop"
+}
+
+//=================================================================================================
+//
+// Green Demon / Chaos Serpent spawner
+//
+//=================================================================================================
+
+ACTOR ChaosSerpentGreenSpot : CustomMonsterInvasionSpot 5508
+{
+	Game Hexen
+	DropItem "Demon1"
+}
+
+//=================================================================================================
+//
+// Green Demon / Chaos Serpent Ghost spawner
+//
+//=================================================================================================
+
+ACTOR ChaosSerpentGreenGhostSpot : CustomMonsterInvasionSpot 5509
+{
+	Game Hexen
+	DropItem "Demon1Mash"
+}
+
+//=================================================================================================
+//
+// Brown Demon / Chaos Serpent spawner
+//
+//=================================================================================================
+
+ACTOR ChaosSerpentBrownSpot : CustomMonsterInvasionSpot 5510
+{
+	Game Hexen
+	DropItem "Demon2"
+}
+
+//=================================================================================================
+//
+// Brown Demon / Chaos Serpent Ghost spawner
+//
+//=================================================================================================
+
+ACTOR ChaosSerpentBrownGhostSpot : CustomMonsterInvasionSpot 5511
+{
+	Game Hexen
+	DropItem "Demon2Mash"
+}
+
+//=================================================================================================
+//
+// Wendigo / Ice Guy spawner
+//
+//=================================================================================================
+
+ACTOR WendigoSpot : CustomMonsterInvasionSpot 5512
+{
+	Game Hexen
+	DropItem "IceGuy"
+}
+
+//=================================================================================================
+//
+// Stalker / Swamp Serpent / Waterlurker spawner (careful where you place those!)
+//
+//=================================================================================================
+
+ACTOR SwampStalkerSpot : CustomMonsterInvasionSpot 5513
+{
+	Game Hexen
+	DropItem "Serpent"
+}
+
+//=================================================================================================
+//
+// Stalker Boss / Swamp Serpent Leader spawner (careful where you place those!)
+//
+//=================================================================================================
+
+ACTOR SwampStalkerLeaderSpot : CustomMonsterInvasionSpot 5514
+{
+	Game Hexen
+	DropItem "SerpentLeader"
+}
+
+//=================================================================================================
+//
+// Reiver / Reaver / Wraith spawner
+//
+//=================================================================================================
+
+ACTOR ReiverWraithSpot : CustomMonsterInvasionSpot 5515
+{
+	Game Hexen
+	DropItem "Wraith"
+}
+
+//=================================================================================================
+//
+// Traductus / Cleric Boss spawner
+//
+//=================================================================================================
+
+ACTOR BossClericTraductusSpot : CustomMonsterInvasionSpot 5516
+{
+	Game Hexen
+	DropItem "ClericBoss"
+}
+
+//=================================================================================================
+//
+// Zedek / Fighter Boss spawner
+//
+//=================================================================================================
+
+ACTOR BossFighterZedekSpot : CustomMonsterInvasionSpot 5517
+{
+	Game Hexen
+	DropItem "FighterBoss"
+}
+
+//=================================================================================================
+//
+// Menelkir / Mage Boss spawner
+//
+//=================================================================================================
+
+ACTOR BossMageMenelkirSpot : CustomMonsterInvasionSpot 5518
+{
+	Game Hexen
+	DropItem "MageBoss"
+}
+
+//=================================================================================================
+//
+// Random Boss NPC spawner
+//
+//=================================================================================================
+
+ACTOR HexenBossSpot : CustomMonsterInvasionSpot 5519
+{
+	Game Hexen
+	DropItem "ClericBoss"
+	DropItem "FighterBoss"
+	DropItem "MageBoss"
+}
+
+//=================================================================================================
+//
+// Heresiarch spawner
+//
+//=================================================================================================
+
+ACTOR HeresiarchSpot : CustomMonsterInvasionSpot 5520
+{
+	Game Hexen
+	DropItem "Heresiarch"
+}
+
+//=================================================================================================
+//
+// Korax spawner
+//
+//=================================================================================================
+
+ACTOR KoraxSpot : CustomMonsterInvasionSpot 5521
+{
+	Game Hexen
+	DropItem "Korax"
+}
+
+
+//=================================================================================================
+//
+// Pig spawner
+//
+//=================================================================================================
+
+ACTOR PigSpot : CustomMonsterInvasionSpot 5522
+{
+	Game Hexen
+	DropItem "Pig"
+}
+
+//=================================================================================================
+//
+// Blue Mana spawner
+//
+//=================================================================================================
+
+ACTOR BlueManaSpot : CustomPickupInvasionSpot 5523
+{
+	Game Hexen
+	DropItem "Mana1"
+}
+
+//=================================================================================================
+//
+// Green Mana spawner
+//
+//=================================================================================================
+
+ACTOR GreenManaSpot : CustomPickupInvasionSpot 5524
+{
+	Game Hexen
+	DropItem "Mana2"
+}
+
+//=================================================================================================
+//
+// Combined Mana spawner
+//
+//=================================================================================================
+
+ACTOR CombinedManaSpot : CustomPickupInvasionSpot 5525
+{
+	Game Hexen
+	DropItem "Mana3"
+}
+
+//=================================================================================================
+//
+// Weapon piece spawner (The big weapons can't be spawned directly)
+//
+//=================================================================================================
+
+ACTOR WeaponPieceRandomSpot : CustomWeaponInvasionSpot 5526
+{
+	Game Hexen
+	DropItem "CWeaponPiece1"
+	DropItem "CWeaponPiece2"
+	DropItem "CWeaponPiece3"
+	DropItem "FWeaponPiece1"
+	DropItem "FWeaponPiece2"
+	DropItem "FWeaponPiece3"
+	DropItem "MWeaponPiece1"
+	DropItem "MWeaponPiece2"
+	DropItem "MWeaponPiece3"
+}
+
+//=================================================================================================
+//
+// Cleric weapon piece spawner
+//
+//=================================================================================================
+
+ACTOR WeaponPieceClericSpot : CustomWeaponInvasionSpot 5527
+{
+	Game Hexen
+	DropItem "CWeaponPiece1"
+	DropItem "CWeaponPiece2"
+	DropItem "CWeaponPiece3"
+}
+
+//=================================================================================================
+//
+// Fighter weapon piece spawner
+//
+//=================================================================================================
+
+ACTOR WeaponPieceFighterSpot : CustomWeaponInvasionSpot 5528
+{
+	Game Hexen
+	DropItem "FWeaponPiece1"
+	DropItem "FWeaponPiece2"
+	DropItem "FWeaponPiece3"
+}
+
+//=================================================================================================
+//
+// Mage weapon piece spawner
+//
+//=================================================================================================
+
+ACTOR WeaponPieceMageSpot : CustomWeaponInvasionSpot 5529
+{
+	Game Hexen
+	DropItem "MWeaponPiece1"
+	DropItem "MWeaponPiece2"
+	DropItem "MWeaponPiece3"
+}
+
+//=================================================================================================
+//
+// Firestorm / Cleric slot 3 weapon spawner
+//
+//=================================================================================================
+
+ACTOR FirestormSpot : CustomWeaponInvasionSpot 5530
+{
+	Game Hexen
+	DropItem "CWeapFlame"
+}
+
+//=================================================================================================
+//
+// Serpent Staff / Cleric slot 2 weapon spawner
+//
+//=================================================================================================
+
+ACTOR SerpentStaffSpot : CustomWeaponInvasionSpot 5531
+{
+	Game Hexen
+	DropItem "CWeapStaff"
+}
+
+//=================================================================================================
+//
+// Timon's Axe / Fighter slot 2 weapon spawner
+//
+//=================================================================================================
+
+ACTOR TimonsAxeSpot : CustomWeaponInvasionSpot 5532
+{
+	Game Hexen
+	DropItem "FWeapAxe"
+}
+
+//=================================================================================================
+//
+// Hammer of Retribution / Fighter slot 3 weapon spawner
+//
+//=================================================================================================
+
+ACTOR HammerSpot : CustomWeaponInvasionSpot 5533
+{
+	Game Hexen
+	DropItem "FWeapHammer"
+}
+
+//=================================================================================================
+//
+// Frost Shards / Mage slot 2 weapon spawner
+//
+//=================================================================================================
+
+ACTOR FrostShardsSpot : CustomWeaponInvasionSpot 5534
+{
+	Game Hexen
+	DropItem "MWeapFrost"
+}
+
+//=================================================================================================
+//
+// Arc of Death / Mage slot 3 weapon spawner
+//
+//=================================================================================================
+
+ACTOR ArcOfDeathSpot : CustomWeaponInvasionSpot 5535
+{
+	Game Hexen
+	DropItem "MWeapLightning"
+}
+
+//=================================================================================================
+//
+// Disc of Repulsion / Blast Radius spawner
+//
+//=================================================================================================
+
+ACTOR ArtiDiscOfRepulsionSpot : CustomPickupInvasionSpot 5536
+{
+	Game Hexen
+	DropItem "ArtiBlastRadius"
+}
+
+//=================================================================================================
+//
+// Dragonskin Bracers / Armor booster spawner
+//
+//=================================================================================================
+
+ACTOR ArtiDragonSkinBracersSpot : CustomPickupInvasionSpot 5537
+{
+	Game Hexen
+	DropItem "ArtiBoostArmor"
+}
+
+//=================================================================================================
+//
+// Krater of Might / Mana refill spawner
+//
+//=================================================================================================
+
+ACTOR ArtiKraterOfMightSpot : CustomPickupInvasionSpot 5538
+{
+	Game Hexen
+	DropItem "ArtiBoostMana"
+}
+
+//=================================================================================================
+//
+// ArtiDarkServant / Minotaur summon spawner
+//
+//=================================================================================================
+
+ACTOR ArtiDarkServantSpot : CustomPickupInvasionSpot 5539
+{
+	Game Hexen
+	DropItem "ArtiDarkServant"
+}
+
+//=================================================================================================
+//
+// Mystic Ambit Incant / Healing Radius spawner
+//
+//=================================================================================================
+
+ACTOR ArtiMysticAmbitIncantSpot : CustomPickupInvasionSpot 5540
+{
+	Game Hexen
+	DropItem "ArtiHealingRadius"
+}
+
+//=================================================================================================
+//
+// Fléchette / Poison bag spawner
+//
+//=================================================================================================
+
+ACTOR ArtiFlechetteSpot : CustomPickupInvasionSpot 5541
+{
+	Game Hexen
+	DropItem "ArtiPoisonBag"
+}
+
+//=================================================================================================
+//
+// Poison Cloud Fléchette spawner (always give the cleric's fléchette, regardless of class)
+//
+//=================================================================================================
+
+ACTOR ArtiFlechettePoisonSpot : CustomPickupInvasionSpot 5542
+{
+	Game Hexen
+	DropItem "ArtiPoisonBag1"
+}
+
+//=================================================================================================
+//
+// Delayed Blast Fléchette spawner (always give the mage's fléchette, regardless of class)
+//
+//=================================================================================================
+
+ACTOR ArtiFlechetteBlastSpot : CustomPickupInvasionSpot 5543
+{
+	Game Hexen
+	DropItem "ArtiPoisonBag2"
+}
+
+//=================================================================================================
+//
+// Bouncing Grenade Fléchette spawner (always give the mage's fléchette, regardless of class)
+//
+//=================================================================================================
+
+ACTOR ArtiFlechetteGrenadeSpot : CustomPickupInvasionSpot 5544
+{
+	Game Hexen
+	DropItem "ArtiPoisonBag3"
+}
+
+
+//=================================================================================================
+//
+// Porkelator spawner
+//
+//=================================================================================================
+
+ACTOR ArtiPorkelatorSpot : CustomPickupInvasionSpot 5545
+{
+	Game Hexen
+	DropItem "ArtiPork"
+}
+
+//=================================================================================================
+//
+// Boots of Speed spawner
+//
+//=================================================================================================
+
+ACTOR ArtiBootOfSpeedSpot : CustomPickupInvasionSpot 5546
+{
+	Game Hexen
+	DropItem "ArtiSpeedBoots"
+}
+
+//=================================================================================================
+//
+// Banishment Device spawner
+//
+//=================================================================================================
+
+ACTOR ArtiBanishmentDeviceSpot : CustomPickupInvasionSpot 5547
+{
+	Game Hexen
+	DropItem "ArtiTeleportOther"
+}
+
+//=================================================================================================
+//
+// Icon of the defender spawner
+//
+//=================================================================================================
+
+ACTOR ArtiInvulnerability2Spot : CustomPickupInvasionSpot 5444
+{
+   Game Hexen
+   DropItem "ArtiInvulnerability2"
+}
+
+//=================================================================================================
+//
+// Random Hexen artifact spawner
+//
+//=================================================================================================
+
+ACTOR RandomHexenArtifactSpot : CustomPickupInvasionSpot 5548
+{
+	Game Hexen
+	DropItem "ArtiBlastRadius"
+	DropItem "ArtiBoostArmor"
+	DropItem "ArtiBoostMana"
+	DropItem "ArtiDarkServant"
+	DropItem "ArtiFly"
+	DropItem "ArtiHealingRadius"
+	DropItem "ArtiHealth"
+	DropItem "ArtiInvulnerability2"
+	DropItem "ArtiPoisonBag"
+	DropItem "ArtiPork"
+	DropItem "ArtiSuperHealth"
+	DropItem "ArtiSpeedBoots"
+	DropItem "ArtiTeleport"
+	DropItem "ArtiTeleportOther"
+	DropItem "ArtiTorch"
+	DropItem "CrystalVial"
+}
+
+//=================================================================================================
+//
+// Hexen armor : Amulet of Warding spawner
+//
+//=================================================================================================
+
+ACTOR ArmorAmuletOfWardingSpot : CustomPickupInvasionSpot 5549
+{
+	Game Hexen
+	DropItem "AmuletOfWarding"
+}
+
+//=================================================================================================
+//
+// Hexen armor : Falcon Shield spawner
+//
+//=================================================================================================
+
+ACTOR ArmorFalconShieldSpot : CustomPickupInvasionSpot 5550
+{
+	Game Hexen
+	DropItem "FalconShield"
+}
+
+//=================================================================================================
+//
+// Hexen armor : Mesh Armor spawner
+//
+//=================================================================================================
+
+ACTOR ArmorMeshArmorSpot : CustomPickupInvasionSpot 5551
+{
+	Game Hexen
+	DropItem "MeshArmor"
+}
+
+//=================================================================================================
+//
+// Hexen armor : Platinum Helm spawner
+//
+//=================================================================================================
+
+ACTOR ArmorPlatinumHelmSpot : CustomPickupInvasionSpot 5552
+{
+	Game Hexen
+	DropItem "PlatinumHelm"
+}
+
+//=================================================================================================
+//
+// Random Fléchette / Poison bag spawner
+//
+//=================================================================================================
+
+ACTOR ArtiFlechetteRandomSpot : CustomPickupInvasionSpot 5553
+{
+	Game Hexen
+	DropItem "ArtiPoisonBag"
+	DropItem "ArtiPoisonBag1"
+	DropItem "ArtiPoisonBag2"
+	DropItem "ArtiPoisonBag3"
+}
+
+//=================================================================================================
+//
+// First part of Wraithverge
+//
+//=================================================================================================
+
+ACTOR WeaponPieceCleric1Spot : CustomWeaponInvasionSpot 5554
+{
+	Game Hexen
+	DropItem "CWeaponPiece1"
+}
+
+//=================================================================================================
+//
+// Second part of Wraithverge
+//
+//=================================================================================================
+
+ACTOR WeaponPieceCleric2Spot : CustomWeaponInvasionSpot 5555
+{
+	Game Hexen
+	DropItem "CWeaponPiece2"
+}
+
+//=================================================================================================
+//
+// Third part of Wraithverge
+//
+//=================================================================================================
+
+ACTOR WeaponPieceCleric3Spot : CustomWeaponInvasionSpot 5556
+{
+	Game Hexen
+	DropItem "CWeaponPiece3"
+}
+
+//=================================================================================================
+//
+// First part of Quietus
+//
+//=================================================================================================
+
+ACTOR WeaponPieceFighter1Spot : CustomWeaponInvasionSpot 5557
+{
+	Game Hexen
+	DropItem "FWeaponPiece1"
+}
+
+//=================================================================================================
+//
+// Second part of Quietus
+//
+//=================================================================================================
+
+ACTOR WeaponPieceFighter2Spot : CustomWeaponInvasionSpot 5558
+{
+	Game Hexen
+	DropItem "FWeaponPiece2"
+}
+
+//=================================================================================================
+//
+// Third part of Quietus
+//
+//=================================================================================================
+
+ACTOR WeaponPieceFighter3Spot : CustomWeaponInvasionSpot 5559
+{
+	Game Hexen
+	DropItem "FWeaponPiece3"
+}
+
+//=================================================================================================
+//
+// First part of Bloodscourge
+//
+//=================================================================================================
+
+ACTOR WeaponPieceMage1Spot : CustomWeaponInvasionSpot 5560
+{
+	Game Hexen
+	DropItem "MWeaponPiece1"
+}
+
+//=================================================================================================
+//
+// Second part of Bloodscourge
+//
+//=================================================================================================
+
+ACTOR WeaponPieceMage2Spot : CustomWeaponInvasionSpot 5561
+{
+	Game Hexen
+	DropItem "MWeaponPiece2"
+}
+
+//=================================================================================================
+//
+// Third part of Bloodscourge
+//
+//=================================================================================================
+
+ACTOR WeaponPieceMage3Spot : CustomWeaponInvasionSpot 5562
+{
+	Game Hexen
+	DropItem "MWeaponPiece3"
+}
+
+//=================================================================================================
+//
+// Cleric weapon spawner
+//
+//=================================================================================================
+
+ACTOR ClericWeaponSpot : CustomWeaponInvasionSpot 5563
+{
+	Game Hexen
+	DropItem "CWeapStaff"
+	DropItem "CWeapFlame"
+}
+
+//=================================================================================================
+//
+// Fighter weapon spawner
+//
+//=================================================================================================
+
+ACTOR FighterWeaponSpot : CustomWeaponInvasionSpot 5564
+{
+	Game Hexen
+	DropItem "FWeapAxe"
+	DropItem "FWeapHammer"
+}
+
+//=================================================================================================
+//
+// Mage weapon spawner
+//
+//=================================================================================================
+
+ACTOR MageWeaponSpot : CustomWeaponInvasionSpot 5565
+{
+	Game Hexen
+	DropItem "MWeapFrost"
+	DropItem "MWeapLightning"
+}
+
+//=================================================================================================
+//
+// Slot 2 weapon spawner
+//
+//=================================================================================================
+
+ACTOR BlueManaWeaponSpot : CustomWeaponInvasionSpot 5566
+{
+	Game Hexen
+	DropItem "CWeapStaff"
+	DropItem "FWeapAxe"
+	DropItem "MWeapFrost"
+}
+
+//=================================================================================================
+//
+// Slot 3 weapon spawner
+//
+//=================================================================================================
+
+ACTOR GreenManaWeaponSpot : CustomWeaponInvasionSpot 5567
+{
+	Game Hexen
+	DropItem "CWeapFlame"
+	DropItem "FWeapHammer"
+	DropItem "MWeapLightning"
+}
+
+
+//=================================================================================================
+//
+// Mook / Weak Monster spawner
+//
+//=================================================================================================
+
+ACTOR HexenMookSpot : CustomMonsterInvasionSpot 5568
+{
+	Game Hexen
+	DropItem "Centaur"
+	DropItem "Ettin"
+	DropItem "FireDemon"
+	DropItem "IceGuy"
+}
+
+//=================================================================================================
+//
+// Tough / Powerful Monster spawner
+//
+//=================================================================================================
+
+ACTOR HexenToughSpot : CustomMonsterInvasionSpot 5569
+{
+	Game Hexen
+	DropItem "CentaurLeader"
+	DropItem "Bishop"
+	DropItem "Demon1"
+	DropItem "Demon2"
+	DropItem "Wraith"
+}
+
+//=================================================================================================
+//
+// Random Monster spawner (but no boss, no pig, and no swamp serpent)
+//
+//=================================================================================================
+
+ACTOR HexenMonsterSpot : CustomMonsterInvasionSpot 5570
+{
+	Game Hexen
+	DropItem "Centaur"
+	DropItem "Ettin"
+	DropItem "FireDemon"
+	DropItem "IceGuy"
+	DropItem "CentaurLeader"
+	DropItem "Bishop"
+	DropItem "Demon1"
+	DropItem "Demon2"
+	DropItem "Wraith"
+}
+
+ACTOR HexenMashSpot : CustomMonsterInvasionSpot 5571
+{
+	Game Hexen
+	DropItem "CentaurMash"
+	DropItem "EttinMash"
+	DropItem "Demon1Mash"
+	DropItem "Demon2Mash"
+}
+

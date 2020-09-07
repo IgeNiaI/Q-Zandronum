@@ -1,0 +1,41 @@
+[IntroStrings]
+"Look out for the Metallica of DooM!"
+"What?! Only 327,598,258 linedefs?! This level SUCKS!"
+
+[RareRoamingStrings]
+"You know Lord of the Cyberdemons? Well I'm about to be Lord of YOUR ASS!!!"
+"Those stick figures on my homepage are a reflection of my general crappiness."
+"I am dead sexy."
+"I usually have sex with my levels."
+
+[FragStrings]
+"That one was Tom Hanks approved!"
+"King REoL! #1 in timbuktu!"
+"I am REoL tough (tm)."
+"Fear my REoL toughness!"
+"I learned that one from John Romero himself. He taught me that cause I rule so much."
+"The Metallica of DooM reigns surpreme!"
+"Detail kill!"
+
+[KilledStrings]
+"I took down the Software Creations BBS, and I'll take you down, too!"
+"No fair! I was blinded by this levels proper detail levels!"
+"I bet that wouldn't have happened if there were 12 billion of me!"
+"I'm at such a disadvantage with there being only one of me."
+"Fear the Fiffy wrath!"
+"The Metallica of DooM will own your llama ass!"
+
+[RoamingStrings]
+"I am the greatest!"
+"Did you know that Lord of the Cyberdemons started off at 127,873 sectors, but ended up being 879,781,275 sectors?"
+"My first levels sucked, but everything after that, oh man, they own your llama ass!"
+"More is better!"
+"AOL is the damn greatest thing ever."
+"Gothic 99 sucks. IT DOESN'T EVEN HAVE ANY ARCHES!!!"
+"I am *King REoL!"
+"Kurt Cobain's uncle said that Kurt would be the perfect partner for me."
+"People love me. That's why I'm *King REoL! All my fans call me that. It has nothing to do with my ego."
+"King REoL! #1 on mars! I'm #1, baby!"
+
+[EnragedStrings]
+"Don't fuck with King REoL!!! I WILL SHUT YOU DOWN!!!"

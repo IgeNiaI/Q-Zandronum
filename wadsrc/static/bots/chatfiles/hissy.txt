@@ -1,0 +1,18 @@
+[IntroStrings]
+"Please free me, Linguica!"
+"I want to go home!"
+
+[KilledStrings]
+"Hissssssssss!"
+
+[RoamingStrings]
+"Please rescue me from the clutches of Linguica!"
+"Help me!"
+"Linguica keeps telling me I'm his bitch. What does he mean???"
+"Please save me!"
+"Linguica keeps fondling my horns. Please make him stop!"
+"Linguica keeps telling me I have a great rack. I feel awkward when he says that!"
+"Linguica keeps touching me in funny places. Why does he do that?"
+"Free me!"
+"Linguica keeps putting me in his pants. What should I do???"
+"Linguica keeps using me as his sex toy. I feel so scared!"

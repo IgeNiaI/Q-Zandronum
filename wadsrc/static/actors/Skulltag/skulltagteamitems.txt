@@ -1,0 +1,249 @@
+//=================================================================================================
+//
+// TeamItem, base class for Flag and Skull
+//
+//=================================================================================================
+
+ACTOR TeamItem : Inventory native
+{
+	+INTERHUBSTRIP
+	Inventory.PickupSound "misc/k_pkup"
+}
+
+//=================================================================================================
+//
+// Flag, base class for all flags
+//
+//=================================================================================================
+
+ACTOR Flag : TeamItem native
+{
+}
+
+//=================================================================================================
+//
+// Blue Flag
+//
+//=================================================================================================
+
+ACTOR BlueFlag : Flag 5130
+{
+	SpawnID 177
+	Radius 20
+	Height 48
+	+INTERHUBSTRIP
+	+NOTDMATCH
+	Inventory.PickupSound "misc/k_pkup"
+	Inventory.PickupMessage "$PICKUP_BLUEFLAG"
+	Inventory.Icon "BFLAB0"
+	States
+	{
+	Spawn:
+		BFLA ABC 3
+		BFLA DEF 3 BRIGHT
+		Loop
+	Carry:
+		BFLS ABCDEF 3
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Red Flag
+//
+//=================================================================================================
+
+ACTOR RedFlag : Flag 5131
+{
+	SpawnID 178
+	Radius 20
+	Height 48
+	+INTERHUBSTRIP
+	+NOTDMATCH
+	Inventory.PickupSound "misc/k_pkup"
+	Inventory.PickupMessage "$PICKUP_REDFLAG"
+	Inventory.Icon "RFLAB0"
+	States
+	{
+	Spawn:
+		RFLA ABC 3
+		RFLA DEF 3 BRIGHT
+		Loop
+	Carry:
+		RFLS ABCDEF 3
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// WhiteFlag for one flag CTF.
+//
+//=================================================================================================
+
+ACTOR WhiteFlag : Flag 5132 native
+{
+	SpawnID 179 
+	Radius 20
+	Height 48
+	+NOTDMATCH
+	Inventory.PickupMessage "$PICKUP_WHITEFLAG"
+	Inventory.Icon "WFLAB0"
+	States
+	{
+	Spawn:
+		WFLA ABC 3
+		WFLA DEF 3 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Green Flag
+//
+//=================================================================================================
+
+ACTOR GreenFlag : Flag 5133
+{
+	Radius 20
+	Height 48
+	+INTERHUBSTRIP
+	+NOTDMATCH
+	Inventory.PickupSound "misc/k_pkup"
+	Inventory.PickupMessage "$PICKUP_GREENFLAG"
+	Inventory.Icon "GFLAB0"
+	States
+	{
+	Spawn:
+		GFLA ABC 3
+		GFLA DEF 3 BRIGHT
+		Loop
+	Carry:
+		GFLS ABCDEF 3
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Gold Flag
+//
+//=================================================================================================
+
+ACTOR GoldFlag : Flag 5134
+{
+	Radius 20
+	Height 48
+	+INTERHUBSTRIP
+	+NOTDMATCH
+	Inventory.PickupSound "misc/k_pkup"
+	Inventory.PickupMessage "$PICKUP_GOLDFLAG"
+	Inventory.Icon "YFLAB0"
+	States
+	{
+	Spawn:
+		YFLA ABC 3
+		YFLA DEF 3 BRIGHT
+		Loop
+	Carry:
+		YFLS ABCDEF 3
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Skull, base class for all skulls
+//
+//=================================================================================================
+
+ACTOR Skull : TeamItem native
+{
+}
+
+//=================================================================================================
+//
+// Blue Skull ST
+//
+//=================================================================================================
+
+ACTOR BlueSkullST : Skull
+{
+	Radius 20
+	Height 16
+	+INTERHUBSTRIP
+	+NOTDMATCH
+	Inventory.PickupSound "misc/k_pkup"
+	Inventory.PickupMessage "$PICKUP_BLUESKULL_ST"
+	Inventory.Icon "BSKUB0"
+	States
+	{
+	Spawn:
+		BSKU A 10
+		BSKU B 10 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Red Skull ST
+//
+//=================================================================================================
+
+ACTOR RedSkullST : Skull
+{
+	Radius 20
+	Height 16
+	+INTERHUBSTRIP
+	+NOTDMATCH
+	Inventory.PickupSound "misc/k_pkup"
+	Inventory.PickupMessage "$PICKUP_REDSKULL_ST"
+	Inventory.Icon "RSKUB0"
+	States
+	{
+	Spawn:
+		RSKU A 10
+		RSKU B 10 BRIGHT
+		Loop
+	}
+}
+
+//=================================================================================================
+//
+// Green Skull ST
+//
+//=================================================================================================
+
+ACTOR GreenSkullST : BlueSkullST
+{
+	translation "192:207=112:123", "240:247=124:127"
+	Inventory.PickupMessage "$PICKUP_GREENSKULL_ST"
+	Inventory.Icon "GSKLBIG"
+}
+
+//=================================================================================================
+//
+// Gold (Yellow) Skull ST
+//
+//=================================================================================================
+
+ACTOR GoldSkullST : Skull
+{
+	Radius 20
+	Height 16
+	+INTERHUBSTRIP
+	+NOTDMATCH
+	Inventory.PickupSound "misc/k_pkup"
+	Inventory.PickupMessage "$PICKUP_GOLDSKULL_ST"
+	Inventory.Icon "YSKUB0"
+	States
+	{
+	Spawn:
+		YSKU A 10
+		YSKU B 10 BRIGHT
+		Loop
+	}
+}
