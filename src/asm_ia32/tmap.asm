@@ -1778,8 +1778,6 @@ _rtext_tmap_end:
 GLOBAL	R_SetupShadedCol
 GLOBAL	@R_SetupShadedCol@0
 
-# Patch the values of dc_colormap and dc_color into the shaded column drawer.
-
 R_SetupShadedCol:
 @R_SetupShadedCol@0:
 		mov		eax,[dc_colormap]
@@ -1802,9 +1800,6 @@ R_SetupShadedCol:
 
 GLOBAL	R_SetupAddCol
 GLOBAL	@R_SetupAddCol@0
-
-# Patch the values of dc_colormap, dc_srcblend, and dc_destblend into the
-# unclamped adding column drawer.
 
 R_SetupAddCol:
 @R_SetupAddCol@0:
@@ -1834,9 +1829,6 @@ R_SetupAddCol:
 
 GLOBAL	R_SetupAddClampCol
 GLOBAL	@R_SetupAddClampCol@0
-
-# Patch the values of dc_colormap, dc_srcblend, and dc_destblend into the
-# add with clamping column drawer.
 
 R_SetupAddClampCol:
 @R_SetupAddClampCol@0:
