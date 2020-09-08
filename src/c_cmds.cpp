@@ -1078,9 +1078,23 @@ CCMD (fov)
 	}
 	else
 	{
-		// Just do this here in client games.
-		if ( NETWORK_GetState( ) == NETSTATE_CLIENT )
-			player->DesiredFOV = static_cast<float> ( clamp (atoi (argv[1]), 5, 179) );
+		// Do it for everyone but server
+		if ( NETWORK_GetState() != NETSTATE_SERVER )
+		{
+			float newfov = static_cast<float> (clamp(atoi(argv[1]), 5, 179));
+
+			UCVarValue Value;
+			Value.Float = newfov;
+			cl_fov.ForceSet(Value, CVAR_Float);
+
+			for (int i = 0; i < MAXPLAYERS; ++i)
+			{
+				if (playeringame[i])
+				{
+					players[i].DesiredFOV = newfov;
+				}
+			}
+		}
 
 		Net_WriteByte (DEM_MYFOV);
 	}

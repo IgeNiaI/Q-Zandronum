@@ -208,6 +208,7 @@ EXTERN_CVAR( Flag, cl_dontrestorefrags )
 EXTERN_CVAR( String, cl_password )
 EXTERN_CVAR( String, cl_joinpassword )
 EXTERN_CVAR( Bool, cl_hitscandecalhack )
+EXTERN_CVAR( Float, cl_fov )
 
 // Not in cl_main.cpp, but this seems like a good enough place for it.
 EXTERN_CVAR( Int, cl_skins )

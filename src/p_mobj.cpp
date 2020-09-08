@@ -5551,7 +5551,7 @@ APlayerPawn *P_SpawnPlayer (FPlayerStart *mthing, int playernum, int flags)
 		mobj->sprite = skins[lSkin].sprite;
 	}
 
-	p->DesiredFOV = p->FOV = 90.f;
+	p->DesiredFOV = p->FOV = cl_fov;
 	p->camera = p->mo;
 	p->playerstate = PST_LIVE;
 	p->refire = 0;

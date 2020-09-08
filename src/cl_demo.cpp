@@ -1015,7 +1015,7 @@ CCMD( demo_spectatefreely )
 		p->mo->angle = pCamera->angle;
 		p->mo->flags |= (MF_NOGRAVITY);
 		p->mo->player = p;
-		p->DesiredFOV = p->FOV = 90.f;
+		p->DesiredFOV = p->FOV = cl_fov;
 		p->crouchfactor = FRACUNIT;
 		PLAYER_SetDefaultSpectatorValues ( p );
 		players[consoleplayer].camera = g_demoCameraPlayer.mo;
