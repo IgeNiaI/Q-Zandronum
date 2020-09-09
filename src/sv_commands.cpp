@@ -2144,6 +2144,20 @@ void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags f
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetMovementConfig( ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	NetCommand command( SVC_SETMOVEMENTCONFIG );
+	command.addShort( sv_quakemovement );
+	command.addFloat( q_acceleration );
+	command.addFloat( q_friction );
+	command.addFloat( q_airacceleration );
+	command.addFloat( q_cpmacceleration );
+	command.addFloat( q_stopspeed );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_SetGameEndLevelDelay( ULONG ulEndLevelDelay, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	NetCommand command( SVC_SETGAMEENDLEVELDELAY );

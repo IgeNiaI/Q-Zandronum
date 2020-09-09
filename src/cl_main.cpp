@@ -170,6 +170,7 @@ static	void	client_SetGameMode( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameSkill( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameDMFlags( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameModeLimits( BYTESTREAM_s *pByteStream );
+static	void	client_SetMovementConfig( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameEndLevelDelay( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameModeState( BYTESTREAM_s *pByteStream );
 static	void	client_SetDuelNumDuels( BYTESTREAM_s *pByteStream );
@@ -1483,6 +1484,10 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 	case SVC_SETGAMEMODELIMITS:
 
 		client_SetGameModeLimits( pByteStream );
+		break;
+	case SVC_SETMOVEMENTCONFIG:
+
+		client_SetMovementConfig(pByteStream);
 		break;
 	case SVC_SETGAMEENDLEVELDELAY:
 		
@@ -5681,6 +5686,37 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	// [TP] Yea.
 	Value.Bool = !!NETWORK_ReadByte( pByteStream );
 	sv_limitcommands.ForceSet( Value, CVAR_Bool );
+}
+
+//*****************************************************************************
+//
+static void client_SetMovementConfig(BYTESTREAM_s *pByteStream)
+{
+	UCVarValue	Value;
+
+	// Read in, and set the value for fraglimit.
+	Value.Int = NETWORK_ReadShort(pByteStream);
+	sv_quakemovement.ForceSet(Value, CVAR_Int);
+
+	// Read in, and set the value for timelimit.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	q_acceleration.ForceSet(Value, CVAR_Float);
+
+	// Read in, and set the value for timelimit.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	q_friction.ForceSet(Value, CVAR_Float);
+
+	// Read in, and set the value for timelimit.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	q_airacceleration.ForceSet(Value, CVAR_Float);
+
+	// Read in, and set the value for timelimit.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	q_cpmacceleration.ForceSet(Value, CVAR_Float);
+
+	// Read in, and set the value for timelimit.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	q_stopspeed.ForceSet(Value, CVAR_Float);
 }
 
 //*****************************************************************************

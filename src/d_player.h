@@ -120,6 +120,12 @@ public:
 	virtual void FilterCoopRespawnInventory (APlayerPawn *oldplayer);
 	// [BC]
 	virtual void Destroy( );
+	
+	// Quake movement
+	float QTweakSpeed();
+	float QMoveFactor();
+	void QFriction(TVector3<float> &vel, const float stopspeed, const float friction);
+	void QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel);
 
 	void SetupWeaponSlots ();
 	void GiveDefaultInventory ();
@@ -838,5 +844,13 @@ inline bool AActor::IsNoClip2() const
 #define CROUCHSPEED (FRACUNIT/12)
 
 bool P_IsPlayerTotallyFrozen(const player_t *player);
+
+// [Ivory] quake movement vars
+EXTERN_CVAR(Int, sv_quakemovement);
+EXTERN_CVAR(Float, q_acceleration);
+EXTERN_CVAR(Float, q_friction);
+EXTERN_CVAR(Float, q_airacceleration);
+EXTERN_CVAR(Float, q_cpmacceleration);
+EXTERN_CVAR(Float, q_stopspeed);
 
 #endif // __D_PLAYER_H__

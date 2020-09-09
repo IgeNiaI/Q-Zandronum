@@ -2047,6 +2047,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 {
 	static int pushtime = 0;
 	bool bForceSlide = scrollx || scrolly;
+	bool quakeMovement = sv_quakemovement;
 	angle_t angle;
 	fixed_t ptryx, ptryy;
 	player_t *player;
@@ -2085,7 +2086,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 	// that large thrusts can't propel an actor through a wall, because wall
 	// running depends on the player's original movement continuing even after
 	// it gets blocked.
-	if ((mo->player != NULL && (i_compatflags & COMPATF_WALLRUN)) || (mo->waterlevel >= 1) ||
+	if (!quakeMovement && (mo->player != NULL && (i_compatflags & COMPATF_WALLRUN)) || (mo->waterlevel >= 1) ||
 		(mo->player != NULL && mo->player->crouchfactor < FRACUNIT*3/4))
 	{
 		// preserve the direction instead of clamping x and y independently.
@@ -2552,6 +2553,11 @@ explode:
 			}
 		}
 	}
+	
+	// [Ivory] this thing below makes strafe jumping feel terrible.
+	// Avoid at all costs.
+	if (quakeMovement)
+		return oldfloorz;
 
 	// killough 11/98:
 	// Stop voodoo dolls that have come to rest, despite any

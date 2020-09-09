@@ -2793,11 +2793,187 @@ CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 	}
 }
 
+//*****************************************************************************
+// [Ivory] Quake movement stuff
+//
+CUSTOM_CVAR( Int, sv_quakemovement, 0, CVAR_SERVERINFO )
+{
+	if (self < 0)
+	{
+		self = 0;
+	}
+	else if (self > 2) {
+		self = 2;
+	}
+
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+CUSTOM_CVAR( Float, q_acceleration, 10.f, CVAR_SERVERINFO )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+CUSTOM_CVAR( Float, q_friction, 6.f, CVAR_SERVERINFO )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+CUSTOM_CVAR( Float, q_airacceleration, 1.5f, CVAR_SERVERINFO )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+CUSTOM_CVAR( Float, q_cpmacceleration, 100.f, CVAR_SERVERINFO )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+CUSTOM_CVAR( Float, q_stopspeed, 12.f, CVAR_SERVERINFO )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+//***************************************************
+// Vectors Math
+//***************************************************
+
+float VectorLength(const TVector3<float> &v)
+{
+	return sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
+}
+
+float VectorNormalize(TVector3<float> &v)
+{
+	float length = sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
+	
+	if (length)
+	{
+		v.X /= length;
+		v.Y /= length;
+		v.Z /= length;
+	}
+
+	return length;
+}
+
+void VectorScale(const TVector3<float> &in, const float &scale, TVector3<float> &out)
+{
+	out.X = in.X * scale;
+	out.Y = in.Y * scale;
+	out.Z = in.Z * scale;
+}
+
+void VectorRotate(float &x, float &y, const float &angle)
+{
+	float oX = x, oY = y, cosine = (float)cos(angle * PI / 180), sine = (float)sin(angle * PI / 180);
+	x = cosine * oX - sine * oY;
+	y = sine * oX + cosine * oY;
+}
+
+float DotProduct(const TVector3<float> &v, const TVector3<float> &t)
+{
+	return v.X * t.X + v.Y * t.Y + v.Z * t.Z;
+}
+
+//***************************************************
+// Quake movement specifics
+//***************************************************
+
+float APlayerPawn::QTweakSpeed()
+{
+	// Powerup speed multi
+	if (!player->morphTics && Inventory != NULL)
+		return FIXED2FLOAT(Inventory->GetSpeedFactor());
+
+	// [BC] Apply the 25% speed increase power.
+	if (player->cheats & CF_SPEED25)
+		return 1.25f;
+
+	return 1.f;
+}
+
+float APlayerPawn::QMoveFactor()
+{
+	if (player->onground && (player->cmd.ucmd.forwardmove | player->cmd.ucmd.sidemove))
+	{
+		if (player->crouchfactor == 32768) // player fully crouched
+			return 0.25f;
+		else if (player->cmd.ucmd.buttons & BT_SPEED)
+			return 0.5f;
+	}
+
+	return 1.f;
+}
+
+void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const float friction)
+{
+	float velocity = VectorLength(vel);
+	TVector3<float> vel2D = { vel.X, vel.Y, 0.f };
+	bool waterflying = player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY);
+
+	// water/flying going too slow
+	if (waterflying)
+	{
+		if (velocity < 0.5f)
+		{
+			vel.X = vel.Y = vel.Z = 0.f;
+			return;
+		}
+	}
+	else if (VectorLength(vel2D) < 1.f)
+	{
+		vel.X = vel.Y = 0.f;
+		return;
+	}
+	
+	float drop = 0.f, control = 0.f;
+	if (waterflying)
+	{
+		drop = velocity * friction / TICRATE;
+	}
+	else if (player->onground && !player->mo->InState( FindState( NAME_Pain ) ) )
+	{
+		control = velocity < stopspeed ? friction : velocity;
+		drop = control * friction / TICRATE;
+	}
+
+	float newvelocity = std::max(velocity - drop, 0.f) / velocity;
+
+	vel.X *= newvelocity;
+	vel.Y *= newvelocity;
+	if (waterflying) { vel.Z *= newvelocity; }
+}
+
+void APlayerPawn::QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel)
+{
+	float currentspeed = DotProduct(wishdir, vel);
+	float addspeed = wishspeed - currentspeed;
+	if (addspeed <= 0.f) { return; }
+
+	float accelerationspeed = std::min(accel * wishspeed / TICRATE, addspeed);
+	vel.X += wishdir.X * accelerationspeed;
+	vel.Y += wishdir.Y * accelerationspeed;
+	vel.Z += wishdir.Z * accelerationspeed;
+}
+
 void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 {
 	// [BB] A client doesn't know enough about the other players to make their movement.
-	if ( NETWORK_InClientMode() &&
-		(( player - players ) != consoleplayer ) && !CLIENTDEMO_IsFreeSpectatorPlayer ( player ))
+	if ( NETWORK_InClientMode() && (player - players) != consoleplayer &&
+		 !CLIENTDEMO_IsFreeSpectatorPlayer ( player ))
 	{
 		return;
 	}
@@ -2824,84 +3000,126 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 
 	player->onground = (mo->z <= mo->floorz) || (mo->flags2 & MF2_ONMOBJ) || (mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
-	// killough 10/98:
-	//
-	// We must apply thrust to the player and bobbing separately, to avoid
-	// anomalies. The thrust applied to bobbing is always the same strength on
-	// ice, because the player still "works just as hard" to move, while the
-	// thrust applied to the movement varies with 'movefactor'.
-
-	if (cmd->ucmd.forwardmove | cmd->ucmd.sidemove)
+	if (sv_quakemovement)
 	{
-		fixed_t forwardmove, sidemove;
-		int bobfactor;
-		int friction, movefactor;
-		int fm, sm;
+		//******************************************************************************//
+		// [Ivory Duke] Quake movement code. Convert fixed point math to floating point //
+		//              to apply the Quake engine friction and acceleration formulas.	//
+		//				I know this would be better broken up in a bunch of functions	//
+		//				but I'd rather not add possible troubles.						//
+		//******************************************************************************//
 
-		movefactor = P_GetMoveFactor (mo, &friction);
-		bobfactor = friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR;
-		if (!player->onground && !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel)
+		//*******************************************************
+		// Horizontal movement (+ vertical for flying and water)
+		//*******************************************************
+
+		// Setup
+		bool waterflying = false;
+		float flAngle = mo->angle * (360.f / ANGLE_MAX);
+		float movefactor = mo->QMoveFactor();
+		float maxgroundspeed = q_stopspeed * FIXED2FLOAT(player->mo->Speed) * movefactor * mo->QTweakSpeed();
+		TVector3<float> vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
+
+		if (player->mo->waterlevel >= 2)
 		{
-			// [RH] allow very limited movement if not on ground.
-			if ( zacompatflags & ZACOMPATF_LIMITED_AIRMOVEMENT )
+			// Input vector
+			TVector3<float> acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+									 cmd->ucmd.forwardmove ? - (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+									 0.f };
+			// Calculate the vertical push according to the view pitch
+			if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
 			{
-				movefactor = FixedMul (movefactor, level.aircontrol);
-				bobfactor = FixedMul (bobfactor, level.aircontrol);
+				acceleration.Z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
 			}
 			else
 			{
-				// Skulltag needs increased air movement for jump pads, etc.
-				movefactor /= 4;
-				bobfactor /= 4;
+				float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI / 180;
+				acceleration.Z = acceleration.X * sin(-pitch);
+				acceleration.X *= cos(pitch);
 			}
-		}
+			//Friction
+			mo->QFriction(vel, 0, 2.f);
+			//Acceleration
+			VectorNormalize(acceleration);
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
 
-		fm = cmd->ucmd.forwardmove;
-		sm = cmd->ucmd.sidemove;
-		mo->TweakSpeeds (fm, sm);
-		fm = FixedMul (fm, player->mo->Speed);
-		sm = FixedMul (sm, player->mo->Speed);
-
-		// When crouching, speed and bobbing have to be reduced
-		if (player->CanCrouch() && player->crouchfactor != FRACUNIT)
-		{
-			fm = FixedMul(fm, player->crouchfactor);
-			sm = FixedMul(sm, player->crouchfactor);
-			bobfactor = FixedMul(bobfactor, player->crouchfactor);
+			waterflying = true;
 		}
-
-		forwardmove = Scale (fm, movefactor * 35, TICRATE << 8);
-		sidemove = Scale (sm, movefactor * 35, TICRATE << 8);
-
-		if (forwardmove)
+		else if(mo->flags & MF_NOGRAVITY)
 		{
-			P_Bob (player, mo->angle, (cmd->ucmd.forwardmove * bobfactor) >> 8, true);
-			P_ForwardThrust (player, mo->angle, forwardmove);
-		}
-		if (sidemove)
-		{
-			P_Bob (player, mo->angle-ANG90, (cmd->ucmd.sidemove * bobfactor) >> 8, false);
-			P_SideThrust (player, mo->angle, sidemove);
-		}
-/*
-		if (debugfile)
-		{
-			fprintf (debugfile, "move player for pl %d%c: (%d,%d,%d) (%d,%d) %d %d w%d [", int(player-players),
-				player->cheats&CF_PREDICTING?'p':' ',
-				player->mo->x, player->mo->y, player->mo->z,forwardmove, sidemove, movefactor, friction, player->mo->waterlevel);
-			msecnode_t *n = player->mo->touching_sectorlist;
-			while (n != NULL)
+			// Input vector
+			TVector3<float> acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+									 cmd->ucmd.forwardmove ? - (float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+									 0.f };
+			// Calculate the vertical push according to the view pitch
+			if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
 			{
-				fprintf (debugfile, "%td ", n->m_sector-sectors);
-				n = n->m_tnext;
+				acceleration.Z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
 			}
-			fprintf (debugfile, "]\n");
+			else
+			{
+				float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI / 180;
+				acceleration.Z = acceleration.X * sin(-pitch);
+				acceleration.X *= cos(pitch);
+			}
+			//Friction
+			mo->QFriction(vel, 0.f, 3.f);
+			//Acceleration
+			VectorNormalize(acceleration);
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 2.f, 8.f);
+
+			waterflying = true;
 		}
-*/
-		// [BB] Spectators shall stay in their spawn state and don't execute any code pointers.
-		if ( (CLIENT_PREDICT_IsPredicting( ) == false) && (forwardmove|sidemove) && (player->bSpectating == false) )//(!(player->cheats & CF_PREDICTING))
+		else if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
 		{
-			player->mo->PlayRunning ();
+			// Input vector
+			TVector3<float> acceleration = { (float)cmd->ucmd.forwardmove, - (float)cmd->ucmd.sidemove, 0.f };
+			// Orient inputs to view angle
+			VectorNormalize(acceleration);
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			// Acceleration
+			if (sv_quakemovement == 1)
+			{
+				mo->QAcceleration(vel, acceleration, maxgroundspeed, q_airacceleration);
+			}
+			else
+			{
+				float velocity = VectorLength(vel);
+				if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
+					mo->QAcceleration(vel, acceleration, 1.5f, q_cpmacceleration);
+				else
+					mo->QAcceleration(vel, acceleration, maxgroundspeed, q_airacceleration);
+			}
+		}
+		else
+		{
+			// Input vector
+			TVector3<float> acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
+			// Orient inputs to view angle
+			VectorNormalize(acceleration);
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			// Friction
+			mo->QFriction(vel, maxgroundspeed, q_friction);
+			// Acceleration
+			mo->QAcceleration(vel, acceleration, maxgroundspeed, q_acceleration / movefactor);
+		}
+
+		// ...convert it back to fixed point, velz is untouched so no need for that
+		player->mo->velx = FLOAT2FIXED(vel.X);
+		player->mo->vely = FLOAT2FIXED(vel.Y);
+		player->mo->velz = FLOAT2FIXED(vel.Z);
+
+		// also take care of view/weapon bobbing
+		player->velx = player->mo->velx;
+		player->vely = player->mo->vely;
+
+		// Only play run animation when moving and not in the air
+		if (!CLIENT_PREDICT_IsPredicting() && !player->bSpectating &&
+			(player->mo->velx || player->mo->vely) && player->onground)
+		{
+			player->mo->PlayRunning();
 		}
 
 		if (player->cheats & CF_REVERTPLEASE)
@@ -2909,67 +3127,175 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 			player->cheats &= ~CF_REVERTPLEASE;
 			player->camera = player->mo;
 		}
-	}
+		
+		//*******************************************************
+		// Jumping
+		//*******************************************************
 
-	// [RH] check for jump
-	if ( cmd->ucmd.buttons & BT_JUMP )
+		// Water and flying have already executed jump press logic
+		if (waterflying) { return; }
+
+		// Always 0, only 0
+		player->jumpTics = 0;
+
+		// Stop here if not in good condition to jump
+		if (!(cmd->ucmd.buttons & BT_JUMP) ||
+			!player->onground ||
+			player->bSpectating ||
+			!level.IsJumpingAllowed())
+		{
+			return;
+		}
+
+		fixed_t	JumpVelz = player->mo->CalcJumpVelz();
+
+		// Removing the jump delay effectively makes jump up steps totally broken, therefore a demultiplier
+		// must be applied if player will end up having a vertical velocity higher than normal
+		if (player->mo->velz > 0)
+		{
+			JumpVelz = FixedMul(JumpVelz, 46334);
+		}
+
+		if (!CLIENT_PREDICT_IsPredicting())
+			S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+
+		if (NETWORK_GetState() == NETSTATE_SERVER)
+			SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+
+		player->mo->flags2 &= ~MF2_ONMOBJ;
+		player->mo->velz += JumpVelz;
+	}
+	else // default Doom movement
 	{
-		if (player->mo->waterlevel >= 2)
+		if (cmd->ucmd.forwardmove | cmd->ucmd.sidemove)
 		{
-			player->mo->velz = FixedMul(4*FRACUNIT, player->mo->Speed);
+			fixed_t forwardmove, sidemove;
+			int bobfactor;
+			int friction, movefactor;
+			int fm, sm;
 
-			// [Leo] Apply cl_spectatormove here.
-			if ( player->bSpectating )
-				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+			movefactor = P_GetMoveFactor(mo, &friction);
+			bobfactor = friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR;
+			if (!player->onground && !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel)
+			{
+				// [RH] allow very limited movement if not on ground.
+				if (zacompatflags & ZACOMPATF_LIMITED_AIRMOVEMENT)
+				{
+					movefactor = FixedMul(movefactor, level.aircontrol);
+					bobfactor = FixedMul(bobfactor, level.aircontrol);
+				}
+				else
+				{
+					// Skulltag needs increased air movement for jump pads, etc.
+					movefactor /= 4;
+					bobfactor /= 4;
+				}
+			}
+
+			fm = cmd->ucmd.forwardmove;
+			sm = cmd->ucmd.sidemove;
+			mo->TweakSpeeds(fm, sm);
+			fm = FixedMul(fm, player->mo->Speed);
+			sm = FixedMul(sm, player->mo->Speed);
+
+			// When crouching, speed and bobbing have to be reduced
+			if (player->CanCrouch() && player->crouchfactor != FRACUNIT)
+			{
+				fm = FixedMul(fm, player->crouchfactor);
+				sm = FixedMul(sm, player->crouchfactor);
+				bobfactor = FixedMul(bobfactor, player->crouchfactor);
+			}
+
+			forwardmove = Scale(fm, movefactor * 35, TICRATE << 8);
+			sidemove = Scale(sm, movefactor * 35, TICRATE << 8);
+
+			if (forwardmove)
+			{
+				P_Bob(player, mo->angle, (cmd->ucmd.forwardmove * bobfactor) >> 8, true);
+				P_ForwardThrust(player, mo->angle, forwardmove);
+			}
+			if (sidemove)
+			{
+				P_Bob(player, mo->angle - ANG90, (cmd->ucmd.sidemove * bobfactor) >> 8, false);
+				P_SideThrust(player, mo->angle, sidemove);
+			}
+
+			// [BB] Spectators shall stay in their spawn state and don't execute any code pointers.
+			if ((CLIENT_PREDICT_IsPredicting() == false) && (player->bSpectating == false))//(!(player->cheats & CF_PREDICTING))
+			{
+				player->mo->PlayRunning();
+			}
+
+			if (player->cheats & CF_REVERTPLEASE)
+			{
+				player->cheats &= ~CF_REVERTPLEASE;
+				player->camera = player->mo;
+			}
 		}
-		else if (player->mo->flags2 & MF2_FLY)
+
+		//**********************************
+		// Jumping
+
+		// [RH] check for jump
+		if (cmd->ucmd.buttons & BT_JUMP)
 		{
-			player->mo->velz = 3*FRACUNIT;
+			if (player->mo->waterlevel >= 2)
+			{
+				player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 
-			// [Leo] Apply cl_spectatormove here.
-			if ( player->bSpectating )
-				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
-		}
-		// [Leo] Spectators shouldn't be limited by the server settings.
-		else if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && player->jumpTics == 0)
-		{
-			fixed_t	JumpVelz;
-			ULONG	ulJumpTicks;
+				// [Leo] Apply cl_spectatormove here.
+				if (player->bSpectating)
+					player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+			}
+			else if (player->mo->flags2 & MF2_FLY)
+			{
+				player->mo->velz = 3 * FRACUNIT;
 
-			// Set base jump velocity.
-			// [Dusk] Exported this into a function as I need it elsewhere as well.
-			JumpVelz = player->mo->CalcJumpVelz();
+				// [Leo] Apply cl_spectatormove here.
+				if (player->bSpectating)
+					player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+			}
+			// [Leo] Spectators shouldn't be limited by the server settings.
+			else if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && !player->jumpTics)
+			{
+				fixed_t	JumpVelz;
+				ULONG	ulJumpTicks;
 
-			// Set base jump ticks.
-			// [BB] In ZDoom revision 2970 changed the jumping behavior.
-			if ( zacompatflags & ZACOMPATF_SKULLTAG_JUMPING )
-				ulJumpTicks = 18 * TICRATE / 35;
-			else
-				ulJumpTicks = -1;
+				// Set base jump velocity.
+				// [Dusk] Exported this into a function as I need it elsewhere as well.
+				JumpVelz = player->mo->CalcJumpVelz();
 
-			// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-			if ( CLIENT_PREDICT_IsPredicting( ) == false )
-				S_Sound (player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+				// Set base jump ticks.
+				// [BB] In ZDoom revision 2970 changed the jumping behavior.
+				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
+					ulJumpTicks = 18 * TICRATE / 35;
+				else
+					ulJumpTicks = -1;
 
-			// [EP] Inform the other clients to play the sound.
-			if ( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT );
+				// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+				if (CLIENT_PREDICT_IsPredicting() == false)
+					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
-			player->mo->flags2 &= ~MF2_ONMOBJ;
+				// [EP] Inform the other clients to play the sound.
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 
-			// [BC] Increase jump delay if the player has the high jump power.
-			if ( player->cheats & CF_HIGHJUMP )
-				ulJumpTicks *= 2;
+				player->mo->flags2 &= ~MF2_ONMOBJ;
 
-			// [BC] Remove jump delay if the player is on a spring pad.
-			if ( player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD )
-				ulJumpTicks = 0;
+				// [BC] Increase jump delay if the player has the high jump power.
+				if (player->cheats & CF_HIGHJUMP)
+					ulJumpTicks *= 2;
 
-			player->mo->velz += JumpVelz;
-			player->jumpTics = ulJumpTicks;
+				// [BC] Remove jump delay if the player is on a spring pad.
+				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+					ulJumpTicks = 0;
+
+				player->mo->velz += JumpVelz;
+				player->jumpTics = ulJumpTicks;
+			}
 		}
 	}
-}		
+}
 
 //==========================================================================
 //
