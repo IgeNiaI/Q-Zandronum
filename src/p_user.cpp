@@ -78,6 +78,7 @@
 #include "invasion.h"
 #include "d_netinf.h"
 #include "g_shared/pwo.h"
+#include "p_trace.h"
 
 static FRandom pr_skullpop ("SkullPop");
 
@@ -298,6 +299,15 @@ player_t::player_t()
   chickenPeck(0),
   jumpTics(0),
   onground(0),
+  doubleJumpState(0),
+  crouchSlideTics(0),
+  isCrouchSliding(0),
+  wallClimbTics(0),
+  isWallClimbing(0),
+  dashTics(0),
+  prepareTapValue(0),
+  lastTapValue(0),
+  stepInterval(0),
   respawn_time(0),
   camera(0),
   air_finished(0),
@@ -432,6 +442,15 @@ player_t &player_t::operator=(const player_t &p)
 	chickenPeck = p.chickenPeck;
 	jumpTics = p.jumpTics;
 	onground = p.onground;
+	doubleJumpState = p.doubleJumpState;
+	crouchSlideTics = p.crouchSlideTics;
+	isCrouchSliding = p.isCrouchSliding;
+	wallClimbTics = p.wallClimbTics;
+	isWallClimbing = p.isWallClimbing;
+	dashTics = p.dashTics;
+	prepareTapValue = p.prepareTapValue;
+	lastTapValue = p.lastTapValue;
+	stepInterval = p.stepInterval;
 	respawn_time = p.respawn_time;
 	camera = p.camera;
 	air_finished = p.air_finished;
@@ -720,7 +739,27 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< MorphWeapon
 		<< DamageFade
 		<< PlayerFlags
-		<< FlechetteType;
+		<< FlechetteType
+		<< CrouchScale
+		<< CrouchChangeSpeed
+		<< MvType
+		<< JumpDelay
+		<< SecondJumpZ
+		<< MaxWallClimbTics
+		<< WallFrictionEnabled
+		<< CrouchSpeedFactor
+		<< WalkSpeedFactor
+		<< AirAcceleration
+		<< DashForce
+		<< DashDelay
+		<< GroundAcceleration
+		<< GroundFriction
+		<< SlideAcceleration
+		<< SlideFriction
+		<< SlideMaxTics
+		<< CpmAirAcceleration
+		<< CpmMaxForwardAngleRad;
+
 	if (SaveVersion < 3829)
 	{
 		GruntSpeed = 12*FRACUNIT;
@@ -841,6 +880,17 @@ void APlayerPawn::PostBeginPlay()
 	else
 	{
 		player->SendPitchLimits();
+	}
+
+	// [Ivory] no you can't haz both
+	if (player->mo->mvFlags & MV_DOUBLEJUMP)
+	{
+		player->mo->mvFlags &= ~MV_WALLJUMP;
+		player->mo->mvFlags &= ~MV_WALLCLIMB;
+	}
+	else if (player->mo->mvFlags & MV_WALLCLIMB)
+	{
+		player->mo->mvFlags &= ~MV_WALLJUMP;
 	}
 }
 
@@ -1400,11 +1450,12 @@ bool APlayerPawn::UpdateWaterLevel (fixed_t oldz, bool splash)
 	{
 		if (oldlevel < 3 && waterlevel == 3)
 		{ // Our head just went under.
-			S_Sound (this, CHAN_VOICE, "*dive", 1, ATTN_NORM);
+			if (!(player->mo->mvFlags & MV_SILENT))
+				S_Sound (this, CHAN_VOICE, "*dive", 1, ATTN_NORM);
 		}
 		else if (oldlevel == 3 && waterlevel < 3)
 		{ // Our head just came up.
-			if (player->air_finished > level.time)
+			if (player->air_finished > level.time && !(player->mo->mvFlags & MV_SILENT))
 			{ // We hadn't run out of air yet.
 				S_Sound (this, CHAN_VOICE, "*surface", 1, ATTN_NORM);
 			}
@@ -2217,7 +2268,8 @@ void APlayerPawn::DropImportantItems( bool bLeavingGame, AActor *pSource )
 void APlayerPawn::TweakSpeeds (int &forward, int &side)
 {
 	// [Dusk] Let the user move at whatever speed they desire when spectating.
-	if (player->bSpectating) {
+	if (player->bSpectating)
+	{
 		fixed_t factor = FLOAT2FIXED(cl_spectatormove);
 		forward = FixedMul(forward, factor);
 		side = FixedMul(side, factor);
@@ -2229,24 +2281,6 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 	{
 		forward = clamp(forward, -0x1900, 0x1900);
 		side = clamp(side, -0x1800, 0x1800);
-	}
-
-	// [GRB]
-	if ((unsigned int)(forward + 0x31ff) < 0x63ff)
-	{
-		forward = FixedMul (forward, ForwardMove1);
-	}
-	else
-	{
-		forward = FixedMul (forward, ForwardMove2);
-	}
-	if ((unsigned int)(side + 0x27ff) < 0x4fff)
-	{
-		side = FixedMul (side, SideMove1);
-	}
-	else
-	{
-		side = FixedMul (side, SideMove2);
 	}
 
 	// [BC] This comes out to 50%, so we can use this for the turbosphere.
@@ -2263,6 +2297,28 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 		forward = (LONG)( forward * 1.25 );
 		side = (LONG)( side * 1.25 );
 	}
+}
+
+//===========================================================================
+//
+// CrouchWalkFactor
+//
+//===========================================================================
+
+float CrouchWalkFactor(player_t* player, ticcmd_t *cmd)
+{
+	if (player->CanCrouch() && player->crouchfactor < FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
+	{
+		// Interpolate current crouch speed between full crouch and no crouch
+		float LerpValue = (FIXED2FLOAT(player->crouchfactor) - FIXED2FLOAT(player->mo->CrouchScale)) / (1.f - FIXED2FLOAT(player->mo->CrouchScale));
+		return player->mo->CrouchSpeedFactor + (1.f - player->mo->CrouchSpeedFactor) * LerpValue;
+	}
+	else if (cmd->ucmd.buttons & BT_SPEED)
+	{
+		return player->mo->WalkSpeedFactor;
+	}
+
+	return 1.f;
 }
 
 //===========================================================================
@@ -2302,6 +2358,17 @@ fixed_t APlayerPawn::CalcJumpVelz()
 	// [BC] If the player is standing on a spring pad, halve his jump velocity.
 	if ( player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD )
 		z /= 2;
+
+	return z;
+}
+
+fixed_t APlayerPawn::CalcDoubleJumpVelz()
+{
+	fixed_t z = SecondJumpZ * 35 / TICRATE;
+
+	// [BC] If the player has the high jump power, double his jump velocity.
+	if (player->cheats & CF_HIGHJUMP)
+		z *= 2;
 
 	return z;
 }
@@ -2533,7 +2600,7 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 	}
 
 	// Set the crouch sprite?
-	if (player->crouchfactor < FRACUNIT*3/4)
+	if (player->crouchfactor < player->mo->CrouchScaleHalfWay)
 	{
 		if (spritenum == actor->SpawnState->sprite || spritenum == player->mo->crouchsprite) 
 		{
@@ -2555,9 +2622,9 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 		{
 			spritenum = crouchspriteno;
 		}
-		else if (player->playerstate != PST_DEAD && player->crouchfactor < FRACUNIT*3/4)
+		else if (player->playerstate != PST_DEAD && player->crouchfactor < player->mo->CrouchScaleHalfWay)
 		{
-			scaley /= 2;
+			scaley = FixedMul(scaley, player->mo->CrouchScale);
 		}
 	}
 }
@@ -2642,14 +2709,6 @@ void P_CalcHeight (player_t *player)
 	fixed_t 	bob;
 	bool		still = false;
 
-	// [BB] Clients don't calculate the viewheight of the player whose eyes they are looking through
-	// they receive that from the server (except if they are looking through their own eyes).
-	if (( NETWORK_GetState( ) == NETSTATE_CLIENT ) && ( player->mo->CheckLocalView( consoleplayer ) ) &&
-		(( player - players ) != consoleplayer ))
-	{
-		return;
-	}
-
 	// [BC] If we're predicting, nothing to do here.
 	if ( CLIENT_PREDICT_IsPredicting( ))
 		return;
@@ -2683,7 +2742,7 @@ void P_CalcHeight (player_t *player)
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				player->bob = FixedMul( player->bob, 16384 );
 			else
-				player->bob = FixedMul (player->bob, player->userinfo.GetMoveBob());
+				player->bob = FixedMul (player->bob, players[consoleplayer].userinfo.GetMoveBob());
 
 			// [BB] I've seen bob becoming negative for a high ping clients (250+) on low gravity servers (sv_gravity 200)
 			// when moving forward in the air for too long. Overflow problem? Nevertheless, setting negative values
@@ -2711,7 +2770,7 @@ void P_CalcHeight (player_t *player)
 		{
 			// [BC] We need to cap level.time, because if it gets too big, DivScale
 			// can crash.
-			angle = DivScale13 (level.time % 65536, 120*TICRATE/35) & FINEMASK;
+			angle = DivScale13 (level.time % FRACUNIT, 120*TICRATE/35) & FINEMASK;
 			bob = FixedMul (player->userinfo.GetStillBob(), finesine[angle]);
 		}
 		else
@@ -2724,7 +2783,7 @@ void P_CalcHeight (player_t *player)
 		// DivScale 13 because FINEANGLES == (1<<13)
 		// [BC] We need to cap level.time, because if it gets too big, DivScale
 		// can crash.
-		angle = DivScale13 (level.time % 65536, 20*TICRATE/35) & FINEMASK;
+		angle = DivScale13 (level.time % FRACUNIT, 20*TICRATE/35) & FINEMASK;
 		bob = FixedMul (player->bob>>(player->mo->waterlevel > 1 ? 2 : 1), finesine[angle]);
 	}
 
@@ -2773,16 +2832,9 @@ void P_CalcHeight (player_t *player)
 	}
 }
 
-/*
-=================
-=
-= P_MovePlayer
-=
-=================
-*/
 CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 {
-	level.aircontrol = (fixed_t)(self * 65536.f);
+	level.aircontrol = (fixed_t)(self * FRACUNIT);
 	G_AirControlChanged ();
 
 	// [BB] Let the clients know about the change.
@@ -2793,183 +2845,1019 @@ CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 	}
 }
 
-void P_MovePlayer (player_t *player, ticcmd_t *cmd)
+//***************************************************
+// Vectors Math
+//***************************************************
+
+void VectorRotate(float &x, float &y, const float &angle)
 {
-	// [BB] A client doesn't know enough about the other players to make their movement.
-	if ( NETWORK_InClientMode() &&
-		(( player - players ) != consoleplayer ) && !CLIENTDEMO_IsFreeSpectatorPlayer ( player ))
+	float oX = x, oY = y, cosine = float(cos(angle * PI / 180)), sine = float(sin(angle * PI / 180));
+	x = cosine * oX - sine * oY;
+	y = sine * oX + cosine * oY;
+}
+
+float DotProduct(const FVector3 &v, const FVector3 &t)
+{
+	return v.X * t.X + v.Y * t.Y + v.Z * t.Z;
+}
+
+//***************************************************
+// Quake movement specifics
+//***************************************************
+
+float APlayerPawn::QTweakSpeed()
+{
+	// Powerup speed multi
+	if (!player->morphTics && Inventory != NULL)
+		return FIXED2FLOAT(Inventory->GetSpeedFactor());
+
+	// [BC] Apply the 25% speed increase power.
+	if (player->cheats & CF_SPEED25)
+		return 1.25f;
+
+	return 1.f;
+}
+
+void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const float friction)
+{
+	float velocity = float(vel.Length());
+
+	// happens when somebody gets stuck in a corner, and causes same results as a division by 0
+	if (velocity > 10000.f)
+		return;
+
+	bool waterflying = player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY);
+
+	if (waterflying)
 	{
+		if (velocity < 0.5f)
+		{
+			vel.X = vel.Y = vel.Z = 0.f;
+			return;
+		}
+	}
+	else if (FVector2(vel.X, vel.Y).Length() < 1.f)
+	{
+		vel.X = vel.Y = 0.f;
 		return;
 	}
 
-	APlayerPawn *mo = player->mo;
+	float drop = 0.f, control = 0.f;
+	if (waterflying)
+	{
+		drop = velocity * friction / TICRATE;
+	}
+	else if ( (player->onground || player->isWallClimbing) && !player->mo->InState( FindState( NAME_Pain ) ) )
+	{
+		control = velocity < groundspeedlimit ? friction : velocity;
+		drop = control * friction / TICRATE;
+	}
+
+	float newvelocity = MAX(velocity - drop, 0.f) / velocity;
+
+	vel.X *= newvelocity;
+	vel.Y *= newvelocity;
+	if (waterflying) { vel.Z *= newvelocity; }
+}
+
+void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel)
+{
+	float currentspeed = DotProduct(wishdir, vel);
+	float addspeed = wishspeed - currentspeed;
+	if (addspeed <= 0.f) { return; }
+
+	float accelerationspeed = MIN(accel * wishspeed / TICRATE, addspeed);
+	vel += wishdir * accelerationspeed;
+}
+
+//==========================================================================
+//
+// Double tap check
+//
+//==========================================================================
+
+#define DASH_TAPTIME -10
+
+bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
+{
+	// dash cooler
+	if (player->dashTics > 0)
+	{
+		player->dashTics--;
+		return false;
+	}
+
+	bool success = false;
+	int tapValue = cmd->ucmd.forwardmove | cmd->ucmd.sidemove;
+	int secondTapValue = 0;
+
+	if (tapValue & ~player->lastTapValue)
+	{
+		if (!player->prepareTapValue)
+		{
+			player->dashTics = DASH_TAPTIME;
+			player->prepareTapValue = tapValue;
+		}
+		else
+		{
+			if (tapValue != player->prepareTapValue)
+				player->prepareTapValue = 0;
+			else
+				secondTapValue = tapValue;
+		}
+	}
+
+	if (secondTapValue && player->dashTics < 0)
+	{
+		player->prepareTapValue = 0;
+		player->dashTics = player->mo->DashDelay; // set the dash cooler
+
+		success = true;
+	}
+	else
+	{
+		player->dashTics++;
+
+		if (player->dashTics >= 0)
+		{
+			player->prepareTapValue = 0;
+		}
+	}
+
+	player->lastTapValue = tapValue;
+
+	return success;
+}
+
+//==========================================================================
+//
+// P_XXXX_Looping_Sounds
+//
+//==========================================================================
+
+void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
+{
+	// crouch slide sound start/stop
+	if (isSliding && !player->isCrouchSliding)
+	{
+		if (!(player->mo->mvFlags & MV_SILENT))
+		{
+			if (!CLIENT_PREDICT_IsPredicting())
+				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
+		}
+	}
+	else if (!isSliding && player->isCrouchSliding)
+	{
+		S_StopSound(player->mo, CHAN_SEVEN);
+	}
+
+	player->isCrouchSliding = isSliding;
+}
+
+void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
+{
+	// Wall climb parameters and sound start/stop
+	if (canclimb && !player->isWallClimbing)
+	{
+		if (!(player->mo->mvFlags & MV_SILENT))
+		{
+			if (!CLIENT_PREDICT_IsPredicting())
+				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
+		}
+	}
+	else if (!(canclimb % 2) && player->isWallClimbing)
+	{
+		S_StopSound(player->mo, CHAN_SEVEN);
+	}
+
+	player->isWallClimbing = canclimb < 2 ? canclimb != 0 : false;
+}
+
+//==========================================================================
+//
+// P_MovePlayer_Doom
+//
+//==========================================================================
+
+void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
+{
+	int canClimb = 0;
+	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
+	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
+	bool isDasher = player->mo->mvFlags & MV_DASH ? true : false;
+
+	FVector2 vel;
+	float velocity = 0.f;
+	if (isDasher || isClimber)
+	{
+		vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
+		velocity = float(vel.Length());
+	}
+
+	// Wall proximity check
+	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 16.f)
+	{
+		FTraceResults trace;
+		angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
+		fixed_t vx = finecosine[angle];
+		fixed_t vy = finesine[angle];
+
+		Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
+			vx, vy, 0, (player->mo->radius * 7) / 5, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+
+		if (trace.HitType == TRACE_HitWall)
+			canClimb = 1;
+		else if (player->isWallClimbing) // if over the ledge give it a final kick
+			canClimb = 2;
+	}
+
+	if (canClimb)
+	{
+		player->mo->velx /= 2;
+		player->mo->vely /= 2;
+
+		if (canClimb == 1)
+		{
+			player->mo->velz = FLOAT2FIXED(5.f);
+			player->wallClimbTics--;
+		}
+		else
+		{
+			player->mo->velz = FLOAT2FIXED(8.f);
+			player->wallClimbTics = 0;
+		}
+	}
+	else
+	{
+		if (isDasher && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
+		{
+			FVector2 dir = FVector2(float(cmd->ucmd.forwardmove), -float(cmd->ucmd.sidemove)).Unit();
+			float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
+			VectorRotate(dir.X, dir.Y, flAngle);
+
+			vel += dir * player->mo->DashForce * FIXED2FLOAT(player->mo->Speed);
+
+			player->mo->velx = FLOAT2FIXED(vel.X);
+			player->mo->vely = FLOAT2FIXED(vel.Y);
+
+			// do a little jump if on ground (75% of regular jump height)
+			if (player->onground)
+				player->mo->velz = (player->mo->CalcJumpVelz() / 4) * 3;
+
+			player->onground = false; // no friction to influence the dash
+
+			if (!(player->mo->mvFlags & MV_SILENT))
+			{
+				if (CLIENT_PREDICT_IsPredicting() == false)
+					S_Sound(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM);
+			}
+		}
+
+		if (anyMove)
+		{
+			fixed_t forwardmove, sidemove;
+			int bobfactor;
+			int friction, movefactor;
+			int fm, sm;
+
+			movefactor = P_GetMoveFactor(player->mo, &friction);
+			bobfactor = friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR;
+			if (!player->onground && !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel)
+			{
+				// [RH] allow very limited movement if not on ground.
+				if (zacompatflags & ZACOMPATF_LIMITED_AIRMOVEMENT)
+				{
+					movefactor = FixedMul(movefactor, level.aircontrol);
+					bobfactor = FixedMul(bobfactor, level.aircontrol);
+				}
+				else
+				{
+					fixed_t airacceleration = FLOAT2FIXED(player->mo->AirAcceleration);
+					movefactor = FixedMul(movefactor, airacceleration);
+					bobfactor = FixedMul(bobfactor, airacceleration);
+				}
+			}
+
+			fm = cmd->ucmd.forwardmove;
+			sm = cmd->ucmd.sidemove;
+			player->mo->TweakSpeeds(fm, sm);
+			fm = FixedMul(fm, player->mo->Speed);
+			sm = FixedMul(sm, player->mo->Speed);
+
+			int crouchWalkFactor = FLOAT2FIXED(CrouchWalkFactor(player, cmd));
+			fm = FixedMul(fm, crouchWalkFactor);
+			sm = FixedMul(sm, crouchWalkFactor);
+			bobfactor = FixedMul(bobfactor, crouchWalkFactor);
+
+			forwardmove = Scale(fm, movefactor * 35, TICRATE << 8);
+			sidemove = Scale(sm, movefactor * 35, TICRATE << 8);
+
+			if (forwardmove)
+			{
+				P_Bob(player, player->mo->angle, (cmd->ucmd.forwardmove * bobfactor) >> 8, true);
+				P_ForwardThrust(player, player->mo->angle, forwardmove);
+			}
+			if (sidemove)
+			{
+				P_Bob(player, player->mo->angle - ANG90, (cmd->ucmd.sidemove * bobfactor) >> 8, false);
+				P_SideThrust(player, player->mo->angle, sidemove);
+			}
+
+			// [BB] Spectators shall stay in their spawn state and don't execute any code pointers.
+			if ((CLIENT_PREDICT_IsPredicting() == false) && (player->bSpectating == false))//(!(player->cheats & CF_PREDICTING))
+			{
+				player->mo->PlayRunning();
+			}
+
+			if (player->cheats & CF_REVERTPLEASE)
+			{
+				player->cheats &= ~CF_REVERTPLEASE;
+				player->camera = player->mo;
+			}
+		}
+	}
+
+	// set wall climb parameters
+	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
+		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+	if (isClimber)
+		P_Climb_Looping_Sounds(player, canClimb);
+
+	//*******************************************************
+	// Footsteps
+	//*******************************************************
+
+	if ( !CLIENT_PREDICT_IsPredicting() )
+	{
+		if (!velocity)
+			velocity = float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length());
+
+		if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
+			(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
+		{
+			player->stepInterval = player->mo->FootstepInterval / 2;
+		}
+		else
+		{
+			if (player->stepInterval <= 0)
+			{
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
+				}
+
+				player->stepInterval = player->mo->FootstepInterval;
+			}
+			else
+			{
+				player->stepInterval--;
+			}
+		}
+	}
+
+	//**********************************
+	// Jumping
+	//**********************************
+
+	if (player->onground)
+	{
+		player->doubleJumpState = DJ_AVAILABLE;
+
+		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
+			player->jumpTics = player->mo->JumpDelay;
+	}
+
+	if (canClimb)
+		return;
 
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
+
+	if (player->mo->waterlevel >= 2)
+	{
+		if (cmd->ucmd.buttons & BT_JUMP)
+		{
+			// [Leo] Apply cl_spectatormove here.
+			if (player->bSpectating)
+				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+			else
+				player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
+		}
+		else if (cmd->ucmd.buttons & BT_CROUCH)
+		{
+			// [Leo] Apply cl_spectatormove here.
+			if (player->bSpectating)
+				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+			else
+				player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
+		}
+
+	}
+	else if (player->mo->flags & MF_NOGRAVITY)
+	{
+		if (cmd->ucmd.buttons & BT_JUMP)
+		{
+			// [Leo] Apply cl_spectatormove here.
+			if (player->bSpectating)
+			{
+				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+			}
+			else
+			{
+				fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
+				if (player->mo->velz < maxSpeed)
+				{
+					fixed_t velBonus = MIN(FixedMul(3 * FRACUNIT, player->mo->Speed), maxSpeed - player->mo->velz);
+					player->mo->velz += velBonus;
+				}
+			}
+		}
+		else if (cmd->ucmd.buttons & BT_CROUCH)
+		{
+			// [Leo] Apply cl_spectatormove here.
+			if (player->bSpectating)
+			{
+				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+			}
+			else
+			{
+				fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
+				if (player->mo->velz > -maxSpeed)
+				{
+					fixed_t velBonus = MIN(FixedMul(3 * FRACUNIT, player->mo->Speed), maxSpeed + player->mo->velz);
+					player->mo->velz -= velBonus;
+				}
+			}
+		}
+	}
+	// [RH] check for jump
+	else if (cmd->ucmd.buttons & BT_JUMP)
+	{
+		// [Leo] Spectators shouldn't be limited by the server settings.
+		if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && !player->jumpTics)
+		{
+			fixed_t	JumpVelz;
+			ULONG	ulJumpTicks;
+			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
+
+			if (!player->mo->wasJustThrustedZ || isRampJumper)
+			{
+				// Set base jump velocity.
+				// [Dusk] Exported this into a function as I need it elsewhere as well.
+				JumpVelz = player->mo->CalcJumpVelz();
+
+				// Set base jump ticks.
+				// [BB] In ZDoom revision 2970 changed the jumping behavior.
+				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
+					ulJumpTicks = 18 * TICRATE / 35;
+				else
+					ulJumpTicks = -1;
+
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+					if (CLIENT_PREDICT_IsPredicting() == false)
+						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+				}
+
+				player->mo->flags2 &= ~MF2_ONMOBJ;
+
+				// [BC] Increase jump delay if the player has the high jump power.
+				if (player->cheats & CF_HIGHJUMP)
+					ulJumpTicks *= 2;
+
+				// [BC] Remove jump delay if the player is on a spring pad.
+				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+					ulJumpTicks = 0;
+
+				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
+				player->jumpTics = ulJumpTicks;
+			}
+		}
+		// [Ivory]: Double Jump and wall jump
+		else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
+			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
+		{
+			fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
+
+			// Wall proximity check
+			bool doDoubleJump = false;
+			if (player->mo->mvFlags & MV_WALLJUMP)
+			{
+				int angle;
+				fixed_t xDir, yDir;
+				for (int i = 0; i < 8; ++i)
+				{
+					angle = 45 * i;
+					xDir = player->mo->x + FixedMul(FRACUNIT, FLOAT2FIXED(cos(angle)));
+					yDir = player->mo->y + FixedMul(FRACUNIT, FLOAT2FIXED(sin(angle)));
+
+					// if player cannot move in a direction and a line is blocking it
+					// it must be a wall that can be jumped on
+					if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
+					{
+						SecondJumpVelz = (SecondJumpVelz / 4) * 3;
+
+						if (!(player->mo->mvFlags & MV_SILENT))
+						{
+							if (!CLIENT_PREDICT_IsPredicting())
+								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+						}
+
+						doDoubleJump = true;
+
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					if (!CLIENT_PREDICT_IsPredicting())
+						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
+				}
+
+				doDoubleJump = true;
+			}
+
+			if (doDoubleJump)
+			{
+				if (player->mo->velz < 0)
+				{
+					player->mo->velz = SecondJumpVelz;
+				}
+				else
+				{
+					player->mo->velz += SecondJumpVelz;
+				}
+
+				player->doubleJumpState = DJ_NOT_AVAILABLE;
+			}
+		}
+	}
+	else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
+	{
+		player->doubleJumpState = DJ_READY;
+	}
+}
+
+//******************************************************************************//
+// [Ivory Duke] Quake movement code. Convert fixed point math to floating point //
+//              to apply the Quake engine friction and acceleration formulas.	//
+//				I know this would be better broken up in a bunch of functions	//
+//				but I'd rather not add possible troubles.						//
+//******************************************************************************//
+
+void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
+{
+	//*******************************************************
+	// Horizontal movement (+ vertical for flying and water)
+	//*******************************************************
+
+	// Setup
+	bool noJump = false;
+	bool isSliding = false;
+	int canClimb = 0;
+	bool isSlider = player->mo->mvFlags & MV_CROUCHSLIDE ? true : false;
+	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
+	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
+	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
+	float movefactor = CrouchWalkFactor(player, cmd);
+	float maxgroundspeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
+	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
+	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.f };
+	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
+	player->mo->wasJustThrustedZ = false;
+	float velocity = 0.f;
+
+	if (player->mo->waterlevel >= 2)
+	{
+		// Calculate the vertical push according to the view pitch
+		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
+		{
+			acceleration.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
+		}
+		else
+		{
+			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
+			acceleration.Z = acceleration.X * sin(-pitch);
+			acceleration.X *= cos(pitch);
+		}
+		//Friction
+		player->mo->QFriction(vel, 0, 2.f);
+		//Acceleration
+		VectorRotate(acceleration.X, acceleration.Y, flAngle);
+		acceleration.MakeUnit();
+		maxgroundspeed *= movefactor;
+		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
+
+		noJump = true;
+
+		// Reset wall climb tics
+		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+	}
+	else if (player->mo->flags & MF_NOGRAVITY)
+	{
+		// Calculate the vertical push according to the view pitch
+		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
+		{
+			acceleration.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
+		}
+		else
+		{
+			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
+			acceleration.Z = acceleration.X * sin(-pitch);
+			acceleration.X *= cos(pitch);
+		}
+		//Friction
+		player->mo->QFriction(vel, 0.f, 3.f);
+		//Acceleration
+		VectorRotate(acceleration.X, acceleration.Y, flAngle);
+		acceleration.MakeUnit();
+		maxgroundspeed *= movefactor;
+		player->mo->QAcceleration(vel, acceleration, maxgroundspeed, 8.f);
+
+		noJump = true;
+
+		// Reset wall climb tics
+		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+	}
+	else
+	{
+		// Wall proximity check
+		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
+			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxgroundspeed + 2.f)
+		{
+			FTraceResults trace;
+			angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
+			fixed_t vx = finecosine[angle];
+			fixed_t vy = finesine[angle];
+
+			Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
+				vx, vy, 0, (player->mo->radius * 7) / 5, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+
+			if (trace.HitType == TRACE_HitWall)
+				canClimb = 1;
+			else if (player->isWallClimbing) // if over the ledge give it a final kick
+				canClimb = 2;
+		}
+
+		if (canClimb)
+		{
+			player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction);
+			if (canClimb == 1)
+			{
+				vel.Z = 5.f;
+				player->wallClimbTics--;
+			}
+			else
+			{
+				vel.Z = 8.f;
+				player->wallClimbTics = 0;
+			}
+
+			noJump = true;
+		}
+		else
+		{
+			// Orient inputs to view angle
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			acceleration.MakeUnit();
+
+			// Dashing
+			if ((player->mo->mvFlags & MV_DASH) && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
+			{
+				velocity = float(FVector2(vel.X, vel.Y).Length());
+
+				vel += acceleration * player->mo->DashForce * FIXED2FLOAT(player->mo->Speed);
+
+				// do a little jump if on ground (75% of regular jump height)
+				if (player->onground)
+					vel.Z = FIXED2FLOAT((player->mo->CalcJumpVelz() / 4) * 3);
+
+				player->onground = false;
+
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					if (CLIENT_PREDICT_IsPredicting() == false)
+						S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
+				}
+			}
+
+			if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
+			{
+				maxgroundspeed *= movefactor;
+				velocity = float(FVector2(vel.X, vel.Y).Length());
+
+				// Acceleration
+				if (player->mo->MvType == MV_QUAKE_CPM)
+				{
+					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
+					{
+						// Side acceleration only
+						player->mo->QAcceleration(vel, acceleration, 1.5f, player->mo->CpmAirAcceleration * 6.f);
+					}
+					else
+					{
+						FVector3 vel2D = { vel.X, vel.Y, 0 };
+						vel2D.MakeUnit();
+						acceleration.MakeUnit();
+						float dot = DotProduct(vel2D, acceleration);
+						if (!cmd->ucmd.sidemove && velocity && acceleration.Length() && dot > 0)
+						{
+							// Forward acceleration only
+							if (dot < cos(player->mo->CpmMaxForwardAngleRad))
+							{
+								// Player is facing further than the character can turn
+								// Limit velocity change to CpmMaxForwardAngleRad
+								float Atan = atan2(vel2D.X * acceleration.Y - vel2D.Y * acceleration.X, vel2D.X * acceleration.X + vel2D.Y * acceleration.Y);
+								float Rad = Atan > 0 ? player->mo->CpmMaxForwardAngleRad : - player->mo->CpmMaxForwardAngleRad;
+
+								acceleration.X = vel2D.X * cos(Rad) - vel2D.Y * sin(Rad);
+								acceleration.Y = vel2D.X * sin(Rad) + vel2D.Y * cos(Rad);
+							}
+
+							FVector2 forwardVel = acceleration * velocity;
+							vel.X = forwardVel.X;
+							vel.Y = forwardVel.Y;
+						}
+						else
+						{
+							// Both side and forward acceleration
+							player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6.f);
+						}
+					}
+				}
+				else
+				{
+					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6.f);
+				}
+
+				// set slide duration if player can do it.
+				// Duration is proportional to the velocity.
+				if (isSlider && player->mo->velz < 0)
+					player->crouchSlideTics = MIN(FLOAT2FIXED(float(vel.Length()) / 15258.0f), player->mo->SlideMaxTics);
+			}
+			else if (!wasJustThrustedZ)
+			{
+				isSliding = isSlider &&									// player has the flag
+						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
+						   player->crouchSlideTics;						// there is crouch slide charge to spend
+
+				// Friction & Acceleration
+				if (isSliding)
+				{
+					player->mo->QFriction(vel, 0.f, player->mo->SlideFriction * floorFriction);
+					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->SlideAcceleration * floorFriction);
+					player->crouchSlideTics--;
+				}
+				else
+				{
+					maxgroundspeed *= movefactor;
+					player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction * floorFriction);
+					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->GroundAcceleration / movefactor * floorFriction);
+					player->crouchSlideTics = 0;
+				}
+
+				// Reset wall climb tics
+				player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+			}
+		}
+	}
+
+	// ...convert it back to fixed point
+	player->mo->velx = FLOAT2FIXED(vel.X);
+	player->mo->vely = FLOAT2FIXED(vel.Y);
+	player->mo->velz = FLOAT2FIXED(vel.Z);
+
+	// also take care of view/weapon bobbing
+	if (isSliding)
+	{
+		// but not when sliding
+		player->velx = 0;
+		player->vely = 0;
+	}
+	else
+	{
+		player->velx = player->mo->velx;
+		player->vely = player->mo->vely;
+	}
+
+	// handle looping sounds of slide and climb
+	if (isSlider)
+		P_Slide_Looping_Sounds(player, isSliding);
+	if (isClimber)
+		P_Climb_Looping_Sounds(player, canClimb);
+
+	// Only play run animation when moving and not in the air
+	if (!CLIENT_PREDICT_IsPredicting() && player->onground &&
+		!player->bSpectating && (player->mo->velx || player->mo->vely) && !isSliding)
+	{
+		player->mo->PlayRunning();
+	}
+
+	if (player->cheats & CF_REVERTPLEASE)
+	{
+		player->cheats &= ~CF_REVERTPLEASE;
+		player->camera = player->mo;
+	}
+
+	//*******************************************************
+	// Footsteps
+	//*******************************************************
+
+	if ( !CLIENT_PREDICT_IsPredicting() )
+	{
+		if (!velocity)
+			velocity = float(FVector2(vel.X, vel.Y).Length());
+
+		if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
+		{
+			player->stepInterval = player->mo->FootstepInterval / 2;
+		}
+		else
+		{
+			if (player->stepInterval <= 0 && !player->isCrouchSliding)
+			{
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
+				}
+
+				player->stepInterval = player->mo->FootstepInterval;
+			}
+			else
+			{
+				player->stepInterval--;
+			}
+		}
+	}
+
+	//*******************************************************
+	// Jumping
+	//*******************************************************
+
+	if (player->onground)
+	{
+		player->doubleJumpState = DJ_AVAILABLE;
+
+		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
+			player->jumpTics = player->mo->JumpDelay;
+	}
+
+	// Water and flying have already executed jump press logic
+	if (noJump)
+		return;
+
+	// Stop here if not in good condition to jump
+	if (cmd->ucmd.buttons & BT_JUMP)
+	{
+		if (player->onground && !player->jumpTics && (player->bSpectating || level.IsJumpingAllowed()))
+		{
+			fixed_t	JumpVelz = player->mo->CalcJumpVelz();
+			ULONG	ulJumpTicks;
+			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
+			
+			if (!player->mo->wasJustThrustedZ || isRampJumper)
+			{
+				// Set base jump velocity.
+				// [Dusk] Exported this into a function as I need it elsewhere as well.
+				JumpVelz = player->mo->CalcJumpVelz();
+
+				// Set base jump ticks.
+				// [BB] In ZDoom revision 2970 changed the jumping behavior.
+				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
+					ulJumpTicks = 18 * TICRATE / 35;
+				else
+					ulJumpTicks = -1;
+
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+					if (CLIENT_PREDICT_IsPredicting() == false)
+						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+				}
+
+				player->mo->flags2 &= ~MF2_ONMOBJ;
+
+				// [BC] Increase jump delay if the player has the high jump power.
+				if (player->cheats & CF_HIGHJUMP)
+					ulJumpTicks *= 2;
+
+				// [BC] Remove jump delay if the player is on a spring pad.
+				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+					ulJumpTicks = 0;
+
+				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
+				player->jumpTics = ulJumpTicks;
+			}
+		}
+		else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
+			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
+		{
+			fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
+
+			// Wall proximity check
+			bool doDoubleJump = false;
+			if (player->mo->mvFlags & MV_WALLJUMP)
+			{
+				int angle;
+				fixed_t xDir, yDir;
+				for (int i = 0; i < 8; ++i)
+				{
+					angle = 45 * i;
+					xDir = player->mo->x + FixedMul(FRACUNIT, FLOAT2FIXED(cos(angle)));
+					yDir = player->mo->y + FixedMul(FRACUNIT, FLOAT2FIXED(sin(angle)));
+
+					// if player cannot move in a direction and a line is blocking
+					// it must be a wall that can be jumped on
+					if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
+					{
+						SecondJumpVelz = (SecondJumpVelz / 4) * 3;
+
+						if (!(player->mo->mvFlags & MV_SILENT))
+						{
+							if (!CLIENT_PREDICT_IsPredicting())
+								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+						}
+
+						doDoubleJump = true;
+
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					if (!CLIENT_PREDICT_IsPredicting())
+						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
+				}
+
+				doDoubleJump = true;
+			}
+
+			if (doDoubleJump)
+			{
+				if (player->mo->velz < 0)
+				{
+					player->mo->velz = SecondJumpVelz;
+				}
+				else
+				{
+					player->mo->velz += SecondJumpVelz;
+				}
+
+				player->doubleJumpState = DJ_NOT_AVAILABLE;
+			}
+		}
+	}
+	else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
+	{
+		player->doubleJumpState = DJ_READY;
+	}
+}
+
+/*
+=================
+=
+= P_MovePlayer
+=
+=================
+*/
+void P_MovePlayer(player_t *player, ticcmd_t *cmd)
+{
+	APlayerPawn *mo = player->mo;
 
 	// [RH] 180-degree turn overrides all other yaws
 	if (player->turnticks)
 	{
 		player->turnticks--;
-		mo->angle += (ANGLE_180 / TURN180_TICKS);
+		player->mo->angle += (ANGLE_180 / TURN180_TICKS);
 	}
 	else
 	{
-		mo->angle += cmd->ucmd.yaw << 16;
+		player->mo->angle += cmd->ucmd.yaw << 16;
 	}
 
 	// [TP] Allow spectators to move freely even if the game is suspended.
-	if ( GAME_GetEndLevelDelay( ) && ( player->bSpectating == false ))
-		memset( cmd, 0, sizeof( ticcmd_t ));
+	if (GAME_GetEndLevelDelay() && (player->bSpectating == false))
+		memset(cmd, 0, sizeof(ticcmd_t));
 
-	player->onground = (mo->z <= mo->floorz) || (mo->flags2 & MF2_ONMOBJ) || (mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
+	player->onground = player->mo->z <= player->mo->floorz || (player->mo->flags2 & MF2_ONMOBJ) ||
+					   (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
-	// killough 10/98:
-	//
-	// We must apply thrust to the player and bobbing separately, to avoid
-	// anomalies. The thrust applied to bobbing is always the same strength on
-	// ice, because the player still "works just as hard" to move, while the
-	// thrust applied to the movement varies with 'movefactor'.
-
-	if (cmd->ucmd.forwardmove | cmd->ucmd.sidemove)
+	if (player->mo->MvType)
 	{
-		fixed_t forwardmove, sidemove;
-		int bobfactor;
-		int friction, movefactor;
-		int fm, sm;
-
-		movefactor = P_GetMoveFactor (mo, &friction);
-		bobfactor = friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR;
-		if (!player->onground && !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel)
-		{
-			// [RH] allow very limited movement if not on ground.
-			if ( zacompatflags & ZACOMPATF_LIMITED_AIRMOVEMENT )
-			{
-				movefactor = FixedMul (movefactor, level.aircontrol);
-				bobfactor = FixedMul (bobfactor, level.aircontrol);
-			}
-			else
-			{
-				// Skulltag needs increased air movement for jump pads, etc.
-				movefactor /= 4;
-				bobfactor /= 4;
-			}
-		}
-
-		fm = cmd->ucmd.forwardmove;
-		sm = cmd->ucmd.sidemove;
-		mo->TweakSpeeds (fm, sm);
-		fm = FixedMul (fm, player->mo->Speed);
-		sm = FixedMul (sm, player->mo->Speed);
-
-		// When crouching, speed and bobbing have to be reduced
-		if (player->CanCrouch() && player->crouchfactor != FRACUNIT)
-		{
-			fm = FixedMul(fm, player->crouchfactor);
-			sm = FixedMul(sm, player->crouchfactor);
-			bobfactor = FixedMul(bobfactor, player->crouchfactor);
-		}
-
-		forwardmove = Scale (fm, movefactor * 35, TICRATE << 8);
-		sidemove = Scale (sm, movefactor * 35, TICRATE << 8);
-
-		if (forwardmove)
-		{
-			P_Bob (player, mo->angle, (cmd->ucmd.forwardmove * bobfactor) >> 8, true);
-			P_ForwardThrust (player, mo->angle, forwardmove);
-		}
-		if (sidemove)
-		{
-			P_Bob (player, mo->angle-ANG90, (cmd->ucmd.sidemove * bobfactor) >> 8, false);
-			P_SideThrust (player, mo->angle, sidemove);
-		}
-/*
-		if (debugfile)
-		{
-			fprintf (debugfile, "move player for pl %d%c: (%d,%d,%d) (%d,%d) %d %d w%d [", int(player-players),
-				player->cheats&CF_PREDICTING?'p':' ',
-				player->mo->x, player->mo->y, player->mo->z,forwardmove, sidemove, movefactor, friction, player->mo->waterlevel);
-			msecnode_t *n = player->mo->touching_sectorlist;
-			while (n != NULL)
-			{
-				fprintf (debugfile, "%td ", n->m_sector-sectors);
-				n = n->m_tnext;
-			}
-			fprintf (debugfile, "]\n");
-		}
-*/
-		// [BB] Spectators shall stay in their spawn state and don't execute any code pointers.
-		if ( (CLIENT_PREDICT_IsPredicting( ) == false) && (forwardmove|sidemove) && (player->bSpectating == false) )//(!(player->cheats & CF_PREDICTING))
-		{
-			player->mo->PlayRunning ();
-		}
-
-		if (player->cheats & CF_REVERTPLEASE)
-		{
-			player->cheats &= ~CF_REVERTPLEASE;
-			player->camera = player->mo;
-		}
+		P_MovePlayer_Quake(player, cmd);
 	}
-
-	// [RH] check for jump
-	if ( cmd->ucmd.buttons & BT_JUMP )
+	else // default Doom movement
 	{
-		if (player->mo->waterlevel >= 2)
-		{
-			player->mo->velz = FixedMul(4*FRACUNIT, player->mo->Speed);
-
-			// [Leo] Apply cl_spectatormove here.
-			if ( player->bSpectating )
-				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
-		}
-		else if (player->mo->flags2 & MF2_FLY)
-		{
-			player->mo->velz = 3*FRACUNIT;
-
-			// [Leo] Apply cl_spectatormove here.
-			if ( player->bSpectating )
-				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
-		}
-		// [Leo] Spectators shouldn't be limited by the server settings.
-		else if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && player->jumpTics == 0)
-		{
-			fixed_t	JumpVelz;
-			ULONG	ulJumpTicks;
-
-			// Set base jump velocity.
-			// [Dusk] Exported this into a function as I need it elsewhere as well.
-			JumpVelz = player->mo->CalcJumpVelz();
-
-			// Set base jump ticks.
-			// [BB] In ZDoom revision 2970 changed the jumping behavior.
-			if ( zacompatflags & ZACOMPATF_SKULLTAG_JUMPING )
-				ulJumpTicks = 18 * TICRATE / 35;
-			else
-				ulJumpTicks = -1;
-
-			// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-			if ( CLIENT_PREDICT_IsPredicting( ) == false )
-				S_Sound (player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
-
-			// [EP] Inform the other clients to play the sound.
-			if ( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT );
-
-			player->mo->flags2 &= ~MF2_ONMOBJ;
-
-			// [BC] Increase jump delay if the player has the high jump power.
-			if ( player->cheats & CF_HIGHJUMP )
-				ulJumpTicks *= 2;
-
-			// [BC] Remove jump delay if the player is on a spring pad.
-			if ( player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD )
-				ulJumpTicks = 0;
-
-			player->mo->velz += JumpVelz;
-			player->jumpTics = ulJumpTicks;
-		}
+		P_MovePlayer_Doom(player, cmd);
 	}
-}		
+}
 
 //==========================================================================
 //
@@ -3062,8 +3950,12 @@ void P_FallingDamage (AActor *actor)
 
 	if (actor->player)
 	{
-		S_Sound (actor, CHAN_AUTO, "*land", 1, ATTN_NORM);
-		P_NoiseAlert (actor, actor, true);
+		if (!(actor->mvFlags & MV_SILENT))
+		{
+			S_Sound(actor, CHAN_AUTO, "*land", 1, ATTN_NORM);
+			P_NoiseAlert(actor, actor, true);
+		}
+
 		if (damage == 1000000 && (actor->player->cheats & (CF_GODMODE | CF_BUDDHA)))
 		{
 			damage = 999;
@@ -3087,6 +3979,16 @@ void P_DeathThink (player_t *player)
 	P_MovePsprites (player);
 
 	player->onground = (player->mo->z <= player->mo->floorz);
+
+	if (player->mo->MvType > 0 && player->onground)
+	{
+		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
+		player->mo->QFriction(vel, FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed(), 6.f);
+		player->mo->velx = FLOAT2FIXED(vel.X);
+		player->mo->vely = FLOAT2FIXED(vel.Y);
+		player->mo->velz = FLOAT2FIXED(vel.Z);
+	}
+
 	if (player->mo->IsKindOf (RUNTIME_CLASS(APlayerChunk)))
 	{ // Flying bloody skull or flying ice chunk
 		player->viewheight = 6 * FRACUNIT;
@@ -3345,7 +4247,7 @@ void P_CrouchMove(player_t * player, int direction)
 {
 	fixed_t defaultheight = player->mo->GetDefault()->height;
 	fixed_t savedheight = player->mo->height;
-	fixed_t crouchspeed = direction * CROUCHSPEED;
+	fixed_t crouchspeed = direction * player->mo->CrouchChangeSpeed;
 	fixed_t oldheight = player->viewheight;
 
 	player->crouchdir = (signed char) direction;
@@ -3365,7 +4267,7 @@ void P_CrouchMove(player_t * player, int direction)
 	}
 	player->mo->height = savedheight;
 
-	player->crouchfactor = clamp<fixed_t>(player->crouchfactor, FRACUNIT/2, FRACUNIT);
+	player->crouchfactor = clamp<fixed_t>(player->crouchfactor, player->mo->CrouchScale, FRACUNIT);
 	player->viewheight = FixedMul(player->mo->ViewHeight, player->crouchfactor);
 	player->crouchviewdelta = player->viewheight - player->mo->ViewHeight;
 
@@ -3444,7 +4346,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			desired *= fabsf(player->ReadyWeapon->FOVScale);
 		}
 		if (player->FOV != desired)
-	{
+		{
 			if (fabsf (player->FOV - desired) < 7.f)
 			{
 				player->FOV = desired;
@@ -3518,34 +4420,30 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 
 	bool totallyfrozen = P_IsPlayerTotallyFrozen(player);
 
-	// [BB] Why should a predicting client ignore CF_TOTALLYFROZEN and CF_FROZEN?
-	//if ( CLIENT_PREDICT_IsPredicting( ) == false )
+	// [RH] Being totally frozen zeros out most input parameters.
+	if (totallyfrozen)
 	{
-		// [RH] Being totally frozen zeros out most input parameters.
-		if (totallyfrozen)
+		if (gamestate == GS_TITLELEVEL)
 		{
-			if (gamestate == GS_TITLELEVEL)
-			{
-				cmd->ucmd.buttons = 0;
-			}
-			else
-			{
-				cmd->ucmd.buttons &= BT_USE;
-			}
-			cmd->ucmd.pitch = 0;
-			cmd->ucmd.yaw = 0;
-			cmd->ucmd.roll = 0;
-			cmd->ucmd.forwardmove = 0;
-			cmd->ucmd.sidemove = 0;
-			cmd->ucmd.upmove = 0;
-			player->turnticks = 0;
+			cmd->ucmd.buttons = 0;
 		}
-		else if (player->cheats & CF_FROZEN)
+		else
 		{
-			cmd->ucmd.forwardmove = 0;
-			cmd->ucmd.sidemove = 0;
-			cmd->ucmd.upmove = 0;
+			cmd->ucmd.buttons &= BT_USE;
 		}
+		cmd->ucmd.pitch = 0;
+		cmd->ucmd.yaw = 0;
+		cmd->ucmd.roll = 0;
+		cmd->ucmd.forwardmove = 0;
+		cmd->ucmd.sidemove = 0;
+		cmd->ucmd.upmove = 0;
+		player->turnticks = 0;
+	}
+	else if (player->cheats & CF_FROZEN)
+	{
+		cmd->ucmd.forwardmove = 0;
+		cmd->ucmd.sidemove = 0;
+		cmd->ucmd.upmove = 0;
 	}
 
 	// If this is a bot, run its logic.
@@ -3565,7 +4463,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 	// [BC] Don't do this for clients other than ourself in client mode.
 	// [BB] Also, don't do this while predicting.
-	if (( NETWORK_InClientMode() == false ) || ( (( player - players ) == consoleplayer ) && ( CLIENT_PREDICT_IsPredicting( ) == false ) ))
+	if (( NETWORK_InClientMode() == false ) || ( CLIENT_PREDICT_IsPredicting( ) == false ))
 	{
 		if (player->CanCrouch() && player->health > 0 && level.IsCrouchingAllowed())
 		{
@@ -3586,7 +4484,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 				{
 					P_CrouchMove(player, 1);
 				}
-				else if (crouchdir == -1 && player->crouchfactor > FRACUNIT/2)
+				else if (crouchdir == -1 && player->crouchfactor > player->mo->CrouchScale)
 				{
 					P_CrouchMove(player, -1);
 				}
@@ -3600,7 +4498,6 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 
 	player->crouchoffset = -FixedMul(player->mo->ViewHeight, (FRACUNIT - player->crouchfactor));
 
-
 	if (player->playerstate == PST_DEAD)
 	{
 		player->Uncrouch();
@@ -3610,7 +4507,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		player->oldbuttons = player->cmd.ucmd.buttons;
 		return;
 	}
-	if (player->jumpTics != 0)
+	if (player->jumpTics)
 	{
 		player->jumpTics--;
 		if (player->onground && player->jumpTics < -18)
@@ -3698,57 +4595,21 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 
 	// Handle movement
-	if (player->mo->reactiontime)
-	{ // Player is frozen
-			player->mo->reactiontime--;
+	if (player->mo->reactiontime) // Player is frozen
+	{
+		player->mo->reactiontime--;
 	}
 	else
 	{
 		P_MovePlayer (player, cmd);
 
-		if (cmd->ucmd.upmove == -32768)
-		{ // Only land if in the air
-			if ((player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2)
-			{
-				//player->mo->flags2 &= ~MF2_FLY;
-				player->mo->flags &= ~MF_NOGRAVITY;
-			}
-		}
-		else if (cmd->ucmd.upmove != 0)
+		// [BB] The server tells the client that it used the fly item.
+		if (cmd->ucmd.upmove > 0 && NETWORK_GetState() != NETSTATE_CLIENT)
 		{
-			// Clamp the speed to some reasonable maximum.
-			int magnitude = abs (cmd->ucmd.upmove);
-			if (magnitude > 0x300)
+			AInventory *fly = player->mo->FindInventory(NAME_ArtiFly);
+			if (fly != NULL)
 			{
-				cmd->ucmd.upmove = ksgn (cmd->ucmd.upmove) * 0x300;
-			}
-			if (player->mo->waterlevel >= 2 || (player->mo->flags2 & MF2_FLY) || (player->cheats & CF_NOCLIP2))
-			{
-				player->mo->velz = FixedMul(player->mo->Speed, cmd->ucmd.upmove << 9);
-
-				// [Leo] Apply cl_spectatormove here.
-				if ( player->bSpectating )
-					player->mo->velz = FixedMul(player->mo->velz, FLOAT2FIXED(cl_spectatormove));
-
-				if (player->mo->waterlevel < 2 && !(player->mo->flags & MF_NOGRAVITY))
-				{
-					player->mo->flags2 |= MF2_FLY;
-					player->mo->flags |= MF_NOGRAVITY;
-					if ((player->mo->velz <= -39 * FRACUNIT) && !CLIENT_PREDICT_IsPredicting( )) // [BB] Adapted prediction.
-					{ // Stop falling scream
-						S_StopSound (player->mo, CHAN_VOICE);
-					}
-				}
-			}
-			else if (cmd->ucmd.upmove > 0)// && !(player->cheats & CF_PREDICTING))
-			{
-				AInventory *fly = player->mo->FindInventory (NAME_ArtiFly);
-				if (fly != NULL)
-				{
-					// [BB] The server tells the client that it used the fly item.
-					if( NETWORK_GetState( ) != NETSTATE_CLIENT )
-						player->mo->UseInventory (fly);
-				}
+				player->mo->UseInventory(fly);
 			}
 		}
 	}
@@ -3889,6 +4750,8 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			}
 		}
 	}
+
+	player->clientTicOnServerEnd++;
 }
 
 /*
@@ -4148,6 +5011,11 @@ void player_t::Serialize (FArchive &arc)
 		<< PremorphWeapon
 		<< chickenPeck
 		<< jumpTics
+		<< doubleJumpState
+		<< crouchSlideTics
+		<< isCrouchSliding
+		<< wallClimbTics
+		<< isWallClimbing
 		<< respawn_time
 		<< air_finished
 		<< turnticks

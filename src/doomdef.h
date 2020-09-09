@@ -423,11 +423,9 @@ enum
 	// [BB] Treat ACS scripts with the SCRIPTF_Net flag to be client side, i.e.
 	// executed on the clients, but not on the server.
 	ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE		= 1 << 0,
-	// [BB] Clients send ucmd.buttons as "long" instead of as "byte" in CLIENTCOMMANDS_ClientMove.
-	// So far this is only necessary if the ACS function GetPlayerInput is used in a server side
-	// script to check for buttons bigger than BT_ZOOM. Otherwise this information is completely
-	// useless for the server and the additional net traffic to send it should be avoided.
-	ZACOMPATF_CLIENTS_SEND_FULL_BUTTON_INFO		= 1 << 1,
+
+	// Used to be ZACOMPATF_CLIENTS_SEND_FULL_BUTTON_INFO here, but it is no longer needed
+
 	// [BB] Players are not allowed to use the land CCMD. Because of Skulltag's default amount
 	// of air control, flying players can get a huge speed boast with the land CCMD. Disallowing
 	// players to land, allows to keep the default air control most people are used to while not

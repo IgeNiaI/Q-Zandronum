@@ -2959,14 +2959,22 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t trailx, traily;
 	fixed_t newx, newy;
 	fixed_t xmove, ymove;
-	const secplane_t * walkplane;
+	const secplane_t *walkplane;
+	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
+	const bool noWallFriction = playerNotVoodoo && !mo->player->mo->WallFrictionEnabled && (mo->player->velx || mo->player->vely);
 	int hitcount;
 
 	hitcount = 3;
 	slidemo = mo;
 
-	if (mo->player && mo->player->mo == mo && mo->reactiontime > 0)
-		return;	// player coming right out of a teleporter.
+	FVector2 preSlideVel;
+	if (playerNotVoodoo)
+	{
+		if (mo->reactiontime > 0) // player coming right out of a teleporter.
+			return;
+		else if(noWallFriction)
+			preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };
+	}
 
 retry:
 	if (!--hitcount)
@@ -3053,8 +3061,23 @@ retry:
 	mo->vely = tmymove * numsteps;
 
 	// killough 10/98: affect the bobbing the same way (but not voodoo dolls)
-	if (mo->player && mo->player->mo == mo)
+	if (playerNotVoodoo)
 	{
+		// [Ivory]: Quake like wall friction
+		if (noWallFriction && (mo->velx || mo->vely))
+		{
+			FVector2 slideVel = FVector2(FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely)).Unit();
+			FVector2 velUnit = preSlideVel.Unit();
+			float velDot = velUnit.X * slideVel.X + velUnit.Y * slideVel.Y;
+			if (velDot > 0)
+			{
+				velDot = velDot > 0.75f ? 1.f : velDot * 0.75f;
+				preSlideVel = velDot * preSlideVel.Length() * slideVel;
+				mo->velx = FLOAT2FIXED(preSlideVel.X);
+				mo->vely = FLOAT2FIXED(preSlideVel.Y);
+			}
+		}
+
 		if (abs(mo->player->velx) > abs(mo->velx))
 			mo->player->velx = mo->velx;
 		if (abs(mo->player->vely) > abs(mo->vely))
@@ -5762,9 +5785,26 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 					if (!(flags & RADF_NODAMAGE) && !(bombspot->flags3 & MF3_BLOODLESSIMPACT))
 						P_TraceBleed(newdam > 0 ? newdam : damage, thing, bombspot);
 
-					if ((flags & RADF_NODAMAGE) || !(bombspot->flags2 & MF2_NODMGTHRUST))
+					if (((flags & RADF_NODAMAGE) && bombsource == NULL) || !(bombspot->flags2 & MF2_NODMGTHRUST))
 					{
-						if (bombsource == NULL || !(bombsource->flags2 & MF2_NODMGTHRUST))
+						// tweaked behavior rockets, only affects players
+						if ((flags & RADF_QROCKETJUMP) && thing->player != NULL)
+						{
+							fixed_t heightOffset = thing == bombsource ? thing->player->viewheight : thing->height / 2; // facilitates rocket jumps and behaves intuitively against opponents
+							FVector3 thingPos = { FIXED2FLOAT(thing->x), FIXED2FLOAT(thing->y) , FIXED2FLOAT(thing->z + heightOffset) };
+							FVector3 explosionToPlayer = thingPos - FVector3(FIXED2FLOAT(bombspot->x), FIXED2FLOAT(bombspot->y), FIXED2FLOAT(bombspot->z));
+							explosionToPlayer.MakeUnit();
+
+							int pushDamage = damage;
+							bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
+							pushDamage = MIN(pushDamage, (damage * 5) / 4); // put a cap on the push force
+							explosionToPlayer *= pushDamage * 0.35f;
+
+							thing->velx += FLOAT2FIXED(explosionToPlayer.X);
+							thing->vely += FLOAT2FIXED(explosionToPlayer.Y);
+							thing->velz += FLOAT2FIXED(explosionToPlayer.Z);
+						}
+						else
 						{
 							thrust = points * 0.5f / (double)thing->Mass;
 							if (bombsource == thing)
@@ -5772,14 +5812,6 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 								thrust *= selfthrustscale;
 							}
 							velz = (double)(thing->z + (thing->height >> 1) - bombspot->z) * thrust;
-							if (bombsource != thing)
-							{
-								velz *= 0.5f;
-							}
-							else
-							{
-								velz *= 0.8f;
-							}
 
 							// [BB] Potentially use the horizontal thrust of old ZDoom versions.
 							if ( zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST )

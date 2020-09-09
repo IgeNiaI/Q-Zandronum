@@ -107,7 +107,6 @@ enum
 #define	CLIENT_UPDATE_FORWARDMOVE		0x10
 #define	CLIENT_UPDATE_SIDEMOVE			0x20
 #define	CLIENT_UPDATE_UPMOVE			0x40
-#define	CLIENT_UPDATE_BUTTONS_LONG		0x80
 
 // [BC/BB] Flags to handle jumps in code pointers
 enum ClientJumpUpdateFlag
@@ -170,7 +169,8 @@ enum FlagSet
 	FLAGSET_FLAGS5,
 	FLAGSET_FLAGS6,
 	FLAGSET_FLAGS7,
-	FLAGSET_FLAGSST
+	FLAGSET_FLAGSST,
+	FLAGSET_MVFLAGS
 };
 
 enum ActorScaleFlag

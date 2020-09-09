@@ -1017,6 +1017,11 @@ FUNC(LS_ThrustThingZ)	// [BC]
 					victim->velz += thrust;
 			}
 
+			if (victim->player && victim->velz > 0)
+			{
+				victim->player->mo->wasJustThrustedZ = true;
+			}
+
 			// [BC] If we're the server, update the thing's velocity.
 			// [BB] Unfortunately there are sync issues, if we don't also update the actual position.
 			// Is there a way to fix this without sending the position?
@@ -1034,6 +1039,11 @@ FUNC(LS_ThrustThingZ)	// [BC]
 				it->velz = thrust;
 			else
 				it->velz += thrust;
+		}
+
+		if (it->player && it->velz > 0)
+		{
+			it->player->mo->wasJustThrustedZ = true;
 		}
 
 		// [BC] If we're the server, update the thing's velocity.

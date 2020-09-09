@@ -2150,12 +2150,6 @@ bool SERVER_GetUserInfo( BYTESTREAM_s *pByteStream, bool bAllowKick, bool bEnfor
 			pPlayer->userinfo.RailColorChanged ( value.ToLong() );
 		else if ( name == NAME_Handicap )
 			pPlayer->userinfo.HandicapChanged ( value.ToLong() );
-		// [BB]
-		else if ( name == NAME_CL_TicsPerUpdate )
-			pPlayer->userinfo.TicsPerUpdateChanged ( value.ToLong() );
-		// [BB]
-		else if ( name == NAME_CL_ConnectionType )
-			pPlayer->userinfo.ConnectionTypeChanged ( value.ToLong() );
 		// [CK] We use a bitfield now.
 		else if ( name == NAME_CL_ClientFlags )
 			pPlayer->userinfo.ClientFlagsChanged ( value.ToLong() );
@@ -2202,8 +2196,7 @@ bool SERVER_GetUserInfo( BYTESTREAM_s *pByteStream, bool bAllowKick, bool bEnfor
 	{
 		static const std::set<FName> required = {
 			NAME_Name, NAME_Autoaim, NAME_Gender, NAME_Skin, NAME_RailColor,
-			NAME_CL_ConnectionType, NAME_CL_ClientFlags,
-			NAME_Handicap, NAME_CL_TicsPerUpdate, NAME_Color
+			NAME_CL_ClientFlags, NAME_Handicap, NAME_Color
 		};
 		std::set<FName> missing;
 		std::set_difference( required.begin(), required.end(), names.begin(), names.end(),
@@ -2776,24 +2769,6 @@ void SERVER_WriteCommands( void )
 		if ( SERVER_GetClient ( ulIdx )->bWeaponChangeRequested && ( ( gametic - SERVER_GetClient ( ulIdx )->bLastWeaponChangeRequestTick ) > 2 ) )
 			SERVERCOMMANDS_Nothing( ulIdx, true );
 
-		// Don't need to update origin every tic. 
-		// [BB] The client decides how often he wants to be updated.
-		// The server sends origin and velocity of a 
-		// player and the client always knows origin on the next tic.
-		if (( gametic % players[ulIdx].userinfo.GetTicsPerUpdate() ) != 0 )
-			continue;
-
-		// [BB] You can be watching through the eyes of someone, even if you are not a spectator.
-		// If this player is watching through the eyes of another player, send this
-		// player some extra info about that player to make for a better watching
-		// experience.
-		if (( g_aClients[ulIdx].ulDisplayPlayer != ulIdx ) &&
-			( g_aClients[ulIdx].ulDisplayPlayer <= MAXPLAYERS ) &&
-			( players[g_aClients[ulIdx].ulDisplayPlayer].mo != NULL ))
-		{
-			SERVERCOMMANDS_UpdatePlayerExtraData( ulIdx, g_aClients[ulIdx].ulDisplayPlayer );
-		}
-
 		// See if any players need to be updated to clients.
 		// [BB] Only necessary if we are in a level.
 		if ( gamestate == GS_LEVEL )
@@ -2819,7 +2794,7 @@ void SERVER_WriteCommands( void )
 		if ( players[ulIdx].bSpectating || SERVER_GetClient ( ulIdx )->bFullUpdateIncomplete ) 
 		{
 			// Don't send this to bots.
-			if ((( gametic % ( players[ulIdx].userinfo.GetTicsPerUpdate() * TICRATE )) == 0 ) && ( players[ulIdx].bIsBot == false ) ) 
+			if ( players[ulIdx].bIsBot == false ) 
 			{
 				// Just send them one byte to let them know they're still alive.
 				// [BB] Send this as reliable packet to those who didn't get the full update yet (see above)
@@ -5172,7 +5147,7 @@ ClientMoveCommand::ClientMoveCommand ( BYTESTREAM_s *pByteStream )
 		pCmd->ucmd.roll = NETWORK_ReadShort( pByteStream );
 
 	if ( ulBits & CLIENT_UPDATE_BUTTONS )
-		pCmd->ucmd.buttons = ( ulBits & CLIENT_UPDATE_BUTTONS_LONG ) ? NETWORK_ReadLong( pByteStream ) : NETWORK_ReadByte( pByteStream );
+		pCmd->ucmd.buttons = NETWORK_ReadLong( pByteStream );
 
 	if ( ulBits & CLIENT_UPDATE_FORWARDMOVE )
 		pCmd->ucmd.forwardmove = NETWORK_ReadShort( pByteStream );

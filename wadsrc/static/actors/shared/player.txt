@@ -34,6 +34,35 @@ Actor PlayerPawn : Actor native
 	Player.FlechetteType "ArtiPoisonBag3"
 	Player.AirCapacity 1
 	Player.MaxSkinSizeFactor 3.44, 1.68 // [TP]
+	
+	Player.CrouchScale 0.5
+	Player.CrouchChangeSpeed 0.08
+	
+	Player.MvType 0 // movement type (0 == doom, 1 == quake, 2 == quake CPM)
+	
+	Player.FootstepInterval 12
+	Player.FootstepVolume 1.0
+	Player.JumpDelay 7
+	Player.SecondJumpZ 8
+	Player.MaxWallClimbTics 70
+	Player.WallFrictionEnabled 1
+	Player.CrouchSpeedFactor 0.5
+	Player.WalkSpeedFactor 0.75
+	Player.AirAcceleration 0.25
+	Player.DashForce 10.0
+	Player.DashDelay 35
+	
+	// MvType 1 or 2 only
+	Player.GroundAcceleration 10.0
+	Player.GroundFriction 6.0
+	Player.SlideAcceleration 10.0
+	Player.SlideFriction 1.0
+	Player.SlideMaxTics 70
+	
+	// MvType 2 only
+	Player.CpmAirAcceleration 17
+	Player.CpmMaxForwardAngleRad 0.122173 // 7 degrees
+	
 	Obituary "$OB_MPDEFAULT"
 }
 

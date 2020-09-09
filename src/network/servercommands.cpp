@@ -1,4 +1,4 @@
-// 165593acf9813c3b35b22b1d534008f6
+// 2512d2eb8f67e73a8d482776222a5e48
 // This file has been automatically generated. Do not edit by hand.
 #include "cl_main.h"
 #include "servercommands.h"
@@ -298,14 +298,22 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			command.flags = NETWORK_ReadByte( bytestream );
 			if ( command.IsVisible() )
 			{
+				command.clientTicOnServerEnd = NETWORK_ReadLong( bytestream );
 				command.x = NETWORK_ReadLong( bytestream );
 				command.y = NETWORK_ReadLong( bytestream );
-				command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
+				command.z = NETWORK_ReadLong( bytestream );
+				command.waterlevel = NETWORK_ReadByte( bytestream );
 				command.angle = NETWORK_ReadLong( bytestream );
-				command.velx = NETWORK_ReadShort( bytestream ) << FRACBITS;
-				command.vely = NETWORK_ReadShort( bytestream ) << FRACBITS;
-				command.velz = NETWORK_ReadShort( bytestream ) << FRACBITS;
-				command.isCrouching = NETWORK_ReadBit( bytestream );
+				command.pitch = NETWORK_ReadLong( bytestream );
+				command.velx = NETWORK_ReadLong( bytestream );
+				command.vely = NETWORK_ReadLong( bytestream );
+				command.velz = NETWORK_ReadLong( bytestream );
+				command.ucmd_forwardmove = NETWORK_ReadShort( bytestream );
+				command.ucmd_sidemove = NETWORK_ReadShort( bytestream );
+				command.ucmd_upmove = NETWORK_ReadShort( bytestream );
+				command.ucmd_yaw = NETWORK_ReadShort( bytestream );
+				command.ucmd_pitch = NETWORK_ReadShort( bytestream );
+				command.ucmd_buttons = NETWORK_ReadLong( bytestream );
 			}
 			temp2 = command.player - players;
 
@@ -1084,50 +1092,17 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 		}
 		return true;
 
-	case SVC_UPDATEPLAYEREXTRADATA:
+	case SVC_UPDATEPLAYERTIME:
 		{
-			ServerCommands::UpdatePlayerExtraData command;
+			ServerCommands::UpdatePlayerTime command;
 			int temp36;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
-			command.pitch = NETWORK_ReadLong( bytestream );
-			command.waterLevel = NETWORK_ReadByte( bytestream );
-			command.buttons = NETWORK_ReadByte( bytestream );
-			command.viewZ = NETWORK_ReadLong( bytestream );
-			command.bob = NETWORK_ReadLong( bytestream );
+			command.time = NETWORK_ReadShort( bytestream );
 			temp36 = command.player - players;
 
 			if ( PLAYER_IsValidPlayer( temp36 ) == false )
 			{
-				CLIENT_PrintWarning( "UpdatePlayerExtraData: Invalid player number: %d\n", temp36 );
-				return true;
-			}
-
-
-			if ( command.player->mo == NULL )
-				return true;
-
-			if ( bytestream->pbStream > bytestream->pbStreamEnd )
-			{
-				CLIENT_PrintWarning( "UpdatePlayerExtraData: Packet contained %td too few bytes\n",
-					bytestream->pbStream - bytestream->pbStreamEnd );
-				return true;
-			}
-
-			command.Execute();
-		}
-		return true;
-
-	case SVC_UPDATEPLAYERTIME:
-		{
-			ServerCommands::UpdatePlayerTime command;
-			int temp37;
-			command.player = &players[NETWORK_ReadByte( bytestream )];
-			command.time = NETWORK_ReadShort( bytestream );
-			temp37 = command.player - players;
-
-			if ( PLAYER_IsValidPlayer( temp37 ) == false )
-			{
-				CLIENT_PrintWarning( "UpdatePlayerTime: Invalid player number: %d\n", temp37 );
+				CLIENT_PrintWarning( "UpdatePlayerTime: Invalid player number: %d\n", temp36 );
 				return true;
 			}
 
@@ -1167,13 +1142,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DISCONNECTPLAYER:
 		{
 			ServerCommands::DisconnectPlayer command;
-			int temp38;
+			int temp37;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
-			temp38 = command.player - players;
+			temp37 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp38 ) == false )
+			if ( PLAYER_IsValidPlayer( temp37 ) == false )
 			{
-				CLIENT_PrintWarning( "DisconnectPlayer: Invalid player number: %d\n", temp38 );
+				CLIENT_PrintWarning( "DisconnectPlayer: Invalid player number: %d\n", temp37 );
 				return true;
 			}
 
@@ -1213,14 +1188,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_GIVEPLAYERMEDAL:
 		{
 			ServerCommands::GivePlayerMedal command;
-			int temp39;
+			int temp38;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
 			command.medal = NETWORK_ReadByte( bytestream );
-			temp39 = command.player - players;
+			temp38 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp39 ) == false )
+			if ( PLAYER_IsValidPlayer( temp38 ) == false )
 			{
-				CLIENT_PrintWarning( "GivePlayerMedal: Invalid player number: %d\n", temp39 );
+				CLIENT_PrintWarning( "GivePlayerMedal: Invalid player number: %d\n", temp38 );
 				return true;
 			}
 
@@ -1245,14 +1220,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_PLAYERISSPECTATOR:
 		{
 			ServerCommands::PlayerIsSpectator command;
-			int temp40;
+			int temp39;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
 			command.deadSpectator = NETWORK_ReadBit( bytestream );
-			temp40 = command.player - players;
+			temp39 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp40 ) == false )
+			if ( PLAYER_IsValidPlayer( temp39 ) == false )
 			{
-				CLIENT_PrintWarning( "PlayerIsSpectator: Invalid player number: %d\n", temp40 );
+				CLIENT_PrintWarning( "PlayerIsSpectator: Invalid player number: %d\n", temp39 );
 				return true;
 			}
 
@@ -1287,13 +1262,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_PLAYERTAUNT:
 		{
 			ServerCommands::PlayerTaunt command;
-			int temp41;
+			int temp40;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
-			temp41 = command.player - players;
+			temp40 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp41 ) == false )
+			if ( PLAYER_IsValidPlayer( temp40 ) == false )
 			{
-				CLIENT_PrintWarning( "PlayerTaunt: Invalid player number: %d\n", temp41 );
+				CLIENT_PrintWarning( "PlayerTaunt: Invalid player number: %d\n", temp40 );
 				return true;
 			}
 
@@ -1315,13 +1290,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_PLAYERRESPAWNINVULNERABILITY:
 		{
 			ServerCommands::PlayerRespawnInvulnerability command;
-			int temp42;
+			int temp41;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
-			temp42 = command.player - players;
+			temp41 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp42 ) == false )
+			if ( PLAYER_IsValidPlayer( temp41 ) == false )
 			{
-				CLIENT_PrintWarning( "PlayerRespawnInvulnerability: Invalid player number: %d\n", temp42 );
+				CLIENT_PrintWarning( "PlayerRespawnInvulnerability: Invalid player number: %d\n", temp41 );
 				return true;
 			}
 
@@ -1343,21 +1318,21 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_PLAYERUSEINVENTORY:
 		{
 			ServerCommands::PlayerUseInventory command;
+			int temp42;
 			int temp43;
-			int temp44;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
-			temp43 = NETWORK_ReadShort( bytestream );
-			command.itemType = NETWORK_GetClassFromIdentification( temp43 );
+			temp42 = NETWORK_ReadShort( bytestream );
+			command.itemType = NETWORK_GetClassFromIdentification( temp42 );
 
 			if ( command.itemType->IsDescendantOf( RUNTIME_CLASS( AInventory )) == false )
 				command.itemType = NULL;
 
 
-			temp44 = command.player - players;
+			temp43 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp44 ) == false )
+			if ( PLAYER_IsValidPlayer( temp43 ) == false )
 			{
-				CLIENT_PrintWarning( "PlayerUseInventory: Invalid player number: %d\n", temp44 );
+				CLIENT_PrintWarning( "PlayerUseInventory: Invalid player number: %d\n", temp43 );
 				return true;
 			}
 
@@ -1368,7 +1343,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.itemType == NULL )
 			{
-				CLIENT_PrintWarning( "PlayerUseInventory: unknown class ID for itemType: %d\n", temp43 );
+				CLIENT_PrintWarning( "PlayerUseInventory: unknown class ID for itemType: %d\n", temp42 );
 				return true;
 			}
 
@@ -1387,21 +1362,21 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_PLAYERDROPINVENTORY:
 		{
 			ServerCommands::PlayerDropInventory command;
+			int temp44;
 			int temp45;
-			int temp46;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
-			temp45 = NETWORK_ReadShort( bytestream );
-			command.itemType = NETWORK_GetClassFromIdentification( temp45 );
+			temp44 = NETWORK_ReadShort( bytestream );
+			command.itemType = NETWORK_GetClassFromIdentification( temp44 );
 
 			if ( command.itemType->IsDescendantOf( RUNTIME_CLASS( AInventory )) == false )
 				command.itemType = NULL;
 
 
-			temp46 = command.player - players;
+			temp45 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp46 ) == false )
+			if ( PLAYER_IsValidPlayer( temp45 ) == false )
 			{
-				CLIENT_PrintWarning( "PlayerDropInventory: Invalid player number: %d\n", temp46 );
+				CLIENT_PrintWarning( "PlayerDropInventory: Invalid player number: %d\n", temp45 );
 				return true;
 			}
 
@@ -1412,7 +1387,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.itemType == NULL )
 			{
-				CLIENT_PrintWarning( "PlayerDropInventory: unknown class ID for itemType: %d\n", temp45 );
+				CLIENT_PrintWarning( "PlayerDropInventory: unknown class ID for itemType: %d\n", temp44 );
 				return true;
 			}
 
@@ -1579,17 +1554,17 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNTHING:
 		{
 			ServerCommands::SpawnThing command;
-			int temp47;
+			int temp46;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			temp47 = NETWORK_ReadShort( bytestream );
-			command.type = NETWORK_GetClassFromIdentification( temp47 );
+			temp46 = NETWORK_ReadShort( bytestream );
+			command.type = NETWORK_GetClassFromIdentification( temp46 );
 			command.id = NETWORK_ReadShort( bytestream );
 
 			if ( command.type == NULL )
 			{
-				CLIENT_PrintWarning( "SpawnThing: unknown class ID for type: %d\n", temp47 );
+				CLIENT_PrintWarning( "SpawnThing: unknown class ID for type: %d\n", temp46 );
 				return true;
 			}
 
@@ -1608,16 +1583,16 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNTHINGNONETID:
 		{
 			ServerCommands::SpawnThingNoNetID command;
-			int temp48;
+			int temp47;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			temp48 = NETWORK_ReadShort( bytestream );
-			command.type = NETWORK_GetClassFromIdentification( temp48 );
+			temp47 = NETWORK_ReadShort( bytestream );
+			command.type = NETWORK_GetClassFromIdentification( temp47 );
 
 			if ( command.type == NULL )
 			{
-				CLIENT_PrintWarning( "SpawnThingNoNetID: unknown class ID for type: %d\n", temp48 );
+				CLIENT_PrintWarning( "SpawnThingNoNetID: unknown class ID for type: %d\n", temp47 );
 				return true;
 			}
 
@@ -1636,17 +1611,17 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNTHINGEXACT:
 		{
 			ServerCommands::SpawnThingExact command;
-			int temp49;
+			int temp48;
 			command.x = NETWORK_ReadLong( bytestream );
 			command.y = NETWORK_ReadLong( bytestream );
 			command.z = NETWORK_ReadLong( bytestream );
-			temp49 = NETWORK_ReadShort( bytestream );
-			command.type = NETWORK_GetClassFromIdentification( temp49 );
+			temp48 = NETWORK_ReadShort( bytestream );
+			command.type = NETWORK_GetClassFromIdentification( temp48 );
 			command.id = NETWORK_ReadShort( bytestream );
 
 			if ( command.type == NULL )
 			{
-				CLIENT_PrintWarning( "SpawnThingExact: unknown class ID for type: %d\n", temp49 );
+				CLIENT_PrintWarning( "SpawnThingExact: unknown class ID for type: %d\n", temp48 );
 				return true;
 			}
 
@@ -1665,16 +1640,16 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNTHINGEXACTNONETID:
 		{
 			ServerCommands::SpawnThingExactNoNetID command;
-			int temp50;
+			int temp49;
 			command.x = NETWORK_ReadLong( bytestream );
 			command.y = NETWORK_ReadLong( bytestream );
 			command.z = NETWORK_ReadLong( bytestream );
-			temp50 = NETWORK_ReadShort( bytestream );
-			command.type = NETWORK_GetClassFromIdentification( temp50 );
+			temp49 = NETWORK_ReadShort( bytestream );
+			command.type = NETWORK_GetClassFromIdentification( temp49 );
 
 			if ( command.type == NULL )
 			{
-				CLIENT_PrintWarning( "SpawnThingExactNoNetID: unknown class ID for type: %d\n", temp50 );
+				CLIENT_PrintWarning( "SpawnThingExactNoNetID: unknown class ID for type: %d\n", temp49 );
 				return true;
 			}
 
@@ -1693,8 +1668,8 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_MOVETHING:
 		{
 			ServerCommands::MoveThing command;
-			int temp51;
-			temp51 = NETWORK_ReadShort( bytestream );
+			int temp50;
+			temp50 = NETWORK_ReadShort( bytestream );
 			command.bits = NETWORK_ReadShort( bytestream );
 			if ( command.ContainsNewX() )
 			{
@@ -1744,7 +1719,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			{
 				command.movedir = NETWORK_ReadByte( bytestream );
 			}
-			if ( CLIENT_ReadActorFromNetID( temp51, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp50, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"MoveThing", "actor" ) == false )
 			{
@@ -1802,8 +1777,8 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_MOVETHINGEXACT:
 		{
 			ServerCommands::MoveThingExact command;
-			int temp52;
-			temp52 = NETWORK_ReadShort( bytestream );
+			int temp51;
+			temp51 = NETWORK_ReadShort( bytestream );
 			command.bits = NETWORK_ReadShort( bytestream );
 			if ( command.ContainsNewX() )
 			{
@@ -1853,7 +1828,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			{
 				command.movedir = NETWORK_ReadByte( bytestream );
 			}
-			if ( CLIENT_ReadActorFromNetID( temp52, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp51, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"MoveThingExact", "actor" ) == false )
 			{
@@ -1911,15 +1886,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_KILLTHING:
 		{
 			ServerCommands::KillThing command;
+			int temp52;
 			int temp53;
 			int temp54;
-			int temp55;
-			temp53 = NETWORK_ReadShort( bytestream );
+			temp52 = NETWORK_ReadShort( bytestream );
 			command.health = NETWORK_ReadShort( bytestream );
 			command.damageType = NETWORK_ReadString( bytestream );
+			temp53 = NETWORK_ReadShort( bytestream );
 			temp54 = NETWORK_ReadShort( bytestream );
-			temp55 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp53, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp52, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.victim ),
 											"KillThing", "victim" ) == false )
 			{
@@ -1927,7 +1902,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			}
 
 
-			if ( CLIENT_ReadActorFromNetID( temp54, RUNTIME_CLASS( AActor ), true,
+			if ( CLIENT_ReadActorFromNetID( temp53, RUNTIME_CLASS( AActor ), true,
 											reinterpret_cast<AActor *&>( command.source ),
 											"KillThing", "source" ) == false )
 			{
@@ -1935,7 +1910,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			}
 
 
-			if ( CLIENT_ReadActorFromNetID( temp55, RUNTIME_CLASS( AActor ), true,
+			if ( CLIENT_ReadActorFromNetID( temp54, RUNTIME_CLASS( AActor ), true,
 											reinterpret_cast<AActor *&>( command.inflictor ),
 											"KillThing", "inflictor" ) == false )
 			{
@@ -1957,10 +1932,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGSTATE:
 		{
 			ServerCommands::SetThingState command;
-			int temp56;
-			temp56 = NETWORK_ReadShort( bytestream );
+			int temp55;
+			temp55 = NETWORK_ReadShort( bytestream );
 			command.state = NETWORK_ReadByte( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp56, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp55, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingState", "actor" ) == false )
 			{
@@ -1982,11 +1957,11 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGTARGET:
 		{
 			ServerCommands::SetThingTarget command;
+			int temp56;
 			int temp57;
-			int temp58;
+			temp56 = NETWORK_ReadShort( bytestream );
 			temp57 = NETWORK_ReadShort( bytestream );
-			temp58 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp57, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp56, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingTarget", "actor" ) == false )
 			{
@@ -1994,7 +1969,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			}
 
 
-			if ( CLIENT_ReadActorFromNetID( temp58, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp57, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.target ),
 											"SetThingTarget", "target" ) == false )
 			{
@@ -2016,9 +1991,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DESTROYTHING:
 		{
 			ServerCommands::DestroyThing command;
-			int temp59;
-			temp59 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp59, RUNTIME_CLASS( AActor ), false,
+			int temp58;
+			temp58 = NETWORK_ReadShort( bytestream );
+			if ( CLIENT_ReadActorFromNetID( temp58, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"DestroyThing", "actor" ) == false )
 			{
@@ -2040,10 +2015,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGANGLE:
 		{
 			ServerCommands::SetThingAngle command;
-			int temp60;
-			temp60 = NETWORK_ReadShort( bytestream );
+			int temp59;
+			temp59 = NETWORK_ReadShort( bytestream );
 			command.angle = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			if ( CLIENT_ReadActorFromNetID( temp60, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp59, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingAngle", "actor" ) == false )
 			{
@@ -2065,10 +2040,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGANGLEEXACT:
 		{
 			ServerCommands::SetThingAngleExact command;
-			int temp61;
-			temp61 = NETWORK_ReadShort( bytestream );
+			int temp60;
+			temp60 = NETWORK_ReadShort( bytestream );
 			command.angle = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp61, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp60, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingAngleExact", "actor" ) == false )
 			{
@@ -2090,10 +2065,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGWATERLEVEL:
 		{
 			ServerCommands::SetThingWaterLevel command;
-			int temp62;
-			temp62 = NETWORK_ReadShort( bytestream );
+			int temp61;
+			temp61 = NETWORK_ReadShort( bytestream );
 			command.waterlevel = NETWORK_ReadByte( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp62, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp61, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingWaterLevel", "actor" ) == false )
 			{
@@ -2115,11 +2090,11 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGFLAGS:
 		{
 			ServerCommands::SetThingFlags command;
-			int temp63;
-			temp63 = NETWORK_ReadShort( bytestream );
+			int temp62;
+			temp62 = NETWORK_ReadShort( bytestream );
 			command.flagset = NETWORK_ReadByte( bytestream );
 			command.flags = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp63, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp62, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingFlags", "actor" ) == false )
 			{
@@ -2141,14 +2116,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGARGUMENTS:
 		{
 			ServerCommands::SetThingArguments command;
-			int temp64;
-			temp64 = NETWORK_ReadShort( bytestream );
+			int temp63;
+			temp63 = NETWORK_ReadShort( bytestream );
 			command.arg0 = NETWORK_ReadLong( bytestream );
 			command.arg1 = NETWORK_ReadLong( bytestream );
 			command.arg2 = NETWORK_ReadLong( bytestream );
 			command.arg3 = NETWORK_ReadLong( bytestream );
 			command.arg4 = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp64, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp63, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingArguments", "actor" ) == false )
 			{
@@ -2170,10 +2145,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGTRANSLATION:
 		{
 			ServerCommands::SetThingTranslation command;
-			int temp65;
-			temp65 = NETWORK_ReadShort( bytestream );
+			int temp64;
+			temp64 = NETWORK_ReadShort( bytestream );
 			command.translation = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp65, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp64, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingTranslation", "actor" ) == false )
 			{
@@ -2195,11 +2170,11 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGPROPERTY:
 		{
 			ServerCommands::SetThingProperty command;
-			int temp66;
-			temp66 = NETWORK_ReadShort( bytestream );
+			int temp65;
+			temp65 = NETWORK_ReadShort( bytestream );
 			command.property = NETWORK_ReadByte( bytestream );
 			command.value = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp66, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp65, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingProperty", "actor" ) == false )
 			{
@@ -2221,11 +2196,11 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGSOUND:
 		{
 			ServerCommands::SetThingSound command;
-			int temp67;
-			temp67 = NETWORK_ReadShort( bytestream );
+			int temp66;
+			temp66 = NETWORK_ReadShort( bytestream );
 			command.soundType = NETWORK_ReadByte( bytestream );
 			command.sound = NETWORK_ReadString( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp67, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp66, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingSound", "actor" ) == false )
 			{
@@ -2247,12 +2222,12 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGSPAWNPOINT:
 		{
 			ServerCommands::SetThingSpawnPoint command;
-			int temp68;
-			temp68 = NETWORK_ReadShort( bytestream );
+			int temp67;
+			temp67 = NETWORK_ReadShort( bytestream );
 			command.spawnPointX = NETWORK_ReadLong( bytestream );
 			command.spawnPointY = NETWORK_ReadLong( bytestream );
 			command.spawnPointZ = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp68, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp67, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingSpawnPoint", "actor" ) == false )
 			{
@@ -2274,10 +2249,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGSPECIAL1:
 		{
 			ServerCommands::SetThingSpecial1 command;
-			int temp69;
-			temp69 = NETWORK_ReadShort( bytestream );
+			int temp68;
+			temp68 = NETWORK_ReadShort( bytestream );
 			command.special1 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp69, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp68, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingSpecial1", "actor" ) == false )
 			{
@@ -2299,10 +2274,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGSPECIAL2:
 		{
 			ServerCommands::SetThingSpecial2 command;
-			int temp70;
-			temp70 = NETWORK_ReadShort( bytestream );
+			int temp69;
+			temp69 = NETWORK_ReadShort( bytestream );
 			command.special2 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp70, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp69, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingSpecial2", "actor" ) == false )
 			{
@@ -2324,10 +2299,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGTICS:
 		{
 			ServerCommands::SetThingTics command;
-			int temp71;
-			temp71 = NETWORK_ReadShort( bytestream );
+			int temp70;
+			temp70 = NETWORK_ReadShort( bytestream );
 			command.tics = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp71, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp70, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingTics", "actor" ) == false )
 			{
@@ -2349,10 +2324,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGTID:
 		{
 			ServerCommands::SetThingTID command;
-			int temp72;
-			temp72 = NETWORK_ReadShort( bytestream );
+			int temp71;
+			temp71 = NETWORK_ReadShort( bytestream );
 			command.tid = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp72, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp71, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingTID", "actor" ) == false )
 			{
@@ -2374,10 +2349,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGGRAVITY:
 		{
 			ServerCommands::SetThingGravity command;
-			int temp73;
-			temp73 = NETWORK_ReadShort( bytestream );
+			int temp72;
+			temp72 = NETWORK_ReadShort( bytestream );
 			command.gravity = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp73, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp72, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingGravity", "actor" ) == false )
 			{
@@ -2399,18 +2374,18 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGFRAME:
 		{
 			ServerCommands::SetThingFrame command;
+			int temp73;
 			int temp74;
-			int temp75;
+			temp73 = NETWORK_ReadShort( bytestream );
 			temp74 = NETWORK_ReadShort( bytestream );
-			temp75 = NETWORK_ReadShort( bytestream );
-			command.stateOwner = NETWORK_GetClassFromIdentification( temp75 );
+			command.stateOwner = NETWORK_GetClassFromIdentification( temp74 );
 
 			if ( command.stateOwner->IsDescendantOf( RUNTIME_CLASS( AActor )) == false )
 				command.stateOwner = NULL;
 
 
 			command.offset = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp74, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp73, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingFrame", "actor" ) == false )
 			{
@@ -2421,7 +2396,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.stateOwner == NULL )
 			{
-				CLIENT_PrintWarning( "SetThingFrame: unknown class ID for stateOwner: %d\n", temp75 );
+				CLIENT_PrintWarning( "SetThingFrame: unknown class ID for stateOwner: %d\n", temp74 );
 				return true;
 			}
 
@@ -2440,18 +2415,18 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGFRAMENF:
 		{
 			ServerCommands::SetThingFrameNF command;
+			int temp75;
 			int temp76;
-			int temp77;
+			temp75 = NETWORK_ReadShort( bytestream );
 			temp76 = NETWORK_ReadShort( bytestream );
-			temp77 = NETWORK_ReadShort( bytestream );
-			command.stateOwner = NETWORK_GetClassFromIdentification( temp77 );
+			command.stateOwner = NETWORK_GetClassFromIdentification( temp76 );
 
 			if ( command.stateOwner->IsDescendantOf( RUNTIME_CLASS( AActor )) == false )
 				command.stateOwner = NULL;
 
 
 			command.offset = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp76, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp75, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingFrameNF", "actor" ) == false )
 			{
@@ -2462,7 +2437,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.stateOwner == NULL )
 			{
-				CLIENT_PrintWarning( "SetThingFrameNF: unknown class ID for stateOwner: %d\n", temp77 );
+				CLIENT_PrintWarning( "SetThingFrameNF: unknown class ID for stateOwner: %d\n", temp76 );
 				return true;
 			}
 
@@ -2481,11 +2456,11 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETWEAPONAMMOGIVE:
 		{
 			ServerCommands::SetWeaponAmmoGive command;
-			int temp78;
-			temp78 = NETWORK_ReadShort( bytestream );
+			int temp77;
+			temp77 = NETWORK_ReadShort( bytestream );
 			command.ammoGive1 = NETWORK_ReadShort( bytestream );
 			command.ammoGive2 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp78, RUNTIME_CLASS( AWeapon ), false,
+			if ( CLIENT_ReadActorFromNetID( temp77, RUNTIME_CLASS( AWeapon ), false,
 											reinterpret_cast<AActor *&>( command.weapon ),
 											"SetWeaponAmmoGive", "weapon" ) == false )
 			{
@@ -2507,10 +2482,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_THINGISCORPSE:
 		{
 			ServerCommands::ThingIsCorpse command;
-			int temp79;
-			temp79 = NETWORK_ReadShort( bytestream );
+			int temp78;
+			temp78 = NETWORK_ReadShort( bytestream );
 			command.isMonster = NETWORK_ReadBit( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp79, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp78, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"ThingIsCorpse", "actor" ) == false )
 			{
@@ -2532,9 +2507,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_HIDETHING:
 		{
 			ServerCommands::HideThing command;
-			int temp80;
-			temp80 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp80, RUNTIME_CLASS( AInventory ), false,
+			int temp79;
+			temp79 = NETWORK_ReadShort( bytestream );
+			if ( CLIENT_ReadActorFromNetID( temp79, RUNTIME_CLASS( AInventory ), false,
 											reinterpret_cast<AActor *&>( command.item ),
 											"HideThing", "item" ) == false )
 			{
@@ -2556,8 +2531,8 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_TELEPORTTHING:
 		{
 			ServerCommands::TeleportThing command;
-			int temp81;
-			temp81 = NETWORK_ReadShort( bytestream );
+			int temp80;
+			temp80 = NETWORK_ReadShort( bytestream );
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
@@ -2569,7 +2544,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			command.sourcefog = NETWORK_ReadBit( bytestream );
 			command.destfog = NETWORK_ReadBit( bytestream );
 			command.teleportzoom = NETWORK_ReadBit( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp81, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp80, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"TeleportThing", "actor" ) == false )
 			{
@@ -2591,11 +2566,11 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_THINGACTIVATE:
 		{
 			ServerCommands::ThingActivate command;
+			int temp81;
 			int temp82;
-			int temp83;
+			temp81 = NETWORK_ReadShort( bytestream );
 			temp82 = NETWORK_ReadShort( bytestream );
-			temp83 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp82, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp81, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"ThingActivate", "actor" ) == false )
 			{
@@ -2603,7 +2578,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			}
 
 
-			if ( CLIENT_ReadActorFromNetID( temp83, RUNTIME_CLASS( AActor ), true,
+			if ( CLIENT_ReadActorFromNetID( temp82, RUNTIME_CLASS( AActor ), true,
 											reinterpret_cast<AActor *&>( command.activator ),
 											"ThingActivate", "activator" ) == false )
 			{
@@ -2625,11 +2600,11 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_THINGDEACTIVATE:
 		{
 			ServerCommands::ThingDeactivate command;
+			int temp83;
 			int temp84;
-			int temp85;
+			temp83 = NETWORK_ReadShort( bytestream );
 			temp84 = NETWORK_ReadShort( bytestream );
-			temp85 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp84, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp83, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"ThingDeactivate", "actor" ) == false )
 			{
@@ -2637,7 +2612,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			}
 
 
-			if ( CLIENT_ReadActorFromNetID( temp85, RUNTIME_CLASS( AActor ), true,
+			if ( CLIENT_ReadActorFromNetID( temp84, RUNTIME_CLASS( AActor ), true,
 											reinterpret_cast<AActor *&>( command.activator ),
 											"ThingDeactivate", "activator" ) == false )
 			{
@@ -2659,10 +2634,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_RESPAWNDOOMTHING:
 		{
 			ServerCommands::RespawnDoomThing command;
-			int temp86;
-			temp86 = NETWORK_ReadShort( bytestream );
+			int temp85;
+			temp85 = NETWORK_ReadShort( bytestream );
 			command.fog = NETWORK_ReadBit( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp86, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp85, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"RespawnDoomThing", "actor" ) == false )
 			{
@@ -2684,9 +2659,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_RESPAWNRAVENTHING:
 		{
 			ServerCommands::RespawnRavenThing command;
-			int temp87;
-			temp87 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp87, RUNTIME_CLASS( AActor ), false,
+			int temp86;
+			temp86 = NETWORK_ReadShort( bytestream );
+			if ( CLIENT_ReadActorFromNetID( temp86, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"RespawnRavenThing", "actor" ) == false )
 			{
@@ -2708,14 +2683,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNBLOOD:
 		{
 			ServerCommands::SpawnBlood command;
-			int temp88;
+			int temp87;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.dir = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.damage = NETWORK_ReadByte( bytestream );
-			temp88 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp88, RUNTIME_CLASS( AActor ), false,
+			temp87 = NETWORK_ReadShort( bytestream );
+			if ( CLIENT_ReadActorFromNetID( temp87, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.originator ),
 											"SpawnBlood", "originator" ) == false )
 			{
@@ -2737,12 +2712,12 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNBLOODSPLATTER:
 		{
 			ServerCommands::SpawnBloodSplatter command;
-			int temp89;
+			int temp88;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			temp89 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp89, RUNTIME_CLASS( AActor ), false,
+			temp88 = NETWORK_ReadShort( bytestream );
+			if ( CLIENT_ReadActorFromNetID( temp88, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.originator ),
 											"SpawnBloodSplatter", "originator" ) == false )
 			{
@@ -2764,12 +2739,12 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNBLOODSPLATTER2:
 		{
 			ServerCommands::SpawnBloodSplatter2 command;
-			int temp90;
+			int temp89;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			temp90 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp90, RUNTIME_CLASS( AActor ), false,
+			temp89 = NETWORK_ReadShort( bytestream );
+			if ( CLIENT_ReadActorFromNetID( temp89, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.originator ),
 											"SpawnBloodSplatter2", "originator" ) == false )
 			{
@@ -2791,17 +2766,17 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNPUFF:
 		{
 			ServerCommands::SpawnPuff command;
-			int temp91;
+			int temp90;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			temp91 = NETWORK_ReadShort( bytestream );
-			command.pufftype = NETWORK_GetClassFromIdentification( temp91 );
+			temp90 = NETWORK_ReadShort( bytestream );
+			command.pufftype = NETWORK_GetClassFromIdentification( temp90 );
 			command.id = NETWORK_ReadShort( bytestream );
 
 			if ( command.pufftype == NULL )
 			{
-				CLIENT_PrintWarning( "SpawnPuff: unknown class ID for pufftype: %d\n", temp91 );
+				CLIENT_PrintWarning( "SpawnPuff: unknown class ID for pufftype: %d\n", temp90 );
 				return true;
 			}
 
@@ -2820,12 +2795,12 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNPUFFNONETID:
 		{
 			ServerCommands::SpawnPuffNoNetID command;
-			int temp92;
+			int temp91;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			temp92 = NETWORK_ReadShort( bytestream );
-			command.pufftype = NETWORK_GetClassFromIdentification( temp92 );
+			temp91 = NETWORK_ReadShort( bytestream );
+			command.pufftype = NETWORK_GetClassFromIdentification( temp91 );
 			command.stateid = NETWORK_ReadByte( bytestream );
 			command.receiveTranslation = NETWORK_ReadBit( bytestream );
 			if ( command.ContainsTranslation() )
@@ -2835,7 +2810,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.pufftype == NULL )
 			{
-				CLIENT_PrintWarning( "SpawnPuffNoNetID: unknown class ID for pufftype: %d\n", temp92 );
+				CLIENT_PrintWarning( "SpawnPuffNoNetID: unknown class ID for pufftype: %d\n", temp91 );
 				return true;
 			}
 
@@ -2857,14 +2832,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORFLOORPLANE:
 		{
 			ServerCommands::SetSectorFloorPlane command;
-			int temp93;
-			temp93 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp93 );
+			int temp92;
+			temp92 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp92 );
 			command.height = NETWORK_ReadShort( bytestream ) << FRACBITS;
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorFloorPlane: couldn't find sector: %d\n", temp93 );
+				CLIENT_PrintWarning( "SetSectorFloorPlane: couldn't find sector: %d\n", temp92 );
 				return true;
 			}
 
@@ -2883,14 +2858,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORCEILINGPLANE:
 		{
 			ServerCommands::SetSectorCeilingPlane command;
-			int temp94;
-			temp94 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp94 );
+			int temp93;
+			temp93 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp93 );
 			command.height = NETWORK_ReadShort( bytestream ) << FRACBITS;
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorCeilingPlane: couldn't find sector: %d\n", temp94 );
+				CLIENT_PrintWarning( "SetSectorCeilingPlane: couldn't find sector: %d\n", temp93 );
 				return true;
 			}
 
@@ -2909,16 +2884,16 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORFLOORPLANESLOPE:
 		{
 			ServerCommands::SetSectorFloorPlaneSlope command;
-			int temp95;
-			temp95 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp95 );
+			int temp94;
+			temp94 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp94 );
 			command.a = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.b = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.c = NETWORK_ReadShort( bytestream ) << FRACBITS;
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorFloorPlaneSlope: couldn't find sector: %d\n", temp95 );
+				CLIENT_PrintWarning( "SetSectorFloorPlaneSlope: couldn't find sector: %d\n", temp94 );
 				return true;
 			}
 
@@ -2937,16 +2912,16 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORCEILINGPLANESLOPE:
 		{
 			ServerCommands::SetSectorCeilingPlaneSlope command;
-			int temp96;
-			temp96 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp96 );
+			int temp95;
+			temp95 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp95 );
 			command.a = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.b = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.c = NETWORK_ReadShort( bytestream ) << FRACBITS;
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorCeilingPlaneSlope: couldn't find sector: %d\n", temp96 );
+				CLIENT_PrintWarning( "SetSectorCeilingPlaneSlope: couldn't find sector: %d\n", temp95 );
 				return true;
 			}
 
@@ -2965,14 +2940,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORLIGHTLEVEL:
 		{
 			ServerCommands::SetSectorLightLevel command;
-			int temp97;
-			temp97 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp97 );
+			int temp96;
+			temp96 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp96 );
 			command.lightLevel = NETWORK_ReadShort( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorLightLevel: couldn't find sector: %d\n", temp97 );
+				CLIENT_PrintWarning( "SetSectorLightLevel: couldn't find sector: %d\n", temp96 );
 				return true;
 			}
 
@@ -2991,9 +2966,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORCOLOR:
 		{
 			ServerCommands::SetSectorColor command;
-			int temp98;
-			temp98 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp98 );
+			int temp97;
+			temp97 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp97 );
 			command.red = NETWORK_ReadByte( bytestream );
 			command.green = NETWORK_ReadByte( bytestream );
 			command.blue = NETWORK_ReadByte( bytestream );
@@ -3001,7 +2976,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorColor: couldn't find sector: %d\n", temp98 );
+				CLIENT_PrintWarning( "SetSectorColor: couldn't find sector: %d\n", temp97 );
 				return true;
 			}
 
@@ -3039,16 +3014,16 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORFADE:
 		{
 			ServerCommands::SetSectorFade command;
-			int temp99;
-			temp99 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp99 );
+			int temp98;
+			temp98 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp98 );
 			command.red = NETWORK_ReadByte( bytestream );
 			command.green = NETWORK_ReadByte( bytestream );
 			command.blue = NETWORK_ReadByte( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorFade: couldn't find sector: %d\n", temp99 );
+				CLIENT_PrintWarning( "SetSectorFade: couldn't find sector: %d\n", temp98 );
 				return true;
 			}
 
@@ -3085,15 +3060,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORFLAT:
 		{
 			ServerCommands::SetSectorFlat command;
-			int temp100;
-			temp100 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp100 );
+			int temp99;
+			temp99 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp99 );
 			command.ceilingFlatName = NETWORK_ReadString( bytestream );
 			command.floorFlatName = NETWORK_ReadString( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorFlat: couldn't find sector: %d\n", temp100 );
+				CLIENT_PrintWarning( "SetSectorFlat: couldn't find sector: %d\n", temp99 );
 				return true;
 			}
 
@@ -3112,9 +3087,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORPANNING:
 		{
 			ServerCommands::SetSectorPanning command;
-			int temp101;
-			temp101 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp101 );
+			int temp100;
+			temp100 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp100 );
 			command.ceilingXOffset = NETWORK_ReadLong( bytestream );
 			command.ceilingYOffset = NETWORK_ReadLong( bytestream );
 			command.floorXOffset = NETWORK_ReadLong( bytestream );
@@ -3122,7 +3097,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorPanning: couldn't find sector: %d\n", temp101 );
+				CLIENT_PrintWarning( "SetSectorPanning: couldn't find sector: %d\n", temp100 );
 				return true;
 			}
 
@@ -3141,15 +3116,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORROTATION:
 		{
 			ServerCommands::SetSectorRotation command;
-			int temp102;
-			temp102 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp102 );
+			int temp101;
+			temp101 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp101 );
 			command.ceilingRotation = NETWORK_ReadShort( bytestream );
 			command.floorRotation = NETWORK_ReadShort( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorRotation: couldn't find sector: %d\n", temp102 );
+				CLIENT_PrintWarning( "SetSectorRotation: couldn't find sector: %d\n", temp101 );
 				return true;
 			}
 
@@ -3185,9 +3160,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORSCALE:
 		{
 			ServerCommands::SetSectorScale command;
-			int temp103;
-			temp103 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp103 );
+			int temp102;
+			temp102 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp102 );
 			command.ceilingXScale = NETWORK_ReadLong( bytestream );
 			command.ceilingYScale = NETWORK_ReadLong( bytestream );
 			command.floorXScale = NETWORK_ReadLong( bytestream );
@@ -3195,7 +3170,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorScale: couldn't find sector: %d\n", temp103 );
+				CLIENT_PrintWarning( "SetSectorScale: couldn't find sector: %d\n", temp102 );
 				return true;
 			}
 
@@ -3214,14 +3189,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORSPECIAL:
 		{
 			ServerCommands::SetSectorSpecial command;
-			int temp104;
-			temp104 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp104 );
+			int temp103;
+			temp103 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp103 );
 			command.special = NETWORK_ReadShort( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorSpecial: couldn't find sector: %d\n", temp104 );
+				CLIENT_PrintWarning( "SetSectorSpecial: couldn't find sector: %d\n", temp103 );
 				return true;
 			}
 
@@ -3240,15 +3215,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORFRICTION:
 		{
 			ServerCommands::SetSectorFriction command;
-			int temp105;
-			temp105 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp105 );
+			int temp104;
+			temp104 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp104 );
 			command.friction = NETWORK_ReadLong( bytestream );
 			command.moveFactor = NETWORK_ReadLong( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorFriction: couldn't find sector: %d\n", temp105 );
+				CLIENT_PrintWarning( "SetSectorFriction: couldn't find sector: %d\n", temp104 );
 				return true;
 			}
 
@@ -3267,9 +3242,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORANGLEYOFFSET:
 		{
 			ServerCommands::SetSectorAngleYOffset command;
-			int temp106;
-			temp106 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp106 );
+			int temp105;
+			temp105 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp105 );
 			command.ceilingBaseAngle = NETWORK_ReadLong( bytestream );
 			command.ceilingBaseYOffset = NETWORK_ReadLong( bytestream );
 			command.floorBaseAngle = NETWORK_ReadLong( bytestream );
@@ -3277,7 +3252,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorAngleYOffset: couldn't find sector: %d\n", temp106 );
+				CLIENT_PrintWarning( "SetSectorAngleYOffset: couldn't find sector: %d\n", temp105 );
 				return true;
 			}
 
@@ -3296,14 +3271,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORGRAVITY:
 		{
 			ServerCommands::SetSectorGravity command;
-			int temp107;
-			temp107 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp107 );
+			int temp106;
+			temp106 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp106 );
 			command.gravity = NETWORK_ReadFloat( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorGravity: couldn't find sector: %d\n", temp107 );
+				CLIENT_PrintWarning( "SetSectorGravity: couldn't find sector: %d\n", temp106 );
 				return true;
 			}
 
@@ -3322,15 +3297,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORREFLECTION:
 		{
 			ServerCommands::SetSectorReflection command;
-			int temp108;
-			temp108 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp108 );
+			int temp107;
+			temp107 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp107 );
 			command.ceilingReflection = NETWORK_ReadFloat( bytestream );
 			command.floorReflection = NETWORK_ReadFloat( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorReflection: couldn't find sector: %d\n", temp108 );
+				CLIENT_PrintWarning( "SetSectorReflection: couldn't find sector: %d\n", temp107 );
 				return true;
 			}
 
@@ -3349,16 +3324,16 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSECTORLINK:
 		{
 			ServerCommands::SetSectorLink command;
-			int temp109;
-			temp109 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp109 );
+			int temp108;
+			temp108 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp108 );
 			command.tag = NETWORK_ReadShort( bytestream );
 			command.ceiling = NETWORK_ReadByte( bytestream );
 			command.moveType = NETWORK_ReadByte( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SetSectorLink: couldn't find sector: %d\n", temp109 );
+				CLIENT_PrintWarning( "SetSectorLink: couldn't find sector: %d\n", temp108 );
 				return true;
 			}
 
@@ -3377,13 +3352,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_STOPSECTORLIGHTEFFECT:
 		{
 			ServerCommands::StopSectorLightEffect command;
-			int temp110;
-			temp110 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp110 );
+			int temp109;
+			temp109 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp109 );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "StopSectorLightEffect: couldn't find sector: %d\n", temp110 );
+				CLIENT_PrintWarning( "StopSectorLightEffect: couldn't find sector: %d\n", temp109 );
 				return true;
 			}
 
@@ -3409,16 +3384,16 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_STARTSECTORSEQUENCE:
 		{
 			ServerCommands::StartSectorSequence command;
-			int temp111;
-			temp111 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp111 );
+			int temp110;
+			temp110 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp110 );
 			command.channel = NETWORK_ReadByte( bytestream );
 			command.sequence = NETWORK_ReadString( bytestream );
 			command.modeNum = NETWORK_ReadByte( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "StartSectorSequence: couldn't find sector: %d\n", temp111 );
+				CLIENT_PrintWarning( "StartSectorSequence: couldn't find sector: %d\n", temp110 );
 				return true;
 			}
 
@@ -3437,13 +3412,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_STOPSECTORSEQUENCE:
 		{
 			ServerCommands::StopSectorSequence command;
-			int temp112;
-			temp112 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp112 );
+			int temp111;
+			temp111 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp111 );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "StopSectorSequence: couldn't find sector: %d\n", temp112 );
+				CLIENT_PrintWarning( "StopSectorSequence: couldn't find sector: %d\n", temp111 );
 				return true;
 			}
 
@@ -3462,15 +3437,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DOSECTORLIGHTFIREFLICKER:
 		{
 			ServerCommands::DoSectorLightFireFlicker command;
-			int temp113;
-			temp113 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp113 );
+			int temp112;
+			temp112 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp112 );
 			command.maxLight = NETWORK_ReadShort( bytestream );
 			command.minLight = NETWORK_ReadShort( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "DoSectorLightFireFlicker: couldn't find sector: %d\n", temp113 );
+				CLIENT_PrintWarning( "DoSectorLightFireFlicker: couldn't find sector: %d\n", temp112 );
 				return true;
 			}
 
@@ -3489,15 +3464,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DOSECTORLIGHTFLICKER:
 		{
 			ServerCommands::DoSectorLightFlicker command;
-			int temp114;
-			temp114 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp114 );
+			int temp113;
+			temp113 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp113 );
 			command.maxLight = NETWORK_ReadShort( bytestream );
 			command.minLight = NETWORK_ReadShort( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "DoSectorLightFlicker: couldn't find sector: %d\n", temp114 );
+				CLIENT_PrintWarning( "DoSectorLightFlicker: couldn't find sector: %d\n", temp113 );
 				return true;
 			}
 
@@ -3516,15 +3491,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DOSECTORLIGHTLIGHTFLASH:
 		{
 			ServerCommands::DoSectorLightLightFlash command;
-			int temp115;
-			temp115 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp115 );
+			int temp114;
+			temp114 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp114 );
 			command.maxLight = NETWORK_ReadShort( bytestream );
 			command.minLight = NETWORK_ReadShort( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "DoSectorLightLightFlash: couldn't find sector: %d\n", temp115 );
+				CLIENT_PrintWarning( "DoSectorLightLightFlash: couldn't find sector: %d\n", temp114 );
 				return true;
 			}
 
@@ -3543,9 +3518,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DOSECTORLIGHTSTROBE:
 		{
 			ServerCommands::DoSectorLightStrobe command;
-			int temp116;
-			temp116 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp116 );
+			int temp115;
+			temp115 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp115 );
 			command.darkTime = NETWORK_ReadShort( bytestream );
 			command.brightTime = NETWORK_ReadShort( bytestream );
 			command.maxLight = NETWORK_ReadShort( bytestream );
@@ -3554,7 +3529,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "DoSectorLightStrobe: couldn't find sector: %d\n", temp116 );
+				CLIENT_PrintWarning( "DoSectorLightStrobe: couldn't find sector: %d\n", temp115 );
 				return true;
 			}
 
@@ -3573,13 +3548,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DOSECTORLIGHTGLOW:
 		{
 			ServerCommands::DoSectorLightGlow command;
-			int temp117;
-			temp117 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp117 );
+			int temp116;
+			temp116 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp116 );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "DoSectorLightGlow: couldn't find sector: %d\n", temp117 );
+				CLIENT_PrintWarning( "DoSectorLightGlow: couldn't find sector: %d\n", temp116 );
 				return true;
 			}
 
@@ -3598,9 +3573,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DOSECTORLIGHTGLOW2:
 		{
 			ServerCommands::DoSectorLightGlow2 command;
-			int temp118;
-			temp118 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp118 );
+			int temp117;
+			temp117 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp117 );
 			command.startLight = NETWORK_ReadShort( bytestream );
 			command.endLight = NETWORK_ReadShort( bytestream );
 			command.tics = NETWORK_ReadShort( bytestream );
@@ -3609,7 +3584,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "DoSectorLightGlow2: couldn't find sector: %d\n", temp118 );
+				CLIENT_PrintWarning( "DoSectorLightGlow2: couldn't find sector: %d\n", temp117 );
 				return true;
 			}
 
@@ -3628,15 +3603,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_DOSECTORLIGHTPHASED:
 		{
 			ServerCommands::DoSectorLightPhased command;
-			int temp119;
-			temp119 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp119 );
+			int temp118;
+			temp118 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp118 );
 			command.baseLevel = NETWORK_ReadShort( bytestream );
 			command.phase = NETWORK_ReadByte( bytestream );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "DoSectorLightPhased: couldn't find sector: %d\n", temp119 );
+				CLIENT_PrintWarning( "DoSectorLightPhased: couldn't find sector: %d\n", temp118 );
 				return true;
 			}
 
@@ -3655,14 +3630,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETLINEALPHA:
 		{
 			ServerCommands::SetLineAlpha command;
-			int temp120;
-			temp120 = NETWORK_ReadShort( bytestream );
-			command.line = CLIENT_FindLineByID( temp120 );
+			int temp119;
+			temp119 = NETWORK_ReadShort( bytestream );
+			command.line = CLIENT_FindLineByID( temp119 );
 			command.alpha = NETWORK_ReadLong( bytestream );
 
 			if ( command.line == NULL )
 			{
-				CLIENT_PrintWarning( "SetLineAlpha: couldn't find line: %d\n", temp120 );
+				CLIENT_PrintWarning( "SetLineAlpha: couldn't find line: %d\n", temp119 );
 				return true;
 			}
 
@@ -3681,16 +3656,16 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETLINETEXTURE:
 		{
 			ServerCommands::SetLineTexture command;
-			int temp121;
-			temp121 = NETWORK_ReadShort( bytestream );
-			command.line = CLIENT_FindLineByID( temp121 );
+			int temp120;
+			temp120 = NETWORK_ReadShort( bytestream );
+			command.line = CLIENT_FindLineByID( temp120 );
 			command.textureName = NETWORK_ReadString( bytestream );
 			command.side = NETWORK_ReadBit( bytestream );
 			command.position = NETWORK_ReadByte( bytestream );
 
 			if ( command.line == NULL )
 			{
-				CLIENT_PrintWarning( "SetLineTexture: couldn't find line: %d\n", temp121 );
+				CLIENT_PrintWarning( "SetLineTexture: couldn't find line: %d\n", temp120 );
 				return true;
 			}
 
@@ -3727,14 +3702,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSOMELINEFLAGS:
 		{
 			ServerCommands::SetSomeLineFlags command;
-			int temp122;
-			temp122 = NETWORK_ReadShort( bytestream );
-			command.line = CLIENT_FindLineByID( temp122 );
+			int temp121;
+			temp121 = NETWORK_ReadShort( bytestream );
+			command.line = CLIENT_FindLineByID( temp121 );
 			command.blockFlags = NETWORK_ReadLong( bytestream );
 
 			if ( command.line == NULL )
 			{
-				CLIENT_PrintWarning( "SetSomeLineFlags: couldn't find line: %d\n", temp122 );
+				CLIENT_PrintWarning( "SetSomeLineFlags: couldn't find line: %d\n", temp121 );
 				return true;
 			}
 
@@ -3753,14 +3728,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETSIDEFLAGS:
 		{
 			ServerCommands::SetSideFlags command;
-			int temp123;
-			temp123 = NETWORK_ReadLong( bytestream );
-			command.side = CLIENT_FindSideByID( temp123 );
+			int temp122;
+			temp122 = NETWORK_ReadLong( bytestream );
+			command.side = CLIENT_FindSideByID( temp122 );
 			command.flags = NETWORK_ReadByte( bytestream );
 
 			if ( command.side == NULL )
 			{
-				CLIENT_PrintWarning( "SetSideFlags: couldn't find side: %d\n", temp123 );
+				CLIENT_PrintWarning( "SetSideFlags: couldn't find side: %d\n", temp122 );
 				return true;
 			}
 
@@ -3797,13 +3772,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SOUNDACTOR:
 		{
 			ServerCommands::SoundActor command;
-			int temp124;
-			temp124 = NETWORK_ReadShort( bytestream );
+			int temp123;
+			temp123 = NETWORK_ReadShort( bytestream );
 			command.channel = NETWORK_ReadShort( bytestream );
 			command.sound = NETWORK_ReadString( bytestream );
 			command.volume = NETWORK_ReadByte( bytestream );
 			command.attenuation = NETWORK_ReadByte( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp124, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp123, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SoundActor", "actor" ) == false )
 			{
@@ -3825,13 +3800,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SOUNDACTORIFNOTPLAYING:
 		{
 			ServerCommands::SoundActorIfNotPlaying command;
-			int temp125;
-			temp125 = NETWORK_ReadShort( bytestream );
+			int temp124;
+			temp124 = NETWORK_ReadShort( bytestream );
 			command.channel = NETWORK_ReadShort( bytestream );
 			command.sound = NETWORK_ReadString( bytestream );
 			command.volume = NETWORK_ReadByte( bytestream );
 			command.attenuation = NETWORK_ReadByte( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp125, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp124, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SoundActorIfNotPlaying", "actor" ) == false )
 			{
@@ -3889,15 +3864,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNMISSILE:
 		{
 			ServerCommands::SpawnMissile command;
-			int temp126;
+			int temp125;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.velX = NETWORK_ReadLong( bytestream );
 			command.velY = NETWORK_ReadLong( bytestream );
 			command.velZ = NETWORK_ReadLong( bytestream );
-			temp126 = NETWORK_ReadShort( bytestream );
-			command.missileType = NETWORK_GetClassFromIdentification( temp126 );
+			temp125 = NETWORK_ReadShort( bytestream );
+			command.missileType = NETWORK_GetClassFromIdentification( temp125 );
 
 			if ( command.missileType->IsDescendantOf( RUNTIME_CLASS( AActor )) == false )
 				command.missileType = NULL;
@@ -3908,7 +3883,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.missileType == NULL )
 			{
-				CLIENT_PrintWarning( "SpawnMissile: unknown class ID for missileType: %d\n", temp126 );
+				CLIENT_PrintWarning( "SpawnMissile: unknown class ID for missileType: %d\n", temp125 );
 				return true;
 			}
 
@@ -3927,15 +3902,15 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SPAWNMISSILEEXACT:
 		{
 			ServerCommands::SpawnMissileExact command;
-			int temp127;
+			int temp126;
 			command.x = NETWORK_ReadLong( bytestream );
 			command.y = NETWORK_ReadLong( bytestream );
 			command.z = NETWORK_ReadLong( bytestream );
 			command.velX = NETWORK_ReadLong( bytestream );
 			command.velY = NETWORK_ReadLong( bytestream );
 			command.velZ = NETWORK_ReadLong( bytestream );
-			temp127 = NETWORK_ReadShort( bytestream );
-			command.missileType = NETWORK_GetClassFromIdentification( temp127 );
+			temp126 = NETWORK_ReadShort( bytestream );
+			command.missileType = NETWORK_GetClassFromIdentification( temp126 );
 
 			if ( command.missileType->IsDescendantOf( RUNTIME_CLASS( AActor )) == false )
 				command.missileType = NULL;
@@ -3946,7 +3921,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.missileType == NULL )
 			{
-				CLIENT_PrintWarning( "SpawnMissileExact: unknown class ID for missileType: %d\n", temp127 );
+				CLIENT_PrintWarning( "SpawnMissileExact: unknown class ID for missileType: %d\n", temp126 );
 				return true;
 			}
 
@@ -3965,13 +3940,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_MISSILEEXPLODE:
 		{
 			ServerCommands::MissileExplode command;
-			int temp128;
-			temp128 = NETWORK_ReadShort( bytestream );
+			int temp127;
+			temp127 = NETWORK_ReadShort( bytestream );
 			command.lineId = NETWORK_ReadShort( bytestream );
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			if ( CLIENT_ReadActorFromNetID( temp128, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp127, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.missile ),
 											"MissileExplode", "missile" ) == false )
 			{
@@ -3993,14 +3968,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_WEAPONSOUND:
 		{
 			ServerCommands::WeaponSound command;
-			int temp129;
+			int temp128;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
 			command.sound = NETWORK_ReadString( bytestream );
-			temp129 = command.player - players;
+			temp128 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp129 ) == false )
+			if ( PLAYER_IsValidPlayer( temp128 ) == false )
 			{
-				CLIENT_PrintWarning( "WeaponSound: Invalid player number: %d\n", temp129 );
+				CLIENT_PrintWarning( "WeaponSound: Invalid player number: %d\n", temp128 );
 				return true;
 			}
 
@@ -4022,21 +3997,21 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_WEAPONCHANGE:
 		{
 			ServerCommands::WeaponChange command;
+			int temp129;
 			int temp130;
-			int temp131;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
-			temp130 = NETWORK_ReadShort( bytestream );
-			command.weaponType = NETWORK_GetClassFromIdentification( temp130 );
+			temp129 = NETWORK_ReadShort( bytestream );
+			command.weaponType = NETWORK_GetClassFromIdentification( temp129 );
 
 			if ( command.weaponType->IsDescendantOf( RUNTIME_CLASS( AWeapon )) == false )
 				command.weaponType = NULL;
 
 
-			temp131 = command.player - players;
+			temp130 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp131 ) == false )
+			if ( PLAYER_IsValidPlayer( temp130 ) == false )
 			{
-				CLIENT_PrintWarning( "WeaponChange: Invalid player number: %d\n", temp131 );
+				CLIENT_PrintWarning( "WeaponChange: Invalid player number: %d\n", temp130 );
 				return true;
 			}
 
@@ -4047,7 +4022,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.weaponType == NULL )
 			{
-				CLIENT_PrintWarning( "WeaponChange: unknown class ID for weaponType: %d\n", temp130 );
+				CLIENT_PrintWarning( "WeaponChange: unknown class ID for weaponType: %d\n", temp129 );
 				return true;
 			}
 
@@ -4066,9 +4041,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_WEAPONRAILGUN:
 		{
 			ServerCommands::WeaponRailgun command;
-			int temp132;
-				int temp133;
-			temp132 = NETWORK_ReadShort( bytestream );
+			int temp131;
+				int temp132;
+			temp131 = NETWORK_ReadShort( bytestream );
 			command.start.X = NETWORK_ReadFloat( bytestream );
 			command.start.Y = NETWORK_ReadFloat( bytestream );
 			command.start.Z = NETWORK_ReadFloat( bytestream );
@@ -4083,13 +4058,13 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			if ( command.CheckExtended() )
 			{
 				command.angleoffset = NETWORK_ReadLong( bytestream );
-				temp133 = NETWORK_ReadShort( bytestream );
-				command.spawnclass = NETWORK_GetClassFromIdentification( temp133 );
+				temp132 = NETWORK_ReadShort( bytestream );
+				command.spawnclass = NETWORK_GetClassFromIdentification( temp132 );
 				command.duration = NETWORK_ReadShort( bytestream );
 				command.sparsity = NETWORK_ReadFloat( bytestream );
 				command.drift = NETWORK_ReadFloat( bytestream );
 			}
-			if ( CLIENT_ReadActorFromNetID( temp132, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp131, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.source ),
 											"WeaponRailgun", "source" ) == false )
 			{
@@ -4114,9 +4089,9 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_ACSSCRIPTEXECUTE:
 		{
 			ServerCommands::ACSScriptExecute command;
-			int temp134;
+			int temp133;
 			command.netid = NETWORK_ReadShort( bytestream );
-			temp134 = NETWORK_ReadShort( bytestream );
+			temp133 = NETWORK_ReadShort( bytestream );
 			command.lineid = NETWORK_ReadShort( bytestream );
 			command.levelnum = NETWORK_ReadByte( bytestream );
 			command.arg0 = NETWORK_ReadVariable( bytestream );
@@ -4125,7 +4100,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			command.arg3 = NETWORK_ReadVariable( bytestream );
 			command.backSide = NETWORK_ReadBit( bytestream );
 			command.always = NETWORK_ReadBit( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp134, RUNTIME_CLASS( AActor ), true,
+			if ( CLIENT_ReadActorFromNetID( temp133, RUNTIME_CLASS( AActor ), true,
 											reinterpret_cast<AActor *&>( command.activator ),
 											"ACSScriptExecute", "activator" ) == false )
 			{
@@ -4195,10 +4170,10 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_SECRETFOUND:
 		{
 			ServerCommands::SecretFound command;
-			int temp135;
-			temp135 = NETWORK_ReadShort( bytestream );
+			int temp134;
+			temp134 = NETWORK_ReadShort( bytestream );
 			command.secretFlags = NETWORK_ReadByte( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp135, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp134, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SecretFound", "actor" ) == false )
 			{
@@ -4220,13 +4195,13 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_SECRETMARKSECTORFOUND:
 		{
 			ServerCommands::SecretMarkSectorFound command;
-			int temp136;
-			temp136 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp136 );
+			int temp135;
+			temp135 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp135 );
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SecretMarkSectorFound: couldn't find sector: %d\n", temp136 );
+				CLIENT_PrintWarning( "SecretMarkSectorFound: couldn't find sector: %d\n", temp135 );
 				return true;
 			}
 
@@ -4245,14 +4220,14 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_SETPLAYERACCOUNTNAME:
 		{
 			ServerCommands::SetPlayerAccountName command;
-			int temp137;
+			int temp136;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
 			command.accountName = NETWORK_ReadString( bytestream );
-			temp137 = command.player - players;
+			temp136 = command.player - players;
 
-			if (( temp137 < 0 ) || ( temp137 >= MAXPLAYERS ))
+			if (( temp136 < 0 ) || ( temp136 >= MAXPLAYERS ))
 			{
-				CLIENT_PrintWarning( "SetPlayerAccountName: Invalid player number: %d\n", temp137 );
+				CLIENT_PrintWarning( "SetPlayerAccountName: Invalid player number: %d\n", temp136 );
 				return true;
 			}
 
@@ -4270,17 +4245,17 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_GIVEWEAPONHOLDER:
 		{
 			ServerCommands::GiveWeaponHolder command;
+			int temp137;
 			int temp138;
-			int temp139;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
 			command.pieceMask = NETWORK_ReadShort( bytestream );
-			temp138 = NETWORK_ReadShort( bytestream );
-			command.pieceWeapon = NETWORK_GetClassFromIdentification( temp138 );
-			temp139 = command.player - players;
+			temp137 = NETWORK_ReadShort( bytestream );
+			command.pieceWeapon = NETWORK_GetClassFromIdentification( temp137 );
+			temp138 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp139 ) == false )
+			if ( PLAYER_IsValidPlayer( temp138 ) == false )
 			{
-				CLIENT_PrintWarning( "GiveWeaponHolder: Invalid player number: %d\n", temp139 );
+				CLIENT_PrintWarning( "GiveWeaponHolder: Invalid player number: %d\n", temp138 );
 				return true;
 			}
 
@@ -4291,7 +4266,7 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 
 			if ( command.pieceWeapon == NULL )
 			{
-				CLIENT_PrintWarning( "GiveWeaponHolder: unknown class ID for pieceWeapon: %d\n", temp138 );
+				CLIENT_PrintWarning( "GiveWeaponHolder: unknown class ID for pieceWeapon: %d\n", temp137 );
 				return true;
 			}
 
@@ -4310,18 +4285,18 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_SETHEXENARMORSLOTS:
 		{
 			ServerCommands::SetHexenArmorSlots command;
-			int temp140;
+			int temp139;
 			command.player = &players[NETWORK_ReadByte( bytestream )];
 			command.slot0 = NETWORK_ReadLong( bytestream );
 			command.slot1 = NETWORK_ReadLong( bytestream );
 			command.slot2 = NETWORK_ReadLong( bytestream );
 			command.slot3 = NETWORK_ReadLong( bytestream );
 			command.slot4 = NETWORK_ReadLong( bytestream );
-			temp140 = command.player - players;
+			temp139 = command.player - players;
 
-			if ( PLAYER_IsValidPlayer( temp140 ) == false )
+			if ( PLAYER_IsValidPlayer( temp139 ) == false )
 			{
-				CLIENT_PrintWarning( "SetHexenArmorSlots: Invalid player number: %d\n", temp140 );
+				CLIENT_PrintWarning( "SetHexenArmorSlots: Invalid player number: %d\n", temp139 );
 				return true;
 			}
 
@@ -4343,17 +4318,17 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_LEVELSPAWNTHING:
 		{
 			ServerCommands::LevelSpawnThing command;
-			int temp141;
+			int temp140;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			temp141 = NETWORK_ReadShort( bytestream );
-			command.type = NETWORK_GetClassFromIdentification( temp141 );
+			temp140 = NETWORK_ReadShort( bytestream );
+			command.type = NETWORK_GetClassFromIdentification( temp140 );
 			command.id = NETWORK_ReadShort( bytestream );
 
 			if ( command.type == NULL )
 			{
-				CLIENT_PrintWarning( "LevelSpawnThing: unknown class ID for type: %d\n", temp141 );
+				CLIENT_PrintWarning( "LevelSpawnThing: unknown class ID for type: %d\n", temp140 );
 				return true;
 			}
 
@@ -4372,16 +4347,16 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_LEVELSPAWNTHINGNONETID:
 		{
 			ServerCommands::LevelSpawnThingNoNetID command;
-			int temp142;
+			int temp141;
 			command.x = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.y = NETWORK_ReadShort( bytestream ) << FRACBITS;
 			command.z = NETWORK_ReadShort( bytestream ) << FRACBITS;
-			temp142 = NETWORK_ReadShort( bytestream );
-			command.type = NETWORK_GetClassFromIdentification( temp142 );
+			temp141 = NETWORK_ReadShort( bytestream );
+			command.type = NETWORK_GetClassFromIdentification( temp141 );
 
 			if ( command.type == NULL )
 			{
-				CLIENT_PrintWarning( "LevelSpawnThingNoNetID: unknown class ID for type: %d\n", temp142 );
+				CLIENT_PrintWarning( "LevelSpawnThingNoNetID: unknown class ID for type: %d\n", temp141 );
 				return true;
 			}
 
@@ -4400,10 +4375,10 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_SETTHINGREACTIONTIME:
 		{
 			ServerCommands::SetThingReactionTime command;
-			int temp143;
-			temp143 = NETWORK_ReadShort( bytestream );
+			int temp142;
+			temp142 = NETWORK_ReadShort( bytestream );
 			command.reactiontime = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp143, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp142, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingReactionTime", "actor" ) == false )
 			{
@@ -4425,8 +4400,8 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_SETTHINGSCALE:
 		{
 			ServerCommands::SetThingScale command;
-			int temp144;
-			temp144 = NETWORK_ReadShort( bytestream );
+			int temp143;
+			temp143 = NETWORK_ReadShort( bytestream );
 			command.scaleflags = NETWORK_ReadByte( bytestream );
 			if ( command.ContainsScaleX() )
 			{
@@ -4436,7 +4411,7 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 			{
 				command.scaleY = NETWORK_ReadLong( bytestream );
 			}
-			if ( CLIENT_ReadActorFromNetID( temp144, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp143, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingScale", "actor" ) == false )
 			{
@@ -4464,9 +4439,9 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_SOUNDSECTOR:
 		{
 			ServerCommands::SoundSector command;
-			int temp145;
-			temp145 = NETWORK_ReadShort( bytestream );
-			command.sector = CLIENT_FindSectorByID( temp145 );
+			int temp144;
+			temp144 = NETWORK_ReadShort( bytestream );
+			command.sector = CLIENT_FindSectorByID( temp144 );
 			command.channel = NETWORK_ReadShort( bytestream );
 			command.sound = NETWORK_ReadString( bytestream );
 			command.volume = NETWORK_ReadByte( bytestream );
@@ -4474,7 +4449,7 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 
 			if ( command.sector == NULL )
 			{
-				CLIENT_PrintWarning( "SoundSector: couldn't find sector: %d\n", temp145 );
+				CLIENT_PrintWarning( "SoundSector: couldn't find sector: %d\n", temp144 );
 				return true;
 			}
 
@@ -4493,10 +4468,10 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 	case SVC2_SYNCJOINQUEUE:
 		{
 			ServerCommands::SyncJoinQueue command;
-			unsigned int temp146;
-			temp146 = NETWORK_ReadByte( bytestream );
-			command.slots.Reserve( temp146 );
-			for ( unsigned int i = 0; i < temp146; ++i )
+			unsigned int temp145;
+			temp145 = NETWORK_ReadByte( bytestream );
+			command.slots.Reserve( temp145 );
+			for ( unsigned int i = 0; i < temp145; ++i )
 			{
 				command.slots[i].player = NETWORK_ReadByte( bytestream );
 				command.slots[i].team = NETWORK_ReadByte( bytestream );
@@ -5009,14 +4984,22 @@ NetCommand ServerCommands::MovePlayer::BuildNetCommand() const
 	command.addByte( this->flags );
 	if ( IsVisible() )
 	{
+		command.addLong( this->clientTicOnServerEnd );
 		command.addLong( this->x );
 		command.addLong( this->y );
-		command.addShort( this->z >> FRACBITS );
+		command.addLong( this->z );
+		command.addByte( this->waterlevel );
 		command.addLong( this->angle );
-		command.addShort( this->velx >> FRACBITS );
-		command.addShort( this->vely >> FRACBITS );
-		command.addShort( this->velz >> FRACBITS );
-		command.addBit( this->isCrouching );
+		command.addLong( this->pitch );
+		command.addLong( this->velx );
+		command.addLong( this->vely );
+		command.addLong( this->velz );
+		command.addShort( this->ucmd_forwardmove );
+		command.addShort( this->ucmd_sidemove );
+		command.addShort( this->ucmd_upmove );
+		command.addShort( this->ucmd_yaw );
+		command.addShort( this->ucmd_pitch );
+		command.addLong( this->ucmd_buttons );
 	}
 	return command;
 }
@@ -5031,6 +5014,12 @@ void ServerCommands::MovePlayer::SetFlags( int value )
 {
 	this->flags = value;
 	this->_flagsInitialized = true;
+}
+
+void ServerCommands::MovePlayer::SetClientTicOnServerEnd( unsigned int value )
+{
+	this->clientTicOnServerEnd = value;
+	this->_clientTicOnServerEndInitialized = true;
 }
 
 void ServerCommands::MovePlayer::SetX( fixed_t value )
@@ -5051,10 +5040,22 @@ void ServerCommands::MovePlayer::SetZ( fixed_t value )
 	this->_zInitialized = true;
 }
 
+void ServerCommands::MovePlayer::SetWaterlevel( int value )
+{
+	this->waterlevel = value;
+	this->_waterlevelInitialized = true;
+}
+
 void ServerCommands::MovePlayer::SetAngle( angle_t value )
 {
 	this->angle = value;
 	this->_angleInitialized = true;
+}
+
+void ServerCommands::MovePlayer::SetPitch( fixed_t value )
+{
+	this->pitch = value;
+	this->_pitchInitialized = true;
 }
 
 void ServerCommands::MovePlayer::SetVelx( fixed_t value )
@@ -5075,10 +5076,40 @@ void ServerCommands::MovePlayer::SetVelz( fixed_t value )
 	this->_velzInitialized = true;
 }
 
-void ServerCommands::MovePlayer::SetIsCrouching( bool value )
+void ServerCommands::MovePlayer::SetUcmd_forwardmove( int value )
 {
-	this->isCrouching = value;
-	this->_isCrouchingInitialized = true;
+	this->ucmd_forwardmove = value;
+	this->_ucmd_forwardmoveInitialized = true;
+}
+
+void ServerCommands::MovePlayer::SetUcmd_sidemove( int value )
+{
+	this->ucmd_sidemove = value;
+	this->_ucmd_sidemoveInitialized = true;
+}
+
+void ServerCommands::MovePlayer::SetUcmd_upmove( int value )
+{
+	this->ucmd_upmove = value;
+	this->_ucmd_upmoveInitialized = true;
+}
+
+void ServerCommands::MovePlayer::SetUcmd_yaw( int value )
+{
+	this->ucmd_yaw = value;
+	this->_ucmd_yawInitialized = true;
+}
+
+void ServerCommands::MovePlayer::SetUcmd_pitch( int value )
+{
+	this->ucmd_pitch = value;
+	this->_ucmd_pitchInitialized = true;
+}
+
+void ServerCommands::MovePlayer::SetUcmd_buttons( int value )
+{
+	this->ucmd_buttons = value;
+	this->_ucmd_buttonsInitialized = true;
 }
 
 bool ServerCommands::MovePlayer::IsVisible() const
@@ -5838,60 +5869,6 @@ void ServerCommands::UpdatePlayerPing::SetPing( unsigned int value )
 {
 	this->ping = value;
 	this->_pingInitialized = true;
-}
-
-NetCommand ServerCommands::UpdatePlayerExtraData::BuildNetCommand() const
-{
-	if ( AllParametersInitialized() == false )
-	{
-		Printf( "WARNING: UpdatePlayerExtraData::BuildNetCommand: not all parameters were initialized:\n" );
-		PrintMissingParameters();
-	}
-	NetCommand command ( SVC_UPDATEPLAYEREXTRADATA );
-	command.setUnreliable( true );
-	command.addByte( this->player - players );
-	command.addLong( this->pitch );
-	command.addByte( this->waterLevel );
-	command.addByte( this->buttons );
-	command.addLong( this->viewZ );
-	command.addLong( this->bob );
-	return command;
-}
-
-void ServerCommands::UpdatePlayerExtraData::SetPlayer( player_t * value )
-{
-	this->player = value;
-	this->_playerInitialized = true;
-}
-
-void ServerCommands::UpdatePlayerExtraData::SetPitch( int value )
-{
-	this->pitch = value;
-	this->_pitchInitialized = true;
-}
-
-void ServerCommands::UpdatePlayerExtraData::SetWaterLevel( int value )
-{
-	this->waterLevel = value;
-	this->_waterLevelInitialized = true;
-}
-
-void ServerCommands::UpdatePlayerExtraData::SetButtons( int value )
-{
-	this->buttons = value;
-	this->_buttonsInitialized = true;
-}
-
-void ServerCommands::UpdatePlayerExtraData::SetViewZ( int value )
-{
-	this->viewZ = value;
-	this->_viewZInitialized = true;
-}
-
-void ServerCommands::UpdatePlayerExtraData::SetBob( int value )
-{
-	this->bob = value;
-	this->_bobInitialized = true;
 }
 
 NetCommand ServerCommands::UpdatePlayerTime::BuildNetCommand() const

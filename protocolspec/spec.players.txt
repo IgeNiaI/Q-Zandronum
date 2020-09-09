@@ -28,16 +28,25 @@ Command MovePlayer
 	# The server only sends position, angle, etc. information if the player is actually visible.
 	If (flags & PLAYER_VISIBLE)
 		CheckFunction IsVisible
+		ULong clientTicOnServerEnd
 		# [BB] The x/y position has to be sent at full precision, otherwise the player may be rounded to a neighboring
 		# sector on the clients, potentially completely changing its Z position.
 		Fixed x
 		Fixed y
-		AproxFixed z
+		Fixed z
+		Byte waterlevel
 		Angle angle
-		AproxFixed velx
-		AproxFixed vely
-		AproxFixed velz
-		Bool isCrouching
+		Fixed pitch
+		Fixed velx
+		Fixed vely
+		Fixed velz
+		Short ucmd_forwardmove
+		Short ucmd_sidemove
+		Short ucmd_upmove
+		Short ucmd_yaw
+		Short ucmd_pitch
+		# Short ucmd_roll
+		Long ucmd_buttons
 	EndIf
 EndCommand
 
@@ -191,16 +200,6 @@ Command UpdatePlayerPing
 	UnreliableCommand
 	Player player
 	UShort ping
-EndCommand
-
-Command UpdatePlayerExtraData
-	UnreliableCommand
-	Player player with MoTest
-	Long pitch
-	Byte waterLevel
-	Byte buttons
-	Long viewZ
-	Long bob
 EndCommand
 
 Command UpdatePlayerTime

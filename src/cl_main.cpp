@@ -2188,8 +2188,6 @@ void CLIENT_PrintCommand( LONG lCommand )
 			return;
 		if (( cl_showcommands >= 3 ) && ( lCommand == SVC_MOVEPLAYER ))
 			return;
-		if (( cl_showcommands >= 4 ) && ( lCommand == SVC_UPDATEPLAYEREXTRADATA ))
-			return;
 		if (( cl_showcommands >= 5 ) && ( lCommand == SVC_UPDATEPLAYERPING ))
 			return;
 		if (( cl_showcommands >= 6 ) && ( lCommand == SVC_PING ))
@@ -2860,6 +2858,11 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->PremorphWeapon = 0;
 	pPlayer->chickenPeck = 0;
 	pPlayer->jumpTics = 0;
+	pPlayer->doubleJumpState = 0;
+	pPlayer->crouchSlideTics = 0;
+	pPlayer->isCrouchSliding = 0;
+	pPlayer->wallClimbTics = 0;
+	pPlayer->isWallClimbing = 0;
 	pPlayer->respawn_time = 0;
 	pPlayer->camera = 0;
 	pPlayer->air_finished = 0;
@@ -3613,40 +3616,45 @@ void ServerCommands::MovePlayer::Execute()
 	// [BB] But don't just set the position, but also properly set floorz and ceilingz, etc.
 	CLIENT_MoveThing( player->mo, x, y, z );
 
+	// [BB] If the spectated player uses the GL renderer and we are using software,
+	// the viewangle has to be limited.	We don't care about cl_disallowfullpitch here.
+	if (!currentrenderer)
+	{
+		// [BB] The user can restore ZDoom's freelook limit.
+		const fixed_t pitchLimit = -ANGLE_1*(cl_oldfreelooklimit ? 32 : 56);
+		if (pitch < pitchLimit)
+			pitch = pitchLimit;
+		if (pitch > ANGLE_1 * 56)
+			pitch = ANGLE_1 * 56;
+	}
+
+	player->mo->waterlevel = waterlevel;
+
 	// Set the player's angle.
 	player->mo->angle = angle;
+	player->mo->pitch = pitch;
 
 	// Set the player's XYZ momentum.
 	player->mo->velx = velx;
 	player->mo->vely = vely;
 	player->mo->velz = velz;
 
-	// Is the player crouching?
-	player->crouchdir = ( isCrouching ) ? 1 : -1;
-
-	if (( player->crouchdir == 1 ) &&
-		( player->crouchfactor < FRACUNIT ) &&
-		(( player->mo->z + player->mo->height ) < player->mo->ceilingz ))
+	player->cmd.ucmd.forwardmove = ucmd_forwardmove;
+	player->cmd.ucmd.sidemove = ucmd_sidemove;
+	player->cmd.ucmd.upmove = ucmd_upmove;
+	player->cmd.ucmd.yaw = ucmd_yaw;
+	player->cmd.ucmd.pitch = ucmd_pitch;
+	// player->cmd.ucmd.roll = ucmd_roll;
+	player->cmd.ucmd.roll = player->cmd.ucmd.roll;
+	player->cmd.ucmd.buttons = ucmd_buttons;
+	
+	// [geNia] Predict one tic if we are ahead
+	if (player->clientTicOnServerEnd > clientTicOnServerEnd)
 	{
-		P_CrouchMove( player, 1 );
-	}
-	else if (( player->crouchdir == -1 ) &&
-		( player->crouchfactor > FRACUNIT/2 ))
-	{
-		P_CrouchMove( player, -1 );
+		P_PlayerThink(player);
 	}
 
-	// [BB] Set whether the player is attacking or not.
-	// Check: Is it a good idea to only do this, when the player is visible?
-	if ( flags & PLAYER_ATTACK )
-		player->cmd.ucmd.buttons |= BT_ATTACK;
-	else
-		player->cmd.ucmd.buttons &= ~BT_ATTACK;
-
-	if ( flags & PLAYER_ALTATTACK )
-		player->cmd.ucmd.buttons |= BT_ALTATTACK;
-	else
-		player->cmd.ucmd.buttons &= ~BT_ALTATTACK;
+	player->clientTicOnServerEnd = clientTicOnServerEnd - 1;
 }
 
 //*****************************************************************************
@@ -3921,10 +3929,6 @@ void ServerCommands::SetPlayerUserInfo::Execute()
 		// Read in the player's handicap.
 		else if ( name == NAME_Handicap )
 			player->userinfo.HandicapChanged ( value.ToLong() );
-		else if ( name == NAME_CL_TicsPerUpdate )
-			player->userinfo.TicsPerUpdateChanged ( value.ToLong() );
-		else if ( name == NAME_CL_ConnectionType )
-			player->userinfo.ConnectionTypeChanged ( value.ToLong() );
 		// [CK] We do compressed bitfields now.
 		else if ( name == NAME_CL_ClientFlags )
 			player->userinfo.ClientFlagsChanged ( value.ToLong() );
@@ -4208,30 +4212,6 @@ void ServerCommands::SetPlayerLivesLeft::Execute()
 void ServerCommands::UpdatePlayerPing::Execute()
 {
 	player->ulPing = ping;
-}
-
-//*****************************************************************************
-//
-void ServerCommands::UpdatePlayerExtraData::Execute()
-{
-	// [BB] If the spectated player uses the GL renderer and we are using software,
-	// the viewangle has to be limited.	We don't care about cl_disallowfullpitch here.
-	if ( !currentrenderer )
-	{
-		// [BB] The user can restore ZDoom's freelook limit.
-		const fixed_t pitchLimit = -ANGLE_1*( cl_oldfreelooklimit ? 32 : 56 );
-		if (pitch < pitchLimit)
-			pitch = pitchLimit;
-		if (pitch > ANGLE_1*56)
-			pitch = ANGLE_1*56;
-	}
-	player->mo->pitch = pitch;
-	player->mo->waterlevel = waterLevel;
-	// [BB] The attack buttons are now already set in *_MovePlayer, so additionally setting
-	// them here is obsolete. I don't want to change this before 97D2 final though.
-	player->cmd.ucmd.buttons = buttons;
-	player->viewz = viewZ;
-	player->bob = bob;
 }
 
 //*****************************************************************************
@@ -4973,6 +4953,10 @@ void ServerCommands::SetThingFlags::Execute()
 	case FLAGSET_FLAGSST:
 
 		actor->ulSTFlags = flags;
+		break;
+	case FLAGSET_MVFLAGS:
+
+		actor->mvFlags = flags;
 		break;
 	default:
 		CLIENT_PrintWarning( "client_SetThingFlags: Received an unknown flagset value: %d\n", static_cast<int>( flagset ) );

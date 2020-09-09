@@ -253,7 +253,8 @@ void AActor::Serialize (FArchive &arc)
 		<< flags6;
 	if (SaveVersion >= 4504)
 	{
-		arc << flags7;
+		arc << flags7
+			<< mvFlags;
 	}
 	arc	<< special1
 		<< special2
@@ -2047,6 +2048,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 {
 	static int pushtime = 0;
 	bool bForceSlide = scrollx || scrolly;
+	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType; // only apply to non voodoo dolls players
 	angle_t angle;
 	fixed_t ptryx, ptryy;
 	player_t *player;
@@ -2085,8 +2087,8 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 	// that large thrusts can't propel an actor through a wall, because wall
 	// running depends on the player's original movement continuing even after
 	// it gets blocked.
-	if ((mo->player != NULL && (i_compatflags & COMPATF_WALLRUN)) || (mo->waterlevel >= 1) ||
-		(mo->player != NULL && mo->player->crouchfactor < FRACUNIT*3/4))
+	if (!quakeMovement && (mo->player != NULL && (i_compatflags & COMPATF_WALLRUN)) || (mo->waterlevel >= 1) ||
+		(mo->player != NULL && mo->player->crouchfactor < mo->player->mo->CrouchScaleHalfWay))
 	{
 		// preserve the direction instead of clamping x and y independently.
 		xmove = clamp (mo->velx, -maxmove, maxmove);
@@ -2184,32 +2186,30 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 	// line. For Doom to detect that the line is there, it needs to actually cut
 	// through the actor.
 
+	maxmove = mo->radius - FRACUNIT;
+
+	if (maxmove <= 0)
+	{ // gibs can have radius 0, so don't divide by zero below!
+		maxmove = MAXMOVE;
+	}
+
+	const fixed_t xspeed = abs (xmove);
+	const fixed_t yspeed = abs (ymove);
+
+	steps = 1;
+
+	if (xspeed > yspeed)
 	{
-		maxmove = mo->radius - FRACUNIT;
-
-		if (maxmove <= 0)
-		{ // gibs can have radius 0, so don't divide by zero below!
-			maxmove = MAXMOVE;
-		}
-
-		const fixed_t xspeed = abs (xmove);
-		const fixed_t yspeed = abs (ymove);
-
-		steps = 1;
-
-		if (xspeed > yspeed)
+		if (xspeed > maxmove)
 		{
-			if (xspeed > maxmove)
-			{
-				steps = 1 + xspeed / maxmove;
-			}
+			steps = 1 + xspeed / maxmove;
 		}
-		else
+	}
+	else
+	{
+		if (yspeed > maxmove)
 		{
-			if (yspeed > maxmove)
-			{
-				steps = 1 + yspeed / maxmove;
-			}
+			steps = 1 + yspeed / maxmove;
 		}
 	}
 
@@ -2505,6 +2505,13 @@ explode:
 		return oldfloorz;
 	}
 
+	// [Ivory] everything below this point make strafe jumping
+	// feel terrible. Avoid at all costs.
+	if (quakeMovement)
+	{
+		return oldfloorz;
+	}
+
 	if (mo->z > mo->floorz && !(mo->flags2 & MF2_ONMOBJ) &&
 		!mo->IsNoClip2() &&
 		(!(mo->flags2 & MF2_FLY) || !(mo->flags & MF_NOGRAVITY)) &&
@@ -2598,21 +2605,34 @@ explode:
 		// Reducing player velocity is no longer needed to reduce
 		// bobbing, so ice works much better now.
 
-		fixed_t friction = P_GetFriction (mo, NULL);
-
-		mo->velx = FixedMul (mo->velx, friction);
-		mo->vely = FixedMul (mo->vely, friction);
-
-		// killough 10/98: Always decrease player bobbing by ORIG_FRICTION.
-		// This prevents problems with bobbing on ice, where it was not being
-		// reduced fast enough, leading to all sorts of kludges being developed.
-
-		if (player && player->mo == mo)		//  Not voodoo dolls
+		if (player && (player->mo == mo))		//  Not voodoo dolls
 		{
-			player->velx = FixedMul (player->velx, ORIG_FRICTION);
-			player->vely = FixedMul (player->vely, ORIG_FRICTION);
+			if (((player->onground && !player->mo->wasJustThrustedZ) || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
+			{
+				fixed_t friction = P_GetFriction (mo, NULL);
+
+				mo->velx = FixedMul (mo->velx, friction);
+				mo->vely = FixedMul (mo->vely, friction);
+
+				// killough 10/98: Always decrease player bobbing by ORIG_FRICTION.
+				// This prevents problems with bobbing on ice, where it was not being
+				// reduced fast enough, leading to all sorts of kludges being developed.
+
+				player->velx = FixedMul (player->velx, ORIG_FRICTION);
+				player->vely = FixedMul (player->vely, ORIG_FRICTION);
+			}
+
+			player->mo->wasJustThrustedZ = false;
+		}
+		else
+		{
+			fixed_t friction = P_GetFriction(mo, NULL);
+
+			mo->velx = FixedMul(mo->velx, friction);
+			mo->vely = FixedMul(mo->vely, friction);
 		}
 	}
+
 	return oldfloorz;
 }
 
@@ -2899,79 +2919,102 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 //
 // apply gravity
 //
+	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType;
+
 	if (mo->z > mo->floorz && !(mo->flags & MF_NOGRAVITY))
 	{
-		fixed_t startvelz = mo->velz;
-
-		if (mo->waterlevel == 0 || (mo->player &&
-			!(mo->player->cmd.ucmd.forwardmove | mo->player->cmd.ucmd.sidemove)))
+		// [Ivory] Quake gravity but only for players.
+		// I want nothing to do with that thing below
+		// so I make it entirely separate.
+		if (quakeMovement)
 		{
-			// [RH] Double gravity only if running off a ledge. Coming down from
-			// an upward thrust (e.g. a jump) should not double it.
-			// [AM] Old versions of ZDoom didn't have double gravity.
-			if (mo->velz == 0 && oldfloorz > mo->floorz && mo->z == oldfloorz &&
-				!(zacompatflags & ZACOMPATF_OLD_ZDOOM_ZMOVEMENT))
-			{
-				mo->velz -= grav + grav;
-			}
-			else
+			if (mo->waterlevel < 2)
 			{
 				mo->velz -= grav;
 			}
-		}
-		if (mo->player == NULL)
-		{
-			if (mo->waterlevel >= 1)
+			else if(!(mo->player->cmd.ucmd.forwardmove | mo->player->cmd.ucmd.sidemove) &&
+					!(mo->player->cmd.ucmd.buttons & BT_JUMP) && !(mo->player->cmd.ucmd.buttons & BT_CROUCH))
 			{
-				fixed_t sinkspeed;
-
-				if ((mo->flags & MF_SPECIAL) && !(mo->flags3 & MF3_ISMONSTER))
-				{ // Pickup items don't sink if placed and drop slowly if dropped
-					sinkspeed = (mo->flags & MF_DROPPED) ? -WATER_SINK_SPEED / 8 : 0;
-				}
-				else
-				{
-					sinkspeed = -WATER_SINK_SPEED;
-
-					// If it's not a player, scale sinkspeed by its mass, with
-					// 100 being equivalent to a player.
-					if (mo->player == NULL)
-					{
-						sinkspeed = Scale(sinkspeed, clamp(mo->Mass, 1, 4000), 100);
-					}
-				}
-				if (mo->velz < sinkspeed)
-				{ // Dropping too fast, so slow down toward sinkspeed.
-					mo->velz -= MAX(sinkspeed*2, -FRACUNIT*8);
-					if (mo->velz > sinkspeed)
-					{
-						mo->velz = sinkspeed;
-					}
-				}
-				else if (mo->velz > sinkspeed)
-				{ // Dropping too slow/going up, so trend toward sinkspeed.
-					mo->velz = startvelz + MAX(sinkspeed/3, -FRACUNIT*8);
-					if (mo->velz < sinkspeed)
-					{
-						mo->velz = sinkspeed;
-					}
-				}
+				float velx = FIXED2FLOAT(mo->velx), vely = FIXED2FLOAT(mo->vely);
+				if (FVector2(velx, vely).Length() < 4.)
+					mo->velz = -32768; // 0.5f
 			}
 		}
 		else
 		{
-			if (mo->waterlevel > 1)
-			{
-				fixed_t sinkspeed = -WATER_SINK_SPEED;
+			fixed_t startvelz = mo->velz;
 
-				if (mo->velz < sinkspeed)
+			if (!mo->waterlevel || (mo->player &&
+				!(mo->player->cmd.ucmd.forwardmove | mo->player->cmd.ucmd.sidemove)))
+			{
+				// [RH] Double gravity only if running off a ledge. Coming down from
+				// an upward thrust (e.g. a jump) should not double it.
+				// [AM] Old versions of ZDoom didn't have double gravity.
+				if (!mo->velz && oldfloorz > mo->floorz && mo->z == oldfloorz &&
+					!(zacompatflags & ZACOMPATF_OLD_ZDOOM_ZMOVEMENT))
 				{
-					mo->velz = (startvelz < sinkspeed) ? startvelz : sinkspeed;
+					mo->velz -= grav + grav;
 				}
 				else
 				{
-					mo->velz = startvelz + ((mo->velz - startvelz) >>
-						(mo->waterlevel == 1 ? WATER_SINK_SMALL_FACTOR : WATER_SINK_FACTOR));
+					mo->velz -= grav;
+				}
+			}
+
+			if (!mo->player)
+			{
+				if (mo->waterlevel >= 1)
+				{
+					fixed_t sinkspeed;
+
+					if ((mo->flags & MF_SPECIAL) && !(mo->flags3 & MF3_ISMONSTER))
+					{ // Pickup items don't sink if placed and drop slowly if dropped
+						sinkspeed = (mo->flags & MF_DROPPED) ? -WATER_SINK_SPEED / 8 : 0;
+					}
+					else
+					{
+						sinkspeed = -WATER_SINK_SPEED;
+
+						// If it's not a player, scale sinkspeed by its mass, with
+						// 100 being equivalent to a player.
+						if (mo->player == NULL)
+						{
+							sinkspeed = Scale(sinkspeed, clamp(mo->Mass, 1, 4000), 100);
+						}
+					}
+					if (mo->velz < sinkspeed)
+					{ // Dropping too fast, so slow down toward sinkspeed.
+						mo->velz -= MAX(sinkspeed * 2, -FRACUNIT * 8);
+						if (mo->velz > sinkspeed)
+						{
+							mo->velz = sinkspeed;
+						}
+					}
+					else if (mo->velz > sinkspeed)
+					{ // Dropping too slow/going up, so trend toward sinkspeed.
+						mo->velz = startvelz + MAX(sinkspeed / 3, -FRACUNIT * 8);
+						if (mo->velz < sinkspeed)
+						{
+							mo->velz = sinkspeed;
+						}
+					}
+				}
+			}
+			else
+			{
+				if (mo->waterlevel > 1)
+				{
+					fixed_t sinkspeed = -WATER_SINK_SPEED;
+
+					if (mo->velz < sinkspeed)
+					{
+						mo->velz = startvelz < sinkspeed ? startvelz : sinkspeed;
+					}
+					else
+					{
+						mo->velz = startvelz + ((mo->velz - startvelz) >>
+							(mo->waterlevel == 1 ? WATER_SINK_SMALL_FACTOR : WATER_SINK_FACTOR));
+					}
 				}
 			}
 		}
@@ -3015,17 +3058,19 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 			}
 		}
 	}
-	if (mo->player && (mo->flags & MF_NOGRAVITY) && (mo->z > mo->floorz))
+
+	// [Ivory] This is bad for quake movement as well
+	if (!quakeMovement)
 	{
-		if (!mo->IsNoClip2())
+		if (mo->player && (mo->flags & MF_NOGRAVITY) && mo->z > mo->floorz)
 		{
-			mo->z += finesine[(FINEANGLES/80*level.maptime)&FINEMASK]/8;
+			if (!mo->IsNoClip2())
+				mo->z += finesine[(FINEANGLES / 80 * level.maptime)&FINEMASK] / 8;
+			mo->velz = FixedMul (mo->velz, FRICTION_FLY);
 		}
-		mo->velz = FixedMul (mo->velz, FRICTION_FLY);
-	}
-	if (mo->waterlevel && !(mo->flags & MF_NOGRAVITY))
-	{
-		mo->velz = FixedMul (mo->velz, mo->Sector->friction);
+
+		if (mo->waterlevel && !(mo->flags & MF_NOGRAVITY))
+			mo->velz = FixedMul (mo->velz, mo->Sector->friction);
 	}
 
 //
@@ -3156,21 +3201,12 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				}
 				// Let the actor do something special for hitting the floor
 				mo->HitFloor ();
-				if (mo->player)
+				if (mo->player && !(mo->flags & MF_NOGRAVITY))
 				{
-					// [BB] ZDoom changed the jumping here revision 2238.
-					// The old behavior is necessary for existing jumpmaze wads.
-					if ( ( zacompatflags & ZACOMPATF_SKULLTAG_JUMPING ) || mo->player->jumpTics < 0 || mo->velz < minvel)
-					{ // delay any jumping for a short while
-						mo->player->jumpTics = 7;
-					}
-					if (mo->velz < minvel && !(mo->flags & MF_NOGRAVITY))
-					{
-						// Squat down.
-						// Decrease viewheight for a moment after hitting the ground (hard),
-						// and utter appropriate sound.
-						PlayerLandedOnThing (mo, NULL);
-					}
+					// Squat down.
+					// Decrease viewheight for a moment after hitting the ground (hard),
+					// and utter appropriate sound.
+					PlayerLandedOnThing(mo, NULL);
 				}
 				mo->velz = 0;
 			}
@@ -3343,8 +3379,6 @@ void P_CheckFakeFloorTriggers (AActor *mo, fixed_t oldz, bool oldz_has_viewheigh
 
 static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 {
-	bool grunted;
-
 	if (!mo->player)
 		return;
 
@@ -3352,48 +3386,64 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 	if ( CLIENT_PREDICT_IsPredicting( ))
 		return;
 
-	if (mo->player->mo == mo)
-	{
-		mo->player->deltaviewheight = mo->velz >> 3;
-	}
+	const fixed_t minvel = -8 * FRACUNIT;	// landing speed from a jump with normal gravity
 
-/* [BB] I don't know why ZDoom needs to adjust deltaviewheight while predicting.
-        Skulltag may not do this, otherwise the view skins into the floor when
-        jumpding down a ledge with high ping.
-	if (mo->player->cheats & CF_PREDICTING)
-		return;
-*/
-	P_FallingDamage (mo);
+	bool grunted;
 
-	// [RH] only make noise if alive
-	// [WS/BB] As client only play the sound for the consoleplayer.
-	if (!mo->player->morphTics && mo->health > 0 && NETWORK_IsConsolePlayerOrNotInClientMode( mo->player ))
+	if (mo->velz < minvel)
 	{
-		grunted = false;
-		// Why should this number vary by gravity?
-		// [BB] For unassigned voodoo dolls, mo->player->mo is NULL.
-		if (mo->player->mo && mo->health > 0 && mo->velz < -mo->player->mo->GruntSpeed)
+		if (mo->player->mo == mo)
 		{
-			S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM);
-			grunted = true;
-
-			// [BC] Tell players that this player struck the ground (hard!)
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
+			mo->player->deltaviewheight = mo->velz >> 3;
 		}
-		if (onmobj != NULL || !Terrains[P_GetThingFloorType (mo)].IsLiquid)
+
+		/* [BB] I don't know why ZDoom needs to adjust deltaviewheight while predicting.
+		Skulltag may not do this, otherwise the view skins into the floor when
+		jumpding down a ledge with high ping.
+		if (mo->player->cheats & CF_PREDICTING)
+		return;
+		*/
+		P_FallingDamage (mo);
+
+		// [RH] only make noise if alive
+		// [WS/BB] As client only play the sound for the consoleplayer.
+		if (!mo->player->morphTics && mo->health > 0 && NETWORK_IsConsolePlayerOrNotInClientMode( mo->player ))
 		{
-			if (!grunted || !S_AreSoundsEquivalent (mo, "*grunt", "*land"))
+			grunted = false;
+			// Why should this number vary by gravity?
+			// [BB] For unassigned voodoo dolls, mo->player->mo is NULL.
+			if (mo->player->mo && mo->health > 0 && mo->velz < -mo->player->mo->GruntSpeed)
 			{
-				S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM);
+				S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM);
+				grunted = true;
 
 				// [BC] Tell players that this player struck the ground (hard!)
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SoundActor( mo, CHAN_AUTO, "*land", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
+					SERVERCOMMANDS_SoundActor( mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
+			}
+
+			if ((onmobj != NULL || !Terrains[P_GetThingFloorType (mo)].IsLiquid) && !(mo->mvFlags & MV_SILENT))
+			{
+				if (!grunted || !S_AreSoundsEquivalent (mo, "*grunt", "*land"))
+				{
+					S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM);
+
+					// [BC] Tell players that this player struck the ground (hard!)
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+						SERVERCOMMANDS_SoundActor( mo, CHAN_AUTO, "*land", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
+				}
 			}
 		}
+		//	mo->player->centering = true;
 	}
-//	mo->player->centering = true;
+	else if (mo->player->mo->waterlevel < 2 && !mo->player->isCrouchSliding)
+	{
+		// [geNia] Don't do this while predicting.
+		if (CLIENT_PREDICT_IsPredicting())
+			return;
+
+		S_Sound(mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+	}
 }
 
 
@@ -4499,6 +4549,7 @@ void AActor::Tick ()
 			if (!PoisonDurationReceived) PoisonDamageReceived = 0;
 		}
 	}
+
 	// [BC] Don't tick states while predicting.
 	if ( CLIENT_PREDICT_IsPredicting( ))
 		return;
@@ -6591,8 +6642,8 @@ statedone:
 			// spawn state. Therefore, there's no need to treat it as a special case.
 			// [BB] This saves bandwidth, but doesn't spawn the blood size based on the damage dealt,
 			// so only use this for players with a slow connection.
-			SERVERCOMMANDS_SpawnThingNoNetID( th, MAXPLAYERS, SVCF_ONLY_CONNECTIONTYPE_0 );
-			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS, SVCF_ONLY_CONNECTIONTYPE_1 );
+			SERVERCOMMANDS_SpawnThingNoNetID( th, MAXPLAYERS );
+			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS );
 		}
 		else
 			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator );
@@ -7837,6 +7888,7 @@ void AActor::Revive()
 	flags5 = info->flags5;
 	flags6 = info->flags6;
 	flags7 = info->flags7;
+	mvFlags = info->mvFlags;
 
 	// [BC] Apply new ST flags as well.
 	// [BB] The STFL_LEVELSPAWNED flag may not be removed by the default flags.
@@ -8036,6 +8088,9 @@ void PrintMiscActorInfo(AActor *query)
 		Printf("\n   flags7: %x", query->flags7);
 		for (flagi = 0; flagi <= 31; flagi++)
 			if (query->flags7 & 1<<flagi) Printf(" %s", FLAG_NAME(1<<flagi, flags7));
+		Printf("\n   mvFlags: %x", query->mvFlags);
+		for (flagi = 0; flagi <= 31; flagi++)
+			if (query->mvFlags & 1<<flagi) Printf(" %s", FLAG_NAME(1<<flagi, mvFlags));
 		Printf("\nBounce flags: %x\nBounce factors: f:%f, w:%f", 
 			query->BounceFlags, FIXED2FLOAT(query->bouncefactor), 
 			FIXED2FLOAT(query->wallbouncefactor));

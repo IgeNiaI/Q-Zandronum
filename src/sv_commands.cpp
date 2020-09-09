@@ -270,31 +270,34 @@ void SERVERCOMMANDS_SpawnPlayer( ULONG ulPlayer, LONG lPlayerState, ULONG ulPlay
 //
 void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	ULONG ulPlayerAttackFlags = 0;
+	ULONG ulPlayerFlags = 0;
 
 	if ( PLAYER_IsValidPlayerWithMo( ulPlayer ) == false )
 		return;
 
-	// [BB] Check if ulPlayer is pressing any attack buttons.
-	if ( players[ulPlayer].cmd.ucmd.buttons & BT_ATTACK )
-		ulPlayerAttackFlags |= PLAYER_ATTACK;
-	if ( players[ulPlayer].cmd.ucmd.buttons & BT_ALTATTACK )
-		ulPlayerAttackFlags |= PLAYER_ALTATTACK;
-
 	ServerCommands::MovePlayer fullCommand;
 	fullCommand.SetPlayer ( &players[ulPlayer] );
-	fullCommand.SetFlags( ulPlayerAttackFlags | PLAYER_VISIBLE );
-	fullCommand.SetX( players[ulPlayer].mo->x );
-	fullCommand.SetY( players[ulPlayer].mo->y );
-	fullCommand.SetZ( players[ulPlayer].mo->z );
-	fullCommand.SetAngle( players[ulPlayer].mo->angle );
-	fullCommand.SetVelx( players[ulPlayer].mo->velx );
-	fullCommand.SetVely( players[ulPlayer].mo->vely );
-	fullCommand.SetVelz( players[ulPlayer].mo->velz );
-	fullCommand.SetIsCrouching(( players[ulPlayer].crouchdir >= 0 ) ? true : false );
+	fullCommand.SetClientTicOnServerEnd ( players[ulPlayer].clientTicOnServerEnd );
+	fullCommand.SetFlags( ulPlayerFlags | PLAYER_VISIBLE );
+	fullCommand.SetX( players[ulPlayer].mo->ClientX );
+	fullCommand.SetY( players[ulPlayer].mo->ClientY );
+	fullCommand.SetZ( players[ulPlayer].mo->ClientZ );
+	fullCommand.SetWaterlevel( players[ulPlayer].mo->waterlevel );
+	fullCommand.SetAngle( players[ulPlayer].mo->ClientAngle );
+	fullCommand.SetPitch( players[ulPlayer].mo->ClientPitch );
+	fullCommand.SetVelx( players[ulPlayer].mo->ClientVelX );
+	fullCommand.SetVely( players[ulPlayer].mo->ClientVelY );
+	fullCommand.SetVelz( players[ulPlayer].mo->ClientVelZ );
+	fullCommand.SetUcmd_forwardmove( players[ulPlayer].cmd.ucmd.forwardmove );
+	fullCommand.SetUcmd_sidemove( players[ulPlayer].cmd.ucmd.sidemove );
+	fullCommand.SetUcmd_upmove( players[ulPlayer].cmd.ucmd.upmove );
+	fullCommand.SetUcmd_yaw( players[ulPlayer].cmd.ucmd.yaw );
+	fullCommand.SetUcmd_pitch( players[ulPlayer].cmd.ucmd.pitch );
+	// fullCommand.SetUcmd_roll( players[ulPlayer].cmd.ucmd.roll );
+	fullCommand.SetUcmd_buttons( players[ulPlayer].cmd.ucmd.buttons );
 
 	ServerCommands::MovePlayer stubCommand = fullCommand;
-	stubCommand.SetFlags( ulPlayerAttackFlags );
+	stubCommand.SetFlags( ulPlayerFlags );
 
 	for ( ClientIterator it ( ulPlayerExtra, flags ); it.notAtEnd(); ++it )
 	{
@@ -303,6 +306,15 @@ void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerComma
 		else
 			stubCommand.sendCommandToClients( *it, SVCF_ONLYTHISCLIENT );
 	}
+
+	players[ulPlayer].mo->ClientX = players[ulPlayer].mo->x;
+	players[ulPlayer].mo->ClientY = players[ulPlayer].mo->y;
+	players[ulPlayer].mo->ClientZ = players[ulPlayer].mo->z;
+	players[ulPlayer].mo->ClientVelX = players[ulPlayer].mo->velx;
+	players[ulPlayer].mo->ClientVelY = players[ulPlayer].mo->vely;
+	players[ulPlayer].mo->ClientVelZ = players[ulPlayer].mo->velz;
+	players[ulPlayer].mo->ClientAngle = players[ulPlayer].mo->angle;
+	players[ulPlayer].mo->ClientPitch = players[ulPlayer].mo->pitch;
 }
 
 //*****************************************************************************
@@ -864,23 +876,6 @@ void SERVERCOMMANDS_UpdatePlayerPing( ULONG ulPlayer, ULONG ulPlayerExtra, Serve
 	command.SetPlayer( &players[ulPlayer] );
 	command.SetPing( players[ulPlayer].ulPing );
 	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_UpdatePlayerExtraData( ULONG ulPlayer, ULONG ulDisplayPlayer )
-{
-	if (( SERVER_IsValidClient( ulPlayer ) == false ) || ( PLAYER_IsValidPlayer( ulDisplayPlayer ) == false ))
-		return;
-
-	ServerCommands::UpdatePlayerExtraData command;
-	command.SetPlayer( &players[ulDisplayPlayer] );
-	command.SetPitch( players[ulDisplayPlayer].mo->pitch );
-	command.SetWaterLevel( players[ulDisplayPlayer].mo->waterlevel );
-	command.SetButtons( players[ulDisplayPlayer].cmd.ucmd.buttons );
-	command.SetViewZ( players[ulDisplayPlayer].viewz );
-	command.SetBob( players[ulDisplayPlayer].bob );
-	command.sendCommandToClients( ulPlayer, SVCF_ONLYTHISCLIENT );
 }
 
 //*****************************************************************************
@@ -1461,6 +1456,7 @@ void SERVERCOMMANDS_SetThingFlags( AActor *pActor, FlagSet flagset, ULONG ulPlay
 		case FLAGSET_FLAGS6:	actorFlags = pActor->flags6; break;
 		case FLAGSET_FLAGS7:	actorFlags = pActor->flags7; break;
 		case FLAGSET_FLAGSST:	actorFlags = pActor->ulSTFlags; break;
+		case FLAGSET_MVFLAGS:	actorFlags = pActor->mvFlags; break;
 		default: return;
 	}
 

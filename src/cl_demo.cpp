@@ -342,8 +342,6 @@ void CLIENTDEMO_WriteUserInfo( void )
 	NETWORK_WriteString( &g_ByteStream, skins[players[consoleplayer].userinfo.GetSkin()].name );
 	NETWORK_WriteLong( &g_ByteStream, players[consoleplayer].userinfo.GetRailColor() );
 	NETWORK_WriteByte( &g_ByteStream, players[consoleplayer].userinfo.GetHandicap() );
-	NETWORK_WriteByte( &g_ByteStream, players[consoleplayer].userinfo.GetTicsPerUpdate() );
-	NETWORK_WriteByte( &g_ByteStream, players[consoleplayer].userinfo.GetConnectionType() );
 	NETWORK_WriteByte( &g_ByteStream, players[consoleplayer].userinfo.GetClientFlags() ); // [CK] List of booleans
 	NETWORK_WriteString( &g_ByteStream, PlayerClasses[players[consoleplayer].CurrentPlayerClass].Type->Meta.GetMetaString( APMETA_DisplayName ));
 }
@@ -361,8 +359,6 @@ void CLIENTDEMO_ReadUserInfo( void )
 	*static_cast<FIntCVar *>(info[NAME_Skin]) = R_FindSkin( NETWORK_ReadString( &g_ByteStream ), players[consoleplayer].CurrentPlayerClass );
 	*static_cast<FIntCVar *>(info[NAME_RailColor]) = NETWORK_ReadLong( &g_ByteStream );
 	*static_cast<FIntCVar *>(info[NAME_Handicap]) = NETWORK_ReadByte( &g_ByteStream );
-	info.TicsPerUpdateChanged ( NETWORK_ReadByte( &g_ByteStream ) );
-	info.ConnectionTypeChanged ( NETWORK_ReadByte( &g_ByteStream ) );
 	info.ClientFlagsChanged ( NETWORK_ReadByte( &g_ByteStream ) ); // [CK] Client booleans
 	info.PlayerClassChanged ( NETWORK_ReadString( &g_ByteStream ));
 

@@ -248,6 +248,9 @@ void S_Sound (fixed_t x, fixed_t y, fixed_t z, int channel, FSoundID sfxid, floa
 #define CHAN_VOICE				2
 #define CHAN_ITEM				3
 #define CHAN_BODY				4
+#define CHAN_FIVE				5
+#define CHAN_SIX				6
+#define CHAN_SEVEN				7
 
 // Channel alias for sector sounds. These define how listener height is
 // used when calculating 3D sound volume.

@@ -1,4 +1,4 @@
-// 6fe469a3c6a69423536e195f876723cc
+// 932e78ef75607593a6787ebc830c8e77
 // This file has been automatically generated. Do not edit by hand.
 #pragma once
 #include "actor.h"
@@ -656,24 +656,40 @@ namespace ServerCommands
 		MovePlayer() :
 			_playerInitialized( false ),
 			_flagsInitialized( false ),
+			_clientTicOnServerEndInitialized( false ),
 			_xInitialized( false ),
 			_yInitialized( false ),
 			_zInitialized( false ),
+			_waterlevelInitialized( false ),
 			_angleInitialized( false ),
+			_pitchInitialized( false ),
 			_velxInitialized( false ),
 			_velyInitialized( false ),
 			_velzInitialized( false ),
-			_isCrouchingInitialized( false ) {}
+			_ucmd_forwardmoveInitialized( false ),
+			_ucmd_sidemoveInitialized( false ),
+			_ucmd_upmoveInitialized( false ),
+			_ucmd_yawInitialized( false ),
+			_ucmd_pitchInitialized( false ),
+			_ucmd_buttonsInitialized( false ) {}
 		void SetPlayer( player_t * value );
 		void SetFlags( int value );
+		void SetClientTicOnServerEnd( unsigned int value );
 		void SetX( fixed_t value );
 		void SetY( fixed_t value );
 		void SetZ( fixed_t value );
+		void SetWaterlevel( int value );
 		void SetAngle( angle_t value );
+		void SetPitch( fixed_t value );
 		void SetVelx( fixed_t value );
 		void SetVely( fixed_t value );
 		void SetVelz( fixed_t value );
-		void SetIsCrouching( bool value );
+		void SetUcmd_forwardmove( int value );
+		void SetUcmd_sidemove( int value );
+		void SetUcmd_upmove( int value );
+		void SetUcmd_yaw( int value );
+		void SetUcmd_pitch( int value );
+		void SetUcmd_buttons( int value );
 		bool IsVisible() const;
 		void Execute();
 		NetCommand BuildNetCommand() const;
@@ -682,14 +698,22 @@ namespace ServerCommands
 		{
 			return _playerInitialized
 				&& _flagsInitialized
+				&& _clientTicOnServerEndInitialized
 				&& _xInitialized
 				&& _yInitialized
 				&& _zInitialized
+				&& _waterlevelInitialized
 				&& _angleInitialized
+				&& _pitchInitialized
 				&& _velxInitialized
 				&& _velyInitialized
 				&& _velzInitialized
-				&& _isCrouchingInitialized;
+				&& _ucmd_forwardmoveInitialized
+				&& _ucmd_sidemoveInitialized
+				&& _ucmd_upmoveInitialized
+				&& _ucmd_yawInitialized
+				&& _ucmd_pitchInitialized
+				&& _ucmd_buttonsInitialized;
 		}
 		void PrintMissingParameters() const
 		{
@@ -697,45 +721,77 @@ namespace ServerCommands
 				Printf( "Missing: player\n" );
 			if ( _flagsInitialized == false )
 				Printf( "Missing: flags\n" );
+			if ( _clientTicOnServerEndInitialized == false )
+				Printf( "Missing: clientTicOnServerEnd\n" );
 			if ( _xInitialized == false )
 				Printf( "Missing: x\n" );
 			if ( _yInitialized == false )
 				Printf( "Missing: y\n" );
 			if ( _zInitialized == false )
 				Printf( "Missing: z\n" );
+			if ( _waterlevelInitialized == false )
+				Printf( "Missing: waterlevel\n" );
 			if ( _angleInitialized == false )
 				Printf( "Missing: angle\n" );
+			if ( _pitchInitialized == false )
+				Printf( "Missing: pitch\n" );
 			if ( _velxInitialized == false )
 				Printf( "Missing: velx\n" );
 			if ( _velyInitialized == false )
 				Printf( "Missing: vely\n" );
 			if ( _velzInitialized == false )
 				Printf( "Missing: velz\n" );
-			if ( _isCrouchingInitialized == false )
-				Printf( "Missing: isCrouching\n" );
+			if ( _ucmd_forwardmoveInitialized == false )
+				Printf( "Missing: ucmd_forwardmove\n" );
+			if ( _ucmd_sidemoveInitialized == false )
+				Printf( "Missing: ucmd_sidemove\n" );
+			if ( _ucmd_upmoveInitialized == false )
+				Printf( "Missing: ucmd_upmove\n" );
+			if ( _ucmd_yawInitialized == false )
+				Printf( "Missing: ucmd_yaw\n" );
+			if ( _ucmd_pitchInitialized == false )
+				Printf( "Missing: ucmd_pitch\n" );
+			if ( _ucmd_buttonsInitialized == false )
+				Printf( "Missing: ucmd_buttons\n" );
 		}
 
 	protected:
 		player_t *player;
 		int flags;
+		unsigned int clientTicOnServerEnd;
 		fixed_t x;
 		fixed_t y;
 		fixed_t z;
+		int waterlevel;
 		angle_t angle;
+		fixed_t pitch;
 		fixed_t velx;
 		fixed_t vely;
 		fixed_t velz;
-		bool isCrouching;
+		int ucmd_forwardmove;
+		int ucmd_sidemove;
+		int ucmd_upmove;
+		int ucmd_yaw;
+		int ucmd_pitch;
+		int ucmd_buttons;
 		bool _playerInitialized;
 		bool _flagsInitialized;
+		bool _clientTicOnServerEndInitialized;
 		bool _xInitialized;
 		bool _yInitialized;
 		bool _zInitialized;
+		bool _waterlevelInitialized;
 		bool _angleInitialized;
+		bool _pitchInitialized;
 		bool _velxInitialized;
 		bool _velyInitialized;
 		bool _velzInitialized;
-		bool _isCrouchingInitialized;
+		bool _ucmd_forwardmoveInitialized;
+		bool _ucmd_sidemoveInitialized;
+		bool _ucmd_upmoveInitialized;
+		bool _ucmd_yawInitialized;
+		bool _ucmd_pitchInitialized;
+		bool _ucmd_buttonsInitialized;
 	};
 
 	class DamagePlayer : public BaseServerCommand
@@ -1653,65 +1709,6 @@ namespace ServerCommands
 		unsigned int ping;
 		bool _playerInitialized;
 		bool _pingInitialized;
-	};
-
-	class UpdatePlayerExtraData : public BaseServerCommand
-	{
-	public:
-		UpdatePlayerExtraData() :
-			_playerInitialized( false ),
-			_pitchInitialized( false ),
-			_waterLevelInitialized( false ),
-			_buttonsInitialized( false ),
-			_viewZInitialized( false ),
-			_bobInitialized( false ) {}
-		void SetPlayer( player_t * value );
-		void SetPitch( int value );
-		void SetWaterLevel( int value );
-		void SetButtons( int value );
-		void SetViewZ( int value );
-		void SetBob( int value );
-		void Execute();
-		NetCommand BuildNetCommand() const;
-		friend bool ::CLIENT_ParseServerCommand( SVC, BYTESTREAM_s * );
-		bool AllParametersInitialized() const
-		{
-			return _playerInitialized
-				&& _pitchInitialized
-				&& _waterLevelInitialized
-				&& _buttonsInitialized
-				&& _viewZInitialized
-				&& _bobInitialized;
-		}
-		void PrintMissingParameters() const
-		{
-			if ( _playerInitialized == false )
-				Printf( "Missing: player\n" );
-			if ( _pitchInitialized == false )
-				Printf( "Missing: pitch\n" );
-			if ( _waterLevelInitialized == false )
-				Printf( "Missing: waterLevel\n" );
-			if ( _buttonsInitialized == false )
-				Printf( "Missing: buttons\n" );
-			if ( _viewZInitialized == false )
-				Printf( "Missing: viewZ\n" );
-			if ( _bobInitialized == false )
-				Printf( "Missing: bob\n" );
-		}
-
-	protected:
-		player_t *player;
-		int pitch;
-		int waterLevel;
-		int buttons;
-		int viewZ;
-		int bob;
-		bool _playerInitialized;
-		bool _pitchInitialized;
-		bool _waterLevelInitialized;
-		bool _buttonsInitialized;
-		bool _viewZInitialized;
-		bool _bobInitialized;
 	};
 
 	class UpdatePlayerTime : public BaseServerCommand
