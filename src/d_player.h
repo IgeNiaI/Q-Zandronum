@@ -845,12 +845,17 @@ inline bool AActor::IsNoClip2() const
 
 bool P_IsPlayerTotallyFrozen(const player_t *player);
 
-// [Ivory] quake movement vars
-EXTERN_CVAR(Int, sv_quakemovement);
-EXTERN_CVAR(Float, q_acceleration);
-EXTERN_CVAR(Float, q_friction);
-EXTERN_CVAR(Float, q_airacceleration);
-EXTERN_CVAR(Float, q_cpmacceleration);
-EXTERN_CVAR(Float, q_stopspeed);
+// [Ivory] movement vars
+const int MV_DOOM = 0;
+const int MV_QUAKE = 1;
+const int MV_QUAKE_CPMA = 2;
+
+EXTERN_CVAR( Int,	mv_type );
+EXTERN_CVAR( Int,	mv_jumptics );
+EXTERN_CVAR( Float,	mv_acceleration );
+EXTERN_CVAR( Float,	mv_friction );
+EXTERN_CVAR( Float,	mv_airacceleration );
+EXTERN_CVAR( Float, mv_cpmacceleration);
+EXTERN_CVAR( Float,	mv_stopspeed );
 
 #endif // __D_PLAYER_H__

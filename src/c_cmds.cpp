@@ -1055,6 +1055,44 @@ CCMD (dir)
 	chdir (curdir);
 }
 
+CCMD(movement)
+{
+	if (argv.argc() != 2)
+	{
+		Printf("Please specify movement preset\n");
+		return;
+	}
+	else
+	{
+		char *arg1 = copystring(argv[1]);
+		if (strcmp(arg1, "doom") == 0) {
+			mv_type = MV_DOOM;
+			mv_jumptics = 7;
+		}
+		if (strcmp(arg1, "doom_jump") == 0) {
+			mv_type = MV_DOOM;
+			mv_jumptics = 0;
+		}
+		if (strcmp(arg1, "quake") == 0) {
+			mv_type = MV_QUAKE;
+			mv_jumptics = 0;
+			mv_acceleration = 10.f;
+			mv_friction = 6.f;
+			mv_airacceleration = 1.5f;
+			mv_stopspeed = 12.f;
+		}
+		if (strcmp(arg1, "cpma") == 0) {
+			mv_type = MV_QUAKE_CPMA;
+			mv_jumptics = 0;
+			mv_acceleration = 10.f;
+			mv_friction = 6.f;
+			mv_airacceleration = 1.5f;
+			mv_stopspeed = 12.f;
+			mv_cpmacceleration = 100.f;
+		}
+	}
+}
+
 //==========================================================================
 //
 // CCMD warp

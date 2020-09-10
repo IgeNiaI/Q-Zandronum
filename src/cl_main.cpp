@@ -5694,29 +5694,33 @@ static void client_SetMovementConfig(BYTESTREAM_s *pByteStream)
 {
 	UCVarValue	Value;
 
-	// Read in, and set the value for fraglimit.
+	// Read in, and set the value for movement type
 	Value.Int = NETWORK_ReadShort(pByteStream);
-	sv_quakemovement.ForceSet(Value, CVAR_Int);
+	mv_type.ForceSet(Value, CVAR_Int);
 
-	// Read in, and set the value for timelimit.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	q_acceleration.ForceSet(Value, CVAR_Float);
+	// Read in, and set the value for jumptics.
+	Value.Int = NETWORK_ReadShort(pByteStream);
+	mv_jumptics.ForceSet(Value, CVAR_Int);
 
-	// Read in, and set the value for timelimit.
+	// Read in, and set the value for acceleration.
 	Value.Float = NETWORK_ReadFloat(pByteStream);
-	q_friction.ForceSet(Value, CVAR_Float);
+	mv_acceleration.ForceSet(Value, CVAR_Float);
+	
+	// Read in, and set the value for friction.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	mv_friction.ForceSet(Value, CVAR_Float);
 
-	// Read in, and set the value for timelimit.
+	// Read in, and set the value for airacceleration.
 	Value.Float = NETWORK_ReadFloat(pByteStream);
-	q_airacceleration.ForceSet(Value, CVAR_Float);
+	mv_airacceleration.ForceSet(Value, CVAR_Float);
+	
+	// Read in, and set the value for cpmacceleration.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	mv_cpmacceleration.ForceSet(Value, CVAR_Float);
 
-	// Read in, and set the value for timelimit.
+	// Read in, and set the value for stopspeed.
 	Value.Float = NETWORK_ReadFloat(pByteStream);
-	q_cpmacceleration.ForceSet(Value, CVAR_Float);
-
-	// Read in, and set the value for timelimit.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	q_stopspeed.ForceSet(Value, CVAR_Float);
+	mv_stopspeed.ForceSet(Value, CVAR_Float);
 }
 
 //*****************************************************************************

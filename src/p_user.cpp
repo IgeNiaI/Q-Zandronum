@@ -2796,14 +2796,14 @@ CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 //*****************************************************************************
 // [Ivory] Quake movement stuff
 //
-CUSTOM_CVAR( Int, sv_quakemovement, 0, CVAR_SERVERINFO )
+CUSTOM_CVAR( Int, mv_type, MV_DOOM, CVAR_SERVERINFO )
 {
-	if (self < 0)
+	if (self < MV_DOOM)
 	{
-		self = 0;
+		self = MV_DOOM;
 	}
-	else if (self > 2) {
-		self = 2;
+	else if (self > MV_QUAKE_CPMA) { // MV_QUAKE_CPMA is highest at the moment
+		self = MV_QUAKE_CPMA;
 	}
 
 	// [TP] The client also enforces movement config so this cvar must be synced.
@@ -2811,35 +2811,42 @@ CUSTOM_CVAR( Int, sv_quakemovement, 0, CVAR_SERVERINFO )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, q_acceleration, 10.f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Int, mv_jumptics, 7, CVAR_SERVERINFO)
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, q_friction, 6.f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Float, mv_acceleration, 10.f, CVAR_SERVERINFO )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, q_airacceleration, 1.5f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Float, mv_friction, 6.f, CVAR_SERVERINFO )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, q_cpmacceleration, 100.f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Float, mv_airacceleration, 1.5f, CVAR_SERVERINFO )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, q_stopspeed, 12.f, CVAR_SERVERINFO )
+CUSTOM_CVAR(Float, mv_cpmacceleration, 100.f, CVAR_SERVERINFO)
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+CUSTOM_CVAR( Float, mv_stopspeed, 12.f, CVAR_SERVERINFO )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -3000,7 +3007,7 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 
 	player->onground = (mo->z <= mo->floorz) || (mo->flags2 & MF2_ONMOBJ) || (mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
-	if (sv_quakemovement)
+	if (int(mv_type) == MV_QUAKE || int(mv_type) == MV_QUAKE_CPMA)
 	{
 		//******************************************************************************//
 		// [Ivory Duke] Quake movement code. Convert fixed point math to floating point //
@@ -3017,7 +3024,7 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		bool waterflying = false;
 		float flAngle = mo->angle * (360.f / ANGLE_MAX);
 		float movefactor = mo->QMoveFactor();
-		float maxgroundspeed = q_stopspeed * FIXED2FLOAT(player->mo->Speed) * movefactor * mo->QTweakSpeed();
+		float maxgroundspeed = mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * movefactor * mo->QTweakSpeed();
 		TVector3<float> vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
 
 		if (player->mo->waterlevel >= 2)
@@ -3080,17 +3087,17 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 			VectorNormalize(acceleration);
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 			// Acceleration
-			if (sv_quakemovement == 1)
+			if (int(mv_type) == MV_QUAKE)
 			{
-				mo->QAcceleration(vel, acceleration, maxgroundspeed, q_airacceleration);
+				mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
 			}
 			else
 			{
 				float velocity = VectorLength(vel);
 				if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
-					mo->QAcceleration(vel, acceleration, 1.5f, q_cpmacceleration);
+					mo->QAcceleration(vel, acceleration, 1.5f, mv_cpmacceleration);
 				else
-					mo->QAcceleration(vel, acceleration, maxgroundspeed, q_airacceleration);
+					mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
 			}
 		}
 		else
@@ -3101,9 +3108,9 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 			VectorNormalize(acceleration);
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 			// Friction
-			mo->QFriction(vel, maxgroundspeed, q_friction);
+			mo->QFriction(vel, maxgroundspeed, mv_friction);
 			// Acceleration
-			mo->QAcceleration(vel, acceleration, maxgroundspeed, q_acceleration / movefactor);
+			mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_acceleration / movefactor);
 		}
 
 		// ...convert it back to fixed point, velz is untouched so no need for that
@@ -3135,14 +3142,12 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		// Water and flying have already executed jump press logic
 		if (waterflying) { return; }
 
-		// Always 0, only 0
-		player->jumpTics = 0;
-
 		// Stop here if not in good condition to jump
 		if (!(cmd->ucmd.buttons & BT_JUMP) ||
 			!player->onground ||
 			player->bSpectating ||
-			!level.IsJumpingAllowed())
+			!level.IsJumpingAllowed() ||
+			player->jumpTics)
 		{
 			return;
 		}
@@ -3164,6 +3169,7 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 
 		player->mo->flags2 &= ~MF2_ONMOBJ;
 		player->mo->velz += JumpVelz;
+		player->jumpTics = -1;
 	}
 	else // default Doom movement
 	{
