@@ -3157,6 +3157,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool waterflying = false;
 	bool canSlide = false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
+	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float movefactor = player->mo->QMoveFactor();
 	float maxgroundspeed = mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	TVector3<float> acceleration = { 0.f, 0.f, 0.f };
@@ -3260,14 +3261,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		// Friction & Acceleration
 		if (canSlide)
 		{
-			player->mo->QFriction(vel, maxgroundspeed, mv_slidefriction);
-			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_slideacceleration);
+			player->mo->QFriction(vel, maxgroundspeed, mv_slidefriction * floorFriction);
+			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_slideacceleration * floorFriction);
 		}
 		else
 		{
 			maxgroundspeed *= movefactor;
-			player->mo->QFriction(vel, maxgroundspeed, mv_friction);
-			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_acceleration / movefactor);
+			player->mo->QFriction(vel, maxgroundspeed, mv_friction * floorFriction);
+			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_acceleration / movefactor * floorFriction);
 		}
 
 		//If not using CSlide right away clear it
