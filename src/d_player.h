@@ -78,13 +78,6 @@ enum
 	APMETA_MaxSkinHeightFactor,
 };
 
-struct Vector3
-{
-	float x;
-	float y;
-	float z;
-};
-
 FPlayerColorSet *P_GetPlayerColorSet(FName classname, int setnum);
 void P_EnumPlayerColorSets(FName classname, TArray<int> *out);
 const char *GetPrintableDisplayName(const PClass *cls);
@@ -131,8 +124,8 @@ public:
 	// Quake movement
 	float QTweakSpeed();
 	float QMoveFactor();
-	void  QFriction(Vector3 &vel, const float stopspeed, const float friction);
-	void  QAcceleration(Vector3 &vel, const Vector3 &wishdir, const float &wishspeed, const float accel);
+	void  QFriction(TVector3<float> &vel, const float stopspeed, const float friction);
+	void  QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel);
 
 	void SetupWeaponSlots ();
 	void GiveDefaultInventory ();

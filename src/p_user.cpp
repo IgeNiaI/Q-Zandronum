@@ -2884,30 +2884,30 @@ CUSTOM_CVAR( Float, mv_stopspeed, 12.f, CVAR_SERVERINFO )
 // Vectors Math
 //***************************************************
 
-float VectorLength(const Vector3 &v)
+float VectorLength(const TVector3<float> &v)
 {
-	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+	return sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
 }
 
-float VectorNormalize(Vector3 &v)
+float VectorNormalize(TVector3<float> &v)
 {
-	float length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+	float length = sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
 	
 	if (length)
 	{
-		v.x /= length;
-		v.y /= length;
-		v.z /= length;
+		v.X /= length;
+		v.Y /= length;
+		v.Z /= length;
 	}
 
 	return length;
 }
 
-void VectorScale(const Vector3 &in, const float &scale, Vector3 &out)
+void VectorScale(const TVector3<float> &in, const float &scale, TVector3<float> &out)
 {
-	out.x = in.x * scale;
-	out.y = in.y * scale;
-	out.z = in.z * scale;
+	out.X = in.X * scale;
+	out.Y = in.Y * scale;
+	out.Z = in.Z * scale;
 }
 
 void VectorRotate(float &x, float &y, const float &angle)
@@ -2917,9 +2917,9 @@ void VectorRotate(float &x, float &y, const float &angle)
 	y = sine * oX + cosine * oY;
 }
 
-float DotProduct(const Vector3 &v, const Vector3 &t)
+float DotProduct(const TVector3<float> &v, const TVector3<float> &t)
 {
-	return v.x * t.x + v.y * t.y + v.z * t.z;
+	return v.X * t.X + v.Y * t.Y + v.Z * t.Z;
 }
 
 //***************************************************
@@ -2949,10 +2949,10 @@ float APlayerPawn::QMoveFactor()
 	return 1.f;
 }
 
-void APlayerPawn::QFriction(Vector3 &vel, const float stopspeed, const float friction)
+void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const float friction)
 {
 	float velocity = VectorLength(vel);
-	Vector3 vel2D = { vel.x, vel.y, 0.f };
+	TVector3<float> vel2D = { vel.X, vel.Y, 0.f };
 	bool waterflying = player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY);
 
 	// water/flying going too slow
@@ -2960,13 +2960,13 @@ void APlayerPawn::QFriction(Vector3 &vel, const float stopspeed, const float fri
 	{
 		if (velocity < 0.5f)
 		{
-			vel.x = vel.y = vel.z = 0.f;
+			vel.X = vel.Y = vel.Z = 0.f;
 			return;
 		}
 	}
 	else if (VectorLength(vel2D) < 1.f)
 	{
-		vel.x = vel.y = 0.f;
+		vel.X = vel.Y = 0.f;
 		return;
 	}
 	
@@ -2983,21 +2983,21 @@ void APlayerPawn::QFriction(Vector3 &vel, const float stopspeed, const float fri
 
 	float newvelocity = std::max(velocity - drop, 0.f) / velocity;
 
-	vel.x *= newvelocity;
-	vel.y *= newvelocity;
-	if (waterflying) { vel.z *= newvelocity; }
+	vel.X *= newvelocity;
+	vel.Y *= newvelocity;
+	if (waterflying) { vel.Z *= newvelocity; }
 }
 
-void APlayerPawn::QAcceleration(Vector3 &vel, const Vector3 &wishdir, const float &wishspeed, const float accel)
+void APlayerPawn::QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel)
 {
 	float currentspeed = DotProduct(wishdir, vel);
 	float addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0.f) { return; }
 
 	float accelerationspeed = std::min(accel * wishspeed / TICRATE, addspeed);
-	vel.x += wishdir.x * accelerationspeed;
-	vel.y += wishdir.y * accelerationspeed;
-	vel.z += wishdir.z * accelerationspeed;
+	vel.X += wishdir.X * accelerationspeed;
+	vel.Y += wishdir.Y * accelerationspeed;
+	vel.Z += wishdir.Z * accelerationspeed;
 }
 
 void P_MovePlayer (player_t *player, ticcmd_t *cmd)
@@ -3051,8 +3051,8 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		float flAngle = mo->angle * (360.f / ANGLE_MAX);
 		float movefactor = mo->QMoveFactor();
 		float maxgroundspeed = mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * mo->QTweakSpeed();
-		Vector3 acceleration = { 0.f, 0.f, 0.f };
-		Vector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
+		TVector3<float> acceleration = { 0.f, 0.f, 0.f };
+		TVector3<float> vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
 
 		if (player->mo->waterlevel >= 2)
 		{
@@ -3065,19 +3065,19 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 			// Calculate the vertical push according to the view pitch
 			if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
 			{
-				acceleration.z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
+				acceleration.Z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
 			}
 			else
 			{
 				float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX) * (PI / 180.f));
-				acceleration.z = acceleration.x * sin(-pitch);
-				acceleration.x *= cos(pitch);
+				acceleration.Z = acceleration.X * sin(-pitch);
+				acceleration.X *= cos(pitch);
 			}
 			//Friction
 			mo->QFriction(vel, 0, 2.f);
 			//Acceleration
 			VectorNormalize(acceleration);
-			VectorRotate(acceleration.x, acceleration.y, flAngle);
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 			mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
 
 			waterflying = true;
@@ -3093,19 +3093,19 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 			// Calculate the vertical push according to the view pitch
 			if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
 			{
-				acceleration.z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
+				acceleration.Z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
 			}
 			else
 			{
 				float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX) * (PI / 180.f));
-				acceleration.z = acceleration.x * sin(-pitch);
-				acceleration.x *= cos(pitch);
+				acceleration.Z = acceleration.X * sin(-pitch);
+				acceleration.X *= cos(pitch);
 			}
 			//Friction
 			mo->QFriction(vel, 0.f, 3.f);
 			//Acceleration
 			VectorNormalize(acceleration);
-			VectorRotate(acceleration.x, acceleration.y, flAngle);
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 			mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 2.f, 8.f);
 
 			waterflying = true;
@@ -3118,7 +3118,7 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 			acceleration = { (float)cmd->ucmd.forwardmove, - (float)cmd->ucmd.sidemove, 0.f };
 			// Orient inputs to view angle
 			VectorNormalize(acceleration);
-			VectorRotate(acceleration.x, acceleration.y, flAngle);
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 			// Acceleration
 			if (quakeMovement == MV_QUAKE)
 			{
@@ -3148,7 +3148,7 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 			acceleration = { (float)cmd->ucmd.forwardmove, - (float)cmd->ucmd.sidemove, 0.f };
 			// Orient inputs to view angle
 			VectorNormalize(acceleration);
-			VectorRotate(acceleration.x, acceleration.y, flAngle);
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 			// Friction & Acceleration
 			if (canSlide)
 			{
@@ -3167,9 +3167,9 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		}
 
 		// ...convert it back to fixed point
-		player->mo->velx = FLOAT2FIXED(vel.x);
-		player->mo->vely = FLOAT2FIXED(vel.y);
-		player->mo->velz = FLOAT2FIXED(vel.z);
+		player->mo->velx = FLOAT2FIXED(vel.X);
+		player->mo->vely = FLOAT2FIXED(vel.Y);
+		player->mo->velz = FLOAT2FIXED(vel.Z);
 
 		// also take care of view/weapon bobbing
 		player->velx = player->mo->velx;
@@ -3205,13 +3205,10 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		// Water and flying have already executed jump press logic
 		if (waterflying) { return; }
 
-		// 0 all the times at all times
-		player->jumpTics = 0;
-
 		// Stop here if not in good condition to jump
 		if (cmd->ucmd.buttons & BT_JUMP)
 		{
-			if (player->onground && (player->bSpectating || level.IsJumpingAllowed()))
+			if (player->onground && !player->jumpTics && (player->bSpectating || level.IsJumpingAllowed()))
 			{
 				fixed_t	JumpVelz = player->mo->CalcJumpVelz();
 
@@ -3229,6 +3226,7 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 				player->mo->flags2 &= ~MF2_ONMOBJ;
 				player->mo->velz += JumpVelz;
 				player->doubleJumpTics = 6;
+				player->jumpTics = -1;
 			}
 			else if ((player->mo->flags7 & MF7_DOUBLEJUMP) && !player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
 			{
@@ -3363,7 +3361,7 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 				// Set base jump ticks.
 				// [BB] In ZDoom revision 2970 changed the jumping behavior.
 				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
-					ulJumpTicks = mv_jumptics * TICRATE / 35;
+					ulJumpTicks = 18 * TICRATE / 35;
 				else
 					ulJumpTicks = -1;
 
@@ -4064,7 +4062,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	if (player->jumpTics)
 	{
 		player->jumpTics--;
-		if (player->onground && player->jumpTics < - mv_jumptics)
+		if (player->onground && player->jumpTics < -18)
 		{
 			player->jumpTics = 0;
 		}
