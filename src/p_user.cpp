@@ -2817,7 +2817,7 @@ CUSTOM_CVAR( Int, mv_type, MV_DOOM, CVAR_SERVERINFO )
 	if (self < MV_DOOM)
 		self = MV_DOOM;
 	else if (self >= MV_TYPES_END)
-		self = MV_TYPES_END;
+		self = MV_TYPES_END - 1;
 
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
