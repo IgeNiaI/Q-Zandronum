@@ -2952,6 +2952,9 @@ float APlayerPawn::QMoveFactor()
 void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const float friction)
 {
 	float velocity = VectorLength(vel);
+	if (!velocity)
+		return;
+
 	TVector3<float> vel2D = { vel.X, vel.Y, 0.f };
 	bool waterflying = player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY);
 
