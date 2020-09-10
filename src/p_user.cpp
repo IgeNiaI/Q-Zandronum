@@ -2816,8 +2816,8 @@ CUSTOM_CVAR( Int, mv_type, MV_DOOM, CVAR_SERVERINFO )
 {
 	if (self < MV_DOOM)
 		self = MV_DOOM;
-	else if (self > MV_QUAKE_CPMA) // MV_QUAKE_CPMA is highest at the moment
-		self = MV_QUAKE_CPMA;
+	else if (self >= MV_TYPES_END)
+		self = MV_TYPES_END;
 
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)

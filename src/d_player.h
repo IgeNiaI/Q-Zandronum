@@ -859,9 +859,13 @@ inline bool AActor::IsNoClip2() const
 bool P_IsPlayerTotallyFrozen(const player_t *player);
 
 // [Ivory] movement vars
-#define MV_DOOM 0
-#define MV_QUAKE 1
-#define MV_QUAKE_CPMA 2
+enum
+{
+	MV_DOOM = 0,
+	MV_QUAKE,
+	MV_QUAKE_CPMA,
+	MV_TYPES_END
+};
 
 EXTERN_CVAR( Int,	mv_type );
 EXTERN_CVAR( Int,	mv_jumptics );
