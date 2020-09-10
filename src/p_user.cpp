@@ -2952,13 +2952,14 @@ float APlayerPawn::QMoveFactor()
 void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const float friction)
 {
 	float velocity = VectorLength(vel);
-	if (!velocity)
+
+	// happens when somebody gets stuck in a corner and causes same results as a division by 0
+	if (velocity > 10000.f)
 		return;
 
 	TVector3<float> vel2D = { vel.X, vel.Y, 0.f };
 	bool waterflying = player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY);
 
-	// water/flying going too slow
 	if (waterflying)
 	{
 		if (velocity < 0.5f)
