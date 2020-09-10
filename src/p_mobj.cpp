@@ -2047,7 +2047,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 {
 	static int pushtime = 0;
 	bool bForceSlide = scrollx || scrolly;
-	bool quakeMovement = mv_type > 0; //mv_type value is clamped in cvar code, no need to check specific values
+	bool quakeMovement = mv_type && mo->player && mo->player->mo == mo; // only apply to non voodoo dolls players
 	angle_t angle;
 	fixed_t ptryx, ptryy;
 	player_t *player;
@@ -2185,32 +2185,30 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 	// line. For Doom to detect that the line is there, it needs to actually cut
 	// through the actor.
 
+	maxmove = mo->radius - FRACUNIT;
+
+	if (maxmove <= 0)
+	{ // gibs can have radius 0, so don't divide by zero below!
+		maxmove = MAXMOVE;
+	}
+
+	const fixed_t xspeed = abs (xmove);
+	const fixed_t yspeed = abs (ymove);
+
+	steps = 1;
+
+	if (xspeed > yspeed)
 	{
-		maxmove = mo->radius - FRACUNIT;
-
-		if (maxmove <= 0)
-		{ // gibs can have radius 0, so don't divide by zero below!
-			maxmove = MAXMOVE;
-		}
-
-		const fixed_t xspeed = abs (xmove);
-		const fixed_t yspeed = abs (ymove);
-
-		steps = 1;
-
-		if (xspeed > yspeed)
+		if (xspeed > maxmove)
 		{
-			if (xspeed > maxmove)
-			{
-				steps = 1 + xspeed / maxmove;
-			}
+			steps = 1 + xspeed / maxmove;
 		}
-		else
+	}
+	else
+	{
+		if (yspeed > maxmove)
 		{
-			if (yspeed > maxmove)
-			{
-				steps = 1 + yspeed / maxmove;
-			}
+			steps = 1 + yspeed / maxmove;
 		}
 	}
 
@@ -2506,6 +2504,13 @@ explode:
 		return oldfloorz;
 	}
 
+	// [Ivory] everything below this point make strafe jumping
+	// feel terrible. Avoid at all costs.
+	if (quakeMovement)
+	{
+		return oldfloorz;
+	}
+
 	if (mo->z > mo->floorz && !(mo->flags2 & MF2_ONMOBJ) &&
 		!mo->IsNoClip2() &&
 		(!(mo->flags2 & MF2_FLY) || !(mo->flags & MF_NOGRAVITY)) &&
@@ -2553,11 +2558,6 @@ explode:
 			}
 		}
 	}
-	
-	// [Ivory] this thing below makes strafe jumping feel terrible.
-	// Avoid at all costs.
-	if (quakeMovement)
-		return oldfloorz;
 
 	// killough 11/98:
 	// Stop voodoo dolls that have come to rest, despite any
@@ -2905,79 +2905,102 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 //
 // apply gravity
 //
+	bool quakeMovement = mv_type && mo->player && mo->player->mo == mo;
+
 	if (mo->z > mo->floorz && !(mo->flags & MF_NOGRAVITY))
 	{
-		fixed_t startvelz = mo->velz;
-
-		if (mo->waterlevel == 0 || (mo->player &&
-			!(mo->player->cmd.ucmd.forwardmove | mo->player->cmd.ucmd.sidemove)))
+		// [Ivory] Quake gravity but only for players.
+		// I want nothing to do with that thing below
+		// so I make it entirely separate.
+		if (quakeMovement)
 		{
-			// [RH] Double gravity only if running off a ledge. Coming down from
-			// an upward thrust (e.g. a jump) should not double it.
-			// [AM] Old versions of ZDoom didn't have double gravity.
-			if (mo->velz == 0 && oldfloorz > mo->floorz && mo->z == oldfloorz &&
-				!(zacompatflags & ZACOMPATF_OLD_ZDOOM_ZMOVEMENT))
-			{
-				mo->velz -= grav + grav;
-			}
-			else
+			if (mo->waterlevel < 2)
 			{
 				mo->velz -= grav;
 			}
-		}
-		if (mo->player == NULL)
-		{
-			if (mo->waterlevel >= 1)
+			else if(!(mo->player->cmd.ucmd.forwardmove | mo->player->cmd.ucmd.sidemove) &&
+					!(mo->player->cmd.ucmd.buttons & BT_JUMP))
 			{
-				fixed_t sinkspeed;
-
-				if ((mo->flags & MF_SPECIAL) && !(mo->flags3 & MF3_ISMONSTER))
-				{ // Pickup items don't sink if placed and drop slowly if dropped
-					sinkspeed = (mo->flags & MF_DROPPED) ? -WATER_SINK_SPEED / 8 : 0;
-				}
-				else
-				{
-					sinkspeed = -WATER_SINK_SPEED;
-
-					// If it's not a player, scale sinkspeed by its mass, with
-					// 100 being equivalent to a player.
-					if (mo->player == NULL)
-					{
-						sinkspeed = Scale(sinkspeed, clamp(mo->Mass, 1, 4000), 100);
-					}
-				}
-				if (mo->velz < sinkspeed)
-				{ // Dropping too fast, so slow down toward sinkspeed.
-					mo->velz -= MAX(sinkspeed*2, -FRACUNIT*8);
-					if (mo->velz > sinkspeed)
-					{
-						mo->velz = sinkspeed;
-					}
-				}
-				else if (mo->velz > sinkspeed)
-				{ // Dropping too slow/going up, so trend toward sinkspeed.
-					mo->velz = startvelz + MAX(sinkspeed/3, -FRACUNIT*8);
-					if (mo->velz < sinkspeed)
-					{
-						mo->velz = sinkspeed;
-					}
-				}
+				float velx = FIXED2FLOAT(mo->velx), vely = FIXED2FLOAT(mo->vely);
+				if (float(TVector2<float>(velx, vely).Length()) < 4.f)
+					mo->velz = - FLOAT2FIXED(0.5f);
 			}
 		}
 		else
 		{
-			if (mo->waterlevel > 1)
+			if (!mo->waterlevel || (mo->player &&
+				!(mo->player->cmd.ucmd.forwardmove | mo->player->cmd.ucmd.sidemove)))
 			{
-				fixed_t sinkspeed = -WATER_SINK_SPEED;
-
-				if (mo->velz < sinkspeed)
+				// [RH] Double gravity only if running off a ledge. Coming down from
+				// an upward thrust (e.g. a jump) should not double it.
+				// [AM] Old versions of ZDoom didn't have double gravity.
+				if (!mo->velz && oldfloorz > mo->floorz && mo->z == oldfloorz &&
+					!(zacompatflags & ZACOMPATF_OLD_ZDOOM_ZMOVEMENT))
 				{
-					mo->velz = (startvelz < sinkspeed) ? startvelz : sinkspeed;
+					mo->velz -= grav + grav;
 				}
 				else
 				{
-					mo->velz = startvelz + ((mo->velz - startvelz) >>
-						(mo->waterlevel == 1 ? WATER_SINK_SMALL_FACTOR : WATER_SINK_FACTOR));
+					mo->velz -= grav;
+				}
+			}
+
+			fixed_t startvelz = mo->velz;
+
+			if (!mo->player)
+			{
+				if (mo->waterlevel >= 1)
+				{
+					fixed_t sinkspeed;
+
+					if ((mo->flags & MF_SPECIAL) && !(mo->flags3 & MF3_ISMONSTER))
+					{ // Pickup items don't sink if placed and drop slowly if dropped
+						sinkspeed = (mo->flags & MF_DROPPED) ? -WATER_SINK_SPEED / 8 : 0;
+					}
+					else
+					{
+						sinkspeed = -WATER_SINK_SPEED;
+
+						// If it's not a player, scale sinkspeed by its mass, with
+						// 100 being equivalent to a player.
+						if (mo->player == NULL)
+						{
+							sinkspeed = Scale(sinkspeed, clamp(mo->Mass, 1, 4000), 100);
+						}
+					}
+					if (mo->velz < sinkspeed)
+					{ // Dropping too fast, so slow down toward sinkspeed.
+						mo->velz -= MAX(sinkspeed * 2, -FRACUNIT * 8);
+						if (mo->velz > sinkspeed)
+						{
+							mo->velz = sinkspeed;
+						}
+					}
+					else if (mo->velz > sinkspeed)
+					{ // Dropping too slow/going up, so trend toward sinkspeed.
+						mo->velz = startvelz + MAX(sinkspeed / 3, -FRACUNIT * 8);
+						if (mo->velz < sinkspeed)
+						{
+							mo->velz = sinkspeed;
+						}
+					}
+				}
+			}
+			else
+			{
+				if (mo->waterlevel > 1)
+				{
+					fixed_t sinkspeed = -WATER_SINK_SPEED;
+
+					if (mo->velz < sinkspeed)
+					{
+						mo->velz = (startvelz < sinkspeed) ? startvelz : sinkspeed;
+					}
+					else
+					{
+						mo->velz = startvelz + ((mo->velz - startvelz) >>
+							(mo->waterlevel == 1 ? WATER_SINK_SMALL_FACTOR : WATER_SINK_FACTOR));
+					}
 				}
 			}
 		}
@@ -3021,17 +3044,19 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 			}
 		}
 	}
-	if (mo->player && (mo->flags & MF_NOGRAVITY) && (mo->z > mo->floorz))
+
+	// [Ivory] This is bad for quake movement as well
+	if (!quakeMovement)
 	{
-		if (!mo->IsNoClip2())
+		if (mo->player && (mo->flags & MF_NOGRAVITY) && mo->z > mo->floorz)
 		{
-			mo->z += finesine[(FINEANGLES/80*level.maptime)&FINEMASK]/8;
+			if (!mo->IsNoClip2())
+				mo->z += finesine[(FINEANGLES / 80 * level.maptime)&FINEMASK] / 8;
+			mo->velz = FixedMul(mo->velz, FRICTION_FLY);
 		}
-		mo->velz = FixedMul (mo->velz, FRICTION_FLY);
-	}
-	if (mo->waterlevel && !(mo->flags & MF_NOGRAVITY))
-	{
-		mo->velz = FixedMul (mo->velz, mo->Sector->friction);
+
+		if (mo->waterlevel && !(mo->flags & MF_NOGRAVITY))
+			mo->velz = FixedMul(mo->velz, mo->Sector->friction);
 	}
 
 //

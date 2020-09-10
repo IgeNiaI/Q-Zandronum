@@ -2877,32 +2877,6 @@ CUSTOM_CVAR( Float, mv_stopspeed, 12.f, CVAR_SERVERINFO )
 // Vectors Math
 //***************************************************
 
-float VectorLength(const TVector3<float> &v)
-{
-	return sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
-}
-
-float VectorNormalize(TVector3<float> &v)
-{
-	float length = sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
-	
-	if (length)
-	{
-		v.X /= length;
-		v.Y /= length;
-		v.Z /= length;
-	}
-
-	return length;
-}
-
-void VectorScale(const TVector3<float> &in, const float &scale, TVector3<float> &out)
-{
-	out.X = in.X * scale;
-	out.Y = in.Y * scale;
-	out.Z = in.Z * scale;
-}
-
 void VectorRotate(float &x, float &y, const float &angle)
 {
 	float oX = x, oY = y, cosine = (float)cos(angle * PI / 180), sine = (float)sin(angle * PI / 180);
@@ -2944,13 +2918,12 @@ float APlayerPawn::QMoveFactor()
 
 void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const float friction)
 {
-	float velocity = VectorLength(vel);
+	float velocity = float(vel.Length());
 
 	// happens when somebody gets stuck in a corner and causes same results as a division by 0
 	if (velocity > 10000.f)
 		return;
-
-	TVector3<float> vel2D = { vel.X, vel.Y, 0.f };
+	
 	bool waterflying = player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY);
 
 	if (waterflying)
@@ -2961,7 +2934,7 @@ void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const f
 			return;
 		}
 	}
-	else if (VectorLength(vel2D) < 1.f)
+	else if (TVector2<float>(vel.X, vel.Y).Length() < 1.f)
 	{
 		vel.X = vel.Y = 0.f;
 		return;
@@ -3195,8 +3168,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		// Input vector
 		acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-			cmd->ucmd.forwardmove ? -(float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-			0.f };
+						 cmd->ucmd.sidemove ? -(float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+						 0.f };
 		// Calculate the vertical push according to the view pitch
 		if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
 		{
@@ -3204,14 +3177,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		}
 		else
 		{
-			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX) * (PI / 180.f));
+			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI / 180;
 			acceleration.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
 		//Friction
 		player->mo->QFriction(vel, 0, 2.f);
 		//Acceleration
-		VectorNormalize(acceleration);
+		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
 
@@ -3223,8 +3196,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		// Input vector
 		acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-			cmd->ucmd.forwardmove ? -(float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
-			0.f };
+						 cmd->ucmd.sidemove ? -(float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+						 0.f };
 		// Calculate the vertical push according to the view pitch
 		if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
 		{
@@ -3232,14 +3205,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		}
 		else
 		{
-			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX) * (PI / 180.f));
+			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI / 180;
 			acceleration.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
 		//Friction
 		player->mo->QFriction(vel, 0.f, 3.f);
 		//Acceleration
-		VectorNormalize(acceleration);
+		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 2.f, 8.f);
 
@@ -3252,7 +3225,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		// Input vector
 		acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
 		// Orient inputs to view angle
-		VectorNormalize(acceleration);
+		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		// Acceleration
 		if (mv_type == MV_QUAKE)
@@ -3261,7 +3234,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		}
 		else
 		{
-			float velocity = VectorLength(vel);
+			float velocity = float(vel.Length());
 			if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
 				player->mo->QAcceleration(vel, acceleration, 1.5f, mv_cpmacceleration);
 			else
@@ -3282,7 +3255,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 														// Input vector
 		acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
 		// Orient inputs to view angle
-		VectorNormalize(acceleration);
+		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		// Friction & Acceleration
 		if (canSlide)

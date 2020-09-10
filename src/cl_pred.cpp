@@ -67,7 +67,7 @@
 void P_MovePlayer (player_t *player, ticcmd_t *cmd);
 void P_CalcHeight (player_t *player);
 void P_DeathThink (player_t *player);
-bool	P_AdjustFloorCeil (AActor *thing);
+bool P_AdjustFloorCeil (AActor *thing);
 
 //*****************************************************************************
 //	VARIABLES
