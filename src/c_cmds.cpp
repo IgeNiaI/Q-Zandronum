@@ -1078,7 +1078,9 @@ CCMD(movement)
 			mv_jumptics = 0;
 			mv_acceleration = 10.f;
 			mv_friction = 6.f;
+			mv_slidefriction = 0.08f;
 			mv_airacceleration = 1.5f;
+			mv_slideacceleration = 4.f;
 			mv_stopspeed = 12.f;
 		}
 		if (strcmp(arg1, "cpma") == 0) {
@@ -1086,7 +1088,9 @@ CCMD(movement)
 			mv_jumptics = 0;
 			mv_acceleration = 10.f;
 			mv_friction = 6.f;
+			mv_slidefriction = 0.08f;
 			mv_airacceleration = 1.5f;
+			mv_slideacceleration = 4.f;
 			mv_stopspeed = 12.f;
 			mv_cpmacceleration = 100.f;
 		}
