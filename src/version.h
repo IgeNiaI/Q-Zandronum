@@ -47,7 +47,7 @@ unsigned int GetRevisionNumber();
 #define GAME_MAJOR_VERSION 3
 #define GAME_MINOR_VERSION 0
 #define GAMEVER_STRING "3.0.1"
-#define DOTVERSIONSTR GAMEVER_STRING
+#define DOTVERSIONSTR GAMEVER_STRING "-qcde"
 #define VERSIONSTR DOTVERSIONSTR
 
 // [BB] The version string that includes revision / compatibility data.
