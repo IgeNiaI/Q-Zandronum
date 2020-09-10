@@ -131,8 +131,8 @@ public:
 	// Quake movement
 	float QTweakSpeed();
 	float QMoveFactor();
-	void QFriction(Vector3 &vel, const float stopspeed, const float friction);
-	void QAcceleration(Vector3 &vel, const Vector3 &wishdir, const float &wishspeed, const float accel);
+	void  QFriction(Vector3 &vel, const float stopspeed, const float friction);
+	void  QAcceleration(Vector3 &vel, const Vector3 &wishdir, const float &wishspeed, const float accel);
 
 	void SetupWeaponSlots ();
 	void GiveDefaultInventory ();
@@ -142,6 +142,7 @@ public:
 
 	// [Dusk]
 	fixed_t CalcJumpVelz();
+	fixed_t CalcDoubleJumpVelz();
 	fixed_t CalcJumpHeight( bool bAddStep = true );
 
 	enum EInvulState
@@ -558,6 +559,11 @@ public:
 	int			jumpTics;				// delay the next jump for a moment
 	bool		onground;				// Identifies if this player is on the ground or other object
 
+	// [Ivory] movement additions
+	int			doubleJumpTics;
+	bool		blockDoubleJump;
+	int			slideDuration;
+
 	int			respawn_time;			// [RH] delay respawning until this tic
 	TObjPtr<AActor>		camera;			// [RH] Whose eyes this player sees through
 
@@ -861,8 +867,10 @@ EXTERN_CVAR( Int,	mv_type );
 EXTERN_CVAR( Int,	mv_jumptics );
 EXTERN_CVAR( Float,	mv_acceleration );
 EXTERN_CVAR( Float,	mv_friction );
+EXTERN_CVAR( Float, mv_slidefriction );
 EXTERN_CVAR( Float,	mv_airacceleration );
 EXTERN_CVAR( Float, mv_cpmacceleration);
+EXTERN_CVAR( Float, mv_slideacceleration );
 EXTERN_CVAR( Float,	mv_stopspeed );
 
 #endif // __D_PLAYER_H__

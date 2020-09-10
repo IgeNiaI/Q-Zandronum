@@ -351,6 +351,10 @@ enum
 	MF7_USEKILLSCRIPTS	= 0x00800000,	// [JM] Use "KILL" Script on death if not forced by GameInfo.
 	MF7_NOKILLSCRIPTS	= 0x01000000,	// [JM] No "KILL" Script on death whatsoever, even if forced by GameInfo.
 
+	// [Ivory] extra movement flags
+	MF7_DOUBLEJUMP = 0x02000000,
+	MF7_CROUCHSLIDE = 0x04000000,
+
 	// [BC] More object flags for Skulltag.
 
 	// Object can only be picked up by blue team members.
