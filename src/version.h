@@ -44,14 +44,18 @@ unsigned int GetRevisionNumber();
 
 /** Lots of different version numbers **/
 
-#define GAME_MAJOR_VERSION 3
+#define GAME_MAJOR_VERSION 1
 #define GAME_MINOR_VERSION 0
-#define GAMEVER_STRING "3.0.1"
-#define DOTVERSIONSTR GAMEVER_STRING
+#define GAMEVER_STRING "1.0.0"
+#define NETGAMEVER_STRING "1.0"
+#define DOTVERSIONSTR GAMEVER_STRING "-alpha"
 #define VERSIONSTR DOTVERSIONSTR
 
 // [BB] The version string that includes revision / compatibility data.
 #define DOTVERSIONSTR_REV DOTVERSIONSTR "-r" HG_TIME
+
+// [geNia] What version of Zandronum is this based off of?
+#define	ZANDROVERSIONSTR	"3.0.1"
 
 // [BC] What version of ZDoom is this based off of?
 #define	ZDOOMVERSIONSTR		"2.8pre-441-g458e1b1"
@@ -82,7 +86,7 @@ unsigned int GetRevisionNumber();
 // to transfer NETGAMEVERSION, so we need to limit its value to [0,255].
 //#define NETGAMEVERSION (GetRevisionNumber() % 256)
 // [BB] Stay network compatible with 3.0.
-#define NETGAMEVERSION (1504266050 % 256)
+#define NETGAMEVERSION ((GAME_MAJOR_VERSION * 100 + GAME_MINOR_VERSION) % 256)
 
 // Version stored in the ini's [LastRun] section.
 // Bump it if you made some configuration change that you want to
@@ -119,15 +123,15 @@ unsigned int GetRevisionNumber();
 #define DYNLIGHT
 
 // This is so that derivates can use the same savegame versions without worrying about engine compatibility
-#define GAMESIG "ZANDRONUM"
-#define BASEWAD "zandronum.pk3"
+#define GAMESIG "Q-ZANDRONUM"
+#define BASEWAD "q-zandronum.pk3"
 
 // More stuff that needs to be different for derivatives.
-#define GAMENAME "Zandronum"
-#define GAMENAMELOWERCASE "zandronum"
+#define GAMENAME "Q-Zandronum"
+#define GAMENAMELOWERCASE "q-zandronum"
 #define DOMAIN_NAME "zandronum.com"
 #define FORUM_URL "https://" DOMAIN_NAME "/forum/"
-#define BUGS_FORUM_URL	"https://" DOMAIN_NAME "/tracker/"
+#define BUGS_FORUM_URL	"https://github.com/IgeNiaI/Zandronum-3.0-QCDE/issues"
 
 // [BC] This is what's displayed as the title for server windows.
 #define	SERVERCONSOLE_TITLESTRING	GAMENAME " v" DOTVERSIONSTR " Server"

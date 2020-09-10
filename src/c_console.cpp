@@ -1326,7 +1326,7 @@ void C_DrawConsole (bool hw2d)
 	static int oldbottom = 0;
 	int lines, left, offset;
 	// [BC] String for drawing the version.
-	char	szString[64];
+	char	szString[84];
 
 	// [BC] No need to draw the console in server mode.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -1383,7 +1383,7 @@ void C_DrawConsole (bool hw2d)
 		{
 			// [BC] In addition to drawing the program version, draw the ZDoom version as well.
 			// [RC] Also draw revision number, but break these up so it's legible.
-			sprintf( szString, "\\cIv%s (\\cD%s\\cI) \\ch%s", GetVersionString(), ZDOOMVERSIONSTR, GetGitTime() );
+			sprintf( szString, "\\cIv%s (\\cDZandronum %s\\cI) (\\cD%s\\cI) \\ch%s", GetVersionString(), ZANDROVERSIONSTR, ZDOOMVERSIONSTR, GetGitTime() );
 			V_ColorizeString( szString );
 
 			screen->DrawText (ConFont, CR_ORANGE, SCREENWIDTH - 8 -

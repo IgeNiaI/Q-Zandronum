@@ -1913,8 +1913,8 @@ void SERVER_SetupNewConnection( BYTESTREAM_s *pByteStream, bool bNewPlayer )
 	{
 		// Make sure the version matches.
 		// if ( stricmp( clientVersion.GetChars(), DOTVERSIONSTR ) != 0 )
-		// [BB] Stay network compatible with 3.0.
-		if ( stricmp( clientVersion.GetChars(), "3.0" ) != 0 )
+		// [BB] Stay network compatible.
+		if ( stricmp( clientVersion.GetChars(), NETGAMEVER_STRING ) != 0 )
 		{
 			SERVER_ClientError( lClient, NETWORK_ERRORCODE_WRONGVERSION );
 #ifdef CREATE_PACKET_LOG

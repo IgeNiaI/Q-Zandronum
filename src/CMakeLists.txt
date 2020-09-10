@@ -1418,7 +1418,7 @@ add_executable( zdoom WIN32
 
 # [BB] To keep the delta to ZDoom small, we keep the target name 'zdoom', but
 # change the label, so that it's displayed as 'Zandronum' in an IDE like VC++.
-SET_TARGET_PROPERTIES( zdoom PROPERTIES PROJECT_LABEL Zandronum )
+SET_TARGET_PROPERTIES( zdoom PROPERTIES PROJECT_LABEL Q-Zandronum )
 
 # [BB/RC] Added CREATE_PACKET_LOG
 OPTION( CREATE_PACKET_LOG "A security debug feature to catch malicious packets." OFF )

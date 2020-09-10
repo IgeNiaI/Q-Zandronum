@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 2.4 )
-project(Zandronum)
+project(Q-Zandronum)
 
 list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} )
 include( CreateLaunchers )
@@ -30,10 +30,10 @@ function( add_pk3 PK3_NAME PK3_DIR )
 
 	# Generate target name. Just use "pk3" for main pk3 target.
 	string( REPLACE "." "_" PK3_TARGET ${PK3_NAME} )
-	# [BB] Replaced 'zdoom' with 'zandronum'
-	if( ${PK3_TARGET} STREQUAL "zandronum_pk3" )
+	# [BB] Replaced 'zdoom' with 'q-zandronum'
+	if( ${PK3_TARGET} STREQUAL "q-zandronum_pk3" )
 		set( PK3_TARGET "pk3" )
-	endif( ${PK3_TARGET} STREQUAL "zandronum_pk3" )
+	endif( ${PK3_TARGET} STREQUAL "q-zandronum_pk3" )
 
 	if( NOT NO_GENERATOR_EXPRESSIONS AND NOT ZDOOM_OUTPUT_OLDSTYLE )
 		add_custom_command( OUTPUT ${ZDOOM_OUTPUT_DIR}/${PK3_NAME}
@@ -70,7 +70,7 @@ IF( NOT CMAKE_BUILD_TYPE )
 ENDIF( NOT CMAKE_BUILD_TYPE )
 
 set( ZDOOM_OUTPUT_DIR ${CMAKE_BINARY_DIR} CACHE PATH "Directory where zdoom.pk3 and the executable will be created." )
-set( ZDOOM_EXE_NAME "zandronum" CACHE FILEPATH "Name of the executable to create" )
+set( ZDOOM_EXE_NAME "q-zandronum" CACHE FILEPATH "Name of the executable to create" )
 if( MSVC )
 	# Allow the user to use ZDOOM_OUTPUT_DIR as a single release point.
 	# Use zdoom, zdoomd, zdoom64, and zdoomd64 for the binary names
@@ -245,7 +245,7 @@ add_subdirectory( dumb )
 add_subdirectory( gdtoa )
 add_subdirectory( wadsrc )
 add_subdirectory( wadsrc_bm )
-# [BB] Zandronum includes the light definitions in zandronum.pk3.
+# [BB] Zandronum includes the light definitions in q-zandronum.pk3.
 #add_subdirectory( wadsrc_lights )
 # [BB] Compatibility wad to support Skulltag mods.
 add_subdirectory( wadsrc_st )
