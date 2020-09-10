@@ -2799,19 +2799,16 @@ CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 CUSTOM_CVAR( Int, mv_type, MV_DOOM, CVAR_SERVERINFO )
 {
 	if (self < MV_DOOM)
-	{
 		self = MV_DOOM;
-	}
-	else if (self > MV_QUAKE_CPMA) { // MV_QUAKE_CPMA is highest at the moment
+	else if (self > MV_QUAKE_CPMA) // MV_QUAKE_CPMA is highest at the moment
 		self = MV_QUAKE_CPMA;
-	}
 
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Int, mv_jumptics, 7, CVAR_SERVERINFO)
+CUSTOM_CVAR( Int, mv_jumptics, 7, CVAR_SERVERINFO )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -2839,7 +2836,7 @@ CUSTOM_CVAR( Float, mv_airacceleration, 1.5f, CVAR_SERVERINFO )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR(Float, mv_cpmacceleration, 100.f, CVAR_SERVERINFO)
+CUSTOM_CVAR( Float, mv_cpmacceleration, 100.f, CVAR_SERVERINFO )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -2857,30 +2854,30 @@ CUSTOM_CVAR( Float, mv_stopspeed, 12.f, CVAR_SERVERINFO )
 // Vectors Math
 //***************************************************
 
-float VectorLength(const TVector3<float> &v)
+float VectorLength(const Vector3 &v)
 {
-	return sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
+	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-float VectorNormalize(TVector3<float> &v)
+float VectorNormalize(Vector3 &v)
 {
-	float length = sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
+	float length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 	
 	if (length)
 	{
-		v.X /= length;
-		v.Y /= length;
-		v.Z /= length;
+		v.x /= length;
+		v.y /= length;
+		v.z /= length;
 	}
 
 	return length;
 }
 
-void VectorScale(const TVector3<float> &in, const float &scale, TVector3<float> &out)
+void VectorScale(const Vector3 &in, const float &scale, Vector3 &out)
 {
-	out.X = in.X * scale;
-	out.Y = in.Y * scale;
-	out.Z = in.Z * scale;
+	out.x = in.x * scale;
+	out.y = in.y * scale;
+	out.z = in.z * scale;
 }
 
 void VectorRotate(float &x, float &y, const float &angle)
@@ -2890,9 +2887,9 @@ void VectorRotate(float &x, float &y, const float &angle)
 	y = sine * oX + cosine * oY;
 }
 
-float DotProduct(const TVector3<float> &v, const TVector3<float> &t)
+float DotProduct(const Vector3 &v, const Vector3 &t)
 {
-	return v.X * t.X + v.Y * t.Y + v.Z * t.Z;
+	return v.x * t.x + v.y * t.y + v.z * t.z;
 }
 
 //***************************************************
@@ -2925,10 +2922,10 @@ float APlayerPawn::QMoveFactor()
 	return 1.f;
 }
 
-void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const float friction)
+void APlayerPawn::QFriction(Vector3 &vel, const float stopspeed, const float friction)
 {
 	float velocity = VectorLength(vel);
-	TVector3<float> vel2D = { vel.X, vel.Y, 0.f };
+	Vector3 vel2D = { vel.x, vel.y, 0.f };
 	bool waterflying = player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY);
 
 	// water/flying going too slow
@@ -2936,13 +2933,13 @@ void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const f
 	{
 		if (velocity < 0.5f)
 		{
-			vel.X = vel.Y = vel.Z = 0.f;
+			vel.x = vel.y = vel.z = 0.f;
 			return;
 		}
 	}
 	else if (VectorLength(vel2D) < 1.f)
 	{
-		vel.X = vel.Y = 0.f;
+		vel.x = vel.y = 0.f;
 		return;
 	}
 	
@@ -2959,21 +2956,21 @@ void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const f
 
 	float newvelocity = std::max(velocity - drop, 0.f) / velocity;
 
-	vel.X *= newvelocity;
-	vel.Y *= newvelocity;
-	if (waterflying) { vel.Z *= newvelocity; }
+	vel.x *= newvelocity;
+	vel.y *= newvelocity;
+	if (waterflying) { vel.z *= newvelocity; }
 }
 
-void APlayerPawn::QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel)
+void APlayerPawn::QAcceleration(Vector3 &vel, const Vector3 &wishdir, const float &wishspeed, const float accel)
 {
 	float currentspeed = DotProduct(wishdir, vel);
 	float addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0.f) { return; }
 
 	float accelerationspeed = std::min(accel * wishspeed / TICRATE, addspeed);
-	vel.X += wishdir.X * accelerationspeed;
-	vel.Y += wishdir.Y * accelerationspeed;
-	vel.Z += wishdir.Z * accelerationspeed;
+	vel.x += wishdir.x * accelerationspeed;
+	vel.y += wishdir.y * accelerationspeed;
+	vel.z += wishdir.z * accelerationspeed;
 }
 
 void P_MovePlayer (player_t *player, ticcmd_t *cmd)
@@ -3006,8 +3003,9 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		memset( cmd, 0, sizeof( ticcmd_t ));
 
 	player->onground = (mo->z <= mo->floorz) || (mo->flags2 & MF2_ONMOBJ) || (mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
+	int quakeMovement = mv_type;
 
-	if (int(mv_type) == MV_QUAKE || int(mv_type) == MV_QUAKE_CPMA)
+	if (quakeMovement)
 	{
 		//******************************************************************************//
 		// [Ivory Duke] Quake movement code. Convert fixed point math to floating point //
@@ -3025,30 +3023,31 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		float flAngle = mo->angle * (360.f / ANGLE_MAX);
 		float movefactor = mo->QMoveFactor();
 		float maxgroundspeed = mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * movefactor * mo->QTweakSpeed();
-		TVector3<float> vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
+		Vector3 acceleration = { 0.f, 0.f, 0.f };
+		Vector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
 
 		if (player->mo->waterlevel >= 2)
 		{
 			// Input vector
-			TVector3<float> acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-									 cmd->ucmd.forwardmove ? - (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-									 0.f };
+			acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+							 cmd->ucmd.forwardmove ? - (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+							 0.f };
 			// Calculate the vertical push according to the view pitch
 			if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
 			{
-				acceleration.Z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
+				acceleration.z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
 			}
 			else
 			{
-				float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI / 180;
-				acceleration.Z = acceleration.X * sin(-pitch);
-				acceleration.X *= cos(pitch);
+				float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX) * (PI / 180.f));
+				acceleration.z = acceleration.x * sin(-pitch);
+				acceleration.x *= cos(pitch);
 			}
 			//Friction
 			mo->QFriction(vel, 0, 2.f);
 			//Acceleration
 			VectorNormalize(acceleration);
-			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			VectorRotate(acceleration.x, acceleration.y, flAngle);
 			mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
 
 			waterflying = true;
@@ -3056,25 +3055,25 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		else if(mo->flags & MF_NOGRAVITY)
 		{
 			// Input vector
-			TVector3<float> acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-									 cmd->ucmd.forwardmove ? - (float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
-									 0.f };
+			acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+							 cmd->ucmd.forwardmove ? - (float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+							 0.f };
 			// Calculate the vertical push according to the view pitch
 			if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
 			{
-				acceleration.Z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
+				acceleration.z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
 			}
 			else
 			{
-				float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI / 180;
-				acceleration.Z = acceleration.X * sin(-pitch);
-				acceleration.X *= cos(pitch);
+				float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX) * (PI / 180.f));
+				acceleration.z = acceleration.x * sin(-pitch);
+				acceleration.x *= cos(pitch);
 			}
 			//Friction
 			mo->QFriction(vel, 0.f, 3.f);
 			//Acceleration
 			VectorNormalize(acceleration);
-			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			VectorRotate(acceleration.x, acceleration.y, flAngle);
 			mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 2.f, 8.f);
 
 			waterflying = true;
@@ -3082,12 +3081,12 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		else if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
 		{
 			// Input vector
-			TVector3<float> acceleration = { (float)cmd->ucmd.forwardmove, - (float)cmd->ucmd.sidemove, 0.f };
+			acceleration = { (float)cmd->ucmd.forwardmove, - (float)cmd->ucmd.sidemove, 0.f };
 			// Orient inputs to view angle
 			VectorNormalize(acceleration);
-			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			VectorRotate(acceleration.x, acceleration.y, flAngle);
 			// Acceleration
-			if (int(mv_type) == MV_QUAKE)
+			if (quakeMovement == MV_QUAKE)
 			{
 				mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
 			}
@@ -3103,10 +3102,10 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		else
 		{
 			// Input vector
-			TVector3<float> acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
+			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
 			// Orient inputs to view angle
 			VectorNormalize(acceleration);
-			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			VectorRotate(acceleration.x, acceleration.y, flAngle);
 			// Friction
 			mo->QFriction(vel, maxgroundspeed, mv_friction);
 			// Acceleration
@@ -3114,9 +3113,9 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 		}
 
 		// ...convert it back to fixed point, velz is untouched so no need for that
-		player->mo->velx = FLOAT2FIXED(vel.X);
-		player->mo->vely = FLOAT2FIXED(vel.Y);
-		player->mo->velz = FLOAT2FIXED(vel.Z);
+		player->mo->velx = FLOAT2FIXED(vel.x);
+		player->mo->vely = FLOAT2FIXED(vel.y);
+		player->mo->velz = FLOAT2FIXED(vel.z);
 
 		// also take care of view/weapon bobbing
 		player->velx = player->mo->velx;
@@ -3141,6 +3140,9 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 
 		// Water and flying have already executed jump press logic
 		if (waterflying) { return; }
+
+		// 0 all the times at all times
+		player->jumpTics = 0;
 
 		// Stop here if not in good condition to jump
 		if (!(cmd->ucmd.buttons & BT_JUMP) ||
@@ -3169,7 +3171,6 @@ void P_MovePlayer (player_t *player, ticcmd_t *cmd)
 
 		player->mo->flags2 &= ~MF2_ONMOBJ;
 		player->mo->velz += JumpVelz;
-		player->jumpTics = -1;
 	}
 	else // default Doom movement
 	{

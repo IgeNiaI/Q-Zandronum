@@ -2047,7 +2047,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 {
 	static int pushtime = 0;
 	bool bForceSlide = scrollx || scrolly;
-	bool quakeMovement = (int(mv_type) == MV_QUAKE || int(mv_type) == MV_QUAKE_CPMA);
+	bool quakeMovement = mv_type > 0; //mv_type value is clamped in cvar code, no need to check specific values
 	angle_t angle;
 	fixed_t ptryx, ptryy;
 	player_t *player;

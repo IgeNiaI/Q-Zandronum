@@ -78,6 +78,13 @@ enum
 	APMETA_MaxSkinHeightFactor,
 };
 
+struct Vector3
+{
+	float x;
+	float y;
+	float z;
+};
+
 FPlayerColorSet *P_GetPlayerColorSet(FName classname, int setnum);
 void P_EnumPlayerColorSets(FName classname, TArray<int> *out);
 const char *GetPrintableDisplayName(const PClass *cls);
@@ -124,8 +131,8 @@ public:
 	// Quake movement
 	float QTweakSpeed();
 	float QMoveFactor();
-	void QFriction(TVector3<float> &vel, const float stopspeed, const float friction);
-	void QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel);
+	void QFriction(Vector3 &vel, const float stopspeed, const float friction);
+	void QAcceleration(Vector3 &vel, const Vector3 &wishdir, const float &wishspeed, const float accel);
 
 	void SetupWeaponSlots ();
 	void GiveDefaultInventory ();
@@ -846,9 +853,9 @@ inline bool AActor::IsNoClip2() const
 bool P_IsPlayerTotallyFrozen(const player_t *player);
 
 // [Ivory] movement vars
-const int MV_DOOM = 0;
-const int MV_QUAKE = 1;
-const int MV_QUAKE_CPMA = 2;
+#define MV_DOOM 0
+#define MV_QUAKE 1
+#define MV_QUAKE_CPMA 2
 
 EXTERN_CVAR( Int,	mv_type );
 EXTERN_CVAR( Int,	mv_jumptics );
