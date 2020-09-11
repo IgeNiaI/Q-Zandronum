@@ -556,6 +556,7 @@ public:
 	int			doubleJumpTics;
 	bool		blockDoubleJump;
 	int			slideDuration;
+	bool		wasSliding;
 	int			wallClimbStamina;
 	bool		wasClimbing;
 

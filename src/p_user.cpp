@@ -301,6 +301,7 @@ player_t::player_t()
   doubleJumpTics(0),
   blockDoubleJump(0),
   slideDuration(0),
+  wasSliding(0),
   wallClimbStamina(0),
   wasClimbing(0),
   onground(0),
@@ -439,6 +440,10 @@ player_t &player_t::operator=(const player_t &p)
 	jumpTics = p.jumpTics;
 	doubleJumpTics = p.doubleJumpTics;
 	blockDoubleJump = p.blockDoubleJump;
+	slideDuration = p.slideDuration;
+	wasSliding = p.wasSliding;
+	wallClimbStamina = p.wallClimbStamina;
+	wasClimbing = p.wasClimbing;
 	onground = p.onground;
 	respawn_time = p.respawn_time;
 	camera = p.camera;
@@ -2937,7 +2942,7 @@ void VectorRotate(float &x, float &y, const float &angle)
 	y = sine * oX + cosine * oY;
 }
 
-float DotProduct(const TVector3<float> &v, const TVector3<float> &t)
+float DotProduct(const FVector3 &v, const FVector3 &t)
 {
 	return v.X * t.X + v.Y * t.Y + v.Z * t.Z;
 }
@@ -2959,7 +2964,7 @@ float APlayerPawn::QTweakSpeed()
 	return 1.f;
 }
 
-void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const float friction)
+void APlayerPawn::QFriction(FVector3 &vel, const float stopspeed, const float friction)
 {
 	float velocity = float(vel.Length());
 
@@ -2977,7 +2982,7 @@ void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const f
 			return;
 		}
 	}
-	else if (TVector2<float>(vel.X, vel.Y).Length() < 1.f)
+	else if (FVector2(vel.X, vel.Y).Length() < 1.f)
 	{
 		vel.X = vel.Y = 0.f;
 		return;
@@ -2988,7 +2993,7 @@ void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const f
 	{
 		drop = velocity * friction / TICRATE;
 	}
-	else if (player->onground && !player->mo->InState( FindState( NAME_Pain ) ) )
+	else if ( player->onground && !player->mo->InState( FindState( NAME_Pain ) ) )
 	{
 		control = velocity < stopspeed ? friction : velocity;
 		drop = control * friction / TICRATE;
@@ -3001,7 +3006,7 @@ void APlayerPawn::QFriction(TVector3<float> &vel, const float stopspeed, const f
 	if (waterflying) { vel.Z *= newvelocity; }
 }
 
-void APlayerPawn::QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel)
+void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel)
 {
 	float currentspeed = DotProduct(wishdir, vel);
 	float addspeed = wishspeed - currentspeed;
@@ -3015,16 +3020,62 @@ void APlayerPawn::QAcceleration(TVector3<float> &vel, const TVector3<float> &wis
 
 //==========================================================================
 //
+// P_XXXX_Looping_Sounds
+//
+//==========================================================================
+
+void P_Slide_Looping_Sounds(player_t *player, const bool& canslide)
+{
+	// crouch slide sound start/stop
+	if (canslide && !player->wasSliding)
+	{
+		if (!CLIENT_PREDICT_IsPredicting())
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
+
+		if (NETWORK_GetState() == NETSTATE_SERVER)
+			SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+	}
+	else if (!canslide && player->wasSliding)
+	{
+		S_StopSound(player->mo, CHAN_SEVEN);
+	}
+
+	player->wasSliding = canslide;
+}
+
+void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
+{
+	// Wall climb parameters and sound start/stop
+	if (canclimb && !player->wasClimbing)
+	{
+		if (!CLIENT_PREDICT_IsPredicting())
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
+
+		if (NETWORK_GetState() == NETSTATE_SERVER)
+			SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+	}
+	else if (!(canclimb % 2) && player->wasClimbing)
+	{
+		S_StopSound(player->mo, CHAN_SEVEN);
+	}
+
+	player->wasClimbing = canclimb < 2 ? canclimb != 0 : false;
+}
+
+//==========================================================================
+//
 // P_MovePlayer_Doom
 //
 //==========================================================================
 
 void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 {
+	int canClimb = 0;
+	bool isClimber = player->mo->flags7 & MF7_WALLCLIMB ? true : false;
+
 	// Wall proximity check
-	int climbing = 0;
-	if ((player->mo->flags7 & MF7_WALLCLIMB) && (cmd->ucmd.buttons & BT_JUMP)
-		&& player->wallClimbStamina > 0 && TVector2<float>(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length() <= 16.f)
+	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbStamina > 0 &&
+		FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length() <= 16.f)
 	{
 		FTraceResults trace;
 		fixed_t distance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
@@ -3037,16 +3088,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
 
 		if (trace.HitType == TRACE_HitWall)
-			climbing = 1;
+			canClimb = 1;
 		else if (player->wasClimbing) // if over the ledge give it a final kick
-			climbing = 2;
+			canClimb = 2;
 	}
 
-	Printf("%d\n", player->wallClimbStamina);
-
-	if (climbing)
+	if (canClimb)
 	{
-		if (climbing == 1)
+		if (canClimb == 1)
 		{
 			player->mo->velz = FLOAT2FIXED(5.f);
 			player->wallClimbStamina--;
@@ -3056,14 +3105,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->mo->velz = FLOAT2FIXED(8.f);
 			player->wallClimbStamina = 0;
 		}
-
-		/* TODO: play wall climb sound
-		if (!CLIENT_PREDICT_IsPredicting())
-		S_Sound(player->mo, 7, "*wallclimb", 1, ATTN_NORM);
-
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SoundActor(player->mo, 7, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
-		*/
 	}
 	else if (cmd->ucmd.forwardmove | cmd->ucmd.sidemove)
 	{
@@ -3130,14 +3171,13 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	// set wall climb parameters
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
-		player->wallClimbStamina = mv_wallclimbstamina;
-
-	player->wasClimbing = climbing < 2 ? climbing : false;
+		player->wallClimbStamina = std::max(int(mv_wallclimbstamina), player->wallClimbStamina + 1);
+	if (isClimber) { P_Climb_Looping_Sounds(player, canClimb); }
 
 	//**********************************
 	// Jumping
 
-	if (climbing) { return; }
+	if (canClimb) { return; }
 
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
@@ -3275,13 +3315,15 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	// Setup
 	bool noJump = false;
 	bool canSlide = false;
-	int climbing = 0;
+	int canClimb = 0;
+	bool isSlider = player->mo->flags7 & MF7_CROUCHSLIDE ? true : false;
+	bool isClimber = player->mo->flags7 & MF7_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
 	float maxgroundspeed = mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
-	TVector3<float> acceleration = { 0.f, 0.f, 0.f };
-	TVector3<float> vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
+	FVector3 acceleration = { 0.f, 0.f, 0.f };
+	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
 
 	if (player->mo->waterlevel >= 2)
 	{
@@ -3350,7 +3392,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		float velocity = 0.f;
 
 		// Wall proximity check
-		if ((player->mo->flags7 & MF7_WALLCLIMB) && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbStamina > 0 && (velocity = float(vel.Length())) <= maxgroundspeed + 2.f)
+		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbStamina > 0 && (velocity = float(vel.Length())) <= maxgroundspeed + 2.f)
 		{
 			FTraceResults trace;
 			fixed_t distance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
@@ -3363,15 +3405,15 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				  vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
 			
 			if (trace.HitType == TRACE_HitWall)
-				climbing = 1;
+				canClimb = 1;
 			else if (player->wasClimbing) // if over the ledge give it a final kick
-				climbing = 2;
+				canClimb = 2;
 		}
 
-		if (climbing)
+		if (canClimb)
 		{
 			player->mo->QFriction(vel, maxgroundspeed, mv_friction);
-			if (climbing == 1)
+			if (canClimb == 1)
 			{
 				vel.Z = 5.f;
 				player->wallClimbStamina--;
@@ -3383,14 +3425,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 
 			noJump = true;
-
-			/* TODO: play wall climb sound
-			if (!CLIENT_PREDICT_IsPredicting())
-			S_Sound(player->mo, 7, "*wallclimb", 1, ATTN_NORM);
-
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SoundActor(player->mo, 7, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
-			*/
 		}
 		else if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
 		{
@@ -3409,14 +3443,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
 
 			// set slide duration if player can do it
-			if (player->mo->flags7 & MF7_CROUCHSLIDE)
-				player->slideDuration = level.maptime - FixedDiv(player->mo->velz, 1000000000);
+			if (isSlider) { player->slideDuration = level.maptime - FixedDiv(player->mo->velz, 1000000000); }
 		}
 		else
 		{
-			canSlide = (player->mo->flags7 & MF7_CROUCHSLIDE) &&		// player has the flag
-						player->crouchfactor < CROUCHSCALEHALFWAY &&	// player is crouching
-						level.maptime <= player->slideDuration;			// there is crouch slide charge to spend
+			canSlide = isSlider &&									// player has the flag
+					   player->crouchfactor < CROUCHSCALEHALFWAY &&	// player is crouching
+					   level.maptime <= player->slideDuration;		// there is crouch slide charge to spend
 
 			// Input vector
 			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
@@ -3437,10 +3470,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 
 			// If not using CSlide right away clear it
-			if (!canSlide && player->slideDuration) { player->slideDuration = 0; }
+			if (!canSlide) { player->slideDuration = 0; }
 
 			// Reset wall climb stamina
-			player->wallClimbStamina = mv_wallclimbstamina;
+			player->wallClimbStamina = std::max(int(mv_wallclimbstamina), player->wallClimbStamina + 1);
 		}
 	}
 
@@ -3453,12 +3486,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	player->velx = player->mo->velx;
 	player->vely = player->mo->vely;
 
-	// set wall climb parameters
-	player->wasClimbing = climbing < 2 ? climbing : false;
+	// handle looping sounds of slide and climb
+	if (isSlider) { P_Slide_Looping_Sounds(player, canSlide); }
+	if (isClimber) { P_Climb_Looping_Sounds(player, canClimb); }
 
 	// Only play run animation when moving and not in the air
-	if (!CLIENT_PREDICT_IsPredicting() && !player->bSpectating &&
-		(player->mo->velx || player->mo->vely) && player->onground)
+	if (!CLIENT_PREDICT_IsPredicting() && player->onground &&
+		!player->bSpectating && (player->mo->velx || player->mo->vely))
 	{
 		player->mo->PlayRunning();
 	}
@@ -3468,16 +3502,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		player->cheats &= ~CF_REVERTPLEASE;
 		player->camera = player->mo;
 	}
-
-	S_Sound(player->mo, 7, "*slide", 1, ATTN_NORM);
-
-	/* TODO: play crouch slide sound
-	if (!CLIENT_PREDICT_IsPredicting())
-	S_Sound(player->mo, 7, "*slide", 1, ATTN_NORM);
-
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-	SERVERCOMMANDS_SoundActor(player->mo, 7, "*slide", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
-	*/
 
 	//*******************************************************
 	// Jumping
