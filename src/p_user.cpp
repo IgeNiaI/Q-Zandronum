@@ -78,6 +78,7 @@
 #include "invasion.h"
 #include "d_netinf.h"
 #include "g_shared/pwo.h"
+#include "p_trace.h"
 
 static FRandom pr_skullpop ("SkullPop");
 
@@ -2222,7 +2223,8 @@ void APlayerPawn::DropImportantItems( bool bLeavingGame, AActor *pSource )
 void APlayerPawn::TweakSpeeds (int &forward, int &side)
 {
 	// [Dusk] Let the user move at whatever speed they desire when spectating.
-	if (player->bSpectating) {
+	if (player->bSpectating)
+	{
 		fixed_t factor = FLOAT2FIXED(cl_spectatormove);
 		forward = FixedMul(forward, factor);
 		side = FixedMul(side, factor);
@@ -3126,28 +3128,55 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->jumpTics = ulJumpTicks;
 			player->doubleJumpTics = 6;
 		}
-		// [Ivory]: Double Jump
-		else if ((player->mo->flags7 & MF7_DOUBLEJUMP) && !player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
+		// [Ivory]: Double Jump and wall jump
+		else if((player->mo->flags7 & MF7_WALLJUMP|MF7_DOUBLEJUMP) &&
+			    !player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
 		{
-			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
-
-			if (!CLIENT_PREDICT_IsPredicting())
-				S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
-
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
-
-			if (player->mo->velz <= 0)
+			// Wall proximity check
+			bool doWallJump = false;
+			if (player->mo->flags7 & MF7_WALLJUMP)
 			{
-				JumpVelz = FixedMul(JumpVelz, FLOAT2FIXED(1.2f));
-				player->mo->velz = JumpVelz;
-			}
-			else
-			{
-				player->mo->velz += JumpVelz;
+				// Account for the fact that bounding box is a square
+				float angle;
+				FTraceResults trace;
+				fixed_t radiusDistance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
+				for (int i = 0; i < 8; i++)
+				{
+					angle = 45.f * i;
+					Trace(player->mo->x, player->mo->y, player->mo->z, player->mo->Sector,
+						  FLOAT2FIXED(cos(angle)), FLOAT2FIXED(sin(angle)), 0, radiusDistance,
+						  MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+
+					if (trace.HitType == TRACE_HitWall)
+					{
+						doWallJump = true;
+						break;
+					}
+				}
 			}
 
-			player->doubleJumpTics = -1;
+			if (player->mo->flags7 & MF7_DOUBLEJUMP || doWallJump)
+			{
+				fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
+
+				if (!CLIENT_PREDICT_IsPredicting())
+					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+
+				if (player->mo->velz <= 0)
+				{
+					JumpVelz = FixedMul(JumpVelz, FLOAT2FIXED(1.2f));
+					player->mo->velz = JumpVelz;
+				}
+				else
+				{
+					player->mo->velz += JumpVelz;
+				}
+
+				player->doubleJumpTics = -1;
+			}
 		}
 
 		if (player->doubleJumpTics == 6) { player->blockDoubleJump = true; }
@@ -3347,26 +3376,53 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			player->doubleJumpTics = 6;
 			player->jumpTics = -1;
 		}
-		else if ((player->mo->flags7 & MF7_DOUBLEJUMP) && !player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
+		else if ((player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP) &&
+			!player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
 		{
-			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
-
-			if (!CLIENT_PREDICT_IsPredicting())
-				S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
-
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
-
-			player->doubleJumpTics = -1;
-
-			if (player->mo->velz <= 0)
+			// Wall proximity check
+			bool doWallJump = false;
+			if (player->mo->flags7 & MF7_WALLJUMP)
 			{
-				JumpVelz = FixedMul(JumpVelz, FLOAT2FIXED(1.2f));
-				player->mo->velz = JumpVelz;
+				// Account for the fact that bounding box is a square
+				float angle;
+				FTraceResults trace;
+				fixed_t radiusDistance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
+				for (int i = 0; i < 8; i++)
+				{
+					angle = 45.f * i;
+					Trace(player->mo->x, player->mo->y, player->mo->z, player->mo->Sector,
+						FLOAT2FIXED(cos(angle)), FLOAT2FIXED(sin(angle)), 0, radiusDistance,
+						MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+
+					if (trace.HitType == TRACE_HitWall)
+					{
+						doWallJump = true;
+						break;
+					}
+				}
 			}
-			else
+
+			if (player->mo->flags7 & MF7_DOUBLEJUMP || doWallJump)
 			{
-				player->mo->velz += JumpVelz;
+				fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
+
+				if (!CLIENT_PREDICT_IsPredicting())
+					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+
+				if (player->mo->velz <= 0)
+				{
+					JumpVelz = FixedMul(JumpVelz, FLOAT2FIXED(1.2f));
+					player->mo->velz = JumpVelz;
+				}
+				else
+				{
+					player->mo->velz += JumpVelz;
+				}
+
+				player->doubleJumpTics = -1;
 			}
 		}
 

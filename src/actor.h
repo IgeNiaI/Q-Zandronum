@@ -352,8 +352,10 @@ enum
 	MF7_NOKILLSCRIPTS	= 0x01000000,	// [JM] No "KILL" Script on death whatsoever, even if forced by GameInfo.
 
 	// [Ivory] extra movement flags
-	MF7_DOUBLEJUMP = 0x02000000,
-	MF7_CROUCHSLIDE = 0x04000000,
+	MF7_DOUBLEJUMP		= 0x02000000,
+	MF7_CROUCHSLIDE		= 0x04000000,
+	MF7_WALLJUMP		= 0x08000000,
+	MF7_WALLCLIMB		= 0x10000000,
 
 	// [BC] More object flags for Skulltag.
 
