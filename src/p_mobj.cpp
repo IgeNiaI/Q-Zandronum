@@ -7407,7 +7407,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle,
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
-							  bool nofreeaim, bool bSpawnSound, bool bSpawnOnClient)
+							  bool nofreeaim, bool bSpawnSound, bool bSpawnOnClient, bool accurate)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
@@ -7462,16 +7462,24 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 
 	if (z != ONFLOORZ && z != ONCEILINGZ)
 	{
-		// Doom spawns missiles 4 units lower than hitscan attacks for players.
-		z += source->z + (source->height>>1) - source->floorclip;
-		if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
+		if (accurate)
 		{
-			z += FixedMul (source->player->mo->AttackZOffset - 4*FRACUNIT, source->player->crouchfactor);
+			z += source->z - source->floorclip + source->player->viewheight;
 		}
 		else
 		{
-			z += 4*FRACUNIT;
+			// Doom spawns missiles 4 units lower than hitscan attacks for players.
+			z += source->z + (source->height >> 1) - source->floorclip;
+			if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
+			{
+				z += FixedMul(source->player->mo->AttackZOffset - 4 * FRACUNIT, source->player->crouchfactor);
+			}
+			else
+			{
+				z += 4 * FRACUNIT;
+			}
 		}
+		
 		// Do not fire beneath the floor.
 		if (z < source->floorz)
 		{

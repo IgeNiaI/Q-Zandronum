@@ -37,6 +37,8 @@
 #include <stddef.h>
 #include "textures/textures.h"
 
+#define MIN_TRACE_DISTANCE_4_ACCURATE 4000000
+
 struct sector_t;
 struct line_t;
 class AActor;

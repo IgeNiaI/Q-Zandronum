@@ -1419,6 +1419,7 @@ enum FB_Flags
 	FBF_NOPITCH = 8,
 	FBF_NOFLASH = 16,
 	FBF_NORANDOMPUFFZ = 32,
+	FBF_ACCURATE = 64
 };
 
 // [BB] This functions is needed to keep code duplication at a minimum while applying the spread power.
@@ -1435,7 +1436,7 @@ void A_FireBulletsHelper ( AActor *self,
 						   const int Flags,
 						   const int laflags )
 {
-	if ((NumberOfBullets==1 && !player->refire) || NumberOfBullets==0)
+	if ((NumberOfBullets == 1 && !player->refire) || !NumberOfBullets)
 	{
 		int damage = DamagePerBullet;
 
@@ -1446,8 +1447,10 @@ void A_FireBulletsHelper ( AActor *self,
 	}
 	else 
 	{
-		if (NumberOfBullets == -1) NumberOfBullets = 1;
-		for (int i=0 ; i<NumberOfBullets ; i++)
+		if (NumberOfBullets == -1)
+			NumberOfBullets = 1;
+
+		for (int i = 0 ; i < NumberOfBullets ; i++)
 		{
 			int angle = bangle;
 			int slope = bslope;
@@ -1465,12 +1468,13 @@ void A_FireBulletsHelper ( AActor *self,
 			int damage = DamagePerBullet;
 
 			if (!(Flags & FBF_NORANDOM))
-				damage *= ((pr_cwbullet()%3)+1);
+				damage *= pr_cwbullet() % 3 + 1;
 
 			P_LineAttack(self, angle, Range, slope, damage, NAME_Hitscan, PuffType, laflags);
 		}
 	}
 }
+
 // [BB] This function should be called by all bullet firing weapons to reduce code duplication.
 void A_CustomFireBullets( AActor *self,
 						  angle_t Spread_XY,
@@ -1481,7 +1485,8 @@ void A_CustomFireBullets( AActor *self,
 						  const char *AttackSound = NULL,
 						  int Flags = 1,
 						  fixed_t Range = 0,
-						  const bool pPlayAttacking = true ){
+						  const bool pPlayAttacking = true )
+{
   	if ( self->player == NULL)
 		return;
 
@@ -1493,14 +1498,16 @@ void A_CustomFireBullets( AActor *self,
 	//int i;
 	int bangle;
 	int bslope = 0;
-	int laflags = (Flags & FBF_NORANDOMPUFFZ)? LAF_NORANDOMPUFFZ : 0;
+	int laflags = Flags & FBF_NORANDOMPUFFZ ? LAF_NORANDOMPUFFZ : 0;
 
-	if ((Flags & FBF_USEAMMO) && weapon)
-	{
-		if (!weapon->DepleteAmmo(weapon->bAltFire, true)) return;	// out of ammo
-	}
+	if (Flags & FBF_ACCURATE)
+		laflags |= LAF_ACCURATE;
+
+	if ((Flags & FBF_USEAMMO) && weapon && !weapon->DepleteAmmo(weapon->bAltFire, true)) // out of ammo
+		return;
 	
-	if (Range == 0) Range = PLAYERMISSILERANGE;
+	if (!Range)
+		Range = PLAYERMISSILERANGE;
 
 	// [BB] Allow to disable the execution of PlayAttacking2.
 	if ( pPlayAttacking && !(Flags & FBF_NOFLASH))
@@ -1624,24 +1631,27 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireBullets)
 //
 //==========================================================================
 // [BB] This functions is needed to keep code duplication at a minimum while applying the spread power.
-void A_FireCustomMissileHelper ( AActor * self,
+void A_FireCustomMissileHelper ( AActor *self,
 								 const fixed_t x,
 								 const fixed_t y,
 								 const fixed_t z,
 								 const fixed_t shootangle,
-								 const PClass * ti,
+								 const PClass *ti,
 								 const angle_t Angle,
-								 const INTBOOL AimAtAngle,
-								 AActor *&linetarget )
+								 const int flags,
+								 AActor *&linetarget)
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor * misl=P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget,	NULL, false, true, false);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, false, true, false, flags & FPF_ACCURATE ? true : false);
+
 	// automatic handling of seeker missiles
 	if (misl)
 	{
-		if (linetarget && misl->flags2&MF2_SEEKERMISSILE) misl->tracer=linetarget;
-		if (!AimAtAngle)
+		if (linetarget && misl->flags2 & MF2_SEEKERMISSILE)
+			misl->tracer = linetarget;
+
+		if (!(flags & FPF_AIMATANGLE))
 		{
 			// This original implementation is to aim straight ahead and then offset
 			// the angle from the resulting direction. 
@@ -1652,7 +1662,9 @@ void A_FireCustomMissileHelper ( AActor * self,
 			misl->velx = FixedMul (missilespeed, finecosine[an]);
 			misl->vely = FixedMul (missilespeed, finesine[an]);
 		}
-		if (misl->flags4&MF4_SPECTRAL) misl->health=-1;
+
+		if (misl->flags4 & MF4_SPECTRAL)
+			misl->health = -1;
 
 		// [BC] If we're the server, tell clients to spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -1668,19 +1680,18 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 	ACTION_PARAM_BOOL(UseAmmo, 2);
 	ACTION_PARAM_INT(SpawnOfs_XY, 3);
 	ACTION_PARAM_FIXED(SpawnHeight, 4);
-	ACTION_PARAM_BOOL(AimAtAngle, 5);
+	ACTION_PARAM_INT(Flags, 5);
 	ACTION_PARAM_ANGLE(pitch, 6);
 
 	if (!self->player) return;
 
-	player_t *player=self->player;
-	AWeapon * weapon=player->ReadyWeapon;
+	player_t *player = self->player;
+	AWeapon *weapon = player->ReadyWeapon;
 	AActor *linetarget;
 
-	if (UseAmmo && weapon)
-	{
-		if (!weapon->DepleteAmmo(weapon->bAltFire, true)) return;	// out of ammo
-	}
+	// out of ammo
+	if (UseAmmo && weapon && !weapon->DepleteAmmo(weapon->bAltFire, true))
+		return;
 
 	// [BB] Should the actor not be spawned, taking in account client side only actors?
 	if ( NETWORK_ShouldActorNotBeSpawned ( self, ti ) )
@@ -1688,53 +1699,69 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 
 	if (ti) 
 	{
+		fixed_t shootangle = self->angle;
+		fixed_t SavedPlayerPitch = self->pitch;
+
+		if (Flags & FPF_ACCURATE)
+		{
+			//*************************************************************************************************************************
+			// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
+
+			// Set origin of the trace
+			fixed_t shootz = player->mo->z - player->mo->floorclip + player->viewheight;
+
+			// Get pitch and angle, and calculate direction of the tracer
+			angle_t aAngle = self->angle >> ANGLETOFINESHIFT;
+			angle_t aPitch = angle_t(-self->pitch) >> ANGLETOFINESHIFT;
+			fixed_t vx = FixedMul(finecosine[aPitch], finecosine[aAngle]);
+			fixed_t vy = FixedMul(finecosine[aPitch], finesine[aAngle]);
+			fixed_t vz = finesine[aPitch];
+
+			// Fire the tracer
+			FTraceResults trace;
+			Trace(self->x, self->y, shootz, self->Sector, vx, vy, vz, 0x20000000,
+				MF_SHOOTABLE, ML_BLOCKEVERYTHING, self, trace);
+
+			if (trace.Distance > MIN_TRACE_DISTANCE_4_ACCURATE)
+			{
+				// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
+				float distance = FIXED2FLOAT(trace.Distance);
+				if (SpawnOfs_XY)
+				{
+					float xyOffs = float(atan2(distance, SpawnOfs_XY) * 180.f / PI);
+					shootangle += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
+				}
+				if (SpawnHeight)
+				{
+					float zOffs = float(atan2(distance, FIXED2FLOAT(SpawnHeight)) * 180.f / PI);
+					self->pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
+				}
+			}
+			else
+			{
+				SpawnOfs_XY = 0;
+				SpawnHeight = 0;
+			}
+		}
+		else if (Flags & FPF_AIMATANGLE)
+		{
+			self->pitch -= pitch;
+			shootangle += Angle;
+		}
+
 		angle_t ang = (self->angle - ANGLE_90) >> ANGLETOFINESHIFT;
 		fixed_t x = SpawnOfs_XY * finecosine[ang];
 		fixed_t y = SpawnOfs_XY * finesine[ang];
-		fixed_t z = SpawnHeight;
-		fixed_t shootangle = self->angle;
 
-		if (AimAtAngle) shootangle+=Angle;
+		A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle, ti, Angle, Flags, linetarget);
 
-		// Temporarily adjusts the pitch
-		fixed_t SavedPlayerPitch = self->pitch;
-		self->pitch -= pitch;
-
-		A_FireCustomMissileHelper( self, x, y, z, shootangle, ti, Angle , AimAtAngle, linetarget );
-
-		if (NULL != self->player )
+		if ( self->player != NULL && self->player->cheats2 & CF2_SPREAD )
 		{
-			if ( self->player->cheats2 & CF2_SPREAD )
-			{
-				A_FireCustomMissileHelper( self, x, y, z, shootangle + ( ANGLE_45 / 3 ), ti, Angle, AimAtAngle, linetarget );
-				A_FireCustomMissileHelper( self, x, y, z, shootangle - ( ANGLE_45 / 3 ), ti, Angle, AimAtAngle, linetarget );
-			}
+			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle + ( ANGLE_45 / 3 ), ti, Angle, Flags, linetarget );
+			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle - ( ANGLE_45 / 3 ), ti, Angle, Flags, linetarget );
 		}
 
-		//AActor * misl=P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget);
 		self->pitch = SavedPlayerPitch;
-/*
-		// automatic handling of seeker missiles
-		if (misl)
-		{
-			if (linetarget && misl->flags2&MF2_SEEKERMISSILE) misl->tracer=linetarget;
-			if (!AimAtAngle)
-			{
-				// This original implementation is to aim straight ahead and then offset
-				// the angle from the resulting direction. 
-				FVector3 velocity(misl->velx, misl->vely, 0);
-				fixed_t missilespeed = (fixed_t)velocity.Length();
-				misl->angle += Angle;
-				angle_t an = misl->angle >> ANGLETOFINESHIFT;
-				misl->velx = FixedMul (missilespeed, finecosine[an]);
-				misl->vely = FixedMul (missilespeed, finesine[an]);
-			}
-
-			// [BC] If we're the server, tell clients to spawn this missile.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissile( misl );
-		}
-*/
 	}
 }
 
@@ -1866,28 +1893,23 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RailAttack)
 	ACTION_PARAM_FLOAT(DriftSpeed, 13);
 	ACTION_PARAM_CLASS(SpawnClass, 14);
 	ACTION_PARAM_FIXED(Spawnofs_Z, 15);
-	
-	if(Range==0) Range=8192*FRACUNIT;
-	if(Sparsity==0) Sparsity=1.0;
 
 	if (!self->player) return;
 
-	AWeapon * weapon=self->player->ReadyWeapon;
+	if (!Range) Range = 8192 * FRACUNIT;
+	if (!Sparsity) Sparsity = 1.0;
 
-	// only use ammo when actually hitting something!
-	if (UseAmmo)
-	{
-		if (!weapon->DepleteAmmo(weapon->bAltFire, true)) return;	// out of ammo
-	}
+	AWeapon *weapon = self->player->ReadyWeapon;
+
+	// out of ammo
+	if (UseAmmo && !weapon->DepleteAmmo(weapon->bAltFire, true))
+		return;
 
 	// [BC] Don't actually do the attack in client mode.
 	// [Spleen] Railgun is handled by the server unless unlagged
-	if ( NETWORK_InClientMode()
-		&& !UNLAGGED_DrawRailClientside( self ) )
-	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
-	}
+	if ( NETWORK_InClientMode() && !UNLAGGED_DrawRailClientside( self )
+		&& !( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+		return;
 
 	angle_t angle;
 	angle_t slope;
@@ -1939,8 +1961,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 	ACTION_PARAM_CLASS(SpawnClass, 14);
 	ACTION_PARAM_FIXED(Spawnofs_Z, 15);
 
-	if(Range==0) Range=8192*FRACUNIT;
-	if(Sparsity==0) Sparsity=1.0;
+	if(!Range) Range = 8192 * FRACUNIT;
+	if(!Sparsity) Sparsity = 1.0;
 
 	AActor *linetarget;
 
@@ -2046,7 +2068,7 @@ static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 	ACTION_PARAM_START(3);
 	ACTION_PARAM_CLASS(mi, 0);
 	ACTION_PARAM_INT(amount, 1);
-	bool	bNeedClientUpdate;
+	bool bNeedClientUpdate;
 	ACTION_PARAM_INT(setreceiver, 2);
 
 	COPY_AAPTR_NOT_NULL(receiver, receiver, setreceiver);

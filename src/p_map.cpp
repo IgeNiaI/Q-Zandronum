@@ -4180,11 +4180,19 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 
 	// [Spleen]
 	UNLAGGED_Reconcile( t1 );
-
-	shootz = t1->z - t1->floorclip + (t1->height >> 1);
+	
 	if (t1->player != NULL)
 	{
-		shootz += FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
+		if (flags & LAF_ACCURATE)
+		{
+			shootz = t1->z - t1->floorclip + t1->player->viewheight;
+		}
+		else
+		{
+			shootz = t1->z - t1->floorclip + (t1->height >> 1) + 
+					 FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
+		}
+		
 		if (damageType == NAME_Melee || damageType == NAME_Hitscan)
 		{
 			// this is coming from a weapon attack function which needs to transfer information to the obituary code,
@@ -4194,7 +4202,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 	}
 	else
 	{
-		shootz += 8 * FRACUNIT;
+		shootz = t1->z - t1->floorclip + (t1->height >> 1) + 8 * FRACUNIT;
 	}
 
 	// We need to check the defaults of the replacement here
@@ -4778,27 +4786,81 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 
 	if (puffclass == NULL) puffclass = PClass::FindClass(NAME_BulletPuff);
 
-	pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
-	angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
-
-	vx = FixedMul(finecosine[pitch], finecosine[angle]);
-	vy = FixedMul(finecosine[pitch], finesine[angle]);
-	vz = finesine[pitch];
+	AActor *puffDefaults = GetDefaultByType(puffclass->GetReplacement()); //Contains all the flags such as FOILINVUL, etc.
+	int flags = (puffDefaults->flags6 & MF6_NOTRIGGER) ? 0 : TRACE_PCross | TRACE_Impact;
 
 	x1 = source->x;
 	y1 = source->y;
 
-	shootz = source->z - source->floorclip + (source->height >> 1) + offset_z;
-
-	if (!(railflags & RAF_CENTERZ))
+	if (railflags & RAF_ACCURATE)
 	{
-		if (source->player != NULL)
+		//*************************************************************************************************************************
+		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
+
+		// Set origin of the trace
+		shootz = source->z - source->floorclip + source->player->viewheight;
+
+		// Get pitch and angle, and calculate direction of the tracer
+		pitch = angle_t(-source->pitch) >> ANGLETOFINESHIFT;
+		angle = source->angle >> ANGLETOFINESHIFT;
+		vx = FixedMul(finecosine[pitch], finecosine[angle]);
+		vy = FixedMul(finecosine[pitch], finesine[angle]);
+		vz = finesine[pitch];
+
+		// Fire the tracer
+		Trace(x1, y1, shootz, source->Sector, vx, vy, vz, distance,
+			MF_SHOOTABLE, ML_BLOCKEVERYTHING, source, trace, flags);
+
+		if (trace.Distance > MIN_TRACE_DISTANCE_4_ACCURATE)
 		{
-			shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+			// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
+			float distance = FIXED2FLOAT(trace.Distance);
+
+			if (offset_xy)
+			{
+				float xyOffs = float(atan2(FIXED2FLOAT(trace.Distance), offset_xy) * 180.f / PI);
+				angleoffset = angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
+			}
+			if (offset_z)
+			{
+				float zOffs = float(atan2(FIXED2FLOAT(trace.Distance), FIXED2FLOAT(offset_z)) * 180.f / PI);
+				pitchoffset = angle_t((zOffs - 90.f) * (ANGLE_MAX / 360));
+			}
+
+			shootz += offset_z;
 		}
-		else
+
+		//*************************************************************************************************************************
+		// Screw the crosshair is where you look not where you aim, my homies always hit the projection of the player's
+		// viewcenter onto the map geometry
+
+		pitch = (angle_t(-source->pitch + pitchoffset)) >> ANGLETOFINESHIFT;
+		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
+
+		vx = FixedMul(finecosine[pitch], finecosine[angle]);
+		vy = FixedMul(finecosine[pitch], finesine[angle]);
+		vz = finesine[pitch];
+	}
+	else
+	{
+		shootz = source->z - source->floorclip + (source->height >> 1) + offset_z;
+
+		pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
+		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
+		vx = FixedMul(finecosine[pitch], finecosine[angle]);
+		vy = FixedMul(finecosine[pitch], finesine[angle]);
+		vz = finesine[pitch];
+
+		if (!(railflags & RAF_CENTERZ))
 		{
-			shootz += 8 * FRACUNIT;
+			if (source->player != NULL)
+			{
+				shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+			}
+			else
+			{
+				shootz += 8 * FRACUNIT;
+			}
 		}
 	}
 
@@ -4806,19 +4868,12 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	x1 += offset_xy * finecosine[angle];
 	y1 += offset_xy * finesine[angle];
 
-	RailData rail_data;
-
-	rail_data.StopAtOne = !!(railflags & RAF_NOPIERCE);
 	start.X = FIXED2FLOAT(x1);
 	start.Y = FIXED2FLOAT(y1);
 	start.Z = FIXED2FLOAT(shootz);
 
-	int flags;
-
-	assert(puffclass != NULL);		// Because we set it to a default above
-	AActor *puffDefaults = GetDefaultByType(puffclass->GetReplacement()); //Contains all the flags such as FOILINVUL, etc.
-
-	flags = (puffDefaults->flags6 & MF6_NOTRIGGER) ? 0 : TRACE_PCross | TRACE_Impact;
+	RailData rail_data;
+	rail_data.StopAtOne = !!(railflags & RAF_NOPIERCE);
 	rail_data.StopAtInvul = (puffDefaults->flags3 & MF3_FOILINVUL) ? false : true;
 
 	Trace(x1, y1, shootz, source->Sector, vx, vy, vz,
@@ -4827,7 +4882,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 
 	// [Spleen]
 	UNLAGGED_Restore( source );
-	
+
 	// Hurt anything the trace hit
 	unsigned int i;
 	FName damagetype = (puffDefaults == NULL || puffDefaults->DamageType == NAME_None) ? FName(NAME_Railgun) : puffDefaults->DamageType;

@@ -25,6 +25,10 @@ const int CMF_OFFSETPITCH = 32;
 const int CMF_SAVEPITCH = 64;
 const int CMF_ABSOLUTEANGLE = 128;
 
+// Flags for A_FireCustomMissile
+const int FCM_AIMATANGLE = 1;
+const int FCM_ACCURATE = 256;
+
 // Flags for A_CustomBulletAttack
 const int CBAF_AIMFACING = 1;
 const int CBAF_NORANDOM = 2;
@@ -42,6 +46,7 @@ const int FBF_EXPLICITANGLE = 4;
 const int FBF_NOPITCH = 8;
 const int FBF_NOFLASH = 16;
 const int FBF_NORANDOMPUFFZ = 32;
+const int FBF_ACCURATE = 256;
 
 // Flags for A_SpawnItemEx
 const int SXF_TRANSFERTRANSLATION = 1;
@@ -132,6 +137,7 @@ const int RGF_NOPIERCING = 2;
 const int RGF_EXPLICITANGLE = 4;
 const int RGF_FULLBRIGHT = 8;
 const int RGF_CENTERZ = 16;
+const int RGF_ACCURATE = 256;
 
 // Flags for A_Mushroom
 const int MSF_Standard = 0;
