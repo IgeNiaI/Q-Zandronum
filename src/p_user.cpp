@@ -3247,18 +3247,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		// Acceleration
-		if (mv_type == MV_QUAKE)
-		{
-			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
-		}
+		if (mv_type == MV_QUAKE_CPMA && cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && float(vel.Length()) >= maxgroundspeed)
+			player->mo->QAcceleration(vel, acceleration, 1.5f, mv_cpmacceleration);
 		else
-		{
-			float velocity = float(vel.Length());
-			if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
-				player->mo->QAcceleration(vel, acceleration, 1.5f, mv_cpmacceleration);
-			else
-				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
-		}
+			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
 
 		// set slide duration if player can do it
 		if (player->mo->flags7 & MF7_CROUCHSLIDE)
