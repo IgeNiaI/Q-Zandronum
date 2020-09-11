@@ -301,6 +301,8 @@ player_t::player_t()
   doubleJumpTics(0),
   blockDoubleJump(0),
   slideDuration(0),
+  wallClimbStamina(0),
+  wasClimbing(0),
   onground(0),
   respawn_time(0),
   camera(0),
@@ -847,6 +849,17 @@ void APlayerPawn::PostBeginPlay()
 	else
 	{
 		player->SendPitchLimits();
+	}
+
+	// [Ivory] no you can't haz both
+	if (player->mo->flags7 & MF7_DOUBLEJUMP)
+	{
+		player->mo->flags7 &= ~MF7_WALLJUMP;
+		player->mo->flags7 &= ~MF7_WALLCLIMB;
+	}
+	else if (player->mo->flags7 & MF7_WALLCLIMB)
+	{
+		player->mo->flags7 &= ~MF7_WALLJUMP;
 	}
 }
 
@@ -3201,8 +3214,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	//*******************************************************
 
 	// Setup
-	bool waterflying = false;
+	bool noJump = false;
 	bool canSlide = false;
+	int climbing = 0;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
@@ -3236,7 +3250,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
 
-		waterflying = true;
+		noJump = true;
+
+		// Reset wall climb stamina
+		player->wallClimbStamina = 70;
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3264,54 +3281,108 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 2.f, 8.f);
 
-		waterflying = true;
-	}
-	else if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
-	{
-		maxgroundspeed *= movefactor;
+		noJump = true;
 
-		// Input vector
-		acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
-		// Orient inputs to view angle
-		acceleration.MakeUnit();
-		VectorRotate(acceleration.X, acceleration.Y, flAngle);
-		// Acceleration
-		if (mv_type == MV_QUAKE_CPMA && cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && float(vel.Length()) >= maxgroundspeed)
-			player->mo->QAcceleration(vel, acceleration, 1.5f, mv_cpmacceleration);
-		else
-			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
-
-		// set slide duration if player can do it
-		if (player->mo->flags7 & MF7_CROUCHSLIDE)
-			player->slideDuration = level.maptime - FixedDiv(player->mo->velz, 1000000000);
+		// Reset wall climb stamina
+		player->wallClimbStamina = 70;
 	}
 	else
 	{
-		canSlide = (player->mo->flags7 & MF7_CROUCHSLIDE) &&	// player has the flag
-			!waterflying &&								// player is not flying nor swimming
-			player->crouchfactor < CROUCHSCALEHALFWAY &&				// player is crouching
-			level.maptime <= player->slideDuration;		// there is crouch slide charge to spend
+		float velocity = 0.f;
 
-														// Input vector
-		acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
-		// Orient inputs to view angle
-		acceleration.MakeUnit();
-		VectorRotate(acceleration.X, acceleration.Y, flAngle);
-		// Friction & Acceleration
-		if (canSlide)
+		// Wall proximity check
+		if ((player->mo->flags7 & MF7_WALLCLIMB) && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbStamina > 0 && (velocity = float(vel.Length())) <= maxgroundspeed + 2.f)
 		{
-			player->mo->QFriction(vel, maxgroundspeed, mv_slidefriction * floorFriction);
-			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_slideacceleration * floorFriction);
+			FTraceResults trace;
+			fixed_t distance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
+			angle_t pitch = angle_t(-player->mo->pitch) >> ANGLETOFINESHIFT;
+			angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
+			fixed_t vx = FixedMul(finecosine[pitch], finecosine[angle]);
+			fixed_t vy = FixedMul(finecosine[pitch], finesine[angle]);
+
+			Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
+				  vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+			
+			if (trace.HitType == TRACE_HitWall)
+				climbing = 1;
+			else if (player->wasClimbing) // if over the ledge give it a final kick
+				climbing = 2;
+		}
+
+		if (climbing)
+		{
+			player->mo->QFriction(vel, maxgroundspeed, mv_friction);
+			if (climbing == 1)
+			{
+				vel.Z = 5.f;
+				player->wallClimbStamina--;
+			}
+			else
+			{
+				vel.Z = 8.f;
+				player->wallClimbStamina = 0;
+			}
+
+			noJump = true;
+
+			/* TODO: play wall climb sound
+			if (!CLIENT_PREDICT_IsPredicting())
+			S_Sound(player->mo, 7, "*wallclimb", 1, ATTN_NORM);
+
+			if (NETWORK_GetState() == NETSTATE_SERVER)
+			SERVERCOMMANDS_SoundActor(player->mo, 7, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+			*/
+		}
+		else if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
+		{
+			maxgroundspeed *= movefactor;
+
+			// Input vector
+			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
+			// Orient inputs to view angle
+			acceleration.MakeUnit();
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			// Acceleration
+			if (!velocity) { velocity = float(vel.Length()); }
+			if (mv_type == MV_QUAKE_CPMA && cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
+				player->mo->QAcceleration(vel, acceleration, 1.5f, mv_cpmacceleration);
+			else
+				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
+
+			// set slide duration if player can do it
+			if (player->mo->flags7 & MF7_CROUCHSLIDE)
+				player->slideDuration = level.maptime - FixedDiv(player->mo->velz, 1000000000);
 		}
 		else
 		{
-			maxgroundspeed *= movefactor;
-			player->mo->QFriction(vel, maxgroundspeed, mv_friction * floorFriction);
-			player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_acceleration / movefactor * floorFriction);
-		}
+			canSlide = (player->mo->flags7 & MF7_CROUCHSLIDE) &&		// player has the flag
+						player->crouchfactor < CROUCHSCALEHALFWAY &&	// player is crouching
+						level.maptime <= player->slideDuration;			// there is crouch slide charge to spend
 
-		//If not using CSlide right away clear it
-		if (!canSlide && player->slideDuration) { player->slideDuration = 0; }
+			// Input vector
+			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
+			// Orient inputs to view angle
+			acceleration.MakeUnit();
+			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			// Friction & Acceleration
+			if (canSlide)
+			{
+				player->mo->QFriction(vel, maxgroundspeed, mv_slidefriction * floorFriction);
+				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_slideacceleration * floorFriction);
+			}
+			else
+			{
+				maxgroundspeed *= movefactor;
+				player->mo->QFriction(vel, maxgroundspeed, mv_friction * floorFriction);
+				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_acceleration / movefactor * floorFriction);
+			}
+
+			// If not using CSlide right away clear it
+			if (!canSlide && player->slideDuration) { player->slideDuration = 0; }
+
+			// Reset wall climb stamina
+			player->wallClimbStamina = 70;
+		}
 	}
 
 	// ...convert it back to fixed point
@@ -3322,6 +3393,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	// also take care of view/weapon bobbing
 	player->velx = player->mo->velx;
 	player->vely = player->mo->vely;
+
+	// set wall climb parameters
+	player->wasClimbing = climbing < 2 ? climbing : false;
 
 	// Only play run animation when moving and not in the air
 	if (!CLIENT_PREDICT_IsPredicting() && !player->bSpectating &&
@@ -3351,7 +3425,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	//*******************************************************
 
 	// Water and flying have already executed jump press logic
-	if (waterflying) { return; }
+	if (noJump) { return; }
 
 	// Stop here if not in good condition to jump
 	if (cmd->ucmd.buttons & BT_JUMP)
@@ -4662,6 +4736,8 @@ void player_t::Serialize (FArchive &arc)
 		<< doubleJumpTics
 		<< blockDoubleJump
 		<< slideDuration
+		<< wallClimbStamina
+		<< wasClimbing
 		<< respawn_time
 		<< air_finished
 		<< turnticks

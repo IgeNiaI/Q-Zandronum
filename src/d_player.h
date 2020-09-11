@@ -556,6 +556,8 @@ public:
 	int			doubleJumpTics;
 	bool		blockDoubleJump;
 	int			slideDuration;
+	int			wallClimbStamina;
+	bool		wasClimbing;
 
 	int			respawn_time;			// [RH] delay respawning until this tic
 	TObjPtr<AActor>		camera;			// [RH] Whose eyes this player sees through
