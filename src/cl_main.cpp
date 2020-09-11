@@ -5729,6 +5729,14 @@ static void client_SetMovementConfig(BYTESTREAM_s *pByteStream)
 	// Read in, and set the value for stopspeed.
 	Value.Float = NETWORK_ReadFloat(pByteStream);
 	mv_stopspeed.ForceSet(Value, CVAR_Float);
+
+	// Read in, and set the value for slideacceleration.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	mv_crouchspeedfactor.ForceSet(Value, CVAR_Float);
+
+	// Read in, and set the value for stopspeed.
+	Value.Float = NETWORK_ReadFloat(pByteStream);
+	mv_walkspeedfactor.ForceSet(Value, CVAR_Float);
 }
 
 //*****************************************************************************

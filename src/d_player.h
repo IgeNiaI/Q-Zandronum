@@ -110,6 +110,7 @@ public:
 	// [BB] We also call this when a player dies. These special items also need to be dropped then.
 	virtual void DropImportantItems( bool bLeavingGame, AActor *pSource = NULL );
 
+	virtual float CrouchWalkFactor();
 	virtual void TweakSpeeds (int &forwardmove, int &sidemove);
 	virtual void MorphPlayerThink ();
 	virtual void ActivateMorphWeapon ();
@@ -123,7 +124,6 @@ public:
 	
 	// Quake movement
 	float QTweakSpeed();
-	float QMoveFactor();
 	void  QFriction(TVector3<float> &vel, const float stopspeed, const float friction);
 	void  QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel);
 
@@ -869,5 +869,7 @@ EXTERN_CVAR( Float,	mv_airacceleration );
 EXTERN_CVAR( Float, mv_cpmacceleration);
 EXTERN_CVAR( Float, mv_slideacceleration );
 EXTERN_CVAR( Float,	mv_stopspeed );
+EXTERN_CVAR( Float,	mv_crouchspeedfactor );
+EXTERN_CVAR( Float,	mv_walkspeedfactor );
 
 #endif // __D_PLAYER_H__

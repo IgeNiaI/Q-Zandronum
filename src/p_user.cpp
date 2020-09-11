@@ -2236,8 +2236,9 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 		side = clamp(side, -0x1800, 0x1800);
 	}
 
+	// Not using this anymore because of CrouchWalkFactor()
 	// [GRB]
-	if ((unsigned int)(forward + 0x31ff) < 0x63ff)
+	/*if ((unsigned int)(forward + 0x31ff) < 0x63ff)
 	{
 		forward = FixedMul (forward, ForwardMove1);
 	}
@@ -2252,7 +2253,7 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 	else
 	{
 		side = FixedMul (side, SideMove2);
-	}
+	}*/
 
 	// [BC] This comes out to 50%, so we can use this for the turbosphere.
 	if (!player->morphTics && Inventory != NULL)
@@ -2268,6 +2269,22 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 		forward = (LONG)( forward * 1.25 );
 		side = (LONG)( side * 1.25 );
 	}
+}
+
+//===========================================================================
+//
+// APlayerPawn :: CrouchWalkFactor
+//
+//===========================================================================
+
+float APlayerPawn::CrouchWalkFactor()
+{
+	if (player->CanCrouch() && player->crouchfactor != FRACUNIT) // player crouched
+		return float(mv_crouchspeedfactor) * player->crouchfactor / (FRACUNIT / 2);
+	else if (player->cmd.ucmd.buttons & BT_SPEED)
+		return float(mv_walkspeedfactor);
+
+	return 1.0f;
 }
 
 //===========================================================================
@@ -2791,7 +2808,7 @@ void P_CalcHeight (player_t *player)
 
 CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 {
-	level.aircontrol = (fixed_t)(self * 65536.f);
+	level.aircontrol = (fixed_t)(self * FRACUNIT);
 	G_AirControlChanged ();
 
 	// [BB] Let the clients know about the change.
@@ -2805,7 +2822,7 @@ CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 //*****************************************************************************
 // [Ivory] Quake movement stuff
 //
-CUSTOM_CVAR( Int, mv_type, MV_DOOM, CVAR_SERVERINFO )
+CUSTOM_CVAR( Int, mv_type, MV_DOOM, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	if (self < MV_DOOM)
 		self = MV_DOOM;
@@ -2817,56 +2834,70 @@ CUSTOM_CVAR( Int, mv_type, MV_DOOM, CVAR_SERVERINFO )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Int, mv_jumptics, 7, CVAR_SERVERINFO )
+CUSTOM_CVAR( Int, mv_jumptics, 7, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_acceleration, 10.f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Float, mv_acceleration, 10.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_friction, 6.f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Float, mv_friction, 6.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR(Float, mv_slidefriction, 0.08f, CVAR_SERVERINFO)
+CUSTOM_CVAR( Float, mv_slidefriction, 0.08f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_airacceleration, 1.5f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Float, mv_airacceleration, 1.5f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_cpmacceleration, 100.f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Float, mv_cpmacceleration, 100.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR(Float, mv_slideacceleration, 4.f, CVAR_SERVERINFO)
+CUSTOM_CVAR( Float, mv_slideacceleration, 4.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_stopspeed, 12.f, CVAR_SERVERINFO )
+CUSTOM_CVAR( Float, mv_stopspeed, 12.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+CUSTOM_CVAR( Float, mv_crouchspeedfactor, 0.5f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
+CUSTOM_CVAR( Float, mv_walkspeedfactor, 0.5f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -2902,16 +2933,6 @@ float APlayerPawn::QTweakSpeed()
 	// [BC] Apply the 25% speed increase power.
 	if (player->cheats & CF_SPEED25)
 		return 1.25f;
-
-	return 1.f;
-}
-
-float APlayerPawn::QMoveFactor()
-{
-	if (player->crouchfactor == 32768) // player fully crouched
-		return 0.25f;
-	else if (player->cmd.ucmd.buttons & BT_SPEED)
-		return 0.5f;
 
 	return 1.f;
 }
@@ -3009,13 +3030,10 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		fm = FixedMul(fm, player->mo->Speed);
 		sm = FixedMul(sm, player->mo->Speed);
 
-		// When crouching, speed and bobbing have to be reduced
-		if (player->CanCrouch() && player->crouchfactor != FRACUNIT)
-		{
-			fm = FixedMul(fm, player->crouchfactor);
-			sm = FixedMul(sm, player->crouchfactor);
-			bobfactor = FixedMul(bobfactor, player->crouchfactor);
-		}
+		int crouchWalkFactor = FLOAT2FIXED(player->mo->CrouchWalkFactor());
+		fm = FixedMul(fm, crouchWalkFactor);
+		sm = FixedMul(sm, crouchWalkFactor);
+		bobfactor = FixedMul(bobfactor, crouchWalkFactor);
 
 		forwardmove = Scale(fm, movefactor * 35, TICRATE << 8);
 		sidemove = Scale(sm, movefactor * 35, TICRATE << 8);
@@ -3158,7 +3176,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool canSlide = false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
-	float movefactor = player->mo->QMoveFactor();
+	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
 	float maxgroundspeed = mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	TVector3<float> acceleration = { 0.f, 0.f, 0.f };
 	TVector3<float> vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
@@ -3178,7 +3196,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		}
 		else
 		{
-			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI / 180;
+			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
 			acceleration.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
@@ -3206,7 +3224,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		}
 		else
 		{
-			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI / 180;
+			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
 			acceleration.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
@@ -3250,7 +3268,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		canSlide = (player->mo->flags7 & MF7_CROUCHSLIDE) &&	// player has the flag
 			!waterflying &&								// player is not flying nor swimming
-			player->crouchfactor < 65536 &&				// player is crouching
+			player->crouchfactor < FRACUNIT &&				// player is crouching
 			level.maptime <= player->slideDuration;		// there is crouch slide charge to spend
 
 														// Input vector

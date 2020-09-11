@@ -47,6 +47,10 @@
 #define PI				3.14159265358979323846		// matches value in gcc v2 math.h
 #endif
 
+#ifndef PI_F
+#define PI_F				3.14159265358979f		// matches value in gcc v2 math.h
+#endif
+
 #define EQUAL_EPSILON (1/65536.f)
 
 

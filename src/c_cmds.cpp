@@ -1068,10 +1068,14 @@ CCMD(movement)
 		if (strcmp(arg1, "doom") == 0) {
 			mv_type = MV_DOOM;
 			mv_jumptics = 7;
+			mv_crouchspeedfactor = 0.5f;
+			mv_walkspeedfactor = 0.5f;
 		}
-		if (strcmp(arg1, "doom_jump") == 0) {
+		if (strcmp(arg1, "doom_qcde") == 0) {
 			mv_type = MV_DOOM;
 			mv_jumptics = 0;
+			mv_crouchspeedfactor = 0.25f;
+			mv_walkspeedfactor = 0.5f;
 		}
 		if (strcmp(arg1, "quake") == 0) {
 			mv_type = MV_QUAKE;
@@ -1082,6 +1086,8 @@ CCMD(movement)
 			mv_airacceleration = 1.5f;
 			mv_slideacceleration = 4.f;
 			mv_stopspeed = 12.f;
+			mv_crouchspeedfactor = 0.25f;
+			mv_walkspeedfactor = 0.5f;
 		}
 		if (strcmp(arg1, "cpma") == 0) {
 			mv_type = MV_QUAKE_CPMA;
@@ -1093,6 +1099,8 @@ CCMD(movement)
 			mv_slideacceleration = 4.f;
 			mv_stopspeed = 12.f;
 			mv_cpmacceleration = 100.f;
+			mv_crouchspeedfactor = 0.25f;
+			mv_walkspeedfactor = 0.5f;
 		}
 	}
 }

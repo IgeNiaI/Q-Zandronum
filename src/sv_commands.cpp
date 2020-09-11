@@ -2156,6 +2156,8 @@ void SERVERCOMMANDS_SetMovementConfig( ULONG ulPlayerExtra, ServerCommandFlags f
 	command.addFloat( mv_cpmacceleration );
 	command.addFloat( mv_slideacceleration );
 	command.addFloat( mv_stopspeed );
+	command.addFloat( mv_crouchspeedfactor );
+	command.addFloat( mv_walkspeedfactor );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
