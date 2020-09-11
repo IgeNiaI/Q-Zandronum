@@ -848,6 +848,8 @@ inline bool AActor::IsNoClip2() const
 }
 
 #define CROUCHSPEED (FRACUNIT/12)
+#define CROUCHSCALE (FRACUNIT*3/4)
+#define CROUCHSCALEHALFWAY (FRACUNIT*7/8)
 
 bool P_IsPlayerTotallyFrozen(const player_t *player);
 

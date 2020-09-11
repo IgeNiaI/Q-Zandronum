@@ -2280,7 +2280,7 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 float APlayerPawn::CrouchWalkFactor()
 {
 	if (player->CanCrouch() && player->crouchfactor != FRACUNIT) // player crouched
-		return float(mv_crouchspeedfactor) * player->crouchfactor / (FRACUNIT / 2);
+		return float(mv_crouchspeedfactor) * player->crouchfactor / CROUCHSCALE;
 	else if (player->cmd.ucmd.buttons & BT_SPEED)
 		return float(mv_walkspeedfactor);
 
@@ -2566,7 +2566,7 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 	}
 
 	// Set the crouch sprite?
-	if (player->crouchfactor < FRACUNIT*3/4)
+	if (player->crouchfactor < CROUCHSCALEHALFWAY)
 	{
 		if (spritenum == actor->SpawnState->sprite || spritenum == player->mo->crouchsprite) 
 		{
@@ -2588,9 +2588,9 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 		{
 			spritenum = crouchspriteno;
 		}
-		else if (player->playerstate != PST_DEAD && player->crouchfactor < FRACUNIT*3/4)
+		else if (player->playerstate != PST_DEAD && player->crouchfactor < CROUCHSCALEHALFWAY)
 		{
-			scaley /= 2;
+			scaley = FixedMul(scaley, CROUCHSCALE);
 		}
 	}
 }
@@ -3268,7 +3268,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		canSlide = (player->mo->flags7 & MF7_CROUCHSLIDE) &&	// player has the flag
 			!waterflying &&								// player is not flying nor swimming
-			player->crouchfactor < FRACUNIT &&				// player is crouching
+			player->crouchfactor < CROUCHSCALEHALFWAY &&				// player is crouching
 			level.maptime <= player->slideDuration;		// there is crouch slide charge to spend
 
 														// Input vector
@@ -3824,7 +3824,7 @@ void P_CrouchMove(player_t * player, int direction)
 	}
 	player->mo->height = savedheight;
 
-	player->crouchfactor = clamp<fixed_t>(player->crouchfactor, FRACUNIT/2, FRACUNIT);
+	player->crouchfactor = clamp<fixed_t>(player->crouchfactor, CROUCHSCALE, FRACUNIT);
 	player->viewheight = FixedMul(player->mo->ViewHeight, player->crouchfactor);
 	player->crouchviewdelta = player->viewheight - player->mo->ViewHeight;
 
@@ -4045,7 +4045,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 				{
 					P_CrouchMove(player, 1);
 				}
-				else if (crouchdir == -1 && player->crouchfactor > FRACUNIT/2)
+				else if (crouchdir == -1 && player->crouchfactor > CROUCHSCALE)
 				{
 					P_CrouchMove(player, -1);
 				}

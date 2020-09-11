@@ -2087,7 +2087,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 	// running depends on the player's original movement continuing even after
 	// it gets blocked.
 	if (!quakeMovement && (mo->player != NULL && (i_compatflags & COMPATF_WALLRUN)) || (mo->waterlevel >= 1) ||
-		(mo->player != NULL && mo->player->crouchfactor < FRACUNIT*3/4))
+		(mo->player != NULL && mo->player->crouchfactor < CROUCHSCALEHALFWAY))
 	{
 		// preserve the direction instead of clamping x and y independently.
 		xmove = clamp (mo->velx, -maxmove, maxmove);
