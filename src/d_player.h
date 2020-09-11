@@ -875,5 +875,6 @@ EXTERN_CVAR( Float, mv_slideacceleration );
 EXTERN_CVAR( Float,	mv_stopspeed );
 EXTERN_CVAR( Float,	mv_crouchspeedfactor );
 EXTERN_CVAR( Float,	mv_walkspeedfactor );
+EXTERN_CVAR( Int,	mv_wallclimbstamina );
 
 #endif // __D_PLAYER_H__

@@ -1071,6 +1071,7 @@ CCMD(movement)
 			mv_airacceleration = 0.25f;
 			mv_crouchspeedfactor = 0.5f;
 			mv_walkspeedfactor = 0.75f;
+			mv_wallclimbstamina = 70;
 		}
 		if (strcmp(arg1, "doom_qcde") == 0) {
 			mv_type = MV_DOOM;
@@ -1078,6 +1079,7 @@ CCMD(movement)
 			mv_airacceleration = 0.25f;
 			mv_crouchspeedfactor = 0.25f;
 			mv_walkspeedfactor = 0.5f;
+			mv_wallclimbstamina = 70;
 		}
 		if (strcmp(arg1, "quake") == 0) {
 			mv_type = MV_QUAKE;
@@ -1090,6 +1092,7 @@ CCMD(movement)
 			mv_stopspeed = 12.f;
 			mv_crouchspeedfactor = 0.25f;
 			mv_walkspeedfactor = 0.5f;
+			mv_wallclimbstamina = 70;
 		}
 		if (strcmp(arg1, "cpma") == 0) {
 			mv_type = MV_QUAKE_CPMA;
@@ -1103,6 +1106,7 @@ CCMD(movement)
 			mv_cpmacceleration = 100.f;
 			mv_crouchspeedfactor = 0.25f;
 			mv_walkspeedfactor = 0.5f;
+			mv_wallclimbstamina = 70;
 		}
 	}
 }

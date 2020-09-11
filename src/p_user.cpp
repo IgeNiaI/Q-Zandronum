@@ -2919,6 +2919,13 @@ CUSTOM_CVAR( Float, mv_walkspeedfactor, 0.75f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
+CUSTOM_CVAR( Int, mv_wallclimbstamina, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
 //***************************************************
 // Vectors Math
 //***************************************************
@@ -3122,7 +3129,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 
 	// set wall climb parameters
-	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY)) { player->wallClimbStamina = 70; }
+	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
+		player->wallClimbStamina = mv_wallclimbstamina;
+
 	player->wasClimbing = climbing < 2 ? climbing : false;
 
 	//**********************************
@@ -3303,7 +3312,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb stamina
-		player->wallClimbStamina = 70;
+		player->wallClimbStamina = mv_wallclimbstamina;
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3334,7 +3343,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb stamina
-		player->wallClimbStamina = 70;
+		player->wallClimbStamina = mv_wallclimbstamina;
 	}
 	else
 	{
@@ -3431,7 +3440,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			if (!canSlide && player->slideDuration) { player->slideDuration = 0; }
 
 			// Reset wall climb stamina
-			player->wallClimbStamina = 70;
+			player->wallClimbStamina = mv_wallclimbstamina;
 		}
 	}
 
