@@ -2848,7 +2848,7 @@ CUSTOM_CVAR( Float, mv_acceleration, 10.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_friction, 6.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+CUSTOM_CVAR( Float, mv_friction, 1.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -2862,7 +2862,7 @@ CUSTOM_CVAR( Float, mv_slidefriction, 0.08f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_airacceleration, 1.5f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+CUSTOM_CVAR( Float, mv_airacceleration, 0.25f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -2897,7 +2897,7 @@ CUSTOM_CVAR( Float, mv_crouchspeedfactor, 0.5f, CVAR_SERVERINFO | CVAR_DEMOSAVE 
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_walkspeedfactor, 0.5f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+CUSTOM_CVAR( Float, mv_walkspeedfactor, 0.75f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -3018,9 +3018,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			}
 			else
 			{
-				// Skulltag needs increased air movement for jump pads, etc.
-				movefactor /= 4;
-				bobfactor /= 4;
+				fixed_t airacceleration = FLOAT2FIXED(mv_airacceleration);
+				movefactor = FixedMul(movefactor, airacceleration);
+				bobfactor = FixedMul(bobfactor, airacceleration);
 			}
 		}
 

@@ -1068,12 +1068,14 @@ CCMD(movement)
 		if (strcmp(arg1, "doom") == 0) {
 			mv_type = MV_DOOM;
 			mv_jumptics = 7;
+			mv_airacceleration = 0.25f;
 			mv_crouchspeedfactor = 0.5f;
-			mv_walkspeedfactor = 0.5f;
+			mv_walkspeedfactor = 0.75f;
 		}
 		if (strcmp(arg1, "doom_qcde") == 0) {
 			mv_type = MV_DOOM;
 			mv_jumptics = 0;
+			mv_airacceleration = 0.25f;
 			mv_crouchspeedfactor = 0.25f;
 			mv_walkspeedfactor = 0.5f;
 		}
