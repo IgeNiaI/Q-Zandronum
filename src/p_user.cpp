@@ -3014,7 +3014,51 @@ void APlayerPawn::QAcceleration(TVector3<float> &vel, const TVector3<float> &wis
 
 void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 {
-	if (cmd->ucmd.forwardmove | cmd->ucmd.sidemove)
+	// Wall proximity check
+	int climbing = 0;
+	if ((player->mo->flags7 & MF7_WALLCLIMB) && (cmd->ucmd.buttons & BT_JUMP)
+		&& player->wallClimbStamina > 0 && TVector2<float>(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length() <= 16.f)
+	{
+		FTraceResults trace;
+		fixed_t distance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
+		angle_t pitch = angle_t(-player->mo->pitch) >> ANGLETOFINESHIFT;
+		angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
+		fixed_t vx = FixedMul(finecosine[pitch], finecosine[angle]);
+		fixed_t vy = FixedMul(finecosine[pitch], finesine[angle]);
+
+		Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
+			vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+
+		if (trace.HitType == TRACE_HitWall)
+			climbing = 1;
+		else if (player->wasClimbing) // if over the ledge give it a final kick
+			climbing = 2;
+	}
+
+	Printf("%d\n", player->wallClimbStamina);
+
+	if (climbing)
+	{
+		if (climbing == 1)
+		{
+			player->mo->velz = FLOAT2FIXED(5.f);
+			player->wallClimbStamina--;
+		}
+		else
+		{
+			player->mo->velz = FLOAT2FIXED(8.f);
+			player->wallClimbStamina = 0;
+		}
+
+		/* TODO: play wall climb sound
+		if (!CLIENT_PREDICT_IsPredicting())
+		S_Sound(player->mo, 7, "*wallclimb", 1, ATTN_NORM);
+
+		if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SoundActor(player->mo, 7, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+		*/
+	}
+	else if (cmd->ucmd.forwardmove | cmd->ucmd.sidemove)
 	{
 		fixed_t forwardmove, sidemove;
 		int bobfactor;
@@ -3077,8 +3121,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		}
 	}
 
+	// set wall climb parameters
+	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY)) { player->wallClimbStamina = 70; }
+	player->wasClimbing = climbing < 2 ? climbing : false;
+
 	//**********************************
 	// Jumping
+
+	if (climbing) { return; }
 
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
