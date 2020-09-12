@@ -19,6 +19,7 @@ Actor PlayerPawn : Actor native
 	+WINDTHRUST
 	+TELESTOMP
 	+NOBLOCKMONST
+	+DOUBLEJUMP
 	Player.AttackZOffset 8
 	Player.JumpZ 8
 	Player.GruntSpeed 12
