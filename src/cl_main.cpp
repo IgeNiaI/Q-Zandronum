@@ -2199,8 +2199,6 @@ void CLIENT_PrintCommand( LONG lCommand )
 			return;
 		if (( cl_showcommands >= 6 ) && ( lCommand == SVC_PING ))
 			return;
-		if (( cl_showcommands >= 7 ) && ( lCommand == SVC_SETLOCALPLAYERJUMPTICS ))
-			return;
 
 		if ( ( lCommand - NUM_SERVERCONNECT_COMMANDS ) < 0 )
 			return;
@@ -2867,12 +2865,6 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->PremorphWeapon = 0;
 	pPlayer->chickenPeck = 0;
 	pPlayer->jumpTics = 0;
-	pPlayer->doubleJumpTics = 0;
-	pPlayer->blockDoubleJump = 0;
-	pPlayer->slideDuration = 0;
-	pPlayer->wasSliding = 0;
-	pPlayer->wallClimbStamina = 0;
-	pPlayer->wasClimbing = 0;
 	pPlayer->respawn_time = 0;
 	pPlayer->camera = 0;
 	pPlayer->air_finished = 0;
@@ -4309,34 +4301,6 @@ void ServerCommands::MoveLocalPlayer::Execute()
 		pPlayer->mo->vely = vely;
 		pPlayer->mo->velz = velz;
 	}
-}
-
-//*****************************************************************************
-//
-void ServerCommands::SetLocalPlayerJumpTics::Execute()
-{
-	player_t *pPlayer = &players[consoleplayer];
-
-	// No player object to update.
-	if (pPlayer->mo == NULL)
-		return;
-
-	if (CLIENT_GetLatestServerGametic() > latestServerGametic)
-		return;
-	CLIENT_SetLatestServerGametic(latestServerGametic);
-	CLIENT_SetLastConsolePlayerUpdateTick(clientTicOnServerEnd);
-
-	if (gametic - CLIENTDEMO_GetGameticOffset() - clientTicOnServerEnd >= TICRATE &&
-		gametic + CLIENTDEMO_GetGameticOffset() - g_ulEndFullUpdateTic > TICRATE)
-		g_bClientLagging = true;
-	else
-		g_bClientLagging = false;
-
-	if (pPlayer->playerstate == PST_DEAD)
-		return;
-	
-	pPlayer->jumpTics = jumpTics;
-	pPlayer->doubleJumpTics = doubleJumpTics;
 }
 
 //*****************************************************************************

@@ -3157,7 +3157,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		}
 
 		// [BB] Spectators shall stay in their spawn state and don't execute any code pointers.
-		if (!CLIENT_PREDICT_IsPredicting() && !player->bSpectating)//(!(player->cheats & CF_PREDICTING))
+		if ((CLIENT_PREDICT_IsPredicting() == false) && (player->bSpectating == false))//(!(player->cheats & CF_PREDICTING))
 		{
 			player->mo->PlayRunning();
 		}
@@ -3354,7 +3354,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb stamina
-		if (player->wallClimbStamina < mv_wallclimbstamina) { player->wallClimbStamina++; }
+		player->wallClimbStamina = mv_wallclimbstamina;
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3385,7 +3385,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb stamina
-		if (player->wallClimbStamina < mv_wallclimbstamina) { player->wallClimbStamina++; }
+		player->wallClimbStamina = mv_wallclimbstamina;
 	}
 	else
 	{
@@ -3473,7 +3473,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			if (!canSlide) { player->slideDuration = 0; }
 
 			// Reset wall climb stamina
-			if (player->wallClimbStamina < mv_wallclimbstamina) { player->wallClimbStamina++; }
+			player->wallClimbStamina = std::max(int(mv_wallclimbstamina), player->wallClimbStamina + 1);
 		}
 	}
 
@@ -3532,10 +3532,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			player->mo->velz += JumpVelz;
 			player->doubleJumpTics = 6;
 			player->jumpTics = -1;
-
-			// notify the change of jumptics
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SetLocalPlayerJumpTics(player - players);
 		}
 		else if ((player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP) &&
 			!player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
@@ -3584,10 +3580,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				}
 
 				player->doubleJumpTics = -1;
-
-				// notify the change of jumptics
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SetLocalPlayerJumpTics(player - players);
 			}
 		}
 
