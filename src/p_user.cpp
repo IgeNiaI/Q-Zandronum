@@ -3179,9 +3179,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	if (canClimb) { return; }
 
-	// [Ivory] blockDoubleJump should not need c/s sync since doubleJumpTics already is
-	if (player->doubleJumpTics) { player->blockDoubleJump = true; }
-
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
 
@@ -3293,6 +3290,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				player->doubleJumpTics = -1;
 			}
 		}
+
+		if (player->doubleJumpTics == 6) { player->blockDoubleJump = true; }
 	}
 	else
 	{
