@@ -883,19 +883,19 @@ FUNC(LS_Teleport_NewMap)
 FUNC(LS_Teleport)
 // Teleport (tid, sectortag, bNoSourceFog)
 {
-	return EV_Teleport (arg0, arg1, ln, backSide, it, true, !arg2, false);
+	return EV_Teleport (arg0, arg1, ln, backSide, it, it->player, true, !arg2, false);
 }
 
 FUNC( LS_Teleport_NoStop )
 // Teleport_NoStop (tid, sectortag, bNoSourceFog)
 {
-	return EV_Teleport( arg0, arg1, ln, backSide, it, true, !arg2, false, false );
+	return EV_Teleport( arg0, arg1, ln, backSide, it, it->player, true, !arg2, false, false );
 }
 
 FUNC(LS_Teleport_NoFog)
 // Teleport_NoFog (tid, useang, sectortag, keepheight)
 {
-	return EV_Teleport (arg0, arg2, ln, backSide, it, false, false, !arg1, true, !!arg3);
+	return EV_Teleport (arg0, arg2, ln, backSide, it, it->player, false, false, !arg1, true, !!arg3);
 }
 
 FUNC(LS_Teleport_ZombieChanger)
@@ -904,7 +904,7 @@ FUNC(LS_Teleport_ZombieChanger)
 	// This is practically useless outside of Strife, but oh well.
 	if (it != NULL)
 	{
-		EV_Teleport (arg0, arg1, ln, backSide, it, false, false, false);
+		EV_Teleport (arg0, arg1, ln, backSide, it, NULL, false, false, false);
 
 		// [BC] If we're the server, tell clients to put this thing in its pain state.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -974,10 +974,6 @@ FUNC(LS_ThrustThing)
 
 static void ThrustThingHelper (AActor *it, angle_t angle, int force, INTBOOL nolimit)
 {
-	// [BB] This is server side.
-	if ( ( NETWORK_IsConsolePlayerOrNotInClientMode ( it->player ) == false ) && !( it->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
-		return;
-
 	angle >>= ANGLETOFINESHIFT;
 	it->velx += force * finecosine[angle];
 	it->vely += force * finesine[angle];
@@ -989,7 +985,8 @@ static void ThrustThingHelper (AActor *it, angle_t angle, int force, INTBOOL nol
 
 	// [BC] If we're the server, update the thing's velocity.
 	// [Dusk] Use SERVER_UpdateThingVelocity
-	SERVER_UpdateThingVelocity( it, false );
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVER_UpdateThingVelocity( it, false );
 }
 
 FUNC(LS_ThrustThingZ)	// [BC]
@@ -1008,14 +1005,10 @@ FUNC(LS_ThrustThingZ)	// [BC]
 
 		while ( (victim = iterator.Next ()) )
 		{
-			// [BB] This is server side.
-			if ( NETWORK_GetState( ) != NETSTATE_CLIENT )
-			{
-				if (!arg3)
-					victim->velz = thrust;
-				else
-					victim->velz += thrust;
-			}
+			if (!arg3)
+				victim->velz = thrust;
+			else
+				victim->velz += thrust;
 
 			if (victim->player && victim->velz > 0)
 			{
@@ -1032,14 +1025,10 @@ FUNC(LS_ThrustThingZ)	// [BC]
 	}
 	else if (it)
 	{
-		// [BB] This is server side.
-		if ( ( NETWORK_IsConsolePlayerOrNotInClientMode ( it->player ) ) || ( it->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
-		{
-			if (!arg3)
-				it->velz = thrust;
-			else
-				it->velz += thrust;
-		}
+		if (!arg3)
+			it->velz = thrust;
+		else
+			it->velz += thrust;
 
 		if (it->player && it->velz > 0)
 		{

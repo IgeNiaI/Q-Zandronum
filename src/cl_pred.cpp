@@ -149,17 +149,6 @@ void CLIENT_PREDICT_PlayerPredict( void )
 		return;
 	}
 
-	// Just came out of a teleport.
-	if ( pPlayer->mo->reactiontime )
-	{
-		pPlayer->cmd.ucmd.forwardmove = 0;
-		pPlayer->cmd.ucmd.sidemove = 0;
-	
-		P_PlayerThink( pPlayer );
-		pPlayer->mo->Tick( );
-		return;
-	}
-
 	// Back up the player's current position to see if we predicted correctly.
 #ifdef	_DEBUG
 	SavedX	= pPlayer->mo->x;

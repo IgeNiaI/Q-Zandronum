@@ -211,7 +211,7 @@ bool CheckIfExitIsGood (AActor *self, level_info_t *info)
 				FPlayerStart *pSpot = SelectRandomCooperativeSpot( ulPlayer );
 				if ( bSolidFlag )
 					players[ulPlayer].mo->flags |=  MF_SOLID;
-				P_Teleport (self, pSpot->x, pSpot->y, ONFLOORZ, ANG45 * (pSpot->angle/45), true, true, false);
+				P_Teleport (self, NULL, pSpot->x, pSpot->y, ONFLOORZ, ANG45 * (pSpot->angle/45), false, true, true, false);
 				NETWORK_Printf( "You need to kill %d percent of the monsters before exiting the level.\n", *sv_killallmonsters_percentage );
 
 			}
@@ -307,6 +307,7 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 	BYTE special;
 
 	// Special Zandronum checks
+	// TODO [geNia] replace ML_BLOCKUSE with a new flag dedicated for client acs execution
 	if ( GAMEMODE_IsHandledSpecial (mo, line->special) == false )
 		return false;
 
@@ -315,7 +316,8 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 		return false;
 	}
 	bool remote = (line->special != 7 && line->special != 8 && (line->special < 11 || line->special > 14));
-	if (line->locknumber > 0 && !P_CheckKeys (mo, line->locknumber, remote)) return false;
+	if (line->locknumber > 0 && !P_CheckKeys (mo, line->locknumber, remote))
+		return false;
 	lineActivation = line->activation;
 	repeat = line->flags & ML_REPEAT_SPECIAL;
 	buttonSuccess = false;

@@ -1294,7 +1294,8 @@ bool NETWORK_InClientModeAndActorNotClientHandled( const AActor *pActor )
 //
 bool NETWORK_IsClientPredictedSpecial( const int Special )
 {
-	return ( ( Special == ThrustThing ) || ( Special == ThrustThingZ ) );
+	// TODO [geNia] replace ACS_ExecuteWithResult with a new special that indicates that the script is bound to client prediction
+	return ( Special == Teleport ) || ( Special == ThrustThing ) || ( Special == ThrustThingZ ) || ( Special == ACS_ExecuteWithResult );
 }
 
 //*****************************************************************************

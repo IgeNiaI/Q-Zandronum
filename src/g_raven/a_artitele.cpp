@@ -88,7 +88,7 @@ bool AArtiTeleport::Use (bool pickup)
 			I_Error( "ArtiTeleport: No player start found!" );
 		}
 	}
-	P_Teleport (Owner, destX, destY, ONFLOORZ, destAngle, true, true, false);
+	P_Teleport (Owner, NULL, destX, destY, ONFLOORZ, destAngle, false, true, true, false);
 	bool canlaugh = true;
  	if (Owner->player->morphTics && (Owner->player->MorphStyle & MORPH_UNDOBYCHAOSDEVICE))
  	{ // Teleporting away will undo any morph effects (pig)
