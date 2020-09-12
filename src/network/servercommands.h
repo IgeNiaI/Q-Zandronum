@@ -1,4 +1,4 @@
-// 6fe469a3c6a69423536e195f876723cc
+// d6d7210f353240065487815b184ffc2c
 // This file has been automatically generated. Do not edit by hand.
 #pragma once
 #include "actor.h"
@@ -1816,6 +1816,51 @@ namespace ServerCommands
 		bool _velxInitialized;
 		bool _velyInitialized;
 		bool _velzInitialized;
+	};
+
+	class SetLocalPlayerJumpTics : public BaseServerCommand
+	{
+	public:
+		SetLocalPlayerJumpTics() :
+			_clientTicOnServerEndInitialized( false ),
+			_latestServerGameticInitialized( false ),
+			_jumpTicsInitialized( false ),
+			_doubleJumpTicsInitialized( false ) {}
+		void SetClientTicOnServerEnd( unsigned int value );
+		void SetLatestServerGametic( int value );
+		void SetJumpTics( SBYTE value );
+		void SetDoubleJumpTics( SBYTE value );
+		void Execute();
+		NetCommand BuildNetCommand() const;
+		friend bool ::CLIENT_ParseExtendedServerCommand( SVC2, BYTESTREAM_s * );
+		bool AllParametersInitialized() const
+		{
+			return _clientTicOnServerEndInitialized
+				&& _latestServerGameticInitialized
+				&& _jumpTicsInitialized
+				&& _doubleJumpTicsInitialized;
+		}
+		void PrintMissingParameters() const
+		{
+			if ( _clientTicOnServerEndInitialized == false )
+				Printf( "Missing: clientTicOnServerEnd\n" );
+			if ( _latestServerGameticInitialized == false )
+				Printf( "Missing: latestServerGametic\n" );
+			if ( _jumpTicsInitialized == false )
+				Printf( "Missing: jumpTics\n" );
+			if ( _doubleJumpTicsInitialized == false )
+				Printf( "Missing: doubleJumpTics\n" );
+		}
+
+	protected:
+		unsigned int clientTicOnServerEnd;
+		int latestServerGametic;
+		SBYTE jumpTics;
+		SBYTE doubleJumpTics;
+		bool _clientTicOnServerEndInitialized;
+		bool _latestServerGameticInitialized;
+		bool _jumpTicsInitialized;
+		bool _doubleJumpTicsInitialized;
 	};
 
 	class DisconnectPlayer : public BaseServerCommand

@@ -1,4 +1,4 @@
-// 165593acf9813c3b35b22b1d534008f6
+// 59daac9e8e246eeb6be4eeb04f2a76aa
 // This file has been automatically generated. Do not edit by hand.
 #include "cl_main.h"
 #include "servercommands.h"
@@ -4267,6 +4267,24 @@ bool CLIENT_ParseExtendedServerCommand( SVC2 header, BYTESTREAM_s *bytestream )
 		}
 		return true;
 
+	case SVC_SETLOCALPLAYERJUMPTICS:
+		{
+			ServerCommands::SetLocalPlayerJumpTics command;
+			command.clientTicOnServerEnd = NETWORK_ReadLong( bytestream );
+			command.latestServerGametic = NETWORK_ReadLong( bytestream );
+			command.jumpTics = NETWORK_ReadByte( bytestream );
+			command.doubleJumpTics = NETWORK_ReadByte( bytestream );
+			if ( bytestream->pbStream > bytestream->pbStreamEnd )
+			{
+				CLIENT_PrintWarning( "SetLocalPlayerJumpTics: Packet contained %td too few bytes\n",
+					bytestream->pbStream - bytestream->pbStreamEnd );
+				return true;
+			}
+
+			command.Execute();
+		}
+		return true;
+
 	case SVC2_GIVEWEAPONHOLDER:
 		{
 			ServerCommands::GiveWeaponHolder command;
@@ -5986,6 +6004,46 @@ void ServerCommands::MoveLocalPlayer::SetVelz( fixed_t value )
 {
 	this->velz = value;
 	this->_velzInitialized = true;
+}
+
+NetCommand ServerCommands::SetLocalPlayerJumpTics::BuildNetCommand() const
+{
+	if ( AllParametersInitialized() == false )
+	{
+		Printf( "WARNING: SetLocalPlayerJumpTics::BuildNetCommand: not all parameters were initialized:\n" );
+		PrintMissingParameters();
+	}
+	NetCommand command ( SVC_SETLOCALPLAYERJUMPTICS );
+	command.setUnreliable( true );
+	command.addLong( this->clientTicOnServerEnd );
+	command.addLong( this->latestServerGametic );
+	command.addByte( this->jumpTics );
+	command.addByte( this->doubleJumpTics );
+	return command;
+}
+
+void ServerCommands::SetLocalPlayerJumpTics::SetClientTicOnServerEnd( unsigned int value )
+{
+	this->clientTicOnServerEnd = value;
+	this->_clientTicOnServerEndInitialized = true;
+}
+
+void ServerCommands::SetLocalPlayerJumpTics::SetLatestServerGametic( int value )
+{
+	this->latestServerGametic = value;
+	this->_latestServerGameticInitialized = true;
+}
+
+void ServerCommands::SetLocalPlayerJumpTics::SetJumpTics( SBYTE value )
+{
+	this->jumpTics = value;
+	this->_jumpTicsInitialized = true;
+}
+
+void ServerCommands::SetLocalPlayerJumpTics::SetDoubleJumpTics( SBYTE value )
+{
+	this->doubleJumpTics = value;
+	this->_doubleJumpTicsInitialized = true;
 }
 
 NetCommand ServerCommands::DisconnectPlayer::BuildNetCommand() const

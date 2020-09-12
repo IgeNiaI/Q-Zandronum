@@ -222,6 +222,15 @@ Command MoveLocalPlayer
 	Fixed velz
 EndCommand
 
+Command SetLocalPlayerJumpTics
+	ExtendedCommand
+	UnreliableCommand
+	ULong clientTicOnServerEnd
+	Long latestServerGametic
+	SByte jumpTics
+	SByte doubleJumpTics
+EndCommand
+
 Command DisconnectPlayer
 	Player player
 EndCommand
