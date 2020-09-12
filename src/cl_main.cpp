@@ -2865,6 +2865,12 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->PremorphWeapon = 0;
 	pPlayer->chickenPeck = 0;
 	pPlayer->jumpTics = 0;
+	pPlayer->doubleJumpTics = 0;
+	pPlayer->blockDoubleJump = 0;
+	pPlayer->slideDuration = 0;
+	pPlayer->wasSliding = 0;
+	pPlayer->wallClimbStamina = 0;
+	pPlayer->wasClimbing = 0;
 	pPlayer->respawn_time = 0;
 	pPlayer->camera = 0;
 	pPlayer->air_finished = 0;
