@@ -3180,7 +3180,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (canClimb) { return; }
 
 	// [Ivory] blockDoubleJump should not need c/s sync since doubleJumpTics already is
-	if (player->doubleJumpTics) { player->blockDoubleJump = true; }
+	if (player->doubleJumpTics > 0) { player->blockDoubleJump = true; }
 
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
@@ -3520,7 +3520,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	if (noJump) { return; }
 
 	// [Ivory] blockDoubleJump should not need c/s sync since doubleJumpTics already is
-	if (player->doubleJumpTics) { player->blockDoubleJump = true; }
+	if (player->doubleJumpTics > 0) { player->blockDoubleJump = true; }
 
 	// Stop here if not in good condition to jump
 	if (cmd->ucmd.buttons & BT_JUMP)
