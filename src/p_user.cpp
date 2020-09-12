@@ -3179,6 +3179,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	if (canClimb) { return; }
 
+	// [Ivory] blockDoubleJump should not need c/s sync since doubleJumpTics already is
+	if (player->doubleJumpTics > 0) { player->blockDoubleJump = true; }
+
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
 
@@ -3239,7 +3242,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->mo->velz += JumpVelz;
 			player->jumpTics = ulJumpTicks;
 			player->doubleJumpTics = 6;
-			player->blockDoubleJump = true;
 
 			// notify the change of jumptics
 			if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -3517,6 +3519,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	// Water and flying have already executed jump press logic
 	if (noJump) { return; }
 
+	// [Ivory] blockDoubleJump should not need c/s sync since doubleJumpTics already is
+	if (player->doubleJumpTics > 0) { player->blockDoubleJump = true; }
+
 	// Stop here if not in good condition to jump
 	if (cmd->ucmd.buttons & BT_JUMP)
 	{
@@ -3539,7 +3544,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			player->mo->velz += JumpVelz;
 			player->doubleJumpTics = 6;
 			player->jumpTics = -1;
-			player->blockDoubleJump = true;
 
 			// notify the change of jumptics
 			if (NETWORK_GetState() == NETSTATE_SERVER)
