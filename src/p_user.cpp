@@ -3239,6 +3239,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->mo->velz += JumpVelz;
 			player->jumpTics = ulJumpTicks;
 			player->doubleJumpTics = 6;
+			player->blockDoubleJump = true;
 		}
 		// [Ivory]: Double Jump and wall jump
 		else if((player->mo->flags7 & MF7_WALLJUMP|MF7_DOUBLEJUMP) &&
@@ -3290,8 +3291,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				player->doubleJumpTics = -1;
 			}
 		}
-
-		if (player->doubleJumpTics == 6) { player->blockDoubleJump = true; }
 	}
 	else
 	{
@@ -3532,6 +3531,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			player->mo->velz += JumpVelz;
 			player->doubleJumpTics = 6;
 			player->jumpTics = -1;
+			player->blockDoubleJump = true;
 		}
 		else if ((player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP) &&
 			!player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
@@ -3582,8 +3582,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				player->doubleJumpTics = -1;
 			}
 		}
-
-		if (player->doubleJumpTics == 6) { player->blockDoubleJump = true; }
 	}
 	else
 	{
