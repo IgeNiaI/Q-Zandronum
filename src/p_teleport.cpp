@@ -36,6 +36,7 @@
 #include "doomstat.h"
 // [BB] New #includes.
 #include "sv_commands.h"
+#include "cl_main.h"
 #include "network.h"
 
 #define FUDGEFACTOR		10
@@ -96,7 +97,14 @@ void P_SpawnTeleportFog(fixed_t x, fixed_t y, fixed_t z, int spawnid)
 // TELEPORTATION
 //
 
-bool P_Teleport (AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
+bool P_Teleport(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
+	bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
+{
+	return P_Teleport(thing, NULL, x, y, z, angle,
+		useFog, sourceFog, keepOrientation, bHaltVelocity, keepHeight);
+}
+
+bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
 				 bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
 {
 	fixed_t oldx;
@@ -184,8 +192,9 @@ bool P_Teleport (AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
 		angle = thing->angle;
 	}
 
-	// [BC] Teleporting spectators do not create fog.
-	if ( thing && thing->player && thing->player->bSpectating )
+	// [BC] Spectators and predicting clients do not create fog.
+	if ( ( thing && thing->player && thing->player->bSpectating )
+		|| CLIENT_PREDICT_IsPredicting() )
 	{
 		useFog = false;
 		sourceFog = false;
@@ -217,8 +226,18 @@ bool P_Teleport (AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
 	if (thing->player && (useFog || !keepOrientation) && bHaltVelocity)
 	{
 		// Freeze player for about .5 sec
-		if (thing->Inventory == NULL || thing->Inventory->GetSpeedFactor() <= FRACUNIT)
-			thing->reactiontime = 18;
+		if ( thing->Inventory == NULL || thing->Inventory->GetSpeedFactor() <= FRACUNIT )
+		{
+			if ( NETWORK_GetState() == NETSTATE_SERVER )
+			{
+				// [BB] The clients start their reactiontime later on their end. Try to adjust for this.
+				thing->reactiontime = 18 - ( thing->player->ulPing * TICRATE / 1000 );
+				if ( thing->reactiontime < 0 )
+					thing->reactiontime = 0;
+			}
+			else if ( !CLIENT_PREDICT_IsPredicting() )
+				thing->reactiontime = 18;
+		}
 	}
 	if (thing->flags & MF_MISSILE)
 	{
@@ -236,13 +255,16 @@ bool P_Teleport (AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
 	}
 
 	// [BC] If we're the server, update clients about this teleport.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_TeleportThing( thing, sourceFog, useFog, ( useFog && bHaltVelocity ));
+		player_t *player = thing->player;
+		if (player && player->mo != thing)
+			player = NULL;
 
-		// [BB] The clients start their reactiontime later on their end. Try to adjust for this.
-		if ( thing->player && thing->reactiontime )
-			SERVER_AdjustPlayersReactiontime ( static_cast<ULONG> ( thing->player - players ) );
+		if (instigator && instigator == player)
+			SERVERCOMMANDS_TeleportThing( thing, sourceFog, useFog, ( useFog && bHaltVelocity ), ULONG( instigator - players ), SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_TeleportThing( thing, sourceFog, useFog, (useFog && bHaltVelocity) );
 	}
 
 	return true;
@@ -342,7 +364,7 @@ static AActor *SelectTeleDest (int tid, int tag)
 	return NULL;
 }
 
-bool EV_Teleport (int tid, int tag, line_t *line, int side, AActor *thing, bool fog,
+bool EV_Teleport (int tid, int tag, line_t *line, int side, AActor *thing, player_t *instigator, bool fog,
 				  bool sourceFog, bool keepOrientation, bool haltVelocity, bool keepHeight)
 {
 	AActor *searcher;
@@ -405,7 +427,7 @@ bool EV_Teleport (int tid, int tag, line_t *line, int side, AActor *thing, bool 
 	{
 		badangle = 1 << ANGLETOFINESHIFT;
 	}
-	if (P_Teleport (thing, searcher->x, searcher->y, z, searcher->angle + badangle, fog, sourceFog, keepOrientation, haltVelocity, keepHeight))
+	if (P_Teleport (thing, instigator, searcher->x, searcher->y, z, searcher->angle + badangle, fog, sourceFog, keepOrientation, haltVelocity, keepHeight))
 	{
 		// [RH] Lee Killough's changes for silent teleporters from BOOM
 		if (!fog && line && keepOrientation)
@@ -657,7 +679,7 @@ bool EV_TeleportOther (int other_tid, int dest_tid, bool fog)
 
 		while ( (victim = iterator.Next ()) )
 		{
-			didSomething |= EV_Teleport (dest_tid, 0, NULL, 0, victim, fog, fog, !fog);
+			didSomething |= EV_Teleport (dest_tid, 0, NULL, 0, victim, NULL, fog, fog, !fog);
 		}
 	}
 

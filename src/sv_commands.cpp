@@ -3698,334 +3698,149 @@ void SERVERCOMMANDS_PlayBounceSound( const AActor *pActor, const bool bOnfloor, 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoDoor( sector_t *pSector, DDoor::EVlDoor type, LONG lSpeed, LONG lDirection, LONG lLightTag, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoDoor( DDoor *Door, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	LONG	lSectorID;
 
-	lSectorID = LONG( pSector - sectors );
+	lSectorID = LONG( Door->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
-		return;
-
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustDoorDirection( lDirection );
-	if ( lDirection == INT_MIN )
 		return;
 
 	NetCommand command ( SVC_DODOOR );
 	command.addShort ( lSectorID );
-	command.addByte ( (BYTE)type );
-	command.addLong ( lSpeed );
-	command.addByte ( lDirection );
-	command.addShort ( lLightTag );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyDoor( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYDOOR );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangeDoorDirection( LONG lID, LONG lDirection, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustDoorDirection( lDirection );
-	if ( lDirection == INT_MIN )
-		return;
-
-	NetCommand command ( SVC_CHANGEDOORDIRECTION );
-	command.addShort ( lID );
-	command.addByte ( lDirection );
+	command.addByte ( (BYTE)Door->GetType() );
+	command.addByte( Door->GetLastInstigator() - players );
+	command.addLong ( Door->GetPosition() );
+	command.addByte ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
+	command.addLong ( Door->GetSpeed() );
+	command.addByte ( Door->GetTopWait() );
+	command.addByte ( Door->GetCountdown() );
+	command.addShort ( Door->GetLightTag() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoFloor( DFloor::EFloor Type, sector_t *pSector, LONG lDirection, LONG lSpeed, LONG lFloorDestDist, LONG Crush, bool Hexencrush, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoFloor( DFloor *Floor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG lSectorID = LONG( Floor->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustFloorDirection( lDirection );
-	if ( lDirection == INT_MIN )
-		return;
-
 	NetCommand command ( SVC_DOFLOOR );
-	command.addByte ( (ULONG)Type );
+	command.addByte ( (ULONG) Floor->GetType() );
 	command.addShort ( lSectorID );
-	command.addByte ( lDirection );
-	command.addLong ( lSpeed );
-	command.addLong ( lFloorDestDist );
-	command.addByte ( clamp<LONG>(Crush,-128,127) );
-	command.addByte ( Hexencrush );
-	command.addShort ( lID );
+	command.addByte ( Floor->GetLastInstigator() - players );
+	command.addLong ( Floor->GetPosition() );
+	command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
+	command.addLong ( Floor->GetSpeed() );
+	command.addLong ( Floor->GetFloorDestDist() );
+	command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
+	command.addByte ( Floor->GetHexencrush() );
+	command.addLong ( Floor->GetNewSpecial() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DestroyFloor( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_BuildStair( DFloor *Floor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DESTROYFLOOR );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangeFloorDirection( LONG lID, LONG lDirection, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustFloorDirection( lDirection );
-	if ( lDirection == INT_MIN )
-		return;
-
-	NetCommand command ( SVC_CHANGEFLOORDIRECTION );
-	command.addShort ( lID );
-	command.addByte ( lDirection );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangeFloorType( LONG lID, DFloor::EFloor Type, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_CHANGEFLOORTYPE );
-	command.addShort ( lID );
-	command.addByte ( (ULONG)Type );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangeFloorDestDist( LONG lID, LONG lFloorDestDist, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_CHANGEFLOORDESTDIST );
-	command.addShort ( lID );
-	command.addLong ( lFloorDestDist );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_StartFloorSound( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_STARTFLOORSOUND );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_BuildStair( DFloor::EFloor Type, sector_t *pSector, int Direction, fixed_t Speed, fixed_t FloorDestDist, int Crush, bool Hexencrush, int ResetCount, int Delay, int PauseTime, int StepTime, int PerStepTime, int ID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	int		SectorID;
-
-	SectorID = int( pSector - sectors );
+	int SectorID = int( Floor->GetSector() - sectors );
 	if (( SectorID < 0 ) || ( SectorID >= numsectors ))
 		return;
 
 	NetCommand command ( SVC2_BUILDSTAIR );
-	command.addByte ( (int)Type );
+	command.addByte ( (ULONG) Floor->GetType() );
 	command.addShort ( SectorID );
-	command.addByte ( clamp(Direction,-128,127) );
-	command.addLong ( Speed );
-	command.addLong ( FloorDestDist );
-	command.addByte ( clamp(Crush,-128,127) );
-	command.addByte ( Hexencrush );
-	command.addLong ( ResetCount );
-	command.addLong ( Delay );
-	command.addLong ( PauseTime );
-	command.addLong ( StepTime );
-	command.addLong ( PerStepTime );
-	command.addShort ( ID );
+	command.addByte( Floor->GetLastInstigator() - players );
+	command.addLong ( Floor->GetPosition() );
+	command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
+	command.addLong ( Floor->GetSpeed() );
+	command.addLong ( Floor->GetFloorDestDist() );
+	command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
+	command.addByte ( Floor->GetHexencrush() );
+	command.addLong ( Floor->GetNewSpecial() );
+	command.addLong ( Floor->GetResetCount() );
+	command.addLong ( Floor->GetDelay() );
+	command.addLong ( Floor->GetPauseTime() );
+	command.addLong ( Floor->GetStepTime() );
+	command.addLong ( Floor->GetPerStepTime() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoCeiling( DCeiling::ECeiling Type, sector_t *pSector, LONG lDirection, LONG lBottomHeight, LONG lTopHeight, LONG lSpeed, LONG lCrush, bool Hexencrush, LONG lSilent, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG lSectorID = LONG( Ceiling->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustCeilingDirection( lDirection );
-	if ( lDirection == INT_MIN )
-		return;
-
 	NetCommand command ( SVC_DOCEILING );
-	command.addByte ( (ULONG)Type );
 	command.addShort ( lSectorID );
-	command.addByte ( lDirection );
-	command.addLong ( lBottomHeight );
-	command.addLong ( lTopHeight );
-	command.addLong ( lSpeed );
-	command.addByte ( clamp<LONG>(lCrush,-128,127) );
-	command.addByte ( Hexencrush );
-	command.addShort ( lSilent );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyCeiling( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYCEILING );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangeCeilingDirection( LONG lID, LONG lDirection, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustCeilingDirection( lDirection );
-	if ( lDirection == INT_MIN )
-		return;
-
-	NetCommand command ( SVC_CHANGECEILINGDIRECTION );
-	command.addShort ( lID );
-	command.addByte ( lDirection );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangeCeilingSpeed( LONG lID, LONG lSpeed, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_CHANGECEILINGSPEED );
-	command.addShort ( lID );
-	command.addLong ( lSpeed );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_PlayCeilingSound( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_PLAYCEILINGSOUND );
-	command.addShort ( lID );
+	command.addByte( Ceiling->GetLastInstigator() - players );
+	command.addByte ( Ceiling->GetTag() );
+	command.addByte ( (ULONG)Ceiling->GetType() );
+	command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetDirection() ) );
+	command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetOldDirection() ) );
+	command.addLong ( Ceiling->GetPosition() );
+	command.addLong ( Ceiling->GetBottomHeight() );
+	command.addLong ( Ceiling->GetTopHeight() );
+	command.addLong ( Ceiling->GetSpeed() );
+	command.addLong ( Ceiling->GetSpeedDown() );
+	command.addLong ( Ceiling->GetSpeedUp() );
+	command.addByte ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
+	command.addByte ( Ceiling->GetHexencrush() );
+	command.addShort ( Ceiling->GetSilent() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoPlat( DPlat::EPlatType Type, sector_t *pSector, DPlat::EPlatState Status, LONG lHigh, LONG lLow, LONG lSpeed, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoPlat( DPlat *Plat, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG lSectorID = LONG( Plat->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
 	NetCommand command ( SVC_DOPLAT );
-	command.addByte ( (ULONG)Type );
 	command.addShort ( lSectorID );
-	command.addByte ( (ULONG)Status );
-	command.addLong ( lHigh );
-	command.addLong ( lLow );
-	command.addLong ( lSpeed );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyPlat( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYPLAT );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangePlatStatus( LONG lID, DPlat::EPlatState Status, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_CHANGEPLATSTATUS );
-	command.addShort ( lID );
-	command.addByte ( (ULONG)Status );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_PlayPlatSound( LONG lID, LONG lSound, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_PLAYPLATSOUND );
-	command.addShort ( lID );
-	command.addByte ( lSound );
+	command.addByte( Plat->GetLastInstigator() - players );
+	command.addByte ( (ULONG)Plat->GetType() );
+	command.addByte ( (ULONG)Plat->GetStatus() );
+	command.addByte ( (ULONG)Plat->GetOldStatus() );
+	command.addLong ( Plat->GetSpeed() );
+	command.addLong ( Plat->GetHigh() );
+	command.addLong ( Plat->GetLow() );
+	command.addLong ( Plat->GetPosition() );
+	command.addByte ( Plat->GetWait() );
+	command.addByte ( Plat->GetCount() );
+	command.addByte ( Plat->GetCrush() );
+	command.addByte ( Plat->GetTag() );
+	command.addByte ( Plat->GetFinished() ? 1 : 0 );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoElevator( DElevator::EElevator Type, sector_t *pSector, LONG lSpeed, LONG lDirection, LONG lFloorDestDist, LONG lCeilingDestDist, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG	lSectorID = LONG( Elevator->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustElevatorDirection( lDirection );
-	if ( lDirection == INT_MIN )
-		return;
-
 	NetCommand command ( SVC_DOELEVATOR );
-	command.addByte ( Type );
 	command.addShort ( lSectorID );
-	command.addLong ( lSpeed );
-	command.addByte ( lDirection );
-	command.addLong ( lFloorDestDist );
-	command.addLong ( lCeilingDestDist );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyElevator( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYELEVATOR );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_StartElevatorSound( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_STARTELEVATORSOUND );
-	command.addShort ( lID );
+	command.addByte( Elevator->GetLastInstigator() - players );
+	command.addByte ( Elevator->GetType() );
+	command.addLong ( Elevator->GetSpeed() );
+	command.addByte ( SERVER_AdjustElevatorDirection( Elevator->GetDirection() ) );
+	command.addLong ( Elevator->GetFloorDestDist() );
+	command.addLong ( Elevator->GetCeilingDestDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4111,140 +3926,70 @@ void SERVERCOMMANDS_UpdateWaggle( LONG lID, LONG lAccumulator, ULONG ulPlayerExt
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoRotatePoly( LONG lSpeed, LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoRotatePoly( DRotatePoly *RotatePoly, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	NetCommand command ( SVC_DOROTATEPOLY );
-	command.addLong ( lSpeed );
-	command.addShort ( lPolyNum );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyRotatePoly( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYROTATEPOLY );
-	command.addShort ( lPolyNum );
+	command.addShort ( RotatePoly->GetPolyObj() );
+	command.addByte( RotatePoly->GetLastInstigator() - players );
+	command.addLong ( RotatePoly->GetSpeed() );
+	command.addLong ( RotatePoly->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoMovePoly( LONG lXSpeed, LONG lYSpeed, LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoMovePoly( DMovePoly *MovePoly, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	NetCommand command ( SVC_DOMOVEPOLY );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addShort ( lPolyNum );
+	command.addShort ( MovePoly->GetPolyObj() );
+	command.addByte( MovePoly->GetLastInstigator() - players );
+	command.addLong ( MovePoly->GetXSpeed() );
+	command.addLong ( MovePoly->GetYSpeed() );
+	command.addLong ( MovePoly->GetSpeed() );
+	command.addLong ( MovePoly->GetAngle() );
+	command.addLong ( MovePoly->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
+//*****************************************************************************
 //
-void SERVERCOMMANDS_DestroyMovePoly( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoMovePolyTo( DMovePolyTo *MovePolyTo, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DESTROYMOVEPOLY );
-	command.addShort ( lPolyNum );
+	NetCommand command ( SVC_DOMOVEPOLYTO );
+	command.addShort ( MovePolyTo->GetPolyObj() );
+	command.addByte( MovePolyTo->GetLastInstigator() - players );
+	command.addLong ( MovePolyTo->GetXTarget() );
+	command.addLong ( MovePolyTo->GetYTarget() );
+	command.addLong ( MovePolyTo->GetXSpeed() );
+	command.addLong ( MovePolyTo->GetYSpeed() );
+	command.addLong ( MovePolyTo->GetSpeed() );
+	command.addLong ( MovePolyTo->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoPolyDoor( LONG lType, LONG lXSpeed, LONG lYSpeed, LONG lSpeed, LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoPolyDoor( DPolyDoor *PolyDoor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	NetCommand command ( SVC_DOPOLYDOOR );
-	command.addByte ( lType );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addLong ( lSpeed );
-	command.addShort ( lPolyNum );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyPolyDoor( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYPOLYDOOR );
-	command.addShort ( lPolyNum );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetPolyDoorSpeedPosition( LONG lPolyNum, LONG lXSpeed, LONG lYSpeed, LONG lX, LONG lY, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_SETPOLYDOORSPEEDPOSITION );
-	command.addShort ( lPolyNum );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addLong ( lX );
-	command.addLong ( lY );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetPolyDoorSpeedRotation( LONG lPolyNum, LONG lSpeed, LONG lAngle, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_SETPOLYDOORSPEEDROTATION );
-	command.addShort ( lPolyNum );
-	command.addLong ( lSpeed );
-	command.addLong ( lAngle );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_PlayPolyobjSound( LONG lPolyNum, bool PolyMode, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_PLAYPOLYOBJSOUND );
-	command.addShort ( lPolyNum );
-	command.addByte ( PolyMode );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_StopPolyobjSound( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC2_STOPPOLYOBJSOUND );
-	command.addShort ( lPolyNum );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetPolyobjPosition( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	FPolyObj	*pPoly;
-
-	pPoly = PO_GetPolyobj( lPolyNum );
-	if ( pPoly == NULL )
-		return;
-
-	NetCommand command ( SVC_SETPOLYOBJPOSITION );
-	command.addShort ( lPolyNum );
-	command.addLong ( pPoly->StartSpot.x );
-	command.addLong ( pPoly->StartSpot.y );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetPolyobjRotation( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	FPolyObj	*pPoly;
-
-	pPoly = PO_GetPolyobj( lPolyNum );
-	if ( pPoly == NULL )
-		return;
-
-	NetCommand command ( SVC_SETPOLYOBJROTATION );
-	command.addShort ( lPolyNum );
-	command.addLong ( pPoly->angle );
+	command.addShort ( PolyDoor->GetPolyObj() );
+	command.addByte ( PolyDoor->GetType() );
+	command.addByte( PolyDoor->GetLastInstigator() - players );
+	command.addLong ( PolyDoor->GetX() );
+	command.addLong ( PolyDoor->GetY() );
+	command.addLong ( PolyDoor->GetXSpeed() );
+	command.addLong ( PolyDoor->GetYSpeed() );
+	command.addLong ( PolyDoor->GetSpeed() );
+	command.addLong ( PolyDoor->GetAngle() );
+	command.addLong ( PolyDoor->GetDist() );
+	command.addLong ( PolyDoor->GetTotalDist() );
+	command.addBit ( PolyDoor->GetClose() ? 1 : 0 );
+	command.addShort ( PolyDoor->GetDirection() );
+	command.addShort ( PolyDoor->GetTics() );
+	command.addShort ( PolyDoor->GetWaitTics() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 

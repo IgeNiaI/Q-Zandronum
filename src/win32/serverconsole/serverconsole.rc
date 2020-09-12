@@ -189,21 +189,22 @@ FONT 8, "Tahoma", 0, 0, 1
     AUTOCHECKBOX    "Sector sounds use original method", IDC_COMPATF_SECTORSOUNDS, 20, 160, 125, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Disable shooting where crosshair is", IDC_ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE, 20, 170, 127, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "NET scripts are clientside", IDC_ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE, 169, 10, 95, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Find shortest textures like Doom", IDC_SHORTTEX, 169, 20, 116, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Use buggier stair building", IDC_STAIRINDEX, 169, 30, 95, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Limit pain elementals to 20 lost souls", IDC_LIMITPAIN, 169, 40, 129, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Actors are infinitely tall", IDC_NO_PASSMOBJ, 169, 50, 85, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Spawn item drops on the floor", IDC_NOTOSSDROPS, 169, 60, 109, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "All special lines can drop use lines", IDC_USEBLOCKING, 169, 70, 123, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Disable Boom door light effect", IDC_NODOORLIGHT, 169, 80, 110, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Original sound curve", IDC_ORIGINALSOUNDCURVE, 169, 90, 81, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Raven's scrollers use original speed", IDC_COMPATF_RAVENSCROLL, 169, 100, 130, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Use sector based sound target code", IDC_COMPATF_SOUNDTARGET, 169, 110, 130, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Limit deh.MaxHealth to health bonus", IDC_COMPATF_DEHHEALTH, 169, 120, 130, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Trace ignore lines w/ same sector on both sides", IDC_COMPATF_TRACE, 169, 130, 167, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Monsters can't be pushed off cliffs", IDC_COMPATF_CROSSDROPOFF, 169, 140, 126, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Old damage radius (infinite height)", IDC_COMPATF_OLDRADIUSDMG, 169, 150, 126, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Use original missile clipping height", IDC_COMPATF_MISSILECLIP, 169, 160, 122, 10, 0, WS_EX_LEFT
+	AUTOCHECKBOX    "Don't execute prediction ACS on client", IDC_ZACOMPATF_NO_PREDICTION_ACS, 169, 20, 132, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Find shortest textures like Doom", IDC_SHORTTEX, 169, 30, 116, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Use buggier stair building", IDC_STAIRINDEX, 169, 40, 95, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Limit pain elementals to 20 lost souls", IDC_LIMITPAIN, 169, 50, 129, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Actors are infinitely tall", IDC_NO_PASSMOBJ, 169, 60, 85, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Spawn item drops on the floor", IDC_NOTOSSDROPS, 169, 70, 109, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "All special lines can drop use lines", IDC_USEBLOCKING, 169, 80, 123, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Disable Boom door light effect", IDC_NODOORLIGHT, 169, 90, 110, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Original sound curve", IDC_ORIGINALSOUNDCURVE, 169, 100, 81, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Raven's scrollers use original speed", IDC_COMPATF_RAVENSCROLL, 169, 110, 130, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Use sector based sound target code", IDC_COMPATF_SOUNDTARGET, 169, 120, 130, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Limit deh.MaxHealth to health bonus", IDC_COMPATF_DEHHEALTH, 169, 130, 130, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Trace ignore lines w/ same sector on both sides", IDC_COMPATF_TRACE, 169, 140, 167, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Monsters can't be pushed off cliffs", IDC_COMPATF_CROSSDROPOFF, 169, 150, 126, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Old damage radius (infinite height)", IDC_COMPATF_OLDRADIUSDMG, 169, 160, 126, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Use original missile clipping height", IDC_COMPATF_MISSILECLIP, 169, 170, 122, 10, 0, WS_EX_LEFT
     GROUPBOX        "Oldschool", IDC_STATIC, 14, 6, 140, 109, 0, WS_EX_LEFT
 }
 

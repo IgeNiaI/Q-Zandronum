@@ -486,6 +486,10 @@ enum
 
 	// [geNia] Disable crosshair accurate weapons
 	ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE = 1 << 27,
+
+	// [geNia] Disable executing ACS_ExecuteWithResult on client
+	// TODO add new prediction ACS type for this
+	ZACOMPATF_NO_PREDICTION_ACS = 1 << 28,
 };
 
 // Emulate old bugs for select maps. These are not exposed by a cvar

@@ -1294,7 +1294,46 @@ bool NETWORK_InClientModeAndActorNotClientHandled( const AActor *pActor )
 //
 bool NETWORK_IsClientPredictedSpecial( const int Special )
 {
-	return ( ( Special == ThrustThing ) || ( Special == ThrustThingZ ) );
+	if ((NETWORK_GetState() == NETSTATE_SERVER) || !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS))
+		// TODO [geNia] replace ACS_ExecuteWithResult with a new special that indicates that the script is bound to client prediction
+		if (Special == ACS_ExecuteWithResult)
+			return true;
+
+	return
+		// Floors, ceilings and elevators
+		( Special >= Floor_LowerByValue && Special <= Floor_RaiseAndCrush )
+		|| ( Special >= Floor_RaiseByValueTimes8 && Special <= Floor_MoveToValue )
+		|| ( Special >= Ceiling_LowerByValue && Special <= Ceiling_MoveToValue )
+		|| ( Special >= Floor_LowerInstant && Special <= Ceiling_MoveToValueTimes8 )
+		|| ( Special >= FloorAndCeiling_LowerByValue && Special <= Ceiling_LowerAndCrushDist )
+		|| ( Special >= Ceiling_LowerToHighestFloor && Special <= Generic_Ceiling )
+		|| ( Special >= Floor_RaiseToLowestCeiling && Special <= Floor_LowerToHighest )
+		|| ( Special >= Floor_Donut && Special <= Ceiling_CrushRaiseAndStaySilA )
+		|| ( Special >= Elevator_RaiseToNearest && Special <= Elevator_LowerToNearest )
+		|| ( Special == Generic_Crusher ) || ( Special == Floor_TransferTrigger ) || ( Special == Floor_TransferNumeric )
+		|| ( Special == Stairs_BuildDownSync ) || ( Special == Stairs_BuildUpSync )
+		|| ( Special == Stairs_BuildUpDoom ) || ( Special == Ceiling_LowerAndCrushDist )
+
+		// Teleports
+		|| ( Special == Teleport ) || ( Special == Teleport_NoFog ) || ( Special == Teleport_NoStop ) || ( Special == Teleport_Line )
+
+		// Platforms
+		|| ( Special >= Plat_PerpetualRaise && Special <= Plat_UpByValue )
+		|| ( Special == Plat_UpNearestWaitDownStay ) || ( Special == Plat_DownWaitUpStayLip ) || ( Special == Plat_PerpetualRaiseLip )
+		|| ( Special == Plat_RaiseAndStayTx0 ) || ( Special == Plat_UpByValueStayTx ) || ( Special == Plat_ToggleCeiling )
+
+		// Doors
+		|| ( Special >= Door_Close && Special <= Door_LockedRaise )
+		|| ( Special == Door_CloseWaitOpen ) || ( Special == Generic_Door )
+
+		// Polyobj
+		|| ( Special >= Polyobj_RotateLeft && Special <= Polyobj_Move )
+		|| ( Special >= Polyobj_MoveTimes8 && Special <= Polyobj_DoorSlide )
+		|| ( Special == Polyobj_OR_MoveToSpot )
+		|| ( Special >= Polyobj_MoveToSpot && Special <= Polyobj_OR_MoveTimes8 )
+
+		// Thrust
+		|| ( Special == ThrustThing ) || ( Special == ThrustThingZ );
 }
 
 //*****************************************************************************

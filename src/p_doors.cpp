@@ -40,6 +40,7 @@
 #include "cl_demo.h"
 #include "network.h"
 #include "sv_commands.h"
+#include "cl_main.h"
 
 //============================================================================
 //
@@ -59,6 +60,7 @@ inline FArchive &operator<< (FArchive &arc, DDoor::EVlDoor &type)
 
 DDoor::DDoor ()
 {
+	m_LastInstigator = NULL;
 }
 
 void DDoor::Serialize (FArchive &arc)
@@ -71,9 +73,7 @@ void DDoor::Serialize (FArchive &arc)
 		<< m_Direction
 		<< m_TopWait
 		<< m_TopCountdown
-		<< m_LightTag
-		// [BC]
-		<< m_lDoorID;
+		<< m_LightTag;
 }
 
 //============================================================================
@@ -100,13 +100,6 @@ void DDoor::Tick ()
 	switch (m_Direction)
 	{
 	case 0:
-		// [BC] If we're the client, don't change the door's direction. It could
-		// de-sync the game. Instead, wait for the server to tell us to change
-		// the door's direction.
-		// [EP] Don't let the clients read the undefined m_TopCountdown variable
-		if ( NETWORK_InClientMode() )
-			break;
-
 		// WAITING
 		if (!--m_TopCountdown)
 		{
@@ -116,9 +109,9 @@ void DDoor::Tick ()
 				m_Direction = -1; // time to go back down
 				DoorSound (false);
 
-				// [BC] If we're the server, tell clients to change the door's direction.
+				// [geNia] If we are the server, update the clients
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+					SERVERCOMMANDS_DoDoor( this );
 
 				break;
 				
@@ -126,9 +119,9 @@ void DDoor::Tick ()
 				m_Direction = 1;
 				DoorSound (true);
 
-				// [BC] If we're the server, tell clients to change the door's direction.
+				// [geNia] If we are the server, update the clients
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+					SERVERCOMMANDS_DoDoor( this );
 
 				break;
 				
@@ -139,13 +132,6 @@ void DDoor::Tick ()
 		break;
 		
 	case 2:
-		// [BC] If we're the client, don't change the door's direction. It could
-		// de-sync the game. Instead, wait for the server to tell us to change
-		// the door's direction.
-		// [EP] Don't let the clients read the undefined m_TopCountdown variable
-		if ( NETWORK_InClientMode() )
-			break;
-
 		//	INITIAL WAIT
 		if (!--m_TopCountdown)
 		{
@@ -155,10 +141,10 @@ void DDoor::Tick ()
 				m_Direction = 1;
 				m_Type = doorRaise;
 				DoorSound (true);
-			
-				// [BC] If we're the server, tell clients to change the door's direction.
+
+				// [geNia] If we are the server, update the clients
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+					SERVERCOMMANDS_DoDoor( this );
 
 				break;
 				
@@ -179,47 +165,23 @@ void DDoor::Tick ()
 				m_TopDist + m_Sector->floorplane.d));
 		}
 
-		// [BC] If we're the client, don't do any of the following. Wait for the server
-		// to tell us what to do.
-		if ( NETWORK_InClientMode() )
-			break;
-
 		if (res == pastdest)
 		{
-			// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
-			// have the correct floor/ceiling height for this sector.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			{
-				if ( m_Sector->floorOrCeiling == 0 )
-					SERVERCOMMANDS_SetSectorFloorPlane( m_Sector - sectors );
-				else
-					SERVERCOMMANDS_SetSectorCeilingPlane( m_Sector - sectors );
-
-				// Tell clients to stop the floor's sound sequence.
-				SERVERCOMMANDS_StopSectorSequence( m_Sector );
-			}
-
 			SN_StopSequence (m_Sector, CHAN_CEILING);
 			switch (m_Type)
 			{
 			case doorRaise:
 			case doorClose:
-				m_Sector->ceilingdata = NULL;	//jff 2/22/98
-
-				// [BC] If we're the server, tell clients to destroy the door.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DestroyDoor( m_lDoorID );
-
-				Destroy ();						// unlink and free
+				m_Direction = -2;
 				break;
 				
 			case doorCloseWaitOpen:
 				m_Direction = 0;
 				m_TopCountdown = m_TopWait;
 
-				// [BC] If we're the server, tell clients to change the door's direction.
+				// [geNia] If we are the server, update the clients
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+					SERVERCOMMANDS_DoDoor( this );
 
 				break;
 				
@@ -238,9 +200,9 @@ void DDoor::Tick ()
 				m_Direction = 1;
 				DoorSound (true);
 
-				// [BC] If we're the server, tell clients to change the door's direction.
+				// [geNia] If we are the server, update the clients
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+					SERVERCOMMANDS_DoDoor( this );
 
 				break;
 			}
@@ -258,26 +220,8 @@ void DDoor::Tick ()
 				m_TopDist + m_Sector->floorplane.d));
 		}
 
-		// [BC] If we're the client, don't do any of the following. Wait for the server
-		// to tell us what to do.
-		if ( NETWORK_InClientMode() )
-			break;
-
 		if (res == pastdest)
 		{
-			// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
-			// have the correct floor/ceiling height for this sector.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			{
-				if ( m_Sector->floorOrCeiling == 0 )
-					SERVERCOMMANDS_SetSectorFloorPlane( m_Sector - sectors );
-				else
-					SERVERCOMMANDS_SetSectorCeilingPlane( m_Sector - sectors );
-
-				// Tell clients to stop the floor's sound sequence.
-				SERVERCOMMANDS_StopSectorSequence( m_Sector );
-			}
-
 			SN_StopSequence (m_Sector, CHAN_CEILING);
 			switch (m_Type)
 			{
@@ -285,21 +229,15 @@ void DDoor::Tick ()
 				m_Direction = 0; // wait at top
 				m_TopCountdown = m_TopWait;
 
-				// [BC] If we're the server, tell clients to change the door's direction.
+				// [geNia] If we are the server, update the clients
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+					SERVERCOMMANDS_DoDoor( this );
 
 				break;
 				
 			case doorCloseWaitOpen:
 			case doorOpen:
-				m_Sector->ceilingdata = NULL;	//jff 2/22/98
-				
-				// [BC] If we're the server, tell clients to destroy the door.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DestroyDoor( m_lDoorID );
-
-				Destroy ();						// unlink and free
+				m_Direction = -2;
 				break;
 				
 			default:
@@ -326,17 +264,115 @@ void DDoor::Tick ()
 
 void DDoor::UpdateToClient( ULONG ulClient )
 {
-	SERVERCOMMANDS_DoDoor( m_Sector, m_Type, m_Speed, m_Direction, m_LightTag, m_lDoorID, ulClient, SVCF_ONLYTHISCLIENT );
+	SERVERCOMMANDS_DoDoor( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
-int DDoor::GetDirection ()
+bool DDoor::IsBusy()
+{
+	return m_Direction != -2;
+}
+
+void DDoor::Predict()
+{
+	// Use a version of gametic that's appropriate for both the current game and demos.
+	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
+
+	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
+	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
+	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
+		return;
+
+	// How many ticks of prediction do we need?
+	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
+
+	while (TicsToPredict)
+	{
+		Tick();
+		TicsToPredict--;
+	}
+}
+
+fixed_t DDoor::GetPosition()
+{
+	return ( m_Sector->ceilingplane.d );
+}
+
+int DDoor::GetDirection()
 {
 	return ( m_Direction );
 }
 
-void DDoor::SetDirection( LONG lDirection )
+void DDoor::SetPositionAndDirection ( fixed_t Position, int direction )
 {
-	m_Direction = lDirection;
+	fixed_t diff = m_Sector->ceilingplane.d - Position;
+	if (diff > 0)
+	{
+		MoveCeiling(diff, m_BotDist, -1, -1, false);
+	}
+	else if (diff < 0)
+	{
+		MoveCeiling(-diff, m_TopDist, -1, 1, false);
+	}
+
+	if (m_Direction != direction)
+	{
+		if (direction == 1)
+			DoorSound(true);
+		else if (direction == -1)
+			DoorSound(false);
+
+		m_Direction = direction;
+	}
+}
+
+LONG DDoor::GetSectorNum( void )
+{
+	return ( m_Sector->sectornum );
+}
+
+DDoor::EVlDoor DDoor::GetType( void )
+{
+	return ( m_Type );
+}
+
+void DDoor::SetType( DDoor::EVlDoor Type )
+{
+	m_Type = Type;
+}
+
+LONG DDoor::GetSpeed( void )
+{
+	return ( m_Speed );
+}
+
+void DDoor::SetSpeed( LONG lSpeed )
+{
+	m_Speed = lSpeed;
+}
+
+LONG DDoor::GetTopWait( void )
+{
+	return ( m_TopWait );
+}
+
+LONG DDoor::GetCountdown( void )
+{
+	return ( m_TopCountdown );
+}
+
+void DDoor::SetCountdown( LONG lCountdown)
+{
+	m_TopCountdown = lCountdown;
+}
+
+LONG DDoor::GetLightTag( void )
+{
+	return ( m_LightTag );
+}
+
+void DDoor::SetLightTag( LONG lTag )
+{
+	m_LightTag = lTag;
 }
 
 //============================================================================
@@ -449,8 +485,7 @@ void DDoor::DoorSound(bool raise, DSeqNode *curseq) const
 DDoor::DDoor (sector_t *sector)
 	: DMovingCeiling (sector)
 {
-	// [EP]
-	m_lDoorID = -1;
+
 }
 
 //============================================================================
@@ -464,6 +499,11 @@ DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTa
 	: DMovingCeiling (sec),
   	  m_Type (type), m_Speed (speed), m_TopWait (delay), m_LightTag (lightTag)
 {
+	Reinit( bNoSound );
+}
+
+void DDoor::Reinit( bool bNoSound )
+{
 	vertex_t *spot;
 	fixed_t height;
 
@@ -472,39 +512,39 @@ DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTa
 		m_LightTag = 0;
 	}
 
-	switch (type)
+	switch (m_Type)
 	{
 	case doorClose:
 		m_Direction = -1;
-		height = sec->FindLowestCeilingSurrounding (&spot);
-		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
+		height = m_Sector->FindLowestCeilingSurrounding(&spot);
+		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
 		// [BC] Added option to create the door soundlessly.
-		if ( bNoSound == false )
-			DoorSound (false);
+		if (bNoSound == false)
+			DoorSound(false);
 		break;
 
 	case doorOpen:
 	case doorRaise:
 		m_Direction = 1;
-		height = sec->FindLowestCeilingSurrounding (&spot);
-		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
+		height = m_Sector->FindLowestCeilingSurrounding(&spot);
+		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
 		// [BC] Added option to create the door soundlessly.
-		if ((m_TopDist != sec->ceilingplane.d) && ( bNoSound == false ))
-			DoorSound (true);
+		if ((m_TopDist != m_Sector->ceilingplane.d) && (bNoSound == false))
+			DoorSound(true);
 		break;
 
 	case doorCloseWaitOpen:
-		m_TopDist = sec->ceilingplane.d;
+		m_TopDist = m_Sector->ceilingplane.d;
 		m_Direction = -1;
 		// [BC] Added option to create the door soundlessly.
-		if ( bNoSound == false )
-			DoorSound (false);
+		if (bNoSound == false)
+			DoorSound(false);
 		break;
 
 	case doorRaiseIn5Mins:
 		m_Direction = 2;
-		height = sec->FindLowestCeilingSurrounding (&spot);
-		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
+		height = m_Sector->FindLowestCeilingSurrounding(&spot);
+		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
 		m_TopCountdown = 5 * 60 * TICRATE;
 		break;
 	}
@@ -512,61 +552,15 @@ DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTa
 	if (!m_Sector->floordata || !m_Sector->floordata->IsKindOf(RUNTIME_CLASS(DPlat)) ||
 		!(barrier_cast<DPlat*>(m_Sector->floordata))->IsLift())
 	{
-		height = sec->FindHighestFloorPoint (&m_BotSpot);
-		m_BotDist = sec->ceilingplane.PointToDist (m_BotSpot, height);
+		height = m_Sector->FindHighestFloorPoint(&m_BotSpot);
+		m_BotDist = m_Sector->ceilingplane.PointToDist(m_BotSpot, height);
 	}
 	else
 	{
-		height = sec->FindLowestCeilingPoint(&m_BotSpot);
-		m_BotDist = sec->ceilingplane.PointToDist (m_BotSpot, height);
+		height = m_Sector->FindLowestCeilingPoint(&m_BotSpot);
+		m_BotDist = m_Sector->ceilingplane.PointToDist(m_BotSpot, height);
 	}
-	m_OldFloorDist = sec->floorplane.d;
-
-	// [BB] We need to initialize the ID, because P_GetFirstFreeDoorID relies on this.
-	m_lDoorID = -1;
-	// [BC] Assign the door's network ID.
-	if ( NETWORK_InClientMode() == false )
-		m_lDoorID = P_GetFirstFreeDoorID( );
-}
-
-LONG DDoor::GetID( void )
-{
-	return ( m_lDoorID );
-}
-
-void DDoor::SetID( LONG lID )
-{
-	m_lDoorID = lID;
-}
-
-DDoor::EVlDoor DDoor::GetType( void )
-{
-	return ( m_Type );
-}
-
-void DDoor::SetType( DDoor::EVlDoor Type )
-{
-	m_Type = Type;
-}
-
-LONG DDoor::GetSpeed( void )
-{
-	return ( m_Speed );
-}
-
-void DDoor::SetSpeed( LONG lSpeed )
-{
-	m_Speed = lSpeed;
-}
-
-LONG DDoor::GetLightTag( void )
-{
-	return ( m_LightTag );
-}
-
-void DDoor::SetLightTag( LONG lTag )
-{
-	m_LightTag = lTag;
+	m_OldFloorDist = m_Sector->floorplane.d;
 }
 
 //============================================================================
@@ -579,6 +573,15 @@ void DDoor::SetLightTag( LONG lTag )
 bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 				int tag, int speed, int delay, int lock, int lightTag, bool boomgen)
 {
+	return EV_DoDoor(type, line, thing, NULL, tag, speed, delay, lock, lightTag, boomgen);
+}
+
+bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
+	int tag, int speed, int delay, int lock, int lightTag, bool boomgen)
+{
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	bool		rtn = false;
 	int 		secnum;
 	sector_t*	sec;
@@ -622,18 +625,19 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 			if (sec->ceilingdata->IsKindOf (RUNTIME_CLASS(DDoor)))
 			{
 				DDoor *door = barrier_cast<DDoor *>(sec->ceilingdata);
+				door->m_LastInstigator = instigator;
 
 				// ONLY FOR "RAISE" DOORS, NOT "OPEN"s
 				if (door->m_Type == DDoor::doorRaise && type == DDoor::doorRaise)
 				{
-					if (door->m_Direction == -1)
+					if (door->m_Direction == -1 || door->m_Direction == -2)
 					{
 						door->m_Direction = 1;	// go back up
 						door->DoorSound (true);	// [RH] Make noise
 
-						// [BC] If we're the server, tell clients to change the door's direction.
+						// [geNia] If we are the server, update the clients
 						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							SERVERCOMMANDS_ChangeDoorDirection( door->GetID( ), door->m_Direction );
+							SERVERCOMMANDS_DoDoor( door );
 					}
 					else if (!(line->activation & (SPAC_Push|SPAC_MPush)))
 						// [RH] activate push doors don't go back down when you
@@ -650,9 +654,9 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 						// Start the door close sequence.
 						door->DoorSound(false, SN_CheckSequence(sec, CHAN_CEILING));
 
-						// [BC] If we're the server, tell clients to change the door's direction.
+						// [geNia] If we are the server, update the clients
 						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							SERVERCOMMANDS_ChangeDoorDirection( door->GetID( ), door->m_Direction );
+							SERVERCOMMANDS_DoDoor( door );
 
 						return true;
 					}
@@ -661,13 +665,21 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 						return false;
 					}
 				}
+				else if (door->m_Direction == -2)
+				{
+					door->Reinit( false );
+				}
 			}
 			return false;
 		}
 		if ( (pDoor = new DDoor (sec, type, speed, delay, lightTag)))
 		{
+			// Don't update for the instigator client
+			pDoor->m_LastInstigator = instigator;
+
+			// [geNia] If we are the server, update the clients
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DoDoor( sec, type, speed, pDoor->GetDirection( ), lightTag, pDoor->GetID( ));
+				SERVERCOMMANDS_DoDoor( pDoor );
 
 			rtn = true;
 		}
@@ -678,20 +690,34 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 		secnum = -1;
 		while ((secnum = P_FindSectorFromTag (tag,secnum)) >= 0)
 		{
+			pDoor = NULL;
+
 			sec = &sectors[secnum];
 			// if the ceiling is already moving, don't start the door action
 			if (sec->PlaneMoving(sector_t::ceiling))
-				continue;
-
-			if ( (pDoor = new DDoor (sec, type, speed, delay, lightTag)))
 			{
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DoDoor( sec, type, speed, pDoor->GetDirection( ), lightTag, pDoor->GetID( ));
-
-				rtn = true;
+				if (sec->ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)))
+				{
+					pDoor = barrier_cast<DDoor *>(sec->ceilingdata);
+				}
 			}
+
+			if ( pDoor == NULL )
+			{
+				pDoor = new DDoor (sec, type, speed, delay, lightTag);
+			}
+			else if ( pDoor->m_Direction == -2 )
+			{
+				pDoor->Reinit(false);
+			}
+
+			pDoor->m_LastInstigator = instigator;
+			rtn = true;
+
+			// [geNia] If we are the server, update the clients
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				SERVERCOMMANDS_DoDoor( pDoor );
 		}
-				
 	}
 	return rtn;
 }
@@ -734,7 +760,7 @@ void P_SpawnDoorRaiseIn5Mins (sector_t *sec)
 }
 
 //============================================================================
-DDoor *P_GetDoorByID( LONG lID )
+DDoor *P_GetDoorBySectorNum( LONG sectorNum )
 {
 	DDoor	*pDoor;
 
@@ -742,40 +768,11 @@ DDoor *P_GetDoorByID( LONG lID )
 
 	while (( pDoor = Iterator.Next( )))
 	{
-		if ( pDoor->GetID( ) == lID )
+		if ( pDoor->GetSectorNum( ) == sectorNum )
 			return ( pDoor );
 	}
 
 	return ( NULL );
-}
-
-//*****************************************************************************
-//
-LONG P_GetFirstFreeDoorID( void )
-{
-	LONG		lIdx;
-	DDoor		*pDoor;
-	bool		bIDIsAvailable;
-
-	for ( lIdx = 0; lIdx < 8192; lIdx++ )
-	{
-		TThinkerIterator<DDoor>		Iterator;
-
-		bIDIsAvailable = true;
-		while (( pDoor = Iterator.Next( )))
-		{
-			if ( pDoor->GetID( ) == lIdx )
-			{
-				bIDIsAvailable = false;
-				break;
-			}
-		}
-
-		if ( bIDIsAvailable )
-			return ( lIdx );
-	}
-
-	return ( -1 );
 }
 
 //*****************************************************************************

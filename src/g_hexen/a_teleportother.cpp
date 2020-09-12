@@ -141,8 +141,8 @@ int ATelOtherFX1::DoSpecialDamage (AActor *target, int damage, FName damagetype)
 			{
 				target->RemoveFromHash ();
 				P_ExecuteSpecial(target->special, NULL, level.flags & LEVEL_ACTOWNSPECIAL
-					? target : (AActor *)(this->target), false, target->args[0], target->args[1],
-					target->args[2], target->args[3], target->args[4]);
+					? target : (AActor *)(this->target), false, false,
+					target->args[0], target->args[1], target->args[2], target->args[3], target->args[4]);
 				target->special = 0;
 			}
 
@@ -168,7 +168,7 @@ void P_TeleportToPlayerStarts (AActor *victim)
 	destX = start->x;
 	destY = start->y;
 	destAngle = ANG45 * (start->angle/45);
-	P_Teleport (victim, destX, destY, ONFLOORZ, destAngle, true, true, false);
+	P_Teleport (victim, destX, destY, ONFLOORZ, destAngle, false, true, true, false);
 }
 
 //===========================================================================
@@ -190,7 +190,7 @@ void P_TeleportToDeathmatchStarts (AActor *victim)
 		destX = deathmatchstarts[i].x;
 		destY = deathmatchstarts[i].y;
 		destAngle = ANG45 * (deathmatchstarts[i].angle/45);
-		P_Teleport (victim, destX, destY, ONFLOORZ, destAngle, true, true, false);
+		P_Teleport (victim, destX, destY, ONFLOORZ, destAngle, false, true, true, false);
 	}
 	else
 	{

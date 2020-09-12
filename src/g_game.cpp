@@ -3424,7 +3424,6 @@ void GAME_ResetMap( bool bRunEnterScripts )
 		}
 	}
 
-	// This is all we do in client mode.
 	if ( NETWORK_InClientMode() )
 	{
 		// [BB] Clients still need to reset the automap.
@@ -3453,7 +3452,6 @@ void GAME_ResetMap( bool bRunEnterScripts )
 
 		// [BB] Clients may be running CLIENTSIDE scripts, so we also need to reset ACS scripts on the clients.
 		GAME_ResetScripts ( );
-		return;
 	}
 
 	// [BB] Reset the polyobjs.
@@ -3467,31 +3465,6 @@ void GAME_ResetMap( bool bRunEnterScripts )
 		if ( pPoly->specialdata != NULL )
 		{
 			DPolyAction *pPolyAction = pPoly->specialdata;
-			// [WS] We have a poly object door, lets destroy it.
-			if ( pPolyAction->IsKindOf ( RUNTIME_CLASS( DPolyDoor ) ) )
-			{
-				// [WS] Tell clients to destroy the door.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DestroyPolyDoor( pPolyAction->GetPolyObj() );
-			}
-			// [BB] We also have to destroy all other movers.
-			// [EP/TP] Ensure 'DestroyMovePoly' is called on the poly movers, not on the poly rotors.
-			else if ( pPolyAction->IsKindOf ( RUNTIME_CLASS( DMovePoly ) ) )
-			{
-				// [BB] Tell clients to destroy this mover.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DestroyMovePoly( pPolyAction->GetPolyObj() );
-			}
-			// [EP/TP] Deal with the poly rotors, too.
-			else if ( pPolyAction->IsKindOf ( RUNTIME_CLASS( DRotatePoly ) ) )
-			{
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DestroyRotatePoly( pPolyAction->GetPolyObj() );
-			}
-
-			// [BB] Tell clients to destroy the door and stop its sound.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_StopPolyobjSound( pPolyAction->GetPolyObj() );
 
 			// [BB] Stop all sounds associated with this object.
 			SN_StopSequence( pPoly );
@@ -3503,16 +3476,11 @@ void GAME_ResetMap( bool bRunEnterScripts )
 
 		if ( pPoly->bMoved )
 		{
-
 			const LONG lDeltaX = pPoly->SavedStartSpot[0] - pPoly->StartSpot.x;
 			const LONG lDeltaY = pPoly->SavedStartSpot[1] - pPoly->StartSpot.y;
 
 			pPoly->MovePolyobj( lDeltaX, lDeltaY, true );
 			pPoly->bMoved = false;
-
-			// [BB] If we're the server, tell clients about this polyobj reset.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetPolyobjPosition( pPoly->tag );
 		}
 
 		if ( pPoly->bRotated )
@@ -3522,12 +3490,12 @@ void GAME_ResetMap( bool bRunEnterScripts )
 
 			pPoly->RotatePolyobj( lDeltaAngle );
 			pPoly->bRotated = false;
-
-			// [BB] If we're the server, tell clients about this polyobj reset.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetPolyobjRotation( pPoly->tag );
 		}
 	}
+
+	// This is all we do in client mode.
+	if (NETWORK_InClientMode())
+		return;
 
 	for ( ulIdx = 0; ulIdx < (ULONG)numlines; ulIdx++ )
 	{

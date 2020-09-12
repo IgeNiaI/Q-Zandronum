@@ -767,28 +767,29 @@ CVAR (Flag, compat_no_accurate_crosshair,	compatflags2, ZACOMPATF_DISABLE_CROSSH
 // [BB] Out of order ZDoom backport.
 CVAR (Flag, compat_pushwindow,			compatflags2, COMPATF2_PUSHWINDOW);
 // [BB] Skulltag compat flags.
-CVAR (Flag, compat_limited_airmovement, zacompatflags, ZACOMPATF_LIMITED_AIRMOVEMENT);
-CVAR (Flag, compat_plasmabump,	zacompatflags, ZACOMPATF_PLASMA_BUMP_BUG);
-CVAR (Flag, compat_instantrespawn,	zacompatflags, ZACOMPATF_INSTANTRESPAWN);
-CVAR (Flag, compat_disabletaunts,	zacompatflags, ZACOMPATF_DISABLETAUNTS);
-CVAR (Flag, compat_originalsoundcurve,	zacompatflags, ZACOMPATF_ORIGINALSOUNDCURVE);
-CVAR (Flag, compat_oldintermission,	zacompatflags, ZACOMPATF_OLDINTERMISSION);
-CVAR (Flag, compat_disablestealthmonsters,	zacompatflags, ZACOMPATF_DISABLESTEALTHMONSTERS);
-CVAR (Flag, compat_oldradiusdmg,	zacompatflags, ZACOMPATF_OLDRADIUSDMG);
-CVAR (Flag, compat_nocrosshair,		zacompatflags, ZACOMPATF_NO_CROSSHAIR);
-CVAR (Flag, compat_oldweaponswitch,		zacompatflags, ZACOMPATF_OLD_WEAPON_SWITCH);
+CVAR (Flag, compat_limited_airmovement,			zacompatflags, ZACOMPATF_LIMITED_AIRMOVEMENT);
+CVAR (Flag, compat_plasmabump,					zacompatflags, ZACOMPATF_PLASMA_BUMP_BUG);
+CVAR (Flag, compat_instantrespawn,				zacompatflags, ZACOMPATF_INSTANTRESPAWN);
+CVAR (Flag, compat_disabletaunts,				zacompatflags, ZACOMPATF_DISABLETAUNTS);
+CVAR (Flag, compat_originalsoundcurve,			zacompatflags, ZACOMPATF_ORIGINALSOUNDCURVE);
+CVAR (Flag, compat_oldintermission,				zacompatflags, ZACOMPATF_OLDINTERMISSION);
+CVAR (Flag, compat_disablestealthmonsters,		zacompatflags, ZACOMPATF_DISABLESTEALTHMONSTERS);
+CVAR (Flag, compat_oldradiusdmg,				zacompatflags, ZACOMPATF_OLDRADIUSDMG);
+CVAR (Flag, compat_nocrosshair,					zacompatflags, ZACOMPATF_NO_CROSSHAIR);
+CVAR (Flag, compat_oldweaponswitch,				zacompatflags, ZACOMPATF_OLD_WEAPON_SWITCH);
 CVAR (Flag, compat_netscriptsareclientside,		zacompatflags, ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE);
-CVAR (Flag, compat_noland,		zacompatflags, ZACOMPATF_NO_LAND);
-CVAR (Flag, compat_oldrandom,		zacompatflags, ZACOMPATF_OLD_RANDOM_GENERATOR);
-CVAR (Flag, compat_nogravity_spheres,		zacompatflags, ZACOMPATF_NOGRAVITY_SPHERES);
+CVAR (Flag, compat_nopredictionacs,				zacompatflags, ZACOMPATF_NO_PREDICTION_ACS);
+CVAR (Flag, compat_noland,						zacompatflags, ZACOMPATF_NO_LAND);
+CVAR (Flag, compat_oldrandom,					zacompatflags, ZACOMPATF_OLD_RANDOM_GENERATOR);
+CVAR (Flag, compat_nogravity_spheres,			zacompatflags, ZACOMPATF_NOGRAVITY_SPHERES);
 CVAR (Flag, compat_dont_stop_player_scripts_on_disconnect,		zacompatflags, ZACOMPATF_DONT_STOP_PLAYER_SCRIPTS_ON_DISCONNECT);
-CVAR (Flag, compat_explosionthrust,		zacompatflags, ZACOMPATF_OLD_EXPLOSION_THRUST);
-CVAR (Flag, compat_bridgedrops,		zacompatflags, ZACOMPATF_OLD_BRIDGE_DROPS);
-CVAR (Flag, compat_oldzdoomzmovement, zacompatflags, ZACOMPATF_OLD_ZDOOM_ZMOVEMENT);
-CVAR (Flag, compat_fullweaponlower,		zacompatflags, ZACOMPATF_FULL_WEAPON_LOWER);
-CVAR (Flag, compat_autoaim,		zacompatflags, ZACOMPATF_AUTOAIM);
-CVAR (Flag, compat_silentwestspawns,	zacompatflags, ZACOMPATF_SILENT_WEST_SPAWNS);
-CVAR (Flag, compat_skulltagjumping,	zacompatflags, ZACOMPATF_SKULLTAG_JUMPING);
+CVAR (Flag, compat_explosionthrust,				zacompatflags, ZACOMPATF_OLD_EXPLOSION_THRUST);
+CVAR (Flag, compat_bridgedrops,					zacompatflags, ZACOMPATF_OLD_BRIDGE_DROPS);
+CVAR (Flag, compat_oldzdoomzmovement,			zacompatflags, ZACOMPATF_OLD_ZDOOM_ZMOVEMENT);
+CVAR (Flag, compat_fullweaponlower,				zacompatflags, ZACOMPATF_FULL_WEAPON_LOWER);
+CVAR (Flag, compat_autoaim,						zacompatflags, ZACOMPATF_AUTOAIM);
+CVAR (Flag, compat_silentwestspawns,			zacompatflags, ZACOMPATF_SILENT_WEST_SPAWNS);
+CVAR (Flag, compat_skulltagjumping,				zacompatflags, ZACOMPATF_SKULLTAG_JUMPING);
 
 //==========================================================================
 //

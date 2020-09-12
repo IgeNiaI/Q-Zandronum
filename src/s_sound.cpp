@@ -56,6 +56,7 @@
 #include "deathmatch.h"
 #include "network.h"
 #include "sv_commands.h"
+#include "cl_main.h"
 
 // MACROS ------------------------------------------------------------------
 
@@ -878,17 +879,8 @@ static FSoundChan *S_StartSound(AActor *actor, const sector_t *sec, const FPolyO
 	const FVector3 *pt, int channel, FSoundID sound_id, float volume, float attenuation,
 	FRolloffInfo *forcedrolloff=NULL)
 {
-	sfxinfo_t *sfx;
-	int chanflags;
-	int basepriority;
-	int org_id;
-	int pitch;
-	FSoundChan *chan;
-	FVector3 pos, vel;
-	FRolloffInfo *rolloff;
-
-	// [BC] Server doesn't use music/sound.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	// [BC] Server and predicting clients doesn't use music/sound.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER || CLIENT_PREDICT_IsPredicting())
 		return NULL;
 
 	// [BB] Don't play sounds while skipping in a demo.
@@ -898,6 +890,14 @@ static FSoundChan *S_StartSound(AActor *actor, const sector_t *sec, const FPolyO
 	if (sound_id <= 0 || volume <= 0 || nosfx || nosound )
 		return NULL;
 
+	sfxinfo_t *sfx;
+	int chanflags;
+	int basepriority;
+	int org_id;
+	int pitch;
+	FSoundChan *chan;
+	FVector3 pos, vel;
+	FRolloffInfo *rolloff;
 	int type;
 
 	if (actor != NULL)
@@ -1201,6 +1201,9 @@ static FSoundChan *S_StartSound(AActor *actor, const sector_t *sec, const FPolyO
 
 void S_RestartSound(FSoundChan *chan)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return;
+
 	assert(chan->ChanFlags & CHAN_EVICTED);
 
 	FSoundChan *ochan;
@@ -1279,15 +1282,18 @@ void S_Sound (int channel, FSoundID sound_id, float volume, float attenuation, b
 //
 //==========================================================================
 
-void S_Sound (AActor *ent, int channel, FSoundID sound_id, float volume, float attenuation, bool bSoundOnClient) // [EP] Added bSoundOnClient.
+void S_Sound (AActor *ent, int channel, FSoundID sound_id, float volume, float attenuation, bool bSoundOnClient, int playerNumToSkip) // [EP] Added bSoundOnClient.
 {
 	if (ent == NULL || ent->Sector->Flags & SECF_SILENT)
 		return;
 	S_StartSound (ent, NULL, NULL, NULL, channel, sound_id, volume, attenuation);
 
 	// [EP] If we're the server, tell the clients to make a sound.
-	if ( bSoundOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ))
-		SERVERCOMMANDS_SoundActor( ent, channel, S_GetName( sound_id ), volume, attenuation );
+	if (bSoundOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER))
+		if (playerNumToSkip >= 0)
+			SERVERCOMMANDS_SoundActor(ent, channel, S_GetName( sound_id ), volume, attenuation, playerNumToSkip, SVCF_SKIPTHISCLIENT);
+		else
+			SERVERCOMMANDS_SoundActor(ent, channel, S_GetName(sound_id), volume, attenuation);
 }
 
 //==========================================================================
@@ -2271,7 +2277,7 @@ void S_ChannelVirtualChanged(FISoundChannel *ichan, bool is_virtual)
 
 void S_StopChannel(FSoundChan *chan)
 {
-	if (chan == NULL)
+	if (chan == NULL || CLIENT_PREDICT_IsPredicting())
 		return;
 
 	if (chan->SysChannel != NULL)

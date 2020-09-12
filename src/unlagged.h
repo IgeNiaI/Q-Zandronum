@@ -63,6 +63,7 @@ void	UNLAGGED_Restore( AActor *actor );
 void	UNLAGGED_RecordPlayer( player_t *player );
 void	UNLAGGED_ResetPlayer( player_t *player );
 void	UNLAGGED_RecordSectors( );
+void	UNLAGGED_RecordPolyobj( );
 bool	UNLAGGED_DrawRailClientside ( AActor *attacker );
 void	UNLAGGED_GetHitOffset ( const AActor *attacker, const FTraceResults &trace, TVector3<fixed_t> &hitOffset );
 bool	UNLAGGED_IsReconciled ( );

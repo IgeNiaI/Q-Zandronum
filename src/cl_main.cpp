@@ -209,35 +209,19 @@ static	void	client_SetInventoryIcon( BYTESTREAM_s *pByteStream );
 
 // Door commands.
 static	void	client_DoDoor( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyDoor( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeDoorDirection( BYTESTREAM_s *pByteStream );
 
 // Floor commands.
 static	void	client_DoFloor( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyFloor( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeFloorDirection( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeFloorType( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeFloorDestDist( BYTESTREAM_s *pByteStream );
-static	void	client_StartFloorSound( BYTESTREAM_s *pByteStream );
 static	void	client_BuildStair( BYTESTREAM_s *pByteStream );
 
 // Ceiling commands.
 static	void	client_DoCeiling( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyCeiling( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeCeilingDirection( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeCeilingSpeed( BYTESTREAM_s *pByteStream );
-static	void	client_PlayCeilingSound( BYTESTREAM_s *pByteStream );
 
 // Plat commands.
 static	void	client_DoPlat( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyPlat( BYTESTREAM_s *pByteStream );
-static	void	client_ChangePlatStatus( BYTESTREAM_s *pByteStream );
-static	void	client_PlayPlatSound( BYTESTREAM_s *pByteStream );
 
 // Elevator commands.
 static	void	client_DoElevator( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyElevator( BYTESTREAM_s *pByteStream );
-static	void	client_StartElevatorSound( BYTESTREAM_s *pByteStream );
 
 // Pillar commands.
 static	void	client_DoPillar( BYTESTREAM_s *pByteStream );
@@ -248,25 +232,11 @@ static	void	client_DoWaggle( BYTESTREAM_s *pByteStream );
 static	void	client_DestroyWaggle( BYTESTREAM_s *pByteStream );
 static	void	client_UpdateWaggle( BYTESTREAM_s *pByteStream );
 
-// Rotate poly commands.
+// Poly commands.
 static	void	client_DoRotatePoly( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyRotatePoly( BYTESTREAM_s *pByteStream );
-
-// Move poly commands.
 static	void	client_DoMovePoly( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyMovePoly( BYTESTREAM_s *pByteStream );
-
-// Poly door commands.
+static	void	client_DoMovePolyTo( BYTESTREAM_s *pByteStream );
 static	void	client_DoPolyDoor( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyPolyDoor( BYTESTREAM_s *pByteStream );
-static	void	client_SetPolyDoorSpeedPosition( BYTESTREAM_s *pByteStream );
-static  void	client_SetPolyDoorSpeedRotation( BYTESTREAM_s *pByteStream );
-
-// Generic polyobject commands.
-static	void	client_PlayPolyobjSound( BYTESTREAM_s *pByteStream );
-static	void	client_StopPolyobjSound( BYTESTREAM_s *pByteStream );
-static	void	client_SetPolyobjPosition( BYTESTREAM_s *pByteStream );
-static	void	client_SetPolyobjRotation( BYTESTREAM_s *pByteStream );
 
 // Miscellaneous commands.
 static	void	client_EarthQuake( BYTESTREAM_s *pByteStream );
@@ -1604,85 +1574,21 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 
 		client_DoDoor( pByteStream );
 		break;
-	case SVC_DESTROYDOOR:
-
-		client_DestroyDoor( pByteStream );
-		break;
-	case SVC_CHANGEDOORDIRECTION:
-
-		client_ChangeDoorDirection( pByteStream );
-		break;
 	case SVC_DOFLOOR:
 
 		client_DoFloor( pByteStream );
-		break;
-	case SVC_DESTROYFLOOR:
-
-		client_DestroyFloor( pByteStream );
-		break;
-	case SVC_CHANGEFLOORDIRECTION:
-
-		client_ChangeFloorDirection( pByteStream );
-		break;
-	case SVC_CHANGEFLOORTYPE:
-
-		client_ChangeFloorType( pByteStream );
-		break;
-	case SVC_CHANGEFLOORDESTDIST:
-
-		client_ChangeFloorDestDist( pByteStream );
-		break;
-	case SVC_STARTFLOORSOUND:
-
-		client_StartFloorSound( pByteStream );
 		break;
 	case SVC_DOCEILING:
 
 		client_DoCeiling( pByteStream );
 		break;
-	case SVC_DESTROYCEILING:
-
-		client_DestroyCeiling( pByteStream );
-		break;
-	case SVC_CHANGECEILINGDIRECTION:
-
-		client_ChangeCeilingDirection( pByteStream );
-		break;
-	case SVC_CHANGECEILINGSPEED:
-
-		client_ChangeCeilingSpeed( pByteStream );
-		break;
-	case SVC_PLAYCEILINGSOUND:
-
-		client_PlayCeilingSound( pByteStream );
-		break;
 	case SVC_DOPLAT:
 
 		client_DoPlat( pByteStream );
 		break;
-	case SVC_DESTROYPLAT:
-
-		client_DestroyPlat( pByteStream );
-		break;
-	case SVC_CHANGEPLATSTATUS:
-
-		client_ChangePlatStatus( pByteStream );
-		break;
-	case SVC_PLAYPLATSOUND:
-
-		client_PlayPlatSound( pByteStream );
-		break;
 	case SVC_DOELEVATOR:
 
 		client_DoElevator( pByteStream );
-		break;
-	case SVC_DESTROYELEVATOR:
-
-		client_DestroyElevator( pByteStream );
-		break;
-	case SVC_STARTELEVATORSOUND:
-
-		client_StartElevatorSound( pByteStream );
 		break;
 	case SVC_DOPILLAR:
 
@@ -1708,45 +1614,17 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 
 		client_DoRotatePoly( pByteStream );
 		break;
-	case SVC_DESTROYROTATEPOLY:
-
-		client_DestroyRotatePoly( pByteStream );
-		break;
 	case SVC_DOMOVEPOLY:
 
 		client_DoMovePoly( pByteStream );
 		break;
-	case SVC_DESTROYMOVEPOLY:
+	case SVC_DOMOVEPOLYTO:
 
-		client_DestroyMovePoly( pByteStream );
+		client_DoMovePolyTo( pByteStream );
 		break;
 	case SVC_DOPOLYDOOR:
 
 		client_DoPolyDoor( pByteStream );
-		break;
-	case SVC_DESTROYPOLYDOOR:
-
-		client_DestroyPolyDoor( pByteStream );
-		break;
-	case SVC_SETPOLYDOORSPEEDPOSITION:
-
-		client_SetPolyDoorSpeedPosition( pByteStream );
-		break;
-	case SVC_SETPOLYDOORSPEEDROTATION:
-
-		client_SetPolyDoorSpeedRotation( pByteStream );
-		break;
-	case SVC_PLAYPOLYOBJSOUND:
-
-		client_PlayPolyobjSound( pByteStream );
-		break;
-	case SVC_SETPOLYOBJPOSITION:
-
-		client_SetPolyobjPosition( pByteStream );
-		break;
-	case SVC_SETPOLYOBJROTATION:
-
-		client_SetPolyobjRotation( pByteStream );
 		break;
 	case SVC_EARTHQUAKE:
 
@@ -2059,11 +1937,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 					vval.String = cvarValue;
 					cvar->ForceSet( vval, CVAR_String );
 				}
-				break;
-
-			// [EP]
-			case SVC2_STOPPOLYOBJSOUND:
-				client_StopPolyobjSound( pByteStream );
 				break;
 
 			// [EP]
@@ -7249,341 +7122,101 @@ static void client_SetInventoryIcon( BYTESTREAM_s *pByteStream )
 //
 static void client_DoDoor( BYTESTREAM_s *pByteStream )
 {
-	LONG			lSectorID;
-	sector_t		*pSector;
-	BYTE			type;
-	LONG			lSpeed;
-	LONG			lDirection;
-	LONG			lLightTag;
-	LONG			lDoorID;
-	DDoor			*pDoor;
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	fixed_t Direction = CLIENT_AdjustDoorDirection( NETWORK_ReadByte( pByteStream ) );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	int TopWait = NETWORK_ReadByte( pByteStream );
+	int Countdown = NETWORK_ReadByte( pByteStream );
+	int LightTag = NETWORK_ReadShort( pByteStream );
 
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the door type.
-	type = NETWORK_ReadByte( pByteStream );
-
-	// Read in the speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the direction.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Read in the delay.
-	lLightTag = NETWORK_ReadShort( pByteStream );
-
-	// Read in the door ID.
-	lDoorID = NETWORK_ReadShort( pByteStream );
-
-	// Make sure the sector ID is valid.
-	if (( lSectorID >= 0 ) && ( lSectorID < numsectors ))
-		pSector = &sectors[lSectorID];
-	else
+	// Invalid sector.
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustDoorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
+	sector_t *pSector = &sectors[SectorID];
 
-	// If door already has a thinker, we can't spawn a new door on it.
-	if ( pSector->ceilingdata )
+	DDoor *pDoor = P_GetDoorBySectorNum( pSector->sectornum );
+	if (pDoor == NULL)
 	{
-		CLIENT_PrintWarning( "client_DoDoor: WARNING! Door's sector already has a ceiling mover attached to it!\n" );
-		return;
+		// Create the new door.
+		pDoor = new DDoor( pSector, (DDoor::EVlDoor)Type, Speed, TopWait, LightTag, g_ConnectionState != CTS_ACTIVE );
 	}
 
-	// Create the new door.
-	if ( (pDoor = new DDoor( pSector, (DDoor::EVlDoor)type, lSpeed, 0, lLightTag, g_ConnectionState != CTS_ACTIVE )) )
+	pDoor->SetLastInstigator( &players[Instigator] );
+	pDoor->SetPositionAndDirection( Position, Direction );
+	pDoor->SetCountdown( Countdown );
+
+	if ( Instigator == consoleplayer )
 	{
-		pDoor->SetID( lDoorID );
-		pDoor->SetDirection( lDirection );
+		pDoor->Predict();
 	}
-}
-
-//*****************************************************************************
-//
-static void client_DestroyDoor( BYTESTREAM_s *pByteStream )
-{
-	DDoor	*pDoor;
-	LONG	lDoorID;
-
-	// Read in the door ID.
-	lDoorID = NETWORK_ReadShort( pByteStream );
-
-	pDoor = P_GetDoorByID( lDoorID );
-	if ( pDoor == NULL )
-	{
-		CLIENT_PrintWarning( "client_DestroyDoor: Couldn't find door with ID: %ld!\n", lDoorID );
-		return;
-	}
-
-	pDoor->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeDoorDirection( BYTESTREAM_s *pByteStream )
-{
-	DDoor	*pDoor;
-	LONG	lDoorID;
-	LONG	lDirection;
-
-	// Read in the door ID.
-	lDoorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new direction the door should move in.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustDoorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
-
-	pDoor = P_GetDoorByID( lDoorID );
-	if ( pDoor == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeDoorDirection: Couldn't find door with ID: %ld!\n", lDoorID );
-		return;
-	}
-
-	pDoor->SetDirection( lDirection );
-
-	// Don't play a sound if the door is now motionless!
-	if ( lDirection != 0 )
-		pDoor->DoorSound( lDirection == 1 );
 }
 
 //*****************************************************************************
 //
 static void client_DoFloor( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lDirection;
-	LONG			FloorDestDist;
-	LONG			lSpeed;
-	LONG			lSectorID;
-	LONG			Crush;
-	bool			Hexencrush;
-	LONG			lFloorID;
-	sector_t		*pSector;
-	DFloor			*pFloor;
-
-	// Read in the type of floor.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the direction of the floor.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Read in the speed of the floor.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's destination height.
-	FloorDestDist = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's crush.
-	Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-
-	// Read in the floor's crush type.
-	Hexencrush = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the floor's network ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustFloorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
+	int Type = NETWORK_ReadByte( pByteStream );
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	int FloorDestDist = NETWORK_ReadLong( pByteStream );
+	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
+	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
+	int NewSpecial = NETWORK_ReadLong( pByteStream );
 
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	pSector = &sectors[lSectorID];
+	sector_t *pSector = &sectors[SectorID];
 
-	// If the sector already has activity, don't override it.
-	if ( pSector->floordata )
-		return;
+	DFloor *pFloor = P_GetFloorBySectorNum( pSector->sectornum );
+	if (pFloor == NULL )
+	{
+		// Create the new floor.
+		pFloor = new DFloor( pSector );
+	}
 
-	pFloor = new DFloor( pSector );
-	pFloor->SetType( (DFloor::EFloor)lType );
+	pFloor->SetLastInstigator( &players[Instigator] );
+	pFloor->SetType( (DFloor::EFloor)Type );
 	pFloor->SetCrush( Crush );
 	pFloor->SetHexencrush( Hexencrush );
-	pFloor->SetDirection( lDirection );
+	pFloor->SetPositionAndDirection( Position, Direction );
 	pFloor->SetFloorDestDist( FloorDestDist );
-	pFloor->SetSpeed( lSpeed );
-	pFloor->SetID( lFloorID );
-}
+	pFloor->SetSpeed( Speed );
+	pFloor->SetNewSpecial( NewSpecial );
 
-//*****************************************************************************
-//
-static void client_DestroyFloor( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_ChangeFloorType: Couldn't find floor with ID: %ld!\n", lFloorID );
-		return;
+		pFloor->Predict();
 	}
-
-	SN_StopSequence( pFloor->GetSector( ), CHAN_FLOOR );
-	pFloor->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeFloorDirection( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-	LONG		lDirection;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new floor direction.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustFloorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeFloorType: Couldn't find floor with ID: %ld!\n", lFloorID );
-		return;
-	}
-
-	pFloor->SetDirection( lDirection );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeFloorType( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-	LONG		lType;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new type of floor this is.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeFloorType: Couldn't find ceiling with ID: %ld!\n", lFloorID );
-		return;
-	}
-
-	pFloor->SetType( (DFloor::EFloor)lType );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeFloorDestDist( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-	fixed_t		DestDist;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new floor destination distance.
-	DestDist = NETWORK_ReadLong( pByteStream );
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeFloorType: Couldn't find floor with ID: %ld!\n", lFloorID );
-		return;
-	}
-
-	pFloor->SetFloorDestDist( DestDist );
-}
-
-//*****************************************************************************
-//
-static void client_StartFloorSound( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
-	{
-		CLIENT_PrintWarning( "client_StartFloorSound: Couldn't find floor with ID: %ld!\n", lFloorID );
-		return;
-	}
-
-	// Finally, start playing the floor's sound sequence.
-	pFloor->StartFloorSound( );
 }
 
 //*****************************************************************************
 //
 static void client_BuildStair( BYTESTREAM_s *pByteStream )
 {
-	// Read in the type of floor.
 	int Type = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
 	int SectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the direction of the floor.
-	int Direction = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-
-	// Read in the speed of the floor.
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
 	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's destination height.
 	fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's crush.
 	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-
-	// Read in the floor's crush type.
 	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the floor's reset count.
+	LONG lNewSpecial = NETWORK_ReadLong( pByteStream );
 	int ResetCount = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's delay time.
 	int Delay = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's pause time.
 	int PauseTime = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's step time.
 	int StepTime = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's per step time.
 	int PerStepTime = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's network ID.
-	int FloorID = NETWORK_ReadShort( pByteStream );
 
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
@@ -7594,327 +7227,134 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 	// If the sector already has activity, don't override it.
 	if ( sector->floordata )
 		return;
+	
+	DFloor *floor = P_GetFloorBySectorNum( sector->sectornum );
+	if (floor == NULL )
+	{
+		// Create the new floor.
+		floor = new DFloor( sector );
+	}
 
-	DFloor *floor = new DFloor( sector );
+	floor->SetLastInstigator( &players[Instigator] );
 	floor->SetType( (DFloor::EFloor)Type );
 	floor->SetCrush( Crush );
 	floor->SetHexencrush( Hexencrush );
-	floor->SetDirection( Direction );
+	floor->SetPositionAndDirection( Position, Direction );
 	floor->SetFloorDestDist( FloorDestDist );
 	floor->SetSpeed( Speed );
+	floor->SetNewSpecial( lNewSpecial );
 	floor->SetResetCount( ResetCount );
 	floor->SetDelay( Delay );
 	floor->SetPauseTime( PauseTime );
 	floor->SetStepTime( StepTime );
 	floor->SetPerStepTime( PerStepTime );
-	floor->SetID( FloorID );
+
+	if ( Instigator == consoleplayer )
+	{
+		floor->Predict();
+	}
 }
 
 //*****************************************************************************
 //
 static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	fixed_t			BottomHeight;
-	fixed_t			TopHeight;
-	LONG			lSpeed;
-	LONG			lCrush;
-	bool			Hexencrush;
-	LONG			lSilent;
-	LONG			lDirection;
-	LONG			lSectorID;
-	LONG			lCeilingID;
-	sector_t		*pSector;
-	DCeiling		*pCeiling;
-
-	// Read in the type of ceiling this is.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector this ceiling is attached to.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the direction this ceiling is moving in.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Read in the lowest distance the ceiling can travel before it stops.
-	BottomHeight = NETWORK_ReadLong( pByteStream );
-
-	// Read in the highest distance the ceiling can travel before it stops.
-	TopHeight = NETWORK_ReadLong( pByteStream );
-
-	// Read in the speed of the ceiling.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Does this ceiling damage those who get squashed by it?
-	lCrush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-
-	// Is this ceiling crush Hexen style?
-	Hexencrush = !!NETWORK_ReadByte( pByteStream );
-
-	// Does this ceiling make noise?
-	lSilent = NETWORK_ReadShort( pByteStream );
-
-	// Read in the network ID of the ceiling.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustCeilingDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	int Tag = NETWORK_ReadByte( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	int Direction = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
+	int OldDirection = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	fixed_t BottomHeight = NETWORK_ReadLong( pByteStream );
+	fixed_t TopHeight = NETWORK_ReadLong( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	fixed_t SpeedDown = NETWORK_ReadLong( pByteStream );
+	fixed_t SpeedUp = NETWORK_ReadLong( pByteStream );
+	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
+	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
+	int Silent = NETWORK_ReadShort( pByteStream );
 
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	pSector = &sectors[lSectorID];
+	sector_t *pSector = &sectors[SectorID];
 
-	pCeiling = new DCeiling( pSector, lSpeed, 0, lSilent );
+	DCeiling *pCeiling = P_GetCeilingBySectorNum( pSector->sectornum );
+	if ( pCeiling == NULL )
+	{
+		// Create the new ceiling.
+		pCeiling = new DCeiling( pSector, SpeedDown, SpeedUp, Silent );
+	}
+
+	pCeiling->SetLastInstigator( &players[Instigator] );
+	pCeiling->SetTag( Tag );
+	pCeiling->SetType( (DCeiling::ECeiling)Type );
 	pCeiling->SetBottomHeight( BottomHeight );
 	pCeiling->SetTopHeight( TopHeight );
-	pCeiling->SetCrush( lCrush );
+	pCeiling->SetPositionAndDirection( Position, Direction );
+	pCeiling->SetOldDirection( OldDirection );
+	pCeiling->SetSpeed( Speed );
+	pCeiling->SetCrush( Crush );
 	pCeiling->SetHexencrush( Hexencrush );
-	pCeiling->SetDirection( lDirection );
-	pCeiling->SetID( lCeilingID );
-}
+	pCeiling->SetSilent( Silent );
 
-//*****************************************************************************
-//
-static void client_DestroyCeiling( BYTESTREAM_s *pByteStream )
-{
-	DCeiling	*pCeiling;
-	LONG		lCeilingID;
-
-	// Read in the ceiling ID.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	pCeiling = P_GetCeilingByID( lCeilingID );
-	if ( pCeiling == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_DestroyCeiling: Couldn't find ceiling with ID: %ld!\n", lCeilingID );
-		return;
+		pCeiling->Predict();
 	}
-
-	SN_StopSequence( pCeiling->GetSector( ), CHAN_CEILING );
-	pCeiling->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeCeilingDirection( BYTESTREAM_s *pByteStream )
-{
-	DCeiling	*pCeiling;
-	LONG		lCeilingID;
-	LONG		lDirection;
-
-	// Read in the ceiling ID.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new ceiling direction.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustCeilingDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
-
-	pCeiling = P_GetCeilingByID( lCeilingID );
-	if ( pCeiling == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeCeilingDirection: Couldn't find ceiling with ID: %ld!\n", lCeilingID );
-		return;
-	}
-
-	// Finally, set the new ceiling direction.
-	pCeiling->SetDirection( lDirection );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeCeilingSpeed( BYTESTREAM_s *pByteStream )
-{
-	DCeiling	*pCeiling;
-	LONG		lCeilingID;
-	LONG		lSpeed;
-
-	// Read in the ceiling ID.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new ceiling speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	pCeiling = P_GetCeilingByID( lCeilingID );
-	if ( pCeiling == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeCeilingSpeed: Couldn't find ceiling with ID: %ld!\n", lCeilingID );
-		return;
-	}
-
-	pCeiling->SetSpeed( lSpeed );
-}
-
-//*****************************************************************************
-//
-static void client_PlayCeilingSound( BYTESTREAM_s *pByteStream )
-{
-	DCeiling	*pCeiling;
-	LONG		lCeilingID;
-
-	// Read in the ceiling ID.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	pCeiling = P_GetCeilingByID( lCeilingID );
-	if ( pCeiling == NULL )
-	{
-		CLIENT_PrintWarning( "client_PlayCeilingSound: Couldn't find ceiling with ID: %ld!\n", lCeilingID );
-		return;
-	}
-
-	pCeiling->PlayCeilingSound( );
 }
 
 //*****************************************************************************
 //
 static void client_DoPlat( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lStatus;
-	fixed_t			High;
-	fixed_t			Low;
-	LONG			lSpeed;
-	LONG			lSectorID;
-	LONG			lPlatID;
-	sector_t		*pSector;
-	DPlat			*pPlat;
-
-	// Read in the type of plat.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the plat status (moving up, down, etc.).
-	lStatus = NETWORK_ReadByte( pByteStream );
-
-	// Read in the high range of the plat.
-	High = NETWORK_ReadLong( pByteStream );
-
-	// Read in the low range of the plat.
-	Low = NETWORK_ReadLong( pByteStream );
-
-	// Read in the speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the plat ID.
-	lPlatID = NETWORK_ReadShort( pByteStream );
-
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	int Status = NETWORK_ReadByte( pByteStream );
+	int OldStatus = NETWORK_ReadByte( pByteStream );
+	fixed_t lSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t High = NETWORK_ReadLong( pByteStream );
+	fixed_t Low = NETWORK_ReadLong( pByteStream );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	int Wait = NETWORK_ReadByte( pByteStream );
+	int Count = NETWORK_ReadByte( pByteStream );
+	int Crush = NETWORK_ReadByte( pByteStream );
+	int Tag = NETWORK_ReadByte( pByteStream );
+	bool Finished = NETWORK_ReadByte( pByteStream ) ? true : false;
+	
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	pSector = &sectors[lSectorID];
+	sector_t *pSector = &sectors[SectorID];
+	
+	DPlat *pPlat = P_GetPlatBySectorNum( pSector->sectornum );
+	if (pPlat == NULL)
+	{
+		// Create the new door.
+		pPlat = new DPlat( pSector );
+	}
 
-	// Create the plat, and set all its attributes that were read in.
-	pPlat = new DPlat( pSector );
-	pPlat->SetType( (DPlat::EPlatType)lType );
-	pPlat->SetStatus( lStatus );
+	pPlat->SetLastInstigator( &players[Instigator] );
+	pPlat->SetType( (DPlat::EPlatType)Type );
+	pPlat->SetStatus( Status );
+	pPlat->SetOldStatus( OldStatus );
+	pPlat->SetSpeed( lSpeed );
 	pPlat->SetHigh( High );
 	pPlat->SetLow( Low );
-	pPlat->SetSpeed( lSpeed );
-	pPlat->SetID( lPlatID );
+	pPlat->SetPosition( Position );
+	pPlat->SetWait( Wait );
+	pPlat->SetCount( Count );
+	pPlat->SetCrush( Crush );
+	pPlat->SetTag( Tag );
+	pPlat->SetFinished( Finished );
 
-	// Now, set other properties that don't really matter.
-	pPlat->SetCrush( -1 );
-	pPlat->SetTag( 0 );
-
-	// Just set the delay to 0. The server will tell us when it should move again.
-	pPlat->SetDelay( 0 );
-}
-
-//*****************************************************************************
-//
-static void client_DestroyPlat( BYTESTREAM_s *pByteStream )
-{
-	DPlat	*pPlat;
-	LONG	lPlatID;
-
-	// Read in the plat ID.
-	lPlatID = NETWORK_ReadShort( pByteStream );
-
-	pPlat = P_GetPlatByID( lPlatID );
-	if ( pPlat == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_DestroyPlat: Couldn't find plat with ID: %ld!\n", lPlatID );
-		return;
-	}
-
-	pPlat->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_ChangePlatStatus( BYTESTREAM_s *pByteStream )
-{
-	DPlat	*pPlat;
-	LONG	lPlatID;
-	LONG	lStatus;
-
-	// Read in the plat ID.
-	lPlatID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the direction (aka status).
-	lStatus = NETWORK_ReadByte( pByteStream );
-
-	pPlat = P_GetPlatByID( lPlatID );
-	if ( pPlat == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangePlatStatus: Couldn't find plat with ID: %ld!\n", lPlatID );
-		return;
-	}
-
-	pPlat->SetStatus( lStatus );
-}
-
-//*****************************************************************************
-//
-static void client_PlayPlatSound( BYTESTREAM_s *pByteStream )
-{
-	DPlat	*pPlat;
-	LONG	lPlatID;
-	LONG	lSoundType;
-
-	// Read in the plat ID.
-	lPlatID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the type of sound to be played.
-	lSoundType = NETWORK_ReadByte( pByteStream );
-
-	pPlat = P_GetPlatByID( lPlatID );
-	if ( pPlat == NULL )
-	{
-		CLIENT_PrintWarning( "client_PlayPlatSound: Couldn't find plat with ID: %ld!\n", lPlatID );
-		return;
-	}
-
-	switch ( lSoundType )
-	{
-	case 0:
-
-		SN_StopSequence( pPlat->GetSector( ), CHAN_FLOOR );
-		break;
-	case 1:
-
-		pPlat->PlayPlatSound( "Platform" );
-		break;
-	case 2:
-
-		SN_StartSequence( pPlat->GetSector( ), CHAN_FLOOR, "Silence", 0 );
-		break;
-	case 3:
-
-		pPlat->PlayPlatSound( "Floor" );
-		break;
+		pPlat->Predict();
 	}
 }
 
@@ -7922,106 +7362,37 @@ static void client_PlayPlatSound( BYTESTREAM_s *pByteStream )
 //
 static void client_DoElevator( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lSectorID;
-	LONG			lSpeed;
-	LONG			lDirection;
-	LONG			lFloorDestDist;
-	LONG			lCeilingDestDist;
-	LONG			lElevatorID;
-	sector_t		*pSector;
-	DElevator		*pElevator;
-
-	// Read in the type of elevator.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the direction.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Read in the floor's destination distance.
-	lFloorDestDist = NETWORK_ReadLong( pByteStream );
-
-	// Read in the ceiling's destination distance.
-	lCeilingDestDist = NETWORK_ReadLong( pByteStream );
-
-	// Read in the elevator ID.
-	lElevatorID = NETWORK_ReadShort( pByteStream );
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	int Direction = CLIENT_AdjustElevatorDirection( NETWORK_ReadByte( pByteStream ) );
+	fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
+	fixed_t CeilingDestDist = NETWORK_ReadLong( pByteStream );
 
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustElevatorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
-
-	pSector = &sectors[lSectorID];
-
-	// Create the elevator, and set all its attributes that were read in.
-	pElevator = new DElevator( pSector );
-	pElevator->SetType( (DElevator::EElevator)lType );
-	pElevator->SetSpeed( lSpeed );
-	pElevator->SetDirection( lDirection );
-	pElevator->SetFloorDestDist( lFloorDestDist );
-	pElevator->SetCeilingDestDist( lCeilingDestDist );
-	pElevator->SetID( lElevatorID );
-}
-
-//*****************************************************************************
-//
-static void client_DestroyElevator( BYTESTREAM_s *pByteStream )
-{
-	LONG		lElevatorID;
-	DElevator	*pElevator;
-
-	// Read in the elevator ID.
-	lElevatorID = NETWORK_ReadShort( pByteStream );
-
-	pElevator = P_GetElevatorByID( lElevatorID );
-	if ( pElevator == NULL )
+	sector_t *pSector = &sectors[SectorID];
+	
+	DElevator *pElevator = P_GetElevatorBySectorNum( pSector->sectornum );
+	if (pElevator == NULL)
 	{
-		CLIENT_PrintWarning( "client_DestroyElevator: Couldn't find elevator with ID: %ld!\n", lElevatorID );
-		return;
+		// Create the new elevator.
+		pElevator = new DElevator( pSector );
 	}
 
-	/* [BB] I think ZDoom does all this is Destroy now.
-	pElevator->GetSector( )->floordata = NULL;
-	pElevator->GetSector( )->ceilingdata = NULL;
-	stopinterpolation( INTERP_SectorFloor, pElevator->GetSector( ));
-	stopinterpolation( INTERP_SectorCeiling, pElevator->GetSector( ));
-	*/
+	pElevator->SetType( (DElevator::EElevator)Type );
+	pElevator->SetSpeed( Speed );
+	pElevator->SetDirection( Direction );
+	pElevator->SetFloorDestDist( FloorDestDist );
+	pElevator->SetCeilingDestDist( CeilingDestDist );
 
-	// Finally, destroy the elevator.
-	pElevator->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_StartElevatorSound( BYTESTREAM_s *pByteStream )
-{
-	LONG		lElevatorID;
-	DElevator	*pElevator;
-
-	// Read in the elevator ID.
-	lElevatorID = NETWORK_ReadShort( pByteStream );
-
-	pElevator = P_GetElevatorByID( lElevatorID );
-	if ( pElevator == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_StartElevatorSound: Couldn't find elevator with ID: %ld!\n", lElevatorID );
-		return;
+		pElevator->Predict();
 	}
-
-	// Finally, start the elevator sound.
-	pElevator->StartFloorSound( );
 }
 
 //*****************************************************************************
@@ -8217,368 +7588,236 @@ static void client_UpdateWaggle( BYTESTREAM_s *pByteStream )
 //
 static void client_DoRotatePoly( BYTESTREAM_s *pByteStream )
 {
-	LONG			lSpeed;
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	DRotatePoly		*pRotatePoly;
-
-	// Read in the speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the polyobject ID.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
+	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	LONG lDist = NETWORK_ReadLong( pByteStream );
 
 	// Make sure the polyobj exists before we try to work with it.
-	pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoRotatePoly: Invalid polyobj number: %ld\n", lPolyNum );
+		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", lPolyNum );
 		return;
 	}
 
-	// Create the polyobject.
-	pRotatePoly = new DRotatePoly( lPolyNum );
-	pRotatePoly->SetSpeed( lSpeed );
+	DRotatePoly *pRotatePoly = NULL;
 
-	// Attach the new polyobject to this ID.
-	pPoly->specialdata = pRotatePoly;
+	if ( pPoly->specialdata != NULL )
+	{
+		if ( pPoly->specialdata->IsKindOf(RUNTIME_CLASS(DRotatePoly)) )
+			// Reuse existing polyobject
+			pRotatePoly = (DRotatePoly*) pPoly->specialdata;
+		else
+			// Some other polyobject uses this poly
+			return;
+	}
+
+	if (pRotatePoly == NULL )
+	{
+		// Create the polyobject.
+		pRotatePoly = new DRotatePoly(lPolyNum);
+		pPoly->specialdata = pRotatePoly;
+	}
+	
+	pRotatePoly->SetLastInstigator( &players[Instigator] );
+	pRotatePoly->SetSpeed( Speed );
+	pRotatePoly->SetDist( lDist );
 
 	// Also, start the sound sequence associated with this polyobject.
 	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
-}
 
-//*****************************************************************************
-//
-static void client_DestroyRotatePoly( BYTESTREAM_s *pByteStream )
-{
-	LONG							lID;
-	DRotatePoly						*pPoly;
-	DRotatePoly						*pTempPoly;
-	TThinkerIterator<DRotatePoly>	Iterator;
-
-	// Read in the DRotatePoly ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Try to find the object from the ID. If it exists, destroy it.
-	pPoly = NULL;
-	while ( (pTempPoly = Iterator.Next( )) )
+	if ( Instigator == consoleplayer )
 	{
-		if ( pTempPoly->GetPolyObj( ) == lID )
-		{
-			pPoly = pTempPoly;
-			break;
-		}
+		pRotatePoly->Predict();
 	}
-
-	if ( pPoly )
-		pPoly->Destroy( );
 }
 
 //*****************************************************************************
 //
 static void client_DoMovePoly( BYTESTREAM_s *pByteStream )
 {
-	LONG			lXSpeed;
-	LONG			lYSpeed;
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	DMovePoly		*pMovePoly;
-
-	// Read in the speed.
-	lXSpeed = NETWORK_ReadLong( pByteStream );
-	lYSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the polyobject ID.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
+	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	angle_t Angle = NETWORK_ReadLong( pByteStream );
+	LONG lDist = NETWORK_ReadLong( pByteStream );
 
 	// Make sure the polyobj exists before we try to work with it.
-	pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoRotatePoly: Invalid polyobj number: %ld\n", lPolyNum );
+		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", lPolyNum );
 		return;
 	}
 
-	// Create the polyobject.
-	pMovePoly = new DMovePoly( lPolyNum );
-	pMovePoly->SetXSpeed( lXSpeed );
-	pMovePoly->SetYSpeed( lYSpeed );
+	DMovePoly *pMovePoly = NULL;
 
-	// Attach the new polyobject to this ID.
-	pPoly->specialdata = pMovePoly;
+	if ( pPoly->specialdata != NULL )
+	{
+		if ( pPoly->specialdata->IsKindOf(RUNTIME_CLASS(DMovePoly)) )
+			// Reuse existing polyobject
+			pMovePoly = (DMovePoly*) pPoly->specialdata;
+		else
+			// Some other polyobject uses this poly
+			return;
+	}
+
+	if ( pMovePoly == NULL )
+	{
+		// Create the polyobject.
+		pMovePoly = new DMovePoly(lPolyNum);
+		pPoly->specialdata = pMovePoly;
+	}
+	
+	pMovePoly->SetLastInstigator( &players[Instigator] );
+	pMovePoly->SetXSpeed( XSpeed );
+	pMovePoly->SetYSpeed( YSpeed );
+	pMovePoly->SetSpeed( Speed );
+	pMovePoly->SetAngle( Angle );
+	pMovePoly->SetDist( lDist );
 
 	// Also, start the sound sequence associated with this polyobject.
 	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
+
+	if ( Instigator == consoleplayer )
+	{
+		pMovePoly->Predict();
+	}
 }
 
 //*****************************************************************************
 //
-static void client_DestroyMovePoly( BYTESTREAM_s *pByteStream )
+static void client_DoMovePolyTo( BYTESTREAM_s *pByteStream )
 {
-	LONG							lID;
-	DMovePoly						*pPoly;
-	DMovePoly						*pTempPoly;
-	TThinkerIterator<DMovePoly>		Iterator;
+	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t XTarget = NETWORK_ReadLong( pByteStream );
+	fixed_t YTarget = NETWORK_ReadLong( pByteStream );
+	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
+	int Speed = NETWORK_ReadLong( pByteStream );
+	LONG lDist = NETWORK_ReadLong( pByteStream );
 
-	// Read in the DMovePoly ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Try to find the object from the ID. If it exists, destroy it.
-	pPoly = NULL;
-	while ( (pTempPoly = Iterator.Next( )) )
+	// Make sure the polyobj exists before we try to work with it.
+	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
+	if ( pPoly == NULL )
 	{
-		if ( pTempPoly->GetPolyObj( ) == lID )
-		{
-			pPoly = pTempPoly;
-			break;
-		}
+		CLIENT_PrintWarning( "client_DoMovePolyTo: Invalid polyobj number: %ld\n", lPolyNum );
+		return;
 	}
 
-	if ( pPoly )
-		pPoly->Destroy( );
+	DMovePolyTo	*pMovePolyTo = NULL;
+
+	if ( pPoly->specialdata != NULL )
+	{
+		if ( pPoly->specialdata->IsKindOf(RUNTIME_CLASS(DMovePolyTo)) )
+			// Reuse existing polyobject
+			pMovePolyTo = (DMovePolyTo*) pPoly->specialdata;
+		else
+			// Some other polyobject uses this poly
+			return;
+	}
+
+	if (pMovePolyTo == NULL )
+	{
+		// Create the polyobject.
+		pMovePolyTo = new DMovePolyTo(lPolyNum);
+		pPoly->specialdata = pMovePolyTo;
+	}
+	
+	pMovePolyTo->SetLastInstigator( &players[Instigator] );
+	pMovePolyTo->SetXTarget( XTarget );
+	pMovePolyTo->SetYTarget( YTarget );
+	pMovePolyTo->SetXSpeed( XSpeed );
+	pMovePolyTo->SetYSpeed( YSpeed );
+	pMovePolyTo->SetSpeed( Speed );
+	pMovePolyTo->SetDist( lDist );
+
+	// Also, start the sound sequence associated with this polyobject.
+	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
+
+	if ( Instigator == consoleplayer )
+	{
+		pMovePolyTo->Predict();
+	}
 }
 
 //*****************************************************************************
 //
 static void client_DoPolyDoor( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lXSpeed;
-	LONG			lYSpeed;
-	LONG			lSpeed;
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	DPolyDoor		*pPolyDoor;
-
-	// Read in the type of poly door (swing or slide).
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the speed.
-	lXSpeed = NETWORK_ReadLong( pByteStream );
-	lYSpeed = NETWORK_ReadLong( pByteStream );
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the polyobject ID.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
+	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
+	LONG lType = NETWORK_ReadByte( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t X = NETWORK_ReadLong( pByteStream );
+	fixed_t Y = NETWORK_ReadLong( pByteStream );
+	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	angle_t Angle = NETWORK_ReadLong( pByteStream );
+	LONG lDist = NETWORK_ReadLong( pByteStream );
+	LONG lTotalDist = NETWORK_ReadLong( pByteStream );
+	bool bClose = NETWORK_ReadBit( pByteStream ) ? true : false;
+	LONG lDirection = NETWORK_ReadShort( pByteStream );
+	LONG lTics = NETWORK_ReadShort( pByteStream );
+	LONG lWaitTics = NETWORK_ReadShort( pByteStream );
 
 	// Make sure the polyobj exists before we try to work with it.
-	pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
 	if ( pPoly == NULL )
 	{
 		CLIENT_PrintWarning( "client_DoPolyDoor: Invalid polyobj number: %ld\n", lPolyNum );
 		return;
 	}
 
-	// Create the polyobject.
-	pPolyDoor = new DPolyDoor( lPolyNum, (podoortype_t)lType );
-	pPolyDoor->SetXSpeed( lXSpeed );
-	pPolyDoor->SetYSpeed( lYSpeed );
-	pPolyDoor->SetSpeed( lSpeed );
+	DPolyDoor *pPolyDoor = NULL;
 
-	// Attach the new polyobject to this ID.
-	pPoly->specialdata = pPolyDoor;
-}
-
-//*****************************************************************************
-//
-static void client_DestroyPolyDoor( BYTESTREAM_s *pByteStream )
-{
-	LONG							lID;
-	DPolyDoor						*pPoly;
-	DPolyDoor						*pTempPoly;
-	TThinkerIterator<DPolyDoor>		Iterator;
-
-	// Read in the DPolyDoor ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Try to find the object from the ID. If it exists, destroy it.
-	pPoly = NULL;
-	while ( (pTempPoly = Iterator.Next( )) )
+	if ( pPoly->specialdata != NULL )
 	{
-		if ( pTempPoly->GetPolyObj( ) == lID )
-		{
-			pPoly = pTempPoly;
-			break;
-		}
+		if ( pPoly->specialdata->IsKindOf(RUNTIME_CLASS(DPolyDoor)) )
+			// Reuse existing polyobject
+			pPolyDoor = (DPolyDoor*) pPoly->specialdata;
+		else
+			// Some other polyobject uses this poly
+			return;
 	}
 
-	if ( pPoly )
-		pPoly->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_SetPolyDoorSpeedPosition( BYTESTREAM_s *pByteStream )
-{
-	LONG			lPolyID;
-	LONG			lXSpeed;
-	LONG			lYSpeed;
-	LONG			lX;
-	LONG			lY;
-	FPolyObj		*pPoly;
-	LONG			lDeltaX;
-	LONG			lDeltaY;
-
-	// Read in the polyobject ID.
-	lPolyID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the polyobject x/yspeed.
-	lXSpeed = NETWORK_ReadLong( pByteStream );
-	lYSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the polyobject X/.
-	lX = NETWORK_ReadLong( pByteStream );
-	lY = NETWORK_ReadLong( pByteStream );
-
-	pPoly = PO_GetPolyobj( lPolyID );
-	if ( pPoly == NULL )
-		return;
-
-	lDeltaX = lX - pPoly->StartSpot.x;
-	lDeltaY = lY - pPoly->StartSpot.y;
-
-	pPoly->MovePolyobj( lDeltaX, lDeltaY );
+	if ( pPolyDoor == NULL )
+	{
+		// Create the polyobject.
+		pPolyDoor = new DPolyDoor(lPolyNum, (podoortype_t)lType);
+		pPoly->specialdata = pPolyDoor;
+	}
 	
-	if ( pPoly->specialdata == NULL )
-		return;
+	pPolyDoor->SetLastInstigator( &players[Instigator] );
 
-	static_cast<DPolyDoor *>( pPoly->specialdata )->SetXSpeed( lXSpeed );
-	static_cast<DPolyDoor *>( pPoly->specialdata )->SetYSpeed( lYSpeed );
-}
+	fixed_t DeltaX = X - pPoly->StartSpot.x;
+	fixed_t DeltaY = Y - pPoly->StartSpot.y;
+	pPoly->MovePolyobj( DeltaX, DeltaY );
 
-//*****************************************************************************
-//
-static void client_SetPolyDoorSpeedRotation( BYTESTREAM_s *pByteStream )
-{
-	LONG			lPolyID;
-	LONG			lSpeed;
-	LONG			lAngle;
-	FPolyObj		*pPoly;
-	LONG			lDeltaAngle;
+	pPolyDoor->SetXSpeed( XSpeed );
+	pPolyDoor->SetYSpeed( YSpeed );
+	pPolyDoor->SetSpeed( Speed );
 
-	// Read in the polyobject ID.
-	lPolyID = NETWORK_ReadShort( pByteStream );
+	angle_t DeltaAngle = Angle - pPoly->angle;
+	pPoly->RotatePolyobj(DeltaAngle);
 
-	// Read in the polyobject speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
+	pPolyDoor->SetDist( lDist );
+	pPolyDoor->SetTotalDist( lTotalDist );
+	
+	pPolyDoor->SetClose( bClose );
+	pPolyDoor->SetDirection( lDirection );
 
-	// Read in the polyobject angle.
-	lAngle = NETWORK_ReadLong( pByteStream );
+	pPolyDoor->SetTics( lTics );
+	pPolyDoor->SetWaitTics( lWaitTics );
 
-	pPoly = PO_GetPolyobj( lPolyID );
-	if ( pPoly == NULL )
-		return;
-
-	lDeltaAngle = lAngle - pPoly->angle;
-
-	pPoly->RotatePolyobj( lDeltaAngle );
-
-	if ( pPoly->specialdata == NULL )
-		return;
-
-	static_cast<DPolyDoor *>( pPoly->specialdata )->SetSpeed( lSpeed );
-}
-
-//*****************************************************************************
-//
-static void client_PlayPolyobjSound( BYTESTREAM_s *pByteStream )
-{
-	LONG		lID;
-	bool		PolyMode;
-	FPolyObj	*pPoly;
-
-	// Read in the polyobject ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the polyobject mode.
-	PolyMode = !!NETWORK_ReadByte( pByteStream );
-
-	pPoly = PO_GetPolyobj( lID );
-	if ( pPoly == NULL )
-		return;
-
-	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, PolyMode );
-}
-
-//*****************************************************************************
-//
-static void client_StopPolyobjSound( BYTESTREAM_s *pByteStream )
-{
-	LONG		lID;
-	FPolyObj	*pPoly;
-
-	// Read in the polyobject ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	pPoly = PO_GetPolyobj( lID );
-	if ( pPoly == NULL )
-		return;
-
-	SN_StopSequence( pPoly );
-}
-
-//*****************************************************************************
-//
-static void client_SetPolyobjPosition( BYTESTREAM_s *pByteStream )
-{
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	LONG			lX;
-	LONG			lY;
-	LONG			lDeltaX;
-	LONG			lDeltaY;
-
-	// Read in the polyobject number.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
-
-	// Read in the XY position of the polyobj.
-	lX = NETWORK_ReadLong( pByteStream );
-	lY = NETWORK_ReadLong( pByteStream );
-
-	// Get the polyobject from the index given.
-	pPoly = PO_GetPolyobj( lPolyNum );
-	if ( pPoly == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_SetPolyobjPosition: Invalid polyobj number: %ld\n", lPolyNum );
-		return;
+		pPolyDoor->Predict();
 	}
-
-	lDeltaX = lX - pPoly->StartSpot.x;
-	lDeltaY = lY - pPoly->StartSpot.y;
-
-//	Printf( "DeltaX: %d\nDeltaY: %d\n", lDeltaX, lDeltaY );
-
-	// Finally, set the polyobject action.
-	pPoly->MovePolyobj( lDeltaX, lDeltaY );
-}
-
-//*****************************************************************************
-//
-static void client_SetPolyobjRotation( BYTESTREAM_s *pByteStream )
-{
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	LONG			lAngle;
-	LONG			lDeltaAngle;
-
-	// Read in the polyobject number.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
-
-	// Read in the angle of the polyobj.
-	lAngle = NETWORK_ReadLong( pByteStream );
-
-	// Make sure the polyobj exists before we try to work with it.
-	pPoly = PO_GetPolyobj( lPolyNum );
-	if ( pPoly == NULL )
-	{
-		CLIENT_PrintWarning( "client_SetPolyobjRotation: Invalid polyobj number: %ld\n", lPolyNum );
-		return;
-	}
-
-	lDeltaAngle = lAngle - pPoly->angle;
-
-	// Finally, set the polyobject action.
-	pPoly->RotatePolyobj( lDeltaAngle );
 }
 
 //*****************************************************************************
