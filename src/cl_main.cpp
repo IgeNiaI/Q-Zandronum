@@ -2868,6 +2868,7 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->chickenPeck = 0;
 	pPlayer->jumpTics = 0;
 	pPlayer->doubleJumpTics = 0;
+	pPlayer->blockDoubleJump = 0;
 	pPlayer->slideDuration = 0;
 	pPlayer->wasSliding = 0;
 	pPlayer->wallClimbStamina = 0;

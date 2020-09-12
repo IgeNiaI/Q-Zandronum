@@ -299,6 +299,7 @@ player_t::player_t()
   chickenPeck(0),
   jumpTics(0),
   doubleJumpTics(0),
+  blockDoubleJump(0),
   slideDuration(0),
   wasSliding(0),
   wallClimbStamina(0),
@@ -438,6 +439,7 @@ player_t &player_t::operator=(const player_t &p)
 	chickenPeck = p.chickenPeck;
 	jumpTics = p.jumpTics;
 	doubleJumpTics = p.doubleJumpTics;
+	blockDoubleJump = p.blockDoubleJump;
 	slideDuration = p.slideDuration;
 	wasSliding = p.wasSliding;
 	wallClimbStamina = p.wallClimbStamina;
@@ -3177,10 +3179,11 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	if (canClimb) { return; }
 
+	// [Ivory] blockDoubleJump should not need c/s sync since doubleJumpTics already is
+	if (player->doubleJumpTics > 0) { player->blockDoubleJump = true; }
+
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
-
-	bool isDoubleJumper = player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP ? true : false;
 
 	// [RH] check for jump
 	if (cmd->ucmd.buttons & BT_JUMP)
@@ -3239,13 +3242,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->mo->velz += JumpVelz;
 			player->jumpTics = ulJumpTicks;
 			player->doubleJumpTics = 6;
-			player->onground = false;
 
+			// notify the change of jumptics
 			if (NETWORK_GetState() == NETSTATE_SERVER)
 				SERVERCOMMANDS_SetLocalPlayerJumpTics(player - players);
 		}
 		// [Ivory]: Double Jump and wall jump
-		else if(isDoubleJumper && !player->onground && !player->doubleJumpTics)
+		else if((player->mo->flags7 & MF7_WALLJUMP|MF7_DOUBLEJUMP) &&
+			    !player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
 		{
 			// Wall proximity check
 			bool doWallJump = false;
@@ -3291,16 +3295,16 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				}
 
 				player->doubleJumpTics = -1;
+
+				// notify the change of jumptics
 				if (NETWORK_GetState() == NETSTATE_SERVER)
 					SERVERCOMMANDS_SetLocalPlayerJumpTics(player - players);
 			}
 		}
 	}
-	else if (isDoubleJumper && player->doubleJumpTics > 0)
+	else
 	{
-		player->doubleJumpTics = 0;
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SetLocalPlayerJumpTics(player - players);
+		player->blockDoubleJump = false;
 	}
 }
 
@@ -3515,8 +3519,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	// Water and flying have already executed jump press logic
 	if (noJump) { return; }
 
-	bool isDoubleJumper = player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP ? true : false;
-	
+	// [Ivory] blockDoubleJump should not need c/s sync since doubleJumpTics already is
+	if (player->doubleJumpTics > 0) { player->blockDoubleJump = true; }
+
+	// Stop here if not in good condition to jump
 	if (cmd->ucmd.buttons & BT_JUMP)
 	{
 		if (player->onground && !player->jumpTics && (player->bSpectating || level.IsJumpingAllowed()))
@@ -3538,13 +3544,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			player->mo->velz += JumpVelz;
 			player->doubleJumpTics = 6;
 			player->jumpTics = -1;
-			player->onground = false;
 
 			// notify the change of jumptics
 			if (NETWORK_GetState() == NETSTATE_SERVER)
 				SERVERCOMMANDS_SetLocalPlayerJumpTics(player - players);
 		}
-		else if (isDoubleJumper && !player->onground && !player->doubleJumpTics)
+		else if ((player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP) &&
+			!player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
 		{
 			// Wall proximity check
 			bool doWallJump = false;
@@ -3590,16 +3596,16 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				}
 
 				player->doubleJumpTics = -1;
+
+				// notify the change of jumptics
 				if (NETWORK_GetState() == NETSTATE_SERVER)
 					SERVERCOMMANDS_SetLocalPlayerJumpTics(player - players);
 			}
 		}
 	}
-	else if (isDoubleJumper && player->doubleJumpTics > 0)
+	else
 	{
-		player->doubleJumpTics = 0;
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SetLocalPlayerJumpTics(player - players);
+		player->blockDoubleJump = false;
 	}
 }
 
@@ -4294,12 +4300,9 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			player->jumpTics = 0;
 		}
 	}
-	if (player->doubleJumpTics)
+	if (!player->onground && player->doubleJumpTics)
 	{
-		if (player->onground)
-			player->doubleJumpTics = 0;
-		else if(player->doubleJumpTics > 1) // when in the air, only releasing the jump button
-			player->doubleJumpTics--;		// can make this value 0
+		player->doubleJumpTics--;
 	}
 	if (player->morphTics)// && !(player->cheats & CF_PREDICTING))
 	{
@@ -4832,6 +4835,7 @@ void player_t::Serialize (FArchive &arc)
 		<< chickenPeck
 		<< jumpTics
 		<< doubleJumpTics
+		<< blockDoubleJump
 		<< slideDuration
 		<< wallClimbStamina
 		<< wasClimbing
