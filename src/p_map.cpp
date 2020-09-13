@@ -5764,7 +5764,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 					if (!(flags & RADF_NODAMAGE) && !(bombspot->flags3 & MF3_BLOODLESSIMPACT))
 						P_TraceBleed(newdam > 0 ? newdam : damage, thing, bombspot);
 
-					if ((flags & RADF_NODAMAGE) || (bombsource == NULL || !(bombspot->flags2 & MF2_NODMGTHRUST)))
+					if (((flags & RADF_NODAMAGE) && bombsource == NULL) || !(bombspot->flags2 & MF2_NODMGTHRUST))
 					{
 						// tweaked behavior rockets, only affects players
 						if ((flags & RADF_QROCKETJUMP) && thing->player != NULL)
