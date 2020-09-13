@@ -3444,7 +3444,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 			// Acceleration
-			if (!velocity) { velocity = float(vel.Length()); }
+			if (!velocity)
+				velocity = float(vel.Length());
 			if (mv_type == MV_QUAKE_CPMA && cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
 				player->mo->QAcceleration(vel, acceleration, 1.5f, mv_cpmacceleration);
 			else
