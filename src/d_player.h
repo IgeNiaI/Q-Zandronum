@@ -554,8 +554,8 @@ public:
 
 	// [Ivory] movement additions
 	int			doubleJumpState;
-	int			slideDuration;
-	bool		wasSliding;
+	int			crouchSlideTics;
+	bool		isCrouchSliding;
 	int			wallClimbTics;
 	bool		isWallClimbing;
 
@@ -884,5 +884,6 @@ EXTERN_CVAR( Float,	mv_stopspeed );
 EXTERN_CVAR( Float,	mv_crouchspeedfactor );
 EXTERN_CVAR( Float,	mv_walkspeedfactor );
 EXTERN_CVAR( Int,	mv_wallclimbtics );
+EXTERN_CVAR( Int,	mv_crouchslidetics );
 
 #endif // __D_PLAYER_H__

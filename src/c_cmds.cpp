@@ -1093,6 +1093,7 @@ CCMD(movement)
 			mv_crouchspeedfactor = 0.25f;
 			mv_walkspeedfactor = 0.5f;
 			mv_wallclimbtics = 70;
+			mv_crouchslidetics = 70;
 		}
 		if (strcmp(arg1, "cpma") == 0) {
 			mv_type = MV_QUAKE_CPMA;
@@ -1107,6 +1108,7 @@ CCMD(movement)
 			mv_crouchspeedfactor = 0.25f;
 			mv_walkspeedfactor = 0.5f;
 			mv_wallclimbtics = 70;
+			mv_crouchslidetics = 70;
 		}
 	}
 }

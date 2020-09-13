@@ -299,8 +299,8 @@ player_t::player_t()
   chickenPeck(0),
   jumpTics(0),
   doubleJumpState(0),
-  slideDuration(0),
-  wasSliding(0),
+  crouchSlideTics(0),
+  isCrouchSliding(0),
   wallClimbTics(0),
   isWallClimbing(0),
   onground(0),
@@ -438,8 +438,8 @@ player_t &player_t::operator=(const player_t &p)
 	chickenPeck = p.chickenPeck;
 	jumpTics = p.jumpTics;
 	doubleJumpState = p.doubleJumpState;
-	slideDuration = p.slideDuration;
-	wasSliding = p.wasSliding;
+	crouchSlideTics = p.crouchSlideTics;
+	isCrouchSliding = p.isCrouchSliding;
 	wallClimbTics = p.wallClimbTics;
 	isWallClimbing = p.isWallClimbing;
 	onground = p.onground;
@@ -2929,6 +2929,13 @@ CUSTOM_CVAR( Int, mv_wallclimbtics, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
+CUSTOM_CVAR( Int, mv_crouchslidetics, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
 //***************************************************
 // Vectors Math
 //***************************************************
@@ -3025,7 +3032,7 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 void P_Slide_Looping_Sounds(player_t *player, const bool& canslide)
 {
 	// crouch slide sound start/stop
-	if (canslide && !player->wasSliding)
+	if (canslide && !player->isCrouchSliding)
 	{
 		if (!CLIENT_PREDICT_IsPredicting())
 			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
@@ -3033,12 +3040,12 @@ void P_Slide_Looping_Sounds(player_t *player, const bool& canslide)
 		if (NETWORK_GetState() == NETSTATE_SERVER)
 			SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 	}
-	else if (!canslide && player->wasSliding)
+	else if (!canslide && player->isCrouchSliding)
 	{
 		S_StopSound(player->mo, CHAN_SEVEN);
 	}
 
-	player->wasSliding = canslide;
+	player->isCrouchSliding = canslide;
 }
 
 void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
@@ -3354,7 +3361,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		noJump = true;
 
-		// Reset wall climb stamina
+		// Reset wall climb tics
 		player->wallClimbTics = mv_wallclimbtics;
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
@@ -3385,7 +3392,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		noJump = true;
 
-		// Reset wall climb stamina
+		// Reset wall climb tics
 		player->wallClimbTics = mv_wallclimbtics;
 	}
 	else
@@ -3444,14 +3451,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
 
 			// set slide duration if player can do it
-			if (isSlider)
-				player->slideDuration = level.maptime - FixedDiv(player->mo->velz, 1000000000);
+			if (isSlider && player->mo->velz < -450000)
+				player->crouchSlideTics = mv_crouchslidetics;
 		}
 		else
 		{
 			canSlide = isSlider &&									// player has the flag
 					   player->crouchfactor < CROUCHSCALEHALFWAY &&	// player is crouching
-					   level.maptime <= player->slideDuration;		// there is crouch slide charge to spend
+					   player->crouchSlideTics;		// there is crouch slide charge to spend
 
 			// Input vector
 			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
@@ -3463,19 +3470,17 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			{
 				player->mo->QFriction(vel, maxgroundspeed, mv_slidefriction * floorFriction);
 				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_slideacceleration * floorFriction);
+				player->crouchSlideTics--;
 			}
 			else
 			{
 				maxgroundspeed *= movefactor;
 				player->mo->QFriction(vel, maxgroundspeed, mv_friction * floorFriction);
 				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_acceleration / movefactor * floorFriction);
+				player->crouchSlideTics = 0;
 			}
 
-			// If not using CSlide right away clear it
-			if (!canSlide)
-				player->slideDuration = 0;
-
-			// Reset wall climb stamina
+			// Reset wall climb tics
 			player->wallClimbTics = mv_wallclimbtics;
 		}
 	}
@@ -3486,8 +3491,17 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	player->mo->velz = FLOAT2FIXED(vel.Z);
 
 	// also take care of view/weapon bobbing
-	player->velx = player->mo->velx;
-	player->vely = player->mo->vely;
+	if (canSlide)
+	{
+		// but not when sliding
+		player->velx = 0;
+		player->vely = 0;
+	}
+	else
+	{
+		player->velx = player->mo->velx;
+		player->vely = player->mo->vely;
+	}
 
 	// handle looping sounds of slide and climb
 	if (isSlider)
@@ -4820,7 +4834,8 @@ void player_t::Serialize (FArchive &arc)
 		<< chickenPeck
 		<< jumpTics
 		<< doubleJumpState
-		<< slideDuration
+		<< crouchSlideTics
+		<< isCrouchSliding
 		<< wallClimbTics
 		<< isWallClimbing
 		<< respawn_time

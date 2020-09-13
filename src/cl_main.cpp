@@ -2866,8 +2866,8 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->chickenPeck = 0;
 	pPlayer->jumpTics = 0;
 	pPlayer->doubleJumpState = 0;
-	pPlayer->slideDuration = 0;
-	pPlayer->wasSliding = 0;
+	pPlayer->crouchSlideTics = 0;
+	pPlayer->isCrouchSliding = 0;
 	pPlayer->wallClimbTics = 0;
 	pPlayer->isWallClimbing = 0;
 	pPlayer->respawn_time = 0;
@@ -5746,6 +5746,10 @@ static void client_SetMovementConfig(BYTESTREAM_s *pByteStream)
 	// Read in, and set the value for wallclimbtics.
 	Value.Int = NETWORK_ReadShort(pByteStream);
 	mv_wallclimbtics.ForceSet(Value, CVAR_Int);
+
+	// Read in, and set the value for crouchslidetics.
+	Value.Int = NETWORK_ReadShort(pByteStream);
+	mv_crouchslidetics.ForceSet(Value, CVAR_Int);
 }
 
 //*****************************************************************************

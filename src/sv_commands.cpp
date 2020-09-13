@@ -2159,6 +2159,7 @@ void SERVERCOMMANDS_SetMovementConfig( ULONG ulPlayerExtra, ServerCommandFlags f
 	command.addFloat( mv_crouchspeedfactor );
 	command.addFloat( mv_walkspeedfactor );
 	command.addShort( mv_wallclimbtics );
+	command.addShort( mv_crouchslidetics );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
