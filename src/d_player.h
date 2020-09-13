@@ -553,8 +553,7 @@ public:
 	bool		onground;				// Identifies if this player is on the ground or other object
 
 	// [Ivory] movement additions
-	int			doubleJumpTics;
-	bool		blockDoubleJump;
+	int			doubleJumpState;
 	int			slideDuration;
 	bool		wasSliding;
 	int			wallClimbStamina;
@@ -863,6 +862,14 @@ enum
 	MV_QUAKE,
 	MV_QUAKE_CPMA,
 	MV_TYPES_END
+};
+
+// [geNia] double jump state
+enum
+{
+	DJ_NOT_AVAILABLE,
+	DJ_AVAILABLE,
+	DJ_READY
 };
 
 EXTERN_CVAR( Int,	mv_type );

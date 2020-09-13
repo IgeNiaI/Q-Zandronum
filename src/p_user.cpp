@@ -298,8 +298,7 @@ player_t::player_t()
   PremorphWeapon(0),
   chickenPeck(0),
   jumpTics(0),
-  doubleJumpTics(0),
-  blockDoubleJump(0),
+  doubleJumpState(0),
   slideDuration(0),
   wasSliding(0),
   wallClimbStamina(0),
@@ -438,8 +437,7 @@ player_t &player_t::operator=(const player_t &p)
 	PremorphWeapon = p.PremorphWeapon;
 	chickenPeck = p.chickenPeck;
 	jumpTics = p.jumpTics;
-	doubleJumpTics = p.doubleJumpTics;
-	blockDoubleJump = p.blockDoubleJump;
+	doubleJumpState = p.doubleJumpState;
 	slideDuration = p.slideDuration;
 	wasSliding = p.wasSliding;
 	wallClimbStamina = p.wallClimbStamina;
@@ -3240,12 +3238,11 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 			player->mo->velz += JumpVelz;
 			player->jumpTics = ulJumpTicks;
-			player->doubleJumpTics = 6;
-			player->blockDoubleJump = true;
 		}
 		// [Ivory]: Double Jump and wall jump
-		else if((player->mo->flags7 & MF7_WALLJUMP|MF7_DOUBLEJUMP) &&
-			    !player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
+		else if ( (player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP)
+				&& !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel
+				&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
 			// Wall proximity check
 			bool doWallJump = false;
@@ -3290,13 +3287,16 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					player->mo->velz += JumpVelz;
 				}
 
-				player->doubleJumpTics = -1;
+				player->doubleJumpState = DJ_NOT_AVAILABLE;
 			}
 		}
 	}
 	else
 	{
-		player->blockDoubleJump = false;
+		if (player->onground)
+			player->doubleJumpState = DJ_AVAILABLE;
+		else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
+			player->doubleJumpState = DJ_READY;
 	}
 }
 
@@ -3536,12 +3536,11 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			player->mo->flags2 &= ~MF2_ONMOBJ;
 			player->mo->velz += JumpVelz;
-			player->doubleJumpTics = 6;
 			player->jumpTics = -1;
-			player->blockDoubleJump = true;
 		}
-		else if ((player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP) &&
-			!player->onground && !player->doubleJumpTics && !player->blockDoubleJump)
+		else if ((player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP)
+			&& !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel
+			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
 			// Wall proximity check
 			bool doWallJump = false;
@@ -3586,13 +3585,16 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					player->mo->velz += JumpVelz;
 				}
 
-				player->doubleJumpTics = -1;
+				player->doubleJumpState = DJ_NOT_AVAILABLE;
 			}
 		}
 	}
 	else
 	{
-		player->blockDoubleJump = false;
+		if (player->onground)
+			player->doubleJumpState = DJ_AVAILABLE;
+		else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
+			player->doubleJumpState = DJ_READY;
 	}
 }
 
@@ -4287,10 +4289,6 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			player->jumpTics = 0;
 		}
 	}
-	if (!player->onground && player->doubleJumpTics)
-	{
-		player->doubleJumpTics--;
-	}
 	if (player->morphTics)// && !(player->cheats & CF_PREDICTING))
 	{
 		player->mo->MorphPlayerThink ();
@@ -4821,8 +4819,7 @@ void player_t::Serialize (FArchive &arc)
 		<< PremorphWeapon
 		<< chickenPeck
 		<< jumpTics
-		<< doubleJumpTics
-		<< blockDoubleJump
+		<< doubleJumpState
 		<< slideDuration
 		<< wallClimbStamina
 		<< wasClimbing
