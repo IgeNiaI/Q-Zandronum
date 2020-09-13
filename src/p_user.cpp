@@ -3172,12 +3172,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// set wall climb parameters
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
 		player->wallClimbStamina = std::max(int(mv_wallclimbstamina), player->wallClimbStamina + 1);
-	if (isClimber) { P_Climb_Looping_Sounds(player, canClimb); }
+	if (isClimber)
+		P_Climb_Looping_Sounds(player, canClimb);
 
 	//**********************************
 	// Jumping
 
-	if (canClimb) { return; }
+	if (canClimb)
+		return;
 
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
@@ -3442,7 +3444,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
 
 			// set slide duration if player can do it
-			if (isSlider) { player->slideDuration = level.maptime - FixedDiv(player->mo->velz, 1000000000); }
+			if (isSlider)
+				player->slideDuration = level.maptime - FixedDiv(player->mo->velz, 1000000000);
 		}
 		else
 		{
@@ -3469,7 +3472,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 
 			// If not using CSlide right away clear it
-			if (!canSlide) { player->slideDuration = 0; }
+			if (!canSlide)
+				player->slideDuration = 0;
 
 			// Reset wall climb stamina
 			player->wallClimbStamina = std::max(int(mv_wallclimbstamina), player->wallClimbStamina + 1);
@@ -3486,8 +3490,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	player->vely = player->mo->vely;
 
 	// handle looping sounds of slide and climb
-	if (isSlider) { P_Slide_Looping_Sounds(player, canSlide); }
-	if (isClimber) { P_Climb_Looping_Sounds(player, canClimb); }
+	if (isSlider)
+		P_Slide_Looping_Sounds(player, canSlide);
+	if (isClimber)
+		P_Climb_Looping_Sounds(player, canClimb);
 
 	// Only play run animation when moving and not in the air
 	if (!CLIENT_PREDICT_IsPredicting() && player->onground &&
@@ -3507,7 +3513,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	//*******************************************************
 
 	// Water and flying have already executed jump press logic
-	if (noJump) { return; }
+	if (noJump)
+		return;
 
 	// Stop here if not in good condition to jump
 	if (cmd->ucmd.buttons & BT_JUMP)
