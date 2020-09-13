@@ -1086,7 +1086,7 @@ CCMD(movement)
 			mv_jumptics = 0;
 			mv_acceleration = 10.f;
 			mv_friction = 6.f;
-			mv_slidefriction = 0.08f;
+			mv_slidefriction = 1.f;
 			mv_airacceleration = 1.5f;
 			mv_slideacceleration = 4.f;
 			mv_stopspeed = 12.f;
@@ -1100,7 +1100,7 @@ CCMD(movement)
 			mv_jumptics = 0;
 			mv_acceleration = 10.f;
 			mv_friction = 6.f;
-			mv_slidefriction = 0.08f;
+			mv_slidefriction = 1.f;
 			mv_airacceleration = 1.5f;
 			mv_slideacceleration = 4.f;
 			mv_stopspeed = 12.f;

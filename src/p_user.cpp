@@ -2873,7 +2873,7 @@ CUSTOM_CVAR( Float, mv_friction, 1.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Float, mv_slidefriction, 0.08f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+CUSTOM_CVAR( Float, mv_slidefriction, 1.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -3176,7 +3176,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	// set wall climb parameters
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
-		player->wallClimbTics = mv_wallclimbtics;
+		player->wallClimbTics = std::min(int(mv_wallclimbtics), player->wallClimbTics + 1);
 	if (isClimber)
 		P_Climb_Looping_Sounds(player, canClimb);
 
@@ -3362,7 +3362,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb tics
-		player->wallClimbTics = mv_wallclimbtics;
+		player->wallClimbTics = std::min(int(mv_wallclimbtics), player->wallClimbTics + 1);
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3393,7 +3393,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb tics
-		player->wallClimbTics = mv_wallclimbtics;
+		player->wallClimbTics = std::min(int(mv_wallclimbtics), player->wallClimbTics + 1);
 	}
 	else
 	{
@@ -3451,15 +3451,16 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			else
 				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
 
-			// set slide duration if player can do it
-			if (isSlider && player->mo->velz < -450000)
-				player->crouchSlideTics = mv_crouchslidetics;
+			// set slide duration if player can do it.
+			// Duration is proportional to the velz.
+			if (isSlider && player->mo->velz < 0)
+				player->crouchSlideTics = std::min(- FixedDiv(player->mo->velz, 1000000000), int(mv_crouchslidetics));
 		}
 		else
 		{
 			canSlide = isSlider &&									// player has the flag
 					   player->crouchfactor < CROUCHSCALEHALFWAY &&	// player is crouching
-					   player->crouchSlideTics;		// there is crouch slide charge to spend
+					   player->crouchSlideTics;						// there is crouch slide charge to spend
 
 			// Input vector
 			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
@@ -3482,7 +3483,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 
 			// Reset wall climb tics
-			player->wallClimbTics = mv_wallclimbtics;
+			player->wallClimbTics = std::min(int(mv_wallclimbtics), player->wallClimbTics + 1);
 		}
 	}
 
@@ -3512,7 +3513,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	// Only play run animation when moving and not in the air
 	if (!CLIENT_PREDICT_IsPredicting() && player->onground &&
-		!player->bSpectating && (player->mo->velx || player->mo->vely))
+		!player->bSpectating && (player->mo->velx || player->mo->vely) && !canSlide)
 	{
 		player->mo->PlayRunning();
 	}
