@@ -86,6 +86,8 @@ static	fixed_t		g_SavedSpeed[CLIENT_PREDICTION_TICS];
 static	fixed_t		g_SavedCrouchfactor[CLIENT_PREDICTION_TICS];
 static	LONG		g_lSavedJumpTicks[CLIENT_PREDICTION_TICS];
 static	BYTE		g_lSavedDoubleJumpState[CLIENT_PREDICTION_TICS];
+static	LONG		g_lSavedWallClimbTics[CLIENT_PREDICTION_TICS];
+static	BYTE		g_lSavedIsWallClimbing[CLIENT_PREDICTION_TICS];
 static	BYTE		g_SavedTurnTicks[CLIENT_PREDICTION_TICS];
 static	LONG		g_lSavedReactionTime[CLIENT_PREDICTION_TICS];
 static	LONG		g_lSavedWaterLevel[CLIENT_PREDICTION_TICS];
@@ -329,6 +331,8 @@ static void client_predict_BeginPrediction( player_t *pPlayer )
 	g_SavedCrouchfactor[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->crouchfactor;
 	g_lSavedJumpTicks[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->jumpTics;
 	g_lSavedDoubleJumpState[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->doubleJumpState;
+	g_lSavedWallClimbTics[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->wallClimbTics;
+	g_lSavedIsWallClimbing[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->isWallClimbing;
 	g_SavedTurnTicks[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->turnticks;
 	g_lSavedReactionTime[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->reactiontime;
 	g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->waterlevel;
@@ -380,6 +384,8 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		pPlayer->crouchfactor = g_SavedCrouchfactor[( lTick + 1 )% CLIENT_PREDICTION_TICS];
 		pPlayer->jumpTics = g_lSavedJumpTicks[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->doubleJumpState = g_lSavedDoubleJumpState[lTick % CLIENT_PREDICTION_TICS];
+		pPlayer->wallClimbTics = g_lSavedWallClimbTics[lTick % CLIENT_PREDICTION_TICS];
+		pPlayer->isWallClimbing = g_lSavedIsWallClimbing[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->turnticks = g_SavedTurnTicks[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->reactiontime = g_lSavedReactionTime[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->waterlevel = g_lSavedWaterLevel[lTick % CLIENT_PREDICTION_TICS];
@@ -413,6 +419,8 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->crouchfactor = g_SavedCrouchfactor[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->jumpTics = g_lSavedJumpTicks[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->doubleJumpState = g_lSavedDoubleJumpState[g_ulGameTick % CLIENT_PREDICTION_TICS];
+	pPlayer->wallClimbTics = g_lSavedWallClimbTics[g_ulGameTick % CLIENT_PREDICTION_TICS];
+	pPlayer->isWallClimbing = g_lSavedIsWallClimbing[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->turnticks = g_SavedTurnTicks[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->reactiontime = g_lSavedReactionTime[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->waterlevel = g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS];

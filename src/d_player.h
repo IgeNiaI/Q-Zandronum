@@ -556,8 +556,8 @@ public:
 	int			doubleJumpState;
 	int			slideDuration;
 	bool		wasSliding;
-	int			wallClimbStamina;
-	bool		wasClimbing;
+	int			wallClimbTics;
+	bool		isWallClimbing;
 
 	int			respawn_time;			// [RH] delay respawning until this tic
 	TObjPtr<AActor>		camera;			// [RH] Whose eyes this player sees through
@@ -883,6 +883,6 @@ EXTERN_CVAR( Float, mv_slideacceleration );
 EXTERN_CVAR( Float,	mv_stopspeed );
 EXTERN_CVAR( Float,	mv_crouchspeedfactor );
 EXTERN_CVAR( Float,	mv_walkspeedfactor );
-EXTERN_CVAR( Int,	mv_wallclimbstamina );
+EXTERN_CVAR( Int,	mv_wallclimbtics );
 
 #endif // __D_PLAYER_H__

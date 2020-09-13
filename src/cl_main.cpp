@@ -2868,8 +2868,8 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->doubleJumpState = 0;
 	pPlayer->slideDuration = 0;
 	pPlayer->wasSliding = 0;
-	pPlayer->wallClimbStamina = 0;
-	pPlayer->wasClimbing = 0;
+	pPlayer->wallClimbTics = 0;
+	pPlayer->isWallClimbing = 0;
 	pPlayer->respawn_time = 0;
 	pPlayer->camera = 0;
 	pPlayer->air_finished = 0;
@@ -5743,9 +5743,9 @@ static void client_SetMovementConfig(BYTESTREAM_s *pByteStream)
 	Value.Float = NETWORK_ReadFloat(pByteStream);
 	mv_walkspeedfactor.ForceSet(Value, CVAR_Float);
 
-	// Read in, and set the value for stopspeed.
+	// Read in, and set the value for wallclimbtics.
 	Value.Int = NETWORK_ReadShort(pByteStream);
-	mv_wallclimbstamina.ForceSet(Value, CVAR_Int);
+	mv_wallclimbtics.ForceSet(Value, CVAR_Int);
 }
 
 //*****************************************************************************

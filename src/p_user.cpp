@@ -301,8 +301,8 @@ player_t::player_t()
   doubleJumpState(0),
   slideDuration(0),
   wasSliding(0),
-  wallClimbStamina(0),
-  wasClimbing(0),
+  wallClimbTics(0),
+  isWallClimbing(0),
   onground(0),
   respawn_time(0),
   camera(0),
@@ -440,8 +440,8 @@ player_t &player_t::operator=(const player_t &p)
 	doubleJumpState = p.doubleJumpState;
 	slideDuration = p.slideDuration;
 	wasSliding = p.wasSliding;
-	wallClimbStamina = p.wallClimbStamina;
-	wasClimbing = p.wasClimbing;
+	wallClimbTics = p.wallClimbTics;
+	isWallClimbing = p.isWallClimbing;
 	onground = p.onground;
 	respawn_time = p.respawn_time;
 	camera = p.camera;
@@ -2922,7 +2922,7 @@ CUSTOM_CVAR( Float, mv_walkspeedfactor, 0.75f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Int, mv_wallclimbstamina, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
+CUSTOM_CVAR( Int, mv_wallclimbtics, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.
 	if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -3044,7 +3044,7 @@ void P_Slide_Looping_Sounds(player_t *player, const bool& canslide)
 void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 {
 	// Wall climb parameters and sound start/stop
-	if (canclimb && !player->wasClimbing)
+	if (canclimb && !player->isWallClimbing)
 	{
 		if (!CLIENT_PREDICT_IsPredicting())
 			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
@@ -3052,12 +3052,12 @@ void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 		if (NETWORK_GetState() == NETSTATE_SERVER)
 			SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 	}
-	else if (!(canclimb % 2) && player->wasClimbing)
+	else if (!(canclimb % 2) && player->isWallClimbing)
 	{
 		S_StopSound(player->mo, CHAN_SEVEN);
 	}
 
-	player->wasClimbing = canclimb < 2 ? canclimb != 0 : false;
+	player->isWallClimbing = canclimb < 2 ? canclimb != 0 : false;
 }
 
 //==========================================================================
@@ -3072,7 +3072,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool isClimber = player->mo->flags7 & MF7_WALLCLIMB ? true : false;
 
 	// Wall proximity check
-	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbStamina > 0 &&
+	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 &&
 		FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length() <= 16.f)
 	{
 		FTraceResults trace;
@@ -3087,7 +3087,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 		if (trace.HitType == TRACE_HitWall)
 			canClimb = 1;
-		else if (player->wasClimbing) // if over the ledge give it a final kick
+		else if (player->isWallClimbing) // if over the ledge give it a final kick
 			canClimb = 2;
 	}
 
@@ -3096,12 +3096,12 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		if (canClimb == 1)
 		{
 			player->mo->velz = FLOAT2FIXED(5.f);
-			player->wallClimbStamina--;
+			player->wallClimbTics--;
 		}
 		else
 		{
 			player->mo->velz = FLOAT2FIXED(8.f);
-			player->wallClimbStamina = 0;
+			player->wallClimbTics = 0;
 		}
 	}
 	else if (cmd->ucmd.forwardmove | cmd->ucmd.sidemove)
@@ -3169,7 +3169,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	// set wall climb parameters
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
-		player->wallClimbStamina = std::max(int(mv_wallclimbstamina), player->wallClimbStamina + 1);
+		player->wallClimbTics = mv_wallclimbtics;
 	if (isClimber)
 		P_Climb_Looping_Sounds(player, canClimb);
 
@@ -3355,7 +3355,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb stamina
-		player->wallClimbStamina = mv_wallclimbstamina;
+		player->wallClimbTics = mv_wallclimbtics;
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3386,14 +3386,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb stamina
-		player->wallClimbStamina = mv_wallclimbstamina;
+		player->wallClimbTics = mv_wallclimbtics;
 	}
 	else
 	{
 		float velocity = 0.f;
 
 		// Wall proximity check
-		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbStamina > 0 && (velocity = float(vel.Length())) <= maxgroundspeed + 2.f)
+		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (velocity = float(vel.Length())) <= maxgroundspeed + 2.f)
 		{
 			FTraceResults trace;
 			fixed_t distance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
@@ -3407,7 +3407,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			
 			if (trace.HitType == TRACE_HitWall)
 				canClimb = 1;
-			else if (player->wasClimbing) // if over the ledge give it a final kick
+			else if (player->wallClimbTics) // if over the ledge give it a final kick
 				canClimb = 2;
 		}
 
@@ -3417,12 +3417,12 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			if (canClimb == 1)
 			{
 				vel.Z = 5.f;
-				player->wallClimbStamina--;
+				player->wallClimbTics--;
 			}
 			else
 			{
 				vel.Z = 8.f;
-				player->wallClimbStamina = 0;
+				player->wallClimbTics = 0;
 			}
 
 			noJump = true;
@@ -3476,7 +3476,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				player->slideDuration = 0;
 
 			// Reset wall climb stamina
-			player->wallClimbStamina = std::max(int(mv_wallclimbstamina), player->wallClimbStamina + 1);
+			player->wallClimbTics = mv_wallclimbtics;
 		}
 	}
 
@@ -4821,8 +4821,8 @@ void player_t::Serialize (FArchive &arc)
 		<< jumpTics
 		<< doubleJumpState
 		<< slideDuration
-		<< wallClimbStamina
-		<< wasClimbing
+		<< wallClimbTics
+		<< isWallClimbing
 		<< respawn_time
 		<< air_finished
 		<< turnticks
