@@ -5633,7 +5633,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 		bombsource = bombspot;
 	}
 
-	while ((thing = it.Next()))
+	while (thing = it.Next())
 	{
 		// Vulnerable actors can be damaged by radius attacks even if not shootable
 		// Used to emulate MBF's vulnerability of non-missile bouncers to explosions.
@@ -5734,7 +5734,9 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 				if ( NETWORK_InClientMode() == false )
 				{
 					if (!(flags & RADF_NODAMAGE))
+					{
 						newdam = P_DamageMobj(thing, bombspot, bombsource, damage, bombmod);
+					}
 					else if (thing->player == NULL && !(flags & RADF_NOIMPACTDAMAGE))
 					{
 						thing->flags2 |= MF2_BLASTED;
@@ -5762,9 +5764,25 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 					if (!(flags & RADF_NODAMAGE) && !(bombspot->flags3 & MF3_BLOODLESSIMPACT))
 						P_TraceBleed(newdam > 0 ? newdam : damage, thing, bombspot);
 
-					if ((flags & RADF_NODAMAGE) || !(bombspot->flags2 & MF2_NODMGTHRUST))
+					if ((flags & RADF_NODAMAGE) || (bombsource == NULL || !(bombspot->flags2 & MF2_NODMGTHRUST)))
 					{
-						if (bombsource == NULL || !(bombsource->flags2 & MF2_NODMGTHRUST))
+						// tweaked behavior rockets, only affects players
+						if ((flags & RADF_QROCKETJUMP) && thing->player != NULL)
+						{
+							FVector3 thingPos = { FIXED2FLOAT(thing->x), FIXED2FLOAT(thing->y) , FIXED2FLOAT(thing->z + thing->player->viewheight) };
+							FVector3 explosionToPlayer = thingPos - FVector3(FIXED2FLOAT(bombspot->x), FIXED2FLOAT(bombspot->y), FIXED2FLOAT(bombspot->z));
+							explosionToPlayer.MakeUnit();
+
+							int pushDamage = damage;
+							bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
+							pushDamage = MIN(pushDamage, (damage * 5) / 4); // put a cap on the push force
+							explosionToPlayer *= pushDamage * 0.4f;
+
+							thing->velx += FLOAT2FIXED(explosionToPlayer.X);
+							thing->vely += FLOAT2FIXED(explosionToPlayer.Y);
+							thing->velz += FLOAT2FIXED(explosionToPlayer.Z);
+						}
+						else
 						{
 							thrust = points * 0.5f / (double)thing->Mass;
 							if (bombsource == thing)
@@ -5772,17 +5790,9 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 								thrust *= selfthrustscale;
 							}
 							velz = (double)(thing->z + (thing->height >> 1) - bombspot->z) * thrust;
-							if (bombsource != thing)
-							{
-								velz *= 0.5f;
-							}
-							else
-							{
-								velz *= 0.8f;
-							}
 
 							// [BB] Potentially use the horizontal thrust of old ZDoom versions.
-							if ( zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST )
+							if (zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST)
 							{
 								thing->velx = origvelx + static_cast<fixed_t>((thing->x - bombspot->x) * thrust);
 								thing->vely = origvely + static_cast<fixed_t>((thing->y - bombspot->y) * thrust);
@@ -5795,8 +5805,8 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							}
 
 							// [BB] If ZADF_NO_ROCKET_JUMPING is on, don't give players any z-velocity if the attack was made by a player.
-							if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
-								( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
+							if (((zadmflags & ZADF_NO_ROCKET_JUMPING) == false) ||
+								(bombsource == NULL) || (bombsource->player == NULL) || (thing->player == NULL))
 							{
 								if (!(flags & RADF_NODAMAGE))
 									thing->velz += (fixed_t)velz;	// this really doesn't work well

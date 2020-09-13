@@ -3004,7 +3004,7 @@ void APlayerPawn::QFriction(FVector3 &vel, const float stopspeed, const float fr
 		drop = control * friction / TICRATE;
 	}
 
-	float newvelocity = std::max(velocity - drop, 0.f) / velocity;
+	float newvelocity = MAX(velocity - drop, 0.f) / velocity;
 
 	vel.X *= newvelocity;
 	vel.Y *= newvelocity;
@@ -3017,7 +3017,7 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 	float addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0.f) { return; }
 
-	float accelerationspeed = std::min(accel * wishspeed / TICRATE, addspeed);
+	float accelerationspeed = MIN(accel * wishspeed / TICRATE, addspeed);
 	vel.X += wishdir.X * accelerationspeed;
 	vel.Y += wishdir.Y * accelerationspeed;
 	vel.Z += wishdir.Z * accelerationspeed;
@@ -3176,7 +3176,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	// set wall climb parameters
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
-		player->wallClimbTics = std::min(int(mv_wallclimbtics), player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(int(mv_wallclimbtics), player->wallClimbTics + 1);
 	if (isClimber)
 		P_Climb_Looping_Sounds(player, canClimb);
 
@@ -3362,7 +3362,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb tics
-		player->wallClimbTics = std::min(int(mv_wallclimbtics), player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(int(mv_wallclimbtics), player->wallClimbTics + 1);
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3393,7 +3393,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb tics
-		player->wallClimbTics = std::min(int(mv_wallclimbtics), player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(int(mv_wallclimbtics), player->wallClimbTics + 1);
 	}
 	else
 	{
@@ -3454,7 +3454,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			// set slide duration if player can do it.
 			// Duration is proportional to the velz.
 			if (isSlider && player->mo->velz < 0)
-				player->crouchSlideTics = std::min(- FixedDiv(player->mo->velz, 1000000000), int(mv_crouchslidetics));
+				player->crouchSlideTics = MIN(- FixedDiv(player->mo->velz, 1000000000), int(mv_crouchslidetics));
 		}
 		else
 		{
@@ -3483,7 +3483,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 
 			// Reset wall climb tics
-			player->wallClimbTics = std::min(int(mv_wallclimbtics), player->wallClimbTics + 1);
+			player->wallClimbTics = MIN(int(mv_wallclimbtics), player->wallClimbTics + 1);
 		}
 	}
 
