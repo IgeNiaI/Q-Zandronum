@@ -2960,6 +2960,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t newx, newy;
 	fixed_t xmove, ymove;
 	const secplane_t * walkplane;
+	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
 	int hitcount;
 
 	hitcount = 3;
@@ -3049,12 +3050,15 @@ retry:
 
 	HitSlideLine(bestslideline); 	// clip the moves
 
-	mo->velx = tmxmove * numsteps;
-	mo->vely = tmymove * numsteps;
-
 	// killough 10/98: affect the bobbing the same way (but not voodoo dolls)
-	if (mo->player && mo->player->mo == mo)
+	if (playerNotVoodoo)
 	{
+		if(mv_type == MV_DOOM)
+		{
+			mo->velx = tmxmove * numsteps;
+			mo->vely = tmymove * numsteps;
+		}
+
 		if (abs(mo->player->velx) > abs(mo->velx))
 			mo->player->velx = mo->velx;
 		if (abs(mo->player->vely) > abs(mo->vely))

@@ -3018,9 +3018,7 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 	if (addspeed <= 0.f) { return; }
 
 	float accelerationspeed = MIN(accel * wishspeed / TICRATE, addspeed);
-	vel.X += wishdir.X * accelerationspeed;
-	vel.Y += wishdir.Y * accelerationspeed;
-	vel.Z += wishdir.Z * accelerationspeed;
+	vel += wishdir * accelerationspeed;
 }
 
 //==========================================================================

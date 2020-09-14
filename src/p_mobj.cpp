@@ -2922,8 +2922,8 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 					!(mo->player->cmd.ucmd.buttons & BT_JUMP))
 			{
 				float velx = FIXED2FLOAT(mo->velx), vely = FIXED2FLOAT(mo->vely);
-				if (float(TVector2<float>(velx, vely).Length()) < 4.f)
-					mo->velz = - FLOAT2FIXED(0.5f);
+				if (FVector2(velx, vely).Length() < 4.)
+					mo->velz = - 32768; // 0.5f
 			}
 		}
 		else
