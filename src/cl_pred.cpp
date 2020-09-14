@@ -389,9 +389,9 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		pPlayer->jumpTics = g_lSavedJumpTicks[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->doubleJumpState = g_lSavedDoubleJumpState[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->wallClimbTics = g_lSavedWallClimbTics[lTick % CLIENT_PREDICTION_TICS];
-		pPlayer->isWallClimbing = g_lSavedIsWallClimbing[lTick % CLIENT_PREDICTION_TICS];
+		pPlayer->isWallClimbing = g_lSavedIsWallClimbing[lTick % CLIENT_PREDICTION_TICS] > 0;
 		pPlayer->crouchSlideTics = g_lSavedCrouchSlideTics[lTick % CLIENT_PREDICTION_TICS];
-		pPlayer->isCrouchSliding = g_lSavedIsCrouchSliding[lTick % CLIENT_PREDICTION_TICS];
+		pPlayer->isCrouchSliding = g_lSavedIsCrouchSliding[lTick % CLIENT_PREDICTION_TICS] > 0;
 		pPlayer->turnticks = g_SavedTurnTicks[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->reactiontime = g_lSavedReactionTime[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->waterlevel = g_lSavedWaterLevel[lTick % CLIENT_PREDICTION_TICS];
@@ -426,9 +426,9 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->jumpTics = g_lSavedJumpTicks[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->doubleJumpState = g_lSavedDoubleJumpState[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->wallClimbTics = g_lSavedWallClimbTics[g_ulGameTick % CLIENT_PREDICTION_TICS];
-	pPlayer->isWallClimbing = g_lSavedIsWallClimbing[g_ulGameTick % CLIENT_PREDICTION_TICS];
+	pPlayer->isWallClimbing = g_lSavedIsWallClimbing[g_ulGameTick % CLIENT_PREDICTION_TICS] > 0;
 	pPlayer->crouchSlideTics = g_lSavedCrouchSlideTics[g_ulGameTick % CLIENT_PREDICTION_TICS];
-	pPlayer->isCrouchSliding = g_lSavedIsCrouchSliding[g_ulGameTick % CLIENT_PREDICTION_TICS];
+	pPlayer->isCrouchSliding = g_lSavedIsCrouchSliding[g_ulGameTick % CLIENT_PREDICTION_TICS] > 0;
 	pPlayer->turnticks = g_SavedTurnTicks[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->reactiontime = g_lSavedReactionTime[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->waterlevel = g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS];
