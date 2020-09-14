@@ -3098,6 +3098,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	if (canClimb)
 	{
+		player->mo->velx /= 2;
+		player->mo->vely /= 2;
+
 		if (canClimb == 1)
 		{
 			player->mo->velz = FLOAT2FIXED(5.f);
@@ -3198,7 +3201,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
 		}
-		else if (player->mo->flags2 & MF2_FLY)
+		else if (player->mo->flags2 & MF2_FLY|MF_NOGRAVITY)
 		{
 			player->mo->velz = 3 * FRACUNIT;
 
@@ -3246,9 +3249,10 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		}
 		// [Ivory]: Double Jump and wall jump
 		else if ( (player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP)
-				&& !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel
 				&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
+			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
+
 			// Wall proximity check
 			bool doWallJump = false;
 			if (player->mo->flags7 & MF7_WALLJUMP)
@@ -3261,30 +3265,37 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				{
 					angle = 45.f * i;
 					Trace(player->mo->x, player->mo->y, player->mo->z, player->mo->Sector,
-						  FLOAT2FIXED(cos(angle)), FLOAT2FIXED(sin(angle)), 0, radiusDistance,
-						  MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+						FLOAT2FIXED(cos(angle)), FLOAT2FIXED(sin(angle)), 0, radiusDistance,
+						MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
 
 					if (trace.HitType == TRACE_HitWall)
 					{
 						doWallJump = true;
+						JumpVelz = (JumpVelz / 4) * 3;
 						break;
 					}
 				}
+
+				if (!CLIENT_PREDICT_IsPredicting())
+					S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
-
-			if (player->mo->flags7 & MF7_DOUBLEJUMP || doWallJump)
+			else
 			{
-				fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
-
 				if (!CLIENT_PREDICT_IsPredicting())
 					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
 				if (NETWORK_GetState() == NETSTATE_SERVER)
 					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+			}
 
-				if (player->mo->velz <= 0)
+			if (player->mo->flags7 & MF7_DOUBLEJUMP || doWallJump)
+			{
+				if (player->mo->velz < 0)
 				{
-					JumpVelz = FixedMul(JumpVelz, FLOAT2FIXED(1.2f));
+					JumpVelz = (JumpVelz * 6) / 5;
 					player->mo->velz = JumpVelz;
 				}
 				else
@@ -3553,9 +3564,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			player->jumpTics = -1;
 		}
 		else if ((player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP)
-			&& !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel
 			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
+			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
+
 			// Wall proximity check
 			bool doWallJump = false;
 			if (player->mo->flags7 & MF7_WALLJUMP)
@@ -3574,24 +3586,31 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					if (trace.HitType == TRACE_HitWall)
 					{
 						doWallJump = true;
+						JumpVelz = (JumpVelz / 4) * 3;
 						break;
 					}
 				}
+
+				if (!CLIENT_PREDICT_IsPredicting())
+					S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
-
-			if (player->mo->flags7 & MF7_DOUBLEJUMP || doWallJump)
+			else
 			{
-				fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
-
 				if (!CLIENT_PREDICT_IsPredicting())
 					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
 				if (NETWORK_GetState() == NETSTATE_SERVER)
 					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+			}
 
-				if (player->mo->velz <= 0)
+			if (player->mo->flags7 & MF7_DOUBLEJUMP || doWallJump)
+			{
+				if (player->mo->velz < 0)
 				{
-					JumpVelz = FixedMul(JumpVelz, FLOAT2FIXED(1.2f));
+					JumpVelz = (JumpVelz * 6) / 5;
 					player->mo->velz = JumpVelz;
 				}
 				else
