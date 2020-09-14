@@ -2973,7 +2973,7 @@ void APlayerPawn::QFriction(FVector3 &vel, const float stopspeed, const float fr
 {
 	float velocity = float(vel.Length());
 
-	// happens when somebody gets stuck in a corner and causes same results as a division by 0
+	// happens when somebody gets stuck in a corner, and causes same results as a division by 0
 	if (velocity > 10000.f)
 		return;
 	
@@ -2998,7 +2998,7 @@ void APlayerPawn::QFriction(FVector3 &vel, const float stopspeed, const float fr
 	{
 		drop = velocity * friction / TICRATE;
 	}
-	else if ( player->onground && !player->mo->InState( FindState( NAME_Pain ) ) )
+	else if ( (player->onground || player->isWallClimbing) && !player->mo->InState( FindState( NAME_Pain ) ) )
 	{
 		control = velocity < stopspeed ? friction : velocity;
 		drop = control * friction / TICRATE;
@@ -3422,8 +3422,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
 				  vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
-
-			Printf("%d %d %d\n", player->mo->radius, distance, trace.HitType);
 			
 			if (trace.HitType == TRACE_HitWall)
 				canClimb = 1;
