@@ -3053,7 +3053,7 @@ retry:
 	if (mo->player && mo->player->mo == mo)
 	{
 		// [Ivory]: no wall friction on players when Quake movement is active
-		if (mv_type == MV_DOOM)
+		if (mv_wallfriction)
 		{
 			mo->velx = tmxmove * numsteps;
 			mo->vely = tmymove * numsteps;

@@ -2880,6 +2880,13 @@ CUSTOM_CVAR( Float, mv_slidefriction, 1.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
+CUSTOM_CVAR(Bool, mv_wallfriction, 1.f, CVAR_SERVERINFO | CVAR_DEMOSAVE)
+{
+	// [TP] The client also enforces movement config so this cvar must be synced.
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetMovementConfig();
+}
+
 CUSTOM_CVAR( Float, mv_airacceleration, 0.25f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 {
 	// [TP] The client also enforces movement config so this cvar must be synced.

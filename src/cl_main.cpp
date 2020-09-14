@@ -5719,6 +5719,10 @@ static void client_SetMovementConfig(BYTESTREAM_s *pByteStream)
 	Value.Float = NETWORK_ReadFloat(pByteStream);
 	mv_slidefriction.ForceSet(Value, CVAR_Float);
 
+	// Read in, and set the value for slidefriction.
+	Value.Bool = NETWORK_ReadBit(pByteStream);
+	mv_wallfriction.ForceSet(Value, CVAR_Bool);
+
 	// Read in, and set the value for airacceleration.
 	Value.Float = NETWORK_ReadFloat(pByteStream);
 	mv_airacceleration.ForceSet(Value, CVAR_Float);

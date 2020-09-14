@@ -1068,6 +1068,7 @@ CCMD(movement)
 		if (strcmp(arg1, "doom") == 0) {
 			mv_type = MV_DOOM;
 			mv_jumptics = 7;
+			mv_wallfriction = true;
 			mv_airacceleration = 0.25f;
 			mv_crouchspeedfactor = 0.5f;
 			mv_walkspeedfactor = 0.75f;
@@ -1076,6 +1077,7 @@ CCMD(movement)
 		if (strcmp(arg1, "doom_qcde") == 0) {
 			mv_type = MV_DOOM;
 			mv_jumptics = 0;
+			mv_wallfriction = false;
 			mv_airacceleration = 0.25f;
 			mv_crouchspeedfactor = 0.25f;
 			mv_walkspeedfactor = 0.5f;
@@ -1087,6 +1089,7 @@ CCMD(movement)
 			mv_acceleration = 10.f;
 			mv_friction = 6.f;
 			mv_slidefriction = 1.f;
+			mv_wallfriction = false;
 			mv_airacceleration = 1.5f;
 			mv_slideacceleration = 4.f;
 			mv_stopspeed = 12.f;
@@ -1101,6 +1104,7 @@ CCMD(movement)
 			mv_acceleration = 10.f;
 			mv_friction = 6.f;
 			mv_slidefriction = 1.f;
+			mv_wallfriction = false;
 			mv_airacceleration = 1.5f;
 			mv_slideacceleration = 4.f;
 			mv_stopspeed = 12.f;

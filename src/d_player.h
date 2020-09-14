@@ -877,6 +877,7 @@ EXTERN_CVAR( Int,	mv_jumptics );
 EXTERN_CVAR( Float,	mv_acceleration );
 EXTERN_CVAR( Float,	mv_friction );
 EXTERN_CVAR( Float, mv_slidefriction );
+EXTERN_CVAR( Bool,	mv_wallfriction );
 EXTERN_CVAR( Float,	mv_airacceleration );
 EXTERN_CVAR( Float, mv_cpmacceleration );
 EXTERN_CVAR( Float, mv_slideacceleration );

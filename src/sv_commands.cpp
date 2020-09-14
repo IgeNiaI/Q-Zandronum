@@ -2152,6 +2152,7 @@ void SERVERCOMMANDS_SetMovementConfig( ULONG ulPlayerExtra, ServerCommandFlags f
 	command.addFloat( mv_acceleration );
 	command.addFloat( mv_friction );
 	command.addFloat( mv_slidefriction );
+	command.addBit( mv_wallfriction );
 	command.addFloat( mv_airacceleration );
 	command.addFloat( mv_cpmacceleration );
 	command.addFloat( mv_slideacceleration );
