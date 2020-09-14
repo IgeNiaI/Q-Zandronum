@@ -3422,10 +3422,12 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
 				  vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+
+			Printf("%d %d %d\n", player->mo->radius, distance, trace.HitType);
 			
 			if (trace.HitType == TRACE_HitWall)
 				canClimb = 1;
-			else if (player->wallClimbTics) // if over the ledge give it a final kick
+			else if (player->isWallClimbing) // if over the ledge give it a final kick
 				canClimb = 2;
 		}
 
