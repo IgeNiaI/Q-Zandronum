@@ -3074,10 +3074,11 @@ void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 {
 	int canClimb = 0;
+	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
 	bool isClimber = player->mo->flags7 & MF7_WALLCLIMB ? true : false;
 
 	// Wall proximity check
-	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 &&
+	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove &&
 		FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length() <= 16.f)
 	{
 		FTraceResults trace;
@@ -3112,7 +3113,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->wallClimbTics = 0;
 		}
 	}
-	else if (cmd->ucmd.forwardmove | cmd->ucmd.sidemove)
+	else if (anyMove)
 	{
 		fixed_t forwardmove, sidemove;
 		int bobfactor;
@@ -3201,7 +3202,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
 		}
-		else if (player->mo->flags2 & MF2_FLY|MF_NOGRAVITY)
+		else if (player->mo->flags2 & MF_NOGRAVITY)
 		{
 			player->mo->velz = 3 * FRACUNIT;
 
@@ -3409,7 +3410,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		float velocity = 0.f;
 
 		// Wall proximity check
-		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (velocity = float(vel.Length())) <= maxgroundspeed + 2.f)
+		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
+			(velocity = float(vel.Length())) <= maxgroundspeed + 2.f)
 		{
 			FTraceResults trace;
 			fixed_t distance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
