@@ -2959,7 +2959,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t trailx, traily;
 	fixed_t newx, newy;
 	fixed_t xmove, ymove;
-	const secplane_t * walkplane;
+	const secplane_t *walkplane;
 	int hitcount;
 
 	hitcount = 3;
@@ -3048,21 +3048,26 @@ retry:
 	tryy = tmymove = FixedMul(tryy, bestslidefrac);
 
 	HitSlideLine(bestslideline); 	// clip the moves
-	
-	// [Ivory]: no wall friction with Quake movement
-	if(!mo->player || (mo->player && mv_type == MV_DOOM))
-	{
-		mo->velx = tmxmove * numsteps;
-		mo->vely = tmymove * numsteps;
-	}
 
 	// killough 10/98: affect the bobbing the same way (but not voodoo dolls)
 	if (mo->player && mo->player->mo == mo)
 	{
+		// [Ivory]: no wall friction on players when Quake movement is active
+		if (mv_type == MV_DOOM)
+		{
+			mo->velx = tmxmove * numsteps;
+			mo->vely = tmymove * numsteps;
+		}
+
 		if (abs(mo->player->velx) > abs(mo->velx))
 			mo->player->velx = mo->velx;
 		if (abs(mo->player->vely) > abs(mo->vely))
 			mo->player->vely = mo->vely;
+	}
+	else
+	{
+		mo->velx = tmxmove * numsteps;
+		mo->vely = tmymove * numsteps;
 	}
 
 	walkplane = P_CheckSlopeWalk(mo, tmxmove, tmymove);

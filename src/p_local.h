@@ -542,7 +542,7 @@ enum
 	RADF_NOIMPACTDAMAGE = 2,
 	RADF_SOURCEISSPOT = 4,
 	RADF_NODAMAGE = 8,
-	RADF_QROCKETJUMP = 16,
+	RADF_QROCKETJUMP = 256
 };
 void	P_RadiusAttack (AActor *spot, AActor *source, int damage, int distance, 
 						FName damageType, int flags, int fulldamagedistance=0);
