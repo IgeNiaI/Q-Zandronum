@@ -2960,13 +2960,21 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t newx, newy;
 	fixed_t xmove, ymove;
 	const secplane_t *walkplane;
+	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
+	const bool noWallFriction = playerNotVoodoo && mv_wallfriction == false;
 	int hitcount;
 
 	hitcount = 3;
 	slidemo = mo;
 
-	if (mo->player && mo->player->mo == mo && mo->reactiontime > 0)
-		return;	// player coming right out of a teleporter.
+	FVector2 startVel;
+	if (playerNotVoodoo)
+	{
+		if (mo->reactiontime > 0) // player coming right out of a teleporter.
+			return;
+		else if(noWallFriction)
+			startVel = { FIXED2FLOAT(mo->player->velx), FIXED2FLOAT(mo->player->vely) };
+	}
 
 retry:
 	if (!--hitcount)
@@ -3049,25 +3057,31 @@ retry:
 
 	HitSlideLine(bestslideline); 	// clip the moves
 
+	mo->velx = tmxmove * numsteps;
+	mo->vely = tmymove * numsteps;
+
 	// killough 10/98: affect the bobbing the same way (but not voodoo dolls)
-	if (mo->player && mo->player->mo == mo)
+	if (playerNotVoodoo)
 	{
-		// [Ivory]: no wall friction on players when Quake movement is active
-		if (mv_wallfriction)
+		// [Ivory]: Quake like wall friction
+		if (noWallFriction && (mo->velx || mo->vely))
 		{
-			mo->velx = tmxmove * numsteps;
-			mo->vely = tmymove * numsteps;
+			FVector2 slideVel = FVector2(FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely)).Unit();
+			FVector2 velUnit = startVel.Unit();
+			float velDot = velUnit.X * slideVel.X + velUnit.Y * slideVel.Y;
+			if (velDot > 0)
+			{
+				velDot = velDot > 0.75f ? 1.f : velDot / 0.75f;
+				startVel = velDot * startVel.Length() * slideVel;
+				mo->velx = FLOAT2FIXED(startVel.X);
+				mo->vely = FLOAT2FIXED(startVel.Y);
+			}
 		}
 
 		if (abs(mo->player->velx) > abs(mo->velx))
 			mo->player->velx = mo->velx;
 		if (abs(mo->player->vely) > abs(mo->vely))
 			mo->player->vely = mo->vely;
-	}
-	else
-	{
-		mo->velx = tmxmove * numsteps;
-		mo->vely = tmymove * numsteps;
 	}
 
 	walkplane = P_CheckSlopeWalk(mo, tmxmove, tmymove);
