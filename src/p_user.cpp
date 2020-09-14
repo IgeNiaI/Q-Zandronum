@@ -3249,7 +3249,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->jumpTics = ulJumpTicks;
 		}
 		// [Ivory]: Double Jump and wall jump
-		else if ( (player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP)
+		else if ( ((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
 				&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
 			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
@@ -3292,7 +3292,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 
-			if (player->mo->flags7 & MF7_DOUBLEJUMP || doWallJump)
+			if ((player->mo->flags7 & MF7_DOUBLEJUMP) || doWallJump)
 			{
 				if (player->mo->velz < 0)
 				{
@@ -3422,7 +3422,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
 				  vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
-			
+
 			if (trace.HitType == TRACE_HitWall)
 				canClimb = 1;
 			else if (player->isWallClimbing) // if over the ledge give it a final kick
@@ -3565,7 +3565,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			player->mo->velz += JumpVelz;
 			player->jumpTics = -1;
 		}
-		else if ((player->mo->flags7 & MF7_WALLJUMP | MF7_DOUBLEJUMP)
+		else if (((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
 			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
 			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();

@@ -2923,7 +2923,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 			{
 				float velx = FIXED2FLOAT(mo->velx), vely = FIXED2FLOAT(mo->vely);
 				if (FVector2(velx, vely).Length() < 4.)
-					mo->velz = - 32768; // 0.5f
+					mo->velz = -32768; // 0.5f
 			}
 		}
 		else
