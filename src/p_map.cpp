@@ -3071,7 +3071,7 @@ retry:
 			float velDot = velUnit.X * slideVel.X + velUnit.Y * slideVel.Y;
 			if (velDot > 0)
 			{
-				velDot = velDot > 0.75f ? 1.f : velDot / 0.75f;
+				velDot = velDot > 0.75f ? 1.f : velDot * 0.75f;
 				preSlideVel = velDot * preSlideVel.Length() * slideVel;
 				mo->velx = FLOAT2FIXED(preSlideVel.X);
 				mo->vely = FLOAT2FIXED(preSlideVel.Y);

@@ -3089,14 +3089,12 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length() <= 16.f)
 	{
 		FTraceResults trace;
-		fixed_t distance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
-		angle_t pitch = angle_t(-player->mo->pitch) >> ANGLETOFINESHIFT;
 		angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
-		fixed_t vx = FixedMul(finecosine[pitch], finecosine[angle]);
-		fixed_t vy = FixedMul(finecosine[pitch], finesine[angle]);
+		fixed_t vx = finecosine[angle];
+		fixed_t vy = finesine[angle];
 
 		Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
-			vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+			vx, vy, 0, (player->mo->radius * 7) / 5, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
 
 		if (trace.HitType == TRACE_HitWall)
 			canClimb = 1;
@@ -3420,14 +3418,12 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			(velocity = float(vel.Length())) <= maxgroundspeed + 2.f)
 		{
 			FTraceResults trace;
-			fixed_t distance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
-			angle_t pitch = angle_t(-player->mo->pitch) >> ANGLETOFINESHIFT;
 			angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
-			fixed_t vx = FixedMul(finecosine[pitch], finecosine[angle]);
-			fixed_t vy = FixedMul(finecosine[pitch], finesine[angle]);
+			fixed_t vx = finecosine[angle];
+			fixed_t vy = finesine[angle];
 
 			Trace(player->mo->x, player->mo->y, player->mo->z + player->mo->ViewHeight, player->mo->Sector,
-				  vx, vy, 0, distance, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+				vx, vy, 0, (player->mo->radius * 7) / 5, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
 
 			if (trace.HitType == TRACE_HitWall)
 				canClimb = 1;
@@ -3580,18 +3576,17 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			bool doWallJump = false;
 			if (player->mo->flags7 & MF7_WALLJUMP)
 			{
-				// Account for the fact that bounding box is a square
-				float angle;
-				FTraceResults trace;
-				fixed_t radiusDistance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
-				for (int i = 0; i < 8; i++)
+				int angle;
+				fixed_t xDir, yDir;
+				for (int i = 0; i < 8; ++i)
 				{
-					angle = 45.f * i;
-					Trace(player->mo->x, player->mo->y, player->mo->z, player->mo->Sector,
-						FLOAT2FIXED(cos(angle)), FLOAT2FIXED(sin(angle)), 0, radiusDistance,
-						MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+					angle = 45 * i;
+					xDir = player->mo->x + FixedMul(65536, FLOAT2FIXED(cos(angle)));
+					yDir = player->mo->y + FixedMul(65536, FLOAT2FIXED(sin(angle)));
 
-					if (trace.HitType == TRACE_HitWall)
+					// if player cannot move in a direction and a line is blocking
+					// it must be a wall that can be jumped on
+					if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
 					{
 						doWallJump = true;
 						JumpVelz = (JumpVelz / 4) * 3;
