@@ -2961,19 +2961,19 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t xmove, ymove;
 	const secplane_t *walkplane;
 	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
-	const bool noWallFriction = playerNotVoodoo && mv_wallfriction == false;
+	const bool noWallFriction = playerNotVoodoo && mv_wallfriction == false && (mo->player->velx || mo->player->vely);
 	int hitcount;
 
 	hitcount = 3;
 	slidemo = mo;
 
-	FVector2 startVel;
+	FVector2 preSlideVel;
 	if (playerNotVoodoo)
 	{
 		if (mo->reactiontime > 0) // player coming right out of a teleporter.
 			return;
 		else if(noWallFriction)
-			startVel = { FIXED2FLOAT(mo->player->velx), FIXED2FLOAT(mo->player->vely) };
+			preSlideVel = { FIXED2FLOAT(mo->player->velx), FIXED2FLOAT(mo->player->vely) };
 	}
 
 retry:
@@ -3067,14 +3067,14 @@ retry:
 		if (noWallFriction && (mo->velx || mo->vely))
 		{
 			FVector2 slideVel = FVector2(FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely)).Unit();
-			FVector2 velUnit = startVel.Unit();
+			FVector2 velUnit = preSlideVel.Unit();
 			float velDot = velUnit.X * slideVel.X + velUnit.Y * slideVel.Y;
 			if (velDot > 0)
 			{
 				velDot = velDot > 0.75f ? 1.f : velDot / 0.75f;
-				startVel = velDot * startVel.Length() * slideVel;
-				mo->velx = FLOAT2FIXED(startVel.X);
-				mo->vely = FLOAT2FIXED(startVel.Y);
+				preSlideVel = velDot * preSlideVel.Length() * slideVel;
+				mo->velx = FLOAT2FIXED(preSlideVel.X);
+				mo->vely = FLOAT2FIXED(preSlideVel.Y);
 			}
 		}
 
