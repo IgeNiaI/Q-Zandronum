@@ -3265,18 +3265,17 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			bool doWallJump = false;
 			if (player->mo->flags7 & MF7_WALLJUMP)
 			{
-				// Account for the fact that bounding box is a square
-				float angle;
-				FTraceResults trace;
-				fixed_t radiusDistance = FixedMul(player->mo->radius, FLOAT2FIXED(1.4142f));
-				for (int i = 0; i < 8; i++)
+				int angle;
+				fixed_t xDir, yDir;
+				for (int i = 0; i < 8; ++i)
 				{
-					angle = 45.f * i;
-					Trace(player->mo->x, player->mo->y, player->mo->z, player->mo->Sector,
-						FLOAT2FIXED(cos(angle)), FLOAT2FIXED(sin(angle)), 0, radiusDistance,
-						MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
+					angle = 45 * i;
+					xDir = player->mo->x + FixedMul(65536, FLOAT2FIXED(cos(angle)));
+					yDir = player->mo->y + FixedMul(65536, FLOAT2FIXED(sin(angle)));
 
-					if (trace.HitType == TRACE_HitWall)
+					// if player cannot move in a direction and a line is blocking it
+					// it must be a wall that can be jumped on
+					if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
 					{
 						doWallJump = true;
 						JumpVelz = (JumpVelz / 4) * 3;
