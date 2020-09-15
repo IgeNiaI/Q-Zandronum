@@ -3794,6 +3794,16 @@ void P_DeathThink (player_t *player)
 	P_MovePsprites (player);
 
 	player->onground = (player->mo->z <= player->mo->floorz);
+
+	if (mv_type > 0 && player->onground)
+	{
+		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
+		player->mo->QFriction(vel, mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed(), 6.f);
+		player->mo->velx = FLOAT2FIXED(vel.X);
+		player->mo->vely = FLOAT2FIXED(vel.Y);
+		player->mo->velz = FLOAT2FIXED(vel.Z);
+	}
+
 	if (player->mo->IsKindOf (RUNTIME_CLASS(APlayerChunk)))
 	{ // Flying bloody skull or flying ice chunk
 		player->viewheight = 6 * FRACUNIT;
@@ -4151,7 +4161,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			desired *= fabsf(player->ReadyWeapon->FOVScale);
 		}
 		if (player->FOV != desired)
-	{
+		{
 			if (fabsf (player->FOV - desired) < 7.f)
 			{
 				player->FOV = desired;
