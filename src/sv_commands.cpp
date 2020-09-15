@@ -2161,6 +2161,7 @@ void SERVERCOMMANDS_SetMovementConfig( ULONG ulPlayerExtra, ServerCommandFlags f
 	command.addFloat( mv_walkspeedfactor );
 	command.addShort( mv_wallclimbtics );
 	command.addShort( mv_crouchslidetics );
+	command.addBit( mv_qteleporter );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
