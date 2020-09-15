@@ -56,6 +56,7 @@
 
 // [BB]
 CVAR( Float, blood_fade_scalar, 0.5f, CVAR_ARCHIVE )
+CVAR( Float, pickup_blend_scalar, 1.f, CVAR_ARCHIVE )
 
 // [RH] Amount of red flash for up to 114 damage points. Calculated by hand
 //		using a logarithmic scale and my trusty HP48G.
@@ -122,7 +123,7 @@ void V_AddPlayerBlend (player_t *CPlayer, float blend[4], float maxinvalpha, int
 		cnt = CPlayer->bonuscount << 3;
 		
 		V_AddBlend (RPART(gameinfo.pickupcolor)/255.f, GPART(gameinfo.pickupcolor)/255.f, 
-					BPART(gameinfo.pickupcolor)/255.f, cnt > 128 ? 0.5f : cnt / 255.f, blend);
+					BPART(gameinfo.pickupcolor)/255.f, (cnt > 128 ? 0.5f : cnt / 255.f) * pickup_blend_scalar, blend);
 	}
 
 	PalEntry painFlash = CPlayer->mo->DamageFade;

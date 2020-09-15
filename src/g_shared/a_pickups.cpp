@@ -1195,10 +1195,10 @@ void AInventory::Touch (AActor *toucher)
 			if (toucher->player != NULL)
 			{
 				PlayPickupSound (toucher->player->mo);
-			if (!(ItemFlags & IF_NOSCREENFLASH))
-			{
-				toucher->player->bonuscount = BONUSADD;
-			}
+				if (!(ItemFlags & IF_NOSCREENFLASH))
+				{
+					toucher->player->bonuscount = BONUSADD;
+				}
 			}
 			else
 			{
