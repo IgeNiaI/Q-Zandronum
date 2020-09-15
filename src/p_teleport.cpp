@@ -97,8 +97,8 @@ void P_SpawnTeleportFog(fixed_t x, fixed_t y, fixed_t z, int spawnid)
 // TELEPORTATION
 //
 
-bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
-				 bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
+bool P_TeleportCommon(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
+					bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity = true, bool keepHeight = false)
 {
 	fixed_t oldx;
 	fixed_t oldy;
@@ -247,17 +247,40 @@ bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixe
 			player->velx = player->vely = 0;
 	}
 
+	return true;
+}
+
+bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
+				 bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
+{
+	bool success = P_TeleportCommon(thing, x, y, z, angle, useFog, sourceFog, keepOrientation, bHaltVelocity, keepHeight);
+
 	// [BC] If we're the server, update clients about this teleport.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	if (success && NETWORK_GetState() == NETSTATE_SERVER )
 	{
-		bool skipThisClient = ( instigator && ( instigator == player ) );
-		if (skipThisClient)
+		player_t *player = thing->player;
+		if (player && player->mo != thing)
+			player = NULL;
+
+		if (instigator && instigator == player)
 			SERVERCOMMANDS_TeleportThing( thing, sourceFog, useFog, ( useFog && bHaltVelocity ), ULONG( instigator - players ), SVCF_SKIPTHISCLIENT );
 		else
 			SERVERCOMMANDS_TeleportThing( thing, sourceFog, useFog, (useFog && bHaltVelocity) );
 	}
 
-	return true;
+	return success;
+}
+
+bool P_Teleport (AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
+				bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
+{
+	bool success = P_TeleportCommon(thing, x, y, z, angle, useFog, sourceFog, keepOrientation, bHaltVelocity, keepHeight);
+
+	// [BC] If we're the server, update clients about this teleport.
+	if (success && NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_TeleportThing(thing, sourceFog, useFog, (useFog && bHaltVelocity));
+
+	return success;
 }
 
 static AActor *SelectTeleDest (int tid, int tag)
@@ -686,7 +709,7 @@ static bool DoGroupForOne (AActor *victim, AActor *source, AActor *dest, bool fl
 	fixed_t newY = DMulScale16 (offX, finesine[an], offY, finecosine[an]);
 
 	bool res =
-		P_Teleport (victim, NULL, dest->x + newX,
+		P_Teleport (victim, dest->x + newX,
 							dest->y + newY,
 							floorz ? ONFLOORZ : dest->z + victim->z - source->z,
 							0, fog, fog, !fog);
@@ -760,7 +783,7 @@ bool EV_TeleportGroup (int group_tid, AActor *victim, int source_tid, int dest_t
 	if (moveSource && didSomething)
 	{
 		didSomething |=
-			P_Teleport (sourceOrigin, NULL, destOrigin->x, destOrigin->y,
+			P_Teleport (sourceOrigin, destOrigin->x, destOrigin->y,
 				floorz ? ONFLOORZ : destOrigin->z, 0, false, false, true);
 		sourceOrigin->angle = destOrigin->angle;
 	}
