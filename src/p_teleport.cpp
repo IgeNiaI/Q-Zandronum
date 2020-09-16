@@ -205,11 +205,13 @@ bool P_Teleport (AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
 		AActor *fog = Spawn<ATeleportFog> (x + 20*finecosine[an],
 			y + 20*finesine[an], thing->z + fogDelta, ALLOW_REPLACE);
 		fog->target = thing;
-
-		// [RH] Zoom player's field of vision
-		// [BC] && bHaltVelocity.
-		if (!mv_qteleporter && thing->player && telezoom && thing->player->mo == thing && bHaltVelocity)
-			thing->player->FOV = MIN (175.f, thing->player->DesiredFOV + 45.f);
+		if (thing->player)
+		{
+			// [RH] Zoom player's field of vision
+			// [BC] && bHaltVelocity.
+			if (telezoom && thing->player->mo == thing && bHaltVelocity)
+				thing->player->FOV = MIN (175.f, thing->player->DesiredFOV + 45.f);
+		}
 	}
 	// [BC] && bHaltVelocity.
 	if (thing->player && (useFog || !keepOrientation) && bHaltVelocity)

@@ -1073,7 +1073,6 @@ CCMD(movement)
 			mv_crouchspeedfactor = 0.5f;
 			mv_walkspeedfactor = 0.75f;
 			mv_wallclimbtics = 70;
-			mv_qteleporter = false;
 		}
 		if (strcmp(arg1, "doom_qcde") == 0) {
 			mv_type = MV_DOOM;
@@ -1083,7 +1082,6 @@ CCMD(movement)
 			mv_crouchspeedfactor = 0.25f;
 			mv_walkspeedfactor = 0.5f;
 			mv_wallclimbtics = 70;
-			mv_qteleporter = true;
 		}
 		if (strcmp(arg1, "quake") == 0) {
 			mv_type = MV_QUAKE;
@@ -1099,7 +1097,6 @@ CCMD(movement)
 			mv_walkspeedfactor = 0.5f;
 			mv_wallclimbtics = 70;
 			mv_crouchslidetics = 70;
-			mv_qteleporter = true;
 		}
 		if (strcmp(arg1, "cpma") == 0) {
 			mv_type = MV_QUAKE_CPMA;
@@ -1116,7 +1113,6 @@ CCMD(movement)
 			mv_walkspeedfactor = 0.5f;
 			mv_wallclimbtics = 70;
 			mv_crouchslidetics = 70;
-			mv_qteleporter = true;
 		}
 	}
 }

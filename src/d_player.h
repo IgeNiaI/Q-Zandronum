@@ -124,8 +124,8 @@ public:
 	
 	// Quake movement
 	float QTweakSpeed();
-	void  QFriction(FVector3 &vel, const float stopspeed, const float friction);
-	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);
+	void  QFriction(TVector3<float> &vel, const float stopspeed, const float friction);
+	void  QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel);
 
 	void SetupWeaponSlots ();
 	void GiveDefaultInventory ();
@@ -886,6 +886,5 @@ EXTERN_CVAR( Float,	mv_crouchspeedfactor );
 EXTERN_CVAR( Float,	mv_walkspeedfactor );
 EXTERN_CVAR( Int,	mv_wallclimbtics );
 EXTERN_CVAR( Int,	mv_crouchslidetics );
-EXTERN_CVAR( Bool,	mv_qteleporter );
 
 #endif // __D_PLAYER_H__

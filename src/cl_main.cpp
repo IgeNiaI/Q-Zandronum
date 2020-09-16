@@ -5754,10 +5754,6 @@ static void client_SetMovementConfig(BYTESTREAM_s *pByteStream)
 	// Read in, and set the value for crouchslidetics.
 	Value.Int = NETWORK_ReadShort(pByteStream);
 	mv_crouchslidetics.ForceSet(Value, CVAR_Int);
-	
-	// Read in, and set the value for quake teleporters.
-	Value.Bool = NETWORK_ReadBit(pByteStream);
-	mv_qteleporter.ForceSet(Value, CVAR_Bool);
 }
 
 //*****************************************************************************

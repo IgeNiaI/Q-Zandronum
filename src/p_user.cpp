@@ -2943,13 +2943,6 @@ CUSTOM_CVAR( Int, mv_crouchslidetics, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 		SERVERCOMMANDS_SetMovementConfig();
 }
 
-CUSTOM_CVAR( Bool, mv_qteleporter, false, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
 //***************************************************
 // Vectors Math
 //***************************************************
@@ -3035,18 +3028,6 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 	vel += wishdir * accelerationspeed;
 }
 
-bool CheckTeleporterMotion(FVector3 &dir, const FVector3 &vel)
-{
-	FVector3 velUnit = vel.Unit();
-	if (DotProduct(velUnit, dir) < -0.5f)
-	{
-		dir = { 0.f, 0.f, 0.f };
-		return false;
-	}
-
-	return true;
-}
-
 //==========================================================================
 //
 // P_XXXX_Looping_Sounds
@@ -3097,7 +3078,7 @@ void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 //
 //==========================================================================
 
-void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd, const bool &qTeleporter)
+void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 {
 	int canClimb = 0;
 	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
@@ -3175,17 +3156,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd, const bool &qTeleporter)
 
 		forwardmove = Scale(fm, movefactor * 35, TICRATE << 8);
 		sidemove = Scale(sm, movefactor * 35, TICRATE << 8);
-
-		if (qTeleporter)
-		{
-			FVector3 dir = { float(forwardmove), -float(sidemove), 0.f };
-			FVector3 vel = { float(player->mo->velx), float(player->mo->vely), 0.f };
-			if (!CheckTeleporterMotion(dir, vel))
-			{
-				forwardmove = 0;
-				sidemove = 0;
-			}
-		}
 
 		if (forwardmove)
 		{
@@ -3358,7 +3328,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd, const bool &qTeleporter)
 //				but I'd rather not add possible troubles.						//
 //******************************************************************************//
 
-void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter)
+void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 {
 	//*******************************************************
 	// Horizontal movement (+ vertical for flying and water)
@@ -3382,8 +3352,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 		maxgroundspeed *= movefactor;
 
 		// Input vector
-		acceleration = { cmd->ucmd.forwardmove ? float(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-						 cmd->ucmd.sidemove ? - float(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+		acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+						 cmd->ucmd.sidemove ? -(float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
 						 0.f };
 		// Calculate the vertical push according to the view pitch
 		if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
@@ -3401,9 +3371,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 		//Acceleration
 		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
-		// Deny backtracking if just got out of teleporter
-		if (qTeleporter)
-			CheckTeleporterMotion(acceleration, vel);
 		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
 
 		noJump = true;
@@ -3416,8 +3383,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 		maxgroundspeed *= movefactor;
 
 		// Input vector
-		acceleration = { cmd->ucmd.forwardmove ? float(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-						 cmd->ucmd.sidemove ? - float(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+		acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+						 cmd->ucmd.sidemove ? -(float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
 						 0.f };
 		// Calculate the vertical push according to the view pitch
 		if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
@@ -3426,7 +3393,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 		}
 		else
 		{
-			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
+			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
 			acceleration.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
@@ -3435,9 +3402,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 		//Acceleration
 		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
-		// Deny backtracking if just got out of teleporter
-		if (qTeleporter)
-			CheckTeleporterMotion(acceleration, vel);
 		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 2.f, 8.f);
 
 		noJump = true;
@@ -3488,13 +3452,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 			maxgroundspeed *= movefactor;
 
 			// Input vector
-			acceleration = { float(cmd->ucmd.forwardmove), float(cmd->ucmd.sidemove), 0.f };
+			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
 			// Orient inputs to view angle
 			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
-			// Deny backtracking if just got out of teleporter
-			if (qTeleporter)
-				CheckTeleporterMotion(acceleration, vel);
 			// Acceleration
 			if (!velocity)
 				velocity = float(vel.Length());
@@ -3515,13 +3476,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 					   player->crouchSlideTics;						// there is crouch slide charge to spend
 
 			// Input vector
-			acceleration = { float(cmd->ucmd.forwardmove), float(cmd->ucmd.sidemove), 0.f };
+			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
 			// Orient inputs to view angle
 			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
-			// Deny backtracking if just got out of teleporter
-			if (qTeleporter)
-				CheckTeleporterMotion(acceleration, vel);
 			// Friction & Acceleration
 			if (canSlide)
 			{
@@ -3685,18 +3643,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 */
 void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 {
-	bool qTeleporter = mv_qteleporter;
-	if (player->mo->reactiontime)
-	{
-		player->mo->reactiontime--;
-		if (!qTeleporter)
-			return;
-	}
-	else if (qTeleporter)
-	{
-		qTeleporter = false;
-	}
-
 	// [BB] A client doesn't know enough about the other players to make their movement.
 	if (NETWORK_InClientMode() && (player - players) != consoleplayer &&
 		!CLIENTDEMO_IsFreeSpectatorPlayer(player))
@@ -3724,11 +3670,11 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 
 	if (quakeMovement)
 	{
-		P_MovePlayer_Quake(player, cmd, qTeleporter);
+		P_MovePlayer_Quake(player, cmd);
 	}
 	else // default Doom movement
 	{
-		P_MovePlayer_Doom(player, cmd, qTeleporter);
+		P_MovePlayer_Doom(player, cmd);
 	}
 }
 
@@ -4469,10 +4415,14 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 
 	// Handle movement
-	P_MovePlayer(player, cmd);
-
-	if (!player->mo->reactiontime)
+	if (player->mo->reactiontime)
+	{ // Player is frozen
+			player->mo->reactiontime--;
+	}
+	else
 	{
+		P_MovePlayer (player, cmd);
+
 		if (cmd->ucmd.upmove == -32768)
 		{ // Only land if in the air
 			if ((player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2)
