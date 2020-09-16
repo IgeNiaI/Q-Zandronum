@@ -3488,7 +3488,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 			maxgroundspeed *= movefactor;
 
 			// Input vector
-			acceleration = { float(cmd->ucmd.forwardmove), -float(cmd->ucmd.sidemove), 0.f };
+			acceleration = { float(cmd->ucmd.forwardmove), float(cmd->ucmd.sidemove), 0.f };
 			// Orient inputs to view angle
 			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
@@ -3515,7 +3515,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd, const bool &qTeleporter
 					   player->crouchSlideTics;						// there is crouch slide charge to spend
 
 			// Input vector
-			acceleration = { float(cmd->ucmd.forwardmove), -float(cmd->ucmd.sidemove), 0.f };
+			acceleration = { float(cmd->ucmd.forwardmove), float(cmd->ucmd.sidemove), 0.f };
 			// Orient inputs to view angle
 			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
