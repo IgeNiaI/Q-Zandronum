@@ -2919,7 +2919,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				mo->velz -= grav;
 			}
 			else if(!(mo->player->cmd.ucmd.forwardmove | mo->player->cmd.ucmd.sidemove) &&
-					!(mo->player->cmd.ucmd.buttons & BT_JUMP))
+					!(mo->player->cmd.ucmd.buttons & BT_JUMP) && !(mo->player->cmd.ucmd.buttons & BT_CROUCH))
 			{
 				float velx = FIXED2FLOAT(mo->velx), vely = FIXED2FLOAT(mo->vely);
 				if (FVector2(velx, vely).Length() < 4.)
@@ -2928,6 +2928,8 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		}
 		else
 		{
+			fixed_t startvelz = mo->velz;
+
 			if (!mo->waterlevel || (mo->player &&
 				!(mo->player->cmd.ucmd.forwardmove | mo->player->cmd.ucmd.sidemove)))
 			{
@@ -2944,8 +2946,6 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 					mo->velz -= grav;
 				}
 			}
-
-			fixed_t startvelz = mo->velz;
 
 			if (!mo->player)
 			{
@@ -2994,7 +2994,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 
 					if (mo->velz < sinkspeed)
 					{
-						mo->velz = (startvelz < sinkspeed) ? startvelz : sinkspeed;
+						mo->velz = startvelz < sinkspeed ? startvelz : sinkspeed;
 					}
 					else
 					{

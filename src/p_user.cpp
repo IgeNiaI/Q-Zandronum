@@ -2297,7 +2297,7 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 
 float APlayerPawn::CrouchWalkFactor()
 {
-	if (player->CanCrouch() && player->crouchfactor != FRACUNIT) // player crouched
+	if (player->CanCrouch() && player->crouchfactor != FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
 		return float(mv_crouchspeedfactor) * player->crouchfactor / CROUCHSCALE;
 	else if (player->cmd.ucmd.buttons & BT_SPEED)
 		return float(mv_walkspeedfactor);
@@ -2949,7 +2949,7 @@ CUSTOM_CVAR( Int, mv_crouchslidetics, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
 
 void VectorRotate(float &x, float &y, const float &angle)
 {
-	float oX = x, oY = y, cosine = (float)cos(angle * PI / 180), sine = (float)sin(angle * PI / 180);
+	float oX = x, oY = y, cosine = float(cos(angle * PI / 180)), sine = float(sin(angle * PI / 180));
 	x = cosine * oX - sine * oY;
 	y = sine * oX + cosine * oY;
 }
@@ -3352,17 +3352,17 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		maxgroundspeed *= movefactor;
 
 		// Input vector
-		acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-						 cmd->ucmd.sidemove ? -(float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+		acceleration = { cmd->ucmd.forwardmove ? float(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+						 cmd->ucmd.sidemove ? - float(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
 						 0.f };
 		// Calculate the vertical push according to the view pitch
-		if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
+		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
 		{
-			acceleration.Z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
+			acceleration.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
 		}
 		else
 		{
-			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
+			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
 			acceleration.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
@@ -3383,17 +3383,17 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		maxgroundspeed *= movefactor;
 
 		// Input vector
-		acceleration = { cmd->ucmd.forwardmove ? (float)(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-						 cmd->ucmd.sidemove ? -(float)(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+		acceleration = { cmd->ucmd.forwardmove ? float(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+						 cmd->ucmd.sidemove ? - float(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
 						 0.f };
 		// Calculate the vertical push according to the view pitch
-		if (cmd->ucmd.buttons & BT_JUMP || cmd->ucmd.buttons & BT_CROUCH)
+		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
 		{
-			acceleration.Z = (cmd->ucmd.buttons & BT_JUMP) ? 1.f : -1.f;
+			acceleration.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
 		}
 		else
 		{
-			float pitch = (float)(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
+			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
 			acceleration.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
@@ -3452,7 +3452,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			maxgroundspeed *= movefactor;
 
 			// Input vector
-			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
+			acceleration = { float(cmd->ucmd.forwardmove), - float(cmd->ucmd.sidemove), 0.f };
 			// Orient inputs to view angle
 			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
@@ -3476,7 +3476,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					   player->crouchSlideTics;						// there is crouch slide charge to spend
 
 			// Input vector
-			acceleration = { (float)cmd->ucmd.forwardmove, -(float)cmd->ucmd.sidemove, 0.f };
+			acceleration = { float(cmd->ucmd.forwardmove), - float(cmd->ucmd.sidemove), 0.f };
 			// Orient inputs to view angle
 			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
