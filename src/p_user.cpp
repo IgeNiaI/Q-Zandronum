@@ -4442,53 +4442,15 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	{
 		P_MovePlayer (player, cmd);
 
-		/*
-		if (cmd->ucmd.upmove == -32768)
-		{ // Only land if in the air
-			if ((player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2)
-			{
-				//player->mo->flags2 &= ~MF2_FLY;
-				player->mo->flags &= ~MF_NOGRAVITY;
-			}
-		}
-		else if (cmd->ucmd.upmove != 0)
+		// [BB] The server tells the client that it used the fly item.
+		if (cmd->ucmd.upmove > 0 && NETWORK_GetState() != NETSTATE_CLIENT)
 		{
-			// Clamp the speed to some reasonable maximum.
-			int magnitude = abs (cmd->ucmd.upmove);
-			if (magnitude > 0x300)
+			AInventory *fly = player->mo->FindInventory(NAME_ArtiFly);
+			if (fly != NULL)
 			{
-				cmd->ucmd.upmove = ksgn (cmd->ucmd.upmove) * 0x300;
-			}
-			if (player->mo->waterlevel >= 2 || (player->mo->flags2 & MF2_FLY) || (player->cheats & CF_NOCLIP2))
-			{
-				player->mo->velz = FixedMul(player->mo->Speed, cmd->ucmd.upmove << 9);
-
-				// [Leo] Apply cl_spectatormove here.
-				if ( player->bSpectating )
-					player->mo->velz = FixedMul(player->mo->velz, FLOAT2FIXED(cl_spectatormove));
-
-				if (player->mo->waterlevel < 2 && !(player->mo->flags & MF_NOGRAVITY))
-				{
-					player->mo->flags2 |= MF2_FLY;
-					player->mo->flags |= MF_NOGRAVITY;
-					if ((player->mo->velz <= -39 * FRACUNIT) && !CLIENT_PREDICT_IsPredicting( )) // [BB] Adapted prediction.
-					{ // Stop falling scream
-						S_StopSound (player->mo, CHAN_VOICE);
-					}
-				}
-			}
-			else if (cmd->ucmd.upmove > 0)// && !(player->cheats & CF_PREDICTING))
-			{
-				AInventory *fly = player->mo->FindInventory (NAME_ArtiFly);
-				if (fly != NULL)
-				{
-					// [BB] The server tells the client that it used the fly item.
-					if( NETWORK_GetState( ) != NETSTATE_CLIENT )
-						player->mo->UseInventory (fly);
-				}
+				player->mo->UseInventory(fly);
 			}
 		}
-		*/
 	}
 
 	P_CalcHeight (player);
