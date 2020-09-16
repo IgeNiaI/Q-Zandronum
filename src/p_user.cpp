@@ -3196,27 +3196,46 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
 
-	// [RH] check for jump
-	if (cmd->ucmd.buttons & BT_JUMP)
+	if (player->mo->waterlevel >= 2)
 	{
-		if (player->mo->waterlevel >= 2)
-		{
+		if (cmd->ucmd.buttons & BT_JUMP) {
 			player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
 		}
-		else if (player->mo->flags2 & MF_NOGRAVITY)
-		{
-			player->mo->velz = 3 * FRACUNIT;
+		else if (cmd->ucmd.buttons & BT_CROUCH) {
+			player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
+
+			// [Leo] Apply cl_spectatormove here.
+			if (player->bSpectating)
+				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+		}
+
+	}
+	else if (player->mo->flags & MF_NOGRAVITY)
+	{
+		if (cmd->ucmd.buttons & BT_JUMP) {
+			player->mo->velz = FixedMul(12 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
 		}
+		else if (cmd->ucmd.buttons & BT_CROUCH) {
+			player->mo->velz = -FixedMul(12 * FRACUNIT, player->mo->Speed);
+
+			// [Leo] Apply cl_spectatormove here.
+			if (player->bSpectating)
+				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+		}
+	}
+	// [RH] check for jump
+	else if (cmd->ucmd.buttons & BT_JUMP)
+	{
 		// [Leo] Spectators shouldn't be limited by the server settings.
-		else if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && !player->jumpTics)
+		if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && !player->jumpTics)
 		{
 			fixed_t	JumpVelz;
 			ULONG	ulJumpTicks;
@@ -3254,8 +3273,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->jumpTics = ulJumpTicks;
 		}
 		// [Ivory]: Double Jump and wall jump
-		else if ( ((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
-				&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
+		else if (((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
+			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
 			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
 
