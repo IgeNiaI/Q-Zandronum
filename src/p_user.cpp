@@ -3421,7 +3421,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Acceleration
 		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
-		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 3.f, 8.f);
+		player->mo->QAcceleration(vel, acceleration, maxgroundspeed, 8.f);
 
 		noJump = true;
 
@@ -4434,14 +4434,15 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 
 	// Handle movement
-	if (player->mo->reactiontime)
-	{ // Player is frozen
-			player->mo->reactiontime--;
+	if (player->mo->reactiontime) // Player is frozen
+	{
+		player->mo->reactiontime--;
 	}
 	else
 	{
 		P_MovePlayer (player, cmd);
 
+		/*
 		if (cmd->ucmd.upmove == -32768)
 		{ // Only land if in the air
 			if ((player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2)
@@ -4487,6 +4488,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 				}
 			}
 		}
+		*/
 	}
 
 	P_CalcHeight (player);
