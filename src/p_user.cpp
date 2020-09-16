@@ -3421,7 +3421,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Acceleration
 		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
-		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 2.f, 8.f);
+		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 3.f, 8.f);
 
 		noJump = true;
 
