@@ -3190,6 +3190,13 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	//**********************************
 	// Jumping
 
+	// [BB] ZDoom changed the jumping here revision 2238.
+	// The old behavior is necessary for existing jumpmaze wads.
+	if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
+	{ // delay any jumping for a short while
+		player->jumpTics = mv_jumptics;
+	}
+
 	if (canClimb)
 		return;
 
@@ -3198,14 +3205,16 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	if (player->mo->waterlevel >= 2)
 	{
-		if (cmd->ucmd.buttons & BT_JUMP) {
+		if (cmd->ucmd.buttons & BT_JUMP)
+		{
 			player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
 		}
-		else if (cmd->ucmd.buttons & BT_CROUCH) {
+		else if (cmd->ucmd.buttons & BT_CROUCH)
+		{
 			player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
@@ -3216,14 +3225,16 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
-		if (cmd->ucmd.buttons & BT_JUMP) {
+		if (cmd->ucmd.buttons & BT_JUMP)
+		{
 			player->mo->velz = FixedMul(12 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
 		}
-		else if (cmd->ucmd.buttons & BT_CROUCH) {
+		else if (cmd->ucmd.buttons & BT_CROUCH)
+		{
 			player->mo->velz = -FixedMul(12 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
@@ -3560,6 +3571,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	// Jumping
 	//*******************************************************
 
+	// [BB] ZDoom changed the jumping here revision 2238.
+	// The old behavior is necessary for existing jumpmaze wads.
+	if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
+	{ // delay any jumping for a short while
+		player->jumpTics = mv_jumptics;
+	}
+
 	// Water and flying have already executed jump press logic
 	if (noJump)
 		return;
@@ -3684,11 +3702,8 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	if (GAME_GetEndLevelDelay() && (player->bSpectating == false))
 		memset(cmd, 0, sizeof(ticcmd_t));
 
-	// Consider player to be above ground if velz > 0
-	player->onground = ((player->mo->z <= player->mo->floorz) && (player->mo->velz <= 0))
-		|| (player->mo->flags2 & MF2_ONMOBJ)
-		|| (player->mo->BounceFlags & BOUNCE_MBF)
-		|| (player->cheats & CF_NOCLIP2);
+	player->onground = player->mo->z <= player->mo->floorz || (player->mo->flags2 & MF2_ONMOBJ)
+		|| (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 	int quakeMovement = mv_type;
 
 	if (quakeMovement)
