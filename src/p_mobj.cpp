@@ -2589,7 +2589,7 @@ explode:
 		if (player && player->mo == mo)
 			player->velx = player->vely = 0; 
 	}
-	else if (player && player->onground)
+	else
 	{
 		// phares 3/17/98
 		// Friction will have been adjusted by friction thinkers for icy
@@ -2604,19 +2604,29 @@ explode:
 		// Reducing player velocity is no longer needed to reduce
 		// bobbing, so ice works much better now.
 
-		fixed_t friction = P_GetFriction (mo, NULL);
-
-		mo->velx = FixedMul (mo->velx, friction);
-		mo->vely = FixedMul (mo->vely, friction);
-
-		// killough 10/98: Always decrease player bobbing by ORIG_FRICTION.
-		// This prevents problems with bobbing on ice, where it was not being
-		// reduced fast enough, leading to all sorts of kludges being developed.
-
-		if (player && player->mo == mo)		//  Not voodoo dolls
+		if (player && (player->mo == mo))		//  Not voodoo dolls
 		{
-			player->velx = FixedMul (player->velx, ORIG_FRICTION);
-			player->vely = FixedMul (player->vely, ORIG_FRICTION);
+			if ((player->onground || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
+			{
+				fixed_t friction = P_GetFriction(mo, NULL);
+
+				mo->velx = FixedMul(mo->velx, friction);
+				mo->vely = FixedMul(mo->vely, friction);
+
+				// killough 10/98: Always decrease player bobbing by ORIG_FRICTION.
+				// This prevents problems with bobbing on ice, where it was not being
+				// reduced fast enough, leading to all sorts of kludges being developed.
+
+				player->velx = FixedMul(player->velx, ORIG_FRICTION);
+				player->vely = FixedMul(player->vely, ORIG_FRICTION);
+			}
+		}
+		else
+		{
+			fixed_t friction = P_GetFriction(mo, NULL);
+
+			mo->velx = FixedMul(mo->velx, friction);
+			mo->vely = FixedMul(mo->vely, friction);
 		}
 	}
 	return oldfloorz;
