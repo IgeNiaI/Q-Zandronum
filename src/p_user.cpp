@@ -3499,7 +3499,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			if (isSlider && player->mo->velz < 0)
 				player->crouchSlideTics = MIN(- FixedDiv(player->mo->velz, 1000000000), int(mv_crouchslidetics));
 		}
-		else
+		else if (player->mo->velz <= 0)
 		{
 			canSlide = isSlider &&									// player has the flag
 					   player->crouchfactor < CROUCHSCALEHALFWAY &&	// player is crouching
