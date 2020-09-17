@@ -1294,8 +1294,12 @@ bool NETWORK_InClientModeAndActorNotClientHandled( const AActor *pActor )
 //
 bool NETWORK_IsClientPredictedSpecial( const int Special )
 {
-	// TODO [geNia] replace ACS_ExecuteWithResult with a new special that indicates that the script is bound to client prediction
-	return ( Special == Teleport ) || ( Special == ThrustThing ) || ( Special == ThrustThingZ ) || ( Special == ACS_ExecuteWithResult );
+	if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS))
+		// TODO [geNia] replace ACS_ExecuteWithResult with a new special that indicates that the script is bound to client prediction
+		if (Special == ACS_ExecuteWithResult)
+			return true;
+
+	return ( Special == Teleport ) || ( Special == ThrustThing ) || ( Special == ThrustThingZ );
 }
 
 //*****************************************************************************
