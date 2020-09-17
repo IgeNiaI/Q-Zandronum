@@ -3684,7 +3684,11 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	if (GAME_GetEndLevelDelay() && (player->bSpectating == false))
 		memset(cmd, 0, sizeof(ticcmd_t));
 
-	player->onground = (player->mo->z <= player->mo->floorz) || (player->mo->flags2 & MF2_ONMOBJ) || (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
+	// Consider player to be above ground if velz > 0
+	player->onground = ((player->mo->z <= player->mo->floorz) && (player->mo->velz <= 0))
+		|| (player->mo->flags2 & MF2_ONMOBJ)
+		|| (player->mo->BounceFlags & BOUNCE_MBF)
+		|| (player->cheats & CF_NOCLIP2);
 	int quakeMovement = mv_type;
 
 	if (quakeMovement)

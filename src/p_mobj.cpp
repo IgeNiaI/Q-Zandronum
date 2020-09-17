@@ -2589,7 +2589,7 @@ explode:
 		if (player && player->mo == mo)
 			player->velx = player->vely = 0; 
 	}
-	else
+	else if (player && player->onground)
 	{
 		// phares 3/17/98
 		// Friction will have been adjusted by friction thinkers for icy
