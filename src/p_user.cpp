@@ -2303,7 +2303,7 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 
 float APlayerPawn::CrouchWalkFactor()
 {
-	if (player->CanCrouch() && player->crouchfactor != FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
+	if (player->CanCrouch() && player->crouchfactor < FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
 		return CrouchSpeedFactor * player->crouchfactor / CROUCHSCALE;
 	else if (player->cmd.ucmd.buttons & BT_SPEED)
 		return WalkSpeedFactor;
@@ -2768,7 +2768,7 @@ void P_CalcHeight (player_t *player)
 		{
 			// [BC] We need to cap level.time, because if it gets too big, DivScale
 			// can crash.
-			angle = DivScale13 (level.time % 65536, 120*TICRATE/35) & FINEMASK;
+			angle = DivScale13 (level.time % FRACUNIT, 120*TICRATE/35) & FINEMASK;
 			bob = FixedMul (player->userinfo.GetStillBob(), finesine[angle]);
 		}
 		else
@@ -2781,7 +2781,7 @@ void P_CalcHeight (player_t *player)
 		// DivScale 13 because FINEANGLES == (1<<13)
 		// [BC] We need to cap level.time, because if it gets too big, DivScale
 		// can crash.
-		angle = DivScale13 (level.time % 65536, 20*TICRATE/35) & FINEMASK;
+		angle = DivScale13 (level.time % FRACUNIT, 20*TICRATE/35) & FINEMASK;
 		bob = FixedMul (player->bob>>(player->mo->waterlevel > 1 ? 2 : 1), finesine[angle]);
 	}
 
@@ -2936,7 +2936,10 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 
 CUSTOM_CVAR(Int, cl_doubletapmaxtime, 10, CVAR_ARCHIVE | CVAR_USERINFO | CVAR_DEMOSAVE)
 {
-
+	if (self < 0)
+		self = 0;
+	else if (self > 20)
+		self = 20;
 }
 
 #define DASH_PUSH 8.f
@@ -3097,7 +3100,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
-		if (isDasher && player->crouchfactor == 65536 && DoubleTapDash(player, cmd))
+		if (isDasher && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapDash(player, cmd))
 		{
 			FVector2 dir = FVector2(float(cmd->ucmd.forwardmove), - float(cmd->ucmd.sidemove)).Unit();
 			float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
@@ -3203,9 +3206,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (canClimb)
 		return;
 
-	if (player->onground)
-		player->doubleJumpState = DJ_AVAILABLE;
-
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
 
@@ -3309,8 +3309,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				for (int i = 0; i < 8; ++i)
 				{
 					angle = 45 * i;
-					xDir = player->mo->x + FixedMul(65536, FLOAT2FIXED(cos(angle)));
-					yDir = player->mo->y + FixedMul(65536, FLOAT2FIXED(sin(angle)));
+					xDir = player->mo->x + FixedMul(FRACUNIT, FLOAT2FIXED(cos(angle)));
+					yDir = player->mo->y + FixedMul(FRACUNIT, FLOAT2FIXED(sin(angle)));
 
 					// if player cannot move in a direction and a line is blocking it
 					// it must be a wall that can be jumped on
@@ -3493,7 +3493,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 
 			// Dashing
-			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor == 65536 && DoubleTapDash(player, cmd))
+			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapDash(player, cmd))
 			{
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
@@ -3606,9 +3606,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	if (noJump)
 		return;
 
-	if (player->onground)
-		player->doubleJumpState = DJ_AVAILABLE;
-
 	// Stop here if not in good condition to jump
 	if (cmd->ucmd.buttons & BT_JUMP)
 	{
@@ -3645,8 +3642,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				for (int i = 0; i < 8; ++i)
 				{
 					angle = 45 * i;
-					xDir = player->mo->x + FixedMul(65536, FLOAT2FIXED(cos(angle)));
-					yDir = player->mo->y + FixedMul(65536, FLOAT2FIXED(sin(angle)));
+					xDir = player->mo->x + FixedMul(FRACUNIT, FLOAT2FIXED(cos(angle)));
+					yDir = player->mo->y + FixedMul(FRACUNIT, FLOAT2FIXED(sin(angle)));
 
 					// if player cannot move in a direction and a line is blocking
 					// it must be a wall that can be jumped on
