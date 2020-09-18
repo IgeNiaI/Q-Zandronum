@@ -2947,13 +2947,13 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 
 //==========================================================================
 //
-// Double tap dash
+// Double tap check
 //
 //==========================================================================
 
 #define DASH_TAPTIME 10
 
-bool DoubleTapDash(player_t *player, const ticcmd_t * const cmd)
+bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 {
 	// dash cooler
 	if (player->firstTapTime < 0)
@@ -2964,7 +2964,7 @@ bool DoubleTapDash(player_t *player, const ticcmd_t * const cmd)
 
 	bool success = false;
 	int maxTapTime = DASH_TAPTIME;
-	int tapValue = (cmd->ucmd.buttons & BT_FORWARD) | (cmd->ucmd.buttons & BT_BACK) | (cmd->ucmd.buttons & BT_MOVERIGHT) | (cmd->ucmd.buttons & BT_MOVELEFT);
+	int tapValue = cmd->ucmd.forwardmove | cmd->ucmd.sidemove;
 	int secondTapValue = 0;
 
 	if (tapValue & ~player->oldTapValue)
@@ -3108,7 +3108,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
-		if (isDasher && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapDash(player, cmd))
+		if (isDasher && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapCheck(player, cmd))
 		{
 			FVector2 dir = FVector2(float(cmd->ucmd.forwardmove), - float(cmd->ucmd.sidemove)).Unit();
 			float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
@@ -3392,14 +3392,12 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
 	float maxgroundspeed = player->mo->StopSpeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-	FVector3 acceleration;
+	FVector3 acceleration = { cmd->ucmd.forwardmove ? float(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
+							  cmd->ucmd.sidemove ? -float(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
+							  0.f };
 
 	if (player->mo->waterlevel >= 2)
 	{
-		// Input vector
-		acceleration = { cmd->ucmd.forwardmove ? float(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-						 cmd->ucmd.sidemove ? - float(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
-						 0.f };
 		// Calculate the vertical push according to the view pitch
 		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
 		{
@@ -3426,10 +3424,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
-		// Input vector
-		acceleration = { cmd->ucmd.forwardmove ? float(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-						 cmd->ucmd.sidemove ? - float(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
-						 0.f };
 		// Calculate the vertical push according to the view pitch
 		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
 		{
@@ -3494,14 +3488,12 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		}
 		else
 		{
-			// Input vector
-			acceleration = { float(cmd->ucmd.forwardmove), -float(cmd->ucmd.sidemove), 0.f };
 			// Orient inputs to view angle
 			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 
 			// Dashing
-			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapDash(player, cmd))
+			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapCheck(player, cmd))
 			{
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
@@ -3735,7 +3727,7 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	player->onground = player->mo->z <= player->mo->floorz || (player->mo->flags2 & MF2_ONMOBJ) ||
 					   (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
-	if (player->mo->MvType)
+	if (1)
 	{
 		P_MovePlayer_Quake(player, cmd);
 	}
