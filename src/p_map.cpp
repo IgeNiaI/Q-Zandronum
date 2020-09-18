@@ -2961,7 +2961,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t xmove, ymove;
 	const secplane_t *walkplane;
 	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
-	const bool noWallFriction = playerNotVoodoo && ((APlayerPawn*) mo)->WallFrictionEnabled && (mo->player->velx || mo->player->vely);
+	const bool noWallFriction = playerNotVoodoo && mo->player->mo->WallFrictionEnabled && (mo->player->velx || mo->player->vely);
 	int hitcount;
 
 	hitcount = 3;

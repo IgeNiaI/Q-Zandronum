@@ -3084,6 +3084,13 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	//**********************************
 	// Jumping
 
+	// [BB] ZDoom changed the jumping here revision 2238.
+	// The old behavior is necessary for existing jumpmaze wads.
+	if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < - 8 * FRACUNIT)
+	{ // delay any jumping for a short while
+		player->jumpTics = player->mo->JumpDelay;
+	}
+
 	if (canClimb)
 		return;
 
@@ -3095,14 +3102,16 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	if (player->mo->waterlevel >= 2)
 	{
-		if (cmd->ucmd.buttons & BT_JUMP) {
+		if (cmd->ucmd.buttons & BT_JUMP)
+		{
 			player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
 		}
-		else if (cmd->ucmd.buttons & BT_CROUCH) {
+		else if (cmd->ucmd.buttons & BT_CROUCH)
+		{
 			player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
@@ -3113,14 +3122,16 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
-		if (cmd->ucmd.buttons & BT_JUMP) {
+		if (cmd->ucmd.buttons & BT_JUMP)
+		{
 			player->mo->velz = FixedMul(12 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
 		}
-		else if (cmd->ucmd.buttons & BT_CROUCH) {
+		else if (cmd->ucmd.buttons & BT_CROUCH)
+		{
 			player->mo->velz = -FixedMul(12 * FRACUNIT, player->mo->Speed);
 
 			// [Leo] Apply cl_spectatormove here.
@@ -3140,6 +3151,11 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			// Set base jump velocity.
 			// [Dusk] Exported this into a function as I need it elsewhere as well.
 			JumpVelz = player->mo->CalcJumpVelz();
+
+			// Removing the jump delay effectively makes jump up steps totally broken, therefore a demultiplier
+			// must be applied if player will end up having a vertical velocity higher than normal
+			if (player->mo->velz > 0)
+				JumpVelz = (JumpVelz / 10) * 6;
 
 			// Set base jump ticks.
 			// [BB] In ZDoom revision 2970 changed the jumping behavior.
@@ -3455,6 +3471,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	// Jumping
 	//*******************************************************
 
+	// [BB] ZDoom changed the jumping here revision 2238.
+	// The old behavior is necessary for existing jumpmaze wads.
+	if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
+	{ // delay any jumping for a short while
+		player->jumpTics = player->mo->JumpDelay;
+	}
+
 	// Water and flying have already executed jump press logic
 	if (noJump)
 		return;
@@ -3472,7 +3495,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			// Removing the jump delay effectively makes jump up steps totally broken, therefore a demultiplier
 			// must be applied if player will end up having a vertical velocity higher than normal
 			if (player->mo->velz > 0)
-				JumpVelz = FixedMul(JumpVelz, 46334);
+				JumpVelz = (JumpVelz / 10) * 6;
 
 			if (!CLIENT_PREDICT_IsPredicting())
 				S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
