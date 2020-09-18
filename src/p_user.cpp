@@ -3087,6 +3087,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (canClimb)
 		return;
 
+	if (player->onground)
+		player->doubleJumpState = DJ_AVAILABLE;
+
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
 
@@ -3226,12 +3229,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			}
 		}
 	}
-	else
+	else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
 	{
-		if (player->onground)
-			player->doubleJumpState = DJ_AVAILABLE;
-		else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
-			player->doubleJumpState = DJ_READY;
+		player->doubleJumpState = DJ_READY;
 	}
 }
 
@@ -3459,6 +3459,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	if (noJump)
 		return;
 
+	if (player->onground)
+		player->doubleJumpState = DJ_AVAILABLE;
+
 	// Stop here if not in good condition to jump
 	if (cmd->ucmd.buttons & BT_JUMP)
 	{
@@ -3540,12 +3543,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 		}
 	}
-	else
+	else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
 	{
-		if (player->onground)
-			player->doubleJumpState = DJ_AVAILABLE;
-		else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
-			player->doubleJumpState = DJ_READY;
+		player->doubleJumpState = DJ_READY;
 	}
 }
 
