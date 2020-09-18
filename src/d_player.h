@@ -124,8 +124,8 @@ public:
 	
 	// Quake movement
 	float QTweakSpeed();
-	void  QFriction(TVector3<float> &vel, const float stopspeed, const float friction);
-	void  QAcceleration(TVector3<float> &vel, const TVector3<float> &wishdir, const float &wishspeed, const float accel);
+	void  QFriction(FVector3 &vel, const float stopspeed, const float friction);
+	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);
 
 	void SetupWeaponSlots ();
 	void GiveDefaultInventory ();
@@ -577,6 +577,9 @@ public:
 	bool		isCrouchSliding;
 	int			wallClimbTics;
 	bool		isWallClimbing;
+	int			firstTapTime;
+	int			firstTapValue;
+	int			oldTapValue;
 
 	int			respawn_time;			// [RH] delay respawning until this tic
 	TObjPtr<AActor>		camera;			// [RH] Whose eyes this player sees through
@@ -890,5 +893,7 @@ enum
 	DJ_AVAILABLE,
 	DJ_READY
 };
+
+EXTERN_CVAR(Int, cl_doubletapmaxtime);
 
 #endif // __D_PLAYER_H__

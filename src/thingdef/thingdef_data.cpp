@@ -258,6 +258,7 @@ static FFlagDef ActorFlags[]=
 	DEFINE_FLAG(MF7, CROUCHSLIDE, AActor, flags7),
 	DEFINE_FLAG(MF7, WALLJUMP, AActor, flags7),
 	DEFINE_FLAG(MF7, WALLCLIMB, AActor, flags7),
+	DEFINE_FLAG(MF7, DASH, AActor, flags7),
 
 	// [BC] New DECORATE flag defines here.
 	DEFINE_FLAG(STFL, BLUETEAM, AActor, ulSTFlags),
