@@ -43,6 +43,8 @@ Actor PlayerPawn : Actor native
 	Player.CrouchSpeedFactor 0.5
 	Player.WalkSpeedFactor 0.75
 	Player.AirAcceleration 0.25
+	Player.DashForce 8.0
+	Player.DashDelay 35
 	
 	// MvType 1 or 2 only
 	Player.GroundAcceleration 10

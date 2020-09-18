@@ -179,6 +179,8 @@ public:
 	float		CrouchSpeedFactor;
 	float		WalkSpeedFactor;
 	float		AirAcceleration;
+	float		DashForce;
+	int			DashDelay;
 
 	// Quake movement only
 	float		GroundAcceleration;

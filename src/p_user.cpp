@@ -737,7 +737,24 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< MorphWeapon
 		<< DamageFade
 		<< PlayerFlags
-		<< FlechetteType;
+		<< FlechetteType
+		<< MvType
+		<< JumpDelay
+		<< MaxWallClimbTics
+		<< WallFrictionEnabled
+		<< CrouchSpeedFactor
+		<< WalkSpeedFactor
+		<< AirAcceleration
+		<< DashForce
+		<< DashDelay
+		<< GroundAcceleration
+		<< GroundFriction
+		<< SlideAcceleration
+		<< SlideFriction
+		<< SlideMaxTics
+		<< StopSpeed
+		<< CpmAirAcceleration;
+
 	if (SaveVersion < 3829)
 	{
 		GruntSpeed = 12*FRACUNIT;
@@ -2934,16 +2951,7 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 //
 //==========================================================================
 
-CUSTOM_CVAR(Int, cl_doubletapmaxtime, 10, CVAR_ARCHIVE | CVAR_USERINFO | CVAR_DEMOSAVE)
-{
-	if (self < 0)
-		self = 0;
-	else if (self > 20)
-		self = 20;
-}
-
-#define DASH_PUSH 8.f
-#define DASH_COOLER 105
+#define DASH_TAPTIME 10
 
 bool DoubleTapDash(player_t *player, const ticcmd_t * const cmd)
 {
@@ -2955,7 +2963,7 @@ bool DoubleTapDash(player_t *player, const ticcmd_t * const cmd)
 	}
 
 	bool success = false;
-	int maxTapTime = cl_doubletapmaxtime;
+	int maxTapTime = DASH_TAPTIME;
 	int tapValue = (cmd->ucmd.buttons & BT_FORWARD) | (cmd->ucmd.buttons & BT_BACK) | (cmd->ucmd.buttons & BT_MOVERIGHT) | (cmd->ucmd.buttons & BT_MOVELEFT);
 	int secondTapValue = 0;
 
@@ -2986,7 +2994,7 @@ bool DoubleTapDash(player_t *player, const ticcmd_t * const cmd)
 			SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 
 		player->firstTapValue = 0;
-		player->firstTapTime = -DASH_COOLER; // set the dash cooler
+		player->firstTapTime = -player->mo->DashDelay; // set the dash cooler
 	}
 	else if (level.maptime > player->firstTapTime + maxTapTime)
 	{
@@ -3107,10 +3115,10 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			VectorRotate(dir.X, dir.Y, flAngle);
 
 			// Set a minimum result speed for better feel
-			if (velLength < 12.f)
-				vel = dir * (12.f + DASH_PUSH);
+			if (velLength < player->mo->DashForce * 1.5)
+				vel = dir * (player->mo->DashForce * 2.5);
 			else
-				vel += dir * DASH_PUSH;
+				vel += dir * player->mo->DashForce;
 
 			player->mo->velx = FLOAT2FIXED(vel.X);
 			player->mo->vely = FLOAT2FIXED(vel.Y);
@@ -3499,9 +3507,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 				// Set a minimum result speed for better feel
 				if (velocity < maxgroundspeed)
-					vel = acceleration * (maxgroundspeed + DASH_PUSH);
+					vel = acceleration * (maxgroundspeed + player->mo->DashForce);
 				else
-					vel += acceleration * DASH_PUSH;
+					vel += acceleration * player->mo->DashForce;
 
 				// do a little jump if on ground (75% of regular jump height)
 				if (player->onground)

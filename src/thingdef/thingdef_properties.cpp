@@ -2917,6 +2917,24 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, airacceleration, F, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, dashforce, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(i, 0);
+	defaults->DashForce = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, dashdelay, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	defaults->DashDelay = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, groundacceleration, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
