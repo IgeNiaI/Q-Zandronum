@@ -3199,10 +3199,19 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				mo->HitFloor ();
 				if (mo->player)
 				{
-					// Squat down.
-					// Decrease viewheight for a moment after hitting the ground (hard),
-					// and utter appropriate sound.
-					PlayerLandedOnThing(mo, NULL);
+					// [BB] ZDoom changed the jumping here revision 2238.
+					// The old behavior is necessary for existing jumpmaze wads.
+					if ( ( zacompatflags & ZACOMPATF_SKULLTAG_JUMPING ) || mo->player->jumpTics < 0 || mo->velz < minvel)
+					{ // delay any jumping for a short while
+						mo->player->jumpTics = mv_jumptics;
+					}
+					if (mo->velz < minvel && !(mo->flags & MF_NOGRAVITY))
+					{
+						// Squat down.
+						// Decrease viewheight for a moment after hitting the ground (hard),
+						// and utter appropriate sound.
+						PlayerLandedOnThing (mo, NULL);
+					}
 				}
 				mo->velz = 0;
 			}
