@@ -3190,23 +3190,24 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					{
 						doWallJump = true;
 						JumpVelz = (JumpVelz / 4) * 3;
+
+						if (!CLIENT_PREDICT_IsPredicting())
+							S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+
+						if (NETWORK_GetState() == NETSTATE_SERVER)
+							SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+
 						break;
 					}
 				}
-
-				if (!CLIENT_PREDICT_IsPredicting())
-					S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
-
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 			else
 			{
 				if (!CLIENT_PREDICT_IsPredicting())
-					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+					S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
 
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 
 			if ((player->mo->flags7 & MF7_DOUBLEJUMP) || doWallJump)
@@ -3503,23 +3504,24 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					{
 						doWallJump = true;
 						JumpVelz = (JumpVelz / 4) * 3;
+
+						if (!CLIENT_PREDICT_IsPredicting())
+							S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+
+						if (NETWORK_GetState() == NETSTATE_SERVER)
+							SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+
 						break;
 					}
 				}
-
-				if (!CLIENT_PREDICT_IsPredicting())
-					S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
-
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 			else
 			{
 				if (!CLIENT_PREDICT_IsPredicting())
-					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+					S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
 
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 
 			if (player->mo->flags7 & MF7_DOUBLEJUMP || doWallJump)
