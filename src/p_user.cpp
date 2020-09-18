@@ -3052,8 +3052,15 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	int canClimb = 0;
 	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
 	bool isClimber = player->mo->flags7 & MF7_WALLCLIMB ? true : false;
-	FVector2 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
-	float velLength = float(vel.Length());
+	bool isDasher = player->mo->flags7 & MF7_DASH ? true : false;
+
+	FVector2 vel;
+	float velLength;
+	if (isDasher || isClimber)
+	{
+		vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
+		velLength = float(vel.Length());
+	}
 
 	// Wall proximity check
 	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velLength <= 16.f)
@@ -3090,10 +3097,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
-		if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor == 65536 && DoubleTapDash(player, cmd))
+		if (isDasher && player->crouchfactor == 65536 && DoubleTapDash(player, cmd))
 		{
-			FVector3 dir = { float(cmd->ucmd.forwardmove), -float(cmd->ucmd.sidemove), 0.f };
-			dir.MakeUnit();
+			FVector2 dir = FVector2(float(cmd->ucmd.forwardmove), - float(cmd->ucmd.sidemove)).Unit();
 			float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 			VectorRotate(dir.X, dir.Y, flAngle);
 
@@ -3489,8 +3495,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			// Dashing
 			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor == 65536 && DoubleTapDash(player, cmd))
 			{
-				if (!velocity)
-					velocity = float(FVector2(vel.X, vel.Y).Length());
+				velocity = float(FVector2(vel.X, vel.Y).Length());
 
 				// Set a minimum result speed for better feel
 				if (velocity < maxgroundspeed)
@@ -3508,8 +3513,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
 			{
 				maxgroundspeed *= movefactor;
-				if (!velocity)
-					velocity = float(FVector2(vel.X, vel.Y).Length());
+				velocity = float(FVector2(vel.X, vel.Y).Length());
 
 				// Acceleration
 				if (player->mo->MvType == MV_QUAKE_CPM && cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
