@@ -1335,9 +1335,6 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 	// Send timelimit, fraglimit, etc.
 	SERVERCOMMANDS_SetGameModeLimits( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
-	// Send movement configuration
-	SERVERCOMMANDS_SetMovementConfig( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
-
 	// If this is LMS, send the allowed weapons.
 	if ( lastmanstanding || teamlms )
 		SERVERCOMMANDS_SetLMSAllowedWeapons( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
@@ -6160,9 +6157,6 @@ static bool server_AuthenticateLevel( BYTESTREAM_s *pByteStream )
 
 	// Send timelimit, fraglimit, etc.
 	SERVERCOMMANDS_SetGameModeLimits( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
-
-	// Send movement configuration
-	SERVERCOMMANDS_SetMovementConfig( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
 	// If this is LMS, send the allowed weapons.
 	if ( lastmanstanding || teamlms )

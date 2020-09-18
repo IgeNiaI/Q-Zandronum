@@ -2144,28 +2144,6 @@ void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags f
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_SetMovementConfig( ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command( SVC_SETMOVEMENTCONFIG );
-	command.addShort( mv_type );
-	command.addShort( mv_jumptics );
-	command.addFloat( mv_acceleration );
-	command.addFloat( mv_friction );
-	command.addFloat( mv_slidefriction );
-	command.addBit( mv_wallfriction );
-	command.addFloat( mv_airacceleration );
-	command.addFloat( mv_cpmacceleration );
-	command.addFloat( mv_slideacceleration );
-	command.addFloat( mv_stopspeed );
-	command.addFloat( mv_crouchspeedfactor );
-	command.addFloat( mv_walkspeedfactor );
-	command.addShort( mv_wallclimbtics );
-	command.addShort( mv_crouchslidetics );
-	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
 void SERVERCOMMANDS_SetGameEndLevelDelay( ULONG ulEndLevelDelay, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	NetCommand command( SVC_SETGAMEENDLEVELDELAY );

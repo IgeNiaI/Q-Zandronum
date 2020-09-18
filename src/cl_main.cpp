@@ -170,7 +170,6 @@ static	void	client_SetGameMode( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameSkill( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameDMFlags( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameModeLimits( BYTESTREAM_s *pByteStream );
-static	void	client_SetMovementConfig( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameEndLevelDelay( BYTESTREAM_s *pByteStream );
 static	void	client_SetGameModeState( BYTESTREAM_s *pByteStream );
 static	void	client_SetDuelNumDuels( BYTESTREAM_s *pByteStream );
@@ -1484,10 +1483,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 	case SVC_SETGAMEMODELIMITS:
 
 		client_SetGameModeLimits( pByteStream );
-		break;
-	case SVC_SETMOVEMENTCONFIG:
-
-		client_SetMovementConfig(pByteStream);
 		break;
 	case SVC_SETGAMEENDLEVELDELAY:
 		
@@ -5691,69 +5686,6 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	// [TP] Yea.
 	Value.Bool = !!NETWORK_ReadByte( pByteStream );
 	sv_limitcommands.ForceSet( Value, CVAR_Bool );
-}
-
-//*****************************************************************************
-//
-static void client_SetMovementConfig(BYTESTREAM_s *pByteStream)
-{
-	UCVarValue	Value;
-
-	// Read in, and set the value for movement type
-	Value.Int = NETWORK_ReadShort(pByteStream);
-	mv_type.ForceSet(Value, CVAR_Int);
-
-	// Read in, and set the value for jumptics.
-	Value.Int = NETWORK_ReadShort(pByteStream);
-	mv_jumptics.ForceSet(Value, CVAR_Int);
-
-	// Read in, and set the value for acceleration.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_acceleration.ForceSet(Value, CVAR_Float);
-	
-	// Read in, and set the value for friction.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_friction.ForceSet(Value, CVAR_Float);
-
-	// Read in, and set the value for slidefriction.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_slidefriction.ForceSet(Value, CVAR_Float);
-
-	// Read in, and set the value for slidefriction.
-	Value.Bool = NETWORK_ReadBit(pByteStream);
-	mv_wallfriction.ForceSet(Value, CVAR_Bool);
-
-	// Read in, and set the value for airacceleration.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_airacceleration.ForceSet(Value, CVAR_Float);
-	
-	// Read in, and set the value for cpmacceleration.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_cpmacceleration.ForceSet(Value, CVAR_Float);
-
-	// Read in, and set the value for slideacceleration.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_slideacceleration.ForceSet(Value, CVAR_Float);
-
-	// Read in, and set the value for stopspeed.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_stopspeed.ForceSet(Value, CVAR_Float);
-
-	// Read in, and set the value for slideacceleration.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_crouchspeedfactor.ForceSet(Value, CVAR_Float);
-
-	// Read in, and set the value for stopspeed.
-	Value.Float = NETWORK_ReadFloat(pByteStream);
-	mv_walkspeedfactor.ForceSet(Value, CVAR_Float);
-
-	// Read in, and set the value for wallclimbtics.
-	Value.Int = NETWORK_ReadShort(pByteStream);
-	mv_wallclimbtics.ForceSet(Value, CVAR_Int);
-
-	// Read in, and set the value for crouchslidetics.
-	Value.Int = NETWORK_ReadShort(pByteStream);
-	mv_crouchslidetics.ForceSet(Value, CVAR_Int);
 }
 
 //*****************************************************************************

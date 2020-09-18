@@ -2836,4 +2836,150 @@ DEFINE_CLASS_PROPERTY_PREFIX( player, maxskinsizefactor, F_F, PlayerPawn )
 	info->Class->Meta.SetMetaFixed( APMETA_MaxSkinHeightFactor, heightfactor );
 }
 
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, mvtype, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0)
+		i = 0;
+	else if (i >= MV_TYPES_END)
+		i = MV_TYPES_END - 1;
 
+	defaults->MvType = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, jumpdelay, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0)
+		i = 0;
+
+	defaults->JumpDelay = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, maxwallclimbtics, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0)
+		i = 0;
+
+	defaults->MaxWallClimbTics = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, wallfrictionenabled, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+
+	defaults->WallFrictionEnabled = i ? true : false;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, crouchspeedfactor, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->CrouchSpeedFactor = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, walkspeedfactor, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->WalkSpeedFactor = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, airacceleration, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->AirAcceleration = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, groundacceleration, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->GroundAcceleration = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, groundfriction, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->GroundFriction = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, slideacceleration, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->SlideAcceleration = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, slidefriction, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->SlideFriction = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, slidemaxtics, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+
+	defaults->SlideMaxTics = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, stopspeed, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->StopSpeed = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, cpmairacceleration, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->CpmAirAcceleration = f;
+}

@@ -172,6 +172,25 @@ public:
 	fixed_t		AirCapacity;			// Multiplier for air supply underwater.
 	const PClass *FlechetteType;
 
+	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
+	int			JumpDelay;
+	int			MaxWallClimbTics;
+	bool		WallFrictionEnabled;
+	float		CrouchSpeedFactor;
+	float		WalkSpeedFactor;
+	float		AirAcceleration;
+
+	// Quake movement only
+	float		GroundAcceleration;
+	float		GroundFriction;
+	float		SlideAcceleration;
+	float		SlideFriction;
+	int			SlideMaxTics;
+	float		StopSpeed;
+
+	// Quake CPM movement only
+	float		CpmAirAcceleration;
+
 	// [CW] Fades for when you are being damaged.
 	PalEntry DamageFade;
 
@@ -860,7 +879,7 @@ enum
 {
 	MV_DOOM = 0,
 	MV_QUAKE,
-	MV_QUAKE_CPMA,
+	MV_QUAKE_CPM,
 	MV_TYPES_END
 };
 
@@ -871,20 +890,5 @@ enum
 	DJ_AVAILABLE,
 	DJ_READY
 };
-
-EXTERN_CVAR( Int,	mv_type );
-EXTERN_CVAR( Int,	mv_jumptics );
-EXTERN_CVAR( Float,	mv_acceleration );
-EXTERN_CVAR( Float,	mv_friction );
-EXTERN_CVAR( Float, mv_slidefriction );
-EXTERN_CVAR( Bool,	mv_wallfriction );
-EXTERN_CVAR( Float,	mv_airacceleration );
-EXTERN_CVAR( Float, mv_cpmacceleration );
-EXTERN_CVAR( Float, mv_slideacceleration );
-EXTERN_CVAR( Float,	mv_stopspeed );
-EXTERN_CVAR( Float,	mv_crouchspeedfactor );
-EXTERN_CVAR( Float,	mv_walkspeedfactor );
-EXTERN_CVAR( Int,	mv_wallclimbtics );
-EXTERN_CVAR( Int,	mv_crouchslidetics );
 
 #endif // __D_PLAYER_H__

@@ -2047,7 +2047,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 {
 	static int pushtime = 0;
 	bool bForceSlide = scrollx || scrolly;
-	bool quakeMovement = mv_type && mo->player && mo->player->mo == mo; // only apply to non voodoo dolls players
+	bool quakeMovement = mo->player && mo->player->mo == mo && ((APlayerPawn*) mo)->MvType; // only apply to non voodoo dolls players
 	angle_t angle;
 	fixed_t ptryx, ptryy;
 	player_t *player;
@@ -2915,7 +2915,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 //
 // apply gravity
 //
-	bool quakeMovement = mv_type && mo->player && mo->player->mo == mo;
+	bool quakeMovement = mo->player && mo->player->mo == mo && ((APlayerPawn*) mo)->MvType;
 
 	if (mo->z > mo->floorz && !(mo->flags & MF_NOGRAVITY))
 	{
@@ -3203,7 +3203,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 					// The old behavior is necessary for existing jumpmaze wads.
 					if ( ( zacompatflags & ZACOMPATF_SKULLTAG_JUMPING ) || mo->player->jumpTics < 0 || mo->velz < minvel)
 					{ // delay any jumping for a short while
-						mo->player->jumpTics = mv_jumptics;
+						mo->player->jumpTics = ((APlayerPawn*) mo)->JumpDelay;
 					}
 					if (mo->velz < minvel && !(mo->flags & MF_NOGRAVITY))
 					{

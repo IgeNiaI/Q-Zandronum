@@ -2298,9 +2298,9 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 float APlayerPawn::CrouchWalkFactor()
 {
 	if (player->CanCrouch() && player->crouchfactor != FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
-		return float(mv_crouchspeedfactor) * player->crouchfactor / CROUCHSCALE;
+		return CrouchSpeedFactor * player->crouchfactor / CROUCHSCALE;
 	else if (player->cmd.ucmd.buttons & BT_SPEED)
-		return float(mv_walkspeedfactor);
+		return WalkSpeedFactor;
 
 	return 1.0f;
 }
@@ -2837,112 +2837,6 @@ CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 	}
 }
 
-//*****************************************************************************
-// [Ivory] Quake movement stuff
-//
-CUSTOM_CVAR( Int, mv_type, MV_DOOM, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	if (self < MV_DOOM)
-		self = MV_DOOM;
-	else if (self >= MV_TYPES_END)
-		self = MV_TYPES_END - 1;
-
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Int, mv_jumptics, 7, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_acceleration, 10.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_friction, 1.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_slidefriction, 1.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR(Bool, mv_wallfriction, 1.f, CVAR_SERVERINFO | CVAR_DEMOSAVE)
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_airacceleration, 0.25f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_cpmacceleration, 100.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_slideacceleration, 4.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_stopspeed, 12.f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_crouchspeedfactor, 0.5f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Float, mv_walkspeedfactor, 0.75f, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Int, mv_wallclimbtics, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
-CUSTOM_CVAR( Int, mv_crouchslidetics, 70, CVAR_SERVERINFO | CVAR_DEMOSAVE )
-{
-	// [TP] The client also enforces movement config so this cvar must be synced.
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_SetMovementConfig();
-}
-
 //***************************************************
 // Vectors Math
 //***************************************************
@@ -3137,7 +3031,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			}
 			else
 			{
-				fixed_t airacceleration = FLOAT2FIXED(mv_airacceleration);
+				fixed_t airacceleration = FLOAT2FIXED(player->mo->AirAcceleration);
 				movefactor = FixedMul(movefactor, airacceleration);
 				bobfactor = FixedMul(bobfactor, airacceleration);
 			}
@@ -3183,7 +3077,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	// set wall climb parameters
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
-		player->wallClimbTics = MIN(int(mv_wallclimbtics), player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
 	if (isClimber)
 		P_Climb_Looping_Sounds(player, canClimb);
 
@@ -3362,7 +3256,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
-	float maxgroundspeed = mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
+	float maxgroundspeed = player->mo->StopSpeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 acceleration = { 0.f, 0.f, 0.f };
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) }; // convert velocity to floating point...
 
@@ -3395,7 +3289,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb tics
-		player->wallClimbTics = MIN(int(mv_wallclimbtics), player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3426,7 +3320,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb tics
-		player->wallClimbTics = MIN(int(mv_wallclimbtics), player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
 	}
 	else
 	{
@@ -3452,7 +3346,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		if (canClimb)
 		{
-			player->mo->QFriction(vel, maxgroundspeed, mv_friction);
+			player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction);
 			if (canClimb == 1)
 			{
 				vel.Z = 5.f;
@@ -3478,15 +3372,15 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			// Acceleration
 			if (!velocity)
 				velocity = float(vel.Length());
-			if (mv_type == MV_QUAKE_CPMA && cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
-				player->mo->QAcceleration(vel, acceleration, 1.5f, mv_cpmacceleration);
+			if (player->mo->MvType == MV_QUAKE_CPM && cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
+				player->mo->QAcceleration(vel, acceleration, 1.5f, player->mo->CpmAirAcceleration * 6);
 			else
-				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_airacceleration);
+				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6);
 
 			// set slide duration if player can do it.
 			// Duration is proportional to the velz.
 			if (isSlider && player->mo->velz < 0)
-				player->crouchSlideTics = MIN(- FixedDiv(player->mo->velz, 1000000000), int(mv_crouchslidetics));
+				player->crouchSlideTics = MIN(- FixedDiv(player->mo->velz, 1000000000), player->mo->SlideMaxTics);
 		}
 		else if (player->mo->velz <= 0)
 		{
@@ -3502,20 +3396,20 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			// Friction & Acceleration
 			if (canSlide)
 			{
-				player->mo->QFriction(vel, maxgroundspeed, mv_slidefriction * floorFriction);
-				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_slideacceleration * floorFriction);
+				player->mo->QFriction(vel, maxgroundspeed, player->mo->SlideFriction * floorFriction);
+				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->SlideAcceleration * floorFriction);
 				player->crouchSlideTics--;
 			}
 			else
 			{
 				maxgroundspeed *= movefactor;
-				player->mo->QFriction(vel, maxgroundspeed, mv_friction * floorFriction);
-				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, mv_acceleration / movefactor * floorFriction);
+				player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction * floorFriction);
+				player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->GroundAcceleration / movefactor * floorFriction);
 				player->crouchSlideTics = 0;
 			}
 
 			// Reset wall climb tics
-			player->wallClimbTics = MIN(int(mv_wallclimbtics), player->wallClimbTics + 1);
+			player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
 		}
 	}
 
@@ -3684,14 +3578,10 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	if (GAME_GetEndLevelDelay() && (player->bSpectating == false))
 		memset(cmd, 0, sizeof(ticcmd_t));
 
-	// Consider player to be above ground if velz > 0
-	player->onground = ((player->mo->z <= player->mo->floorz) && (player->mo->velz <= 0))
-		|| (player->mo->flags2 & MF2_ONMOBJ)
-		|| (player->mo->BounceFlags & BOUNCE_MBF)
-		|| (player->cheats & CF_NOCLIP2);
-	int quakeMovement = mv_type;
+	player->onground = player->mo->z <= player->mo->floorz || (player->mo->flags2 & MF2_ONMOBJ)
+		|| (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
-	if (quakeMovement)
+	if (player->mo->MvType)
 	{
 		P_MovePlayer_Quake(player, cmd);
 	}
@@ -3818,10 +3708,10 @@ void P_DeathThink (player_t *player)
 
 	player->onground = (player->mo->z <= player->mo->floorz);
 
-	if (mv_type > 0 && player->onground)
+	if (player->mo->MvType > 0 && player->onground)
 	{
 		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-		player->mo->QFriction(vel, mv_stopspeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed(), 6.f);
+		player->mo->QFriction(vel, player->mo->StopSpeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed(), 6.f);
 		player->mo->velx = FLOAT2FIXED(vel.X);
 		player->mo->vely = FLOAT2FIXED(vel.Y);
 		player->mo->velz = FLOAT2FIXED(vel.Z);
