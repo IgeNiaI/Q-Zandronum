@@ -357,6 +357,7 @@ enum
 	MF7_WALLJUMP		= 0x08000000,
 	MF7_WALLCLIMB		= 0x10000000,
 	MF7_DASH			= 0x20000000,
+	MF7_RAMPJUMP		= 0x40000000,
 
 	// [BC] More object flags for Skulltag.
 
