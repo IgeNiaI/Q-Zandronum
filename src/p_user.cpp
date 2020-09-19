@@ -3268,9 +3268,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			// [Dusk] Exported this into a function as I need it elsewhere as well.
 			JumpVelz = player->mo->CalcJumpVelz();
 
-			if (isRampJumper && player->mo->velz > 0)
-				JumpVelz = (JumpVelz / 10) * 6;
-
 			// Set base jump ticks.
 			// [BB] In ZDoom revision 2970 changed the jumping behavior.
 			if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
@@ -3616,11 +3613,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		{
 			fixed_t	JumpVelz = player->mo->CalcJumpVelz();
 			bool isRampJumper = player->mo->flags7 & MF7_RAMPJUMP ? true : false;
-
-			// Removing the jump delay effectively makes jump up steps totally broken, therefore a demultiplier
-			// must be applied if player will end up having a vertical velocity higher than normal
-			if (isRampJumper && player->mo->velz > 0)
-				JumpVelz = (JumpVelz / 10) * 6;
 
 			if (!CLIENT_PREDICT_IsPredicting())
 				S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
