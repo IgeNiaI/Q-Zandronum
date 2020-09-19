@@ -3733,7 +3733,7 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	player->onground = player->mo->z <= player->mo->floorz || (player->mo->flags2 & MF2_ONMOBJ) ||
 					   (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
-	if (1)
+	if (player->mo->MvType)
 	{
 		P_MovePlayer_Quake(player, cmd);
 	}
