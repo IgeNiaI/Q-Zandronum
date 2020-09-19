@@ -1055,52 +1055,6 @@ CCMD (dir)
 	chdir (curdir);
 }
 
-CCMD (fov)
-{
-	player_t *player = who ? who->player : &players[consoleplayer];
-
-	if (argv.argc() != 2)
-	{
-		Printf ("fov is %g\n", player->DesiredFOV);
-		return;
-	}
-	else if (dmflags & DF_NO_FOV)
-	{
-		if (consoleplayer == Net_Arbitrator)
-		{
-			Net_WriteByte (DEM_FOV);
-		}
-		else
-		{
-			Printf ("A setting controller has disabled FOV changes.\n");
-			return;
-		}
-	}
-	else
-	{
-		// Do it for everyone but server
-		if ( NETWORK_GetState() != NETSTATE_SERVER )
-		{
-			float newfov = static_cast<float> (clamp(atoi(argv[1]), 5, 179));
-
-			UCVarValue Value;
-			Value.Float = newfov;
-			cl_fov.ForceSet(Value, CVAR_Float);
-
-			for (int i = 0; i < MAXPLAYERS; ++i)
-			{
-				if (playeringame[i])
-				{
-					players[i].DesiredFOV = newfov;
-				}
-			}
-		}
-
-		Net_WriteByte (DEM_MYFOV);
-	}
-	Net_WriteByte (clamp (atoi (argv[1]), 5, 179));
-}
-
 //==========================================================================
 //
 // CCMD warp

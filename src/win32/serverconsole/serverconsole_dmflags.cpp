@@ -117,7 +117,7 @@ static	ULONG			g_ulLMSSpectatorSettings;
 //==================================================================================
 // [RC] This big map of fun ties all of the DMFlags to their respective checkboxes.
 //==================================================================================
-#define NUMBER_OF_FLAGS 99
+#define NUMBER_OF_FLAGS 98
 
 static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] = 
 {
@@ -135,7 +135,6 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ DF_FAST_MONSTERS,					IDC_FAST_MONSTERS,				&g_ulDMFlags, },	
 	{ DF_NO_FREELOOK,					IDC_NO_FREELOOK,				&g_ulDMFlags, },
 	{ DF_RESPAWN_SUPER,					IDC_RESPAWN_SUPER,				&g_ulDMFlags, },
-	{ DF_NO_FOV,						IDC_NO_FOV,						&g_ulDMFlags, },
 	{ DF_NO_COOP_WEAPON_SPAWN,			IDC_NO_COOP_MP_WEAPON_SPAWN,	&g_ulDMFlags, },
 	{ DF_COOP_LOSE_INVENTORY,			IDC_COOP_LOSE_INVENTORY,		&g_ulDMFlags, },
 	{ DF_COOP_LOSE_KEYS,				IDC_LOSE_KEYS,					&g_ulDMFlags, },

@@ -424,23 +424,6 @@ CUSTOM_CVAR (Int, dmflags, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK)
 				players[consoleplayer].mo->pitch = 0;
 		}
 	}
-	// If nofov is set, force everybody to the arbitrator's FOV.
-	if ((self & DF_NO_FOV) && consoleplayer == Net_Arbitrator)
-	{
-		BYTE fov;
-
-		Net_WriteByte (DEM_FOV);
-
-		// If the game is started with DF_NO_FOV set, the arbitrator's
-		// DesiredFOV will not be set when this callback is run, so
-		// be sure not to transmit a 0 FOV.
-		fov = (BYTE)players[consoleplayer].DesiredFOV;
-		if (fov == 0)
-		{
-			fov = 90;
-		}
-		Net_WriteByte (fov);
-	}
 
 	// [BC] If we're the server, tell clients that the dmflags changed.
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
@@ -469,7 +452,6 @@ CVAR (Flag, sv_nojump,			dmflags, DF_NO_JUMP);
 CVAR (Flag, sv_allowjump,		dmflags, DF_YES_JUMP);
 CVAR (Flag, sv_nofreelook,		dmflags, DF_NO_FREELOOK);
 CVAR (Flag, sv_respawnsuper,	dmflags, DF_RESPAWN_SUPER);
-CVAR (Flag, sv_nofov,			dmflags, DF_NO_FOV);
 CVAR (Flag, sv_noweaponspawn,	dmflags, DF_NO_COOP_WEAPON_SPAWN);
 CVAR (Flag, sv_nocrouch,		dmflags, DF_NO_CROUCH);
 CVAR (Flag, sv_allowcrouch,		dmflags, DF_YES_CROUCH);

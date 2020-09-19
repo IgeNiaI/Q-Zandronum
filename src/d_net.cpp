@@ -2385,31 +2385,6 @@ void Net_DoCommand (int type, BYTE **stream, int player)
 		gameaction = ga_autosave;
 		break;
 
-	case DEM_FOV:
-		{
-			float newfov = (float)ReadByte (stream);
-
-			if (newfov != players[consoleplayer].DesiredFOV)
-			{
-				Printf ("FOV%s set to %g\n",
-					consoleplayer == Net_Arbitrator ? " for everyone" : "",
-					newfov);
-			}
-
-			for (i = 0; i < MAXPLAYERS; ++i)
-			{
-				if (playeringame[i])
-				{
-					players[i].DesiredFOV = newfov;
-				}
-			}
-		}
-		break;
-
-	case DEM_MYFOV:
-		players[player].DesiredFOV = (float)ReadByte (stream);
-		break;
-
 	case DEM_RUNSCRIPT:
 	case DEM_RUNSCRIPT2:
 		{
@@ -2647,8 +2622,6 @@ void Net_SkipCommand (int type, BYTE **stream)
 
 		case DEM_GENERICCHEAT:
 		case DEM_DROPPLAYER:
-		case DEM_FOV:
-		case DEM_MYFOV:
 		case DEM_ADDCONTROLLER:
 		case DEM_DELCONTROLLER:
 			skip = 1;

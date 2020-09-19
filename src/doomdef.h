@@ -263,7 +263,7 @@ enum
 	DF_YES_JUMP				= 2 << 16,
 	DF_NO_FREELOOK			= 1 << 18,	// Don't allow freelook
 	DF_RESPAWN_SUPER		= 1 << 19,	// Respawn invulnerability and invisibility
-	DF_NO_FOV				= 1 << 20,	// Only let the arbitrator set FOV (for all players)
+//							= 1 << 20,	// Used to be DF_NO_FOV, but it's no longer relevant
 	DF_NO_COOP_WEAPON_SPAWN	= 1 << 21,	// Don't spawn multiplayer weapons in coop games
 	DF_NO_CROUCH			= 1 << 22,	// Don't allow crouching
 	DF_YES_CROUCH			= 2 << 22,	//

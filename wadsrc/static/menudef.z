@@ -218,7 +218,8 @@ OptionMenu "VideoOptions"
 	// [TP] Zandronum's scoreboard does not use these options
 	// Submenu "Scoreboard Options", 		"ScoreboardOptions"
 	StaticText " "
-	Slider "Screen size",				"screenblocks", 3.0, 12.0, 1.0, 0
+	Slider "Screen size",				"screenblocks",					3.0, 12.0, 1.0, 0
+	Slider "Field of View",				"fov",							5.0, 179.0, 1.0, 0
 
 	Slider "Gamma correction",			"Gamma",						0.75, 3.0, 0.05, 2
 	Slider "Brightness",				"vid_brightness",				-0.8,0.8, 0.05

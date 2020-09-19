@@ -125,47 +125,45 @@ enum EDemoCommand
 	DEM_UNDONE5,		// 24
 	DEM_UNDONE6,		// 25
 	DEM_SUMMON,			// 26 String: Thing to fabricate
-	DEM_FOV,			// 27 Byte: New FOV for all players
-	DEM_MYFOV,			// 28 Byte: New FOV for this player
-	DEM_CHANGEMAP2,		// 29 Byte: Position in new map, String: name of new map
-	DEM_UNDONE7,		// 30
-	DEM_UNDONE8,		// 31
-	DEM_RUNSCRIPT,		// 32 Word: Script#, Byte: # of args; each arg is a 4-byte int
-	DEM_SINFCHANGEDXOR,	// 33 Like DEM_SINFCHANGED, but data is a byte indicating how to set a bit
-	DEM_INVDROP,		// 34 4 bytes: ID of item to drop
-	DEM_WARPCHEAT,		// 35 4 bytes: 2 for x, 2 for y
-	DEM_CENTERVIEW,		// 36
-	DEM_SUMMONFRIEND,	// 37 String: Thing to fabricate
-	DEM_SPRAY,			// 38 String: The decal to spray
-	DEM_CROUCH,			// 39
-	DEM_RUNSCRIPT2,		// 40 Same as DEM_RUNSCRIPT, but always executes
-	DEM_CHECKAUTOSAVE,	// 41 Check if the user has autosaves enabled. Ignored for demoplayback.
-	DEM_DOAUTOSAVE,		// 42 An autosave should be made
-	DEM_MORPHEX,		// 43 String: The class to morph to.
-	DEM_SUMMONFOE,		// 44 String: Thing to fabricate
-	DEM_UNDONE9,		// 45
-	DEM_UNDONE10,		// 46
-	DEM_TAKECHEAT,		// 47 String: item to take, Word: quantity
-	DEM_ADDCONTROLLER,	// 48 Player to add to the controller list.
-	DEM_DELCONTROLLER,	// 49 Player to remove from the controller list.
-	DEM_KILLCLASSCHEAT,	// 50 String: Class to kill.
-	DEM_UNDONE11,		// 51
-	DEM_SUMMON2,		// 52 String: Thing to fabricate, WORD: angle offset
-	DEM_SUMMONFRIEND2,	// 53
-	DEM_SUMMONFOE2,		// 54
-	DEM_ADDSLOTDEFAULT,	// 55
-	DEM_ADDSLOT,		// 56
-	DEM_SETSLOT,		// 57
-	DEM_SUMMONMBF,		// 58
-	DEM_CONVREPLY,		// 59 Word: Dialogue node, Byte: Reply number
-	DEM_CONVCLOSE,		// 60
-	DEM_CONVNULL,		// 61
-	DEM_RUNSPECIAL,		// 62 Byte: Special number, Byte: Arg count, Ints: Args
-	DEM_SETPITCHLIMIT,	// 63 Byte: Up limit, Byte: Down limit (in degrees)
-	DEM_ADVANCEINTER,	// 64 Advance intermission screen state
-	DEM_RUNNAMEDSCRIPT,	// 65 String: Script name, Byte: Arg count + Always flag; each arg is a 4-byte int
-	DEM_REVERTCAMERA,	// 66
-	DEM_SETSLOTPNUM,	// 67 Byte: player number, the rest is the same as DEM_SETSLOT
+	DEM_CHANGEMAP2,		// 27 Byte: Position in new map, String: name of new map
+	DEM_UNDONE7,		// 28
+	DEM_UNDONE8,		// 29
+	DEM_RUNSCRIPT,		// 30 Word: Script#, Byte: # of args; each arg is a 4-byte int
+	DEM_SINFCHANGEDXOR,	// 31 Like DEM_SINFCHANGED, but data is a byte indicating how to set a bit
+	DEM_INVDROP,		// 32 4 bytes: ID of item to drop
+	DEM_WARPCHEAT,		// 33 4 bytes: 2 for x, 2 for y
+	DEM_CENTERVIEW,		// 34
+	DEM_SUMMONFRIEND,	// 35 String: Thing to fabricate
+	DEM_SPRAY,			// 36 String: The decal to spray
+	DEM_CROUCH,			// 37
+	DEM_RUNSCRIPT2,		// 38 Same as DEM_RUNSCRIPT, but always executes
+	DEM_CHECKAUTOSAVE,	// 39 Check if the user has autosaves enabled. Ignored for demoplayback.
+	DEM_DOAUTOSAVE,		// 40 An autosave should be made
+	DEM_MORPHEX,		// 41 String: The class to morph to.
+	DEM_SUMMONFOE,		// 42 String: Thing to fabricate
+	DEM_UNDONE9,		// 43
+	DEM_UNDONE10,		// 44
+	DEM_TAKECHEAT,		// 45 String: item to take, Word: quantity
+	DEM_ADDCONTROLLER,	// 46 Player to add to the controller list.
+	DEM_DELCONTROLLER,	// 47 Player to remove from the controller list.
+	DEM_KILLCLASSCHEAT,	// 48 String: Class to kill.
+	DEM_UNDONE11,		// 49
+	DEM_SUMMON2,		// 50 String: Thing to fabricate, WORD: angle offset
+	DEM_SUMMONFRIEND2,	// 51
+	DEM_SUMMONFOE2,		// 52
+	DEM_ADDSLOTDEFAULT,	// 53
+	DEM_ADDSLOT,		// 54
+	DEM_SETSLOT,		// 55
+	DEM_SUMMONMBF,		// 56
+	DEM_CONVREPLY,		// 57 Word: Dialogue node, Byte: Reply number
+	DEM_CONVCLOSE,		// 58
+	DEM_CONVNULL,		// 59
+	DEM_RUNSPECIAL,		// 60 Byte: Special number, Byte: Arg count, Ints: Args
+	DEM_SETPITCHLIMIT,	// 61 Byte: Up limit, Byte: Down limit (in degrees)
+	DEM_ADVANCEINTER,	// 62 Advance intermission screen state
+	DEM_RUNNAMEDSCRIPT,	// 63 String: Script name, Byte: Arg count + Always flag; each arg is a 4-byte int
+	DEM_REVERTCAMERA,	// 64
+	DEM_SETSLOTPNUM,	// 65 Byte: player number, the rest is the same as DEM_SETSLOT
 };
 
 // The following are implemented by cht_DoCheat in m_cheat.cpp

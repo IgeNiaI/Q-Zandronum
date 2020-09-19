@@ -701,6 +701,7 @@ OptionMenu "VideoOptions"
 	Submenu "Scoreboard Options", 		"ScoreboardOptions"
 	StaticText " "
 	Slider "Screen size",				"screenblocks", 3.0, 12.0, 1.0, 0
+	Slider "Field of View",				"fov", 5.0, 179.0, 1.0, 2
 	Slider "Brightness",				"Gamma", 0.75, 3.0, 0.05, 2
 	Option "Vertical Sync",				"vid_vsync", "OnOff"
 	Option "Column render mode",		"r_columnmethod", "ColumnMethods"
@@ -1271,7 +1272,6 @@ OptionMenu GameplayOptions
 	Option "Allow jump",			"sv_jump", "JumpCrouch"
 	Option "Allow crouch",			"sv_crouch", "JumpCrouch"
 	Option "Allow freelook",		"sv_nofreelook", "NoYes"
-	Option "Allow FOV",				"sv_nofov", "NoYes"
 	// [TP] Zandronum has this CVar under a different name
 	// Option "Allow BFG aiming",		"sv_nobfgaim", "NoYes"
 	Option "Allow BFG aiming",		"sv_bfgfreeaim", "YesNo"

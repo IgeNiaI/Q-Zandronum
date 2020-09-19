@@ -3432,7 +3432,7 @@ void ServerCommands::SpawnPlayer::Execute()
 		pActor->sprite = skins[lSkin].sprite;
 	}
 
-	pPlayer->DesiredFOV = pPlayer->FOV = cl_fov;
+	pPlayer->DesiredFOV = pPlayer->FOV = float(fov);
 	// If the console player was watching another player in demo mode, continue to follow
 	// that other player.
 	if ( pCameraActor )
@@ -9231,7 +9231,21 @@ CVAR( Flag, cl_hidecountry, cl_connect_flags, CCF_HIDECOUNTRY )
 CVAR( String, cl_password, "password", 0 )
 CVAR( String, cl_joinpassword, "password", 0 )
 CVAR( Bool, cl_hitscandecalhack, true, CVAR_ARCHIVE )
-CVAR( Float, cl_fov, 90, CVAR_ARCHIVE | CVAR_USERINFO | CVAR_NOSET )
+CUSTOM_CVAR( Int, fov, 90, CVAR_ARCHIVE | CVAR_USERINFO )
+{
+	if (self < 5)
+		fov = 5;
+	else if (self > 179)
+		self = 179;
+
+	for (int i = 0; i < MAXPLAYERS; ++i)
+	{
+		if (playeringame[i])
+		{
+			players[i].DesiredFOV = float(self);
+		}
+	}
+}
 
 //*****************************************************************************
 //	STATISTICS
