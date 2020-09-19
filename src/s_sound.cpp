@@ -1289,9 +1289,9 @@ void S_Sound (AActor *ent, int channel, FSoundID sound_id, float volume, float a
 	S_StartSound (ent, NULL, NULL, NULL, channel, sound_id, volume, attenuation);
 
 	// [EP] If we're the server, tell the clients to make a sound.
-	if ( bSoundOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ))
-		if (playerNumToSkip >= 0 )
-			SERVERCOMMANDS_SoundActor( ent, channel, S_GetName( sound_id ), volume, attenuation, playerNumToSkip, SVCF_SKIPTHISCLIENT);
+	if (bSoundOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER))
+		if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && playerNumToSkip >= 0)
+			SERVERCOMMANDS_SoundActor(ent, channel, S_GetName( sound_id ), volume, attenuation, playerNumToSkip, SVCF_SKIPTHISCLIENT);
 		else
 			SERVERCOMMANDS_SoundActor(ent, channel, S_GetName(sound_id), volume, attenuation);
 }
