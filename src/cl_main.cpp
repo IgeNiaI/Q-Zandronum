@@ -3636,7 +3636,7 @@ void ServerCommands::MovePlayer::Execute()
 		P_CrouchMove( player, 1 );
 	}
 	else if (( player->crouchdir == -1 ) &&
-		( player->crouchfactor > CROUCHSCALE ))
+		( player->crouchfactor > player->mo->CrouchScale ))
 	{
 		P_CrouchMove( player, -1 );
 	}

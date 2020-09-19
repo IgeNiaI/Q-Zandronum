@@ -35,6 +35,9 @@ Actor PlayerPawn : Actor native
 	Player.AirCapacity 1
 	Player.MaxSkinSizeFactor 3.44, 1.68 // [TP]
 	
+	Player.CrouchScale 0.5
+	Player.CrouchChangeSpeed 0.08
+	
 	Player.MvType 0 // movement type (0 == doom, 1 == quake, 2 == quake CPM)
 	
 	Player.JumpDelay 7

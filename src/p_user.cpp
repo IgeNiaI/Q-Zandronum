@@ -738,6 +738,8 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< DamageFade
 		<< PlayerFlags
 		<< FlechetteType
+		<< CrouchScale
+		<< CrouchChangeSpeed
 		<< MvType
 		<< JumpDelay
 		<< MaxWallClimbTics
@@ -2321,9 +2323,15 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 float APlayerPawn::CrouchWalkFactor()
 {
 	if (player->CanCrouch() && player->crouchfactor < FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
-		return CrouchSpeedFactor * player->crouchfactor / CROUCHSCALE;
+	{
+		// Interpolate current crouch speed between full crouch and no crouch
+		float LerpValue = (FIXED2FLOAT(player->crouchfactor) - FIXED2FLOAT(player->mo->CrouchScale)) / (1.0 - FIXED2FLOAT(player->mo->CrouchScale));
+		return CrouchSpeedFactor + (1. - CrouchSpeedFactor) * LerpValue;
+	}
 	else if (player->cmd.ucmd.buttons & BT_SPEED)
+	{
 		return WalkSpeedFactor;
+	}
 
 	return 1.0f;
 }
@@ -2607,7 +2615,7 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 	}
 
 	// Set the crouch sprite?
-	if (player->crouchfactor < CROUCHSCALEHALFWAY)
+	if (player->crouchfactor < player->mo->CrouchScaleHalfWay)
 	{
 		if (spritenum == actor->SpawnState->sprite || spritenum == player->mo->crouchsprite) 
 		{
@@ -2629,9 +2637,9 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 		{
 			spritenum = crouchspriteno;
 		}
-		else if (player->playerstate != PST_DEAD && player->crouchfactor < CROUCHSCALEHALFWAY)
+		else if (player->playerstate != PST_DEAD && player->crouchfactor < player->mo->CrouchScaleHalfWay)
 		{
-			scaley = FixedMul(scaley, CROUCHSCALE);
+			scaley = FixedMul(scaley, player->mo->CrouchScale);
 		}
 	}
 }
@@ -3104,7 +3112,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
-		if (isDasher && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapCheck(player, cmd))
+		if (isDasher && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
 		{
 			FVector2 dir = FVector2(float(cmd->ucmd.forwardmove), -float(cmd->ucmd.sidemove)).Unit();
 			float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
@@ -3491,7 +3499,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 
 			// Dashing
-			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapCheck(player, cmd))
+			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
 			{
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
@@ -3529,7 +3537,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			else if (player->mo->velz <= 0)
 			{
 				canSlide = isSlider &&									// player has the flag
-						   player->crouchfactor < CROUCHSCALEHALFWAY &&	// player is crouching
+						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
 						   player->crouchSlideTics;						// there is crouch slide charge to spend
 				
 				// Friction & Acceleration
@@ -4121,7 +4129,7 @@ void P_CrouchMove(player_t * player, int direction)
 {
 	fixed_t defaultheight = player->mo->GetDefault()->height;
 	fixed_t savedheight = player->mo->height;
-	fixed_t crouchspeed = direction * CROUCHSPEED;
+	fixed_t crouchspeed = direction * player->mo->CrouchChangeSpeed;
 	fixed_t oldheight = player->viewheight;
 
 	player->crouchdir = (signed char) direction;
@@ -4141,7 +4149,7 @@ void P_CrouchMove(player_t * player, int direction)
 	}
 	player->mo->height = savedheight;
 
-	player->crouchfactor = clamp<fixed_t>(player->crouchfactor, CROUCHSCALE, FRACUNIT);
+	player->crouchfactor = clamp<fixed_t>(player->crouchfactor, player->mo->CrouchScale, FRACUNIT);
 	player->viewheight = FixedMul(player->mo->ViewHeight, player->crouchfactor);
 	player->crouchviewdelta = player->viewheight - player->mo->ViewHeight;
 
@@ -4362,7 +4370,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 				{
 					P_CrouchMove(player, 1);
 				}
-				else if (crouchdir == -1 && player->crouchfactor > CROUCHSCALE)
+				else if (crouchdir == -1 && player->crouchfactor > player->mo->CrouchScale)
 				{
 					P_CrouchMove(player, -1);
 				}

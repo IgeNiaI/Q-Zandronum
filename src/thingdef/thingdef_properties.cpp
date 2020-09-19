@@ -2839,6 +2839,35 @@ DEFINE_CLASS_PROPERTY_PREFIX( player, maxskinsizefactor, F_F, PlayerPawn )
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, crouchscale, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(crouchscale, 0);
+	if (crouchscale < 6553)
+		crouchscale = 6553;
+	else if (crouchscale > 58982)
+		crouchscale = 58982;
+
+	defaults->CrouchScale = crouchscale;
+	defaults->CrouchScaleHalfWay = (65536 - crouchscale) / 2 + crouchscale;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, crouchchangespeed, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(crouchchangespeed, 0);
+	if (crouchchangespeed < 655)
+		crouchchangespeed = 655;
+	else if (crouchchangespeed > 65536)
+		crouchchangespeed = 65536;
+
+	defaults->CrouchChangeSpeed = crouchchangespeed;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, mvtype, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);

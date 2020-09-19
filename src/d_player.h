@@ -172,6 +172,10 @@ public:
 	fixed_t		AirCapacity;			// Multiplier for air supply underwater.
 	const PClass *FlechetteType;
 
+	fixed_t		CrouchChangeSpeed;
+	fixed_t		CrouchScale;
+	fixed_t		CrouchScaleHalfWay;
+
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
 	int			JumpDelay;
 	int			MaxWallClimbTics;
@@ -872,10 +876,6 @@ inline bool AActor::IsNoClip2() const
 	}
 	return false;
 }
-
-#define CROUCHSPEED			(FRACUNIT/12)
-#define CROUCHSCALE			(FRACUNIT*3/4)
-#define CROUCHSCALEHALFWAY	(FRACUNIT*7/8)
 
 bool P_IsPlayerTotallyFrozen(const player_t *player);
 
