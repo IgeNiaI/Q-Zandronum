@@ -304,9 +304,9 @@ player_t::player_t()
   isCrouchSliding(0),
   wallClimbTics(0),
   isWallClimbing(0),
-  firstTapTime(0),
-  firstTapValue(0),
-  oldTapValue(0),
+  dashTics(0),
+  prepareTapValue(0),
+  lastTapValue(0),
   respawn_time(0),
   camera(0),
   air_finished(0),
@@ -446,9 +446,9 @@ player_t &player_t::operator=(const player_t &p)
 	isCrouchSliding = p.isCrouchSliding;
 	wallClimbTics = p.wallClimbTics;
 	isWallClimbing = p.isWallClimbing;
-	firstTapTime = p.firstTapTime;
-	firstTapValue = p.firstTapValue;
-	oldTapValue = p.oldTapValue;
+	dashTics = p.dashTics;
+	prepareTapValue = p.prepareTapValue;
+	lastTapValue = p.lastTapValue;
 	respawn_time = p.respawn_time;
 	camera = p.camera;
 	air_finished = p.air_finished;
@@ -2951,59 +2951,55 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 //
 //==========================================================================
 
-#define DASH_TAPTIME 10
+#define DASH_TAPTIME -10
 
 bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 {
 	// dash cooler
-	if (player->firstTapTime < 0)
+	if (player->dashTics > 0)
 	{
-		player->firstTapTime++;
+		player->dashTics--;
 		return false;
 	}
 
 	bool success = false;
-	int maxTapTime = DASH_TAPTIME;
 	int tapValue = cmd->ucmd.forwardmove | cmd->ucmd.sidemove;
 	int secondTapValue = 0;
 
-	if (tapValue & ~player->oldTapValue)
+	if (tapValue & ~player->lastTapValue)
 	{
-		if (!player->firstTapValue)
+		if (!player->prepareTapValue)
 		{
-			player->firstTapTime = level.maptime;
-			player->firstTapValue = tapValue;
+			player->dashTics = DASH_TAPTIME;
+			player->prepareTapValue = tapValue;
 		}
 		else
 		{
-			if (tapValue != player->firstTapValue)
-				player->firstTapTime = player->firstTapValue = 0;
+			if (tapValue != player->prepareTapValue)
+				player->prepareTapValue = 0;
 			else
 				secondTapValue = tapValue;
 		}
 	}
 
-	if (secondTapValue && level.maptime <= player->firstTapTime + maxTapTime)
+	if (secondTapValue && player->dashTics < 0)
 	{
+		player->prepareTapValue = 0;
+		player->dashTics = player->mo->DashDelay; // set the dash cooler
+
 		success = true;
-
-		if (CLIENT_PREDICT_IsPredicting() == false)
-			S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
-
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
-
-		player->firstTapValue = 0;
-		player->firstTapTime = -player->mo->DashDelay; // set the dash cooler
 	}
-	else if (level.maptime > player->firstTapTime + maxTapTime)
+	else
 	{
-		success = false;
+		player->dashTics++;
 
-		player->firstTapValue = player->firstTapTime = 0;
+		if (player->dashTics >= 0)
+		{
+			player->prepareTapValue = 0;
+		}
 	}
 
-	player->oldTapValue = tapValue;
+	player->lastTapValue = tapValue;
 
 	return success;
 }
@@ -3110,15 +3106,11 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	{
 		if (isDasher && player->crouchfactor > CROUCHSCALEHALFWAY && DoubleTapCheck(player, cmd))
 		{
-			FVector2 dir = FVector2(float(cmd->ucmd.forwardmove), - float(cmd->ucmd.sidemove)).Unit();
+			FVector2 dir = FVector2(float(cmd->ucmd.forwardmove), -float(cmd->ucmd.sidemove)).Unit();
 			float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 			VectorRotate(dir.X, dir.Y, flAngle);
 
-			// Set a minimum result speed for better feel
-			if (velLength < player->mo->DashForce * 1.5)
-				vel = dir * (player->mo->DashForce * 2.5);
-			else
-				vel += dir * player->mo->DashForce;
+			vel += dir * player->mo->DashForce * FIXED2FLOAT(player->mo->Speed);
 
 			player->mo->velx = FLOAT2FIXED(vel.X);
 			player->mo->vely = FLOAT2FIXED(vel.Y);
@@ -3128,6 +3120,12 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				player->mo->velz += (player->mo->CalcJumpVelz() / 4) * 3;
 
 			player->onground = false; // no friction to influence the dash
+
+			if (CLIENT_PREDICT_IsPredicting() == false)
+				S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
+
+			if (NETWORK_GetState() == NETSTATE_SERVER)
+				SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 		}
 
 		if (anyMove)
@@ -3500,17 +3498,19 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			{
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
-				// Set a minimum result speed for better feel
-				if (velocity < maxgroundspeed)
-					vel = acceleration * (maxgroundspeed + player->mo->DashForce);
-				else
-					vel += acceleration * player->mo->DashForce;
+				vel += acceleration * player->mo->DashForce * FIXED2FLOAT(player->mo->Speed);
 
 				// do a little jump if on ground (75% of regular jump height)
 				if (player->onground)
 					vel.Z += FIXED2FLOAT((player->mo->CalcJumpVelz() / 4) * 3);
 
 				player->onground = false;
+
+				if (CLIENT_PREDICT_IsPredicting() == false)
+					S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
+
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 
 			if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
