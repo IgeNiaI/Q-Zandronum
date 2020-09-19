@@ -3297,7 +3297,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
 				ulJumpTicks = 0;
 
-			player->mo->velz = JumpVelz;
+			player->mo->velz += JumpVelz;
 			player->jumpTics = ulJumpTicks;
 		}
 		// [Ivory]: Double Jump and wall jump
@@ -3619,7 +3619,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 
 			player->mo->flags2 &= ~MF2_ONMOBJ;
-			player->mo->velz = JumpVelz;
+			player->mo->velz += JumpVelz;
 			player->jumpTics = -1;
 		}
 		else if (((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
