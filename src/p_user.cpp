@@ -2325,15 +2325,15 @@ float APlayerPawn::CrouchWalkFactor()
 	if (player->CanCrouch() && player->crouchfactor < FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
 	{
 		// Interpolate current crouch speed between full crouch and no crouch
-		float LerpValue = (FIXED2FLOAT(player->crouchfactor) - FIXED2FLOAT(player->mo->CrouchScale)) / (1.0 - FIXED2FLOAT(player->mo->CrouchScale));
-		return CrouchSpeedFactor + (1. - CrouchSpeedFactor) * LerpValue;
+		float LerpValue = (FIXED2FLOAT(player->crouchfactor) - FIXED2FLOAT(player->mo->CrouchScale)) / (1.f - FIXED2FLOAT(player->mo->CrouchScale));
+		return CrouchSpeedFactor + (1.f - CrouchSpeedFactor) * LerpValue;
 	}
 	else if (player->cmd.ucmd.buttons & BT_SPEED)
 	{
 		return WalkSpeedFactor;
 	}
 
-	return 1.0f;
+	return 1.f;
 }
 
 //===========================================================================
@@ -3381,6 +3381,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 //				but I'd rather not add possible troubles.						//
 //******************************************************************************//
 
+#define FL_NORMALIZE(f)	((f) > 0 ? 1.f : ((f) < 0 ? -1.f : 0.f))
+
 void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 {
 	//*******************************************************
@@ -3398,9 +3400,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
 	float maxgroundspeed = player->mo->StopSpeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-	FVector3 acceleration = { cmd->ucmd.forwardmove ? float(cmd->ucmd.forwardmove / abs(cmd->ucmd.forwardmove)) : 0.f,
-							  cmd->ucmd.sidemove ? -float(cmd->ucmd.sidemove / abs(cmd->ucmd.sidemove)) : 0.f,
-							  0.f };
+	FVector3 acceleration = { FL_NORMALIZE(cmd->ucmd.forwardmove), - FL_NORMALIZE(cmd->ucmd.sidemove), 0.f };
 
 	if (player->mo->waterlevel >= 2)
 	{
