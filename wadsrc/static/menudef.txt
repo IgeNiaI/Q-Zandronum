@@ -824,6 +824,8 @@ OptionMenu "HUDOptions"
 	Option "Stretch Fullscreen HUD",	"hud_scale", "OnOff"
 	Option "Use old ouch mug shot formula",	"st_oldouch", "OnOff"
 	StaticText " "
+	Slider "Pickup flash intensity",	"pickup_blend_scalar", 0, 1, 0.05, 2
+	Slider "Screen blood intensity",	"blood_fade_scalar",   0, 1, 0.05, 2
 	Option "Hexen weapon flashes",		"pf_hexenweaps",	"ZDoomHexen"
 	Option "Poison damage flashes",		"pf_poison",		"ZDoomHexen"
 	Option "Ice death flashes",			"pf_ice",			"ZDoomHexen"
