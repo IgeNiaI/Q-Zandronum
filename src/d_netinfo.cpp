@@ -97,10 +97,6 @@ CVAR (Flag,		cl_unlagged,				cl_clientflags, CLIENTFLAGS_UNLAGGED );
 CVAR (Flag, 	cl_respawnonfire, 			cl_clientflags, CLIENTFLAGS_RESPAWNONFIRE );
 // [CK] Unlagged settings where we can choose ping unlagged.
 CVAR (Flag,		cl_ping_unlagged,			cl_clientflags, CLIENTFLAGS_PING_UNLAGGED );
-// [BB] Let the user control how often the server sends updated player positions to him.
-CVAR (Int,		cl_ticsperupdate,			3,		CVAR_USERINFO | CVAR_ARCHIVE);
-// [BB] Let the user control specify his connection speed (higher is faster).
-CVAR (Int,		cl_connectiontype,			1,		CVAR_USERINFO | CVAR_ARCHIVE);
 // [CK] Let the user control if they want clientside puffs or not.
 CVAR (Flag,		cl_clientsidepuffs,			cl_clientflags, CLIENTFLAGS_CLIENTSIDEPUFFS );
 
@@ -226,10 +222,6 @@ enum
 	INFO_PlayerClass,
 	INFO_ColorSet,
 
-	// [BB]
-	INFO_Ticsperupdate,
-	// [BB]
-	INFO_ConnectionType,
 	// [CK}
 	INFO_ClientFlags
 };
@@ -602,8 +594,6 @@ void D_SetupUserInfo ()
 			// [BB]
 			case NAME_RailColor:			coninfo->RailColorChanged(railcolor); break;
 			case NAME_Handicap:				coninfo->HandicapChanged(handicap); break;
-			case NAME_CL_TicsPerUpdate:		coninfo->TicsPerUpdateChanged(cl_ticsperupdate); break;
-			case NAME_CL_ConnectionType:	coninfo->ConnectionTypeChanged(cl_connectiontype); break;
 			case NAME_CL_ClientFlags:		coninfo->ClientFlagsChanged(cl_clientflags); break;
 
 			// The rest do.
@@ -782,32 +772,6 @@ int userinfo_t::HandicapChanged(int handicap)
 }
 
 // [BB]
-int userinfo_t::TicsPerUpdateChanged(int ticsperupdate)
-{
-	if ( (*this)[NAME_CL_TicsPerUpdate] == NULL )
-	{
-		Printf ( "Error: No TicsPerUpdate key found!\n" );
-		return 0;
-	}
-	ticsperupdate = clamp ( ticsperupdate, 1, 3 );
-	*static_cast<FIntCVar *>((*this)[NAME_CL_TicsPerUpdate]) = ticsperupdate;
-	return ticsperupdate;
-}
-
-// [BB]
-int userinfo_t::ConnectionTypeChanged(int connectiontype)
-{
-	if ( (*this)[NAME_CL_ConnectionType] == NULL )
-	{
-		Printf ( "Error: No ConnectionType key found!\n" );
-		return 0;
-	}
-	connectiontype = clamp ( connectiontype, 0, 1 );
-	*static_cast<FIntCVar *>((*this)[NAME_CL_ConnectionType]) = connectiontype;
-	return connectiontype;
-}
-
-// [BB]
 int userinfo_t::ClientFlagsChanged(int flags)
 {
 	if ( (*this)[NAME_CL_ClientFlags] == NULL )
@@ -929,34 +893,6 @@ void D_UserInfoChanged (FBaseCVar *cvar)
 		if ( stillbob > 16 )
 		{
 			stillbob = 16;
-			return;
-		}
-	}
-	// [BB]
-	else if ( cvar == &cl_ticsperupdate )
-	{
-		if ( cl_ticsperupdate < 1 )
-		{
-			cl_ticsperupdate = 1;
-			return;
-		}
-		if ( cl_ticsperupdate > 3 )
-		{
-			cl_ticsperupdate = 3;
-			return;
-		}
-	}
-	// [BB]
-	else if ( cvar == &cl_connectiontype )
-	{
-		if ( cl_connectiontype < 0 )
-		{
-			cl_connectiontype = 0;
-			return;
-		}
-		if ( cl_connectiontype > 1 )
-		{
-			cl_connectiontype = 1;
 			return;
 		}
 	}
@@ -1361,16 +1297,6 @@ void D_ReadUserInfoStrings (int pnum, BYTE **stream, bool update)
 			// [BB]
 			case NAME_Handicap:
 				info->HandicapChanged ( atoi( value ) );
-				break;
-
-			// [BB]
-			case NAME_CL_TicsPerUpdate:
-				info->TicsPerUpdateChanged ( atoi (value) );
-				break;
-
-			// [BB]
-			case NAME_CL_ConnectionType:
-				info->ConnectionTypeChanged ( atoi (value) );
 				break;
 
 			// [CK]

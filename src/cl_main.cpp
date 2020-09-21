@@ -2188,8 +2188,6 @@ void CLIENT_PrintCommand( LONG lCommand )
 			return;
 		if (( cl_showcommands >= 3 ) && ( lCommand == SVC_MOVEPLAYER ))
 			return;
-		if (( cl_showcommands >= 4 ) && ( lCommand == SVC_UPDATEPLAYEREXTRADATA ))
-			return;
 		if (( cl_showcommands >= 5 ) && ( lCommand == SVC_UPDATEPLAYERPING ))
 			return;
 		if (( cl_showcommands >= 6 ) && ( lCommand == SVC_PING ))
@@ -3618,40 +3616,39 @@ void ServerCommands::MovePlayer::Execute()
 	// [BB] But don't just set the position, but also properly set floorz and ceilingz, etc.
 	CLIENT_MoveThing( player->mo, x, y, z );
 
+	// [BB] If the spectated player uses the GL renderer and we are using software,
+	// the viewangle has to be limited.	We don't care about cl_disallowfullpitch here.
+	if (!currentrenderer)
+	{
+		// [BB] The user can restore ZDoom's freelook limit.
+		const fixed_t pitchLimit = -ANGLE_1*(cl_oldfreelooklimit ? 32 : 56);
+		if (pitch < pitchLimit)
+			pitch = pitchLimit;
+		if (pitch > ANGLE_1 * 56)
+			pitch = ANGLE_1 * 56;
+	}
+
+	player->mo->waterlevel = waterlevel;
+
 	// Set the player's angle.
 	player->mo->angle = angle;
+	player->mo->pitch = pitch;
 
 	// Set the player's XYZ momentum.
 	player->mo->velx = velx;
 	player->mo->vely = vely;
 	player->mo->velz = velz;
 
-	// Is the player crouching?
-	player->crouchdir = ( isCrouching ) ? 1 : -1;
-
-	if (( player->crouchdir == 1 ) &&
-		( player->crouchfactor < FRACUNIT ) &&
-		(( player->mo->z + player->mo->height ) < player->mo->ceilingz ))
-	{
-		P_CrouchMove( player, 1 );
-	}
-	else if (( player->crouchdir == -1 ) &&
-		( player->crouchfactor > player->mo->CrouchScale ))
-	{
-		P_CrouchMove( player, -1 );
-	}
-
-	// [BB] Set whether the player is attacking or not.
-	// Check: Is it a good idea to only do this, when the player is visible?
-	if ( flags & PLAYER_ATTACK )
-		player->cmd.ucmd.buttons |= BT_ATTACK;
-	else
-		player->cmd.ucmd.buttons &= ~BT_ATTACK;
-
-	if ( flags & PLAYER_ALTATTACK )
-		player->cmd.ucmd.buttons |= BT_ALTATTACK;
-	else
-		player->cmd.ucmd.buttons &= ~BT_ALTATTACK;
+	usercmd_t usercmd;
+	usercmd.forwardmove = ucmd_forwardmove;
+	usercmd.sidemove = ucmd_sidemove;
+	usercmd.upmove = ucmd_upmove;
+	usercmd.yaw = ucmd_yaw;
+	usercmd.pitch = ucmd_pitch;
+	// usercmd.roll = ucmd_roll;
+	usercmd.roll = player->cmd.ucmd.roll;
+	usercmd.buttons = ucmd_buttons;
+	player->cmd.ucmd = usercmd;
 }
 
 //*****************************************************************************
@@ -3926,10 +3923,6 @@ void ServerCommands::SetPlayerUserInfo::Execute()
 		// Read in the player's handicap.
 		else if ( name == NAME_Handicap )
 			player->userinfo.HandicapChanged ( value.ToLong() );
-		else if ( name == NAME_CL_TicsPerUpdate )
-			player->userinfo.TicsPerUpdateChanged ( value.ToLong() );
-		else if ( name == NAME_CL_ConnectionType )
-			player->userinfo.ConnectionTypeChanged ( value.ToLong() );
 		// [CK] We do compressed bitfields now.
 		else if ( name == NAME_CL_ClientFlags )
 			player->userinfo.ClientFlagsChanged ( value.ToLong() );
@@ -4213,30 +4206,6 @@ void ServerCommands::SetPlayerLivesLeft::Execute()
 void ServerCommands::UpdatePlayerPing::Execute()
 {
 	player->ulPing = ping;
-}
-
-//*****************************************************************************
-//
-void ServerCommands::UpdatePlayerExtraData::Execute()
-{
-	// [BB] If the spectated player uses the GL renderer and we are using software,
-	// the viewangle has to be limited.	We don't care about cl_disallowfullpitch here.
-	if ( !currentrenderer )
-	{
-		// [BB] The user can restore ZDoom's freelook limit.
-		const fixed_t pitchLimit = -ANGLE_1*( cl_oldfreelooklimit ? 32 : 56 );
-		if (pitch < pitchLimit)
-			pitch = pitchLimit;
-		if (pitch > ANGLE_1*56)
-			pitch = ANGLE_1*56;
-	}
-	player->mo->pitch = pitch;
-	player->mo->waterlevel = waterLevel;
-	// [BB] The attack buttons are now already set in *_MovePlayer, so additionally setting
-	// them here is obsolete. I don't want to change this before 97D2 final though.
-	player->cmd.ucmd.buttons = buttons;
-	player->viewz = viewZ;
-	player->bob = bob;
 }
 
 //*****************************************************************************

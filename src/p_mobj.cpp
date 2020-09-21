@@ -6645,8 +6645,8 @@ statedone:
 			// spawn state. Therefore, there's no need to treat it as a special case.
 			// [BB] This saves bandwidth, but doesn't spawn the blood size based on the damage dealt,
 			// so only use this for players with a slow connection.
-			SERVERCOMMANDS_SpawnThingNoNetID( th, MAXPLAYERS, SVCF_ONLY_CONNECTIONTYPE_0 );
-			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS, SVCF_ONLY_CONNECTIONTYPE_1 );
+			SERVERCOMMANDS_SpawnThingNoNetID( th, MAXPLAYERS );
+			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS );
 		}
 		else
 			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator );

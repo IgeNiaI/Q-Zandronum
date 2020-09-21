@@ -270,31 +270,33 @@ void SERVERCOMMANDS_SpawnPlayer( ULONG ulPlayer, LONG lPlayerState, ULONG ulPlay
 //
 void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	ULONG ulPlayerAttackFlags = 0;
+	ULONG ulPlayerFlags = 0;
 
 	if ( PLAYER_IsValidPlayerWithMo( ulPlayer ) == false )
 		return;
 
-	// [BB] Check if ulPlayer is pressing any attack buttons.
-	if ( players[ulPlayer].cmd.ucmd.buttons & BT_ATTACK )
-		ulPlayerAttackFlags |= PLAYER_ATTACK;
-	if ( players[ulPlayer].cmd.ucmd.buttons & BT_ALTATTACK )
-		ulPlayerAttackFlags |= PLAYER_ALTATTACK;
-
 	ServerCommands::MovePlayer fullCommand;
 	fullCommand.SetPlayer ( &players[ulPlayer] );
-	fullCommand.SetFlags( ulPlayerAttackFlags | PLAYER_VISIBLE );
-	fullCommand.SetX( players[ulPlayer].mo->x );
-	fullCommand.SetY( players[ulPlayer].mo->y );
-	fullCommand.SetZ( players[ulPlayer].mo->z );
-	fullCommand.SetAngle( players[ulPlayer].mo->angle );
-	fullCommand.SetVelx( players[ulPlayer].mo->velx );
-	fullCommand.SetVely( players[ulPlayer].mo->vely );
-	fullCommand.SetVelz( players[ulPlayer].mo->velz );
-	fullCommand.SetIsCrouching(( players[ulPlayer].crouchdir >= 0 ) ? true : false );
+	fullCommand.SetFlags( ulPlayerFlags | PLAYER_VISIBLE );
+	fullCommand.SetX( players[ulPlayer].mo->LastX );
+	fullCommand.SetY( players[ulPlayer].mo->LastY );
+	fullCommand.SetZ( players[ulPlayer].mo->LastZ );
+	fullCommand.SetWaterlevel( players[ulPlayer].mo->waterlevel );
+	fullCommand.SetAngle( players[ulPlayer].mo->LastAngle );
+	fullCommand.SetPitch( players[ulPlayer].mo->LastPitch );
+	fullCommand.SetVelx( players[ulPlayer].mo->LastVelX );
+	fullCommand.SetVely( players[ulPlayer].mo->LastVelY );
+	fullCommand.SetVelz( players[ulPlayer].mo->lastVelz );
+	fullCommand.SetUcmd_forwardmove( players[ulPlayer].cmd.ucmd.forwardmove );
+	fullCommand.SetUcmd_sidemove( players[ulPlayer].cmd.ucmd.sidemove );
+	fullCommand.SetUcmd_upmove( players[ulPlayer].cmd.ucmd.upmove );
+	fullCommand.SetUcmd_yaw( players[ulPlayer].cmd.ucmd.yaw );
+	fullCommand.SetUcmd_pitch( players[ulPlayer].cmd.ucmd.pitch );
+	// fullCommand.SetUcmd_roll( players[ulPlayer].cmd.ucmd.roll );
+	fullCommand.SetUcmd_buttons( players[ulPlayer].cmd.ucmd.buttons );
 
 	ServerCommands::MovePlayer stubCommand = fullCommand;
-	stubCommand.SetFlags( ulPlayerAttackFlags );
+	stubCommand.SetFlags( ulPlayerFlags );
 
 	for ( ClientIterator it ( ulPlayerExtra, flags ); it.notAtEnd(); ++it )
 	{
@@ -864,23 +866,6 @@ void SERVERCOMMANDS_UpdatePlayerPing( ULONG ulPlayer, ULONG ulPlayerExtra, Serve
 	command.SetPlayer( &players[ulPlayer] );
 	command.SetPing( players[ulPlayer].ulPing );
 	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_UpdatePlayerExtraData( ULONG ulPlayer, ULONG ulDisplayPlayer )
-{
-	if (( SERVER_IsValidClient( ulPlayer ) == false ) || ( PLAYER_IsValidPlayer( ulDisplayPlayer ) == false ))
-		return;
-
-	ServerCommands::UpdatePlayerExtraData command;
-	command.SetPlayer( &players[ulDisplayPlayer] );
-	command.SetPitch( players[ulDisplayPlayer].mo->pitch );
-	command.SetWaterLevel( players[ulDisplayPlayer].mo->waterlevel );
-	command.SetButtons( players[ulDisplayPlayer].cmd.ucmd.buttons );
-	command.SetViewZ( players[ulDisplayPlayer].viewz );
-	command.SetBob( players[ulDisplayPlayer].bob );
-	command.sendCommandToClients( ulPlayer, SVCF_ONLYTHISCLIENT );
 }
 
 //*****************************************************************************

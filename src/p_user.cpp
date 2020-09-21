@@ -2708,14 +2708,6 @@ void P_CalcHeight (player_t *player)
 	fixed_t 	bob;
 	bool		still = false;
 
-	// [BB] Clients don't calculate the viewheight of the player whose eyes they are looking through
-	// they receive that from the server (except if they are looking through their own eyes).
-	if (( NETWORK_GetState( ) == NETSTATE_CLIENT ) && ( player->mo->CheckLocalView( consoleplayer ) ) &&
-		(( player - players ) != consoleplayer ))
-	{
-		return;
-	}
-
 	// [BC] If we're predicting, nothing to do here.
 	if ( CLIENT_PREDICT_IsPredicting( ))
 		return;
@@ -2749,7 +2741,7 @@ void P_CalcHeight (player_t *player)
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				player->bob = FixedMul( player->bob, 16384 );
 			else
-				player->bob = FixedMul (player->bob, player->userinfo.GetMoveBob());
+				player->bob = FixedMul (player->bob, players[consoleplayer].userinfo.GetMoveBob());
 
 			// [BB] I've seen bob becoming negative for a high ping clients (250+) on low gravity servers (sv_gravity 200)
 			// when moving forward in the air for too long. Overflow problem? Nevertheless, setting negative values
@@ -2892,7 +2884,7 @@ void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const f
 	// happens when somebody gets stuck in a corner, and causes same results as a division by 0
 	if (velocity > 10000.f)
 		return;
-	
+
 	bool waterflying = player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY);
 
 	if (waterflying)
@@ -2908,7 +2900,7 @@ void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const f
 		vel.X = vel.Y = 0.f;
 		return;
 	}
-	
+
 	float drop = 0.f, control = 0.f;
 	if (waterflying)
 	{
@@ -3317,10 +3309,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
 					if (CLIENT_PREDICT_IsPredicting() == false)
 						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
-
-					// [EP] Inform the other clients to play the sound.
-					if (NETWORK_GetState() == NETSTATE_SERVER)
-						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 				}
 
 				player->mo->flags2 &= ~MF2_ONMOBJ;
@@ -3619,7 +3607,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				isSliding = isSlider &&									// player has the flag
 						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
 						   player->crouchSlideTics;						// there is crouch slide charge to spend
-				
+
 				// Friction & Acceleration
 				if (isSliding)
 				{
@@ -3834,11 +3822,18 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 */
 void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 {
-	// [BB] A client doesn't know enough about the other players to make their movement.
-	if (NETWORK_InClientMode() && (player - players) != consoleplayer &&
-		!CLIENTDEMO_IsFreeSpectatorPlayer(player))
+	APlayerPawn *mo = player->mo;
+
+	if (NETWORK_GetState() == NETSTATE_SERVER)
 	{
-		return;
+		player->mo->LastX = player->mo->x;
+		player->mo->LastY = player->mo->y;
+		player->mo->LastZ = player->mo->z;
+		player->mo->LastVelX = player->mo->velx;
+		player->mo->LastVelY = player->mo->vely;
+		player->mo->LastVelZ = player->mo->velz;
+		player->mo->LastAngle = player->mo->angle;
+		player->mo->LastPitch = player->mo->pitch;
 	}
 
 	// [RH] 180-degree turn overrides all other yaws
@@ -3965,7 +3960,7 @@ void P_FallingDamage (AActor *actor)
 			S_Sound(actor, CHAN_AUTO, "*land", 1, ATTN_NORM);
 			P_NoiseAlert(actor, actor, true);
 		}
-		
+
 		if (damage == 1000000 && (actor->player->cheats & (CF_GODMODE | CF_BUDDHA)))
 		{
 			damage = 999;
@@ -4511,7 +4506,6 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 
 	player->crouchoffset = -FixedMul(player->mo->ViewHeight, (FRACUNIT - player->crouchfactor));
-
 
 	if (player->playerstate == PST_DEAD)
 	{

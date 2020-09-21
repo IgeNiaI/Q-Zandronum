@@ -70,12 +70,6 @@ bool ClientIterator::isCurrentValid ( ) const {
 		return false;
 	}
 
-	if ( ( _flags & SVCF_ONLY_CONNECTIONTYPE_0 ) && ( players[_current].userinfo.GetConnectionType() != 0 ) )
-		return false;
-
-	if ( ( _flags & SVCF_ONLY_CONNECTIONTYPE_1 ) && ( players[_current].userinfo.GetConnectionType() != 1 ) )
-		return false;
-
 	return true;
 }
 

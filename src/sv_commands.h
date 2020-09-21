@@ -67,9 +67,7 @@
 enum ServerCommandFlag
 {
 	SVCF_SKIPTHISCLIENT			= ( 1 << 0 ),
-	SVCF_ONLYTHISCLIENT			= ( 1 << 1 ),
-	SVCF_ONLY_CONNECTIONTYPE_0	= ( 1 << 2 ),
-	SVCF_ONLY_CONNECTIONTYPE_1	= ( 1 << 3 )
+	SVCF_ONLYTHISCLIENT			= ( 1 << 1 )
 };
 
 /*
@@ -142,7 +140,6 @@ void	SERVERCOMMANDS_SetPlayerLivesLeft( ULONG ulPlayer, ULONG ulPlayerExtra = MA
 void	SERVERCOMMANDS_SetPlayerViewHeight( ULONG ulPlayer, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SyncPlayerAmmoAmount( ULONG ulPlayer, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_UpdatePlayerPing( ULONG ulPlayer, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_UpdatePlayerExtraData( ULONG ulPlayer, ULONG ulDisplayPlayer );
 void	SERVERCOMMANDS_UpdatePlayerTime( ULONG ulPlayer, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_MoveLocalPlayer( ULONG ulPlayer );
 void	SERVERCOMMANDS_DisconnectPlayer( ULONG ulPlayer, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );

@@ -121,7 +121,7 @@ public:
 	virtual void FilterCoopRespawnInventory (APlayerPawn *oldplayer);
 	// [BC]
 	virtual void Destroy( );
-	
+
 	// Quake movement
 	float QTweakSpeed();
 	void  QFriction(FVector3 &vel, const float speedlimit, const float friction);
@@ -197,6 +197,13 @@ public:
 	// Quake CPM movement only
 	float		CpmAirAcceleration;
 	float		CpmMaxForwardAngleRad;
+
+	// [geNia] The server updates player data before sending it to clients, but the player input is still old.
+	// That results in player input being one tic behind position, so we need to remember last position to send it to other clients.
+	fixed_t		LastX, LastY, LastZ;
+	fixed_t		LastVelX, LastVelY, LastVelZ;
+	angle_t		LastAngle;
+	fixed_t		LastPitch;
 
 	// [CW] Fades for when you are being damaged.
 	PalEntry DamageFade;
@@ -439,8 +446,6 @@ struct userinfo_t : TMap<FName,FBaseCVar *>
 	int GenderNumChanged(int gendernum);
 	int RailColorChanged(int railcolor);
 	int HandicapChanged(int handicap);
-	int TicsPerUpdateChanged(int ticsperupdate);
-	int ConnectionTypeChanged(int connectiontype);
 	int ClientFlagsChanged(int flags);
 	int GetRailColor() const 
 	{
@@ -457,24 +462,6 @@ struct userinfo_t : TMap<FName,FBaseCVar *>
 			return *static_cast<FIntCVar *>(*CheckKey(NAME_Handicap));
 		else {
 			Printf ( "Error: No Handicap key found!\n" );
-			return 0;
-		}
-	}
-	int GetTicsPerUpdate() const
-	{
-		if ( CheckKey(NAME_CL_TicsPerUpdate) != NULL )
-			return *static_cast<FIntCVar *>(*CheckKey(NAME_CL_TicsPerUpdate));
-		else {
-			Printf ( "Error: No TicsPerUpdate key found!\n" );
-			return 0;
-		}
-	}
-	int GetConnectionType() const
-	{
-		if ( CheckKey(NAME_CL_ConnectionType) != NULL )
-			return *static_cast<FIntCVar *>(*CheckKey(NAME_CL_ConnectionType));
-		else {
-			Printf ( "Error: No ConnectionType key found!\n" );
 			return 0;
 		}
 	}
