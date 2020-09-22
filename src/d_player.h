@@ -159,6 +159,7 @@ public:
 
 	// [GRB] Player class properties
 	fixed_t		JumpZ;
+	bool		wasJustThrustedZ;
 	fixed_t		GruntSpeed;
 	fixed_t		FallingScreamMinSpeed, FallingScreamMaxSpeed;
 	fixed_t		ViewHeight;

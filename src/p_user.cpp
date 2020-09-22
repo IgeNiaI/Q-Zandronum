@@ -3272,37 +3272,40 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			ULONG	ulJumpTicks;
 			bool isRampJumper = player->mo->flags7 & MF7_RAMPJUMP ? true : false;
 
-			// Set base jump velocity.
-			// [Dusk] Exported this into a function as I need it elsewhere as well.
-			JumpVelz = player->mo->CalcJumpVelz();
+			if (!player->mo->wasJustThrustedZ || isRampJumper)
+			{
+				// Set base jump velocity.
+				// [Dusk] Exported this into a function as I need it elsewhere as well.
+				JumpVelz = player->mo->CalcJumpVelz();
 
-			// Set base jump ticks.
-			// [BB] In ZDoom revision 2970 changed the jumping behavior.
-			if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
-				ulJumpTicks = 18 * TICRATE / 35;
-			else
-				ulJumpTicks = -1;
+				// Set base jump ticks.
+				// [BB] In ZDoom revision 2970 changed the jumping behavior.
+				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
+					ulJumpTicks = 18 * TICRATE / 35;
+				else
+					ulJumpTicks = -1;
 
-			// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-			if (CLIENT_PREDICT_IsPredicting() == false)
-				S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+				// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+				if (CLIENT_PREDICT_IsPredicting() == false)
+					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
-			// [EP] Inform the other clients to play the sound.
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				// [EP] Inform the other clients to play the sound.
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 
-			player->mo->flags2 &= ~MF2_ONMOBJ;
+				player->mo->flags2 &= ~MF2_ONMOBJ;
 
-			// [BC] Increase jump delay if the player has the high jump power.
-			if (player->cheats & CF_HIGHJUMP)
-				ulJumpTicks *= 2;
+				// [BC] Increase jump delay if the player has the high jump power.
+				if (player->cheats & CF_HIGHJUMP)
+					ulJumpTicks *= 2;
 
-			// [BC] Remove jump delay if the player is on a spring pad.
-			if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
-				ulJumpTicks = 0;
+				// [BC] Remove jump delay if the player is on a spring pad.
+				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+					ulJumpTicks = 0;
 
-			player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
-			player->jumpTics = ulJumpTicks;
+				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
+				player->jumpTics = ulJumpTicks;
+			}
 		}
 		// [Ivory]: Double Jump and wall jump
 		else if (((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
@@ -3401,6 +3404,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float maxgroundspeed = player->mo->StopSpeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FL_NORMALIZE(cmd->ucmd.forwardmove), - FL_NORMALIZE(cmd->ucmd.sidemove), 0.f };
+	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
+	player->mo->wasJustThrustedZ = false;
 
 	if (player->mo->waterlevel >= 2)
 	{
@@ -3555,7 +3560,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				if (isSlider && player->mo->velz < 0)
 					player->crouchSlideTics = MIN(-FixedDiv(player->mo->velz, 1000000000), player->mo->SlideMaxTics);
 			}
-			else if (player->mo->velz <= 0.f)
+			else if (!wasJustThrustedZ)
 			{
 				canSlide = isSlider &&									// player has the flag
 						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
@@ -3643,15 +3648,18 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			fixed_t	JumpVelz = player->mo->CalcJumpVelz();
 			bool isRampJumper = player->mo->flags7 & MF7_RAMPJUMP ? true : false;
 
-			if (!CLIENT_PREDICT_IsPredicting())
-				S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+			if (!wasJustThrustedZ || isRampJumper)
+			{
+				if (!CLIENT_PREDICT_IsPredicting())
+					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 
-			player->mo->flags2 &= ~MF2_ONMOBJ;
-			player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
-			player->jumpTics = -1;
+				player->mo->flags2 &= ~MF2_ONMOBJ;
+				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
+				player->jumpTics = -1;
+			}
 		}
 		else if (((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
 			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())

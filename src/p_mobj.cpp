@@ -2606,7 +2606,7 @@ explode:
 
 		if (player && (player->mo == mo))		//  Not voodoo dolls
 		{
-			if (((player->onground && player->mo->velz <= 0) || (mo->player->cmd.ucmd.buttons & BT_JUMP) || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
+			if (((player->onground && !player->mo->wasJustThrustedZ) || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
 			{
 				fixed_t friction = P_GetFriction(mo, NULL);
 
@@ -2620,6 +2620,8 @@ explode:
 				player->velx = FixedMul(player->velx, ORIG_FRICTION);
 				player->vely = FixedMul(player->vely, ORIG_FRICTION);
 			}
+
+			player->mo->wasJustThrustedZ = false;
 		}
 		else
 		{
@@ -2629,6 +2631,7 @@ explode:
 			mo->vely = FixedMul(mo->vely, friction);
 		}
 	}
+
 	return oldfloorz;
 }
 
@@ -4531,6 +4534,7 @@ void AActor::Tick ()
 			if (!PoisonDurationReceived) PoisonDamageReceived = 0;
 		}
 	}
+
 	// [BC] Don't tick states while predicting.
 	if ( CLIENT_PREDICT_IsPredicting( ))
 		return;
