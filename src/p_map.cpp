@@ -2973,7 +2973,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 		if (mo->reactiontime > 0) // player coming right out of a teleporter.
 			return;
 		else if(noWallFriction)
-			preSlideVel = { FIXED2FLOAT(mo->player->velx), FIXED2FLOAT(mo->player->vely) };
+			preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };
 	}
 
 retry:
