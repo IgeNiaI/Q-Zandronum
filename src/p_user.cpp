@@ -3524,17 +3524,38 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
 				// Acceleration
-				if (player->mo->MvType == MV_QUAKE_CPM && cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
-					player->mo->QAcceleration(vel, acceleration, 1.5f, player->mo->CpmAirAcceleration * 6);
+				if (player->mo->MvType == MV_QUAKE_CPM)
+				{
+					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
+					{
+						player->mo->QAcceleration(vel, acceleration, 1.5f, player->mo->CpmAirAcceleration * 6.f);
+					}
+					else
+					{
+						if (velocity && !cmd->ucmd.sidemove && DotProduct(vel, acceleration) > 0)
+						{
+							FVector2 forwardVel = FVector2(vel.X + acceleration.X * 10.f, vel.Y + acceleration.Y * 10.f).Unit() * velocity;
+							vel.X = forwardVel.X;
+							vel.Y = forwardVel.Y;
+						}
+						else
+						{
+							player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6.f);
+						}
+					}
+				}
 				else
-					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6);
+				{
+					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6.f);
+				}
+
 
 				// set slide duration if player can do it.
 				// Duration is proportional to the velz.
 				if (isSlider && player->mo->velz < 0)
 					player->crouchSlideTics = MIN(-FixedDiv(player->mo->velz, 1000000000), player->mo->SlideMaxTics);
 			}
-			else if (player->mo->velz <= 0)
+			else if (player->mo->velz <= 0.f)
 			{
 				canSlide = isSlider &&									// player has the flag
 						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
