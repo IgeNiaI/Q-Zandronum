@@ -4378,7 +4378,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 	// [BC] Don't do this for clients other than ourself in client mode.
 	// [BB] Also, don't do this while predicting.
-	if (( NETWORK_InClientMode() == false ) || ( (( player - players ) == consoleplayer ) && ( CLIENT_PREDICT_IsPredicting( ) == false ) ))
+	if (( NETWORK_InClientMode() == false ) || ( CLIENT_PREDICT_IsPredicting( ) == false ))
 	{
 		if (player->CanCrouch() && player->health > 0 && level.IsCrouchingAllowed())
 		{
