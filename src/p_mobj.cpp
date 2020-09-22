@@ -2606,7 +2606,7 @@ explode:
 
 		if (player && (player->mo == mo))		//  Not voodoo dolls
 		{
-			if (((player->onground && player->mo->velz <= 0) || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
+			if (((player->onground && player->mo->velz <= 0) || (mo->player->cmd.ucmd.buttons & BT_JUMP) || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
 			{
 				fixed_t friction = P_GetFriction(mo, NULL);
 
