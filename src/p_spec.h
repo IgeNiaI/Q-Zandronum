@@ -512,6 +512,7 @@ protected:
 	int			m_Crush;
 	int 		m_Tag;
 	EPlatType	m_Type;
+	player_t	*lastInstigator;
 
 	// [BC] This is the platform's unique network ID.
 	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
@@ -526,12 +527,19 @@ private:
 	friend bool	EV_DoPlat (int tag, line_t *line, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
 	friend void EV_StopPlat (int tag);
+	friend bool	EV_DoPlat (int tag, player_t *instigator, line_t *line, EPlatType type,
+						   int height, int speed, int delay, int lip, int change);
+	friend void EV_StopPlat (int tag);
+	friend void EV_StopPlat (int tag, player_t *instigator);
 	friend void P_ActivateInStasis (int tag);
 };
 
 bool EV_DoPlat (int tag, line_t *line, DPlat::EPlatType type,
 				int height, int speed, int delay, int lip, int change);
+bool EV_DoPlat (int tag, player_t *instigator, line_t *line, DPlat::EPlatType type,
+				int height, int speed, int delay, int lip, int change);
 void EV_StopPlat (int tag);
+void EV_StopPlat (int tag, player_t *instigator);
 void P_ActivateInStasis (int tag);
 
 //

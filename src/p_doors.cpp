@@ -111,7 +111,7 @@ void DDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to change the door's direction.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+					if ( lastInstigator )
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
@@ -124,7 +124,7 @@ void DDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to change the door's direction.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+					if ( lastInstigator )
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
@@ -150,7 +150,7 @@ void DDoor::Tick ()
 			
 				// [BC] If we're the server, tell clients to change the door's direction.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+					if ( lastInstigator )
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
@@ -180,7 +180,7 @@ void DDoor::Tick ()
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 				{
 					if (m_Sector->floorOrCeiling == 0)
 						SERVERCOMMANDS_SetSectorFloorPlane(m_Sector - sectors, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -211,7 +211,7 @@ void DDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to destroy the door.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+					if ( lastInstigator )
 						SERVERCOMMANDS_DestroyDoor(m_lDoorID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_DestroyDoor(m_lDoorID);
@@ -225,7 +225,7 @@ void DDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to change the door's direction.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+					if ( lastInstigator )
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
@@ -249,7 +249,7 @@ void DDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to change the door's direction.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+					if ( lastInstigator )
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
@@ -276,7 +276,7 @@ void DDoor::Tick ()
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 				{
 					if (m_Sector->floorOrCeiling == 0)
 						SERVERCOMMANDS_SetSectorFloorPlane(m_Sector - sectors, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -307,7 +307,7 @@ void DDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to change the door's direction.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+					if ( lastInstigator )
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
@@ -320,7 +320,7 @@ void DDoor::Tick ()
 				
 				// [BC] If we're the server, tell clients to destroy the door.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+					if ( lastInstigator )
 						SERVERCOMMANDS_DestroyDoor(m_lDoorID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_DestroyDoor(m_lDoorID);
@@ -671,7 +671,7 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 							if (player && player->mo != thing)
 								player = NULL;
 
-							if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+							if (instigator && instigator == player)
 								SERVERCOMMANDS_ChangeDoorDirection(door->GetID(), door->m_Direction, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 							else
 								SERVERCOMMANDS_ChangeDoorDirection(door->GetID(), door->m_Direction);
@@ -699,7 +699,7 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 							if (player && player->mo != thing)
 								player = NULL;
 
-							if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+							if (instigator && instigator == player)
 								SERVERCOMMANDS_ChangeDoorDirection(door->GetID(), door->m_Direction, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 							else
 								SERVERCOMMANDS_ChangeDoorDirection(door->GetID(), door->m_Direction);
@@ -725,7 +725,7 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 				if (player && player->mo != thing)
 					player = NULL;
 
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+				if (instigator && instigator == player)
 					SERVERCOMMANDS_DoDoor(sec, type, speed, pDoor->GetDirection(), lightTag, pDoor->GetID(), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_DoDoor(sec, type, speed, pDoor->GetDirection(), lightTag, pDoor->GetID());
@@ -755,7 +755,7 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 					if (player && player->mo != thing)
 						player = NULL;
 
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+					if (instigator && instigator == player)
 						SERVERCOMMANDS_DoDoor(sec, type, speed, pDoor->GetDirection(), lightTag, pDoor->GetID(), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_DoDoor(sec, type, speed, pDoor->GetDirection(), lightTag, pDoor->GetID());

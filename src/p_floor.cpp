@@ -203,7 +203,7 @@ void DFloor::Tick ()
 		// have the correct floor/ceiling height for this sector.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+			if (lastInstigator)
 				if (m_Sector->floorOrCeiling == 0)
 					SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 				else
@@ -217,7 +217,7 @@ void DFloor::Tick ()
 
 		// [BC] If we're the server, tell clients to stop the floor's sound sequence.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+			if (lastInstigator)
 				SERVERCOMMANDS_StopSectorSequence(m_Sector, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 			else
 				SERVERCOMMANDS_StopSectorSequence(m_Sector);
@@ -230,7 +230,7 @@ void DFloor::Tick ()
 
 			// [BC] Tell clients to change the floor type.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 					SERVERCOMMANDS_ChangeFloorType(m_lFloorID, m_Type, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_ChangeFloorType(m_lFloorID, m_Type);
@@ -252,7 +252,7 @@ void DFloor::Tick ()
 
 					// [BC] Update clients about this flat change.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+						if (lastInstigator)
 							SERVERCOMMANDS_SetSectorFlat(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						else
 							SERVERCOMMANDS_SetSectorFlat(ULONG(m_Sector - sectors));
@@ -278,7 +278,7 @@ void DFloor::Tick ()
 
 					// [BC] Update clients about this flat change.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+						if (lastInstigator)
 							SERVERCOMMANDS_SetSectorFlat(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						else
 							SERVERCOMMANDS_SetSectorFlat(ULONG(m_Sector - sectors));
@@ -323,7 +323,7 @@ void DFloor::Tick ()
 
 			// [BC] If we're the server, tell clients to destroy the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 					SERVERCOMMANDS_DestroyFloor(m_lFloorID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_DestroyFloor(m_lFloorID);
@@ -726,7 +726,7 @@ manual_floor:
 
 				// [BC] Update clients about this flat change.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+					if (instigator)
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
@@ -762,7 +762,7 @@ manual_floor:
 
 				// [BC] Update clients about this flat change.
 				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+					if (instigator)
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
@@ -779,7 +779,7 @@ manual_floor:
 		// [BC] If we're the server, tell clients to create the floor.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+			if (instigator)
 			{
 				SERVERCOMMANDS_DoFloor(floortype, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID,
 					ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
@@ -833,7 +833,7 @@ manual_floor:
 
 					// [BC] Update clients about this flat change.
 					if (NETWORK_GetState() == NETSTATE_SERVER)
-						if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+						if (instigator)
 							SERVERCOMMANDS_SetSectorFlat(ULONG(modelsec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 						else
 							SERVERCOMMANDS_SetSectorFlat(ULONG(modelsec - sectors));
@@ -846,7 +846,7 @@ manual_floor:
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+					if (instigator)
 						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors));
@@ -884,7 +884,7 @@ bool EV_FloorCrushStop (int tag, player_t *instigator)
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+				if (instigator)
 					if (sec->floorOrCeiling == 0)
 						SERVERCOMMANDS_SetSectorFloorPlane(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
@@ -898,7 +898,7 @@ bool EV_FloorCrushStop (int tag, player_t *instigator)
 
 			// [BC] If we're the server, tell clients to stop the floor's sound sequence.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+				if (instigator)
 					SERVERCOMMANDS_StopSectorSequence(sec, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_StopSectorSequence(sec);
@@ -907,7 +907,7 @@ bool EV_FloorCrushStop (int tag, player_t *instigator)
 
 			// [BC] If we're the server, tell clients to destroy the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+				if (instigator)
 					SERVERCOMMANDS_DestroyFloor(barrier_cast<DFloor *>(sec->floordata)->m_lFloorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_DestroyFloor(barrier_cast<DFloor *>(sec->floordata)->m_lFloorID);
@@ -1043,7 +1043,7 @@ manual_stair:
 
 		// [BC] If we're the server, tell clients to create the floor.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+			if (instigator)
 				SERVERCOMMANDS_BuildStair(floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist,
 					floor->m_Crush, floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID,
 					ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
@@ -1167,7 +1167,7 @@ manual_stair:
 				// [BC] If we're the server, tell clients to create the floor.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+					if (instigator)
 					{
 						SERVERCOMMANDS_BuildStair(floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush,
 							floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID,
@@ -1277,7 +1277,7 @@ manual_donut:
 			// [BC] If we're the server, tell clients to create the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+				if (instigator)
 				{
 					SERVERCOMMANDS_DoFloor(floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID,
 					ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
@@ -1310,7 +1310,7 @@ manual_donut:
 			// [BC] If we're the server, tell clients to create the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+				if (instigator)
 				{
 					SERVERCOMMANDS_DoFloor(floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID,
 						ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
@@ -1453,7 +1453,7 @@ void DElevator::Tick ()
 		// have the correct floor/ceiling height for this sector.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+			if (lastInstigator)
 			{
 				SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 				SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -1469,7 +1469,7 @@ void DElevator::Tick ()
 		// destroy the elevator.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+			if (lastInstigator)
 			{
 				SERVERCOMMANDS_StopSectorSequence(m_Sector, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 				SERVERCOMMANDS_DestroyElevator(m_lElevatorID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -1620,7 +1620,7 @@ manual_elevator:
 		// [BC] If we're the server, tell clients to create the elevator.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+			if (instigator)
 			{
 				SERVERCOMMANDS_DoElevator(elevator->m_Type, elevator->m_Sector, elevator->m_Speed, elevator->m_Direction, elevator->m_FloorDestDist,
 					elevator->m_CeilingDestDist, elevator->m_lElevatorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
@@ -1688,7 +1688,7 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigato
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+					if (instigator)
 						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors));
@@ -1706,7 +1706,7 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigato
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+					if (instigator)
 						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors));
@@ -1907,7 +1907,7 @@ void DWaggleBase::DoWaggle (bool ceiling, player_t *instigator)
 
 			// [BC] If we're the server, tell clients to delete the waggle.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+				if (instigator)
 					SERVERCOMMANDS_DestroyWaggle(m_lWaggleID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_DestroyWaggle(m_lWaggleID);
@@ -2072,7 +2072,7 @@ manual_waggle:
 
 		// [BC] If we're the server, tell clients to do the waggle.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+			if (instigator)
 				SERVERCOMMANDS_DoWaggle(ceiling, sector, waggle->m_OriginalDist, waggle->m_Accumulator, waggle->m_AccDelta, waggle->m_TargetScale,
 					waggle->m_Scale, waggle->m_ScaleDelta, waggle->m_Ticker, waggle->m_State, waggle->m_lWaggleID,
 					ULONG(instigator - players), SVCF_SKIPTHISCLIENT);

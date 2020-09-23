@@ -1744,7 +1744,7 @@ void DPlaneWatcher::Tick ()
 	if ((LastD < WatchD && newd >= WatchD) ||
 		(LastD > WatchD && newd <= WatchD))
 	{
-		P_ExecuteSpecial(Special, Line, Activator, LineSide, Arg0, Arg1, Arg2, Arg3, Arg4);
+		P_ExecuteSpecial(Special, Line, Activator, LineSide, true, Arg0, Arg1, Arg2, Arg3, Arg4);
 		Destroy ();
 	}
 
@@ -5763,7 +5763,7 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
 				int arg3 = argCount > 3 ? args[3] : 0;
 				int arg4 = argCount > 4 ? args[4] : 0;
 				return P_ExecuteSpecial(NamedACSToNormalACS[funcIndex - ACSF_ACS_NamedExecute],
-					activationline, activator, backSide,
+					activationline, activator, backSide, true,
 					scriptnum, arg1, arg2, arg3, arg4);
 			}
 			break;
@@ -7096,20 +7096,20 @@ int DLevelScript::RunScript ()
 			break;
 
 		case PCD_LSPEC1:
-			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide,
+			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide, true,
 									STACK(1) & specialargmask, 0, 0, 0, 0);
 			sp -= 1;
 			break;
 
 		case PCD_LSPEC2:
-			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide,
+			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide, true,
 									STACK(2) & specialargmask,
 									STACK(1) & specialargmask, 0, 0, 0);
 			sp -= 2;
 			break;
 
 		case PCD_LSPEC3:
-			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide,
+			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide, true,
 									STACK(3) & specialargmask,
 									STACK(2) & specialargmask,
 									STACK(1) & specialargmask, 0, 0);
@@ -7117,7 +7117,7 @@ int DLevelScript::RunScript ()
 			break;
 
 		case PCD_LSPEC4:
-			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide,
+			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide, true,
 									STACK(4) & specialargmask,
 									STACK(3) & specialargmask,
 									STACK(2) & specialargmask,
@@ -7126,7 +7126,7 @@ int DLevelScript::RunScript ()
 			break;
 
 		case PCD_LSPEC5:
-			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide,
+			P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide, true,
 									STACK(5) & specialargmask,
 									STACK(4) & specialargmask,
 									STACK(3) & specialargmask,
@@ -7136,7 +7136,7 @@ int DLevelScript::RunScript ()
 			break;
 
 		case PCD_LSPEC5RESULT:
-			STACK(5) = P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide,
+			STACK(5) = P_ExecuteSpecial(NEXTBYTE, activationline, activator, backSide, true,
 									STACK(5) & specialargmask,
 									STACK(4) & specialargmask,
 									STACK(3) & specialargmask,
@@ -7147,14 +7147,14 @@ int DLevelScript::RunScript ()
 
 		case PCD_LSPEC1DIRECT:
 			temp = NEXTBYTE;
-			P_ExecuteSpecial(temp, activationline, activator, backSide,
+			P_ExecuteSpecial(temp, activationline, activator, backSide, true,
 								uallong(pc[0]) & specialargmask ,0, 0, 0, 0);
 			pc += 1;
 			break;
 
 		case PCD_LSPEC2DIRECT:
 			temp = NEXTBYTE;
-			P_ExecuteSpecial(temp, activationline, activator, backSide,
+			P_ExecuteSpecial(temp, activationline, activator, backSide, true,
 								uallong(pc[0]) & specialargmask,
 								uallong(pc[1]) & specialargmask, 0, 0, 0);
 			pc += 2;
@@ -7162,7 +7162,7 @@ int DLevelScript::RunScript ()
 
 		case PCD_LSPEC3DIRECT:
 			temp = NEXTBYTE;
-			P_ExecuteSpecial(temp, activationline, activator, backSide,
+			P_ExecuteSpecial(temp, activationline, activator, backSide, true,
 								uallong(pc[0]) & specialargmask,
 								uallong(pc[1]) & specialargmask,
 								uallong(pc[2]) & specialargmask, 0, 0);
@@ -7171,7 +7171,7 @@ int DLevelScript::RunScript ()
 
 		case PCD_LSPEC4DIRECT:
 			temp = NEXTBYTE;
-			P_ExecuteSpecial(temp, activationline, activator, backSide,
+			P_ExecuteSpecial(temp, activationline, activator, backSide, true,
 								uallong(pc[0]) & specialargmask,
 								uallong(pc[1]) & specialargmask,
 								uallong(pc[2]) & specialargmask,
@@ -7181,7 +7181,7 @@ int DLevelScript::RunScript ()
 
 		case PCD_LSPEC5DIRECT:
 			temp = NEXTBYTE;
-			P_ExecuteSpecial(temp, activationline, activator, backSide,
+			P_ExecuteSpecial(temp, activationline, activator, backSide, true,
 								uallong(pc[0]) & specialargmask,
 								uallong(pc[1]) & specialargmask,
 								uallong(pc[2]) & specialargmask,
@@ -7192,32 +7192,32 @@ int DLevelScript::RunScript ()
 
 		// Parameters for PCD_LSPEC?DIRECTB are by definition bytes so never need and-ing.
 		case PCD_LSPEC1DIRECTB:
-			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide,
+			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide, true,
 				((BYTE *)pc)[1], 0, 0, 0, 0);
 			pc = (int *)((BYTE *)pc + 2);
 			break;
 
 		case PCD_LSPEC2DIRECTB:
-			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide,
+			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide, true,
 				((BYTE *)pc)[1], ((BYTE *)pc)[2], 0, 0, 0);
 			pc = (int *)((BYTE *)pc + 3);
 			break;
 
 		case PCD_LSPEC3DIRECTB:
-			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide,
+			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide, true,
 				((BYTE *)pc)[1], ((BYTE *)pc)[2], ((BYTE *)pc)[3], 0, 0);
 			pc = (int *)((BYTE *)pc + 4);
 			break;
 
 		case PCD_LSPEC4DIRECTB:
-			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide,
+			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide, true,
 				((BYTE *)pc)[1], ((BYTE *)pc)[2], ((BYTE *)pc)[3],
 				((BYTE *)pc)[4], 0);
 			pc = (int *)((BYTE *)pc + 5);
 			break;
 
 		case PCD_LSPEC5DIRECTB:
-			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide,
+			P_ExecuteSpecial(((BYTE *)pc)[0], activationline, activator, backSide, true,
 				((BYTE *)pc)[1], ((BYTE *)pc)[2], ((BYTE *)pc)[3],
 				((BYTE *)pc)[4], ((BYTE *)pc)[5]);
 			pc = (int *)((BYTE *)pc + 6);

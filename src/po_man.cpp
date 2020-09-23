@@ -550,7 +550,7 @@ void DRotatePoly::Tick ()
 			// [BC] Tell clients to stop the sound sequence, and destroy the rotate poly.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 				{
 					SERVERCOMMANDS_SetPolyobjRotation(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					SERVERCOMMANDS_StopPolyobjSound(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -571,7 +571,7 @@ void DRotatePoly::Tick ()
 	else if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		// [WS] The poly object is blocked, tell clients the rotation!
 	{
-		if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+		if (lastInstigator)
 			SERVERCOMMANDS_SetPolyobjRotation(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 		else
 			SERVERCOMMANDS_SetPolyobjRotation(m_PolyObj);
@@ -635,7 +635,7 @@ bool EV_RotatePoly (line_t *line, player_t *instigator, int polyNum, int speed, 
 
 		// [BC] If we're the server, tell clients to create the rotate poly.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+			if (instigator)
 				SERVERCOMMANDS_DoRotatePoly(pe->m_Speed, pe->m_PolyObj, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 			else
 				SERVERCOMMANDS_DoRotatePoly(pe->m_Speed, pe->m_PolyObj);
@@ -666,7 +666,7 @@ void DMovePoly::Tick ()
 				// [BC] Tell clients to stop the sound sequence, and destroy the move poly.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 					{
 						SERVERCOMMANDS_SetPolyobjPosition(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						SERVERCOMMANDS_StopPolyobjSound(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -693,7 +693,7 @@ void DMovePoly::Tick ()
 		else if ( NETWORK_GetState ( ) == NETSTATE_SERVER )
 			// [WS] The poly object is blocked, tell clients the position!
 		{
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+			if (lastInstigator)
 				SERVERCOMMANDS_SetPolyobjPosition(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 			else
 				SERVERCOMMANDS_SetPolyobjPosition(m_PolyObj);
@@ -746,7 +746,7 @@ bool EV_MovePoly (line_t *line, player_t *instigator, int polyNum, int speed, an
 
 		// [BC] If we're the server, tell clients to create the move poly.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+			if (instigator)
 				SERVERCOMMANDS_DoMovePoly(pe->m_xSpeed, pe->m_ySpeed, pe->m_PolyObj, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 			else
 				SERVERCOMMANDS_DoMovePoly(pe->m_xSpeed, pe->m_ySpeed, pe->m_PolyObj);
@@ -868,7 +868,7 @@ void DPolyDoor::Tick ()
 			SN_StartSequence (poly, poly->seqType, SEQ_DOOR, m_Close);
 			// [EP] Tell the clients to play the closing door sound sequence
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 					SERVERCOMMANDS_PlayPolyobjSound(m_PolyObj, m_Close, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_PlayPolyobjSound(m_PolyObj, m_Close);
@@ -885,7 +885,7 @@ void DPolyDoor::Tick ()
 			{
 				// [EP] The door is not blocked anymore.
 				poly->bBlocked = false;
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 					SERVERCOMMANDS_SetPolyDoorSpeedPosition(m_PolyObj, m_xSpeed, m_ySpeed, poly->StartSpot.x, poly->StartSpot.y, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_SetPolyDoorSpeedPosition(m_PolyObj, m_xSpeed, m_ySpeed, poly->StartSpot.x, poly->StartSpot.y);
@@ -897,7 +897,7 @@ void DPolyDoor::Tick ()
 			{
 				// [BC] Tell clients to stop the sound sequence.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 						SERVERCOMMANDS_StopPolyobjSound(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_StopPolyobjSound(m_PolyObj);
@@ -914,7 +914,7 @@ void DPolyDoor::Tick ()
 
 					// [WS] Inform clients the door has stopped.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+						if (lastInstigator)
 							SERVERCOMMANDS_SetPolyDoorSpeedPosition(m_PolyObj, 0, 0, poly->StartSpot.x, poly->StartSpot.y, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						else
 							SERVERCOMMANDS_SetPolyDoorSpeedPosition(m_PolyObj, 0, 0, poly->StartSpot.x, poly->StartSpot.y);
@@ -925,7 +925,7 @@ void DPolyDoor::Tick ()
 					// [BC] If we're the server, tell clients to destroy the poly door.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 					{
-						if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+						if (lastInstigator)
 						{
 							SERVERCOMMANDS_DestroyPolyDoor(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 							SERVERCOMMANDS_SetPolyobjPosition(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -949,7 +949,7 @@ void DPolyDoor::Tick ()
 				if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( m_Dist > 0 ) && ( poly->bBlocked == false ) )
 				{
 					poly->bBlocked = true;
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 						SERVERCOMMANDS_SetPolyDoorSpeedPosition(m_PolyObj, 0, 0, poly->StartSpot.x, poly->StartSpot.y, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetPolyDoorSpeedPosition(m_PolyObj, 0, 0, poly->StartSpot.x, poly->StartSpot.y);
@@ -970,7 +970,7 @@ void DPolyDoor::Tick ()
 				// [WS] Tell clients to update the speed and position.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 					{
 						SERVERCOMMANDS_PlayPolyobjSound(m_PolyObj, 0, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						SERVERCOMMANDS_SetPolyDoorSpeedPosition(m_PolyObj, m_xSpeed, m_ySpeed, poly->StartSpot.x, poly->StartSpot.y, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -994,7 +994,7 @@ void DPolyDoor::Tick ()
 			{
 				// [BB] The door is not blocked anymore.
 				poly->bBlocked = false;
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 					SERVERCOMMANDS_SetPolyDoorSpeedRotation(m_PolyObj, m_Speed, poly->angle, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_SetPolyDoorSpeedRotation(m_PolyObj, m_Speed, poly->angle);
@@ -1012,7 +1012,7 @@ void DPolyDoor::Tick ()
 
 				// [BC] Tell clients to stop the sound sequence.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 						SERVERCOMMANDS_StopPolyobjSound(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_StopPolyobjSound(m_PolyObj);
@@ -1026,7 +1026,7 @@ void DPolyDoor::Tick ()
 
 					// [WS] Inform clients the door has stopped.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+						if (lastInstigator)
 							SERVERCOMMANDS_SetPolyDoorSpeedRotation(m_PolyObj, 0, poly->angle, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						else
 							SERVERCOMMANDS_SetPolyDoorSpeedRotation(m_PolyObj, 0, poly->angle);
@@ -1037,7 +1037,7 @@ void DPolyDoor::Tick ()
 					// [BC] Tell clients to destroy the poly door.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 					{
-						if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+						if (lastInstigator)
 						{
 							SERVERCOMMANDS_DestroyPolyDoor(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 							SERVERCOMMANDS_SetPolyobjRotation(m_PolyObj, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -1061,7 +1061,7 @@ void DPolyDoor::Tick ()
 				if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( m_Dist > 0 ) && ( poly->bBlocked == false ) )
 				{
 					poly->bBlocked = true;
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 						SERVERCOMMANDS_SetPolyDoorSpeedRotation(m_PolyObj, 0, poly->angle, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetPolyDoorSpeedRotation(m_PolyObj, 0, poly->angle);
@@ -1079,7 +1079,7 @@ void DPolyDoor::Tick ()
 				// [WS] Tell clients to update the speed and rotation.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 					{
 						SERVERCOMMANDS_PlayPolyobjSound(m_PolyObj, 0, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						SERVERCOMMANDS_SetPolyDoorSpeedRotation(m_PolyObj, m_Speed, poly->angle, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -1159,7 +1159,7 @@ bool EV_OpenPolyDoor (line_t *line, player_t *instigator, int polyNum, int speed
 		// [BC] Tell clients to create the poly door, and play a sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+			if (instigator)
 			{
 				SERVERCOMMANDS_DoPolyDoor(pd->m_Type, pd->m_xSpeed, pd->m_ySpeed, pd->m_Speed, pd->m_PolyObj, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 				SERVERCOMMANDS_PlayPolyobjSound(poly->tag, 0, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);

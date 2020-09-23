@@ -1294,6 +1294,8 @@ bool NETWORK_InClientModeAndActorNotClientHandled( const AActor *pActor )
 //
 bool NETWORK_IsClientPredictedSpecial( const int Special )
 {
+	Printf("%d\n", Special);
+
 	if ((NETWORK_GetState() == NETSTATE_SERVER) || !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS))
 		// TODO [geNia] replace ACS_ExecuteWithResult with a new special that indicates that the script is bound to client prediction
 		if (Special == ACS_ExecuteWithResult)
@@ -1319,6 +1321,11 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		|| ( Special == Floor_Waggle ) || ( Special == Generic_Crusher )
 		|| ( Special == Floor_TransferTrigger ) || ( Special == Floor_TransferNumeric )
 		|| ( Special == Stairs_BuildDownSync ) || ( Special == Stairs_BuildUpSync ) || ( Special == Stairs_BuildUpDoom )
+
+		// Platforms
+		|| ( Special >= Plat_PerpetualRaise && Special <= Plat_UpByValue )
+		|| ( Special == Plat_UpNearestWaitDownStay ) || ( Special == Plat_DownWaitUpStayLip ) || ( Special == Plat_PerpetualRaiseLip )
+		|| ( Special == Plat_RaiseAndStayTx0 ) || ( Special == Plat_UpByValueStayTx ) || ( Special == Plat_ToggleCeiling )
 
 		// Doors
 		|| ( Special >= Door_Close && Special <= Door_Animated)

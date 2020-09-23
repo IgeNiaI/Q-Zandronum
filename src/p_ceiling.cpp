@@ -134,10 +134,6 @@ void DCeiling::Tick ()
 		// UP
 		res = MoveCeiling (m_Speed, m_TopHeight, m_Direction);
 		
-		// [BC] Don't need to do anything more here if we're a client.
-		if ( NETWORK_InClientMode() )
-			break;
-
 		if (res == pastdest)
 		{
 			// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
@@ -145,12 +141,12 @@ void DCeiling::Tick ()
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
 				if ( m_Sector->floorOrCeiling == 0 )
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 						SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors));
 				else
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 						SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(m_Sector - sectors));
@@ -168,7 +164,7 @@ void DCeiling::Tick ()
 				// [BC] If we're the server, send out a bunch of updates to clients.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 					{
 						// Tell clients to change the direction of the ceiling.
 						SERVERCOMMANDS_ChangeCeilingDirection(m_lCeilingID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -205,7 +201,7 @@ void DCeiling::Tick ()
 
 				// [TP] If we're the server, tell the client to change the ceiling texture.
 				if ( NETWORK_GetState() == NETSTATE_SERVER )
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 						SERVERCOMMANDS_SetSectorFlat(m_Sector - sectors, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat(m_Sector - sectors);
@@ -219,7 +215,7 @@ void DCeiling::Tick ()
 				// [BC] If we're the server, tell the client to destroy this ceiling.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 					{
 						SERVERCOMMANDS_StopSectorSequence(m_Sector, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						SERVERCOMMANDS_DestroyCeiling(m_lCeilingID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -242,17 +238,13 @@ void DCeiling::Tick ()
 		// DOWN
 		res = MoveCeiling (m_Speed, m_BottomHeight, m_Crush, m_Direction, m_Hexencrush);
 		
-		// [BC] Don't need to do anything more here if we're a client.
-		if ( NETWORK_InClientMode() )
-			break;
-
 		if (res == pastdest)
 		{
 			// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				if (lastInstigator)
 					if (m_Sector->floorOrCeiling == 0)
 						SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
@@ -277,7 +269,7 @@ void DCeiling::Tick ()
 				// [BC] If we're the server, send out a bunch of updates to clients.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 					{
 						// Tell clients to change the direction of the ceiling.
 						SERVERCOMMANDS_ChangeCeilingDirection(m_lCeilingID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -315,7 +307,7 @@ void DCeiling::Tick ()
 
 				// [TP] If we're the server, tell the client to change the ceiling texture.
 				if ( NETWORK_GetState() == NETSTATE_SERVER )
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 						SERVERCOMMANDS_SetSectorFlat(m_Sector - sectors, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat(m_Sector - sectors);
@@ -329,7 +321,7 @@ void DCeiling::Tick ()
 				// [BC] If we're the server, tell the client to destroy this ceiling.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+					if (lastInstigator)
 					{
 						SERVERCOMMANDS_StopSectorSequence(m_Sector, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 						SERVERCOMMANDS_DestroyCeiling(m_lCeilingID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -362,7 +354,7 @@ void DCeiling::Tick ()
 
 						// [BC] If we're the server, tell clients to change the ceiling's speed.
 						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+							if (lastInstigator)
 								SERVERCOMMANDS_ChangeCeilingSpeed(m_lCeilingID, m_Speed, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 							else
 								SERVERCOMMANDS_ChangeCeilingSpeed(m_lCeilingID, m_Speed);
@@ -681,7 +673,7 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 
 	// [BC] If we're the server, tell clients to create a ceiling.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && ceiling->lastInstigator)
+		if (ceiling->lastInstigator)
 			SERVERCOMMANDS_DoCeiling(type, sec, ceiling->m_Direction, ceiling->m_BottomHeight, ceiling->m_TopHeight, ceiling->m_Speed,
 				ceiling->m_Crush, ceiling->m_Hexencrush, ceiling->m_Silent, ceiling->m_lCeilingID, ULONG(ceiling->lastInstigator - players), SVCF_SKIPTHISCLIENT);
 		else
@@ -746,7 +738,7 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 
 	// [BC] If we're the server, tell clients to play the ceiling sound.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && ceiling->lastInstigator)
+		if (ceiling->lastInstigator)
 			SERVERCOMMANDS_PlayCeilingSound(ceiling->m_lCeilingID, ULONG(ceiling->lastInstigator - players), SVCF_SKIPTHISCLIENT);
 		else
 			SERVERCOMMANDS_PlayCeilingSound(ceiling->m_lCeilingID);
@@ -834,7 +826,7 @@ void P_ActivateInStasisCeiling (int tag)
 			// play the ceiling sound.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && scan->lastInstigator)
+				if (scan->lastInstigator)
 				{
 					SERVERCOMMANDS_ChangeCeilingDirection(scan->GetID(), scan->GetDirection(), ULONG(scan->lastInstigator - players), SVCF_SKIPTHISCLIENT);
 					SERVERCOMMANDS_PlayCeilingSound(scan->GetID(), ULONG(scan->lastInstigator - players), SVCF_SKIPTHISCLIENT);
@@ -876,7 +868,7 @@ bool EV_CeilingCrushStop (int tag, player_t *instigator)
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+				if (instigator)
 				{
 					if (scan->m_Sector->floorOrCeiling == 0)
 						SERVERCOMMANDS_SetSectorFloorPlane(ULONG(scan->m_Sector - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
@@ -905,7 +897,7 @@ bool EV_CeilingCrushStop (int tag, player_t *instigator)
 
 			// [BB] Also tell the updated direction to the clients.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator)
+				if (instigator)
 					SERVERCOMMANDS_ChangeCeilingDirection(scan->GetID(), scan->GetDirection(), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 				else
 					SERVERCOMMANDS_ChangeCeilingDirection(scan->GetID(), scan->GetDirection());

@@ -261,7 +261,7 @@ bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixe
 		if (player && player->mo != thing)
 			player = NULL;
 
-		if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+		if (instigator && instigator == player)
 			SERVERCOMMANDS_TeleportThing( thing, sourceFog, useFog, ( useFog && bHaltVelocity ), ULONG( instigator - players ), SVCF_SKIPTHISCLIENT );
 		else
 			SERVERCOMMANDS_TeleportThing( thing, sourceFog, useFog, (useFog && bHaltVelocity) );

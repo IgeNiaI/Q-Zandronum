@@ -169,7 +169,7 @@ static int LS_Sector_SetPlaneReflection (line_t *ln, AActor *it, bool backSide,
 	return true;
 }
 */
-static int LS_SetGlobalFogParameter (line_t *ln, AActor *it, bool backSide,
+static int LS_SetGlobalFogParameter (line_t *ln, AActor *it, bool backSide, bool isFromAcs,
 	int arg0, int arg1, int arg2, int arg3, int arg4)
 {
 // SetGlobalFogParameter (type, value)

@@ -4660,7 +4660,7 @@ bool SERVER_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 			{
 				if ( PLAYER_IsValidPlayerWithMo( g_lCurrentClient ))
 				{
-					P_ExecuteSpecial( special, NULL, players[g_lCurrentClient].mo, false,
+					P_ExecuteSpecial( special, NULL, players[g_lCurrentClient].mo, false, false,
 						args[0], args[1], args[2], args[3], args[4] );
 				}
 			}

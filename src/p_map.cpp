@@ -1369,8 +1369,8 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 			}
 		}
 
-		LineSpecials[thing->special]( NULL, tm.thing, false, thing->args[0],
-			thing->args[1], thing->args[2], thing->args[3], thing->args[4] );
+		LineSpecials[thing->special]( NULL, tm.thing, false, false,
+			thing->args[0], thing->args[1], thing->args[2], thing->args[3], thing->args[4] );
 	}
 
 	// killough 3/16/98: Allow non-solid moving objects to move through solid
@@ -7045,7 +7045,7 @@ bool P_ActivateThingSpecial(AActor * thing, AActor * trigger, bool death)
 			(((death && level.flags & LEVEL_ACTOWNSPECIAL && !(thing->activationtype & THINGSPEC_TriggerActs))
 			|| (thing->activationtype & THINGSPEC_ThingActs)) // Who triggers?
 			? thing : trigger),
-			false, thing->args[0], thing->args[1], thing->args[2], thing->args[3], thing->args[4]);
+			false, false, thing->args[0], thing->args[1], thing->args[2], thing->args[3], thing->args[4]);
 
 		// Clears the special if it was run on thing's death or if flag is set.
 		if (death || (thing->activationtype & THINGSPEC_ClearSpecial && res)) thing->special = 0;
