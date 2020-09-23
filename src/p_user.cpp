@@ -307,6 +307,7 @@ player_t::player_t()
   dashTics(0),
   prepareTapValue(0),
   lastTapValue(0),
+  stepInterval(0),
   respawn_time(0),
   camera(0),
   air_finished(0),
@@ -449,6 +450,7 @@ player_t &player_t::operator=(const player_t &p)
 	dashTics = p.dashTics;
 	prepareTapValue = p.prepareTapValue;
 	lastTapValue = p.lastTapValue;
+	stepInterval = p.stepInterval;
 	respawn_time = p.respawn_time;
 	camera = p.camera;
 	air_finished = p.air_finished;
@@ -3070,15 +3072,15 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool isDasher = player->mo->flags7 & MF7_DASH ? true : false;
 
 	FVector2 vel;
-	float velLength;
+	float velocity;
 	if (isDasher || isClimber)
 	{
 		vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
-		velLength = float(vel.Length());
+		velocity = float(vel.Length());
 	}
 
 	// Wall proximity check
-	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velLength <= 16.f)
+	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 16.f)
 	{
 		FTraceResults trace;
 		angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
@@ -3206,8 +3208,39 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (isClimber)
 		P_Climb_Looping_Sounds(player, canClimb);
 
+	//*******************************************************
+	// Footsteps
+	//*******************************************************
+
+	if (!velocity)
+		velocity = float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length());
+
+	if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
+		(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED))
+	{
+		player->stepInterval = 6;
+	}
+	else
+	{
+		if (player->stepInterval <= 0)
+		{
+			if (!CLIENT_PREDICT_IsPredicting())
+				S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+
+			if (NETWORK_GetState() == NETSTATE_SERVER)
+				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+
+			player->stepInterval = 12;
+		}
+		else
+		{
+			player->stepInterval--;
+		}
+	}
+
 	//**********************************
 	// Jumping
+	//**********************************
 
 	if (player->onground)
 	{
@@ -3406,6 +3439,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	FVector3 acceleration = { FL_NORMALIZE(cmd->ucmd.forwardmove), - FL_NORMALIZE(cmd->ucmd.sidemove), 0.f };
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
+	float velocity = 0.f;
 
 	if (player->mo->waterlevel >= 2)
 	{
@@ -3461,8 +3495,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
-		float velocity = 0.f;
-
 		// Wall proximity check
 		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
 			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxgroundspeed + 2.f)
@@ -3622,6 +3654,35 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		player->cheats &= ~CF_REVERTPLEASE;
 		player->camera = player->mo;
+	}
+
+	//*******************************************************
+	// Footsteps
+	//*******************************************************
+
+	if (!velocity)
+		velocity = float(FVector2(vel.X, vel.Y).Length());
+
+	if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED))
+	{
+		player->stepInterval = 6;
+	}
+	else
+	{
+		if (player->stepInterval <= 0)
+		{
+			if (!CLIENT_PREDICT_IsPredicting())
+				S_Sound(player->mo, CHAN_SIX, "*jump", 1, ATTN_NORM);
+
+			if (NETWORK_GetState() == NETSTATE_SERVER)
+				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+
+			player->stepInterval = 12;
+		}
+		else
+		{
+			player->stepInterval--;
+		}
 	}
 
 	//*******************************************************
