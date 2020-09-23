@@ -97,8 +97,15 @@ void P_SpawnTeleportFog(fixed_t x, fixed_t y, fixed_t z, int spawnid)
 // TELEPORTATION
 //
 
-bool P_TeleportCommon(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
-					bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity = true, bool keepHeight = false)
+bool P_Teleport(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
+	bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
+{
+	return P_Teleport(thing, NULL, x, y, z, angle,
+		useFog, sourceFog, keepOrientation, bHaltVelocity, keepHeight);
+}
+
+bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
+				 bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
 {
 	fixed_t oldx;
 	fixed_t oldy;
@@ -115,13 +122,13 @@ bool P_TeleportCommon(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t an
 	oldy = thing->y;
 	oldz = thing->z;
 	aboveFloor = thing->z - thing->floorz;
-	destsect = P_PointInSector (x, y);
+	destsect = P_PointInSector(x, y);
 	// killough 5/12/98: exclude voodoo dolls:
 	player = thing->player;
 	if (player && player->mo != thing)
 		player = NULL;
-	floorheight = destsect->floorplane.ZatPoint (x, y);
-	ceilingheight = destsect->ceilingplane.ZatPoint (x, y);
+	floorheight = destsect->floorplane.ZatPoint(x, y);
+	ceilingheight = destsect->ceilingplane.ZatPoint(x, y);
 	if (thing->flags & MF_MISSILE)
 	{ // We don't measure z velocity, because it doesn't change.
 		missilespeed = xs_CRoundToInt(TVector2<double>(thing->velx, thing->vely).Length());
@@ -164,7 +171,7 @@ bool P_TeleportCommon(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t an
 			z = floorheight;
 		}
 	}
-	if (!P_TeleportMove (thing, x, y, z, false))
+	if (!P_TeleportMove(thing, x, y, z, false))
 	{
 		return false;
 	}
@@ -186,8 +193,8 @@ bool P_TeleportCommon(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t an
 	}
 
 	// [BC] Spectators and predicting clients do not create fog.
-	if ( ( thing && thing->player && thing->player->bSpectating )
-		|| CLIENT_PREDICT_IsPredicting() )
+	if ((thing && thing->player && thing->player->bSpectating)
+		|| CLIENT_PREDICT_IsPredicting())
 	{
 		useFog = false;
 		sourceFog = false;
@@ -197,46 +204,46 @@ bool P_TeleportCommon(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t an
 	if (sourceFog)
 	{
 		fixed_t fogDelta = thing->flags & MF_MISSILE ? 0 : TELEFOGHEIGHT;
-		AActor *fog = Spawn<ATeleportFog> (oldx, oldy, oldz + fogDelta, ALLOW_REPLACE);
+		AActor *fog = Spawn<ATeleportFog>(oldx, oldy, oldz + fogDelta, ALLOW_REPLACE);
 		fog->target = thing;
 	}
 	if (useFog)
 	{
 		fixed_t fogDelta = thing->flags & MF_MISSILE ? 0 : TELEFOGHEIGHT;
 		an = angle >> ANGLETOFINESHIFT;
-		AActor *fog = Spawn<ATeleportFog> (x + 20*finecosine[an],
-			y + 20*finesine[an], thing->z + fogDelta, ALLOW_REPLACE);
+		AActor *fog = Spawn<ATeleportFog>(x + 20 * finecosine[an],
+			y + 20 * finesine[an], thing->z + fogDelta, ALLOW_REPLACE);
 		fog->target = thing;
 		if (thing->player)
 		{
 			// [RH] Zoom player's field of vision
 			// [BC] && bHaltVelocity.
 			if (telezoom && thing->player->mo == thing && bHaltVelocity)
-				thing->player->FOV = MIN (175.f, thing->player->DesiredFOV + 45.f);
+				thing->player->FOV = MIN(175.f, thing->player->DesiredFOV + 45.f);
 		}
 	}
 	// [BC] && bHaltVelocity.
 	if (thing->player && (useFog || !keepOrientation) && bHaltVelocity)
 	{
 		// Freeze player for about .5 sec
-		if ( thing->Inventory == NULL || thing->Inventory->GetSpeedFactor() <= FRACUNIT )
+		if (thing->Inventory == NULL || thing->Inventory->GetSpeedFactor() <= FRACUNIT)
 		{
-			if ( NETWORK_GetState() == NETSTATE_SERVER )
+			if (NETWORK_GetState() == NETSTATE_SERVER)
 			{
 				// [BB] The clients start their reactiontime later on their end. Try to adjust for this.
-				thing->reactiontime = 18 - ( thing->player->ulPing * TICRATE / 1000 );
-				if ( thing->reactiontime < 0 )
+				thing->reactiontime = 18 - (thing->player->ulPing * TICRATE / 1000);
+				if (thing->reactiontime < 0)
 					thing->reactiontime = 0;
 			}
-			else if ( !CLIENT_PREDICT_IsPredicting() )
+			else if (!CLIENT_PREDICT_IsPredicting())
 				thing->reactiontime = 18;
 		}
 	}
 	if (thing->flags & MF_MISSILE)
 	{
 		angle >>= ANGLETOFINESHIFT;
-		thing->velx = FixedMul (missilespeed, finecosine[angle]);
-		thing->vely = FixedMul (missilespeed, finesine[angle]);
+		thing->velx = FixedMul(missilespeed, finecosine[angle]);
+		thing->vely = FixedMul(missilespeed, finesine[angle]);
 	}
 	// [BC] && bHaltVelocity.
 	else if (!keepOrientation && bHaltVelocity) // no fog doesn't alter the player's momentum
@@ -247,16 +254,8 @@ bool P_TeleportCommon(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t an
 			player->velx = player->vely = 0;
 	}
 
-	return true;
-}
-
-bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
-				 bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
-{
-	bool success = P_TeleportCommon(thing, x, y, z, angle, useFog, sourceFog, keepOrientation, bHaltVelocity, keepHeight);
-
 	// [BC] If we're the server, update clients about this teleport.
-	if (success && NETWORK_GetState() == NETSTATE_SERVER )
+	if (NETWORK_GetState() == NETSTATE_SERVER )
 	{
 		player_t *player = thing->player;
 		if (player && player->mo != thing)
@@ -268,19 +267,7 @@ bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixe
 			SERVERCOMMANDS_TeleportThing( thing, sourceFog, useFog, (useFog && bHaltVelocity) );
 	}
 
-	return success;
-}
-
-bool P_Teleport (AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
-				bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
-{
-	bool success = P_TeleportCommon(thing, x, y, z, angle, useFog, sourceFog, keepOrientation, bHaltVelocity, keepHeight);
-
-	// [BC] If we're the server, update clients about this teleport.
-	if (success && NETWORK_GetState() == NETSTATE_SERVER)
-		SERVERCOMMANDS_TeleportThing(thing, sourceFog, useFog, (useFog && bHaltVelocity));
-
-	return success;
+	return true;
 }
 
 static AActor *SelectTeleDest (int tid, int tag)

@@ -100,13 +100,6 @@ void DDoor::Tick ()
 	switch (m_Direction)
 	{
 	case 0:
-		// [BC] If we're the client, don't change the door's direction. It could
-		// de-sync the game. Instead, wait for the server to tell us to change
-		// the door's direction.
-		// [EP] Don't let the clients read the undefined m_TopCountdown variable
-		if ( NETWORK_InClientMode() )
-			break;
-
 		// WAITING
 		if (!--m_TopCountdown)
 		{
@@ -117,8 +110,11 @@ void DDoor::Tick ()
 				DoorSound (false);
 
 				// [BC] If we're the server, tell clients to change the door's direction.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
 
 				break;
 				
@@ -127,8 +123,11 @@ void DDoor::Tick ()
 				DoorSound (true);
 
 				// [BC] If we're the server, tell clients to change the door's direction.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
 
 				break;
 				
@@ -139,13 +138,6 @@ void DDoor::Tick ()
 		break;
 		
 	case 2:
-		// [BC] If we're the client, don't change the door's direction. It could
-		// de-sync the game. Instead, wait for the server to tell us to change
-		// the door's direction.
-		// [EP] Don't let the clients read the undefined m_TopCountdown variable
-		if ( NETWORK_InClientMode() )
-			break;
-
 		//	INITIAL WAIT
 		if (!--m_TopCountdown)
 		{
@@ -157,8 +149,11 @@ void DDoor::Tick ()
 				DoorSound (true);
 			
 				// [BC] If we're the server, tell clients to change the door's direction.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
 
 				break;
 				
@@ -179,24 +174,32 @@ void DDoor::Tick ()
 				m_TopDist + m_Sector->floorplane.d));
 		}
 
-		// [BC] If we're the client, don't do any of the following. Wait for the server
-		// to tell us what to do.
-		if ( NETWORK_InClientMode() )
-			break;
-
 		if (res == pastdest)
 		{
 			// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if ( m_Sector->floorOrCeiling == 0 )
-					SERVERCOMMANDS_SetSectorFloorPlane( m_Sector - sectors );
-				else
-					SERVERCOMMANDS_SetSectorCeilingPlane( m_Sector - sectors );
+				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				{
+					if (m_Sector->floorOrCeiling == 0)
+						SERVERCOMMANDS_SetSectorFloorPlane(m_Sector - sectors, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetSectorCeilingPlane(m_Sector - sectors, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 
-				// Tell clients to stop the floor's sound sequence.
-				SERVERCOMMANDS_StopSectorSequence( m_Sector );
+					// Tell clients to stop the floor's sound sequence.
+					SERVERCOMMANDS_StopSectorSequence(m_Sector, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+				}
+				else
+				{
+					if (m_Sector->floorOrCeiling == 0)
+						SERVERCOMMANDS_SetSectorFloorPlane(m_Sector - sectors);
+					else
+						SERVERCOMMANDS_SetSectorCeilingPlane(m_Sector - sectors);
+
+					// Tell clients to stop the floor's sound sequence.
+					SERVERCOMMANDS_StopSectorSequence(m_Sector);
+				}
 			}
 
 			SN_StopSequence (m_Sector, CHAN_CEILING);
@@ -207,8 +210,11 @@ void DDoor::Tick ()
 				m_Sector->ceilingdata = NULL;	//jff 2/22/98
 
 				// [BC] If we're the server, tell clients to destroy the door.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DestroyDoor( m_lDoorID );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+						SERVERCOMMANDS_DestroyDoor(m_lDoorID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_DestroyDoor(m_lDoorID);
 
 				Destroy ();						// unlink and free
 				break;
@@ -218,8 +224,11 @@ void DDoor::Tick ()
 				m_TopCountdown = m_TopWait;
 
 				// [BC] If we're the server, tell clients to change the door's direction.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
 
 				break;
 				
@@ -239,8 +248,11 @@ void DDoor::Tick ()
 				DoorSound (true);
 
 				// [BC] If we're the server, tell clients to change the door's direction.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
 
 				break;
 			}
@@ -258,24 +270,32 @@ void DDoor::Tick ()
 				m_TopDist + m_Sector->floorplane.d));
 		}
 
-		// [BC] If we're the client, don't do any of the following. Wait for the server
-		// to tell us what to do.
-		if ( NETWORK_InClientMode() )
-			break;
-
 		if (res == pastdest)
 		{
 			// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if ( m_Sector->floorOrCeiling == 0 )
-					SERVERCOMMANDS_SetSectorFloorPlane( m_Sector - sectors );
-				else
-					SERVERCOMMANDS_SetSectorCeilingPlane( m_Sector - sectors );
+				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator)
+				{
+					if (m_Sector->floorOrCeiling == 0)
+						SERVERCOMMANDS_SetSectorFloorPlane(m_Sector - sectors, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetSectorCeilingPlane(m_Sector - sectors, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
 
-				// Tell clients to stop the floor's sound sequence.
-				SERVERCOMMANDS_StopSectorSequence( m_Sector );
+					// Tell clients to stop the floor's sound sequence.
+					SERVERCOMMANDS_StopSectorSequence(m_Sector, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+				}
+				else
+				{
+					if (m_Sector->floorOrCeiling == 0)
+						SERVERCOMMANDS_SetSectorFloorPlane(m_Sector - sectors);
+					else
+						SERVERCOMMANDS_SetSectorCeilingPlane(m_Sector - sectors);
+
+					// Tell clients to stop the floor's sound sequence.
+					SERVERCOMMANDS_StopSectorSequence(m_Sector);
+				}
 			}
 
 			SN_StopSequence (m_Sector, CHAN_CEILING);
@@ -286,8 +306,11 @@ void DDoor::Tick ()
 				m_TopCountdown = m_TopWait;
 
 				// [BC] If we're the server, tell clients to change the door's direction.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_ChangeDoorDirection( m_lDoorID, m_Direction );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_ChangeDoorDirection(m_lDoorID, m_Direction);
 
 				break;
 				
@@ -296,8 +319,11 @@ void DDoor::Tick ()
 				m_Sector->ceilingdata = NULL;	//jff 2/22/98
 				
 				// [BC] If we're the server, tell clients to destroy the door.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DestroyDoor( m_lDoorID );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && lastInstigator )
+						SERVERCOMMANDS_DestroyDoor(m_lDoorID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_DestroyDoor(m_lDoorID);
 
 				Destroy ();						// unlink and free
 				break;
@@ -579,12 +605,18 @@ void DDoor::SetLightTag( LONG lTag )
 bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 				int tag, int speed, int delay, int lock, int lightTag, bool boomgen)
 {
+	return EV_DoDoor(type, line, thing, NULL, tag, speed, delay, lock, lightTag, boomgen);
+}
+
+bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
+	int tag, int speed, int delay, int lock, int lightTag, bool boomgen)
+{
 	bool		rtn = false;
 	int 		secnum;
 	sector_t*	sec;
 	DDoor		*pDoor;
 
-	if (lock != 0 && !P_CheckKeys (thing, lock, tag != 0))
+	if (lock != 0 && !P_CheckKeys(thing, lock, tag != 0))
 		return false;
 
 	if (tag == 0)
@@ -595,15 +627,15 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 		// if the wrong side of door is pushed, give oof sound
 		if (line->sidedef[1] == NULL)			// killough
 		{
-			S_Sound (thing, CHAN_VOICE, "*usefail", 1, ATTN_NORM);
+			S_Sound(thing, CHAN_VOICE, "*usefail", 1, ATTN_NORM);
 
 			// [BC] Tell clients of the "oof" sound.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			if (NETWORK_GetState() == NETSTATE_SERVER)
 			{
-				if ( thing && thing->player )
-					SERVERCOMMANDS_SoundActor( thing, CHAN_VOICE, "*usefail", 1, ATTN_NORM, ULONG( thing->player - players ), SVCF_SKIPTHISCLIENT );
+				if (thing && thing->player)
+					SERVERCOMMANDS_SoundActor(thing, CHAN_VOICE, "*usefail", 1, ATTN_NORM, ULONG(thing->player - players), SVCF_SKIPTHISCLIENT);
 				else
-					SERVERCOMMANDS_SoundActor( thing, CHAN_VOICE, "*usefail", 1, ATTN_NORM );
+					SERVERCOMMANDS_SoundActor(thing, CHAN_VOICE, "*usefail", 1, ATTN_NORM);
 			}
 
 			return false;
@@ -611,7 +643,7 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 
 		// get the sector on the second side of activating linedef
 		sec = line->sidedef[1]->sector;
-		secnum = int(sec-sectors);
+		secnum = int(sec - sectors);
 
 		// if door already has a thinker, use it
 		if (sec->PlaneMoving(sector_t::ceiling))
@@ -619,9 +651,10 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 			// Boom used remote door logic for generalized doors, even if they are manual
 			if (boomgen)
 				return false;
-			if (sec->ceilingdata->IsKindOf (RUNTIME_CLASS(DDoor)))
+			if (sec->ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)))
 			{
 				DDoor *door = barrier_cast<DDoor *>(sec->ceilingdata);
+				door->lastInstigator = instigator;
 
 				// ONLY FOR "RAISE" DOORS, NOT "OPEN"s
 				if (door->m_Type == DDoor::doorRaise && type == DDoor::doorRaise)
@@ -629,13 +662,22 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 					if (door->m_Direction == -1)
 					{
 						door->m_Direction = 1;	// go back up
-						door->DoorSound (true);	// [RH] Make noise
+						door->DoorSound(true);	// [RH] Make noise
 
 						// [BC] If we're the server, tell clients to change the door's direction.
-						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							SERVERCOMMANDS_ChangeDoorDirection( door->GetID( ), door->m_Direction );
+						if (NETWORK_GetState() == NETSTATE_SERVER)
+						{
+							player_t *player = thing->player;
+							if (player && player->mo != thing)
+								player = NULL;
+
+							if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+								SERVERCOMMANDS_ChangeDoorDirection(door->GetID(), door->m_Direction, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+							else
+								SERVERCOMMANDS_ChangeDoorDirection(door->GetID(), door->m_Direction);
+						}
 					}
-					else if (!(line->activation & (SPAC_Push|SPAC_MPush)))
+					else if (!(line->activation & (SPAC_Push | SPAC_MPush)))
 						// [RH] activate push doors don't go back down when you
 						//		run into them (otherwise opening them would be
 						//		a real pain).
@@ -647,12 +689,21 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 
 						door->m_Direction = -1;	// start going down immediately
 
-						// Start the door close sequence.
+												// Start the door close sequence.
 						door->DoorSound(false, SN_CheckSequence(sec, CHAN_CEILING));
 
 						// [BC] If we're the server, tell clients to change the door's direction.
-						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							SERVERCOMMANDS_ChangeDoorDirection( door->GetID( ), door->m_Direction );
+						if (NETWORK_GetState() == NETSTATE_SERVER)
+						{
+							player_t *player = thing->player;
+							if (player && player->mo != thing)
+								player = NULL;
+
+							if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+								SERVERCOMMANDS_ChangeDoorDirection(door->GetID(), door->m_Direction, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+							else
+								SERVERCOMMANDS_ChangeDoorDirection(door->GetID(), door->m_Direction);
+						}
 
 						return true;
 					}
@@ -664,10 +715,21 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 			}
 			return false;
 		}
-		if ( (pDoor = new DDoor (sec, type, speed, delay, lightTag)))
+		if ((pDoor = new DDoor(sec, type, speed, delay, lightTag)))
 		{
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DoDoor( sec, type, speed, pDoor->GetDirection( ), lightTag, pDoor->GetID( ));
+			pDoor->lastInstigator = instigator;
+
+			if (NETWORK_GetState() == NETSTATE_SERVER)
+			{
+				player_t *player = thing->player;
+				if (player && player->mo != thing)
+					player = NULL;
+
+				if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+					SERVERCOMMANDS_DoDoor(sec, type, speed, pDoor->GetDirection(), lightTag, pDoor->GetID(), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+				else
+					SERVERCOMMANDS_DoDoor(sec, type, speed, pDoor->GetDirection(), lightTag, pDoor->GetID());
+			}
 
 			rtn = true;
 		}
@@ -676,22 +738,33 @@ bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 	{	// [RH] Remote door
 
 		secnum = -1;
-		while ((secnum = P_FindSectorFromTag (tag,secnum)) >= 0)
+		while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
 		{
 			sec = &sectors[secnum];
 			// if the ceiling is already moving, don't start the door action
 			if (sec->PlaneMoving(sector_t::ceiling))
 				continue;
 
-			if ( (pDoor = new DDoor (sec, type, speed, delay, lightTag)))
+			if ((pDoor = new DDoor(sec, type, speed, delay, lightTag)))
 			{
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DoDoor( sec, type, speed, pDoor->GetDirection( ), lightTag, pDoor->GetID( ));
+				pDoor->lastInstigator = instigator;
+
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+				{
+					player_t *player = thing->player;
+					if (player && player->mo != thing)
+						player = NULL;
+
+					if (!(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) && instigator && instigator == player)
+						SERVERCOMMANDS_DoDoor(sec, type, speed, pDoor->GetDirection(), lightTag, pDoor->GetID(), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_DoDoor(sec, type, speed, pDoor->GetDirection(), lightTag, pDoor->GetID());
+				}
 
 				rtn = true;
 			}
 		}
-				
+
 	}
 	return rtn;
 }

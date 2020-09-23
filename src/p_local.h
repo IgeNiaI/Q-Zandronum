@@ -617,9 +617,13 @@ typedef enum
 } podoortype_t;
 
 bool EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
+bool EV_RotatePoly(line_t *line, player_t *instigator, int polyNum, int speed, int byteAngle, int direction, bool overRide);
 bool EV_MovePoly (line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
+bool EV_MovePoly(line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
 bool EV_MovePolyTo (line_t *line, int polyNum, int speed, fixed_t x, fixed_t y, bool overRide);
+bool EV_MovePolyTo(line_t *line, player_t *instigator, int polyNum, int speed, fixed_t x, fixed_t y, bool overRide);
 bool EV_OpenPolyDoor (line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
+bool EV_OpenPolyDoor(line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
 bool EV_StopPoly (int polyNum);
 
 
@@ -689,6 +693,7 @@ protected:
 	int m_PolyObj;
 	int m_Speed;
 	int m_Dist;
+	player_t *lastInstigator;
 	TObjPtr<DInterpolation> m_Interpolation;
 
 	void SetInterpolation ();
@@ -708,6 +713,7 @@ private:
 	DRotatePoly ();
 
 	friend bool EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
+	friend bool EV_RotatePoly (line_t *line, player_t *instigator, int polyNum, int speed, int byteAngle, int direction, bool overRide);
 };
 
 
@@ -735,6 +741,7 @@ protected:
 	fixed_t m_ySpeed;
 
 	friend bool EV_MovePoly (line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
+	friend bool EV_MovePoly (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
 };
 
 class DMovePolyTo : public DPolyAction
@@ -750,8 +757,9 @@ protected:
 	fixed_t m_ySpeed;
 	fixed_t m_xTarget;
 	fixed_t m_yTarget;
-
+	
 	friend bool EV_MovePolyTo(line_t *line, int polyNum, int speed, int x, int y, bool overRide);
+	friend bool EV_MovePolyTo(line_t *line, player_t *instigator, int polyNum, int speed, int x, int y, bool overRide);
 };
 
 
@@ -782,6 +790,7 @@ protected:
 	bool m_Close;
 
 	friend bool EV_OpenPolyDoor (line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
+	friend bool EV_OpenPolyDoor (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
 private:
 	DPolyDoor ();
 };
