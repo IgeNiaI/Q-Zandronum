@@ -34,6 +34,7 @@
 #include "cl_demo.h"
 #include "network.h"
 #include "sv_commands.h"
+#include "cl_main.h"
 
 //============================================================================
 //
@@ -372,7 +373,7 @@ void DCeiling::Tick ()
 
 void DCeiling::UpdateToClient( ULONG ulClient )
 {
-	SERVERCOMMANDS_DoCeiling( m_Type, m_Sector, m_Direction, m_BottomHeight, m_TopHeight, m_Speed, m_Crush, m_Hexencrush, m_Silent, m_lCeilingID, ulClient, SVCF_ONLYTHISCLIENT );
+	SERVERCOMMANDS_DoCeiling( m_Type, m_Sector, m_Direction, m_BottomHeight, m_TopHeight, m_Speed, m_Speed2, m_Crush, m_Hexencrush, m_Silent, m_lCeilingID, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
 //============================================================================
@@ -674,10 +675,10 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 	// [BC] If we're the server, tell clients to create a ceiling.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		if (ceiling->lastInstigator)
-			SERVERCOMMANDS_DoCeiling(type, sec, ceiling->m_Direction, ceiling->m_BottomHeight, ceiling->m_TopHeight, ceiling->m_Speed,
+			SERVERCOMMANDS_DoCeiling(type, sec, ceiling->m_Direction, ceiling->m_BottomHeight, ceiling->m_TopHeight, ceiling->m_Speed, ceiling->m_Speed2,
 				ceiling->m_Crush, ceiling->m_Hexencrush, ceiling->m_Silent, ceiling->m_lCeilingID, ULONG(ceiling->lastInstigator - players), SVCF_SKIPTHISCLIENT);
 		else
-			SERVERCOMMANDS_DoCeiling(type, sec, ceiling->m_Direction, ceiling->m_BottomHeight, ceiling->m_TopHeight, ceiling->m_Speed,
+			SERVERCOMMANDS_DoCeiling(type, sec, ceiling->m_Direction, ceiling->m_BottomHeight, ceiling->m_TopHeight, ceiling->m_Speed, ceiling->m_Speed2,
 				ceiling->m_Crush, ceiling->m_Hexencrush, ceiling->m_Silent, ceiling->m_lCeilingID);
 
 	// set texture/type change properties
@@ -768,6 +769,9 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 				   int tag, player_t *instigator, fixed_t speed, fixed_t speed2, fixed_t height,
 				   int crush, int silent, int change, bool hexencrush)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	int 		secnum;
 	bool 		rtn;
 	sector_t*	sec;
@@ -782,7 +786,7 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 		secnum = (int)(sec-sectors);
 		// [RH] Hack to let manual crushers be retriggerable, too
 		tag ^= secnum | 0x1000000;
-		P_ActivateInStasisCeiling (tag);
+		P_ActivateInStasisCeiling (tag, instigator);
 		return !!DCeiling::Create(sec, type, line, tag, instigator, speed, speed2, height, crush, silent, change, hexencrush);
 	}
 	
@@ -790,7 +794,7 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 	// This restarts a crusher after it has been stopped
 	if (type == DCeiling::ceilCrushAndRaise || type == DCeiling::ceilCrushAndRaiseDist)
 	{
-		P_ActivateInStasisCeiling (tag);
+		P_ActivateInStasisCeiling (tag, instigator);
 	}
 
 	secnum = -1;
@@ -810,7 +814,7 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 //
 //============================================================================
 
-void P_ActivateInStasisCeiling (int tag)
+void P_ActivateInStasisCeiling (int tag, player_t *instigator)
 {
 	DCeiling *scan;
 	TThinkerIterator<DCeiling> iterator;
@@ -820,6 +824,7 @@ void P_ActivateInStasisCeiling (int tag)
 		if (scan->m_Tag == tag && scan->m_Direction == 0)
 		{
 			scan->m_Direction = scan->m_OldDirection;
+			scan->lastInstigator = instigator;
 			scan->PlayCeilingSound ();
 
 			// [BC] If we're the server, tell clients to change the ceiling direction, and
@@ -856,6 +861,9 @@ bool EV_CeilingCrushStop (int tag)
 
 bool EV_CeilingCrushStop (int tag, player_t *instigator)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	bool rtn = false;
 	DCeiling *scan;
 	TThinkerIterator<DCeiling> iterator;
@@ -864,6 +872,8 @@ bool EV_CeilingCrushStop (int tag, player_t *instigator)
 	{
 		if (scan->m_Tag == tag && scan->m_Direction != 0)
 		{
+			scan->lastInstigator = instigator;
+
 			// [BC] If we're stopping, this is probably a good time to verify all the clients
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )

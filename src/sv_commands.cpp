@@ -3860,7 +3860,7 @@ void SERVERCOMMANDS_BuildStair( DFloor::EFloor Type, sector_t *pSector, int Dire
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoCeiling( DCeiling::ECeiling Type, sector_t *pSector, LONG lDirection, LONG lBottomHeight, LONG lTopHeight, LONG lSpeed, LONG lCrush, bool Hexencrush, LONG lSilent, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoCeiling( DCeiling::ECeiling Type, sector_t *pSector, LONG lDirection, LONG lBottomHeight, LONG lTopHeight, LONG lSpeed, LONG lSpeed2, LONG lCrush, bool Hexencrush, LONG lSilent, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	LONG	lSectorID;
 
@@ -3881,6 +3881,7 @@ void SERVERCOMMANDS_DoCeiling( DCeiling::ECeiling Type, sector_t *pSector, LONG 
 	command.addLong ( lBottomHeight );
 	command.addLong ( lTopHeight );
 	command.addLong ( lSpeed );
+	command.addLong ( lSpeed2 );
 	command.addByte ( clamp<LONG>(lCrush,-128,127) );
 	command.addByte ( Hexencrush );
 	command.addShort ( lSilent );

@@ -35,6 +35,7 @@
 #include "network.h"
 #include "sv_commands.h"
 #include "cl_demo.h"
+#include "cl_main.h"
 
 static FRandom pr_doplat ("DoPlat");
 
@@ -467,6 +468,9 @@ bool EV_DoPlat(int tag, line_t *line, DPlat::EPlatType type, int height,
 bool EV_DoPlat (int tag, player_t *instigator, line_t *line, DPlat::EPlatType type, int height,
 				int speed, int delay, int lip, int change)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	DPlat *plat;
 	int secnum;
 	sector_t *sec;
@@ -492,7 +496,7 @@ bool EV_DoPlat (int tag, player_t *instigator, line_t *line, DPlat::EPlatType ty
 	case DPlat::platToggle:
 		rtn = true;
 	case DPlat::platPerpetualRaise:
-		P_ActivateInStasis (tag);
+		P_ActivateInStasis (tag, instigator);
 		break;
 
 	default:
@@ -728,7 +732,7 @@ void DPlat::Reactivate ()
 		m_Status = m_OldStatus;
 }
 
-void P_ActivateInStasis (int tag)
+void P_ActivateInStasis (int tag, player_t *instigator)
 {
 	DPlat *scan;
 	TThinkerIterator<DPlat> iterator;
@@ -737,6 +741,7 @@ void P_ActivateInStasis (int tag)
 	{
 		if (scan->m_Tag == tag && scan->m_Status == DPlat::in_stasis)
 		{
+			scan->lastInstigator = instigator;
 			scan->Reactivate ();
 
 			// [BC] If we're the server, tell clients that that status is changing.
@@ -778,6 +783,9 @@ void EV_StopPlat(int tag)
 
 void EV_StopPlat (int tag, player_t *instigator)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return;
+
 	DPlat *scan;
 	TThinkerIterator<DPlat> iterator;
 

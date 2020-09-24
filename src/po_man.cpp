@@ -34,6 +34,7 @@
 #include "network.h"
 #include "version.h"
 #include "sv_commands.h"
+#include "cl_main.h"
 
 // MACROS ------------------------------------------------------------------
 
@@ -595,6 +596,9 @@ bool EV_RotatePoly(line_t *line, int polyNum, int speed, int byteAngle,
 bool EV_RotatePoly (line_t *line, player_t *instigator, int polyNum, int speed, int byteAngle,
 					int direction, bool overRide)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	DRotatePoly *pe = NULL;
 	FPolyObj *poly;
 
@@ -717,6 +721,9 @@ bool EV_MovePoly(line_t *line, int polyNum, int speed, angle_t angle,
 bool EV_MovePoly (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle,
 				  fixed_t dist, bool overRide)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	DMovePoly *pe = NULL;
 	FPolyObj *poly;
 	angle_t an = angle;
@@ -809,6 +816,9 @@ bool EV_MovePolyTo(line_t *line, int polyNum, int speed, fixed_t targx, fixed_t 
 
 bool EV_MovePolyTo(line_t *line, player_t *instigator, int polyNum, int speed, fixed_t targx, fixed_t targy, bool overRide)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	DMovePolyTo *pe = NULL;
 	FPolyObj *poly;
 	TVector2<double> dist;
@@ -1115,6 +1125,9 @@ bool EV_OpenPolyDoor(line_t *line, int polyNum, int speed, angle_t angle,
 bool EV_OpenPolyDoor (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle,
 					  int delay, int distance, podoortype_t type)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	DPolyDoor *pd = NULL;
 	FPolyObj *poly;
 	int swingdir = 1;	// ADD:  PODOOR_SWINGL, PODOOR_SWINGR
@@ -1183,6 +1196,9 @@ bool EV_OpenPolyDoor (line_t *line, player_t *instigator, int polyNum, int speed
 
 bool EV_StopPoly(int polynum)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	FPolyObj *poly;
 
 	if (NULL != (poly = PO_GetPolyobj(polynum)))

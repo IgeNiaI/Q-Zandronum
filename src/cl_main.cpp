@@ -7618,6 +7618,7 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 	fixed_t			BottomHeight;
 	fixed_t			TopHeight;
 	LONG			lSpeed;
+	LONG			lSpeed2;
 	LONG			lCrush;
 	bool			Hexencrush;
 	LONG			lSilent;
@@ -7644,6 +7645,7 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 
 	// Read in the speed of the ceiling.
 	lSpeed = NETWORK_ReadLong( pByteStream );
+	lSpeed2 = NETWORK_ReadLong( pByteStream );
 
 	// Does this ceiling damage those who get squashed by it?
 	lCrush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
@@ -7669,7 +7671,7 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 
 	pSector = &sectors[lSectorID];
 
-	pCeiling = new DCeiling( pSector, lSpeed, 0, lSilent );
+	pCeiling = new DCeiling( pSector, lSpeed, lSpeed2, lSilent );
 	pCeiling->SetBottomHeight( BottomHeight );
 	pCeiling->SetTopHeight( TopHeight );
 	pCeiling->SetCrush( lCrush );

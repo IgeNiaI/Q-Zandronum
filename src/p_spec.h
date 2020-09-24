@@ -526,12 +526,11 @@ private:
 
 	friend bool	EV_DoPlat (int tag, line_t *line, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
-	friend void EV_StopPlat (int tag);
 	friend bool	EV_DoPlat (int tag, player_t *instigator, line_t *line, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
 	friend void EV_StopPlat (int tag);
 	friend void EV_StopPlat (int tag, player_t *instigator);
-	friend void P_ActivateInStasis (int tag);
+	friend void P_ActivateInStasis (int tag, player_t *instigator);
 };
 
 bool EV_DoPlat (int tag, line_t *line, DPlat::EPlatType type,
@@ -540,7 +539,7 @@ bool EV_DoPlat (int tag, player_t *instigator, line_t *line, DPlat::EPlatType ty
 				int height, int speed, int delay, int lip, int change);
 void EV_StopPlat (int tag);
 void EV_StopPlat (int tag, player_t *instigator);
-void P_ActivateInStasis (int tag);
+void P_ActivateInStasis (int tag, player_t *instigator);
 
 //
 // [RH]
@@ -858,7 +857,7 @@ private:
 
 	friend bool EV_CeilingCrushStop (int tag);
 	friend bool EV_CeilingCrushStop (int tag, player_t *instigator);
-	friend void P_ActivateInStasisCeiling (int tag);
+	friend void P_ActivateInStasisCeiling (int tag, player_t *instigator);
 };
 
 bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
@@ -869,7 +868,7 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 	int crush, int silent, int change, bool hexencrush);
 bool EV_CeilingCrushStop (int tag);
 bool EV_CeilingCrushStop (int tag, player_t *instigator);
-void P_ActivateInStasisCeiling (int tag);
+void P_ActivateInStasisCeiling (int tag, player_t *instigator);
 
 
 
