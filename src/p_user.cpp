@@ -3072,7 +3072,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool isDasher = player->mo->flags7 & MF7_DASH ? true : false;
 
 	FVector2 vel;
-	float velocity;
+	float velocity = 0.f;
 	if (isDasher || isClimber)
 	{
 		vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
