@@ -3200,12 +3200,12 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				}
 				// Let the actor do something special for hitting the floor
 				mo->HitFloor ();
-				if (mo->player && mo->velz < minvel && !(mo->flags & MF_NOGRAVITY))
+				if (mo->player && !(mo->flags & MF_NOGRAVITY))
 				{
 					// Squat down.
 					// Decrease viewheight for a moment after hitting the ground (hard),
 					// and utter appropriate sound.
-					PlayerLandedOnThing (mo, NULL);
+					PlayerLandedOnThing(mo, NULL);
 				}
 				mo->velz = 0;
 			}
@@ -3378,8 +3378,6 @@ void P_CheckFakeFloorTriggers (AActor *mo, fixed_t oldz, bool oldz_has_viewheigh
 
 static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 {
-	bool grunted;
-
 	if (!mo->player)
 		return;
 
@@ -3387,48 +3385,66 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 	if ( CLIENT_PREDICT_IsPredicting( ))
 		return;
 
-	if (mo->player->mo == mo)
-	{
-		mo->player->deltaviewheight = mo->velz >> 3;
-	}
+	const fixed_t minvel = -8 * FRACUNIT;	// landing speed from a jump with normal gravity
 
-/* [BB] I don't know why ZDoom needs to adjust deltaviewheight while predicting.
-        Skulltag may not do this, otherwise the view skins into the floor when
-        jumpding down a ledge with high ping.
-	if (mo->player->cheats & CF_PREDICTING)
-		return;
-*/
-	P_FallingDamage (mo);
+	bool grunted;
 
-	// [RH] only make noise if alive
-	// [WS/BB] As client only play the sound for the consoleplayer.
-	if (!mo->player->morphTics && mo->health > 0 && NETWORK_IsConsolePlayerOrNotInClientMode( mo->player ))
+	if (mo->velz < minvel)
 	{
-		grunted = false;
-		// Why should this number vary by gravity?
-		// [BB] For unassigned voodoo dolls, mo->player->mo is NULL.
-		if (mo->player->mo && mo->health > 0 && mo->velz < -mo->player->mo->GruntSpeed)
+		if (mo->player->mo == mo)
 		{
-			S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM);
-			grunted = true;
-
-			// [BC] Tell players that this player struck the ground (hard!)
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
+			mo->player->deltaviewheight = mo->velz >> 3;
 		}
-		if (onmobj != NULL || !Terrains[P_GetThingFloorType (mo)].IsLiquid)
+
+		/* [BB] I don't know why ZDoom needs to adjust deltaviewheight while predicting.
+		Skulltag may not do this, otherwise the view skins into the floor when
+		jumpding down a ledge with high ping.
+		if (mo->player->cheats & CF_PREDICTING)
+		return;
+		*/
+		P_FallingDamage(mo);
+
+		// [RH] only make noise if alive
+		// [WS/BB] As client only play the sound for the consoleplayer.
+		if (!mo->player->morphTics && mo->health > 0 && NETWORK_IsConsolePlayerOrNotInClientMode(mo->player))
 		{
-			if (!grunted || !S_AreSoundsEquivalent (mo, "*grunt", "*land"))
+			grunted = false;
+			// Why should this number vary by gravity?
+			// [BB] For unassigned voodoo dolls, mo->player->mo is NULL.
+			if (mo->player->mo && mo->health > 0 && mo->velz < -mo->player->mo->GruntSpeed)
 			{
-				S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM);
+				S_Sound(mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM);
+				grunted = true;
 
 				// [BC] Tell players that this player struck the ground (hard!)
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SoundActor( mo, CHAN_AUTO, "*land", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG(mo->player - players), SVCF_SKIPTHISCLIENT);
+			}
+			if (onmobj != NULL || !Terrains[P_GetThingFloorType(mo)].IsLiquid)
+			{
+				if (!grunted || !S_AreSoundsEquivalent(mo, "*grunt", "*land"))
+				{
+					S_Sound(mo, CHAN_AUTO, "*land", 1, ATTN_NORM);
+
+					// [BC] Tell players that this player struck the ground (hard!)
+					if (NETWORK_GetState() == NETSTATE_SERVER)
+						SERVERCOMMANDS_SoundActor(mo, CHAN_AUTO, "*land", 1, ATTN_NORM, ULONG(mo->player - players), SVCF_SKIPTHISCLIENT);
+				}
 			}
 		}
+		//	mo->player->centering = true;
 	}
-//	mo->player->centering = true;
+	else
+	{
+		// [geNia] Don't do this while predicting.
+		if (CLIENT_PREDICT_IsPredicting())
+			return;
+
+		S_Sound(mo, CHAN_VOICE, "*footstep", 1, ATTN_NORM);
+
+		if (NETWORK_GetState() == NETSTATE_SERVER)
+			SERVERCOMMANDS_SoundActor(mo, CHAN_VOICE, "*footstep", 1, ATTN_NORM, ULONG(mo->player - players), SVCF_SKIPTHISCLIENT);
+	}
 }
 
 
