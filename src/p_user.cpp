@@ -3672,10 +3672,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		if (player->stepInterval <= 0)
 		{
 			if (!CLIENT_PREDICT_IsPredicting())
-				S_Sound(player->mo, CHAN_SIX, "*jump", 1, ATTN_NORM);
+				S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
 
 			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 
 			player->stepInterval = 12;
 		}
