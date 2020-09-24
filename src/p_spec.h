@@ -658,8 +658,6 @@ protected:
 	vertex_t	*m_BotSpot;
 	fixed_t 	m_Speed;
 
-	player_t	*lastInstigator;
-
 	// 1 = up, 0 = waiting at top, -1 = down
 	int 		m_Direction;
 	
@@ -683,9 +681,6 @@ protected:
 	friend bool	EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 						   int tag, int speed, int delay, int lock,
 						   int lightTag, bool boomgen);
-	friend bool	EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
-						   int tag, int speed, int delay, int lock,
-						   int lightTag, bool boomgen);
 	friend void P_SpawnDoorCloseIn30 (sector_t *sec);
 	friend void P_SpawnDoorRaiseIn5Mins (sector_t *sec);
 private:
@@ -694,9 +689,6 @@ private:
 };
 
 bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
-				int tag, int speed, int delay, int lock,
-				int lightTag, bool boomgen = false);
-bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
 				int tag, int speed, int delay, int lock,
 				int lightTag, bool boomgen = false);
 void P_SpawnDoorCloseIn30 (sector_t *sec);

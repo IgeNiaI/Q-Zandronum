@@ -1314,10 +1314,6 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		|| ( Special == Floor_TransferTrigger ) || ( Special == Floor_TransferNumeric )
 		|| ( Special == Stairs_BuildDownSync ) || ( Special == Stairs_BuildUpSync ) || ( Special == Stairs_BuildUpDoom )
 
-		// Doors
-		|| ( Special >= Door_Close && Special <= Door_Animated)
-		|| ( Special == Door_CloseWaitOpen ) || ( Special == Generic_Door )
-
 		// Teleports
 		|| ( Special == Teleport ) || ( Special == Teleport_NoFog ) || ( Special == Teleport_NoStop ) || ( Special == Teleport_Line )
 
