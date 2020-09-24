@@ -1300,14 +1300,8 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 			return true;
 
 	return
-		// Polyobj
-		( Special >= Polyobj_RotateLeft && Special <= Polyobj_Move )
-		|| ( Special >= Polyobj_MoveTimes8 && Special <= Polyobj_DoorSlide )
-		|| ( Special == Polyobj_OR_MoveToSpot )
-		|| ( Special >= Polyobj_MoveToSpot && Special <= Polyobj_OR_MoveTimes8 )
-
 		// Floors and ceilings
-		|| ( Special >= Floor_LowerByValue && Special <= Floor_RaiseAndCrush )
+		( Special >= Floor_LowerByValue && Special <= Floor_RaiseAndCrush )
 		|| ( Special >= Floor_RaiseByValueTimes8 && Special <= Ceiling_Waggle )
 		|| ( Special >= Ceiling_LowerByValue && Special <= Ceiling_MoveToValue )
 		|| ( Special >= Floor_LowerInstant && Special <= Ceiling_MoveToValueTimes8 )

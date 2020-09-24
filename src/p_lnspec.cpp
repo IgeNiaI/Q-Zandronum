@@ -132,31 +132,31 @@ FUNC(LS_NOP)
 FUNC(LS_Polyobj_RotateLeft)
 // Polyobj_RotateLeft (po, speed, angle)
 {
-	return EV_RotatePoly (ln, GetInstigator(it, isFromAcs), arg0, arg1, arg2, 1, false);
+	return EV_RotatePoly (ln, arg0, arg1, arg2, 1, false);
 }
 
 FUNC(LS_Polyobj_RotateRight)
 // Polyobj_rotateRight (po, speed, angle)
 {
-	return EV_RotatePoly (ln, GetInstigator(it, isFromAcs), arg0, arg1, arg2, -1, false);
+	return EV_RotatePoly (ln, arg0, arg1, arg2, -1, false);
 }
 
 FUNC(LS_Polyobj_Move)
 // Polyobj_Move (po, speed, angle, distance)
 {
-	return EV_MovePoly (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), BYTEANGLE(arg2), arg3 * FRACUNIT, false);
+	return EV_MovePoly (ln, arg0, SPEED(arg1), BYTEANGLE(arg2), arg3 * FRACUNIT, false);
 }
 
 FUNC(LS_Polyobj_MoveTimes8)
 // Polyobj_MoveTimes8 (po, speed, angle, distance)
 {
-	return EV_MovePoly (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), BYTEANGLE(arg2), arg3 * FRACUNIT * 8, false);
+	return EV_MovePoly (ln, arg0, SPEED(arg1), BYTEANGLE(arg2), arg3 * FRACUNIT * 8, false);
 }
 
 FUNC(LS_Polyobj_MoveTo)
 // Polyobj_MoveTo (po, speed, x, y)
 {
-	return EV_MovePolyTo (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), arg2 << FRACBITS, arg3 << FRACBITS, false);
+	return EV_MovePolyTo (ln, arg0, SPEED(arg1), arg2 << FRACBITS, arg3 << FRACBITS, false);
 }
 
 FUNC(LS_Polyobj_MoveToSpot)
@@ -165,49 +165,49 @@ FUNC(LS_Polyobj_MoveToSpot)
 	FActorIterator iterator (arg2);
 	AActor *spot = iterator.Next();
 	if (spot == NULL) return false;
-	return EV_MovePolyTo (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), spot->x, spot->y, false);
+	return EV_MovePolyTo (ln, arg0, SPEED(arg1), spot->x, spot->y, false);
 }
 
 FUNC(LS_Polyobj_DoorSwing)
 // Polyobj_DoorSwing (po, speed, angle, delay)
 {
-	return EV_OpenPolyDoor (ln, GetInstigator(it, isFromAcs), arg0, arg1, BYTEANGLE(arg2), arg3, 0, PODOOR_SWING);
+	return EV_OpenPolyDoor (ln, arg0, arg1, BYTEANGLE(arg2), arg3, 0, PODOOR_SWING);
 }
 
 FUNC(LS_Polyobj_DoorSlide)
 // Polyobj_DoorSlide (po, speed, angle, distance, delay)
 {
-	return EV_OpenPolyDoor (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), BYTEANGLE(arg2), arg4, arg3*FRACUNIT, PODOOR_SLIDE);
+	return EV_OpenPolyDoor (ln, arg0, SPEED(arg1), BYTEANGLE(arg2), arg4, arg3*FRACUNIT, PODOOR_SLIDE);
 }
 
 FUNC(LS_Polyobj_OR_RotateLeft)
 // Polyobj_OR_RotateLeft (po, speed, angle)
 {
-	return EV_RotatePoly (ln, GetInstigator(it, isFromAcs), arg0, arg1, arg2, 1, true);
+	return EV_RotatePoly (ln, arg0, arg1, arg2, 1, true);
 }
 
 FUNC(LS_Polyobj_OR_RotateRight)
 // Polyobj_OR_RotateRight (po, speed, angle)
 {
-	return EV_RotatePoly (ln, GetInstigator(it, isFromAcs), arg0, arg1, arg2, -1, true);
+	return EV_RotatePoly (ln, arg0, arg1, arg2, -1, true);
 }
 
 FUNC(LS_Polyobj_OR_Move)
 // Polyobj_OR_Move (po, speed, angle, distance)
 {
-	return EV_MovePoly (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), BYTEANGLE(arg2), arg3 * FRACUNIT, true);
+	return EV_MovePoly (ln, arg0, SPEED(arg1), BYTEANGLE(arg2), arg3 * FRACUNIT, true);
 }
 
 FUNC(LS_Polyobj_OR_MoveTimes8)
 // Polyobj_OR_MoveTimes8 (po, speed, angle, distance)
 {
-	return EV_MovePoly (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), BYTEANGLE(arg2), arg3 * FRACUNIT * 8, true);
+	return EV_MovePoly (ln, arg0, SPEED(arg1), BYTEANGLE(arg2), arg3 * FRACUNIT * 8, true);
 }
 
 FUNC(LS_Polyobj_OR_MoveTo)
 // Polyobj_OR_MoveTo (po, speed, x, y)
 {
-	return EV_MovePolyTo (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), arg2 << FRACBITS, arg3 << FRACBITS, true);
+	return EV_MovePolyTo (ln, arg0, SPEED(arg1), arg2 << FRACBITS, arg3 << FRACBITS, true);
 }
 
 FUNC(LS_Polyobj_OR_MoveToSpot)
@@ -216,7 +216,7 @@ FUNC(LS_Polyobj_OR_MoveToSpot)
 	FActorIterator iterator (arg2);
 	AActor *spot = iterator.Next();
 	if (spot == NULL) return false;
-	return EV_MovePolyTo (ln, GetInstigator(it, isFromAcs), arg0, SPEED(arg1), spot->x, spot->y, true);
+	return EV_MovePolyTo (ln, arg0, SPEED(arg1), spot->x, spot->y, true);
 }
 
 FUNC(LS_Polyobj_Stop)
