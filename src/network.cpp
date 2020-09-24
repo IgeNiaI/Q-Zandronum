@@ -1300,22 +1300,8 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 			return true;
 
 	return
-		// Floors and ceilings
-		( Special >= Floor_LowerByValue && Special <= Floor_RaiseAndCrush )
-		|| ( Special >= Floor_RaiseByValueTimes8 && Special <= Ceiling_Waggle )
-		|| ( Special >= Ceiling_LowerByValue && Special <= Ceiling_MoveToValue )
-		|| ( Special >= Floor_LowerInstant && Special <= Ceiling_MoveToValueTimes8 )
-		|| ( Special >= FloorAndCeiling_LowerByValue && Special <= Ceiling_LowerAndCrushDist )
-		|| ( Special >= Ceiling_LowerToHighestFloor && Special <= Generic_Ceiling )
-		|| ( Special >= Floor_RaiseToLowestCeiling && Special <= Floor_LowerToHighest )
-		|| ( Special >= Floor_Donut && Special <= Ceiling_CrushRaiseAndStaySilA )
-		|| ( Special >= Elevator_RaiseToNearest && Special <= Elevator_LowerToNearest )
-		|| ( Special == Floor_Waggle ) || ( Special == Generic_Crusher )
-		|| ( Special == Floor_TransferTrigger ) || ( Special == Floor_TransferNumeric )
-		|| ( Special == Stairs_BuildDownSync ) || ( Special == Stairs_BuildUpSync ) || ( Special == Stairs_BuildUpDoom )
-
 		// Teleports
-		|| ( Special == Teleport ) || ( Special == Teleport_NoFog ) || ( Special == Teleport_NoStop ) || ( Special == Teleport_Line )
+		( Special == Teleport ) || ( Special == Teleport_NoFog ) || ( Special == Teleport_NoStop ) || ( Special == Teleport_Line )
 
 		// Thrust
 		|| ( Special == ThrustThing ) || ( Special == ThrustThingZ );

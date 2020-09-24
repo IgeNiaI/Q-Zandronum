@@ -197,30 +197,28 @@ void DFloor::Tick ()
 
 	res = MoveFloor (m_Speed, m_FloorDestDist, m_Crush, m_Direction, m_Hexencrush);
 
+	// [BC] If we're in client mode, just move the floor and get out. The server will
+	// tell us when it stops.
+	if ( NETWORK_InClientMode() )
+	{
+		return;
+	}
+
 	if (res == pastdest)
 	{
 		// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
 		// have the correct floor/ceiling height for this sector.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (lastInstigator)
-				if (m_Sector->floorOrCeiling == 0)
-					SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-				else
-					SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
+			if ( m_Sector->floorOrCeiling == 0 )
+				SERVERCOMMANDS_SetSectorFloorPlane( ULONG( m_Sector - sectors ));
 			else
-				if (m_Sector->floorOrCeiling == 0)
-					SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors));
-				else
-					SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(m_Sector - sectors));
+				SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
 		}
 
 		// [BC] If we're the server, tell clients to stop the floor's sound sequence.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			if (lastInstigator)
-				SERVERCOMMANDS_StopSectorSequence(m_Sector, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-			else
-				SERVERCOMMANDS_StopSectorSequence(m_Sector);
+			SERVERCOMMANDS_StopSectorSequence( m_Sector );
 
 		SN_StopSequence (m_Sector, CHAN_FLOOR);
 
@@ -230,10 +228,7 @@ void DFloor::Tick ()
 
 			// [BC] Tell clients to change the floor type.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (lastInstigator)
-					SERVERCOMMANDS_ChangeFloorType(m_lFloorID, m_Type, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-				else
-					SERVERCOMMANDS_ChangeFloorType(m_lFloorID, m_Type);
+				SERVERCOMMANDS_ChangeFloorType( m_lFloorID, m_Type );
 		}
 
 		if (m_Type != waitStair || m_ResetCount == 0)
@@ -252,10 +247,7 @@ void DFloor::Tick ()
 
 					// [BC] Update clients about this flat change.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						if (lastInstigator)
-							SERVERCOMMANDS_SetSectorFlat(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-						else
-							SERVERCOMMANDS_SetSectorFlat(ULONG(m_Sector - sectors));
+						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
 
 					// [BC] Also, mark this sector as having its flat changed.
 					m_Sector->bFlatChange = true;
@@ -278,10 +270,7 @@ void DFloor::Tick ()
 
 					// [BC] Update clients about this flat change.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						if (lastInstigator)
-							SERVERCOMMANDS_SetSectorFlat(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-						else
-							SERVERCOMMANDS_SetSectorFlat(ULONG(m_Sector - sectors));
+						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
 
 					// [BC] Also, mark this sector as having its flat changed.
 					m_Sector->bFlatChange = true;
@@ -323,10 +312,7 @@ void DFloor::Tick ()
 
 			// [BC] If we're the server, tell clients to destroy the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (lastInstigator)
-					SERVERCOMMANDS_DestroyFloor(m_lFloorID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-				else
-					SERVERCOMMANDS_DestroyFloor(m_lFloorID);
+				SERVERCOMMANDS_DestroyFloor( m_lFloorID );
 
 			Destroy ();
 		}
@@ -530,14 +516,7 @@ void DFloor::SetPerStepTime( int PerStepTime )
 //
 //==========================================================================
 
-bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag,
-	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower)
-{
-	return EV_DoFloor(floortype, line, tag, NULL,
-		speed, height, crush, change, hexencrush, hereticlower);
-}
-
-bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
+bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
 				 fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower)
 {
 	int 		secnum;
@@ -586,7 +565,6 @@ manual_floor:
 		floor->m_Speed = speed;
 		floor->m_ResetCount = 0;				// [RH]
 		floor->m_OrgDist = sec->floorplane.d;	// [RH]
-		floor->lastInstigator = instigator;
 
 		// [BC] Assign the floor's network ID. However, don't do this on the client end.
 		if ( NETWORK_InClientMode() == false )
@@ -725,11 +703,8 @@ manual_floor:
 				sec->SetTexture(sector_t::floor, line->frontsector->GetTexture(sector_t::floor));
 
 				// [BC] Update clients about this flat change.
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if (instigator)
-						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					else
-						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -761,11 +736,8 @@ manual_floor:
 				floor->m_NewSpecial = modelsec->special & ~SECRET_MASK;
 
 				// [BC] Update clients about this flat change.
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					if (instigator)
-						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					else
-						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -779,17 +751,8 @@ manual_floor:
 		// [BC] If we're the server, tell clients to create the floor.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (instigator)
-			{
-				SERVERCOMMANDS_DoFloor(floortype, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID,
-					ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-				SERVERCOMMANDS_StartFloorSound(floor->m_lFloorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-			}
-			else
-			{
-				SERVERCOMMANDS_DoFloor(floortype, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID);
-				SERVERCOMMANDS_StartFloorSound(floor->m_lFloorID);
-			}
+			SERVERCOMMANDS_DoFloor( floortype, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID );
+			SERVERCOMMANDS_StartFloorSound( floor->m_lFloorID );
 		}
 
 		// Do not interpolate instant movement floors.
@@ -832,11 +795,8 @@ manual_floor:
 					floor->SetFloorChangeType (modelsec, change);
 
 					// [BC] Update clients about this flat change.
-					if (NETWORK_GetState() == NETSTATE_SERVER)
-						if (instigator)
-							SERVERCOMMANDS_SetSectorFlat(ULONG(modelsec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-						else
-							SERVERCOMMANDS_SetSectorFlat(ULONG(modelsec - sectors));
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+						SERVERCOMMANDS_SetSectorFlat( ULONG( modelsec - sectors ));
 				}
 			}
 			else if (line)
@@ -846,10 +806,7 @@ manual_floor:
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					if (instigator)
-						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					else
-						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors));
+					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 			}
 		}
 	}
@@ -864,12 +821,7 @@ manual_floor:
 //
 //==========================================================================
 
-bool EV_FloorCrushStop(int tag)
-{
-	return EV_FloorCrushStop(tag, NULL);
-}
-
-bool EV_FloorCrushStop (int tag, player_t *instigator)
+bool EV_FloorCrushStop (int tag)
 {
 	int secnum = -1;
 
@@ -884,33 +836,21 @@ bool EV_FloorCrushStop (int tag, player_t *instigator)
 			// have the correct floor/ceiling height for this sector.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (instigator)
-					if (sec->floorOrCeiling == 0)
-						SERVERCOMMANDS_SetSectorFloorPlane(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					else
-						SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+				if ( sec->floorOrCeiling == 0 )
+					SERVERCOMMANDS_SetSectorFloorPlane( ULONG( sec - sectors ));
 				else
-					if (sec->floorOrCeiling == 0)
-						SERVERCOMMANDS_SetSectorFloorPlane(ULONG(sec - sectors));
-					else
-						SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(sec - sectors));
+					SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( sec - sectors ));
 			}
 
 			// [BC] If we're the server, tell clients to stop the floor's sound sequence.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (instigator)
-					SERVERCOMMANDS_StopSectorSequence(sec, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-				else
-					SERVERCOMMANDS_StopSectorSequence(sec);
+				SERVERCOMMANDS_StopSectorSequence( sec );
 
 			SN_StopSequence (sec, CHAN_FLOOR);
 
 			// [BC] If we're the server, tell clients to destroy the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (instigator)
-					SERVERCOMMANDS_DestroyFloor(barrier_cast<DFloor *>(sec->floordata)->m_lFloorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-				else
-					SERVERCOMMANDS_DestroyFloor(barrier_cast<DFloor *>(sec->floordata)->m_lFloorID);
+				SERVERCOMMANDS_DestroyFloor( barrier_cast<DFloor *>( sec->floordata )->m_lFloorID );
 
 			sec->floordata->Destroy ();
 			sec->floordata = NULL;
@@ -944,16 +884,7 @@ static int P_FindSectorFromTagLinear (int tag, int start)
 //
 //==========================================================================
 
-bool EV_BuildStairs(int tag, DFloor::EStair type, line_t *line,
-	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
-	int usespecials)
-{
-	return EV_BuildStairs(tag, NULL, type, line,
-		stairsize, speed, delay, reset, igntxt,
-		usespecials);
-}
-
-bool EV_BuildStairs (int tag, player_t *instigator, DFloor::EStair type, line_t *line,
+bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
 					 fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 					 int usespecials)
 {
@@ -1025,7 +956,6 @@ manual_stair:
 		floor->m_Delay = delay;
 		floor->m_PauseTime = 0;
 		floor->m_StepTime = floor->m_PerStepTime = persteptime;
-		floor->lastInstigator = instigator;
 
 		floor->m_Crush = (!usespecials && speed == 4*FRACUNIT) ? 10 : -1; //jff 2/27/98 fix uninitialized crush field
 		floor->m_Hexencrush = false;
@@ -1043,13 +973,7 @@ manual_stair:
 
 		// [BC] If we're the server, tell clients to create the floor.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			if (instigator)
-				SERVERCOMMANDS_BuildStair(floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist,
-					floor->m_Crush, floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID,
-					ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-			else
-				SERVERCOMMANDS_BuildStair(floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist,
-					floor->m_Crush, floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID);
+			SERVERCOMMANDS_BuildStair( floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID );
 
 		// Find next sector to raise
 		// 1. Find 2-sided line with same sector side[0] (lowest numbered)
@@ -1141,7 +1065,6 @@ manual_stair:
 				floor->m_Delay = delay;
 				floor->m_PauseTime = 0;
 				floor->m_StepTime = floor->m_PerStepTime = persteptime;
-				floor->lastInstigator = instigator;
 
 				if (usespecials == 2)
 				{
@@ -1167,19 +1090,8 @@ manual_stair:
 				// [BC] If we're the server, tell clients to create the floor.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					if (instigator)
-					{
-						SERVERCOMMANDS_BuildStair(floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush,
-							floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID,
-							ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-						SERVERCOMMANDS_StartFloorSound(floor->m_lFloorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					}
-					else
-					{
-						SERVERCOMMANDS_BuildStair(floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush,
-							floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID);
-						SERVERCOMMANDS_StartFloorSound(floor->m_lFloorID);
-					}
+					SERVERCOMMANDS_BuildStair( floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID );
+					SERVERCOMMANDS_StartFloorSound( floor->m_lFloorID );
 				}
 			}
 		} while (ok);
@@ -1204,12 +1116,7 @@ manual_stair:
 //
 //==========================================================================
 
-bool EV_DoDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
-{
-	return EV_DoDonut(tag, NULL, line, pillarspeed, slimespeed);
-}
-
-bool EV_DoDonut (int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
+bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
 {
 	sector_t*			s1;
 	sector_t*			s2;
@@ -1267,7 +1174,6 @@ manual_donut:
 			floor->m_NewSpecial = 0;
 			height = s3->FindHighestFloorPoint (&spot);
 			floor->m_FloorDestDist = s2->floorplane.PointToDist (spot, height);
-			floor->lastInstigator = instigator;
 			floor->StartFloorSound ();
 			
 			// [BC] Assign the floor's network ID. However, don't do this on the client end.
@@ -1277,17 +1183,8 @@ manual_donut:
 			// [BC] If we're the server, tell clients to create the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (instigator)
-				{
-					SERVERCOMMANDS_DoFloor(floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID,
-					ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					SERVERCOMMANDS_StartFloorSound(floor->m_lFloorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-				}
-				else
-				{
-					SERVERCOMMANDS_DoFloor(floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID);
-					SERVERCOMMANDS_StartFloorSound(floor->m_lFloorID);
-				}
+				SERVERCOMMANDS_DoFloor( floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID );
+				SERVERCOMMANDS_StartFloorSound( floor->m_lFloorID );
 			}
 
 			//	Spawn lowering donut-hole
@@ -1300,7 +1197,6 @@ manual_donut:
 			floor->m_Speed = pillarspeed;
 			height = s3->FindHighestFloorPoint (&spot);
 			floor->m_FloorDestDist = s1->floorplane.PointToDist (spot, height);
-			floor->lastInstigator = instigator;
 			floor->StartFloorSound ();
 
 			// [BC] Assign the floor's network ID. However, don't do this on the client end.
@@ -1310,17 +1206,8 @@ manual_donut:
 			// [BC] If we're the server, tell clients to create the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				if (instigator)
-				{
-					SERVERCOMMANDS_DoFloor(floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID,
-						ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					SERVERCOMMANDS_StartFloorSound(floor->m_lFloorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-				}
-				else
-				{
-					SERVERCOMMANDS_DoFloor(floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID);
-					SERVERCOMMANDS_StartFloorSound(floor->m_lFloorID);
-				}
+				SERVERCOMMANDS_DoFloor( floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID );
+				SERVERCOMMANDS_StartFloorSound( floor->m_lFloorID );
 			}
 
 			break;
@@ -1447,38 +1334,28 @@ void DElevator::Tick ()
 		}
 	}
 
+	// [BC] This is all we need to do in client mode.
+	if ( NETWORK_InClientMode() )
+	{
+		return;
+	}
+
 	if (res == pastdest)	// if destination height acheived
 	{
 		// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
 		// have the correct floor/ceiling height for this sector.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (lastInstigator)
-			{
-				SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-				SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(m_Sector - sectors), ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-			}
-			else
-			{
-				SERVERCOMMANDS_SetSectorFloorPlane(ULONG(m_Sector - sectors));
-				SERVERCOMMANDS_SetSectorCeilingPlane(ULONG(m_Sector - sectors));
-			}
+			SERVERCOMMANDS_SetSectorFloorPlane( ULONG( m_Sector - sectors ));
+			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
 		}
 
 		// [BC] If we're the server, tell clients to play the elevator sound, and then
 		// destroy the elevator.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (lastInstigator)
-			{
-				SERVERCOMMANDS_StopSectorSequence(m_Sector, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-				SERVERCOMMANDS_DestroyElevator(m_lElevatorID, ULONG(lastInstigator - players), SVCF_SKIPTHISCLIENT);
-			}
-			else
-			{
-				SERVERCOMMANDS_StopSectorSequence(m_Sector);
-				SERVERCOMMANDS_DestroyElevator(m_lElevatorID);
-			}
+			SERVERCOMMANDS_StopSectorSequence( m_Sector );
+			SERVERCOMMANDS_DestroyElevator( m_lElevatorID );
 		}
 
 		// make floor stop sound
@@ -1514,15 +1391,8 @@ void DElevator::StartFloorSound ()
 //
 //==========================================================================
 
-bool EV_DoElevator(line_t *line, DElevator::EElevator elevtype,
-	fixed_t speed, fixed_t height, int tag)
-{
-	return EV_DoElevator(line, elevtype,
-		speed, height, tag, NULL);
-}
-
 bool EV_DoElevator (line_t *line, DElevator::EElevator elevtype,
-					fixed_t speed, fixed_t height, int tag, player_t *instigator)
+					fixed_t speed, fixed_t height, int tag)
 {
 	int			secnum;
 	bool		rtn;
@@ -1560,7 +1430,6 @@ manual_elevator:
 		elevator = new DElevator (sec);
 		elevator->m_Type = elevtype;
 		elevator->m_Speed = speed;
-		elevator->lastInstigator = instigator;
 		elevator->StartFloorSound ();
 
 		// [BC] Assign the floor's network ID. However, don't do this on the client end.
@@ -1620,18 +1489,8 @@ manual_elevator:
 		// [BC] If we're the server, tell clients to create the elevator.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			if (instigator)
-			{
-				SERVERCOMMANDS_DoElevator(elevator->m_Type, elevator->m_Sector, elevator->m_Speed, elevator->m_Direction, elevator->m_FloorDestDist,
-					elevator->m_CeilingDestDist, elevator->m_lElevatorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-				SERVERCOMMANDS_StartElevatorSound(elevator->m_lElevatorID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-			}
-			else
-			{
-				SERVERCOMMANDS_DoElevator(elevator->m_Type, elevator->m_Sector, elevator->m_Speed, elevator->m_Direction, elevator->m_FloorDestDist,
-					elevator->m_CeilingDestDist, elevator->m_lElevatorID);
-				SERVERCOMMANDS_StartElevatorSound(elevator->m_lElevatorID);
-			}
+			SERVERCOMMANDS_DoElevator( elevator->m_Type, elevator->m_Sector, elevator->m_Speed, elevator->m_Direction, elevator->m_FloorDestDist, elevator->m_CeilingDestDist, elevator->m_lElevatorID );
+			SERVERCOMMANDS_StartElevatorSound( elevator->m_lElevatorID );
 		}
 
 	}
@@ -1654,12 +1513,7 @@ manual_elevator:
 //
 //==========================================================================
 
-bool EV_DoChange(line_t *line, EChange changetype, int tag)
-{
-	return EV_DoChange(line, changetype, tag, NULL);
-}
-
-bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigator)
+bool EV_DoChange (line_t *line, EChange changetype, int tag)
 {
 	int			secnum;
 	bool		rtn;
@@ -1688,10 +1542,7 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigato
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					if (instigator)
-						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					else
-						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors));
+					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -1706,10 +1557,7 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigato
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					if (instigator)
-						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-					else
-						SERVERCOMMANDS_SetSectorFlat(ULONG(sec - sectors));
+					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -1854,7 +1702,7 @@ void DWaggleBase::SetState( LONG lState )
 //
 //
 //==========================================================================
-void DWaggleBase::DoWaggle (bool ceiling, player_t *instigator)
+void DWaggleBase::DoWaggle (bool ceiling)
 {
 	secplane_t *plane;
 	int pos;
@@ -1907,10 +1755,7 @@ void DWaggleBase::DoWaggle (bool ceiling, player_t *instigator)
 
 			// [BC] If we're the server, tell clients to delete the waggle.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				if (instigator)
-					SERVERCOMMANDS_DestroyWaggle(m_lWaggleID, ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-				else
-					SERVERCOMMANDS_DestroyWaggle(m_lWaggleID);
+				SERVERCOMMANDS_DestroyWaggle( m_lWaggleID );
 
 			Destroy ();
 			return;
@@ -1979,7 +1824,7 @@ DFloorWaggle::DFloorWaggle (sector_t *sec)
 
 void DFloorWaggle::Tick ()
 {
-	DoWaggle (false, lastInstigator);
+	DoWaggle (false);
 }
 
 //==========================================================================
@@ -2001,7 +1846,7 @@ DCeilingWaggle::DCeilingWaggle (sector_t *sec)
 
 void DCeilingWaggle::Tick ()
 {
-	DoWaggle (true, lastInstigator);
+	DoWaggle (true);
 }
 
 //==========================================================================
@@ -2010,14 +1855,7 @@ void DCeilingWaggle::Tick ()
 //
 //==========================================================================
 
-bool EV_StartWaggle(int tag, line_t *line, int height, int speed, int offset,
-	int timer, bool ceiling)
-{
-	return EV_StartWaggle(tag, NULL, line, height, speed, offset,
-		timer, ceiling);
-}
-
-bool EV_StartWaggle (int tag, player_t *instigator, line_t *line, int height, int speed, int offset,
+bool EV_StartWaggle (int tag, line_t *line, int height, int speed, int offset,
 	int timer, bool ceiling)
 {
 	int sectorIndex;
@@ -2064,7 +1902,6 @@ manual_waggle:
 			/(TICRATE+((3*TICRATE)*height)/255);
 		waggle->m_Ticker = timer ? timer*TICRATE : -1;
 		waggle->m_State = WGLSTATE_EXPAND;
-		waggle->lastInstigator = instigator;
 
 		// [BC] Assign the waggle's network ID. However, don't do this on the client end.
 		if ( NETWORK_InClientMode() == false )
@@ -2072,13 +1909,7 @@ manual_waggle:
 
 		// [BC] If we're the server, tell clients to do the waggle.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			if (instigator)
-				SERVERCOMMANDS_DoWaggle(ceiling, sector, waggle->m_OriginalDist, waggle->m_Accumulator, waggle->m_AccDelta, waggle->m_TargetScale,
-					waggle->m_Scale, waggle->m_ScaleDelta, waggle->m_Ticker, waggle->m_State, waggle->m_lWaggleID,
-					ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
-			else
-				SERVERCOMMANDS_DoWaggle(ceiling, sector, waggle->m_OriginalDist, waggle->m_Accumulator, waggle->m_AccDelta, waggle->m_TargetScale,
-					waggle->m_Scale, waggle->m_ScaleDelta, waggle->m_Ticker, waggle->m_State, waggle->m_lWaggleID);
+			SERVERCOMMANDS_DoWaggle( ceiling, sector, waggle->m_OriginalDist, waggle->m_Accumulator, waggle->m_AccDelta, waggle->m_TargetScale, waggle->m_Scale, waggle->m_ScaleDelta, waggle->m_Ticker, waggle->m_State, waggle->m_lWaggleID );
 
 	}
 	return retCode;

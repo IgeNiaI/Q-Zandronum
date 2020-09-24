@@ -777,7 +777,7 @@ public:
 	void Serialize (FArchive &arc);
 	void Tick ();
 
-	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator,
+	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag,
 						fixed_t speed, fixed_t speed2, fixed_t height,
 						int crush, int silent, int change, bool hexencrush);
 
@@ -819,7 +819,6 @@ protected:
 	fixed_t 	m_Speed;
 	fixed_t		m_Speed1;		// [RH] dnspeed of crushers
 	fixed_t		m_Speed2;		// [RH] upspeed of crushers
-	player_t	*lastInstigator;
 	int 		m_Crush;
 	bool		m_Hexencrush;
 	int			m_Silent;
@@ -841,19 +840,14 @@ private:
 	DCeiling ();
 
 	friend bool EV_CeilingCrushStop (int tag);
-	friend bool EV_CeilingCrushStop (int tag, player_t *instigator);
-	friend void P_ActivateInStasisCeiling (int tag, player_t *instigator);
+	friend void P_ActivateInStasisCeiling (int tag);
 };
 
 bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 	int tag, fixed_t speed, fixed_t speed2, fixed_t height,
 	int crush, int silent, int change, bool hexencrush);
-bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
-	int tag, player_t *instigator, fixed_t speed, fixed_t speed2, fixed_t height,
-	int crush, int silent, int change, bool hexencrush);
 bool EV_CeilingCrushStop (int tag);
-bool EV_CeilingCrushStop (int tag, player_t *instigator);
-void P_ActivateInStasisCeiling (int tag, player_t *instigator);
+void P_ActivateInStasisCeiling (int tag);
 
 
 
@@ -973,8 +967,6 @@ protected:
 	fixed_t 	m_FloorDestDist;
 	fixed_t 	m_Speed;
 
-	player_t	*lastInstigator;
-
 	// [RH] New parameters used to reset and delay stairs
 	int			m_ResetCount;
 	int			m_OrgDist;
@@ -990,35 +982,21 @@ protected:
 	friend bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
 		fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 		int usespecials);
-	friend bool EV_BuildStairs (int tag, player_t *instigator, DFloor::EStair type, line_t *line,
-		fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
-		int usespecials);
 	friend bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
 		fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower);
-	friend bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
-		fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower);
 	friend bool EV_FloorCrushStop (int tag);
-	friend bool EV_FloorCrushStop (int tag, player_t *instigator);
 	friend bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
-	friend bool EV_DoDonut (int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
 private:
 	DFloor ();
 };
 
-bool EV_BuildStairs(int tag, DFloor::EStair type, line_t *line,
+bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
 	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 	int usespecials);
-bool EV_BuildStairs(int tag, player_t *instigator, DFloor::EStair type, line_t *line,
-	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
-	int usespecials);
-bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag,
+bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
 	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower=false);
-bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
-	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower=false);
-bool EV_FloorCrushStop(int tag);
-bool EV_FloorCrushStop(int tag, player_t *instigator);
-bool EV_DoDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
-bool EV_DoDonut(int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+bool EV_FloorCrushStop (int tag);
+bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
 
 class DElevator : public DMover
 {
@@ -1063,7 +1041,6 @@ protected:
 	fixed_t		m_FloorDestDist;
 	fixed_t		m_CeilingDestDist;
 	fixed_t		m_Speed;
-	player_t	*lastInstigator;
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
 
@@ -1073,16 +1050,12 @@ protected:
 
 	friend bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed,
 		fixed_t height, int tag);
-	friend bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed,
-		fixed_t height, int tag, player_t *instigator);
 private:
 	DElevator ();
 };
 
 bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed,
 	fixed_t height, int tag);
-bool EV_DoElevator(line_t *line, DElevator::EElevator type, fixed_t speed,
-	fixed_t height, int tag, player_t *instigator);
 
 class DWaggleBase : public DMover
 {
@@ -1116,7 +1089,6 @@ protected:
 	fixed_t m_TargetScale;
 	fixed_t m_Scale;
 	fixed_t m_ScaleDelta;
-	player_t *lastInstigator;
 	int m_Ticker;
 	int m_State;
 	TObjPtr<DInterpolation> m_Interpolation;
@@ -1127,10 +1099,8 @@ protected:
 
 	friend bool EV_StartWaggle (int tag, line_t *line, int height, int speed,
 		int offset, int timer, bool ceiling);
-	friend bool EV_StartWaggle (int tag, player_t *instigator, line_t *line, int height, int speed,
-		int offset, int timer, bool ceiling);
 
-	void DoWaggle (bool ceiling, player_t *instigator);
+	void DoWaggle (bool ceiling);
 	// [BB] Changed Destroy to public, so that it can be called in cl_main.cpp.
 public:
 	void Destroy();
@@ -1139,8 +1109,6 @@ protected:
 };
 
 bool EV_StartWaggle (int tag, line_t *line, int height, int speed,
-	int offset, int timer, bool ceiling);
-bool EV_StartWaggle (int tag, player_t *instigator, line_t *line, int height, int speed,
 	int offset, int timer, bool ceiling);
 
 class DFloorWaggle : public DWaggleBase
@@ -1171,7 +1139,6 @@ enum EChange
 };
 
 bool EV_DoChange (line_t *line, EChange changetype, int tag);
-bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigator);
 
 
 
