@@ -175,6 +175,9 @@ CUSTOM_CVAR(Bool, norawinput, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITC
 	Printf("This won't take effect until " GAMENAME " is restarted.\n");
 }
 
+// [geNia] Always render the game even when it's not focusesd
+CVAR(Bool, vid_alwaysrender, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+
 extern int chatmodeon;
 
 static void I_CheckGUICapture ()
@@ -546,7 +549,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_ACTIVATEAPP:
-		AppActive = wParam;
+		AppActive = vid_alwaysrender || wParam;
 		if (wParam)
 		{
 			SetPriorityClass (GetCurrentProcess (), INGAME_PRIORITY_CLASS);
