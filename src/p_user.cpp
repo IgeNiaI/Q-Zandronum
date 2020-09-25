@@ -2281,25 +2281,6 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 		side = clamp(side, -0x1800, 0x1800);
 	}
 
-	// Not using this anymore because of CrouchWalkFactor()
-	// [GRB]
-	/*if ((unsigned int)(forward + 0x31ff) < 0x63ff)
-	{
-		forward = FixedMul (forward, ForwardMove1);
-	}
-	else
-	{
-		forward = FixedMul (forward, ForwardMove2);
-	}
-	if ((unsigned int)(side + 0x27ff) < 0x4fff)
-	{
-		side = FixedMul (side, SideMove1);
-	}
-	else
-	{
-		side = FixedMul (side, SideMove2);
-	}*/
-
 	// [BC] This comes out to 50%, so we can use this for the turbosphere.
 	if (!player->morphTics && Inventory != NULL)
 	{
