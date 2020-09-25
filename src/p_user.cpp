@@ -3669,7 +3669,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
-		if (player->stepInterval <= 0)
+		if (player->stepInterval <= 0 && !player->isCrouchSliding)
 		{
 			if (!CLIENT_PREDICT_IsPredicting())
 				S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);

@@ -3434,7 +3434,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 		}
 		//	mo->player->centering = true;
 	}
-	else
+	else if (!mo->player->isCrouchSliding)
 	{
 		// [geNia] Don't do this while predicting.
 		if (CLIENT_PREDICT_IsPredicting())
