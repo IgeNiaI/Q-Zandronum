@@ -3698,52 +3698,24 @@ void SERVERCOMMANDS_PlayBounceSound( const AActor *pActor, const bool bOnfloor, 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoDoor( sector_t *pSector, DDoor::EVlDoor type, LONG lSpeed, LONG lDirection, LONG lLightTag, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoDoor( DDoor *Door, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	LONG	lSectorID;
 
-	lSectorID = LONG( pSector - sectors );
+	lSectorID = LONG( Door->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
-		return;
-
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustDoorDirection( lDirection );
-	if ( lDirection == INT_MIN )
 		return;
 
 	NetCommand command ( SVC_DODOOR );
 	command.addShort ( lSectorID );
-	command.addByte ( (BYTE)type );
-	command.addLong ( lSpeed );
-	command.addByte ( lDirection );
-	command.addShort ( lLightTag );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyDoor( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYDOOR );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangeDoorDirection( LONG lID, LONG lDirection, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	// Since we still want to send direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = SERVER_AdjustDoorDirection( lDirection );
-	if ( lDirection == INT_MIN )
-		return;
-
-	NetCommand command ( SVC_CHANGEDOORDIRECTION );
-	command.addShort ( lID );
-	command.addByte ( lDirection );
+	command.addByte ( (BYTE)Door->GetType() );
+	command.addByte( Door->GetLastInstigator() - players );
+	command.addLong ( Door->GetPosition() );
+	command.addByte ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
+	command.addLong ( Door->GetSpeed() );
+	command.addByte ( Door->GetTopWait() );
+	command.addByte ( Door->GetCountdown() );
+	command.addShort ( Door->GetLightTag() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 

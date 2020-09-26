@@ -634,13 +634,21 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
+	void Predict();
 
 	// [BC] Access function(s).
+	player_t*	GetLastInstigator();
+	void	SetLastInstigator(player_t* player);
+	fixed_t	GetPosition( void );
 	int		GetDirection( void );
-	void	SetDirection( LONG lDirection );
+	void	SetPositionAndDirection( fixed_t Position, int direction );
+	
+	LONG	GetTopWait( void );
 
-	LONG	GetID( void );
-	void	SetID( LONG lID );
+	LONG	GetCountdown( void );
+	void	SetCountdown( LONG lCountdown );
+
+	LONG	GetSectorNum( void );
 
 	EVlDoor	GetType( void );
 	void	SetType( EVlDoor Type );
@@ -658,6 +666,8 @@ protected:
 	vertex_t	*m_BotSpot;
 	fixed_t 	m_Speed;
 
+	player_t	*m_LastInstigator;
+
 	// 1 = up, 0 = waiting at top, -1 = down
 	int 		m_Direction;
 	
@@ -671,14 +681,14 @@ protected:
 
 	// [BC] Make this public so clients can call it.
 public:
+	void Reinit (bool bNoSound);
 	void DoorSound (bool raise, class DSeqNode *curseq=NULL) const;
 protected:
 
-	// [BC] This is the door's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lDoorID;
-
 	friend bool	EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
+						   int tag, int speed, int delay, int lock,
+						   int lightTag, bool boomgen);
+	friend bool	EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
 						   int tag, int speed, int delay, int lock,
 						   int lightTag, bool boomgen);
 	friend void P_SpawnDoorCloseIn30 (sector_t *sec);
@@ -689,6 +699,9 @@ private:
 };
 
 bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
+				int tag, int speed, int delay, int lock,
+				int lightTag, bool boomgen = false);
+bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
 				int tag, int speed, int delay, int lock,
 				int lightTag, bool boomgen = false);
 void P_SpawnDoorCloseIn30 (sector_t *sec);
@@ -1174,7 +1187,7 @@ void P_DoDeferedScripts (void);
 bool P_StartQuake (AActor *activator, int tid, int intensity, int duration, int damrad, int tremrad, FSoundID quakesfx);
 
 // [BC] Prototypes dealing with network IDs for movers.
-DDoor		*P_GetDoorByID( LONG lID );
+DDoor		*P_GetDoorBySectorNum( LONG sectorNum );
 DPlat		*P_GetPlatByID( LONG lID );
 DFloor		*P_GetFloorByID( LONG lID );
 DElevator	*P_GetElevatorByID( LONG lID );
@@ -1182,7 +1195,6 @@ DWaggleBase	*P_GetWaggleByID( LONG lID );
 DPillar		*P_GetPillarByID( LONG lID );
 DCeiling	*P_GetCeilingByID( LONG lID );
 
-LONG		P_GetFirstFreeDoorID( void );
 LONG		P_GetFirstFreePlatID( void );
 LONG		P_GetFirstFreeFloorID( void );
 LONG		P_GetFirstFreeElevatorID( void );

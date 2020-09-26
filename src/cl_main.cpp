@@ -209,8 +209,6 @@ static	void	client_SetInventoryIcon( BYTESTREAM_s *pByteStream );
 
 // Door commands.
 static	void	client_DoDoor( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyDoor( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeDoorDirection( BYTESTREAM_s *pByteStream );
 
 // Floor commands.
 static	void	client_DoFloor( BYTESTREAM_s *pByteStream );
@@ -1603,14 +1601,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 	case SVC_DODOOR:
 
 		client_DoDoor( pByteStream );
-		break;
-	case SVC_DESTROYDOOR:
-
-		client_DestroyDoor( pByteStream );
-		break;
-	case SVC_CHANGEDOORDIRECTION:
-
-		client_ChangeDoorDirection( pByteStream );
 		break;
 	case SVC_DOFLOOR:
 
@@ -7249,112 +7239,37 @@ static void client_SetInventoryIcon( BYTESTREAM_s *pByteStream )
 //
 static void client_DoDoor( BYTESTREAM_s *pByteStream )
 {
-	LONG			lSectorID;
-	sector_t		*pSector;
-	BYTE			type;
-	LONG			lSpeed;
-	LONG			lDirection;
-	LONG			lLightTag;
-	LONG			lDoorID;
-	DDoor			*pDoor;
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	fixed_t Direction = CLIENT_AdjustDoorDirection( NETWORK_ReadByte( pByteStream ) );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	int TopWait = NETWORK_ReadByte( pByteStream );
+	int Countdown = NETWORK_ReadByte( pByteStream );
+	int LightTag = NETWORK_ReadShort( pByteStream );
 
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the door type.
-	type = NETWORK_ReadByte( pByteStream );
-
-	// Read in the speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the direction.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Read in the delay.
-	lLightTag = NETWORK_ReadShort( pByteStream );
-
-	// Read in the door ID.
-	lDoorID = NETWORK_ReadShort( pByteStream );
-
-	// Make sure the sector ID is valid.
-	if (( lSectorID >= 0 ) && ( lSectorID < numsectors ))
-		pSector = &sectors[lSectorID];
-	else
+	// Invalid sector.
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustDoorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
+	sector_t *pSector = &sectors[SectorID];
 
-	// If door already has a thinker, we can't spawn a new door on it.
-	if ( pSector->ceilingdata )
+	DDoor *pDoor = P_GetDoorBySectorNum( pSector->sectornum );
+	if (pDoor == NULL)
 	{
-		CLIENT_PrintWarning( "client_DoDoor: WARNING! Door's sector already has a ceiling mover attached to it!\n" );
-		return;
+		// Create the new door.
+		pDoor = new DDoor( pSector, (DDoor::EVlDoor)Type, Speed, TopWait, LightTag, g_ConnectionState != CTS_ACTIVE );
 	}
 
-	// Create the new door.
-	if ( (pDoor = new DDoor( pSector, (DDoor::EVlDoor)type, lSpeed, 0, lLightTag, g_ConnectionState != CTS_ACTIVE )) )
+	pDoor->SetLastInstigator( &players[Instigator] );
+	pDoor->SetPositionAndDirection( Position, Direction );
+	pDoor->SetCountdown( Countdown );
+
+	if ( Instigator == consoleplayer )
 	{
-		pDoor->SetID( lDoorID );
-		pDoor->SetDirection( lDirection );
+		pDoor->Predict();
 	}
-}
-
-//*****************************************************************************
-//
-static void client_DestroyDoor( BYTESTREAM_s *pByteStream )
-{
-	DDoor	*pDoor;
-	LONG	lDoorID;
-
-	// Read in the door ID.
-	lDoorID = NETWORK_ReadShort( pByteStream );
-
-	pDoor = P_GetDoorByID( lDoorID );
-	if ( pDoor == NULL )
-	{
-		CLIENT_PrintWarning( "client_DestroyDoor: Couldn't find door with ID: %ld!\n", lDoorID );
-		return;
-	}
-
-	pDoor->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeDoorDirection( BYTESTREAM_s *pByteStream )
-{
-	DDoor	*pDoor;
-	LONG	lDoorID;
-	LONG	lDirection;
-
-	// Read in the door ID.
-	lDoorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new direction the door should move in.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustDoorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
-
-	pDoor = P_GetDoorByID( lDoorID );
-	if ( pDoor == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeDoorDirection: Couldn't find door with ID: %ld!\n", lDoorID );
-		return;
-	}
-
-	pDoor->SetDirection( lDirection );
-
-	// Don't play a sound if the door is now motionless!
-	if ( lDirection != 0 )
-		pDoor->DoorSound( lDirection == 1 );
 }
 
 //*****************************************************************************
