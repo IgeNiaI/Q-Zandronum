@@ -124,7 +124,7 @@ public:
 	
 	// Quake movement
 	float QTweakSpeed();
-	void  QFriction(FVector3 &vel, const float stopspeed, const float friction);
+	void  QFriction(FVector3 &vel, const float speedlimit, const float friction);
 	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);
 
 	void SetupWeaponSlots ();
@@ -190,10 +190,10 @@ public:
 	// Quake movement only
 	float		GroundAcceleration;
 	float		GroundFriction;
+	float		GroundSpeedLimit;
 	float		SlideAcceleration;
 	float		SlideFriction;
 	int			SlideMaxTics;
-	float		StopSpeed;
 
 	// Quake CPM movement only
 	float		CpmAirAcceleration;

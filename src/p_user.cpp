@@ -756,7 +756,7 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< SlideAcceleration
 		<< SlideFriction
 		<< SlideMaxTics
-		<< StopSpeed
+		<< GroundSpeedLimit
 		<< CpmAirAcceleration;
 
 	if (SaveVersion < 3829)
@@ -2884,7 +2884,7 @@ float APlayerPawn::QTweakSpeed()
 	return 1.f;
 }
 
-void APlayerPawn::QFriction(FVector3 &vel, const float stopspeed, const float friction)
+void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const float friction)
 {
 	float velocity = float(vel.Length());
 
@@ -2915,7 +2915,7 @@ void APlayerPawn::QFriction(FVector3 &vel, const float stopspeed, const float fr
 	}
 	else if ( (player->onground || player->isWallClimbing) && !player->mo->InState( FindState( NAME_Pain ) ) )
 	{
-		control = velocity < stopspeed ? friction : velocity;
+		control = velocity < groundspeedlimit ? friction : velocity;
 		drop = control * friction / TICRATE;
 	}
 
@@ -3001,10 +3001,10 @@ bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 //
 //==========================================================================
 
-void P_Slide_Looping_Sounds(player_t *player, const bool& canslide)
+void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
 {
 	// crouch slide sound start/stop
-	if (canslide && !player->isCrouchSliding)
+	if (isSliding && !player->isCrouchSliding)
 	{
 		if (!CLIENT_PREDICT_IsPredicting())
 			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
@@ -3012,12 +3012,12 @@ void P_Slide_Looping_Sounds(player_t *player, const bool& canslide)
 		if (NETWORK_GetState() == NETSTATE_SERVER)
 			SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 	}
-	else if (!canslide && player->isCrouchSliding)
+	else if (!isSliding && player->isCrouchSliding)
 	{
 		S_StopSound(player->mo, CHAN_SEVEN);
 	}
 
-	player->isCrouchSliding = canslide;
+	player->isCrouchSliding = isSliding;
 }
 
 void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
@@ -3408,14 +3408,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	// Setup
 	bool noJump = false;
-	bool canSlide = false;
+	bool isSliding = false;
 	int canClimb = 0;
 	bool isSlider = player->mo->flags7 & MF7_CROUCHSLIDE ? true : false;
 	bool isClimber = player->mo->flags7 & MF7_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
-	float maxgroundspeed = player->mo->StopSpeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
+	float maxgroundspeed = player->mo->GroundSpeedLimit * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FL_NORMALIZE(cmd->ucmd.forwardmove), - FL_NORMALIZE(cmd->ucmd.sidemove), 0.f };
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
@@ -3575,14 +3575,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 			else if (!wasJustThrustedZ)
 			{
-				canSlide = isSlider &&									// player has the flag
+				isSliding = isSlider &&									// player has the flag
 						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
 						   player->crouchSlideTics;						// there is crouch slide charge to spend
 				
 				// Friction & Acceleration
-				if (canSlide)
+				if (isSliding)
 				{
-					player->mo->QFriction(vel, maxgroundspeed, player->mo->SlideFriction * floorFriction);
+					player->mo->QFriction(vel, 0.f, player->mo->SlideFriction * floorFriction);
 					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->SlideAcceleration * floorFriction);
 					player->crouchSlideTics--;
 				}
@@ -3606,7 +3606,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	player->mo->velz = FLOAT2FIXED(vel.Z);
 
 	// also take care of view/weapon bobbing
-	if (canSlide)
+	if (isSliding)
 	{
 		// but not when sliding
 		player->velx = 0;
@@ -3620,13 +3620,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	// handle looping sounds of slide and climb
 	if (isSlider)
-		P_Slide_Looping_Sounds(player, canSlide);
+		P_Slide_Looping_Sounds(player, isSliding);
 	if (isClimber)
 		P_Climb_Looping_Sounds(player, canClimb);
 
 	// Only play run animation when moving and not in the air
 	if (!CLIENT_PREDICT_IsPredicting() && player->onground &&
-		!player->bSpectating && (player->mo->velx || player->mo->vely) && !canSlide)
+		!player->bSpectating && (player->mo->velx || player->mo->vely) && !isSliding)
 	{
 		player->mo->PlayRunning();
 	}
@@ -3936,7 +3936,7 @@ void P_DeathThink (player_t *player)
 	if (player->mo->MvType > 0 && player->onground)
 	{
 		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-		player->mo->QFriction(vel, player->mo->StopSpeed * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed(), 6.f);
+		player->mo->QFriction(vel, player->mo->GroundSpeedLimit * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed(), 6.f);
 		player->mo->velx = FLOAT2FIXED(vel.X);
 		player->mo->vely = FLOAT2FIXED(vel.Y);
 		player->mo->velz = FLOAT2FIXED(vel.Z);

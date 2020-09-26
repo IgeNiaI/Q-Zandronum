@@ -2984,6 +2984,16 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, groundfriction, F, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, groundspeedlimit, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->GroundSpeedLimit = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, slideacceleration, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
@@ -3009,16 +3019,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, slidemaxtics, I, PlayerPawn)
 	PROP_INT_PARM(i, 0);
 
 	defaults->SlideMaxTics = i;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, stopspeed, F, PlayerPawn)
-{
-	PROP_FLOAT_PARM(f, 0);
-
-	defaults->StopSpeed = f;
 }
 
 //==========================================================================
