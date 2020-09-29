@@ -156,7 +156,7 @@ DFrameBuffer *screen;
 CVAR (Int, vid_defwidth, 640, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Int, vid_defheight, 480, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Int, vid_defbits, 8, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-CVAR (Bool, vid_fps, false, 0)
+CVAR (Bool, vid_fps, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool, ticker, false, 0)
 CVAR (Int, vid_showpalette, 0, 0)
 
