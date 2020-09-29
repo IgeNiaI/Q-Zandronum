@@ -5800,7 +5800,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							int pushDamage = damage;
 							bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
 							pushDamage = MIN(pushDamage, (damage * 5) / 4); // put a cap on the push force
-							explosionToPlayer *= pushDamage * 0.25f;
+							explosionToPlayer *= pushDamage * 0.35f;
 
 							thing->velx += FLOAT2FIXED(explosionToPlayer.X);
 							thing->vely += FLOAT2FIXED(explosionToPlayer.Y);
