@@ -134,7 +134,7 @@ bool NativeMouse;
 bool CursorState;
 
 CVAR (Bool, use_mouse,				true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-CVAR (Bool, m_noprescale,			false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CVAR (Bool, m_noprescale,			true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool,	m_filter,				false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool, m_hidepointer,			true, 0)
 

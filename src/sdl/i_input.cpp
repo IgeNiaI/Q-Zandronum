@@ -29,7 +29,7 @@ static bool NativeMouse = true;
 extern int paused;
 
 CVAR (Bool,  use_mouse,				true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-CVAR (Bool,  m_noprescale,			false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CVAR (Bool,  m_noprescale,			true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool,	 m_filter,				false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool,  sdl_nokeyrepeat,		false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
