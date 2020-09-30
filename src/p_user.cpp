@@ -1449,13 +1449,15 @@ bool APlayerPawn::UpdateWaterLevel (fixed_t oldz, bool splash)
 	{
 		if (oldlevel < 3 && waterlevel == 3)
 		{ // Our head just went under.
-			S_Sound (this, CHAN_VOICE, "*dive", 1, ATTN_NORM);
+			if (!(player->mo->flags7 & MF7_SILENT))
+				S_Sound (this, CHAN_VOICE, "*dive", 1, ATTN_NORM);
 		}
 		else if (oldlevel == 3 && waterlevel < 3)
 		{ // Our head just came up.
 			if (player->air_finished > level.time)
 			{ // We hadn't run out of air yet.
-				S_Sound (this, CHAN_VOICE, "*surface", 1, ATTN_NORM);
+				if (!(player->mo->flags7 & MF7_SILENT))
+					S_Sound (this, CHAN_VOICE, "*surface", 1, ATTN_NORM);
 			}
 			// If we were running out of air, then ResetAirSupply() will play *gasp.
 		}
@@ -3006,11 +3008,14 @@ void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
 	// crouch slide sound start/stop
 	if (isSliding && !player->isCrouchSliding)
 	{
-		if (!CLIENT_PREDICT_IsPredicting())
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
+		if (!(player->mo->flags7 & MF7_SILENT))
+		{
+			if (!CLIENT_PREDICT_IsPredicting())
+				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
 
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+			if (NETWORK_GetState() == NETSTATE_SERVER)
+				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+		}
 	}
 	else if (!isSliding && player->isCrouchSliding)
 	{
@@ -3025,11 +3030,14 @@ void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 	// Wall climb parameters and sound start/stop
 	if (canclimb && !player->isWallClimbing)
 	{
-		if (!CLIENT_PREDICT_IsPredicting())
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
+		if (!(player->mo->flags7 & MF7_SILENT))
+		{
+			if (!CLIENT_PREDICT_IsPredicting())
+				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
 
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+			if (NETWORK_GetState() == NETSTATE_SERVER)
+				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+		}
 	}
 	else if (!(canclimb % 2) && player->isWallClimbing)
 	{
@@ -3112,11 +3120,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 			player->onground = false; // no friction to influence the dash
 
-			if (CLIENT_PREDICT_IsPredicting() == false)
-				S_Sound(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM);
+			if (!(player->mo->flags7 & MF7_SILENT))
+			{
+				if (CLIENT_PREDICT_IsPredicting() == false)
+					S_Sound(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM);
 
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+			}
 		}
 
 		if (anyMove)
@@ -3205,11 +3216,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	{
 		if (player->stepInterval <= 0)
 		{
-			if (!CLIENT_PREDICT_IsPredicting())
-				S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+			if (!(player->mo->flags7 & MF7_SILENT))
+			{
+				if (!CLIENT_PREDICT_IsPredicting())
+					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
 
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+			}
 
 			player->stepInterval = 12;
 		}
@@ -3299,13 +3313,16 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				else
 					ulJumpTicks = -1;
 
-				// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-				if (CLIENT_PREDICT_IsPredicting() == false)
-					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+				if (!(player->mo->flags7 & MF7_SILENT))
+				{
+					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+					if (CLIENT_PREDICT_IsPredicting() == false)
+						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
-				// [EP] Inform the other clients to play the sound.
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+					// [EP] Inform the other clients to play the sound.
+					if (NETWORK_GetState() == NETSTATE_SERVER)
+						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				}
 
 				player->mo->flags2 &= ~MF2_ONMOBJ;
 
@@ -3345,11 +3362,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					{
 						JumpVelz = (JumpVelz / 4) * 3;
 
-						if (!CLIENT_PREDICT_IsPredicting())
-							S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+						if (!(player->mo->flags7 & MF7_SILENT))
+						{
+							if (!CLIENT_PREDICT_IsPredicting())
+								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
 
-						if (NETWORK_GetState() == NETSTATE_SERVER)
-							SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+							if (NETWORK_GetState() == NETSTATE_SERVER)
+								SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+						}
 
 						doDoubleJump = true;
 
@@ -3359,11 +3379,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			}
 			else
 			{
-				if (!CLIENT_PREDICT_IsPredicting())
-					S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
+				if (!(player->mo->flags7 & MF7_SILENT))
+				{
+					if (!CLIENT_PREDICT_IsPredicting())
+						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
 
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+					if (NETWORK_GetState() == NETSTATE_SERVER)
+						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				}
 
 				doDoubleJump = true;
 			}
@@ -3527,11 +3550,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 				player->onground = false;
 
-				if (CLIENT_PREDICT_IsPredicting() == false)
-					S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
+				if (!(player->mo->flags7 & MF7_SILENT))
+				{
+					if (CLIENT_PREDICT_IsPredicting() == false)
+						S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
 
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+					if (NETWORK_GetState() == NETSTATE_SERVER)
+						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				}
 			}
 
 			if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
@@ -3668,11 +3694,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		if (player->stepInterval <= 0 && !player->isCrouchSliding)
 		{
-			if (!CLIENT_PREDICT_IsPredicting())
-				S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+			if (!(player->mo->flags7 & MF7_SILENT))
+			{
+				if (!CLIENT_PREDICT_IsPredicting())
+					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
 
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				if (NETWORK_GetState() == NETSTATE_SERVER)
+					SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+			}
 
 			player->stepInterval = 12;
 		}
@@ -3708,11 +3737,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			if (!wasJustThrustedZ || isRampJumper)
 			{
-				if (!CLIENT_PREDICT_IsPredicting() && !(player->mo->flags7 & MF7_SILENT))
-					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+				if (!(player->mo->flags7 & MF7_SILENT))
+				{
+					if (!CLIENT_PREDICT_IsPredicting())
+						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+					if (NETWORK_GetState() == NETSTATE_SERVER)
+						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				}
 
 				player->mo->flags2 &= ~MF2_ONMOBJ;
 				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
@@ -3742,11 +3774,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					{
 						JumpVelz = (JumpVelz / 4) * 3;
 
-						if (!CLIENT_PREDICT_IsPredicting() && !(player->mo->flags7 & MF7_SILENT))
-							S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+						if (!(player->mo->flags7 & MF7_SILENT))
+						{
+							if (!CLIENT_PREDICT_IsPredicting())
+								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
 
-						if (NETWORK_GetState() == NETSTATE_SERVER)
-							SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+							if (NETWORK_GetState() == NETSTATE_SERVER)
+								SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+						}
 
 						doDoubleJump = true;
 
@@ -3756,11 +3791,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 			else
 			{
-				if (!CLIENT_PREDICT_IsPredicting() && !(player->mo->flags7 & MF7_SILENT))
-					S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
+				if (!(player->mo->flags7 & MF7_SILENT))
+				{
+					if (!CLIENT_PREDICT_IsPredicting())
+						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
 
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+					if (NETWORK_GetState() == NETSTATE_SERVER)
+						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				}
 
 				doDoubleJump = true;
 			}
