@@ -3113,10 +3113,10 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->onground = false; // no friction to influence the dash
 
 			if (CLIENT_PREDICT_IsPredicting() == false)
-				S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
+				S_Sound(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM);
 
 			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
+				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 		}
 
 		if (anyMove)
@@ -3708,7 +3708,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			if (!wasJustThrustedZ || isRampJumper)
 			{
-				if (!CLIENT_PREDICT_IsPredicting())
+				if (!CLIENT_PREDICT_IsPredicting() && !(player->mo->flags7 & MF7_SILENT))
 					S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
 				if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -3742,7 +3742,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					{
 						JumpVelz = (JumpVelz / 4) * 3;
 
-						if (!CLIENT_PREDICT_IsPredicting())
+						if (!CLIENT_PREDICT_IsPredicting() && !(player->mo->flags7 & MF7_SILENT))
 							S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
 
 						if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -3756,7 +3756,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 			else
 			{
-				if (!CLIENT_PREDICT_IsPredicting())
+				if (!CLIENT_PREDICT_IsPredicting() && !(player->mo->flags7 & MF7_SILENT))
 					S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
 
 				if (NETWORK_GetState() == NETSTATE_SERVER)
@@ -3923,8 +3923,12 @@ void P_FallingDamage (AActor *actor)
 
 	if (actor->player)
 	{
-		S_Sound (actor, CHAN_AUTO, "*land", 1, ATTN_NORM);
-		P_NoiseAlert (actor, actor, true);
+		if (!(actor->flags7 & MF7_SILENT))
+		{
+			S_Sound(actor, CHAN_AUTO, "*land", 1, ATTN_NORM);
+			P_NoiseAlert(actor, actor, true);
+		}
+		
 		if (damage == 1000000 && (actor->player->cheats & (CF_GODMODE | CF_BUDDHA)))
 		{
 			damage = 999;
