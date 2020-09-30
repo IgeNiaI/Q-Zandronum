@@ -190,7 +190,6 @@ public:
 	// Quake movement only
 	float		GroundAcceleration;
 	float		GroundFriction;
-	float		GroundSpeedLimit;
 	float		SlideAcceleration;
 	float		SlideFriction;
 	int			SlideMaxTics;

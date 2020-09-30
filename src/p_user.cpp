@@ -756,7 +756,6 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< SlideAcceleration
 		<< SlideFriction
 		<< SlideMaxTics
-		<< GroundSpeedLimit
 		<< CpmAirAcceleration
 		<< CpmMaxForwardAngleRad;
 
@@ -3414,7 +3413,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
-	float maxgroundspeed = player->mo->GroundSpeedLimit * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
+	float maxgroundspeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove), 0.f };
 	acceleration = acceleration.Unit();
@@ -3954,7 +3953,7 @@ void P_DeathThink (player_t *player)
 	if (player->mo->MvType > 0 && player->onground)
 	{
 		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-		player->mo->QFriction(vel, player->mo->GroundSpeedLimit * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed(), 6.f);
+		player->mo->QFriction(vel, FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed(), 6.f);
 		player->mo->velx = FLOAT2FIXED(vel.X);
 		player->mo->vely = FLOAT2FIXED(vel.Y);
 		player->mo->velz = FLOAT2FIXED(vel.Z);
