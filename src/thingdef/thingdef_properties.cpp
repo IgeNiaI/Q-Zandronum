@@ -3030,3 +3030,13 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, cpmairacceleration, F, PlayerPawn)
 
 	defaults->CpmAirAcceleration = f;
 }
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, cpmmaxforwardanglerad, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+
+	defaults->CpmMaxForwardAngleRad = f;
+}

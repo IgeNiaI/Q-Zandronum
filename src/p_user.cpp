@@ -757,7 +757,8 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< SlideFriction
 		<< SlideMaxTics
 		<< GroundSpeedLimit
-		<< CpmAirAcceleration;
+		<< CpmAirAcceleration
+		<< CpmMaxForwardAngleRad;
 
 	if (SaveVersion < 3829)
 	{
@@ -3398,8 +3399,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 //				but I'd rather not add possible troubles.						//
 //******************************************************************************//
 
-#define FL_NORMALIZE(f)	((f) > 0 ? 1.f : ((f) < 0 ? -1.f : 0.f))
-
 void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 {
 	//*******************************************************
@@ -3417,7 +3416,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
 	float maxgroundspeed = player->mo->GroundSpeedLimit * FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-	FVector3 acceleration = { FL_NORMALIZE(cmd->ucmd.forwardmove), - FL_NORMALIZE(cmd->ucmd.sidemove), 0.f };
+	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove), 0.f };
+	acceleration = acceleration.Unit();
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
 	float velocity = 0.f;
@@ -3438,7 +3438,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Friction
 		player->mo->QFriction(vel, 0, 2.f);
 		//Acceleration
-		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		maxgroundspeed *= movefactor;
 		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
@@ -3464,7 +3463,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Friction
 		player->mo->QFriction(vel, 0.f, 3.f);
 		//Acceleration
-		acceleration.MakeUnit();
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		maxgroundspeed *= movefactor;
 		player->mo->QAcceleration(vel, acceleration, maxgroundspeed, 8.f);
@@ -3513,7 +3511,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		else
 		{
 			// Orient inputs to view angle
-			acceleration.MakeUnit();
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 
 			// Dashing
@@ -3546,18 +3543,39 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				{
 					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
 					{
+						// Side acceleration only
 						player->mo->QAcceleration(vel, acceleration, 1.5f, player->mo->CpmAirAcceleration * 6.f);
 					}
 					else
 					{
-						if (velocity && !cmd->ucmd.sidemove && DotProduct(vel, acceleration) > 0)
+						FVector3 vel2d = { vel.X, vel.Y, 0 };
+						vel2d.MakeUnit();
+						float Dot = DotProduct(vel2d, acceleration);
+						if (!cmd->ucmd.sidemove && velocity && acceleration.Length() && Dot > 0)
 						{
-							FVector2 forwardVel = FVector2(vel.X + acceleration.X * 10.f, vel.Y + acceleration.Y * 10.f).Unit() * velocity;
+							// Forward acceleration only
+							if (Dot < cos(player->mo->CpmMaxForwardAngleRad))
+							{
+								// Player is facing further than the character can turn
+								// Limit velocity change to CpmMaxForwardAngleRad
+								float Atan = atan2(vel2d.X * acceleration.Y - vel2d.Y * acceleration.X, vel2d.X * acceleration.X + vel2d.Y * acceleration.Y);
+								float Rad;
+								if (Atan > 0)
+									Rad = player->mo->CpmMaxForwardAngleRad;
+								else
+									Rad = -player->mo->CpmMaxForwardAngleRad;
+
+								acceleration.X = vel2d.X * cos(Rad) - vel2d.Y * sin(Rad);
+								acceleration.Y = vel2d.X * sin(Rad) + vel2d.Y * cos(Rad);
+							}
+
+							FVector2 forwardVel = acceleration * velocity;
 							vel.X = forwardVel.X;
 							vel.Y = forwardVel.Y;
 						}
 						else
 						{
+							// Both side and forward acceleration
 							player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6.f);
 						}
 					}

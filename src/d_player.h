@@ -197,6 +197,7 @@ public:
 
 	// Quake CPM movement only
 	float		CpmAirAcceleration;
+	float		CpmMaxForwardAngleRad;
 
 	// [CW] Fades for when you are being damaged.
 	PalEntry DamageFade;
