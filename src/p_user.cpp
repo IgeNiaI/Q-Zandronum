@@ -3398,6 +3398,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 //				but I'd rather not add possible troubles.						//
 //******************************************************************************//
 
+#define FL_NORMALIZE(f)	((f) > 0 ? 1.f : ((f) < 0 ? -1.f : 0.f))
+
 void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 {
 	//*******************************************************
@@ -3415,8 +3417,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
 	float maxgroundspeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove), 0.f };
-	acceleration = acceleration.Unit();
+	FVector3 acceleration = { FL_NORMALIZE(cmd->ucmd.forwardmove), - FL_NORMALIZE(cmd->ucmd.sidemove), 0.f };
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
 	float velocity = 0.f;
@@ -3547,25 +3548,22 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					}
 					else
 					{
-						FVector3 vel2d = { vel.X, vel.Y, 0 };
-						vel2d.MakeUnit();
-						float Dot = DotProduct(vel2d, acceleration);
-						if (!cmd->ucmd.sidemove && velocity && acceleration.Length() && Dot > 0)
+						FVector3 vel2D = { vel.X, vel.Y, 0 };
+						vel2D.MakeUnit();
+						acceleration.MakeUnit();
+						float dot = DotProduct(vel2D, acceleration);
+						if (!cmd->ucmd.sidemove && velocity && acceleration.Length() && dot > 0)
 						{
 							// Forward acceleration only
-							if (Dot < cos(player->mo->CpmMaxForwardAngleRad))
+							if (dot < cos(player->mo->CpmMaxForwardAngleRad))
 							{
 								// Player is facing further than the character can turn
 								// Limit velocity change to CpmMaxForwardAngleRad
-								float Atan = atan2(vel2d.X * acceleration.Y - vel2d.Y * acceleration.X, vel2d.X * acceleration.X + vel2d.Y * acceleration.Y);
-								float Rad;
-								if (Atan > 0)
-									Rad = player->mo->CpmMaxForwardAngleRad;
-								else
-									Rad = -player->mo->CpmMaxForwardAngleRad;
+								float Atan = atan2(vel2D.X * acceleration.Y - vel2D.Y * acceleration.X, vel2D.X * acceleration.X + vel2D.Y * acceleration.Y);
+								float Rad = Atan > 0 ? player->mo->CpmMaxForwardAngleRad : - player->mo->CpmMaxForwardAngleRad;
 
-								acceleration.X = vel2d.X * cos(Rad) - vel2d.Y * sin(Rad);
-								acceleration.Y = vel2d.X * sin(Rad) + vel2d.Y * cos(Rad);
+								acceleration.X = vel2D.X * cos(Rad) - vel2D.Y * sin(Rad);
+								acceleration.Y = vel2D.X * sin(Rad) + vel2D.Y * cos(Rad);
 							}
 
 							FVector2 forwardVel = acceleration * velocity;
