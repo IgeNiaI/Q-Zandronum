@@ -3398,8 +3398,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 //				but I'd rather not add possible troubles.						//
 //******************************************************************************//
 
-#define FL_NORMALIZE(f)	((f) > 0 ? 1.f : ((f) < 0 ? -1.f : 0.f))
-
 void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 {
 	//*******************************************************
@@ -3417,7 +3415,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
 	float maxgroundspeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-	FVector3 acceleration = { FL_NORMALIZE(cmd->ucmd.forwardmove), - FL_NORMALIZE(cmd->ucmd.sidemove), 0.f };
+	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.f };
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
 	float velocity = 0.f;
@@ -3439,6 +3437,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		player->mo->QFriction(vel, 0, 2.f);
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
+		acceleration.MakeUnit();
 		maxgroundspeed *= movefactor;
 		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
 
@@ -3464,6 +3463,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		player->mo->QFriction(vel, 0.f, 3.f);
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
+		acceleration.MakeUnit();
 		maxgroundspeed *= movefactor;
 		player->mo->QAcceleration(vel, acceleration, maxgroundspeed, 8.f);
 
@@ -3512,6 +3512,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		{
 			// Orient inputs to view angle
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
+			acceleration.MakeUnit();
 
 			// Dashing
 			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
