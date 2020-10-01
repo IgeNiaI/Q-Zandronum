@@ -171,7 +171,7 @@ static int HistSize;
 CVAR (Float, con_notifytime, 3.f, CVAR_ARCHIVE)
 CVAR (Bool, con_centernotify, false, CVAR_ARCHIVE)
 // [BC] con_scaletext is back to being a bool.
-CVAR (Bool, con_scaletext, 0, CVAR_ARCHIVE)		// Scale text at high resolutions?
+CVAR (Bool, con_scaletext, 1, CVAR_ARCHIVE)		// Scale text at high resolutions?
 
 CUSTOM_CVAR(Float, con_alpha, 0.75f, CVAR_ARCHIVE)
 {
@@ -261,7 +261,7 @@ char g_szActualLogFilename[256];
 void C_AddNotifyString (int printlevel, const char *source);
 
 
-FIntCVar msglevel ("msg", 0, CVAR_ARCHIVE);
+FIntCVar msglevel ("msg", 1, CVAR_ARCHIVE);
 
 CUSTOM_CVAR (Int, msg0color, 6, CVAR_ARCHIVE)
 {

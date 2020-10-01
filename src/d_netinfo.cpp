@@ -85,7 +85,7 @@ CVAR (String,	gender,					"male",		CVAR_USERINFO | CVAR_ARCHIVE);
 // [BC] Changed "neverswitchonpickup" to allow it to be set 3 different ways, instead of "on/off".
 // [TP] switchonpickup, movebob and stillbob are not synced to other clients.
 CVAR (Int,		switchonpickup,			1,			CVAR_USERINFO | CVAR_UNSYNCED_USERINFO | CVAR_ARCHIVE);
-CVAR (Float,	movebob,				0.25f,		CVAR_USERINFO | CVAR_UNSYNCED_USERINFO | CVAR_ARCHIVE);
+CVAR (Float,	movebob,				0.05f,		CVAR_USERINFO | CVAR_UNSYNCED_USERINFO | CVAR_ARCHIVE);
 CVAR (Float,	stillbob,				0.f,		CVAR_USERINFO | CVAR_UNSYNCED_USERINFO | CVAR_ARCHIVE);
 CVAR (String,	playerclass,			"Fighter",	CVAR_USERINFO | CVAR_ARCHIVE);
 // [BC] New userinfo entries for Skulltag.

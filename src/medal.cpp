@@ -132,7 +132,7 @@ extern FName MeansOfDeath;
 //*****************************************************************************
 //	CONSOLE VARIABLES
 
-CVAR( Bool, cl_medals, true, CVAR_ARCHIVE )
+CVAR( Bool, cl_medals, false, CVAR_ARCHIVE )
 CVAR( Bool, cl_icons, true, CVAR_ARCHIVE )
 
 //*****************************************************************************

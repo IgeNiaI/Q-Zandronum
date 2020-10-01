@@ -115,7 +115,7 @@ float	saved_relative_volume = 1.0f;	// this could be used to implement an ACS Fa
 // Maximum volume of MOD/stream music.
 //==========================================================================
 
-CUSTOM_CVAR (Float, snd_musicvolume, 0.5f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CUSTOM_CVAR (Float, snd_musicvolume, 0.25f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
 	if (self < 0.f)
 		self = 0.f;

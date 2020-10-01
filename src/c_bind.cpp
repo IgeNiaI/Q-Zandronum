@@ -56,38 +56,38 @@
 static const FBinding DefBindings[] =
 {
 	{ "`", "toggleconsole" },
+
+	// Movement
+	{ "w", "+forward" },
+	{ "s", "+back" },
+	{ "a", "+moveleft" },
+	{ "d", "+moveright" },
+	{ "space", "+jump" },
+	{ "ctrl", "+crouch" },
+	{ "c", "+crouch" },
+	{ "shift", "+speed" },
+
+	// Weapons
+	{ "mouse1", "+attack" },
+	{ "mouse2", "+altattack" },
 	{ "1", "slot 1" },
 	{ "2", "slot 2" },
 	{ "3", "slot 3" },
 	{ "4", "slot 4" },
 	{ "5", "slot 5" },
 	{ "6", "slot 6" },
+	{ "q", "slot 6" },
 	{ "7", "slot 7" },
+	{ "e", "slot 7" },
 	{ "8", "slot 8" },
+	{ "r", "slot 8" },
 	{ "9", "slot 9" },
 	{ "0", "slot 0" },
-	{ "[", "invprev" },
-	{ "]", "invnext" },
-	{ "mwheelleft", "invprev" },
-	{ "mwheelright", "invnext" },
-	{ "enter", "invuse" },
-	{ "-", "sizedown" },
-	{ "=", "sizeup" },
-	{ "ctrl", "+attack" },
-	{ "alt", "+strafe" },
-	{ "shift", "+speed" },
-	{ "space", "+use" },
-	{ "rightarrow", "+right" },
-	{ "leftarrow", "+left" },
-	{ "uparrow", "+forward" },
-	{ "downarrow", "+back" },
-	{ ",", "+moveleft" },
-	{ ".", "+moveright" },
-	{ "mouse1", "+attack" },
-	{ "mouse2", "+strafe" },
-	{ "mouse3", "+forward" },
-	{ "mouse4", "+speed" },
-	{ "capslock", "toggle cl_run" },
+	{ "mwheeldown", "weapnext" },
+	{ "mwheelup", "weapprev" },
+	{ "g", "weapdrop" },
+
+	// UI
 	{ "f1", "menu_help" },
 	{ "f2", "menu_save" },
 	{ "f3", "menu_load" },
@@ -97,87 +97,34 @@ static const FBinding DefBindings[] =
 	{ "f7", "menu_endgame" },
 	{ "f8", "togglemessages" },
 	{ "f9", "quickload" },
-	{ "f11", "bumpgamma" },
 	{ "f10", "menu_quit" },
-	{ "tab", "togglemap" },
-	{ "pause", "pause" },
+	{ "f11", "spectate" },
+	{ "m", "togglemap" },
+	{ "t", "messagemode" },
+	{ "y", "messagemode2" },
+	{ "tab", "+showscores" },
+
+	// Inventory
+	{ "enter", "invuse" },
+	{ "[", "invprev" },
+	{ "kp-", "invprev" },
+	{ "]", "invnext" },
+	{ "kp*", "invnext" },
+	{ "'", "invdrop" },
+	{ "kp/", "invdrop" },
+	{ "del", "drop_upgrade" },
+
+	// Etc
+	{ "alt", "+use" },
+	{ "-", "sizedown" },
+	{ "=", "sizeup" },
 	{ "sysrq", "screenshot" },
-	{ "t", "say" },	// [BC] messagemode changed to "say"
-	{ "\\", "+showscores" },
-	{ "f12", "spynext" },
-	{ "mwheeldown", "weapnext" },
-	{ "mwheelup", "weapprev" },
-	{ "m", "+showmedals" },	// [BC] New buttons below for Skulltag.
-	{ "u", "taunt" },
+	{ "pause", "pause" },
 	{ "pgup", "vote_yes" },
 	{ "pgdn", "vote_no" },
+	{ "f12", "spynext" },
 
-	// Generic joystick buttons
-	{ "joy1", "+attack" },
-	{ "joy2", "+strafe" },
-	{ "joy3", "+speed" },
-	{ "joy4", "+use" },
-
-	// Xbox 360 / PS2 controllers
-	{ "pad_a", "+use" },
-	{ "pad_y", "+jump" },
-	{ "rtrigger", "+attack" },
-	{ "ltrigger", "+altattack" },
-	{ "lshoulder", "weapprev" },
-	{ "rshoulder", "weapnext" },
-	{ "dpadleft", "invprev" },
-	{ "dpadright", "invnext" },
-	{ "dpaddown", "invuse" },
-	{ "dpadup", "togglemap" },
-	{ "pad_start", "pause" },
-	{ "pad_back", "menu_main" },
-	{ "lthumb", "crouch" },
 	{ NULL, NULL }
-};
-
-static const FBinding DefRavenBindings[] =
-{
-	{ "pgup", "+moveup" },
-	{ "insert", "+movedown" },
-	{ "home", "land" },
-	{ "pgdn", "+lookup" },
-	{ "del", "+lookdown" },
-	{ "end", "centerview" },
-	{ NULL, NULL }
-};
-
-static const FBinding DefHereticBindings[] =
-{
-	{ "backspace", "use ArtiTomeOfPower" },
-	{ NULL, NULL }
-};
-
-static const FBinding DefHexenBindings[] =
-{
-	{ "/", "+jump" },
-	{ "backspace", "invuseall" },
-	{ "\\", "use ArtiHealth" },
-	{ "0", "useflechette" },
-	{ "9", "use ArtiBlastRadius" },
-	{ "8", "use ArtiTeleport" },
-	{ "7", "use ArtiTeleportOther" },
-	{ "6", "use ArtiPork" },
-	{ "5", "use ArtiInvulnerability2" },
-	{ "scroll", "+showscores" },
-	{ NULL, NULL }
-};
-
-static const FBinding DefStrifeBindings[] =
-{
-	{ "a", "+jump" },
-	{ "w", "showpop 1" },
-	{ "backspace", "invdrop" },
-	{ "z", "showpop 3" },
-	{ "k", "showpop 2" },
-	{ "q", "invquery" },
-	{ NULL, NULL }
-	// not done
-	// h - use health
 };
 
 static const FBinding DefAutomapBindings[] =
@@ -185,7 +132,7 @@ static const FBinding DefAutomapBindings[] =
 	{ "f", "am_togglefollow" },
 	{ "g", "am_togglegrid" },
 	{ "p", "am_toggletexture" },
-	{ "m", "am_setmark" },
+	{ "n", "am_setmark" },
 	{ "c", "am_clearmarks" },
 	{ "0", "am_gobig" },
 	{ "rightarrow", "+am_panright" },
@@ -199,16 +146,6 @@ static const FBinding DefAutomapBindings[] =
 	{ "mwheelup", "am_zoom 1.2" },
 	{ "mwheeldown", "am_zoom -1.2" },
 	{ NULL, NULL }
-};
-
-// [BB] WASD control layout (clashes with Strife's default controls).
-static const FBinding DefNonStrifeBindings[] =
-{
-	{ "w", "+forward" },
-	{ "s", "+back" },
-	{ "a", "+moveleft" },
-	{ "d", "+moveright" },
-	{ NULL }
 };
 
 
@@ -812,29 +749,6 @@ CCMD (rebind)
 void C_BindDefaults ()
 {
 	Bindings.SetBinds (DefBindings);
-
-	if (gameinfo.gametype & (GAME_Raven|GAME_Strife))
-	{
-		Bindings.SetBinds (DefRavenBindings);
-	}
-
-	if (gameinfo.gametype == GAME_Heretic)
-	{
-		Bindings.SetBinds (DefHereticBindings);
-	}
-
-	if (gameinfo.gametype == GAME_Hexen)
-	{
-		Bindings.SetBinds (DefHexenBindings);
-	}
-
-	if (gameinfo.gametype == GAME_Strife)
-	{
-		Bindings.SetBinds (DefStrifeBindings);
-	}
-	// [BB] WASD control layout (clashes with Strife's default controls).
-	else
-		Bindings.SetBinds (DefNonStrifeBindings);
 
 	AutomapBindings.SetBinds(DefAutomapBindings);
 }
