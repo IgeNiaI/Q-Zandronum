@@ -882,14 +882,14 @@ void APlayerPawn::PostBeginPlay()
 	}
 
 	// [Ivory] no you can't haz both
-	if (player->mo->flags7 & MF7_DOUBLEJUMP)
+	if (player->mo->qFlags & Q_DOUBLEJUMP)
 	{
-		player->mo->flags7 &= ~MF7_WALLJUMP;
-		player->mo->flags7 &= ~MF7_WALLCLIMB;
+		player->mo->flags7 &= ~Q_WALLJUMP;
+		player->mo->flags7 &= ~Q_WALLCLIMB;
 	}
-	else if (player->mo->flags7 & MF7_WALLCLIMB)
+	else if (player->mo->qFlags & Q_WALLCLIMB)
 	{
-		player->mo->flags7 &= ~MF7_WALLJUMP;
+		player->mo->flags7 &= ~Q_WALLJUMP;
 	}
 }
 
@@ -1449,15 +1449,14 @@ bool APlayerPawn::UpdateWaterLevel (fixed_t oldz, bool splash)
 	{
 		if (oldlevel < 3 && waterlevel == 3)
 		{ // Our head just went under.
-			if (!(player->mo->flags7 & MF7_SILENT))
+			if (!(player->mo->qFlags & Q_SILENT))
 				S_Sound (this, CHAN_VOICE, "*dive", 1, ATTN_NORM);
 		}
 		else if (oldlevel == 3 && waterlevel < 3)
 		{ // Our head just came up.
-			if (player->air_finished > level.time)
+			if (player->air_finished > level.time && !(player->mo->qFlags & Q_SILENT))
 			{ // We hadn't run out of air yet.
-				if (!(player->mo->flags7 & MF7_SILENT))
-					S_Sound (this, CHAN_VOICE, "*surface", 1, ATTN_NORM);
+				S_Sound (this, CHAN_VOICE, "*surface", 1, ATTN_NORM);
 			}
 			// If we were running out of air, then ResetAirSupply() will play *gasp.
 		}
@@ -3008,7 +3007,7 @@ void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
 	// crouch slide sound start/stop
 	if (isSliding && !player->isCrouchSliding)
 	{
-		if (!(player->mo->flags7 & MF7_SILENT))
+		if (!(player->mo->qFlags & Q_SILENT))
 		{
 			if (!CLIENT_PREDICT_IsPredicting())
 				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
@@ -3030,7 +3029,7 @@ void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 	// Wall climb parameters and sound start/stop
 	if (canclimb && !player->isWallClimbing)
 	{
-		if (!(player->mo->flags7 & MF7_SILENT))
+		if (!(player->mo->qFlags & Q_SILENT))
 		{
 			if (!CLIENT_PREDICT_IsPredicting())
 				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
@@ -3057,8 +3056,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 {
 	int canClimb = 0;
 	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
-	bool isClimber = player->mo->flags7 & MF7_WALLCLIMB ? true : false;
-	bool isDasher = player->mo->flags7 & MF7_DASH ? true : false;
+	bool isClimber = player->mo->qFlags & Q_WALLCLIMB ? true : false;
+	bool isDasher = player->mo->qFlags & Q_DASH ? true : false;
 
 	FVector2 vel;
 	float velocity = 0.f;
@@ -3120,7 +3119,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 			player->onground = false; // no friction to influence the dash
 
-			if (!(player->mo->flags7 & MF7_SILENT))
+			if (!(player->mo->qFlags & Q_SILENT))
 			{
 				if (CLIENT_PREDICT_IsPredicting() == false)
 					S_Sound(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM);
@@ -3216,7 +3215,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	{
 		if (player->stepInterval <= 0)
 		{
-			if (!(player->mo->flags7 & MF7_SILENT))
+			if (!(player->mo->qFlags & Q_SILENT))
 			{
 				if (!CLIENT_PREDICT_IsPredicting())
 					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
@@ -3298,7 +3297,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		{
 			fixed_t	JumpVelz;
 			ULONG	ulJumpTicks;
-			bool isRampJumper = player->mo->flags7 & MF7_RAMPJUMP ? true : false;
+			bool isRampJumper = player->mo->qFlags & Q_RAMPJUMP ? true : false;
 
 			if (!player->mo->wasJustThrustedZ || isRampJumper)
 			{
@@ -3313,7 +3312,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				else
 					ulJumpTicks = -1;
 
-				if (!(player->mo->flags7 & MF7_SILENT))
+				if (!(player->mo->qFlags & Q_SILENT))
 				{
 					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
 					if (CLIENT_PREDICT_IsPredicting() == false)
@@ -3339,14 +3338,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			}
 		}
 		// [Ivory]: Double Jump and wall jump
-		else if (((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
+		else if (((player->mo->qFlags & Q_WALLJUMP) || (player->mo->qFlags & Q_DOUBLEJUMP))
 			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
 			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
 
 			// Wall proximity check
 			bool doDoubleJump = false;
-			if (player->mo->flags7 & MF7_WALLJUMP)
+			if (player->mo->qFlags & Q_WALLJUMP)
 			{
 				int angle;
 				fixed_t xDir, yDir;
@@ -3362,7 +3361,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					{
 						JumpVelz = (JumpVelz / 4) * 3;
 
-						if (!(player->mo->flags7 & MF7_SILENT))
+						if (!(player->mo->qFlags & Q_SILENT))
 						{
 							if (!CLIENT_PREDICT_IsPredicting())
 								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
@@ -3379,7 +3378,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			}
 			else
 			{
-				if (!(player->mo->flags7 & MF7_SILENT))
+				if (!(player->mo->qFlags & Q_SILENT))
 				{
 					if (!CLIENT_PREDICT_IsPredicting())
 						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
@@ -3431,8 +3430,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool noJump = false;
 	bool isSliding = false;
 	int canClimb = 0;
-	bool isSlider = player->mo->flags7 & MF7_CROUCHSLIDE ? true : false;
-	bool isClimber = player->mo->flags7 & MF7_WALLCLIMB ? true : false;
+	bool isSlider = player->mo->qFlags & Q_CROUCHSLIDE ? true : false;
+	bool isClimber = player->mo->qFlags & Q_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
@@ -3538,7 +3537,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			acceleration.MakeUnit();
 
 			// Dashing
-			if ((player->mo->flags7 & MF7_DASH) && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
+			if ((player->mo->qFlags & Q_DASH) && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
 			{
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
@@ -3550,7 +3549,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 				player->onground = false;
 
-				if (!(player->mo->flags7 & MF7_SILENT))
+				if (!(player->mo->qFlags & Q_SILENT))
 				{
 					if (CLIENT_PREDICT_IsPredicting() == false)
 						S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
@@ -3694,7 +3693,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		if (player->stepInterval <= 0 && !player->isCrouchSliding)
 		{
-			if (!(player->mo->flags7 & MF7_SILENT))
+			if (!(player->mo->qFlags & Q_SILENT))
 			{
 				if (!CLIENT_PREDICT_IsPredicting())
 					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
@@ -3733,11 +3732,11 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		if (player->onground && !player->jumpTics && (player->bSpectating || level.IsJumpingAllowed()))
 		{
 			fixed_t	JumpVelz = player->mo->CalcJumpVelz();
-			bool isRampJumper = player->mo->flags7 & MF7_RAMPJUMP ? true : false;
+			bool isRampJumper = player->mo->qFlags & Q_RAMPJUMP ? true : false;
 
 			if (!wasJustThrustedZ || isRampJumper)
 			{
-				if (!(player->mo->flags7 & MF7_SILENT))
+				if (!(player->mo->qFlags & Q_SILENT))
 				{
 					if (!CLIENT_PREDICT_IsPredicting())
 						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
@@ -3751,14 +3750,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				player->jumpTics = -1;
 			}
 		}
-		else if (((player->mo->flags7 & MF7_WALLJUMP) || (player->mo->flags7 & MF7_DOUBLEJUMP))
+		else if (((player->mo->qFlags & Q_WALLJUMP) || (player->mo->qFlags & Q_DOUBLEJUMP))
 			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
 			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
 
 			// Wall proximity check
 			bool doDoubleJump = false;
-			if (player->mo->flags7 & MF7_WALLJUMP)
+			if (player->mo->qFlags & Q_WALLJUMP)
 			{
 				int angle;
 				fixed_t xDir, yDir;
@@ -3774,7 +3773,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					{
 						JumpVelz = (JumpVelz / 4) * 3;
 
-						if (!(player->mo->flags7 & MF7_SILENT))
+						if (!(player->mo->qFlags & Q_SILENT))
 						{
 							if (!CLIENT_PREDICT_IsPredicting())
 								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
@@ -3791,7 +3790,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 			else
 			{
-				if (!(player->mo->flags7 & MF7_SILENT))
+				if (!(player->mo->qFlags & Q_SILENT))
 				{
 					if (!CLIENT_PREDICT_IsPredicting())
 						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
@@ -3961,7 +3960,7 @@ void P_FallingDamage (AActor *actor)
 
 	if (actor->player)
 	{
-		if (!(actor->flags7 & MF7_SILENT))
+		if (!(actor->qFlags & Q_SILENT))
 		{
 			S_Sound(actor, CHAN_AUTO, "*land", 1, ATTN_NORM);
 			P_NoiseAlert(actor, actor, true);

@@ -3421,7 +3421,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 					SERVERCOMMANDS_SoundActor(mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG(mo->player - players), SVCF_SKIPTHISCLIENT);
 			}
 
-			if ((onmobj != NULL || !Terrains[P_GetThingFloorType(mo)].IsLiquid) && !(mo->flags7 & MF7_SILENT))
+			if ((onmobj != NULL || !Terrains[P_GetThingFloorType(mo)].IsLiquid) && !(mo->qFlags & Q_SILENT))
 			{
 				if (!grunted || !S_AreSoundsEquivalent(mo, "*grunt", "*land"))
 				{

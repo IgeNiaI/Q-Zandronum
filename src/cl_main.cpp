@@ -4979,6 +4979,10 @@ void ServerCommands::SetThingFlags::Execute()
 
 		actor->ulSTFlags = flags;
 		break;
+	case FLAGSET_QFLAGS:
+
+		actor->qFlags = flags;
+		break;
 	default:
 		CLIENT_PrintWarning( "client_SetThingFlags: Received an unknown flagset value: %d\n", static_cast<int>( flagset ) );
 		break;

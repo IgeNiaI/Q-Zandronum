@@ -352,13 +352,13 @@ enum
 	MF7_NOKILLSCRIPTS	= 0x01000000,	// [JM] No "KILL" Script on death whatsoever, even if forced by GameInfo.
 
 	// [Ivory] extra movement flags
-	MF7_DOUBLEJUMP		= 0x02000000,
-	MF7_CROUCHSLIDE		= 0x04000000,
-	MF7_WALLJUMP		= 0x08000000,
-	MF7_WALLCLIMB		= 0x10000000,
-	MF7_DASH			= 0x20000000,
-	MF7_RAMPJUMP		= 0x40000000,
-	MF7_SILENT			= 0x80000000,
+	Q_DOUBLEJUMP		= 0x00000001,
+	Q_CROUCHSLIDE		= 0x00000002,
+	Q_WALLJUMP			= 0x00000004,
+	Q_WALLCLIMB			= 0x00000008,
+	Q_DASH				= 0x00000010,
+	Q_RAMPJUMP			= 0x00000020,
+	Q_SILENT			= 0x00000040,
 
 	// [BC] More object flags for Skulltag.
 
@@ -995,6 +995,7 @@ public:
 	DWORD			flags5;			// OMG! We need another one.
 	DWORD			flags6;			// Shit! Where did all the flags go?
 	DWORD			flags7;			// 
+	DWORD			qFlags;
 
 	// [BB] If 0, everybody can see the actor, if > 0, only members of team (VisibleToTeam-1) can see it.
 	DWORD			VisibleToTeam;
