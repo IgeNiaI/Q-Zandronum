@@ -4979,9 +4979,9 @@ void ServerCommands::SetThingFlags::Execute()
 
 		actor->ulSTFlags = flags;
 		break;
-	case FLAGSET_QFLAGS:
+	case FLAGSET_MVFLAGS:
 
-		actor->qFlags = flags;
+		actor->mvFlags = flags;
 		break;
 	default:
 		CLIENT_PrintWarning( "client_SetThingFlags: Received an unknown flagset value: %d\n", static_cast<int>( flagset ) );

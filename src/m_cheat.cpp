@@ -319,6 +319,7 @@ void cht_DoCheat (player_t *player, int cheat)
 				player->mo->flags5 = player->mo->GetDefault()->flags5;
 				player->mo->flags6 = player->mo->GetDefault()->flags6;
 				player->mo->flags7 = player->mo->GetDefault()->flags7;
+				player->mo->mvFlags = player->mo->GetDefault()->mvFlags;
 				player->mo->renderflags &= ~RF_INVISIBLE;
 				player->mo->height = player->mo->GetDefault()->height;
 				player->mo->radius = player->mo->GetDefault()->radius;

@@ -253,7 +253,8 @@ void AActor::Serialize (FArchive &arc)
 		<< flags6;
 	if (SaveVersion >= 4504)
 	{
-		arc << flags7;
+		arc << flags7
+			<< mvFlags;
 	}
 	arc	<< special1
 		<< special2
@@ -3421,7 +3422,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 					SERVERCOMMANDS_SoundActor(mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG(mo->player - players), SVCF_SKIPTHISCLIENT);
 			}
 
-			if ((onmobj != NULL || !Terrains[P_GetThingFloorType(mo)].IsLiquid) && !(mo->qFlags & Q_SILENT))
+			if ((onmobj != NULL || !Terrains[P_GetThingFloorType(mo)].IsLiquid) && !(mo->mvFlags & MV_SILENT))
 			{
 				if (!grunted || !S_AreSoundsEquivalent(mo, "*grunt", "*land"))
 				{
@@ -7890,6 +7891,7 @@ void AActor::Revive()
 	flags5 = info->flags5;
 	flags6 = info->flags6;
 	flags7 = info->flags7;
+	mvFlags = info->mvFlags;
 
 	// [BC] Apply new ST flags as well.
 	// [BB] The STFL_LEVELSPAWNED flag may not be removed by the default flags.
@@ -8089,6 +8091,9 @@ void PrintMiscActorInfo(AActor *query)
 		Printf("\n   flags7: %x", query->flags7);
 		for (flagi = 0; flagi <= 31; flagi++)
 			if (query->flags7 & 1<<flagi) Printf(" %s", FLAG_NAME(1<<flagi, flags7));
+		Printf("\n   mvFlags: %x", query->mvFlags);
+		for (flagi = 0; flagi <= 31; flagi++)
+			if (query->mvFlags & 1<<flagi) Printf(" %s", FLAG_NAME(1<<flagi, mvFlags));
 		Printf("\nBounce flags: %x\nBounce factors: f:%f, w:%f", 
 			query->BounceFlags, FIXED2FLOAT(query->bouncefactor), 
 			FIXED2FLOAT(query->wallbouncefactor));

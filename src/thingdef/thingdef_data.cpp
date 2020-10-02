@@ -254,13 +254,13 @@ static FFlagDef ActorFlags[]=
 	DEFINE_FLAG(MF7, NOKILLSCRIPTS, AActor, flags7),
 
 	// [Ivory] extra movement flags
-	DEFINE_FLAG(Q, DOUBLEJUMP, AActor, flags7),
-	DEFINE_FLAG(Q, CROUCHSLIDE, AActor, flags7),
-	DEFINE_FLAG(Q, WALLJUMP, AActor, flags7),
-	DEFINE_FLAG(Q, WALLCLIMB, AActor, flags7),
-	DEFINE_FLAG(Q, DASH, AActor, flags7),
-	DEFINE_FLAG(Q, RAMPJUMP, AActor, flags7),
-	DEFINE_FLAG(Q, SILENT, AActor, flags7),
+	DEFINE_FLAG(MV, DOUBLEJUMP, AActor, mvFlags),
+	DEFINE_FLAG(MV, CROUCHSLIDE, AActor, mvFlags),
+	DEFINE_FLAG(MV, WALLJUMP, AActor, mvFlags),
+	DEFINE_FLAG(MV, WALLCLIMB, AActor, mvFlags),
+	DEFINE_FLAG(MV, DASH, AActor, mvFlags),
+	DEFINE_FLAG(MV, RAMPJUMP, AActor, mvFlags),
+	DEFINE_FLAG(MV, SILENT, AActor, mvFlags),
 
 	// [BC] New DECORATE flag defines here.
 	DEFINE_FLAG(STFL, BLUETEAM, AActor, ulSTFlags),
