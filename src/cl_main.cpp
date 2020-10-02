@@ -246,25 +246,11 @@ static	void	client_DoWaggle( BYTESTREAM_s *pByteStream );
 static	void	client_DestroyWaggle( BYTESTREAM_s *pByteStream );
 static	void	client_UpdateWaggle( BYTESTREAM_s *pByteStream );
 
-// Rotate poly commands.
+// Poly commands.
 static	void	client_DoRotatePoly( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyRotatePoly( BYTESTREAM_s *pByteStream );
-
-// Move poly commands.
 static	void	client_DoMovePoly( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyMovePoly( BYTESTREAM_s *pByteStream );
-
-// Poly door commands.
+static	void	client_DoMovePolyTo( BYTESTREAM_s *pByteStream );
 static	void	client_DoPolyDoor( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyPolyDoor( BYTESTREAM_s *pByteStream );
-static	void	client_SetPolyDoorSpeedPosition( BYTESTREAM_s *pByteStream );
-static  void	client_SetPolyDoorSpeedRotation( BYTESTREAM_s *pByteStream );
-
-// Generic polyobject commands.
-static	void	client_PlayPolyobjSound( BYTESTREAM_s *pByteStream );
-static	void	client_StopPolyobjSound( BYTESTREAM_s *pByteStream );
-static	void	client_SetPolyobjPosition( BYTESTREAM_s *pByteStream );
-static	void	client_SetPolyobjRotation( BYTESTREAM_s *pByteStream );
 
 // Miscellaneous commands.
 static	void	client_EarthQuake( BYTESTREAM_s *pByteStream );
@@ -1698,45 +1684,17 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 
 		client_DoRotatePoly( pByteStream );
 		break;
-	case SVC_DESTROYROTATEPOLY:
-
-		client_DestroyRotatePoly( pByteStream );
-		break;
 	case SVC_DOMOVEPOLY:
 
 		client_DoMovePoly( pByteStream );
 		break;
-	case SVC_DESTROYMOVEPOLY:
+	case SVC_DOMOVEPOLYTO:
 
-		client_DestroyMovePoly( pByteStream );
+		client_DoMovePolyTo( pByteStream );
 		break;
 	case SVC_DOPOLYDOOR:
 
 		client_DoPolyDoor( pByteStream );
-		break;
-	case SVC_DESTROYPOLYDOOR:
-
-		client_DestroyPolyDoor( pByteStream );
-		break;
-	case SVC_SETPOLYDOORSPEEDPOSITION:
-
-		client_SetPolyDoorSpeedPosition( pByteStream );
-		break;
-	case SVC_SETPOLYDOORSPEEDROTATION:
-
-		client_SetPolyDoorSpeedRotation( pByteStream );
-		break;
-	case SVC_PLAYPOLYOBJSOUND:
-
-		client_PlayPolyobjSound( pByteStream );
-		break;
-	case SVC_SETPOLYOBJPOSITION:
-
-		client_SetPolyobjPosition( pByteStream );
-		break;
-	case SVC_SETPOLYOBJROTATION:
-
-		client_SetPolyobjRotation( pByteStream );
 		break;
 	case SVC_EARTHQUAKE:
 
@@ -2049,11 +2007,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 					vval.String = cvarValue;
 					cvar->ForceSet( vval, CVAR_String );
 				}
-				break;
-
-			// [EP]
-			case SVC2_STOPPOLYOBJSOUND:
-				client_StopPolyobjSound( pByteStream );
 				break;
 
 			// [EP]
@@ -8132,368 +8085,236 @@ static void client_UpdateWaggle( BYTESTREAM_s *pByteStream )
 //
 static void client_DoRotatePoly( BYTESTREAM_s *pByteStream )
 {
-	LONG			lSpeed;
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	DRotatePoly		*pRotatePoly;
-
-	// Read in the speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the polyobject ID.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
+	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	LONG lDist = NETWORK_ReadLong( pByteStream );
 
 	// Make sure the polyobj exists before we try to work with it.
-	pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoRotatePoly: Invalid polyobj number: %ld\n", lPolyNum );
+		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", lPolyNum );
 		return;
 	}
 
-	// Create the polyobject.
-	pRotatePoly = new DRotatePoly( lPolyNum );
-	pRotatePoly->SetSpeed( lSpeed );
+	DRotatePoly *pRotatePoly = NULL;
 
-	// Attach the new polyobject to this ID.
-	pPoly->specialdata = pRotatePoly;
+	if ( pPoly->specialdata != NULL )
+	{
+		if ( pPoly->specialdata->IsKindOf(RUNTIME_CLASS(DRotatePoly)) )
+			// Reuse existing polyobject
+			pRotatePoly = (DRotatePoly*) pPoly->specialdata;
+		else
+			// Some other polyobject uses this poly
+			return;
+	}
+
+	if (pRotatePoly == NULL )
+	{
+		// Create the polyobject.
+		pRotatePoly = new DRotatePoly(lPolyNum);
+		pPoly->specialdata = pRotatePoly;
+	}
+	
+	pRotatePoly->SetLastInstigator( &players[Instigator] );
+	pRotatePoly->SetSpeed( Speed );
+	pRotatePoly->SetDist( lDist );
 
 	// Also, start the sound sequence associated with this polyobject.
 	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
-}
 
-//*****************************************************************************
-//
-static void client_DestroyRotatePoly( BYTESTREAM_s *pByteStream )
-{
-	LONG							lID;
-	DRotatePoly						*pPoly;
-	DRotatePoly						*pTempPoly;
-	TThinkerIterator<DRotatePoly>	Iterator;
-
-	// Read in the DRotatePoly ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Try to find the object from the ID. If it exists, destroy it.
-	pPoly = NULL;
-	while ( (pTempPoly = Iterator.Next( )) )
+	if ( Instigator == consoleplayer )
 	{
-		if ( pTempPoly->GetPolyObj( ) == lID )
-		{
-			pPoly = pTempPoly;
-			break;
-		}
+		pRotatePoly->Predict();
 	}
-
-	if ( pPoly )
-		pPoly->Destroy( );
 }
 
 //*****************************************************************************
 //
 static void client_DoMovePoly( BYTESTREAM_s *pByteStream )
 {
-	LONG			lXSpeed;
-	LONG			lYSpeed;
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	DMovePoly		*pMovePoly;
-
-	// Read in the speed.
-	lXSpeed = NETWORK_ReadLong( pByteStream );
-	lYSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the polyobject ID.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
+	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	angle_t Angle = NETWORK_ReadLong( pByteStream );
+	LONG lDist = NETWORK_ReadLong( pByteStream );
 
 	// Make sure the polyobj exists before we try to work with it.
-	pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoRotatePoly: Invalid polyobj number: %ld\n", lPolyNum );
+		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", lPolyNum );
 		return;
 	}
 
-	// Create the polyobject.
-	pMovePoly = new DMovePoly( lPolyNum );
-	pMovePoly->SetXSpeed( lXSpeed );
-	pMovePoly->SetYSpeed( lYSpeed );
+	DMovePoly *pMovePoly = NULL;
 
-	// Attach the new polyobject to this ID.
-	pPoly->specialdata = pMovePoly;
+	if ( pPoly->specialdata != NULL )
+	{
+		if ( pPoly->specialdata->IsKindOf(RUNTIME_CLASS(DMovePoly)) )
+			// Reuse existing polyobject
+			pMovePoly = (DMovePoly*) pPoly->specialdata;
+		else
+			// Some other polyobject uses this poly
+			return;
+	}
+
+	if ( pMovePoly == NULL )
+	{
+		// Create the polyobject.
+		pMovePoly = new DMovePoly(lPolyNum);
+		pPoly->specialdata = pMovePoly;
+	}
+	
+	pMovePoly->SetLastInstigator( &players[Instigator] );
+	pMovePoly->SetXSpeed( XSpeed );
+	pMovePoly->SetYSpeed( YSpeed );
+	pMovePoly->SetSpeed( Speed );
+	pMovePoly->SetAngle( Angle );
+	pMovePoly->SetDist( lDist );
 
 	// Also, start the sound sequence associated with this polyobject.
 	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
+
+	if ( Instigator == consoleplayer )
+	{
+		pMovePoly->Predict();
+	}
 }
 
 //*****************************************************************************
 //
-static void client_DestroyMovePoly( BYTESTREAM_s *pByteStream )
+static void client_DoMovePolyTo( BYTESTREAM_s *pByteStream )
 {
-	LONG							lID;
-	DMovePoly						*pPoly;
-	DMovePoly						*pTempPoly;
-	TThinkerIterator<DMovePoly>		Iterator;
+	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t XTarget = NETWORK_ReadLong( pByteStream );
+	fixed_t YTarget = NETWORK_ReadLong( pByteStream );
+	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
+	int Speed = NETWORK_ReadLong( pByteStream );
+	LONG lDist = NETWORK_ReadLong( pByteStream );
 
-	// Read in the DMovePoly ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Try to find the object from the ID. If it exists, destroy it.
-	pPoly = NULL;
-	while ( (pTempPoly = Iterator.Next( )) )
+	// Make sure the polyobj exists before we try to work with it.
+	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
+	if ( pPoly == NULL )
 	{
-		if ( pTempPoly->GetPolyObj( ) == lID )
-		{
-			pPoly = pTempPoly;
-			break;
-		}
+		CLIENT_PrintWarning( "client_DoMovePolyTo: Invalid polyobj number: %ld\n", lPolyNum );
+		return;
 	}
 
-	if ( pPoly )
-		pPoly->Destroy( );
+	DMovePolyTo	*pMovePolyTo = NULL;
+
+	if ( pPoly->specialdata != NULL )
+	{
+		if ( pPoly->specialdata->IsKindOf(RUNTIME_CLASS(DMovePolyTo)) )
+			// Reuse existing polyobject
+			pMovePolyTo = (DMovePolyTo*) pPoly->specialdata;
+		else
+			// Some other polyobject uses this poly
+			return;
+	}
+
+	if (pMovePolyTo == NULL )
+	{
+		// Create the polyobject.
+		pMovePolyTo = new DMovePolyTo(lPolyNum);
+		pPoly->specialdata = pMovePolyTo;
+	}
+	
+	pMovePolyTo->SetLastInstigator( &players[Instigator] );
+	pMovePolyTo->SetXTarget( XTarget );
+	pMovePolyTo->SetYTarget( YTarget );
+	pMovePolyTo->SetXSpeed( XSpeed );
+	pMovePolyTo->SetYSpeed( YSpeed );
+	pMovePolyTo->SetSpeed( Speed );
+	pMovePolyTo->SetDist( lDist );
+
+	// Also, start the sound sequence associated with this polyobject.
+	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
+
+	if ( Instigator == consoleplayer )
+	{
+		pMovePolyTo->Predict();
+	}
 }
 
 //*****************************************************************************
 //
 static void client_DoPolyDoor( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lXSpeed;
-	LONG			lYSpeed;
-	LONG			lSpeed;
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	DPolyDoor		*pPolyDoor;
-
-	// Read in the type of poly door (swing or slide).
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the speed.
-	lXSpeed = NETWORK_ReadLong( pByteStream );
-	lYSpeed = NETWORK_ReadLong( pByteStream );
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the polyobject ID.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
+	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
+	LONG lType = NETWORK_ReadByte( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t X = NETWORK_ReadLong( pByteStream );
+	fixed_t Y = NETWORK_ReadLong( pByteStream );
+	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	angle_t Angle = NETWORK_ReadLong( pByteStream );
+	LONG lDist = NETWORK_ReadLong( pByteStream );
+	LONG lTotalDist = NETWORK_ReadLong( pByteStream );
+	bool bClose = NETWORK_ReadBit( pByteStream ) ? true : false;
+	LONG lDirection = NETWORK_ReadShort( pByteStream );
+	LONG lTics = NETWORK_ReadShort( pByteStream );
+	LONG lWaitTics = NETWORK_ReadShort( pByteStream );
 
 	// Make sure the polyobj exists before we try to work with it.
-	pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
 	if ( pPoly == NULL )
 	{
 		CLIENT_PrintWarning( "client_DoPolyDoor: Invalid polyobj number: %ld\n", lPolyNum );
 		return;
 	}
 
-	// Create the polyobject.
-	pPolyDoor = new DPolyDoor( lPolyNum, (podoortype_t)lType );
-	pPolyDoor->SetXSpeed( lXSpeed );
-	pPolyDoor->SetYSpeed( lYSpeed );
-	pPolyDoor->SetSpeed( lSpeed );
+	DPolyDoor *pPolyDoor = NULL;
 
-	// Attach the new polyobject to this ID.
-	pPoly->specialdata = pPolyDoor;
-}
-
-//*****************************************************************************
-//
-static void client_DestroyPolyDoor( BYTESTREAM_s *pByteStream )
-{
-	LONG							lID;
-	DPolyDoor						*pPoly;
-	DPolyDoor						*pTempPoly;
-	TThinkerIterator<DPolyDoor>		Iterator;
-
-	// Read in the DPolyDoor ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Try to find the object from the ID. If it exists, destroy it.
-	pPoly = NULL;
-	while ( (pTempPoly = Iterator.Next( )) )
+	if ( pPoly->specialdata != NULL )
 	{
-		if ( pTempPoly->GetPolyObj( ) == lID )
-		{
-			pPoly = pTempPoly;
-			break;
-		}
+		if ( pPoly->specialdata->IsKindOf(RUNTIME_CLASS(DPolyDoor)) )
+			// Reuse existing polyobject
+			pPolyDoor = (DPolyDoor*) pPoly->specialdata;
+		else
+			// Some other polyobject uses this poly
+			return;
 	}
 
-	if ( pPoly )
-		pPoly->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_SetPolyDoorSpeedPosition( BYTESTREAM_s *pByteStream )
-{
-	LONG			lPolyID;
-	LONG			lXSpeed;
-	LONG			lYSpeed;
-	LONG			lX;
-	LONG			lY;
-	FPolyObj		*pPoly;
-	LONG			lDeltaX;
-	LONG			lDeltaY;
-
-	// Read in the polyobject ID.
-	lPolyID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the polyobject x/yspeed.
-	lXSpeed = NETWORK_ReadLong( pByteStream );
-	lYSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the polyobject X/.
-	lX = NETWORK_ReadLong( pByteStream );
-	lY = NETWORK_ReadLong( pByteStream );
-
-	pPoly = PO_GetPolyobj( lPolyID );
-	if ( pPoly == NULL )
-		return;
-
-	lDeltaX = lX - pPoly->StartSpot.x;
-	lDeltaY = lY - pPoly->StartSpot.y;
-
-	pPoly->MovePolyobj( lDeltaX, lDeltaY );
+	if ( pPolyDoor == NULL )
+	{
+		// Create the polyobject.
+		pPolyDoor = new DPolyDoor(lPolyNum, (podoortype_t)lType);
+		pPoly->specialdata = pPolyDoor;
+	}
 	
-	if ( pPoly->specialdata == NULL )
-		return;
+	pPolyDoor->SetLastInstigator( &players[Instigator] );
 
-	static_cast<DPolyDoor *>( pPoly->specialdata )->SetXSpeed( lXSpeed );
-	static_cast<DPolyDoor *>( pPoly->specialdata )->SetYSpeed( lYSpeed );
-}
+	fixed_t DeltaX = X - pPoly->StartSpot.x;
+	fixed_t DeltaY = Y - pPoly->StartSpot.y;
+	pPoly->MovePolyobj( DeltaX, DeltaY );
 
-//*****************************************************************************
-//
-static void client_SetPolyDoorSpeedRotation( BYTESTREAM_s *pByteStream )
-{
-	LONG			lPolyID;
-	LONG			lSpeed;
-	LONG			lAngle;
-	FPolyObj		*pPoly;
-	LONG			lDeltaAngle;
+	pPolyDoor->SetXSpeed( XSpeed );
+	pPolyDoor->SetYSpeed( YSpeed );
+	pPolyDoor->SetSpeed( Speed );
 
-	// Read in the polyobject ID.
-	lPolyID = NETWORK_ReadShort( pByteStream );
+	angle_t DeltaAngle = Angle - pPoly->angle;
+	pPoly->RotatePolyobj(DeltaAngle);
 
-	// Read in the polyobject speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
+	pPolyDoor->SetDist( lDist );
+	pPolyDoor->SetTotalDist( lTotalDist );
+	
+	pPolyDoor->SetClose( bClose );
+	pPolyDoor->SetDirection( lDirection );
 
-	// Read in the polyobject angle.
-	lAngle = NETWORK_ReadLong( pByteStream );
+	pPolyDoor->SetTics( lTics );
+	pPolyDoor->SetWaitTics( lWaitTics );
 
-	pPoly = PO_GetPolyobj( lPolyID );
-	if ( pPoly == NULL )
-		return;
-
-	lDeltaAngle = lAngle - pPoly->angle;
-
-	pPoly->RotatePolyobj( lDeltaAngle );
-
-	if ( pPoly->specialdata == NULL )
-		return;
-
-	static_cast<DPolyDoor *>( pPoly->specialdata )->SetSpeed( lSpeed );
-}
-
-//*****************************************************************************
-//
-static void client_PlayPolyobjSound( BYTESTREAM_s *pByteStream )
-{
-	LONG		lID;
-	bool		PolyMode;
-	FPolyObj	*pPoly;
-
-	// Read in the polyobject ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the polyobject mode.
-	PolyMode = !!NETWORK_ReadByte( pByteStream );
-
-	pPoly = PO_GetPolyobj( lID );
-	if ( pPoly == NULL )
-		return;
-
-	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, PolyMode );
-}
-
-//*****************************************************************************
-//
-static void client_StopPolyobjSound( BYTESTREAM_s *pByteStream )
-{
-	LONG		lID;
-	FPolyObj	*pPoly;
-
-	// Read in the polyobject ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	pPoly = PO_GetPolyobj( lID );
-	if ( pPoly == NULL )
-		return;
-
-	SN_StopSequence( pPoly );
-}
-
-//*****************************************************************************
-//
-static void client_SetPolyobjPosition( BYTESTREAM_s *pByteStream )
-{
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	LONG			lX;
-	LONG			lY;
-	LONG			lDeltaX;
-	LONG			lDeltaY;
-
-	// Read in the polyobject number.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
-
-	// Read in the XY position of the polyobj.
-	lX = NETWORK_ReadLong( pByteStream );
-	lY = NETWORK_ReadLong( pByteStream );
-
-	// Get the polyobject from the index given.
-	pPoly = PO_GetPolyobj( lPolyNum );
-	if ( pPoly == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_SetPolyobjPosition: Invalid polyobj number: %ld\n", lPolyNum );
-		return;
+		pPolyDoor->Predict();
 	}
-
-	lDeltaX = lX - pPoly->StartSpot.x;
-	lDeltaY = lY - pPoly->StartSpot.y;
-
-//	Printf( "DeltaX: %d\nDeltaY: %d\n", lDeltaX, lDeltaY );
-
-	// Finally, set the polyobject action.
-	pPoly->MovePolyobj( lDeltaX, lDeltaY );
-}
-
-//*****************************************************************************
-//
-static void client_SetPolyobjRotation( BYTESTREAM_s *pByteStream )
-{
-	LONG			lPolyNum;
-	FPolyObj		*pPoly;
-	LONG			lAngle;
-	LONG			lDeltaAngle;
-
-	// Read in the polyobject number.
-	lPolyNum = NETWORK_ReadShort( pByteStream );
-
-	// Read in the angle of the polyobj.
-	lAngle = NETWORK_ReadLong( pByteStream );
-
-	// Make sure the polyobj exists before we try to work with it.
-	pPoly = PO_GetPolyobj( lPolyNum );
-	if ( pPoly == NULL )
-	{
-		CLIENT_PrintWarning( "client_SetPolyobjRotation: Invalid polyobj number: %ld\n", lPolyNum );
-		return;
-	}
-
-	lDeltaAngle = lAngle - pPoly->angle;
-
-	// Finally, set the polyobject action.
-	pPoly->RotatePolyobj( lDeltaAngle );
 }
 
 //*****************************************************************************

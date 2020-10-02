@@ -4083,140 +4083,70 @@ void SERVERCOMMANDS_UpdateWaggle( LONG lID, LONG lAccumulator, ULONG ulPlayerExt
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoRotatePoly( LONG lSpeed, LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoRotatePoly( DRotatePoly *RotatePoly, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	NetCommand command ( SVC_DOROTATEPOLY );
-	command.addLong ( lSpeed );
-	command.addShort ( lPolyNum );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyRotatePoly( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYROTATEPOLY );
-	command.addShort ( lPolyNum );
+	command.addShort ( RotatePoly->GetPolyObj() );
+	command.addByte( RotatePoly->GetLastInstigator() - players );
+	command.addLong ( RotatePoly->GetSpeed() );
+	command.addLong ( RotatePoly->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoMovePoly( LONG lXSpeed, LONG lYSpeed, LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoMovePoly( DMovePoly *MovePoly, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	NetCommand command ( SVC_DOMOVEPOLY );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addShort ( lPolyNum );
+	command.addShort ( MovePoly->GetPolyObj() );
+	command.addByte( MovePoly->GetLastInstigator() - players );
+	command.addLong ( MovePoly->GetXSpeed() );
+	command.addLong ( MovePoly->GetYSpeed() );
+	command.addLong ( MovePoly->GetSpeed() );
+	command.addLong ( MovePoly->GetAngle() );
+	command.addLong ( MovePoly->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
+//*****************************************************************************
 //
-void SERVERCOMMANDS_DestroyMovePoly( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoMovePolyTo( DMovePolyTo *MovePolyTo, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DESTROYMOVEPOLY );
-	command.addShort ( lPolyNum );
+	NetCommand command ( SVC_DOMOVEPOLYTO );
+	command.addShort ( MovePolyTo->GetPolyObj() );
+	command.addByte( MovePolyTo->GetLastInstigator() - players );
+	command.addLong ( MovePolyTo->GetXTarget() );
+	command.addLong ( MovePolyTo->GetYTarget() );
+	command.addLong ( MovePolyTo->GetXSpeed() );
+	command.addLong ( MovePolyTo->GetYSpeed() );
+	command.addLong ( MovePolyTo->GetSpeed() );
+	command.addLong ( MovePolyTo->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoPolyDoor( LONG lType, LONG lXSpeed, LONG lYSpeed, LONG lSpeed, LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoPolyDoor( DPolyDoor *PolyDoor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	NetCommand command ( SVC_DOPOLYDOOR );
-	command.addByte ( lType );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addLong ( lSpeed );
-	command.addShort ( lPolyNum );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyPolyDoor( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYPOLYDOOR );
-	command.addShort ( lPolyNum );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetPolyDoorSpeedPosition( LONG lPolyNum, LONG lXSpeed, LONG lYSpeed, LONG lX, LONG lY, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_SETPOLYDOORSPEEDPOSITION );
-	command.addShort ( lPolyNum );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addLong ( lX );
-	command.addLong ( lY );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetPolyDoorSpeedRotation( LONG lPolyNum, LONG lSpeed, LONG lAngle, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_SETPOLYDOORSPEEDROTATION );
-	command.addShort ( lPolyNum );
-	command.addLong ( lSpeed );
-	command.addLong ( lAngle );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_PlayPolyobjSound( LONG lPolyNum, bool PolyMode, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_PLAYPOLYOBJSOUND );
-	command.addShort ( lPolyNum );
-	command.addByte ( PolyMode );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_StopPolyobjSound( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC2_STOPPOLYOBJSOUND );
-	command.addShort ( lPolyNum );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetPolyobjPosition( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	FPolyObj	*pPoly;
-
-	pPoly = PO_GetPolyobj( lPolyNum );
-	if ( pPoly == NULL )
-		return;
-
-	NetCommand command ( SVC_SETPOLYOBJPOSITION );
-	command.addShort ( lPolyNum );
-	command.addLong ( pPoly->StartSpot.x );
-	command.addLong ( pPoly->StartSpot.y );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetPolyobjRotation( LONG lPolyNum, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	FPolyObj	*pPoly;
-
-	pPoly = PO_GetPolyobj( lPolyNum );
-	if ( pPoly == NULL )
-		return;
-
-	NetCommand command ( SVC_SETPOLYOBJROTATION );
-	command.addShort ( lPolyNum );
-	command.addLong ( pPoly->angle );
+	command.addShort ( PolyDoor->GetPolyObj() );
+	command.addByte ( PolyDoor->GetType() );
+	command.addByte( PolyDoor->GetLastInstigator() - players );
+	command.addLong ( PolyDoor->GetX() );
+	command.addLong ( PolyDoor->GetY() );
+	command.addLong ( PolyDoor->GetXSpeed() );
+	command.addLong ( PolyDoor->GetYSpeed() );
+	command.addLong ( PolyDoor->GetSpeed() );
+	command.addLong ( PolyDoor->GetAngle() );
+	command.addLong ( PolyDoor->GetDist() );
+	command.addLong ( PolyDoor->GetTotalDist() );
+	command.addBit ( PolyDoor->GetClose() ? 1 : 0 );
+	command.addShort ( PolyDoor->GetDirection() );
+	command.addShort ( PolyDoor->GetTics() );
+	command.addShort ( PolyDoor->GetWaitTics() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 

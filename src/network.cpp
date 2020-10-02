@@ -1307,6 +1307,12 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		|| ( Special >= Door_Close && Special <= Door_LockedRaise )
 		|| ( Special == Door_CloseWaitOpen ) || ( Special == Generic_Door )
 
+		// Polyobj
+		|| ( Special >= Polyobj_RotateLeft && Special <= Polyobj_Move )
+		|| ( Special >= Polyobj_MoveTimes8 && Special <= Polyobj_DoorSlide )
+		|| ( Special == Polyobj_OR_MoveToSpot )
+		|| ( Special >= Polyobj_MoveToSpot && Special <= Polyobj_OR_MoveTimes8 )
+
 		// Thrust
 		|| ( Special == ThrustThing ) || ( Special == ThrustThingZ );
 }

@@ -3128,7 +3128,6 @@ void SERVER_UpdateSectors( ULONG ulClient )
 {
 	ULONG							ulIdx;
 	sector_t						*pSector;
-	FPolyObj						*pPoly;
 	TThinkerIterator<DPolyAction>	PolyActionIterator;
 	DPolyAction						*pPolyAction;
 	TThinkerIterator<DFireFlicker>	FireFlickerIterator;
@@ -3242,21 +3241,6 @@ void SERVER_UpdateSectors( ULONG ulClient )
 		// Tell client to mark all discovered secret sectors.
 		if ((pSector->special & SECRET_MASK) == 0 && pSector->secretsector)
 			SERVERCOMMANDS_SecretMarkSectorFound( pSector, ulClient, SVCF_ONLYTHISCLIENT );
-	}
-
-	for ( ulIdx = 0; static_cast<signed> (ulIdx) <= po_NumPolyobjs; ulIdx++ )
-	{
-		pPoly = GetPolyobjByIndex( ulIdx );
-		if ( pPoly == NULL )
-			continue;
-
-		// Tell client if the position has been changed.
-		if ( pPoly->bMoved )
-			SERVERCOMMANDS_SetPolyobjPosition( pPoly->tag, ulClient, SVCF_ONLYTHISCLIENT );
-
-		// Tell client if the rotation has been changed.
-		if ( pPoly->bRotated )
-			SERVERCOMMANDS_SetPolyobjRotation( pPoly->tag, ulClient, SVCF_ONLYTHISCLIENT );
 	}
 
 	// [WS] Because poly objects can potentially have more than one thinker,
