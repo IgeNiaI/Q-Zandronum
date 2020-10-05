@@ -77,6 +77,9 @@ void UNLAGGED_Tick( void )
 	// [Spleen] Record sectors soon before they are reconciled/restored
 	UNLAGGED_RecordSectors( );
 
+	// [geNia] Record polyobjects
+	UNLAGGED_RecordPolyobj( );
+
 	// [Spleen] Record players
 	for ( ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ++ulIdx )
 	{
@@ -173,6 +176,14 @@ void UNLAGGED_Reconcile( AActor *actor )
 		sectors[i].ceilingplane.d = sectors[i].ceilingplane.unlaggedD[unlaggedIndex];
 	}
 
+	//reconcile the PolyActions
+	TThinkerIterator<DPolyAction> polyActionIt;
+	DPolyAction *polyAction;
+
+	polyActionIt.Reinit();
+	while ((polyAction = polyActionIt.Next()))
+		polyAction->ReconcileUnlagged(unlaggedIndex);
+
 	//reconcile the players
 	for (int i = 0; i < MAXPLAYERS; ++i)
 	{
@@ -267,6 +278,14 @@ void UNLAGGED_Restore( AActor *actor )
 		sectors[i].floorplane.d = sectors[i].floorplane.restoreD;
 		sectors[i].ceilingplane.d = sectors[i].ceilingplane.restoreD;
 	}
+	
+	//reconcile the PolyActions
+	TThinkerIterator<DPolyAction> polyActionIt;
+	DPolyAction *polyAction;
+
+	polyActionIt.Reinit();
+	while ((polyAction = polyActionIt.Next()))
+		polyAction->RestoreUnlagged();
 
 	//restore the players
 	for (int i = 0; i < MAXPLAYERS; ++i)
@@ -342,6 +361,24 @@ void UNLAGGED_RecordSectors( )
 		sectors[i].floorplane.unlaggedD[unlaggedIndex] = sectors[i].floorplane.d;
 		sectors[i].ceilingplane.unlaggedD[unlaggedIndex] = sectors[i].ceilingplane.d;
 	}
+}
+
+// Record the positions of the polyobjects
+void UNLAGGED_RecordPolyobj( )
+{
+	//Only do anything if it's on a server
+	if (NETWORK_GetState() != NETSTATE_SERVER)
+		return;
+	
+	//find the index
+	const int unlaggedIndex = gametic % UNLAGGEDTICS;
+
+	TThinkerIterator<DPolyAction> polyActionIt;
+	DPolyAction *polyAction;
+
+	polyActionIt.Reinit();
+	while ((polyAction = polyActionIt.Next()))
+		polyAction->RecordUnlagged(unlaggedIndex);
 }
 
 bool UNLAGGED_DrawRailClientside ( AActor *attacker )

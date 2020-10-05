@@ -207,13 +207,43 @@ void DPolyAction::SetDist (LONG lDist)
 	m_Dist = lDist;
 }
 
+// [geNia] This should never be called.
+void DPolyAction::RecordUnlagged (LONG lTick)
+{
+	Printf("WARNING: DPolyAction::RecordUnlagged was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+}
+
+// [geNia] This should never be called.
+void DPolyAction::ReconcileUnlagged (LONG lTick)
+{
+	Printf("WARNING: DPolyAction::ReconcileUnlagged was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+}
+
+// [geNia] This should never be called.
+void DPolyAction::RestoreUnlagged ()
+{
+	Printf("WARNING: DPolyAction::RestoreUnlagged was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+}
+
+// [geNia] This should never be called.
+void DPolyAction::RecordPredict (LONG lTick)
+{
+	Printf("WARNING: DPolyAction::RecordPredict was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+}
+
+// [geNia] This should never be called.
+void DPolyAction::RestorePredict (LONG lTick)
+{
+	Printf("WARNING: DPolyAction::RestorePredict was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+}
+
 LONG DPolyAction::GetPolyObj ()
 {
 	return ( m_PolyObj );
 }
 
 // [WS] This should never be called.
-void DPolyAction::UpdateToClient( ULONG ulClient )
+void DPolyAction::UpdateToClient(ULONG ulClient)
 {
 	Printf("WARNING: DPolyAction::UpdateToClient was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
 }
@@ -239,10 +269,70 @@ DRotatePoly::DRotatePoly (int polyNum)
 	: Super (polyNum)
 {
 	m_LastInstigator = NULL;
+	
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+	{
+		FPolyObj *poly = PO_GetPolyobj(m_PolyObj);
+		if (poly == NULL)
+			return;
+
+		m_restoreAngle = poly->angle;
+	}
+}
+
+// [geNia]
+void DRotatePoly::RecordUnlagged (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_unlaggedAngle[lTick] = poly->angle;
+}
+
+// [geNia]
+void DRotatePoly::ReconcileUnlagged (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_restoreAngle = poly->angle;
+	poly->RotatePolyobj(m_unlaggedAngle[lTick] - poly->angle);
+}
+
+// [geNia]
+void DRotatePoly::RestoreUnlagged ()
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	poly->RotatePolyobj(m_restoreAngle - poly->angle);
+}
+
+// [geNia]
+void DRotatePoly::RecordPredict (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_predictAngle[lTick] = poly->angle;
+}
+
+// [geNia]
+void DRotatePoly::RestorePredict (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	poly->RotatePolyobj(m_predictAngle[lTick] - poly->angle);
 }
 
 // [BC]
-void DRotatePoly::UpdateToClient( ULONG ulClient )
+void DRotatePoly::UpdateToClient(ULONG ulClient)
 {
 	SERVERCOMMANDS_DoRotatePoly( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
@@ -292,9 +382,19 @@ DMovePoly::DMovePoly (int polyNum)
 	m_xSpeed = 0;
 	m_ySpeed = 0;
 	m_LastInstigator = NULL;
+
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+	{
+		FPolyObj *poly = PO_GetPolyobj(m_PolyObj);
+		if (poly == NULL)
+			return;
+
+		m_restoreX = poly->StartSpot.x;
+		m_restoreY = poly->StartSpot.y;
+	}
 }
 
-void DMovePoly::UpdateToClient( ULONG ulClient )
+void DMovePoly::UpdateToClient(ULONG ulClient)
 {
 	SERVERCOMMANDS_DoMovePoly( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
@@ -317,6 +417,60 @@ void DMovePoly::Predict()
 		Tick();
 		TicsToPredict--;
 	}
+}
+
+// [geNia]
+void DMovePoly::RecordUnlagged (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_unlaggedX[lTick] = poly->StartSpot.x;
+	m_unlaggedY[lTick] = poly->StartSpot.y;
+}
+
+// [geNia]
+void DMovePoly::ReconcileUnlagged (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_restoreX = poly->StartSpot.x;
+	m_restoreY = poly->StartSpot.y;
+	poly->MovePolyobj(m_unlaggedX[lTick] - poly->StartSpot.x, m_unlaggedY[lTick] - poly->StartSpot.y, true);
+}
+
+// [geNia]
+void DMovePoly::RestoreUnlagged ()
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	poly->MovePolyobj(m_restoreX - poly->StartSpot.x, m_restoreY - poly->StartSpot.y, true);
+}
+
+// [geNia]
+void DMovePoly::RecordPredict (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_predictX[lTick] = poly->StartSpot.x;
+	m_predictY[lTick] = poly->StartSpot.y;
+}
+
+// [geNia]
+void DMovePoly::RestorePredict (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	poly->MovePolyobj(m_predictX[lTick] - poly->StartSpot.x, m_predictY[lTick] - poly->StartSpot.y, true);
 }
 
 fixed_t DMovePoly::GetXSpeed ()
@@ -376,9 +530,11 @@ DMovePolyTo::DMovePolyTo(int polyNum)
 	m_xTarget = 0;
 	m_yTarget = 0;
 	m_LastInstigator = NULL;
+	for (int i = 0; i < UNLAGGEDTICS; i++)
+		RecordUnlagged(i);
 }
 
-void DMovePolyTo::UpdateToClient( ULONG ulClient )
+void DMovePolyTo::UpdateToClient(ULONG ulClient)
 {
 	SERVERCOMMANDS_DoMovePolyTo( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
@@ -469,10 +625,9 @@ DPolyDoor::DPolyDoor (int polyNum, podoortype_t type)
 	m_Tics = 0;
 	m_WaitTics = 0;
 	m_Close = false;
-	m_LastInstigator = NULL;
 }
 
-void DPolyDoor::UpdateToClient( ULONG ulClient )
+void DPolyDoor::UpdateToClient(ULONG ulClient)
 {
 	FPolyObj *poly = PO_GetPolyobj(m_PolyObj);
 	if (poly == NULL)

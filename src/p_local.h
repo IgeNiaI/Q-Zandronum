@@ -687,6 +687,15 @@ public:
 
 	LONG	GetPolyObj( void );
 
+	player_t* GetLastInstigator();
+	void SetLastInstigator(player_t* Player);
+
+	virtual void RecordUnlagged( LONG lTick );
+	virtual void ReconcileUnlagged( LONG lTick );
+	virtual void RestoreUnlagged( );
+	virtual void RecordPredict( LONG lTick );
+	virtual void RestorePredict( LONG lTick );
+
 	virtual void UpdateToClient( ULONG ulClient ); // [WS] We need this here.
 	virtual void Predict();
 protected:
@@ -701,11 +710,6 @@ protected:
 
 	friend void ThrustMobj (AActor *actor, seg_t *seg, FPolyObj *po);
 
-public:
-
-	player_t* GetLastInstigator();
-	void SetLastInstigator(player_t* Player);
-
 };
 
 class DRotatePoly : public DPolyAction
@@ -714,11 +718,22 @@ class DRotatePoly : public DPolyAction
 public:
 	DRotatePoly (int polyNum);
 	void Tick ();
+
+	void RecordUnlagged( LONG lTick );
+	void ReconcileUnlagged( LONG lTick );
+	void RestoreUnlagged( );
+	void RecordPredict( LONG lTick );
+	void RestorePredict( LONG lTick );
+
 	void UpdateToClient( ULONG ulClient );
 	void Predict();
 
 private:
 	DRotatePoly ();
+
+	angle_t		m_unlaggedAngle[UNLAGGEDTICS];
+	angle_t		m_restoreAngle;
+	angle_t		m_predictAngle[CLIENT_PREDICTION_TICS];
 
 	friend bool EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
 	friend bool EV_RotatePoly (line_t *line, player_t *instigator, int polyNum, int speed, int byteAngle, int direction, bool overRide);
@@ -735,6 +750,12 @@ public:
 	virtual void UpdateToClient( ULONG ulClient ); // [WS] This needs to be virtual.
 	virtual void Predict();
 
+	void	RecordUnlagged( LONG lTick );
+	void	ReconcileUnlagged( LONG lTick );
+	void	RestoreUnlagged( );
+	void	RecordPredict( LONG lTick );
+	void	RestorePredict( LONG lTick );
+
 	angle_t	GetAngle( void );
 	void	SetAngle( angle_t lAngle );
 	
@@ -748,6 +769,13 @@ protected:
 	angle_t m_Angle;
 	fixed_t m_xSpeed; // for sliding walls
 	fixed_t m_ySpeed;
+
+	fixed_t		m_unlaggedX[UNLAGGEDTICS];
+	fixed_t		m_unlaggedY[UNLAGGEDTICS];
+	fixed_t		m_restoreX;
+	fixed_t		m_restoreY;
+	fixed_t		m_predictX[CLIENT_PREDICTION_TICS];
+	fixed_t		m_predictY[CLIENT_PREDICTION_TICS];
 
 	friend bool EV_MovePoly (line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
 	friend bool EV_MovePoly (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);

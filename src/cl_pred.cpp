@@ -67,7 +67,7 @@
 void P_MovePlayer (player_t *player, ticcmd_t *cmd);
 void P_CalcHeight (player_t *player);
 void P_DeathThink (player_t *player);
-bool P_AdjustFloorCeil (AActor *thing);
+void P_AdjustFloorCeil (player_t *player);
 
 //*****************************************************************************
 //	VARIABLES
@@ -99,7 +99,6 @@ static	LONG		g_lSavedWaterLevel[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedOnFloor[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedOnMobj[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedWasJustThrustedZ[CLIENT_PREDICTION_TICS];
-static	fixed_t		g_SavedFloorZ[CLIENT_PREDICTION_TICS];
 
 #ifdef	_DEBUG
 CVAR( Bool, cl_showpredictionsuccess, false, 0 );
@@ -270,7 +269,6 @@ void CLIENT_PREDICT_PlayerTeleported( void )
 	for ( ulIdx = 0; ulIdx < CLIENT_PREDICTION_TICS; ulIdx++ )
 	{
 		memset( &g_SavedTiccmd[ulIdx], 0, sizeof( ticcmd_t ));
-		g_SavedFloorZ[ulIdx] = players[consoleplayer].mo->z;
 		g_bSavedOnFloor[ulIdx] = false;
 	}
 }
@@ -284,16 +282,6 @@ bool CLIENT_PREDICT_IsPredicting( void )
 }
 
 //*****************************************************************************
-//*****************************************************************************
-//
-static fixed_t client_predict_GetPredictedFloorZ( player_t *pPlayer, const ULONG Tick )
-{
-	// [BB] Using g_SavedFloorZ when the player is on a lowering floor seems to make things very laggy,
-	// this does not happen when using mo->floorz.
-	return g_bSavedOnMobj[Tick % CLIENT_PREDICTION_TICS] ? g_SavedFloorZ[Tick % CLIENT_PREDICTION_TICS] : pPlayer->mo->floorz;
-}
-
-//*****************************************************************************
 //
 static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const ULONG Tick )
 {
@@ -304,12 +292,10 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 	const AActor *pActor = (pPlayer->mo->flags2 & MF2_ONMOBJ) ? P_CheckOnmobj ( pPlayer->mo ) : NULL;
 	if ( pActor == NULL ) {
 		g_bSavedOnFloor[tickIndex] = pPlayer->mo->z == pPlayer->mo->floorz;
-		g_SavedFloorZ[tickIndex] = pPlayer->mo->floorz;
 	}
 	else
 	{
 		g_bSavedOnFloor[tickIndex] = ( pPlayer->mo->z == pActor->z + pActor->height );
-		g_SavedFloorZ[tickIndex] = pActor->z + pActor->height;
 	}
 
 	// [BB] Remember whether the player was standing on another actor.
@@ -320,6 +306,21 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 //
 static void client_predict_BeginPrediction( player_t *pPlayer )
 {
+	// Record the sectors
+	for (int i = 0; i < numsectors; ++i)
+	{
+		sectors[i].floorplane.predictD[g_ulGameTick % CLIENT_PREDICTION_TICS] = sectors[i].floorplane.d;
+		sectors[i].ceilingplane.predictD[g_ulGameTick % CLIENT_PREDICTION_TICS] = sectors[i].ceilingplane.d;
+	}
+
+	// Record the PolyActions
+	TThinkerIterator<DPolyAction> polyActionIt;
+	DPolyAction *polyAction = NULL;
+
+	polyActionIt.Reinit();
+	while ((polyAction = polyActionIt.Next()))
+		polyAction->RecordPredict( g_ulGameTick % CLIENT_PREDICTION_TICS );
+
 	g_SavedAngle[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->angle;
 	g_SavedPitch[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->pitch;
 	g_SavedSpeed[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->Speed;
@@ -349,32 +350,47 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 
 	LONG lTick = g_ulGameTick - ulTicks;
 
-	// [BB] The server moved us to a postion above the floor and into a sector without a moving floor,
-	// so don't glue us to the floor for this tic.
-	if ( ( g_bSavedOnMobj[lTick % CLIENT_PREDICTION_TICS] == false ) && ( pPlayer->mo->z > pPlayer->mo->floorz )
-		&& pPlayer->mo->Sector && !pPlayer->mo->Sector->floordata )
-		g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS] = false;
-
-	// [BB] The server gave us z-velocity, so don't glue us to a floor or an actor for this tic.
-	if ( pPlayer->mo->velz > 0 )
-	{
-		g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS] = false;
-		g_bSavedOnMobj[lTick % CLIENT_PREDICTION_TICS] = false;
-	}
-
-	// [BB] Restore the saved "on ground" status.
-	if ( g_bSavedOnMobj[lTick % CLIENT_PREDICTION_TICS] )
-		pPlayer->mo->flags2 |= MF2_ONMOBJ;
-	else
-		pPlayer->mo->flags2 &= ~MF2_ONMOBJ;
-	pPlayer->onground = g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS];
-	if ( g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS] )
-		pPlayer->mo->z = client_predict_GetPredictedFloorZ ( pPlayer, lTick );
-
 	while ( ulTicks )
 	{
 		// Disable bobbing, sounds, etc.
 		g_bPredicting = true;
+
+		// Predict the sectors
+		for (int i = 0; i < numsectors; ++i)
+		{
+			sectors[i].floorplane.d = sectors[i].floorplane.predictD[lTick % CLIENT_PREDICTION_TICS];
+			sectors[i].ceilingplane.d = sectors[i].ceilingplane.predictD[lTick % CLIENT_PREDICTION_TICS];
+		}
+
+		//reconcile the PolyActions
+		TThinkerIterator<DPolyAction> polyActionIt;
+		DPolyAction *polyAction = NULL;
+
+		polyActionIt.Reinit();
+		while ((polyAction = polyActionIt.Next()))
+			polyAction->RestorePredict(lTick % CLIENT_PREDICTION_TICS);
+
+		P_AdjustFloorCeil(pPlayer);
+
+		// [BB] The server moved us to a postion above the floor and into a sector without a moving floor,
+		// so don't glue us to the floor for this tic.
+		if ( ( g_bSavedOnMobj[lTick % CLIENT_PREDICTION_TICS] == false ) && ( pPlayer->mo->z > pPlayer->mo->floorz )
+			&& pPlayer->mo->Sector && !pPlayer->mo->Sector->floordata )
+			g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS] = false;
+
+		// [BB] The server gave us z-velocity, so don't glue us to a floor or an actor for this tic.
+		if ( pPlayer->mo->velz > 0 )
+		{
+			g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS] = false;
+			g_bSavedOnMobj[lTick % CLIENT_PREDICTION_TICS] = false;
+		}
+
+		// [BB] Restore the saved "on ground" status.
+		if ( g_bSavedOnMobj[lTick % CLIENT_PREDICTION_TICS] )
+			pPlayer->mo->flags2 |= MF2_ONMOBJ;
+		else
+			pPlayer->mo->flags2 &= ~MF2_ONMOBJ;
+		pPlayer->onground = g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS];
 
 		// Use backed up values for prediction.
 		pPlayer->mo->angle = g_SavedAngle[lTick % CLIENT_PREDICTION_TICS];
@@ -420,6 +436,22 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 //
 static void client_predict_EndPrediction( player_t *pPlayer )
 {
+	for (int i = 0; i < numsectors; ++i)
+	{
+		sectors[i].floorplane.d = sectors[i].floorplane.predictD[g_ulGameTick % CLIENT_PREDICTION_TICS];
+		sectors[i].ceilingplane.d = sectors[i].ceilingplane.predictD[g_ulGameTick % CLIENT_PREDICTION_TICS];
+	}
+
+	//reconcile the PolyActions
+	TThinkerIterator<DPolyAction> polyActionIt;
+	DPolyAction *polyAction = NULL;
+
+	polyActionIt.Reinit();
+	while ((polyAction = polyActionIt.Next()))
+		polyAction->RestorePredict(g_ulGameTick % CLIENT_PREDICTION_TICS);
+
+	P_AdjustFloorCeil(pPlayer);
+
 	pPlayer->mo->angle = g_SavedAngle[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->pitch = g_SavedPitch[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->Speed = g_SavedSpeed[g_ulGameTick % CLIENT_PREDICTION_TICS];

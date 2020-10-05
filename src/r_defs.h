@@ -247,8 +247,9 @@ struct secplane_t
 
 	fixed_t a, b, c, d, ic;
 
-	// [Spleen] Store the old D's of the plane for unlagged support
+	// [Spleen] Store the old D's of the plane for unlagged and client prediction support
 	fixed_t		unlaggedD[UNLAGGEDTICS];
+	fixed_t		predictD[CLIENT_PREDICTION_TICS];
 	fixed_t		restoreD;
 
 	// Returns < 0 : behind; == 0 : on; > 0 : in front
