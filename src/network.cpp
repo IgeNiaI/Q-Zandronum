@@ -1303,6 +1303,11 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		// Teleports
 		( Special == Teleport ) || ( Special == Teleport_NoFog ) || ( Special == Teleport_NoStop ) || ( Special == Teleport_Line )
 
+		// Platforms
+		|| ( Special >= Plat_PerpetualRaise && Special <= Plat_UpByValue )
+		|| ( Special == Plat_UpNearestWaitDownStay ) || ( Special == Plat_DownWaitUpStayLip ) || ( Special == Plat_PerpetualRaiseLip )
+		|| ( Special == Plat_RaiseAndStayTx0 ) || ( Special == Plat_UpByValueStayTx ) || ( Special == Plat_ToggleCeiling )
+
 		// Doors
 		|| ( Special >= Door_Close && Special <= Door_LockedRaise )
 		|| ( Special == Door_CloseWaitOpen ) || ( Special == Generic_Door )

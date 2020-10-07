@@ -3907,51 +3907,27 @@ void SERVERCOMMANDS_PlayCeilingSound( LONG lID, ULONG ulPlayerExtra, ServerComma
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoPlat( DPlat::EPlatType Type, sector_t *pSector, DPlat::EPlatState Status, LONG lHigh, LONG lLow, LONG lSpeed, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoPlat( DPlat *Plat, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG lSectorID = LONG( Plat->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
 	NetCommand command ( SVC_DOPLAT );
-	command.addByte ( (ULONG)Type );
 	command.addShort ( lSectorID );
-	command.addByte ( (ULONG)Status );
-	command.addLong ( lHigh );
-	command.addLong ( lLow );
-	command.addLong ( lSpeed );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyPlat( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYPLAT );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_ChangePlatStatus( LONG lID, DPlat::EPlatState Status, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_CHANGEPLATSTATUS );
-	command.addShort ( lID );
-	command.addByte ( (ULONG)Status );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_PlayPlatSound( LONG lID, LONG lSound, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_PLAYPLATSOUND );
-	command.addShort ( lID );
-	command.addByte ( lSound );
+	command.addByte( Plat->GetLastInstigator() - players );
+	command.addByte ( (ULONG)Plat->GetType() );
+	command.addByte ( (ULONG)Plat->GetStatus() );
+	command.addByte ( (ULONG)Plat->GetOldStatus() );
+	command.addLong ( Plat->GetSpeed() );
+	command.addLong ( Plat->GetHigh() );
+	command.addLong ( Plat->GetLow() );
+	command.addLong ( Plat->GetPosition() );
+	command.addByte ( Plat->GetWait() );
+	command.addByte ( Plat->GetCount() );
+	command.addByte ( Plat->GetCrush() );
+	command.addByte ( Plat->GetTag() );
+	command.addByte ( Plat->GetFinished() ? 1 : 0 );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 

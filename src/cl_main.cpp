@@ -228,9 +228,6 @@ static	void	client_PlayCeilingSound( BYTESTREAM_s *pByteStream );
 
 // Plat commands.
 static	void	client_DoPlat( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyPlat( BYTESTREAM_s *pByteStream );
-static	void	client_ChangePlatStatus( BYTESTREAM_s *pByteStream );
-static	void	client_PlayPlatSound( BYTESTREAM_s *pByteStream );
 
 // Elevator commands.
 static	void	client_DoElevator( BYTESTREAM_s *pByteStream );
@@ -1635,18 +1632,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 	case SVC_DOPLAT:
 
 		client_DoPlat( pByteStream );
-		break;
-	case SVC_DESTROYPLAT:
-
-		client_DestroyPlat( pByteStream );
-		break;
-	case SVC_CHANGEPLATSTATUS:
-
-		client_ChangePlatStatus( pByteStream );
-		break;
-	case SVC_PLAYPLATSOUND:
-
-		client_PlayPlatSound( pByteStream );
 		break;
 	case SVC_DOELEVATOR:
 
@@ -7646,143 +7631,51 @@ static void client_PlayCeilingSound( BYTESTREAM_s *pByteStream )
 //
 static void client_DoPlat( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lStatus;
-	fixed_t			High;
-	fixed_t			Low;
-	LONG			lSpeed;
-	LONG			lSectorID;
-	LONG			lPlatID;
-	sector_t		*pSector;
-	DPlat			*pPlat;
-
-	// Read in the type of plat.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the plat status (moving up, down, etc.).
-	lStatus = NETWORK_ReadByte( pByteStream );
-
-	// Read in the high range of the plat.
-	High = NETWORK_ReadLong( pByteStream );
-
-	// Read in the low range of the plat.
-	Low = NETWORK_ReadLong( pByteStream );
-
-	// Read in the speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the plat ID.
-	lPlatID = NETWORK_ReadShort( pByteStream );
-
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	int Status = NETWORK_ReadByte( pByteStream );
+	int OldStatus = NETWORK_ReadByte( pByteStream );
+	fixed_t lSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t High = NETWORK_ReadLong( pByteStream );
+	fixed_t Low = NETWORK_ReadLong( pByteStream );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	int Wait = NETWORK_ReadByte( pByteStream );
+	int Count = NETWORK_ReadByte( pByteStream );
+	int Crush = NETWORK_ReadByte( pByteStream );
+	int Tag = NETWORK_ReadByte( pByteStream );
+	bool Finished = NETWORK_ReadByte( pByteStream ) ? true : false;
+	
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	pSector = &sectors[lSectorID];
+	sector_t *pSector = &sectors[SectorID];
+	
+	DPlat *pPlat = P_GetPlatBySectorNum( pSector->sectornum );
+	if (pPlat == NULL)
+	{
+		// Create the new door.
+		pPlat = new DPlat( pSector );
+	}
 
-	// Create the plat, and set all its attributes that were read in.
-	pPlat = new DPlat( pSector );
-	pPlat->SetType( (DPlat::EPlatType)lType );
-	pPlat->SetStatus( lStatus );
+	pPlat->SetLastInstigator( &players[Instigator] );
+	pPlat->SetType( (DPlat::EPlatType)Type );
+	pPlat->SetStatus( Status );
+	pPlat->SetOldStatus( OldStatus );
+	pPlat->SetSpeed( lSpeed );
 	pPlat->SetHigh( High );
 	pPlat->SetLow( Low );
-	pPlat->SetSpeed( lSpeed );
-	pPlat->SetID( lPlatID );
+	pPlat->SetPosition( Position );
+	pPlat->SetWait( Wait );
+	pPlat->SetCount( Count );
+	pPlat->SetCrush( Crush );
+	pPlat->SetTag( Tag );
+	pPlat->SetFinished( Finished );
 
-	// Now, set other properties that don't really matter.
-	pPlat->SetCrush( -1 );
-	pPlat->SetTag( 0 );
-
-	// Just set the delay to 0. The server will tell us when it should move again.
-	pPlat->SetDelay( 0 );
-}
-
-//*****************************************************************************
-//
-static void client_DestroyPlat( BYTESTREAM_s *pByteStream )
-{
-	DPlat	*pPlat;
-	LONG	lPlatID;
-
-	// Read in the plat ID.
-	lPlatID = NETWORK_ReadShort( pByteStream );
-
-	pPlat = P_GetPlatByID( lPlatID );
-	if ( pPlat == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_DestroyPlat: Couldn't find plat with ID: %ld!\n", lPlatID );
-		return;
-	}
-
-	pPlat->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_ChangePlatStatus( BYTESTREAM_s *pByteStream )
-{
-	DPlat	*pPlat;
-	LONG	lPlatID;
-	LONG	lStatus;
-
-	// Read in the plat ID.
-	lPlatID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the direction (aka status).
-	lStatus = NETWORK_ReadByte( pByteStream );
-
-	pPlat = P_GetPlatByID( lPlatID );
-	if ( pPlat == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangePlatStatus: Couldn't find plat with ID: %ld!\n", lPlatID );
-		return;
-	}
-
-	pPlat->SetStatus( lStatus );
-}
-
-//*****************************************************************************
-//
-static void client_PlayPlatSound( BYTESTREAM_s *pByteStream )
-{
-	DPlat	*pPlat;
-	LONG	lPlatID;
-	LONG	lSoundType;
-
-	// Read in the plat ID.
-	lPlatID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the type of sound to be played.
-	lSoundType = NETWORK_ReadByte( pByteStream );
-
-	pPlat = P_GetPlatByID( lPlatID );
-	if ( pPlat == NULL )
-	{
-		CLIENT_PrintWarning( "client_PlayPlatSound: Couldn't find plat with ID: %ld!\n", lPlatID );
-		return;
-	}
-
-	switch ( lSoundType )
-	{
-	case 0:
-
-		SN_StopSequence( pPlat->GetSector( ), CHAN_FLOOR );
-		break;
-	case 1:
-
-		pPlat->PlayPlatSound( "Platform" );
-		break;
-	case 2:
-
-		SN_StartSequence( pPlat->GetSector( ), CHAN_FLOOR, "Silence", 0 );
-		break;
-	case 3:
-
-		pPlat->PlayPlatSound( "Floor" );
-		break;
+		pPlat->Predict();
 	}
 }
 

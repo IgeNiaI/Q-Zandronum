@@ -477,45 +477,58 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-
-	// [BC] Access function(s).
-	LONG	GetID( void );
-	void	SetID( LONG lID );
+	void Predict();
+	
+	player_t*	GetLastInstigator();
+	void	SetLastInstigator( player_t* player );
 
 	fixed_t	GetLow( void );
 	void	SetLow( fixed_t Low );
 
 	fixed_t	GetHigh( void );
 	void	SetHigh( fixed_t High );
+	
+	fixed_t	GetPosition( void );
+	void	SetPosition( fixed_t Position );
 
 	EPlatState	GetStatus( void );
 	void		SetStatus( LONG lStatus );
-
+	
+	EPlatState	GetOldStatus( void );
+	void		SetOldStatus( LONG lOldStatus );
+	
+	EPlatType	GetType( void );
 	void	SetType( EPlatType Type );
-	void	SetCrush( LONG lCrush );
-	void	SetTag( LONG lTag );
+	LONG	GetSpeed( void );
 	void	SetSpeed( LONG lSpeed );
-	void	SetDelay( LONG lDelay );
+	LONG	GetWait( void );
+	void	SetWait( LONG lWait );
+	LONG	GetCrush( void );
+	void	SetCrush( LONG lCrush );
+	LONG	GetCount( void );
+	void	SetCount( LONG lCount );
+	LONG	GetTag( void );
+	void	SetTag( LONG lTag );
+	bool	GetFinished( void );
+	void	SetFinished( bool Finished );
 
 	// [BC] Make this public so clients can use it.
 	void PlayPlatSound (const char *sound);
 
 protected:
-
+	
+	EPlatType	m_Type;
+	EPlatState	m_Status;
+	EPlatState	m_OldStatus;
 	fixed_t 	m_Speed;
 	fixed_t 	m_Low;
 	fixed_t 	m_High;
 	int 		m_Wait;
 	int 		m_Count;
-	EPlatState	m_Status;
-	EPlatState	m_OldStatus;
 	int			m_Crush;
 	int 		m_Tag;
-	EPlatType	m_Type;
-
-	// [BC] This is the platform's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lPlatID;
+	player_t	*m_LastInstigator;
+	bool		m_Finished;
 
 	void Reactivate ();
 	void Stop ();
@@ -523,16 +536,22 @@ protected:
 private:
 	DPlat ();
 
-	friend bool	EV_DoPlat (int tag, line_t *line, EPlatType type,
+	friend bool	EV_DoPlat (line_t *line, int tag, EPlatType type,
+						   int height, int speed, int delay, int lip, int change);
+	friend bool	EV_DoPlat (line_t *line, int tag, player_t *instigator, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
 	friend void EV_StopPlat (int tag);
-	friend void P_ActivateInStasis (int tag);
+	friend void EV_StopPlat (int tag, player_t *instigator);
+	friend void P_ActivateInStasis (int tag, player_t *instigator);
 };
 
-bool EV_DoPlat (int tag, line_t *line, DPlat::EPlatType type,
+bool EV_DoPlat (line_t *line, int tag, DPlat::EPlatType type,
+				int height, int speed, int delay, int lip, int change);
+bool EV_DoPlat (line_t *line, int tag, player_t *instigator, DPlat::EPlatType type,
 				int height, int speed, int delay, int lip, int change);
 void EV_StopPlat (int tag);
-void P_ActivateInStasis (int tag);
+void EV_StopPlat (int tag, player_t *instigator);
+void P_ActivateInStasis (int tag, player_t *instigator);
 
 //
 // [RH]
@@ -1188,14 +1207,13 @@ bool P_StartQuake (AActor *activator, int tid, int intensity, int duration, int 
 
 // [BC] Prototypes dealing with network IDs for movers.
 DDoor		*P_GetDoorBySectorNum( LONG sectorNum );
-DPlat		*P_GetPlatByID( LONG lID );
+DPlat		*P_GetPlatBySectorNum( LONG sectornum );
 DFloor		*P_GetFloorByID( LONG lID );
 DElevator	*P_GetElevatorByID( LONG lID );
 DWaggleBase	*P_GetWaggleByID( LONG lID );
 DPillar		*P_GetPillarByID( LONG lID );
 DCeiling	*P_GetCeilingByID( LONG lID );
 
-LONG		P_GetFirstFreePlatID( void );
 LONG		P_GetFirstFreeFloorID( void );
 LONG		P_GetFirstFreeElevatorID( void );
 LONG		P_GetFirstFreeWaggleID( void );

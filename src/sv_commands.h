@@ -366,10 +366,7 @@ void	SERVERCOMMANDS_ChangeCeilingSpeed( LONG lID, LONG lSpeed, ULONG ulPlayerExt
 void	SERVERCOMMANDS_PlayCeilingSound( LONG lID, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 
 // Plat commands. Ditto.
-void	SERVERCOMMANDS_DoPlat( DPlat::EPlatType Type, sector_t *pSector, DPlat::EPlatState Status, LONG lHigh, LONG lLow, LONG lSpeed, LONG lID, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_DestroyPlat( LONG lID, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_ChangePlatStatus( LONG lID, DPlat::EPlatState Status, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_PlayPlatSound( LONG lID, LONG lSound, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_DoPlat( DPlat *Plat, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 
 // Elevator commands. Ditto.
 void	SERVERCOMMANDS_DoElevator( DElevator::EElevator Type, sector_t *pSector, LONG lSpeed, LONG lDirection, LONG lFloorDestDist, LONG lCeilingDestDist, LONG lID, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
