@@ -36,6 +36,7 @@
 #include "cl_demo.h"
 #include "network.h"
 #include "sv_commands.h"
+#include "cl_main.h"
 
 //==========================================================================
 //
@@ -102,58 +103,7 @@ void DFloor::Serialize (FArchive &arc)
 		<< m_PauseTime
 		<< m_StepTime
 		<< m_PerStepTime
-		<< m_Hexencrush
-		// [BC]
-		<< m_lFloorID;
-}
-
-//==========================================================================
-// [BC]
-void DElevator::UpdateToClient( ULONG ulClient )
-{
-	SERVERCOMMANDS_DoElevator( m_Type, m_Sector, m_Speed, m_Direction, m_FloorDestDist, m_CeilingDestDist, m_lElevatorID, ulClient, SVCF_ONLYTHISCLIENT );
-}
-
-// [BC]
-LONG DElevator::GetID( void )
-{
-	return ( m_lElevatorID );
-}
-
-// [BC]
-void DElevator::SetID( LONG lID )
-{
-	m_lElevatorID = lID;
-}
-
-// [BC]
-void DElevator::SetType( EElevator Type )
-{
-	m_Type = Type;
-}
-
-// [BC]
-void DElevator::SetSpeed( LONG lSpeed )
-{
-	m_Speed = lSpeed;
-}
-
-// [BC]
-void DElevator::SetDirection( LONG lDirection )
-{
-	m_Direction = lDirection;
-}
-
-// [BC]
-void DElevator::SetFloorDestDist( LONG lDestDist )
-{
-	m_FloorDestDist = lDestDist;
-}
-
-// [BC]
-void DElevator::SetCeilingDestDist( LONG lDestDist )
-{
-	m_CeilingDestDist = lDestDist;
+		<< m_Hexencrush;
 }
 
 //
@@ -197,38 +147,13 @@ void DFloor::Tick ()
 
 	res = MoveFloor (m_Speed, m_FloorDestDist, m_Crush, m_Direction, m_Hexencrush);
 
-	// [BC] If we're in client mode, just move the floor and get out. The server will
-	// tell us when it stops.
-	if ( NETWORK_InClientMode() )
-	{
-		return;
-	}
-
 	if (res == pastdest)
 	{
-		// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
-		// have the correct floor/ceiling height for this sector.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			if ( m_Sector->floorOrCeiling == 0 )
-				SERVERCOMMANDS_SetSectorFloorPlane( ULONG( m_Sector - sectors ));
-			else
-				SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
-		}
-
-		// [BC] If we're the server, tell clients to stop the floor's sound sequence.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_StopSectorSequence( m_Sector );
-
 		SN_StopSequence (m_Sector, CHAN_FLOOR);
 
 		if (m_Type == buildStair)
 		{
 			m_Type = waitStair;
-
-			// [BC] Tell clients to change the floor type.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_ChangeFloorType( m_lFloorID, m_Type );
 		}
 
 		if (m_Type != waitStair || m_ResetCount == 0)
@@ -310,11 +235,15 @@ void DFloor::Tick ()
 				}
 			}
 
-			// [BC] If we're the server, tell clients to destroy the floor.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DestroyFloor( m_lFloorID );
+			m_Direction = 0;
+		}
 
-			Destroy ();
+		if ( NETWORK_GetState() == NETSTATE_SERVER )
+		{
+			if ( (m_Type != buildStair) && (m_Type != waitStair) && (m_Type != resetStair) )
+				SERVERCOMMANDS_DoFloor( this );
+			else
+				SERVERCOMMANDS_BuildStair( this );
 		}
 	}
 }
@@ -328,10 +257,29 @@ void DFloor::Tick ()
 void DFloor::UpdateToClient( ULONG ulClient )
 {
 	if ( ( m_Type != buildStair ) && ( m_Type != waitStair ) && ( m_Type != resetStair ) )
-		SERVERCOMMANDS_DoFloor( m_Type, m_Sector, m_Direction, m_Speed, m_FloorDestDist, m_Crush, m_Hexencrush, m_lFloorID, ulClient, SVCF_ONLYTHISCLIENT );
+		SERVERCOMMANDS_DoFloor( this, ulClient, SVCF_ONLYTHISCLIENT );
 	else
-		SERVERCOMMANDS_BuildStair( m_Type, m_Sector, m_Direction, m_Speed, m_FloorDestDist, m_Crush, m_Hexencrush, m_ResetCount, m_Delay, m_PauseTime, m_StepTime, m_PerStepTime, m_lFloorID, ulClient, SVCF_ONLYTHISCLIENT );
-	SERVERCOMMANDS_StartFloorSound( m_lFloorID );
+		SERVERCOMMANDS_BuildStair( this, ulClient, SVCF_ONLYTHISCLIENT );
+}
+
+void DFloor::Predict()
+{
+	// Use a version of gametic that's appropriate for both the current game and demos.
+	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
+
+	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
+	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
+	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
+		return;
+
+	// How many ticks of prediction do we need?
+	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
+
+	while (TicsToPredict)
+	{
+		Tick();
+		TicsToPredict--;
+	}
 }
 
 void DFloor::SetFloorChangeType (sector_t *sec, int change)
@@ -374,18 +322,18 @@ void DFloor::StartFloorSound ()
 DFloor::DFloor (sector_t *sec)
 	: DMovingFloor (sec)
 {
-	// [EP]
-	m_lFloorID = -1;
+	m_LastInstigator = NULL;
+	m_Direction = 0;
 }
 
-LONG DFloor::GetID( void )
+player_t* DFloor::GetLastInstigator()
 {
-	return ( m_lFloorID );
+	return m_LastInstigator;
 }
 
-void DFloor::SetID( LONG lID )
+void DFloor::SetLastInstigator( player_t* player )
 {
-	m_lFloorID = lID;
+	m_LastInstigator = player;
 }
 
 DFloor::EFloor DFloor::GetType( void )
@@ -448,14 +396,49 @@ void DFloor::SetOrgDist( fixed_t OrgDist )
 	m_OrgDist = OrgDist;
 }
 
+fixed_t DFloor::GetPosition( void )
+{
+	return ( m_Sector->floorplane.d );
+}
+
 LONG DFloor::GetDirection( void )
 {
 	return ( m_Direction );
 }
 
-void DFloor::SetDirection( LONG lDirection )
+void DFloor::SetPositionAndDirection( fixed_t Position, LONG lDirection )
 {
-	m_Direction = lDirection;
+	fixed_t diff = m_Sector->floorplane.d - Position;
+	fixed_t BottomHeight;
+	fixed_t TopHeight;
+	if (m_OrgDist > m_FloorDestDist)
+	{
+		BottomHeight = m_FloorDestDist;
+		TopHeight = m_OrgDist;
+	}
+	else
+	{
+		BottomHeight = m_OrgDist;
+		TopHeight = m_FloorDestDist;
+	}
+
+	if (diff > 0)
+	{
+		MoveFloor(-diff, BottomHeight, -1, -1, false);
+	}
+	else if (diff < 0)
+	{
+		MoveFloor(diff, TopHeight, -1, 1, false);
+	}
+
+	if (m_Direction != lDirection)
+	{
+		SN_StopSequence(m_Sector, CHAN_CEILING);
+		if (lDirection != 0)
+			StartFloorSound();
+
+		m_Direction = lDirection;
+	}
 }
 
 fixed_t DFloor::GetFloorDestDist( void ) 
@@ -466,6 +449,16 @@ fixed_t DFloor::GetFloorDestDist( void )
 void DFloor::SetFloorDestDist( fixed_t FloorDestDist )
 {
 	m_FloorDestDist = FloorDestDist;
+}
+
+fixed_t DFloor::GetNewSpecial( void ) 
+{
+	return ( m_NewSpecial );
+}
+
+void DFloor::SetNewSpecial( int NewSpecial )
+{
+	m_NewSpecial = NewSpecial;
 }
 
 int DFloor::GetDelay( void )
@@ -517,8 +510,18 @@ void DFloor::SetPerStepTime( int PerStepTime )
 //==========================================================================
 
 bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
+	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower)
+{
+	return EV_DoFloor(floortype, line, tag, NULL,
+		speed, height, crush, change, hexencrush, hereticlower);
+}
+
+bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
 				 fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	int 		secnum;
 	bool 		rtn;
 	sector_t*	sec;
@@ -542,33 +545,35 @@ bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
 	while (tag && (secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
 		sec = &sectors[secnum];
+		floor = NULL;
 
 manual_floor:
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		if (sec->PlaneMoving(sector_t::floor))
 		{
-			// There was a test for 0/non-0 here, supposed to prevent 0-tags from executing "continue" and searching for unrelated sectors
-			// Unfortunately, the condition had been reversed, so that searches for tag-0 would continue,
-			// while numbered tags would abort (return false, even if some floors have been successfully triggered)
-
-			// All occurences of the condition (faulty or not) have been replaced by a looping condition: Looping only occurs if we're looking for a non-0 tag.
-			continue;
+			if (sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
+			{
+				floor = barrier_cast<DFloor*>(sec->floordata);
+			}
 		}
 		
+		if (floor == NULL)
+		{
+			// new floor thinker
+			floor = new DFloor (sec);
+		}
 		
-		// new floor thinker
+		if (floor->m_Direction != 0)
+			return false;
+
 		rtn = true;
-		floor = new DFloor (sec);
 		floor->m_Type = floortype;
 		floor->m_Crush = -1;
 		floor->m_Hexencrush = hexencrush;
 		floor->m_Speed = speed;
 		floor->m_ResetCount = 0;				// [RH]
 		floor->m_OrgDist = sec->floorplane.d;	// [RH]
-
-		// [BC] Assign the floor's network ID. However, don't do this on the client end.
-		if ( NETWORK_InClientMode() == false )
-			floor->m_lFloorID = P_GetFirstFreeFloorID( );
+		floor->m_LastInstigator = instigator;
 
 		floor->StartFloorSound ();
 
@@ -750,10 +755,7 @@ manual_floor:
 
 		// [BC] If we're the server, tell clients to create the floor.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			SERVERCOMMANDS_DoFloor( floortype, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID );
-			SERVERCOMMANDS_StartFloorSound( floor->m_lFloorID );
-		}
+			SERVERCOMMANDS_DoFloor( floor );
 
 		// Do not interpolate instant movement floors.
 		bool silent = false;
@@ -823,37 +825,29 @@ manual_floor:
 
 bool EV_FloorCrushStop (int tag)
 {
+	return EV_FloorCrushStop(tag, NULL);
+}
+
+bool EV_FloorCrushStop (int tag, player_t *instigator)
+{
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	int secnum = -1;
+	DFloor *floor;
 
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
 		sector_t *sec = sectors + secnum;
 
-		if (sec->floordata && sec->floordata->IsKindOf (RUNTIME_CLASS(DFloor)) &&
-			barrier_cast<DFloor *>(sec->floordata)->m_Type == DFloor::floorRaiseAndCrush)
+		if (sec->floordata && sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
 		{
-			// [BC] If we're stopping, this is probably a good time to verify all the clients
-			// have the correct floor/ceiling height for this sector.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			{
-				if ( sec->floorOrCeiling == 0 )
-					SERVERCOMMANDS_SetSectorFloorPlane( ULONG( sec - sectors ));
-				else
-					SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( sec - sectors ));
-			}
+			floor = barrier_cast<DFloor *>(sec->floordata);
 
-			// [BC] If we're the server, tell clients to stop the floor's sound sequence.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_StopSectorSequence( sec );
+			if (floor->m_Type == DFloor::floorRaiseAndCrush)
+				SERVERCOMMANDS_DoFloor( floor );
 
-			SN_StopSequence (sec, CHAN_FLOOR);
-
-			// [BC] If we're the server, tell clients to destroy the floor.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DestroyFloor( barrier_cast<DFloor *>( sec->floordata )->m_lFloorID );
-
-			sec->floordata->Destroy ();
-			sec->floordata = NULL;
+			SN_StopSequence(sec, CHAN_FLOOR);
 		}
 	}
 	return true;
@@ -885,9 +879,21 @@ static int P_FindSectorFromTagLinear (int tag, int start)
 //==========================================================================
 
 bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
+	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
+	int usespecials)
+{
+	return EV_BuildStairs(tag, NULL, type, line,
+		stairsize, speed, delay, reset, igntxt,
+		usespecials);
+}
+
+bool EV_BuildStairs (int tag, player_t *instigator, DFloor::EStair type, line_t *line,
 					 fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 					 int usespecials)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	int 				secnum;
 	int					osecnum;	//jff 3/4/98 save old loop index
 	int 				height;
@@ -931,6 +937,7 @@ bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
 	while ((secnum = FindSector (tag, secnum)) >= 0)
 	{
 		sec = &sectors[secnum];
+		floor = NULL;
 
 manual_stair:
 		// ALREADY MOVING?	IF SO, KEEP GOING...
@@ -939,14 +946,28 @@ manual_stair:
 		if (sec->PlaneMoving(sector_t::floor) || sec->stairlock)
 		{
 			if (!manual)
-				continue;
+			{
+				if (sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
+				{
+					floor = barrier_cast<DFloor*>(sec->floordata);
+				}
+			}
 			else
+			{
 				return rtn;
+			}
 		}
 		
-		// new floor thinker
+		if (floor == NULL)
+		{
+			// new floor thinker
+			floor = new DFloor(sec);
+		} 
+
+		if (floor->m_Direction != 0)
+			return false;
+
 		rtn = true;
-		floor = new DFloor (sec);
 		floor->m_Direction = (type == DFloor::buildUp) ? 1 : -1;
 		stairstep = stairsize * floor->m_Direction;
 		floor->m_Type = DFloor::buildStair;	//jff 3/31/98 do not leave uninited
@@ -956,6 +977,7 @@ manual_stair:
 		floor->m_Delay = delay;
 		floor->m_PauseTime = 0;
 		floor->m_StepTime = floor->m_PerStepTime = persteptime;
+		floor->m_LastInstigator = instigator;
 
 		floor->m_Crush = (!usespecials && speed == 4*FRACUNIT) ? 10 : -1; //jff 2/27/98 fix uninitialized crush field
 		floor->m_Hexencrush = false;
@@ -967,13 +989,9 @@ manual_stair:
 		texture = sec->GetTexture(sector_t::floor);
 		osecnum = secnum;				//jff 3/4/98 preserve loop index
 
-		// [BC] Assign the floor's network ID. However, don't do this on the client end.
-		if ( NETWORK_InClientMode() == false )
-			floor->m_lFloorID = P_GetFirstFreeFloorID( );
-
 		// [BC] If we're the server, tell clients to create the floor.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_BuildStair( floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID );
+			SERVERCOMMANDS_BuildStair( floor );
 
 		// Find next sector to raise
 		// 1. Find 2-sided line with same sector side[0] (lowest numbered)
@@ -996,7 +1014,7 @@ manual_stair:
 
 					// if sector's floor already moving, look for another
 					//jff 2/26/98 special lockout condition for retriggering
-					if (tsec->PlaneMoving(sector_t::floor) || tsec->stairlock)
+					if (tsec->stairlock)
 					{
 						prev = sec;
 						sec = tsec;
@@ -1032,7 +1050,7 @@ manual_stair:
 
 					// if sector's floor already moving, look for another
 					//jff 2/26/98 special lockout condition for retriggering
-					if (tsec->PlaneMoving(sector_t::floor) || tsec->stairlock)
+					if (tsec->stairlock)
 						continue;
 
 					if (!(i_compatflags & COMPATF_STAIRINDEX)) height += stairstep;
@@ -1056,8 +1074,26 @@ manual_stair:
 				sec = tsec;
 				secnum = newsecnum;
 
+				floor = NULL;
+
+				// ALREADY MOVING?	IF SO, KEEP GOING...
+				//jff 2/26/98 add special lockout condition to wait for entire
+				//staircase to build before retriggering
+				if (sec->PlaneMoving(sector_t::floor) && sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
+				{
+					floor = barrier_cast<DFloor*>(sec->floordata);
+				}
+
+				if (floor == NULL)
+				{
+					// new floor thinker
+					floor = new DFloor(sec);
+				}
+
+				if (floor->m_Direction != 0)
+					continue;
+
 				// create and initialize a thinker for the next step
-				floor = new DFloor (sec);
 				floor->StartFloorSound ();
 				floor->m_Direction = (type == DFloor::buildUp) ? 1 : -1;
 				floor->m_FloorDestDist = sec->floorplane.PointToDist (0, 0, height);
@@ -1065,6 +1101,7 @@ manual_stair:
 				floor->m_Delay = delay;
 				floor->m_PauseTime = 0;
 				floor->m_StepTime = floor->m_PerStepTime = persteptime;
+				floor->m_LastInstigator = instigator;
 
 				if (usespecials == 2)
 				{
@@ -1083,16 +1120,9 @@ manual_stair:
 				floor->m_ResetCount = reset;	// [RH] Tics until reset (0 if never)
 				floor->m_OrgDist = sec->floorplane.d;	// [RH] Height to reset to
 
-				// [BC] Assign the floor's network ID. However, don't do this on the client end.
-				if ( NETWORK_InClientMode() == false )
-					floor->m_lFloorID = P_GetFirstFreeFloorID( );
-
 				// [BC] If we're the server, tell clients to create the floor.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				{
-					SERVERCOMMANDS_BuildStair( floor->m_Type, &sectors[secnum], floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_ResetCount, floor->m_Delay, floor->m_PauseTime, floor->m_StepTime, floor->m_PerStepTime, floor->m_lFloorID );
-					SERVERCOMMANDS_StartFloorSound( floor->m_lFloorID );
-				}
+					SERVERCOMMANDS_BuildStair( floor );
 			}
 		} while (ok);
 		// [RH] make sure the first sector doesn't point to a previous one, otherwise
@@ -1118,6 +1148,14 @@ manual_stair:
 
 bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
 {
+	return EV_DoDonut(tag, NULL, line, pillarspeed, slimespeed);
+}
+
+bool EV_DoDonut (int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
+{
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	sector_t*			s1;
 	sector_t*			s2;
 	sector_t*			s3;
@@ -1145,15 +1183,25 @@ bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
 manual_donut:
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		if (s1->PlaneMoving(sector_t::floor))
-			continue; // safe now, because we check that tag is non-0 in the looping condition [fdari]
+		{
+			if (s1->floordata->IsKindOf(RUNTIME_CLASS(DFloor)) || barrier_cast<DFloor*>(s1->floordata)->m_Direction != 0)
+			{
+				continue; // safe now, because we check that tag is non-0 in the looping condition [fdari]
+			}
+		}
 
 		rtn = true;
 		s2 = getNextSector (s1->lines[0], s1);	// s2 is pool's sector
 		if (!s2)								// note lowest numbered line around
 			continue;							// pillar must be two-sided
-
+		
 		if (s2->PlaneMoving(sector_t::floor))
-			continue;
+		{
+			if (s2->floordata->IsKindOf(RUNTIME_CLASS(DFloor)) || barrier_cast<DFloor*>(s2->floordata)->m_Direction != 0)
+			{
+				continue; // safe now, because we check that tag is non-0 in the looping condition [fdari]
+			}
+		}
 
 		for (i = 0; i < s2->linecount; i++)
 		{
@@ -1161,9 +1209,26 @@ manual_donut:
 				(s2->lines[i]->backsector == s1))
 				continue;
 			s3 = s2->lines[i]->backsector;
+			floor = NULL;
+
+			if (s2->PlaneMoving(sector_t::floor))
+			{
+				if (s2->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
+				{
+					floor = barrier_cast<DFloor*>(s2->floordata);
+				}
+			}
+
+			if (floor == NULL)
+			{
+				// new floor thinker
+				floor = new DFloor(s2);
+			}
 			
+			if (floor->m_Direction != 0)
+				continue;
+
 			//	Spawn rising slime
-			floor = new DFloor (s2);
 			floor->m_Type = DFloor::donutRaise;
 			floor->m_Crush = -1;
 			floor->m_Hexencrush = false;
@@ -1174,18 +1239,31 @@ manual_donut:
 			floor->m_NewSpecial = 0;
 			height = s3->FindHighestFloorPoint (&spot);
 			floor->m_FloorDestDist = s2->floorplane.PointToDist (spot, height);
+			floor->m_LastInstigator = instigator;
 			floor->StartFloorSound ();
 			
-			// [BC] Assign the floor's network ID. However, don't do this on the client end.
-			if ( NETWORK_InClientMode() == false )
-				floor->m_lFloorID = P_GetFirstFreeFloorID( );
-
 			// [BC] If we're the server, tell clients to create the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				SERVERCOMMANDS_DoFloor( floor );
+
+			floor = NULL;
+			
+			if (s1->PlaneMoving(sector_t::floor))
 			{
-				SERVERCOMMANDS_DoFloor( floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID );
-				SERVERCOMMANDS_StartFloorSound( floor->m_lFloorID );
+				if (s1->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
+				{
+					floor = barrier_cast<DFloor*>(s1->floordata);
+				}
 			}
+
+			if (floor == NULL)
+			{
+				// new floor thinker
+				floor = new DFloor(s1);
+			}
+			
+			if (floor->m_Direction != 0)
+				continue;
 
 			//	Spawn lowering donut-hole
 			floor = new DFloor (s1);
@@ -1197,18 +1275,12 @@ manual_donut:
 			floor->m_Speed = pillarspeed;
 			height = s3->FindHighestFloorPoint (&spot);
 			floor->m_FloorDestDist = s1->floorplane.PointToDist (spot, height);
+			floor->m_LastInstigator = instigator;
 			floor->StartFloorSound ();
-
-			// [BC] Assign the floor's network ID. However, don't do this on the client end.
-			if ( NETWORK_InClientMode() == false )
-				floor->m_lFloorID = P_GetFirstFreeFloorID( );
 
 			// [BC] If we're the server, tell clients to create the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			{
-				SERVERCOMMANDS_DoFloor( floor->m_Type, floor->m_Sector, floor->m_Direction, floor->m_Speed, floor->m_FloorDestDist, floor->m_Crush, floor->m_Hexencrush, floor->m_lFloorID );
-				SERVERCOMMANDS_StartFloorSound( floor->m_lFloorID );
-			}
+				SERVERCOMMANDS_DoFloor( floor );
 
 			break;
 		}
@@ -1221,6 +1293,153 @@ manual_donut:
 // Elevators
 //
 //==========================================================================
+
+//==========================================================================
+// [BC]
+void DElevator::UpdateToClient( ULONG ulClient )
+{
+	SERVERCOMMANDS_DoElevator( this, ulClient, SVCF_ONLYTHISCLIENT );
+}
+
+bool DElevator::IsBusy()
+{
+	return m_Direction != 0;
+}
+
+void DElevator::Predict()
+{
+	// Use a version of gametic that's appropriate for both the current game and demos.
+	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
+
+	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
+	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
+	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
+		return;
+
+	// How many ticks of prediction do we need?
+	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
+
+	while (TicsToPredict)
+	{
+		Tick();
+		TicsToPredict--;
+	}
+}
+
+player_t* DElevator::GetLastInstigator()
+{
+	return m_LastInstigator;
+}
+
+void DElevator::SetLastInstigator( player_t* player )
+{
+	m_LastInstigator = player;
+}
+
+// [BC]
+DElevator::EElevator DElevator::GetType( void )
+{
+	return ( m_Type );
+}
+
+// [BC]
+void DElevator::SetType( EElevator Type )
+{
+	m_Type = Type;
+}
+
+// [BC]
+fixed_t DElevator::GetSpeed( void )
+{
+	return ( m_Speed );
+}
+
+// [BC]
+void DElevator::SetSpeed( fixed_t Speed )
+{
+	m_Speed = Speed;
+}
+
+// [BC]
+LONG DElevator::GetDirection( void )
+{
+	return ( m_Direction );
+}
+
+// [BC]
+void DElevator::SetDirection( LONG lDirection )
+{
+	if (m_Direction == 0 && lDirection != 0)
+		StartFloorSound();
+	else if (m_Direction != 0 && lDirection == 0)
+		SN_StopSequence (m_Sector, CHAN_FLOOR);
+
+	m_Direction = lDirection;
+}
+
+// [geNia]
+fixed_t	DElevator::GetFloorPosition( void )
+{
+	return ( m_Sector->floorplane.d );
+}
+
+// [geNia]
+void DElevator::SetFloorPosition( fixed_t Position )
+{
+	fixed_t diff = m_Sector->floorplane.d - Position;
+	if (diff > 0)
+	{
+		MoveFloor(-diff, m_FloorDestDist, -1, -1, false);
+	}
+	else if (diff < 0)
+	{
+		MoveFloor(diff, m_FloorDestDist, -1, 1, false);
+	}
+}
+
+// [BC]
+fixed_t DElevator::GetFloorDestDist( void )
+{
+	return ( m_FloorDestDist );
+}
+
+// [BC]
+void DElevator::SetFloorDestDist( fixed_t DestDist )
+{
+	m_FloorDestDist = DestDist;
+}
+
+// [geNia]
+fixed_t	DElevator::GetCeilingPosition( void )
+{
+	return ( m_Sector->ceilingplane.d );
+}
+
+// [geNia]
+void DElevator::SetCeilingPosition( fixed_t Position )
+{
+	fixed_t diff = m_Sector->ceilingplane.d - Position;
+	if (diff > 0)
+	{
+		MoveCeiling(diff, m_CeilingDestDist, -1, -1, false);
+	}
+	else if (diff < 0)
+	{
+		MoveCeiling(-diff, m_CeilingDestDist, -1, 1, false);
+	}
+}
+
+// [BC]
+fixed_t DElevator::GetCeilingDestDist( void )
+{
+	return ( m_CeilingDestDist );
+}
+
+// [BC]
+void DElevator::SetCeilingDestDist( fixed_t DestDist )
+{
+	m_CeilingDestDist = DestDist;
+}
 
 IMPLEMENT_POINTY_CLASS (DElevator)
 	DECLARE_POINTER(m_Interp_Floor)
@@ -1246,8 +1465,8 @@ DElevator::DElevator (sector_t *sec)
 	sec->ceilingdata = this;
 	m_Interp_Floor = sec->SetInterpolation(sector_t::FloorMove, true);
 	m_Interp_Ceiling = sec->SetInterpolation(sector_t::CeilingMove, true);
-	// [EP]
-	m_lElevatorID = -1;
+	m_Direction = 0;
+	m_LastInstigator = NULL;
 }
 
 void DElevator::Serialize (FArchive &arc)
@@ -1259,9 +1478,7 @@ void DElevator::Serialize (FArchive &arc)
 		<< m_CeilingDestDist
 		<< m_Speed
 		<< m_Interp_Floor
-		<< m_Interp_Ceiling
-		// [BC]
-		<< m_lElevatorID;
+		<< m_Interp_Ceiling;
 }
 
 //==========================================================================
@@ -1302,6 +1519,9 @@ void DElevator::Destroy()
 
 void DElevator::Tick ()
 {
+	if (m_Direction == 0)
+		return;
+
 	EResult res;
 
 	fixed_t oldfloor, oldceiling;
@@ -1334,36 +1554,16 @@ void DElevator::Tick ()
 		}
 	}
 
-	// [BC] This is all we need to do in client mode.
-	if ( NETWORK_InClientMode() )
-	{
-		return;
-	}
-
 	if (res == pastdest)	// if destination height acheived
 	{
+		// make floor stop sound
+		SN_StopSequence (m_Sector, CHAN_FLOOR);
+		m_Direction = 0;
+
 		// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
 		// have the correct floor/ceiling height for this sector.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			SERVERCOMMANDS_SetSectorFloorPlane( ULONG( m_Sector - sectors ));
-			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
-		}
-
-		// [BC] If we're the server, tell clients to play the elevator sound, and then
-		// destroy the elevator.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			SERVERCOMMANDS_StopSectorSequence( m_Sector );
-			SERVERCOMMANDS_DestroyElevator( m_lElevatorID );
-		}
-
-		// make floor stop sound
-		SN_StopSequence (m_Sector, CHAN_FLOOR);
-
-		m_Sector->floordata = NULL;		//jff 2/22/98
-		m_Sector->ceilingdata = NULL;	//jff 2/22/98
-		Destroy ();		// remove elevator from actives
+			SERVERCOMMANDS_DoElevator( this );
 	}
 }
 
@@ -1391,9 +1591,18 @@ void DElevator::StartFloorSound ()
 //
 //==========================================================================
 
-bool EV_DoElevator (line_t *line, DElevator::EElevator elevtype,
-					fixed_t speed, fixed_t height, int tag)
+bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator elevtype,
+					fixed_t speed, fixed_t height)
 {
+	return EV_DoElevator(line, tag, NULL, elevtype, speed, height);
+}
+
+bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator elevtype,
+					fixed_t speed, fixed_t height)
+{
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	int			secnum;
 	bool		rtn;
 	sector_t*	sec;
@@ -1420,21 +1629,30 @@ bool EV_DoElevator (line_t *line, DElevator::EElevator elevtype,
 	while (tag && (secnum = P_FindSectorFromTag (tag, secnum)) >= 0) // never loop for a non-0 tag (condition moved to beginning of loop) [FDARI]
 	{
 		sec = &sectors[secnum];
-manual_elevator:
-		// If either floor or ceiling is already activated, skip it
-		if (sec->PlaneMoving(sector_t::floor) || sec->ceilingdata) //jff 2/22/98
-			continue; // the loop used to break at the end if tag were 0, but would miss that step if "continue" occured [FDARI]
+		elevator = NULL;
 
-		// create and initialize new elevator thinker
+manual_elevator:
+		if (sec->PlaneMoving(sector_t::floor))
+		{
+			if (sec->floordata->IsKindOf(RUNTIME_CLASS(DElevator)))
+			{
+				elevator = barrier_cast<DElevator*>(sec->floordata);
+			}
+		}
+
+		if (elevator == NULL)
+		{
+			// new floor thinker
+			elevator = new DElevator(sec);
+		}
+		
+		if (elevator->m_Direction != 0)
+			return false;
+
 		rtn = true;
-		elevator = new DElevator (sec);
 		elevator->m_Type = elevtype;
 		elevator->m_Speed = speed;
 		elevator->StartFloorSound ();
-
-		// [BC] Assign the floor's network ID. However, don't do this on the client end.
-		if ( NETWORK_InClientMode() == false )
-			elevator->m_lElevatorID = P_GetFirstFreeElevatorID( );
 
 		floorheight = sec->CenterFloor ();
 		ceilingheight = sec->CenterCeiling ();
@@ -1488,10 +1706,7 @@ manual_elevator:
 
 		// [BC] If we're the server, tell clients to create the elevator.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			SERVERCOMMANDS_DoElevator( elevator->m_Type, elevator->m_Sector, elevator->m_Speed, elevator->m_Direction, elevator->m_FloorDestDist, elevator->m_CeilingDestDist, elevator->m_lElevatorID );
-			SERVERCOMMANDS_StartElevatorSound( elevator->m_lElevatorID );
-		}
+			SERVERCOMMANDS_DoElevator( elevator );
 
 	}
 	return rtn;
@@ -1514,6 +1729,11 @@ manual_elevator:
 //==========================================================================
 
 bool EV_DoChange (line_t *line, EChange changetype, int tag)
+{
+	return EV_DoChange(line, changetype, tag, NULL);
+}
+
+bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigator)
 {
 	int			secnum;
 	bool		rtn;
@@ -1542,7 +1762,10 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag)
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+					if (instigator)
+						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -1557,7 +1780,10 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag)
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+					if (instigator)
+						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -1917,7 +2143,7 @@ manual_waggle:
 
 //*****************************************************************************
 //
-DFloor *P_GetFloorByID( LONG lID )
+DFloor *P_GetFloorBySectorNum( LONG sectorNum )
 {
 	DFloor	*pFloor;
 
@@ -1925,7 +2151,7 @@ DFloor *P_GetFloorByID( LONG lID )
 
 	while (( pFloor = Iterator.Next( )))
 	{
-		if ( pFloor->GetID( ) == lID )
+		if ( pFloor->GetSector()->sectornum == sectorNum )
 			return ( pFloor );
 	}
 
@@ -1934,7 +2160,7 @@ DFloor *P_GetFloorByID( LONG lID )
 
 //*****************************************************************************
 //
-DElevator *P_GetElevatorByID( LONG lID )
+DElevator *P_GetElevatorBySectorNum( LONG sectorNum )
 {
 	DElevator	*pElevator;
 
@@ -1942,7 +2168,7 @@ DElevator *P_GetElevatorByID( LONG lID )
 
 	while (( pElevator = Iterator.Next( )))
 	{
-		if ( pElevator->GetID( ) == lID )
+		if ( pElevator->GetSector()->sectornum == sectorNum )
 			return ( pElevator );
 	}
 
@@ -1964,64 +2190,6 @@ DWaggleBase *P_GetWaggleByID( LONG lID )
 	}
 
 	return ( NULL );
-}
-
-//*****************************************************************************
-//
-LONG P_GetFirstFreeFloorID( void )
-{
-	LONG		lIdx;
-	DFloor		*pFloor;
-	bool		bIDIsAvailable;
-
-	for ( lIdx = 0; lIdx < 8192; lIdx++ )
-	{
-		TThinkerIterator<DFloor>		Iterator;
-
-		bIDIsAvailable = true;
-		while (( pFloor = Iterator.Next( )))
-		{
-			if ( pFloor->GetID( ) == lIdx )
-			{
-				bIDIsAvailable = false;
-				break;
-			}
-		}
-
-		if ( bIDIsAvailable )
-			return ( lIdx );
-	}
-
-	return ( -1 );
-}
-
-//*****************************************************************************
-//
-LONG P_GetFirstFreeElevatorID( void )
-{
-	LONG		lIdx;
-	DElevator	*pElevator;
-	bool		bIDIsAvailable;
-
-	for ( lIdx = 0; lIdx < 8192; lIdx++ )
-	{
-		TThinkerIterator<DElevator>		Iterator;
-
-		bIDIsAvailable = true;
-		while (( pElevator = Iterator.Next( )))
-		{
-			if ( pElevator->GetID( ) == lIdx )
-			{
-				bIDIsAvailable = false;
-				break;
-			}
-		}
-
-		if ( bIDIsAvailable )
-			return ( lIdx );
-	}
-
-	return ( -1 );
 }
 
 //*****************************************************************************

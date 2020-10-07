@@ -804,24 +804,24 @@ public:
 	};
 
 	DCeiling (sector_t *sec);
-	DCeiling (sector_t *sec, fixed_t speed1, fixed_t speed2, int silent);
+	DCeiling (sector_t *sec, fixed_t speedDown, fixed_t speedUp, int silent);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
 
-	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag,
-						fixed_t speed, fixed_t speed2, fixed_t height,
+	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator,
+						fixed_t speedDown, fixed_t speedUp, fixed_t height,
 						int crush, int silent, int change, bool hexencrush);
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
+	void Predict();
 
 	// [BC] Make this public so clients can use it.
 	void PlayCeilingSound ();
-
-	// [BC] Access function(s).
-	LONG	GetID( void );
-	void	SetID( LONG lID );
+	
+	player_t*	GetLastInstigator();
+	void	SetLastInstigator( player_t* player );
 
 	fixed_t	GetTopHeight( void );
 	void	SetTopHeight( fixed_t TopHeight );
@@ -830,27 +830,40 @@ public:
 	void	SetBottomHeight( fixed_t BottomHeight );
 
 	fixed_t	GetSpeed( void );
+	fixed_t	GetSpeedDown( void );
+	fixed_t	GetSpeedUp( void );
 	void	SetSpeed( fixed_t Speed );
-
+	
+	fixed_t	GetPosition( void );
 	LONG	GetDirection( void );
-	void	SetDirection( LONG lDirection );
+	void	SetPositionAndDirection( LONG lPosition, LONG lDirection );
+
+	LONG	GetOldDirection( void );
+	void	SetOldDirection( LONG lOldDirection );
 
 	ECeiling	GetType( void );
 	void		SetType( ECeiling Type );
+	
+	LONG	GetTag( void );
+	void	SetTag( LONG lTag );
 
 	LONG	GetCrush( void );
 	void	SetCrush( LONG lCrush );
 
 	bool	GetHexencrush( void );
 	void	SetHexencrush( bool Hexencrush );
+	
+	LONG	GetSilent( void );
+	void	SetSilent( LONG lSilent );
 
 protected:
 	ECeiling	m_Type;
 	fixed_t 	m_BottomHeight;
 	fixed_t 	m_TopHeight;
 	fixed_t 	m_Speed;
-	fixed_t		m_Speed1;		// [RH] dnspeed of crushers
-	fixed_t		m_Speed2;		// [RH] upspeed of crushers
+	fixed_t		m_SpeedDown;	// [RH] dnspeed of crushers
+	fixed_t		m_SpeedUp;		// [RH] upspeed of crushers
+	player_t	*m_LastInstigator;
 	int 		m_Crush;
 	bool		m_Hexencrush;
 	int			m_Silent;
@@ -864,22 +877,21 @@ protected:
 	int 		m_Tag;
 	int 		m_OldDirection;
 
-	// [BC] This is the ceiling's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lCeilingID;
-
 private:
 	DCeiling ();
 
 	friend bool EV_CeilingCrushStop (int tag);
-	friend void P_ActivateInStasisCeiling (int tag);
+	friend bool EV_CeilingCrushStop (int tag, player_t *instigator);
 };
 
 bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 	int tag, fixed_t speed, fixed_t speed2, fixed_t height,
 	int crush, int silent, int change, bool hexencrush);
+bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
+	int tag, player_t *instigator, fixed_t speed, fixed_t speed2, fixed_t height,
+	int crush, int silent, int change, bool hexencrush);
 bool EV_CeilingCrushStop (int tag);
-void P_ActivateInStasisCeiling (int tag);
+bool EV_CeilingCrushStop (int tag, player_t *instigator);
 
 
 
@@ -944,14 +956,14 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
+	void Predict();
 
 	// [BC] Make these public so clients can use them.
 	void StartFloorSound ();
 	void SetFloorChangeType (sector_t *sec, int change);
-
-	// [BC] Access function(s).
-	LONG	GetID( void );
-	void	SetID( LONG lID );
+	
+	player_t*	GetLastInstigator();
+	void	SetLastInstigator( player_t* player );
 
 	EFloor	GetType( void );
 	void	SetType( EFloor Type );
@@ -971,11 +983,15 @@ public:
 	fixed_t	GetOrgDist( void );
 	void	SetOrgDist( fixed_t OrgDist );
 
+	fixed_t	GetPosition( void );
 	LONG	GetDirection( void );
-	void	SetDirection( LONG lDirection );
+	void	SetPositionAndDirection( fixed_t Position, LONG lDirection );
 
 	fixed_t	GetFloorDestDist( void );
 	void	SetFloorDestDist( fixed_t FloorDestDist );
+	
+	fixed_t	GetNewSpecial( void );
+	void	SetNewSpecial( int NewSpecial );
 
 	int		GetDelay( void );
 	void	SetDelay( int Delay );
@@ -999,6 +1015,8 @@ protected:
 	fixed_t 	m_FloorDestDist;
 	fixed_t 	m_Speed;
 
+	player_t	*m_LastInstigator;
+
 	// [RH] New parameters used to reset and delay stairs
 	int			m_ResetCount;
 	int			m_OrgDist;
@@ -1007,28 +1025,38 @@ protected:
 	int			m_StepTime;
 	int			m_PerStepTime;
 
-	// [BC] This is the floor's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lFloorID;
-
 	friend bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
+		fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
+		int usespecials);
+	friend bool EV_BuildStairs (int tag, player_t *instigator, DFloor::EStair type, line_t *line,
 		fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 		int usespecials);
 	friend bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
 		fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower);
+	friend bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
+		fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower);
 	friend bool EV_FloorCrushStop (int tag);
+	friend bool EV_FloorCrushStop (int tag, player_t *instigator);
 	friend bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+	friend bool EV_DoDonut (int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
 private:
 	DFloor ();
 };
 
-bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
+bool EV_BuildStairs(int tag, DFloor::EStair type, line_t *line,
 	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 	int usespecials);
-bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
+bool EV_BuildStairs(int tag, player_t *instigator, DFloor::EStair type, line_t *line,
+	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
+	int usespecials);
+bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag,
 	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower=false);
-bool EV_FloorCrushStop (int tag);
-bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
+	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower=false);
+bool EV_FloorCrushStop(int tag);
+bool EV_FloorCrushStop(int tag, player_t *instigator);
+bool EV_DoDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+bool EV_DoDonut(int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
 
 class DElevator : public DMover
 {
@@ -1052,20 +1080,30 @@ public:
 	void Tick ();
 
 	// [BC] Create this object for this new client entering the game.
-	void	UpdateToClient( ULONG ulClient );
+	void UpdateToClient( ULONG ulClient );
+	bool IsBusy();
+	void Predict();
 
 	// [BC] No longer protected so clients can call it.
 	void StartFloorSound ();
+	
+	player_t*	GetLastInstigator();
+	void	SetLastInstigator( player_t* player );
 
-	// [BC] Access function(s).
-	LONG	GetID( void );
-	void	SetID( LONG lID );
-
+	EElevator	GetType( void );
 	void	SetType( EElevator Type );
-	void	SetSpeed( LONG lSpeed );
+	fixed_t	GetSpeed( void );
+	void	SetSpeed( fixed_t speed );
+	LONG	GetDirection( void );
 	void	SetDirection( LONG lDirection );
-	void	SetFloorDestDist( LONG lDestDist );
-	void	SetCeilingDestDist( LONG lDestDist );
+	fixed_t	GetFloorPosition( void );
+	void	SetFloorPosition( fixed_t Position );
+	fixed_t	GetFloorDestDist( void );
+	void	SetFloorDestDist( fixed_t DestDist );
+	fixed_t	GetCeilingPosition( void );
+	void	SetCeilingPosition( fixed_t Position );
+	fixed_t	GetCeilingDestDist( void );
+	void	SetCeilingDestDist( fixed_t DestDist );
 
 protected:
 	EElevator	m_Type;
@@ -1075,19 +1113,21 @@ protected:
 	fixed_t		m_Speed;
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
+	
+	player_t	*m_LastInstigator;
 
-	// [BC] This is the elevator's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lElevatorID;
-
-	friend bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed,
-		fixed_t height, int tag);
+	friend bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator type, fixed_t speed,
+		fixed_t height);
+	friend bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator type, fixed_t speed,
+		fixed_t height);
 private:
 	DElevator ();
 };
 
-bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed,
-	fixed_t height, int tag);
+bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator type, fixed_t speed,
+	fixed_t height);
+bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator type, fixed_t speed,
+	fixed_t height);
 
 class DWaggleBase : public DMover
 {
@@ -1171,6 +1211,7 @@ enum EChange
 };
 
 bool EV_DoChange (line_t *line, EChange changetype, int tag);
+bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigator);
 
 
 
@@ -1208,16 +1249,13 @@ bool P_StartQuake (AActor *activator, int tid, int intensity, int duration, int 
 // [BC] Prototypes dealing with network IDs for movers.
 DDoor		*P_GetDoorBySectorNum( LONG sectorNum );
 DPlat		*P_GetPlatBySectorNum( LONG sectornum );
-DFloor		*P_GetFloorByID( LONG lID );
-DElevator	*P_GetElevatorByID( LONG lID );
+DFloor		*P_GetFloorBySectorNum( LONG sectorNum );
+DElevator	*P_GetElevatorBySectorNum( LONG sectorNum );
 DWaggleBase	*P_GetWaggleByID( LONG lID );
 DPillar		*P_GetPillarByID( LONG lID );
-DCeiling	*P_GetCeilingByID( LONG lID );
+DCeiling	*P_GetCeilingBySectorNum( LONG sectorNum );
 
-LONG		P_GetFirstFreeFloorID( void );
-LONG		P_GetFirstFreeElevatorID( void );
 LONG		P_GetFirstFreeWaggleID( void );
 LONG		P_GetFirstFreePillarID( void );
-LONG		P_GetFirstFreeCeilingID( void );
 
 #endif

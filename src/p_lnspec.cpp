@@ -299,123 +299,123 @@ FUNC(LS_Generic_Door)
 FUNC(LS_Floor_LowerByValue)
 // Floor_LowerByValue (tag, speed, height)
 {
-	return EV_DoFloor (DFloor::floorLowerByValue, ln, arg0, SPEED(arg1), FRACUNIT*arg2, 0, 0, false);
+	return EV_DoFloor (DFloor::floorLowerByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), FRACUNIT*arg2, 0, 0, false);
 }
 
 FUNC(LS_Floor_LowerToLowest)
 // Floor_LowerToLowest (tag, speed)
 {
-	return EV_DoFloor (DFloor::floorLowerToLowest, ln, arg0, SPEED(arg1), 0, 0, 0, false);
+	return EV_DoFloor (DFloor::floorLowerToLowest, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, 0, false);
 }
 
 FUNC(LS_Floor_LowerToHighest)
 // Floor_LowerToHighest (tag, speed, adjust, hereticlower)
 {
-	return EV_DoFloor (DFloor::floorLowerToHighest, ln, arg0, SPEED(arg1), (arg2-128)*FRACUNIT, 0, 0, false, arg3==1);
+	return EV_DoFloor (DFloor::floorLowerToHighest, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), (arg2-128)*FRACUNIT, 0, 0, false, arg3==1);
 }
 
 FUNC(LS_Floor_LowerToNearest)
 // Floor_LowerToNearest (tag, speed)
 {
-	return EV_DoFloor (DFloor::floorLowerToNearest, ln, arg0, SPEED(arg1), 0, 0, 0, false);
+	return EV_DoFloor (DFloor::floorLowerToNearest, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, 0, false);
 }
 
 FUNC(LS_Floor_RaiseByValue)
 // Floor_RaiseByValue (tag, speed, height)
 {
-	return EV_DoFloor (DFloor::floorRaiseByValue, ln, arg0, SPEED(arg1), FRACUNIT*arg2, 0, 0, false);
+	return EV_DoFloor (DFloor::floorRaiseByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), FRACUNIT*arg2, 0, 0, false);
 }
 
 FUNC(LS_Floor_RaiseToHighest)
 // Floor_RaiseToHighest (tag, speed)
 {
-	return EV_DoFloor (DFloor::floorRaiseToHighest, ln, arg0, SPEED(arg1), 0, 0, 0, false);
+	return EV_DoFloor (DFloor::floorRaiseToHighest, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, 0, false);
 }
 
 FUNC(LS_Floor_RaiseToNearest)
 // Floor_RaiseToNearest (tag, speed)
 {
-	return EV_DoFloor (DFloor::floorRaiseToNearest, ln, arg0, SPEED(arg1), 0, 0, 0, false);
+	return EV_DoFloor (DFloor::floorRaiseToNearest, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, 0, false);
 }
 
 FUNC(LS_Floor_RaiseAndCrush)
 // Floor_RaiseAndCrush (tag, speed, crush, crushmode)
 {
-	return EV_DoFloor (DFloor::floorRaiseAndCrush, ln, arg0, SPEED(arg1), 0, arg2, 0, CRUSHTYPE(arg3));
+	return EV_DoFloor (DFloor::floorRaiseAndCrush, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2, 0, CRUSHTYPE(arg3));
 }
 
 FUNC(LS_Floor_RaiseAndCrushDoom)
 // Floor_RaiseAndCrushDoom (tag, speed, crush, crushmode)
 {
-	return EV_DoFloor (DFloor::floorRaiseAndCrushDoom, ln, arg0, SPEED(arg1), 0, arg2, 0, CRUSHTYPE(arg3));
+	return EV_DoFloor (DFloor::floorRaiseAndCrushDoom, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2, 0, CRUSHTYPE(arg3));
 }
 
 FUNC(LS_Floor_RaiseByValueTimes8)
 // FLoor_RaiseByValueTimes8 (tag, speed, height)
 {
-	return EV_DoFloor (DFloor::floorRaiseByValue, ln, arg0, SPEED(arg1), FRACUNIT*arg2*8, 0, 0, false);
+	return EV_DoFloor (DFloor::floorRaiseByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), FRACUNIT*arg2*8, 0, 0, false);
 }
 
 FUNC(LS_Floor_LowerByValueTimes8)
 // Floor_LowerByValueTimes8 (tag, speed, height)
 {
-	return EV_DoFloor (DFloor::floorLowerByValue, ln, arg0, SPEED(arg1), FRACUNIT*arg2*8, 0, 0, false);
+	return EV_DoFloor (DFloor::floorLowerByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), FRACUNIT*arg2*8, 0, 0, false);
 }
 
 FUNC(LS_Floor_CrushStop)
 // Floor_CrushStop (tag)
 {
-	return EV_FloorCrushStop (arg0);
+	return EV_FloorCrushStop (arg0, GetInstigator(it, isFromAcs));
 }
 
 FUNC(LS_Floor_LowerInstant)
 // Floor_LowerInstant (tag, unused, height)
 {
-	return EV_DoFloor (DFloor::floorLowerInstant, ln, arg0, 0, arg2*FRACUNIT*8, 0, 0, false);
+	return EV_DoFloor (DFloor::floorLowerInstant, ln, arg0, GetInstigator(it, isFromAcs), 0, arg2*FRACUNIT*8, 0, 0, false);
 }
 
 FUNC(LS_Floor_RaiseInstant)
 // Floor_RaiseInstant (tag, unused, height)
 {
-	return EV_DoFloor (DFloor::floorRaiseInstant, ln, arg0, 0, arg2*FRACUNIT*8, 0, 0, false);
+	return EV_DoFloor (DFloor::floorRaiseInstant, ln, arg0, GetInstigator(it, isFromAcs), 0, arg2*FRACUNIT*8, 0, 0, false);
 }
 
 FUNC(LS_Floor_MoveToValueTimes8)
 // Floor_MoveToValueTimes8 (tag, speed, height, negative)
 {
-	return EV_DoFloor (DFloor::floorMoveToValue, ln, arg0, SPEED(arg1),
+	return EV_DoFloor (DFloor::floorMoveToValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1),
 					   arg2*FRACUNIT*8*(arg3?-1:1), 0, 0, false);
 }
 
 FUNC(LS_Floor_MoveToValue)
 // Floor_MoveToValue (tag, speed, height, negative)
 {
-	return EV_DoFloor (DFloor::floorMoveToValue, ln, arg0, SPEED(arg1),
+	return EV_DoFloor (DFloor::floorMoveToValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1),
 					   arg2*FRACUNIT*(arg3?-1:1), 0, 0, false);
 }
 
 FUNC(LS_Floor_RaiseToLowestCeiling)
 // Floor_RaiseToLowestCeiling (tag, speed)
 {
-	return EV_DoFloor (DFloor::floorRaiseToLowestCeiling, ln, arg0, SPEED(arg1), 0, 0, 0, false);
+	return EV_DoFloor (DFloor::floorRaiseToLowestCeiling, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, 0, false);
 }
 
 FUNC(LS_Floor_RaiseByTexture)
 // Floor_RaiseByTexture (tag, speed)
 {
-	return EV_DoFloor (DFloor::floorRaiseByTexture, ln, arg0, SPEED(arg1), 0, 0, 0, false);
+	return EV_DoFloor (DFloor::floorRaiseByTexture, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, 0, false);
 }
 
 FUNC(LS_Floor_RaiseByValueTxTy)
 // Floor_RaiseByValueTxTy (tag, speed, height)
 {
-	return EV_DoFloor (DFloor::floorRaiseAndChange, ln, arg0, SPEED(arg1), arg2*FRACUNIT, 0, 0, false);
+	return EV_DoFloor (DFloor::floorRaiseAndChange, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), arg2*FRACUNIT, 0, 0, false);
 }
 
 FUNC(LS_Floor_LowerToLowestTxTy)
 // Floor_LowerToLowestTxTy (tag, speed)
 {
-	return EV_DoFloor (DFloor::floorLowerAndChange, ln, arg0, SPEED(arg1), arg2*FRACUNIT, 0, 0, false);
+	return EV_DoFloor (DFloor::floorLowerAndChange, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), arg2*FRACUNIT, 0, 0, false);
 }
 
 FUNC(LS_Floor_Waggle)
@@ -433,19 +433,19 @@ FUNC(LS_Ceiling_Waggle)
 FUNC(LS_Floor_TransferTrigger)
 // Floor_TransferTrigger (tag)
 {
-	return EV_DoChange (ln, trigChangeOnly, arg0);
+	return EV_DoChange (ln, trigChangeOnly, arg0, GetInstigator(it, isFromAcs));
 }
 
 FUNC(LS_Floor_TransferNumeric)
 // Floor_TransferNumeric (tag)
 {
-	return EV_DoChange (ln, numChangeOnly, arg0);
+	return EV_DoChange (ln, numChangeOnly, arg0, GetInstigator(it, isFromAcs));
 }
 
 FUNC(LS_Floor_Donut)
 // Floor_Donut (pillartag, pillarspeed, slimespeed)
 {
-	return EV_DoDonut (arg0, ln, SPEED(arg1), SPEED(arg2));
+	return EV_DoDonut (arg0, GetInstigator(it, isFromAcs), ln, SPEED(arg1), SPEED(arg2));
 }
 
 FUNC(LS_Generic_Floor)
@@ -480,7 +480,7 @@ FUNC(LS_Generic_Floor)
 		}
 	}
 
-	return EV_DoFloor (type, ln, arg0, SPEED(arg1), arg2*FRACUNIT,
+	return EV_DoFloor (type, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), arg2*FRACUNIT,
 					   (arg4 & 16) ? 20 : -1, arg4 & 7, false);
 					   
 }
@@ -488,35 +488,35 @@ FUNC(LS_Generic_Floor)
 FUNC(LS_Stairs_BuildDown)
 // Stair_BuildDown (tag, speed, height, delay, reset)
 {
-	return EV_BuildStairs (arg0, DFloor::buildDown, ln,
+	return EV_BuildStairs (arg0, GetInstigator(it, isFromAcs), DFloor::buildDown, ln,
 						   arg2 * FRACUNIT, SPEED(arg1), TICS(arg3), arg4, 0, 1);
 }
 
 FUNC(LS_Stairs_BuildUp)
 // Stairs_BuildUp (tag, speed, height, delay, reset)
 {
-	return EV_BuildStairs (arg0, DFloor::buildUp, ln,
+	return EV_BuildStairs (arg0, GetInstigator(it, isFromAcs), DFloor::buildUp, ln,
 						   arg2 * FRACUNIT, SPEED(arg1), TICS(arg3), arg4, 0, 1);
 }
 
 FUNC(LS_Stairs_BuildDownSync)
 // Stairs_BuildDownSync (tag, speed, height, reset)
 {
-	return EV_BuildStairs (arg0, DFloor::buildDown, ln,
+	return EV_BuildStairs (arg0, GetInstigator(it, isFromAcs), DFloor::buildDown, ln,
 						   arg2 * FRACUNIT, SPEED(arg1), 0, arg3, 0, 2);
 }
 
 FUNC(LS_Stairs_BuildUpSync)
 // Stairs_BuildUpSync (tag, speed, height, reset)
 {
-	return EV_BuildStairs (arg0, DFloor::buildUp, ln,
+	return EV_BuildStairs (arg0, GetInstigator(it, isFromAcs), DFloor::buildUp, ln,
 						   arg2 * FRACUNIT, SPEED(arg1), 0, arg3, 0, 2);
 }
 
 FUNC(LS_Stairs_BuildUpDoom)
 // Stairs_BuildUpDoom (tag, speed, height, delay, reset)
 {
-	return EV_BuildStairs (arg0, DFloor::buildUp, ln,
+	return EV_BuildStairs (arg0, GetInstigator(it, isFromAcs), DFloor::buildUp, ln,
 						   arg2 * FRACUNIT, SPEED(arg1), TICS(arg3), arg4, 0, 0);
 }
 
@@ -524,7 +524,7 @@ FUNC(LS_Generic_Stairs)
 // Generic_Stairs (tag, speed, step, dir/igntxt, reset)
 {
 	DFloor::EStair type = (arg3 & 1) ? DFloor::buildUp : DFloor::buildDown;
-	bool res = EV_BuildStairs (arg0, type, ln,
+	bool res = EV_BuildStairs (arg0, GetInstigator(it, isFromAcs), type, ln,
 							   arg2 * FRACUNIT, SPEED(arg1), 0, arg4, arg3 & 2, 0);
 
 	if (res && ln && (ln->flags & ML_REPEAT_SPECIAL) && ln->special == Generic_Stairs)
@@ -555,135 +555,135 @@ FUNC(LS_Pillar_Open)
 FUNC(LS_Ceiling_LowerByValue)
 // Ceiling_LowerByValue (tag, speed, height)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerByValue, ln, arg0, SPEED(arg1), 0, arg2*FRACUNIT, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilLowerByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2*FRACUNIT, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_RaiseByValue)
 // Ceiling_RaiseByValue (tag, speed, height)
 {
-	return EV_DoCeiling (DCeiling::ceilRaiseByValue, ln, arg0, SPEED(arg1), 0, arg2*FRACUNIT, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilRaiseByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2*FRACUNIT, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_LowerByValueTimes8)
 // Ceiling_LowerByValueTimes8 (tag, speed, height)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerByValue, ln, arg0, SPEED(arg1), 0, arg2*FRACUNIT*8, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilLowerByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2*FRACUNIT*8, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_RaiseByValueTimes8)
 // Ceiling_RaiseByValueTimes8 (tag, speed, height)
 {
-	return EV_DoCeiling (DCeiling::ceilRaiseByValue, ln, arg0, SPEED(arg1), 0, arg2*FRACUNIT*8, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilRaiseByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2*FRACUNIT*8, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_CrushAndRaise)
 // Ceiling_CrushAndRaise (tag, speed, crush, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, SPEED(arg1), SPEED(arg1)/2, 0, arg2, 0, 0, CRUSHTYPE(arg3));
+	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1)/2, 0, arg2, 0, 0, CRUSHTYPE(arg3));
 }
 
 FUNC(LS_Ceiling_LowerAndCrush)
 // Ceiling_LowerAndCrush (tag, speed, crush, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerAndCrush, ln, arg0, SPEED(arg1), SPEED(arg1), 0, arg2, 0, 0, CRUSHTYPE(arg3));
+	return EV_DoCeiling (DCeiling::ceilLowerAndCrush, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1), 0, arg2, 0, 0, CRUSHTYPE(arg3));
 }
 
 FUNC(LS_Ceiling_LowerAndCrushDist)
 // Ceiling_LowerAndCrush (tag, speed, crush, dist, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerAndCrushDist, ln, arg0, SPEED(arg1), SPEED(arg1), arg3*FRACUNIT, arg2, 0, 0, CRUSHTYPE(arg4));
+	return EV_DoCeiling (DCeiling::ceilLowerAndCrushDist, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1), arg3*FRACUNIT, arg2, 0, 0, CRUSHTYPE(arg4));
 }
 
 FUNC(LS_Ceiling_CrushStop)
 // Ceiling_CrushStop (tag)
 {
-	return EV_CeilingCrushStop (arg0);
+	return EV_CeilingCrushStop (arg0, GetInstigator(it, isFromAcs));
 }
 
 FUNC(LS_Ceiling_CrushRaiseAndStay)
 // Ceiling_CrushRaiseAndStay (tag, speed, crush, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilCrushRaiseAndStay, ln, arg0, SPEED(arg1), SPEED(arg1)/2, 0, arg2, 0, 0, CRUSHTYPE(arg3));
+	return EV_DoCeiling (DCeiling::ceilCrushRaiseAndStay, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1)/2, 0, arg2, 0, 0, CRUSHTYPE(arg3));
 }
 
 FUNC(LS_Ceiling_MoveToValueTimes8)
 // Ceiling_MoveToValueTimes8 (tag, speed, height, negative)
 {
-	return EV_DoCeiling (DCeiling::ceilMoveToValue, ln, arg0, SPEED(arg1), 0,
+	return EV_DoCeiling (DCeiling::ceilMoveToValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0,
 						 arg2*FRACUNIT*8*((arg3) ? -1 : 1), -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_MoveToValue)
 // Ceiling_MoveToValue (tag, speed, height, negative)
 {
-	return EV_DoCeiling (DCeiling::ceilMoveToValue, ln, arg0, SPEED(arg1), 0,
+	return EV_DoCeiling (DCeiling::ceilMoveToValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0,
 						 arg2*FRACUNIT*((arg3) ? -1 : 1), -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_LowerToHighestFloor)
 // Ceiling_LowerToHighestFloor (tag, speed)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerToHighestFloor, ln, arg0, SPEED(arg1), 0, 0, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilLowerToHighestFloor, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_LowerInstant)
 // Ceiling_LowerInstant (tag, unused, height)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerInstant, ln, arg0, 0, 0, arg2*FRACUNIT*8, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilLowerInstant, ln, arg0, GetInstigator(it, isFromAcs), 0, 0, arg2*FRACUNIT*8, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_RaiseInstant)
 // Ceiling_RaiseInstant (tag, unused, height)
 {
-	return EV_DoCeiling (DCeiling::ceilRaiseInstant, ln, arg0, 0, 0, arg2*FRACUNIT*8, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilRaiseInstant, ln, arg0, GetInstigator(it, isFromAcs), 0, 0, arg2*FRACUNIT*8, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_CrushRaiseAndStayA)
 // Ceiling_CrushRaiseAndStayA (tag, dnspeed, upspeed, damage, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilCrushRaiseAndStay, ln, arg0, SPEED(arg1), SPEED(arg2), 0, arg3, 0, 0, CRUSHTYPE(arg4));
+	return EV_DoCeiling (DCeiling::ceilCrushRaiseAndStay, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg2), 0, arg3, 0, 0, CRUSHTYPE(arg4));
 }
 
 FUNC(LS_Ceiling_CrushRaiseAndStaySilA)
 // Ceiling_CrushRaiseAndStaySilA (tag, dnspeed, upspeed, damage, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilCrushRaiseAndStay, ln, arg0, SPEED(arg1), SPEED(arg2), 0, arg3, 1, 0, CRUSHTYPE(arg4));
+	return EV_DoCeiling (DCeiling::ceilCrushRaiseAndStay, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg2), 0, arg3, 1, 0, CRUSHTYPE(arg4));
 }
 
 FUNC(LS_Ceiling_CrushAndRaiseA)
 // Ceiling_CrushAndRaiseA (tag, dnspeed, upspeed, damage, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, SPEED(arg1), SPEED(arg2), 0, arg3, 0, 0, CRUSHTYPE(arg4));
+	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg2), 0, arg3, 0, 0, CRUSHTYPE(arg4));
 }
 
 FUNC(LS_Ceiling_CrushAndRaiseDist)
 // Ceiling_CrushAndRaiseDist (tag, dist, speed, damage, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilCrushAndRaiseDist, ln, arg0, SPEED(arg2), SPEED(arg2), arg1*FRACUNIT, arg3, 0, 0, CRUSHTYPE(arg4));
+	return EV_DoCeiling (DCeiling::ceilCrushAndRaiseDist, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg2), SPEED(arg2), arg1*FRACUNIT, arg3, 0, 0, CRUSHTYPE(arg4));
 }
 
 FUNC(LS_Ceiling_CrushAndRaiseSilentA)
 // Ceiling_CrushAndRaiseSilentA (tag, dnspeed, upspeed, damage, crushtype)
 {
-	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, SPEED(arg1), SPEED(arg2), 0, arg3, 1, 0, CRUSHTYPE(arg4));
+	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg2), 0, arg3, 1, 0, CRUSHTYPE(arg4));
 }
 
 FUNC(LS_Ceiling_RaiseToNearest)
 // Ceiling_RaiseToNearest (tag, speed)
 {
-	return EV_DoCeiling (DCeiling::ceilRaiseToNearest, ln, arg0, SPEED(arg1), 0, 0, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilRaiseToNearest, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_LowerToLowest)
 // Ceiling_LowerToLowest (tag, speed)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerToLowest, ln, arg0, SPEED(arg1), 0, 0, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilLowerToLowest, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_LowerToFloor)
 // Ceiling_LowerToFloor (tag, speed)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerToFloor, ln, arg0, SPEED(arg1), 0, 0, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilLowerToFloor, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, 0, -1, 0, 0, false);
 }
 
 FUNC(LS_Generic_Ceiling)
@@ -713,14 +713,14 @@ FUNC(LS_Generic_Ceiling)
 		}
 	}
 
-	return EV_DoCeiling (type, ln, arg0, SPEED(arg1), SPEED(arg1), arg2*FRACUNIT,
+	return EV_DoCeiling (type, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1), arg2*FRACUNIT,
 						 (arg4 & 16) ? 20 : -1, 0, arg4 & 7, false);
 }
 
 FUNC(LS_Generic_Crusher)
 // Generic_Crusher (tag, dnspeed, upspeed, silent, damage)
 {
-	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, SPEED(arg1),
+	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1),
 						 SPEED(arg2), 0, arg4, arg3 ? 2 : 0, 0, false);
 }
 
@@ -728,7 +728,7 @@ FUNC(LS_Generic_Crusher2)
 // Generic_Crusher2 (tag, dnspeed, upspeed, silent, damage)
 {
 	// same as above but uses Hexen's crushing method.
-	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, SPEED(arg1),
+	return EV_DoCeiling (DCeiling::ceilCrushAndRaise, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1),
 						 SPEED(arg2), 0, arg4, arg3 ? 2 : 0, 0, true);
 }
 
@@ -1884,13 +1884,13 @@ FUNC(LS_ACS_Terminate)
 FUNC(LS_FloorAndCeiling_LowerByValue)
 // FloorAndCeiling_LowerByValue (tag, speed, height)
 {
-	return EV_DoElevator (ln, DElevator::elevateLower, SPEED(arg1), arg2*FRACUNIT, arg0);
+	return EV_DoElevator (ln, arg0, DElevator::elevateLower, SPEED(arg1), arg2*FRACUNIT);
 }
 
 FUNC(LS_FloorAndCeiling_RaiseByValue)
 // FloorAndCeiling_RaiseByValue (tag, speed, height)
 {
-	return EV_DoElevator (ln, DElevator::elevateRaise, SPEED(arg1), arg2*FRACUNIT, arg0);
+	return EV_DoElevator (ln, arg0, DElevator::elevateRaise, SPEED(arg1), arg2*FRACUNIT);
 }
 
 FUNC(LS_FloorAndCeiling_LowerRaise)
@@ -1911,19 +1911,19 @@ FUNC(LS_FloorAndCeiling_LowerRaise)
 FUNC(LS_Elevator_MoveToFloor)
 // Elevator_MoveToFloor (tag, speed)
 {
-	return EV_DoElevator (ln, DElevator::elevateCurrent, SPEED(arg1), 0, arg0);
+	return EV_DoElevator (ln, arg0, DElevator::elevateCurrent, SPEED(arg1), 0);
 }
 
 FUNC(LS_Elevator_RaiseToNearest)
 // Elevator_RaiseToNearest (tag, speed)
 {
-	return EV_DoElevator (ln, DElevator::elevateUp, SPEED(arg1), 0, arg0);
+	return EV_DoElevator (ln, arg0, DElevator::elevateUp, SPEED(arg1), 0);
 }
 
 FUNC(LS_Elevator_LowerToNearest)
 // Elevator_LowerToNearest (tag, speed)
 {
-	return EV_DoElevator (ln, DElevator::elevateDown, SPEED(arg1), 0, arg0);
+	return EV_DoElevator (ln, arg0, DElevator::elevateDown, SPEED(arg1), 0);
 }
 
 FUNC(LS_Light_ForceLightning)

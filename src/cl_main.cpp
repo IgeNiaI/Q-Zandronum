@@ -212,27 +212,16 @@ static	void	client_DoDoor( BYTESTREAM_s *pByteStream );
 
 // Floor commands.
 static	void	client_DoFloor( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyFloor( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeFloorDirection( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeFloorType( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeFloorDestDist( BYTESTREAM_s *pByteStream );
-static	void	client_StartFloorSound( BYTESTREAM_s *pByteStream );
 static	void	client_BuildStair( BYTESTREAM_s *pByteStream );
 
 // Ceiling commands.
 static	void	client_DoCeiling( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyCeiling( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeCeilingDirection( BYTESTREAM_s *pByteStream );
-static	void	client_ChangeCeilingSpeed( BYTESTREAM_s *pByteStream );
-static	void	client_PlayCeilingSound( BYTESTREAM_s *pByteStream );
 
 // Plat commands.
 static	void	client_DoPlat( BYTESTREAM_s *pByteStream );
 
 // Elevator commands.
 static	void	client_DoElevator( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyElevator( BYTESTREAM_s *pByteStream );
-static	void	client_StartElevatorSound( BYTESTREAM_s *pByteStream );
 
 // Pillar commands.
 static	void	client_DoPillar( BYTESTREAM_s *pByteStream );
@@ -1589,45 +1578,9 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 
 		client_DoFloor( pByteStream );
 		break;
-	case SVC_DESTROYFLOOR:
-
-		client_DestroyFloor( pByteStream );
-		break;
-	case SVC_CHANGEFLOORDIRECTION:
-
-		client_ChangeFloorDirection( pByteStream );
-		break;
-	case SVC_CHANGEFLOORTYPE:
-
-		client_ChangeFloorType( pByteStream );
-		break;
-	case SVC_CHANGEFLOORDESTDIST:
-
-		client_ChangeFloorDestDist( pByteStream );
-		break;
-	case SVC_STARTFLOORSOUND:
-
-		client_StartFloorSound( pByteStream );
-		break;
 	case SVC_DOCEILING:
 
 		client_DoCeiling( pByteStream );
-		break;
-	case SVC_DESTROYCEILING:
-
-		client_DestroyCeiling( pByteStream );
-		break;
-	case SVC_CHANGECEILINGDIRECTION:
-
-		client_ChangeCeilingDirection( pByteStream );
-		break;
-	case SVC_CHANGECEILINGSPEED:
-
-		client_ChangeCeilingSpeed( pByteStream );
-		break;
-	case SVC_PLAYCEILINGSOUND:
-
-		client_PlayCeilingSound( pByteStream );
 		break;
 	case SVC_DOPLAT:
 
@@ -1636,14 +1589,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 	case SVC_DOELEVATOR:
 
 		client_DoElevator( pByteStream );
-		break;
-	case SVC_DESTROYELEVATOR:
-
-		client_DestroyElevator( pByteStream );
-		break;
-	case SVC_STARTELEVATORSOUND:
-
-		client_StartElevatorSound( pByteStream );
 		break;
 	case SVC_DOPILLAR:
 
@@ -7214,229 +7159,64 @@ static void client_DoDoor( BYTESTREAM_s *pByteStream )
 //
 static void client_DoFloor( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lDirection;
-	LONG			FloorDestDist;
-	LONG			lSpeed;
-	LONG			lSectorID;
-	LONG			Crush;
-	bool			Hexencrush;
-	LONG			lFloorID;
-	sector_t		*pSector;
-	DFloor			*pFloor;
-
-	// Read in the type of floor.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the direction of the floor.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Read in the speed of the floor.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's destination height.
-	FloorDestDist = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's crush.
-	Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-
-	// Read in the floor's crush type.
-	Hexencrush = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the floor's network ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustFloorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
+	int Type = NETWORK_ReadByte( pByteStream );
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	int FloorDestDist = NETWORK_ReadLong( pByteStream );
+	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
+	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
+	int NewSpecial = NETWORK_ReadLong( pByteStream );
 
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	pSector = &sectors[lSectorID];
+	sector_t *pSector = &sectors[SectorID];
 
-	// If the sector already has activity, don't override it.
-	if ( pSector->floordata )
-		return;
+	DFloor *pFloor = P_GetFloorBySectorNum( pSector->sectornum );
+	if (pFloor == NULL )
+	{
+		// Create the new floor.
+		pFloor = new DFloor( pSector );
+	}
 
-	pFloor = new DFloor( pSector );
-	pFloor->SetType( (DFloor::EFloor)lType );
+	pFloor->SetLastInstigator( &players[Instigator] );
+	pFloor->SetType( (DFloor::EFloor)Type );
 	pFloor->SetCrush( Crush );
 	pFloor->SetHexencrush( Hexencrush );
-	pFloor->SetDirection( lDirection );
+	pFloor->SetPositionAndDirection( Position, Direction );
 	pFloor->SetFloorDestDist( FloorDestDist );
-	pFloor->SetSpeed( lSpeed );
-	pFloor->SetID( lFloorID );
-}
+	pFloor->SetSpeed( Speed );
+	pFloor->SetNewSpecial( NewSpecial );
 
-//*****************************************************************************
-//
-static void client_DestroyFloor( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_ChangeFloorType: Couldn't find floor with ID: %ld!\n", lFloorID );
-		return;
+		pFloor->Predict();
 	}
-
-	SN_StopSequence( pFloor->GetSector( ), CHAN_FLOOR );
-	pFloor->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeFloorDirection( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-	LONG		lDirection;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new floor direction.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustFloorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeFloorType: Couldn't find floor with ID: %ld!\n", lFloorID );
-		return;
-	}
-
-	pFloor->SetDirection( lDirection );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeFloorType( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-	LONG		lType;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new type of floor this is.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeFloorType: Couldn't find ceiling with ID: %ld!\n", lFloorID );
-		return;
-	}
-
-	pFloor->SetType( (DFloor::EFloor)lType );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeFloorDestDist( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-	fixed_t		DestDist;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new floor destination distance.
-	DestDist = NETWORK_ReadLong( pByteStream );
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeFloorType: Couldn't find floor with ID: %ld!\n", lFloorID );
-		return;
-	}
-
-	pFloor->SetFloorDestDist( DestDist );
-}
-
-//*****************************************************************************
-//
-static void client_StartFloorSound( BYTESTREAM_s *pByteStream )
-{
-	DFloor		*pFloor;
-	LONG		lFloorID;
-
-	// Read in the floor ID.
-	lFloorID = NETWORK_ReadShort( pByteStream );
-
-	pFloor = P_GetFloorByID( lFloorID );
-	if ( pFloor == NULL )
-	{
-		CLIENT_PrintWarning( "client_StartFloorSound: Couldn't find floor with ID: %ld!\n", lFloorID );
-		return;
-	}
-
-	// Finally, start playing the floor's sound sequence.
-	pFloor->StartFloorSound( );
 }
 
 //*****************************************************************************
 //
 static void client_BuildStair( BYTESTREAM_s *pByteStream )
 {
-	// Read in the type of floor.
 	int Type = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
 	int SectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the direction of the floor.
-	int Direction = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-
-	// Read in the speed of the floor.
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
 	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's destination height.
 	fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's crush.
 	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-
-	// Read in the floor's crush type.
 	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the floor's reset count.
+	LONG lNewSpecial = NETWORK_ReadLong( pByteStream );
 	int ResetCount = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's delay time.
 	int Delay = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's pause time.
 	int PauseTime = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's step time.
 	int StepTime = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's per step time.
 	int PerStepTime = NETWORK_ReadLong( pByteStream );
-
-	// Read in the floor's network ID.
-	int FloorID = NETWORK_ReadShort( pByteStream );
 
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
@@ -7447,184 +7227,83 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 	// If the sector already has activity, don't override it.
 	if ( sector->floordata )
 		return;
+	
+	DFloor *floor = P_GetFloorBySectorNum( sector->sectornum );
+	if (floor == NULL )
+	{
+		// Create the new floor.
+		floor = new DFloor( sector );
+	}
 
-	DFloor *floor = new DFloor( sector );
+	floor->SetLastInstigator( &players[Instigator] );
 	floor->SetType( (DFloor::EFloor)Type );
 	floor->SetCrush( Crush );
 	floor->SetHexencrush( Hexencrush );
-	floor->SetDirection( Direction );
+	floor->SetPositionAndDirection( Position, Direction );
 	floor->SetFloorDestDist( FloorDestDist );
 	floor->SetSpeed( Speed );
+	floor->SetNewSpecial( lNewSpecial );
 	floor->SetResetCount( ResetCount );
 	floor->SetDelay( Delay );
 	floor->SetPauseTime( PauseTime );
 	floor->SetStepTime( StepTime );
 	floor->SetPerStepTime( PerStepTime );
-	floor->SetID( FloorID );
+
+	if ( Instigator == consoleplayer )
+	{
+		floor->Predict();
+	}
 }
 
 //*****************************************************************************
 //
 static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	fixed_t			BottomHeight;
-	fixed_t			TopHeight;
-	LONG			lSpeed;
-	LONG			lCrush;
-	bool			Hexencrush;
-	LONG			lSilent;
-	LONG			lDirection;
-	LONG			lSectorID;
-	LONG			lCeilingID;
-	sector_t		*pSector;
-	DCeiling		*pCeiling;
-
-	// Read in the type of ceiling this is.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector this ceiling is attached to.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the direction this ceiling is moving in.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Read in the lowest distance the ceiling can travel before it stops.
-	BottomHeight = NETWORK_ReadLong( pByteStream );
-
-	// Read in the highest distance the ceiling can travel before it stops.
-	TopHeight = NETWORK_ReadLong( pByteStream );
-
-	// Read in the speed of the ceiling.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Does this ceiling damage those who get squashed by it?
-	lCrush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-
-	// Is this ceiling crush Hexen style?
-	Hexencrush = !!NETWORK_ReadByte( pByteStream );
-
-	// Does this ceiling make noise?
-	lSilent = NETWORK_ReadShort( pByteStream );
-
-	// Read in the network ID of the ceiling.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustCeilingDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	int Tag = NETWORK_ReadByte( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	int Direction = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
+	int OldDirection = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
+	fixed_t Position = NETWORK_ReadLong( pByteStream );
+	fixed_t BottomHeight = NETWORK_ReadLong( pByteStream );
+	fixed_t TopHeight = NETWORK_ReadLong( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	fixed_t SpeedDown = NETWORK_ReadLong( pByteStream );
+	fixed_t SpeedUp = NETWORK_ReadLong( pByteStream );
+	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
+	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
+	int Silent = NETWORK_ReadShort( pByteStream );
 
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	pSector = &sectors[lSectorID];
+	sector_t *pSector = &sectors[SectorID];
 
-	pCeiling = new DCeiling( pSector, lSpeed, 0, lSilent );
+	DCeiling *pCeiling = P_GetCeilingBySectorNum( pSector->sectornum );
+	if ( pCeiling == NULL )
+	{
+		// Create the new ceiling.
+		pCeiling = new DCeiling( pSector, SpeedDown, SpeedUp, Silent );
+	}
+
+	pCeiling->SetLastInstigator( &players[Instigator] );
+	pCeiling->SetTag( Tag );
+	pCeiling->SetType( (DCeiling::ECeiling)Type );
 	pCeiling->SetBottomHeight( BottomHeight );
 	pCeiling->SetTopHeight( TopHeight );
-	pCeiling->SetCrush( lCrush );
+	pCeiling->SetPositionAndDirection( Position, Direction );
+	pCeiling->SetOldDirection( OldDirection );
+	pCeiling->SetSpeed( Speed );
+	pCeiling->SetCrush( Crush );
 	pCeiling->SetHexencrush( Hexencrush );
-	pCeiling->SetDirection( lDirection );
-	pCeiling->SetID( lCeilingID );
-}
+	pCeiling->SetSilent( Silent );
 
-//*****************************************************************************
-//
-static void client_DestroyCeiling( BYTESTREAM_s *pByteStream )
-{
-	DCeiling	*pCeiling;
-	LONG		lCeilingID;
-
-	// Read in the ceiling ID.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	pCeiling = P_GetCeilingByID( lCeilingID );
-	if ( pCeiling == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_DestroyCeiling: Couldn't find ceiling with ID: %ld!\n", lCeilingID );
-		return;
+		pCeiling->Predict();
 	}
-
-	SN_StopSequence( pCeiling->GetSector( ), CHAN_CEILING );
-	pCeiling->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeCeilingDirection( BYTESTREAM_s *pByteStream )
-{
-	DCeiling	*pCeiling;
-	LONG		lCeilingID;
-	LONG		lDirection;
-
-	// Read in the ceiling ID.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new ceiling direction.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustCeilingDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
-
-	pCeiling = P_GetCeilingByID( lCeilingID );
-	if ( pCeiling == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeCeilingDirection: Couldn't find ceiling with ID: %ld!\n", lCeilingID );
-		return;
-	}
-
-	// Finally, set the new ceiling direction.
-	pCeiling->SetDirection( lDirection );
-}
-
-//*****************************************************************************
-//
-static void client_ChangeCeilingSpeed( BYTESTREAM_s *pByteStream )
-{
-	DCeiling	*pCeiling;
-	LONG		lCeilingID;
-	LONG		lSpeed;
-
-	// Read in the ceiling ID.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new ceiling speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	pCeiling = P_GetCeilingByID( lCeilingID );
-	if ( pCeiling == NULL )
-	{
-		CLIENT_PrintWarning( "client_ChangeCeilingSpeed: Couldn't find ceiling with ID: %ld!\n", lCeilingID );
-		return;
-	}
-
-	pCeiling->SetSpeed( lSpeed );
-}
-
-//*****************************************************************************
-//
-static void client_PlayCeilingSound( BYTESTREAM_s *pByteStream )
-{
-	DCeiling	*pCeiling;
-	LONG		lCeilingID;
-
-	// Read in the ceiling ID.
-	lCeilingID = NETWORK_ReadShort( pByteStream );
-
-	pCeiling = P_GetCeilingByID( lCeilingID );
-	if ( pCeiling == NULL )
-	{
-		CLIENT_PrintWarning( "client_PlayCeilingSound: Couldn't find ceiling with ID: %ld!\n", lCeilingID );
-		return;
-	}
-
-	pCeiling->PlayCeilingSound( );
 }
 
 //*****************************************************************************
@@ -7683,106 +7362,37 @@ static void client_DoPlat( BYTESTREAM_s *pByteStream )
 //
 static void client_DoElevator( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lSectorID;
-	LONG			lSpeed;
-	LONG			lDirection;
-	LONG			lFloorDestDist;
-	LONG			lCeilingDestDist;
-	LONG			lElevatorID;
-	sector_t		*pSector;
-	DElevator		*pElevator;
-
-	// Read in the type of elevator.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the speed.
-	lSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the direction.
-	lDirection = NETWORK_ReadByte( pByteStream );
-
-	// Read in the floor's destination distance.
-	lFloorDestDist = NETWORK_ReadLong( pByteStream );
-
-	// Read in the ceiling's destination distance.
-	lCeilingDestDist = NETWORK_ReadLong( pByteStream );
-
-	// Read in the elevator ID.
-	lElevatorID = NETWORK_ReadShort( pByteStream );
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	fixed_t Speed = NETWORK_ReadLong( pByteStream );
+	int Direction = CLIENT_AdjustElevatorDirection( NETWORK_ReadByte( pByteStream ) );
+	fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
+	fixed_t CeilingDestDist = NETWORK_ReadLong( pByteStream );
 
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	// Since we still want to receive direction as a byte, but -1 can't be represented in byte
-	// form, adjust the value into something that can be represented.
-	lDirection = CLIENT_AdjustElevatorDirection( lDirection );
-	if ( lDirection == INT_MAX )
-		return;
-
-	pSector = &sectors[lSectorID];
-
-	// Create the elevator, and set all its attributes that were read in.
-	pElevator = new DElevator( pSector );
-	pElevator->SetType( (DElevator::EElevator)lType );
-	pElevator->SetSpeed( lSpeed );
-	pElevator->SetDirection( lDirection );
-	pElevator->SetFloorDestDist( lFloorDestDist );
-	pElevator->SetCeilingDestDist( lCeilingDestDist );
-	pElevator->SetID( lElevatorID );
-}
-
-//*****************************************************************************
-//
-static void client_DestroyElevator( BYTESTREAM_s *pByteStream )
-{
-	LONG		lElevatorID;
-	DElevator	*pElevator;
-
-	// Read in the elevator ID.
-	lElevatorID = NETWORK_ReadShort( pByteStream );
-
-	pElevator = P_GetElevatorByID( lElevatorID );
-	if ( pElevator == NULL )
+	sector_t *pSector = &sectors[SectorID];
+	
+	DElevator *pElevator = P_GetElevatorBySectorNum( pSector->sectornum );
+	if (pElevator == NULL)
 	{
-		CLIENT_PrintWarning( "client_DestroyElevator: Couldn't find elevator with ID: %ld!\n", lElevatorID );
-		return;
+		// Create the new elevator.
+		pElevator = new DElevator( pSector );
 	}
 
-	/* [BB] I think ZDoom does all this is Destroy now.
-	pElevator->GetSector( )->floordata = NULL;
-	pElevator->GetSector( )->ceilingdata = NULL;
-	stopinterpolation( INTERP_SectorFloor, pElevator->GetSector( ));
-	stopinterpolation( INTERP_SectorCeiling, pElevator->GetSector( ));
-	*/
+	pElevator->SetType( (DElevator::EElevator)Type );
+	pElevator->SetSpeed( Speed );
+	pElevator->SetDirection( Direction );
+	pElevator->SetFloorDestDist( FloorDestDist );
+	pElevator->SetCeilingDestDist( CeilingDestDist );
 
-	// Finally, destroy the elevator.
-	pElevator->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_StartElevatorSound( BYTESTREAM_s *pByteStream )
-{
-	LONG		lElevatorID;
-	DElevator	*pElevator;
-
-	// Read in the elevator ID.
-	lElevatorID = NETWORK_ReadShort( pByteStream );
-
-	pElevator = P_GetElevatorByID( lElevatorID );
-	if ( pElevator == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_StartElevatorSound: Couldn't find elevator with ID: %ld!\n", lElevatorID );
-		return;
+		pElevator->Predict();
 	}
-
-	// Finally, start the elevator sound.
-	pElevator->StartFloorSound( );
 }
 
 //*****************************************************************************
