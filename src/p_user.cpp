@@ -3246,19 +3246,19 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	{
 		if (cmd->ucmd.buttons & BT_JUMP)
 		{
-			player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
-
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+			else
+				player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
 		else if (cmd->ucmd.buttons & BT_CROUCH)
 		{
-			player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
-
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+			else
+				player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
 
 	}
@@ -3266,19 +3266,19 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	{
 		if (cmd->ucmd.buttons & BT_JUMP)
 		{
-			player->mo->velz = FixedMul(12 * FRACUNIT, player->mo->Speed);
-
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+			else
+				player->mo->velz = FixedMul(12 * FRACUNIT, player->mo->Speed);
 		}
 		else if (cmd->ucmd.buttons & BT_CROUCH)
 		{
-			player->mo->velz = -FixedMul(12 * FRACUNIT, player->mo->Speed);
-
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+			else
+				player->mo->velz = -FixedMul(12 * FRACUNIT, player->mo->Speed);
 		}
 	}
 	// [RH] check for jump
