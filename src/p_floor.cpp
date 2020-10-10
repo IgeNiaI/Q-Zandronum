@@ -115,6 +115,9 @@ void DFloor::Tick ()
 {
 	EResult res;
 
+	if (m_Direction == 0)
+		return;
+
 	// [RH] Handle resetting stairs
 	if (m_Type == buildStair || m_Type == waitStair)
 	{
@@ -260,6 +263,11 @@ void DFloor::UpdateToClient( ULONG ulClient )
 		SERVERCOMMANDS_DoFloor( this, ulClient, SVCF_ONLYTHISCLIENT );
 	else
 		SERVERCOMMANDS_BuildStair( this, ulClient, SVCF_ONLYTHISCLIENT );
+}
+
+bool DFloor::IsBusy()
+{
+	return m_Direction != 0;
 }
 
 void DFloor::Predict()

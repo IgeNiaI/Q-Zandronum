@@ -15,6 +15,8 @@ public:
 
 	sector_t *GetSector() const { return m_Sector; }
 
+	virtual bool IsBusy();
+
 protected:
 	DSectorEffect ();
 	sector_t *m_Sector;

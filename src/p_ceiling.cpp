@@ -248,6 +248,11 @@ void DCeiling::UpdateToClient( ULONG ulClient )
 	SERVERCOMMANDS_DoCeiling( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
+bool DCeiling::IsBusy()
+{
+	return m_Direction != 0;
+}
+
 void DCeiling::Predict()
 {
 	// Use a version of gametic that's appropriate for both the current game and demos.

@@ -267,6 +267,11 @@ void DDoor::UpdateToClient( ULONG ulClient )
 	SERVERCOMMANDS_DoDoor( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
+bool DDoor::IsBusy()
+{
+	return m_Direction != -2;
+}
+
 void DDoor::Predict()
 {
 	// Use a version of gametic that's appropriate for both the current game and demos.

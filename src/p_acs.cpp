@@ -6940,7 +6940,7 @@ int DLevelScript::RunScript ()
 		int secnum = -1;
 
 		while ((secnum = P_FindSectorFromTag (statedata, secnum)) >= 0)
-			if (sectors[secnum].floordata || sectors[secnum].ceilingdata)
+			if ((sectors[secnum].floordata && sectors[secnum].floordata->IsBusy()) || (sectors[secnum].ceilingdata && sectors[secnum].ceilingdata->IsBusy()))
 				return resultValue;
 
 		// If we got here, none of the tagged sectors were busy

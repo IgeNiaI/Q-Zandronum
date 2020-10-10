@@ -477,6 +477,7 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
+	bool IsBusy();
 	void Predict();
 	
 	player_t*	GetLastInstigator();
@@ -678,6 +679,11 @@ public:
 	LONG	GetLightTag( void );
 	void	SetLightTag( LONG lTag );
 
+	bool	IsBusy();
+
+	void	Reinit(bool bNoSound);
+	void	DoorSound(bool raise, class DSeqNode *curseq = NULL) const;
+
 protected:
 	EVlDoor		m_Type;
 	fixed_t 	m_TopDist;
@@ -697,11 +703,6 @@ protected:
 	int 		m_TopCountdown;
 
 	int			m_LightTag;
-
-	// [BC] Make this public so clients can call it.
-public:
-	void Reinit (bool bNoSound);
-	void DoorSound (bool raise, class DSeqNode *curseq=NULL) const;
 protected:
 
 	friend bool	EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
@@ -808,6 +809,8 @@ public:
 
 	void Serialize (FArchive &arc);
 	void Tick ();
+
+	bool IsBusy();
 
 	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator,
 						fixed_t speedDown, fixed_t speedUp, fixed_t height,
@@ -956,6 +959,7 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
+	bool IsBusy();
 	void Predict();
 
 	// [BC] Make these public so clients can use them.

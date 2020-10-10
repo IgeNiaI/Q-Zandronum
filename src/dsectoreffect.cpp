@@ -69,6 +69,11 @@ void DSectorEffect::Serialize (FArchive &arc)
 	arc << m_Sector;
 }
 
+bool DSectorEffect::IsBusy()
+{
+	return true;
+}
+
 IMPLEMENT_POINTY_CLASS (DMover)
 	DECLARE_POINTER(interpolation)
 END_POINTERS

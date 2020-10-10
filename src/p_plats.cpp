@@ -249,6 +249,11 @@ void DPlat::UpdateToClient( ULONG ulClient )
 	SERVERCOMMANDS_DoPlat( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
+bool DPlat::IsBusy()
+{
+	return !m_Finished;
+}
+
 void DPlat::Predict()
 {
 	// Use a version of gametic that's appropriate for both the current game and demos.
