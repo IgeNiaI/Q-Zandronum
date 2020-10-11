@@ -3431,7 +3431,7 @@ void SERVER_UpdateActorProperties( AActor *pActor, ULONG ulClient )
 	// [WS] Update the actor's reaction time if it's changed.
 	if ( pActor->reactiontime != pActor->GetDefault()->reactiontime )
 		SERVERCOMMANDS_SetThingReactionTime( pActor, ulClient, SVCF_ONLYTHISCLIENT );
-	
+
 	// [geNia] Update the actor's translation
 	if ( pActor->Translation )
 		SERVERCOMMANDS_SetThingTranslation( pActor );
@@ -4797,7 +4797,7 @@ void SERVER_HandleWeaponStateJump( ULONG ulPlayer, FState *pState, LONG lPositio
 		return;
 
 	// [BB] First set the weapon sprite of the player according to the jump.
-	SERVERCOMMANDS_SetPlayerPSprite( ulPlayer, pState, lPosition );
+	SERVERCOMMANDS_SetPlayerPSprite( ulPlayer, pState, lPosition, ulPlayer, SVCF_SKIPTHISCLIENT );
 
 	// [BB] During the time it takes for the server to instruct the client to do the jump
 	// the client possible executes code pointers it shouldn't because the client just ignores
@@ -4813,7 +4813,7 @@ void SERVER_HandleWeaponStateJump( ULONG ulPlayer, FState *pState, LONG lPositio
 
 //*****************************************************************************
 // [BB]
-void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor )
+void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor, int SkipPlayerNumber )
 {
 	ULONG ulBits = 0;
 
@@ -4829,7 +4829,10 @@ void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor )
 		ulBits |= CM_VELZ;
 
 	if ( ulBits )
-		SERVERCOMMANDS_MoveThing( pActor, ulBits );
+		if ( SkipPlayerNumber >= 0 )
+			SERVERCOMMANDS_MoveThing( pActor, ulBits, SkipPlayerNumber, SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_MoveThing( pActor, ulBits );
 }
 
 //*****************************************************************************

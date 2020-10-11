@@ -38,25 +38,15 @@
 
 EXTERN_CVAR (Float, autoaim)
 EXTERN_CVAR ( Int, cl_clientflags ) // [CK]
-EXTERN_CVAR ( Flag, cl_clientsidepuffs ) // [CK]
 
 // [CK] We are using bitfields now for boolean flags to save bandwidth.
 enum
 {
-	CLIENTFLAGS_UNLAGGED = 			0x01,
-	CLIENTFLAGS_RESPAWNONFIRE = 	0x02,
-	CLIENTFLAGS_CLIENTSIDEPUFFS = 	0x04,
-	CLIENTFLAGS_PING_UNLAGGED = 	0x08,
+	CLIENTFLAGS_RESPAWNONFIRE = 	0x01,
 
 	// This is the default flags used for cl_clientflags
-	CLIENTFLAGS_DEFAULT = CLIENTFLAGS_UNLAGGED | CLIENTFLAGS_RESPAWNONFIRE
+	CLIENTFLAGS_DEFAULT = CLIENTFLAGS_RESPAWNONFIRE
 };
-
-// [CK] If the client wants to predict puffs.
-inline bool CLIENT_ShouldPredictPuffs( void )
-{
-	return !!( cl_clientflags & CLIENTFLAGS_CLIENTSIDEPUFFS );
-}
 
 int D_GenderToInt (const char *gender);
 extern const char *GenderNames[3];

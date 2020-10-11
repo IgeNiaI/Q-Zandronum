@@ -98,6 +98,33 @@ static FRandom pr_teleport("A_Teleport");
 
 //==========================================================================
 //
+// [geNia] Used in all code pointers that spawn actors to handle
+// the NETFL_CLIENTSIDEONLY property.
+//
+//==========================================================================
+bool NETWORK_ShouldMissileNotBeSpawned ( const AActor *pSpawner, const PClass *pSpawnType, const bool bForceClientSide )
+{
+	// [BB] Nothing to spawn.
+	if ( pSpawnType == NULL )
+		return true;
+
+	bool bSpawnOnClient = ( bForceClientSide
+	                        || ( pSpawner && ( pSpawner->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+	                        || ( GetDefaultByType(pSpawnType)->ulNetworkFlags & NETFL_CLIENTSIDEONLY )
+	                      );
+
+	// [BB] Clients don't spawn non-client side only things.
+	if ( NETWORK_InClientMode() && !bSpawnOnClient && ( pSpawner->player - players != consoleplayer ) )
+		return true;
+	// [BB] The server doesn't spawn client side only things.
+	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && bSpawnOnClient )
+		return true;
+	else
+		return false;
+}
+
+//==========================================================================
+//
 // [BB] Used in all code pointers that spawn actors to handle
 // the NETFL_CLIENTSIDEONLY property.
 //
@@ -354,13 +381,6 @@ DEFINE_ACTION_FUNCTION(AActor, A_UnsetFloat)
 static void DoAttack (AActor *self, bool domelee, bool domissile,
 					  int MeleeDamage, FSoundID MeleeSound, const PClass *MissileType,fixed_t MissileHeight)
 {
-	// [BC] Let the server play these sounds.
-	if ( NETWORK_InClientMode() )
-	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
-	}
-
 	if (self->target == NULL) return;
 
 	A_FaceTarget (self);
@@ -444,27 +464,62 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_PlaySound)
 	ACTION_PARAM_BOOL(looping, 3);
 	ACTION_PARAM_FLOAT(attenuation, 4);
 
-	// [BC] Let the server play these sounds.
-	if ( NETWORK_InClientMode() )
+	if ( self->player )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
-	}
+		if (!looping)
+		{
+			S_Sound (self, channel, soundid, volume, attenuation, true, (self->player - players) );	// [BC] Inform the clients.
+		}
+		else
+		{
+			if (!S_IsActorPlayingSomething (self, channel&7, soundid))
+			{
+				S_Sound (self, channel | CHAN_LOOP, soundid, volume, attenuation);
 
-	if (!looping)
+				// [BC] If we're the server, tell clients to play the sound.
+				// [Dusk] We need to respect existing sound play since this is a looped sound.
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SoundActor( self, channel | CHAN_LOOP, S_GetName( soundid ), volume, attenuation, (self->player - players), SVCF_SKIPTHISCLIENT, true );
+			}
+		}
+	}
+	else
+	if ( self->target && self->target->player )
 	{
-		S_Sound (self, channel, soundid, volume, attenuation, true );	// [BC] Inform the clients.
+		if (!looping)
+		{
+			S_Sound (self, channel, soundid, volume, attenuation, true, (self->target->player - players) );	// [BC] Inform the clients.
+		}
+		else
+		{
+			if (!S_IsActorPlayingSomething (self, channel&7, soundid))
+			{
+				S_Sound (self, channel | CHAN_LOOP, soundid, volume, attenuation);
+
+				// [BC] If we're the server, tell clients to play the sound.
+				// [Dusk] We need to respect existing sound play since this is a looped sound.
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SoundActor( self, channel | CHAN_LOOP, S_GetName( soundid ), volume, attenuation, (self->target->player - players), SVCF_SKIPTHISCLIENT, true );
+			}
+		}
 	}
 	else
 	{
-		if (!S_IsActorPlayingSomething (self, channel&7, soundid))
+		if (!looping)
 		{
-			S_Sound (self, channel | CHAN_LOOP, soundid, volume, attenuation);
+			S_Sound (self, channel, soundid, volume, attenuation, true );	// [BC] Inform the clients.
+		}
+		else
+		{
+			if (!S_IsActorPlayingSomething (self, channel&7, soundid))
+			{
+				S_Sound (self, channel | CHAN_LOOP, soundid, volume, attenuation);
 
-			// [BC] If we're the server, tell clients to play the sound.
-			// [Dusk] We need to respect existing sound play since this is a looped sound.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( self, channel | CHAN_LOOP, S_GetName( soundid ), volume, attenuation, MAXPLAYERS, 0, true );
+				// [BC] If we're the server, tell clients to play the sound.
+				// [Dusk] We need to respect existing sound play since this is a looped sound.
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SoundActor( self, channel | CHAN_LOOP, S_GetName( soundid ), volume, attenuation, MAXPLAYERS, 0, true );
+			}
 		}
 	}
 }
@@ -502,13 +557,6 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_PlaySoundEx)
 	ACTION_PARAM_BOOL(looping, 2);
 	ACTION_PARAM_INT(attenuation_raw, 3);
 
-	// [BB] Let the server play these sounds.
-	if ( NETWORK_InClientMode() )
-	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
-	}
-
 	float attenuation;
 	switch (attenuation_raw)
 	{
@@ -524,19 +572,40 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_PlaySoundEx)
 		channel = NAME_Auto;
 	}
 
-	if (!looping)
+	if (self && self->player)
 	{
-		S_Sound (self, int(channel) - NAME_Auto, soundid, 1, attenuation, true );	// [BB] Inform the clients.
+		if (!looping)
+		{
+			S_Sound (self, int(channel) - NAME_Auto, soundid, 1, attenuation, true, (self->player - players) );	// [BB] Inform the clients.
+		}
+		else
+		{
+			if (!S_IsActorPlayingSomething (self, int(channel) - NAME_Auto, soundid))
+			{
+				S_Sound (self, (int(channel) - NAME_Auto) | CHAN_LOOP, soundid, 1, attenuation);
+
+				// [BB] If we're the server, tell clients to play the sound, but only if they are not already playing something for this actor.
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SoundActor( self, (int(channel) - NAME_Auto) | CHAN_LOOP, S_GetName( soundid ), 1, attenuation, (self->player - players), SVCF_SKIPTHISCLIENT, true );
+			}
+		}
 	}
 	else
 	{
-		if (!S_IsActorPlayingSomething (self, int(channel) - NAME_Auto, soundid))
+		if (!looping)
 		{
-			S_Sound (self, (int(channel) - NAME_Auto) | CHAN_LOOP, soundid, 1, attenuation);
+			S_Sound (self, int(channel) - NAME_Auto, soundid, 1, attenuation, true );	// [BB] Inform the clients.
+		}
+		else
+		{
+			if (!S_IsActorPlayingSomething (self, int(channel) - NAME_Auto, soundid))
+			{
+				S_Sound (self, (int(channel) - NAME_Auto) | CHAN_LOOP, soundid, 1, attenuation);
 
-			// [BB] If we're the server, tell clients to play the sound, but only if they are not already playing something for this actor.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( self, (int(channel) - NAME_Auto) | CHAN_LOOP, S_GetName( soundid ), 1, attenuation, MAXPLAYERS, 0, true );
+				// [BB] If we're the server, tell clients to play the sound, but only if they are not already playing something for this actor.
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SoundActor( self, (int(channel) - NAME_Auto) | CHAN_LOOP, S_GetName( soundid ), 1, attenuation, MAXPLAYERS, 0, true );
+			}
 		}
 	}
 }
@@ -724,7 +793,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_JumpIfHealthLower)
 	ACTION_PARAM_INT(health, 0);
 	ACTION_PARAM_STATE(jump, 1);
 	ACTION_PARAM_INT(destination_selector, 2);
-	
+
 	AActor *reference = COPY_AAPTR(self, destination_selector);
 	if (!reference)
 	{
@@ -938,12 +1007,6 @@ enum
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Explode)
 {
-	// [BB] This is server side.
-	if ( NETWORK_InClientMode() )
-	{
-		return;
-	}
-
 	ACTION_PARAM_START(8);
 	ACTION_PARAM_INT(damage, 0);
 	ACTION_PARAM_INT(distance, 1);
@@ -1101,7 +1164,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMissile)
 	AActor * missile;
 
 	// [BB] Should the actor not be spawned, taking in account client side only actors?
-	if ( NETWORK_ShouldActorNotBeSpawned ( self, ti ) )
+	if ( NETWORK_ShouldMissileNotBeSpawned ( self, ti ) )
 		return;
 
 	if (self->target != NULL || aimmode==2)
@@ -1217,11 +1280,14 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMissile)
 
 				// [BB] The client did the spawning, so this has to be a client side only actor.
 				// Needs to be done regardless of whether the spawn was successful.
-				if ( NETWORK_InClientMode() )
+				if ( NETWORK_InClientMode() && (missile->ulNetworkFlags & NETFL_CLIENTSIDEONLY) )
 					missile->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 				// [BC] If we're the server, tell clients to spawn the missile.
 				else if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SpawnMissile( missile );
+					if ( self->player )
+						SERVERCOMMANDS_SpawnMissile( missile, (self->player - players), SVCF_SKIPTHISCLIENT );
+					else
+						SERVERCOMMANDS_SpawnMissile( missile );
 
 				P_CheckMissileSpawn(missile, self->radius);
 			}
@@ -1558,8 +1624,7 @@ void A_CustomFireBullets( AActor *self,
 	// [BB] To make hitscan decals kinda work online, we may not stop here yet.
 	// [CK] This also includes predicted puffs and blood decals.
 	if ( NETWORK_InClientMode()
-		&& cl_hitscandecalhack == false
-		&& CLIENT_ShouldPredictPuffs( ) == false )
+		&& cl_hitscandecalhack == false )
 	{
 		return;
 	}
@@ -1679,7 +1744,43 @@ void A_FireCustomMissileHelper ( AActor *self,
 
 		// [BC] If we're the server, tell clients to spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissile( misl );
+		{
+			if ( self->player )
+			{
+				// [geNia] Compensate player ping when shooting missiles
+				int StartingTick = UNLAGGED_Gametic( self->player );
+
+				for (int Tick = StartingTick; Tick < gametic; Tick++)
+				{
+					UNLAGGED_ReconcileTick( self, Tick );
+					UNLAGGED_AddReconciliationBlocker();
+					int InitialTics = misl->tics;
+					misl->tics = -1;
+					misl->Tick();
+					misl->tics = InitialTics;
+
+					if (!(misl->flags & MF_MISSILE))
+					{
+						UNLAGGED_RemoveReconciliationBlocker();
+						break;
+					}
+					UNLAGGED_RemoveReconciliationBlocker();
+				}
+
+				UNLAGGED_Restore(self);
+
+				SERVERCOMMANDS_SpawnMissile( misl, (self->player - players), SVCF_SKIPTHISCLIENT );
+
+				if (!(misl->flags & MF_MISSILE))
+				{
+					SERVERCOMMANDS_MissileExplode( misl, misl->BlockingLine );
+				}
+			}
+			else
+			{
+				SERVERCOMMANDS_SpawnMissile( misl );
+			}
+		}
 	}
 }
 
@@ -1705,7 +1806,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 		return;
 
 	// [BB] Should the actor not be spawned, taking in account client side only actors?
-	if ( NETWORK_ShouldActorNotBeSpawned ( self, ti ) )
+	if ( NETWORK_ShouldMissileNotBeSpawned ( self, ti ) )
 		return;
 
 	if (ti) 
@@ -1913,12 +2014,6 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RailAttack)
 	if (UseAmmo && !weapon->DepleteAmmo(weapon->bAltFire, true))
 		return;
 
-	// [BC] Don't actually do the attack in client mode.
-	// [Spleen] Railgun is handled by the server unless unlagged
-	if ( NETWORK_InClientMode() && !UNLAGGED_DrawRailClientside( self )
-		&& !( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
-		return;
-
 	angle_t angle;
 	angle_t slope;
 
@@ -1990,13 +2085,6 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 	}
 
 	self->flags &= ~MF_AMBUSH;
-
-	// [BB] Don't actually do the attack in client mode, unless necessary for unlagged.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self )
-		&& !UNLAGGED_DrawRailClientside( self ) )
-	{
-		return;
-	}
 
 	if (aim)
 	{
@@ -2071,7 +2159,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 //
 //===========================================================================
 
-static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
+static void DoGiveInventory(AActor *source, AActor *receiver, DECLARE_PARAMINFO)
 {
 	ACTION_PARAM_START(3);
 	ACTION_PARAM_CLASS(mi, 0);
@@ -2093,12 +2181,14 @@ static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 	{
 		bNeedClientUpdate = true;
 		
-		// [BB] The server will let the client know about the outcome.
-		if ( NETWORK_InClientModeAndActorNotClientHandled ( self ) )
-			return;
+		if ( NETWORK_InClientMode() )
+		{
+			// [geNia] Clients can only give items to themselves
+			if ( ( source->player - players != consoleplayer ) || ( source == receiver ) )
+				return;
+		}
 	}
 
-	
 	if (amount==0) amount=1;
 	if (mi) 
 	{
@@ -2136,12 +2226,12 @@ static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GiveInventory)
 {
-	DoGiveInventory(self, PUSH_PARAMINFO);
+	DoGiveInventory(self, self, PUSH_PARAMINFO);
 }	
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GiveToTarget)
 {
-	DoGiveInventory(self->target, PUSH_PARAMINFO);
+	DoGiveInventory(self, self->target, PUSH_PARAMINFO);
 }	
 
 //===========================================================================
@@ -2452,16 +2542,29 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItem)
 		// [BC] If we're the server and the spawn was not blocked, tell clients to spawn the item.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			SERVERCOMMANDS_SpawnThing( mo );
+			if ( self->player )
+			{
+				SERVERCOMMANDS_SpawnThing( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
 
-			if ( mo->angle != 0 )
-				SERVERCOMMANDS_SetThingAngle( mo );
+				if ( mo->angle != 0 )
+					SERVERCOMMANDS_SetThingAngle( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
 
-			if ( mo->Translation )
-				SERVERCOMMANDS_SetThingTranslation( mo );
+				if ( mo->Translation )
+					SERVERCOMMANDS_SetThingTranslation( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
+			}
+			else
+			{
+				SERVERCOMMANDS_SpawnThing( mo );
+
+				if ( mo->angle != 0 )
+					SERVERCOMMANDS_SetThingAngle( mo );
+
+				if ( mo->Translation )
+					SERVERCOMMANDS_SetThingTranslation( mo );
+			}
 		}
 		// [BB] The client did the spawning, so this has to be a client side only actor.
-		else if ( NETWORK_InClientMode() )
+		else if ( NETWORK_InClientMode() && (mo->ulNetworkFlags & NETFL_CLIENTSIDEONLY) )
 			mo->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 	}
 	ACTION_SET_RESULT(res);	// for an inventory item's use state
@@ -2562,30 +2665,56 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 		// [BB] If we're the server and the spawn was not blocked, tell clients to spawn the item
 		if ( res && (NETWORK_GetState( ) == NETSTATE_SERVER) )
 		{
-			SERVERCOMMANDS_SpawnThing( mo );
+			if ( self->player )
+			{
+				SERVERCOMMANDS_SpawnThing( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
 
-			// [BB] Set the angle and velocity if necessary.
-			SERVER_SetThingNonZeroAngleAndVelocity( mo );
+				// [BB] Set the angle and velocity if necessary.
+				SERVER_SetThingNonZeroAngleAndVelocity( mo, (self->player - players) );
 
-			if ( mo->Translation )
-				SERVERCOMMANDS_SetThingTranslation( mo );
+				if ( mo->Translation )
+					SERVERCOMMANDS_SetThingTranslation( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
 
-			// [BB] To properly handle actor-actor bouncing, the client must know the target.
-			if ( mo->BounceFlags != BOUNCE_None )
-				SERVERCOMMANDS_SetThingTarget ( mo );
+				// [BB] To properly handle actor-actor bouncing, the client must know the target.
+				if ( mo->BounceFlags != BOUNCE_None )
+					SERVERCOMMANDS_SetThingTarget ( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
 
-			// [BB] Set scale if necessary.
-			SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( mo );
+				// [BB] Set scale if necessary.
+				SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( mo, (self->player - players), SVCF_SKIPTHISCLIENT);
 
-			if (flags & SXF_TRANSFERSTENCILCOL)
-				SERVERCOMMANDS_SetThingFillColor( mo );
+			if (flags & SIXF_TRANSFERSTENCILCOL)
+				SERVERCOMMANDS_SetThingFillColor( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
 
-			if (flags & SXF_TRANSFERSPRITEFRAME)
-				SERVERCOMMANDS_SetThingSprite( mo );
+			if (flags & SIXF_TRANSFERSPRITE)
+				SERVERCOMMANDS_SetThingSprite( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
+			}
+			else
+			{
+				SERVERCOMMANDS_SpawnThing( mo );
+
+				// [BB] Set the angle and velocity if necessary.
+				SERVER_SetThingNonZeroAngleAndVelocity( mo );
+
+				if ( mo->Translation )
+					SERVERCOMMANDS_SetThingTranslation( mo );
+
+				// [BB] To properly handle actor-actor bouncing, the client must know the target.
+				if ( mo->BounceFlags != BOUNCE_None )
+					SERVERCOMMANDS_SetThingTarget ( mo );
+
+				// [BB] Set scale if necessary.
+				SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( mo );
+
+				if (flags & SXF_TRANSFERSTENCILCOL)
+					SERVERCOMMANDS_SetThingFillColor( mo );
+
+				if (flags & SXF_TRANSFERSPRITEFRAME)
+					SERVERCOMMANDS_SetThingSprite( mo );
+			}
 		}
 
 		// [BC] Flag this actor as being client-spawned.
-		if ( NETWORK_InClientMode() )
+		if ( NETWORK_InClientMode() && (mo->ulNetworkFlags & NETFL_CLIENTSIDEONLY) )
 		{
 			mo->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 		}
@@ -3127,7 +3256,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnDebris)
 			// [BB]
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				SERVERCOMMANDS_SpawnThing( mo );
-			else if ( NETWORK_InClientMode() )
+			else if ( NETWORK_InClientMode() && (mo->ulNetworkFlags & NETFL_CLIENTSIDEONLY) )
 				mo->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 			if (transfer_translation)
@@ -3384,6 +3513,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetBlend)
 	ACTION_PARAM_FLOAT(alpha, 1);
 	ACTION_PARAM_INT(tics, 2);
 	ACTION_PARAM_COLOR(color2, 3);
+
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+		return;
 
 	if (color == MAKEARGB(255,255,255,255)) color=0;
 	if (color2 == MAKEARGB(255,255,255,255)) color2=0;
@@ -4853,7 +4985,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetAngle)
 	ACTION_PARAM_ANGLE(angle, 0);
 	ACTION_PARAM_INT(flags, 1)
 	ACTION_PARAM_INT(destination_selector, 2);
-	
+
 	AActor *reference = COPY_AAPTR(self, destination_selector);
 	if (!reference)
 	{
@@ -4878,7 +5010,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetPitch)
 	ACTION_PARAM_ANGLE(pitch, 0);
 	ACTION_PARAM_INT(flags, 1);
 	ACTION_PARAM_INT(destination_selector, 2);
-	
+
 	AActor *reference = COPY_AAPTR(self, destination_selector);
 	if (!reference)
 	{
@@ -4918,7 +5050,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ScaleVelocity)
 	ACTION_PARAM_START(2);
 	ACTION_PARAM_FIXED(scale, 0);
 	ACTION_PARAM_INT(destination_selector, 1);
-	
+
 	AActor *reference = COPY_AAPTR(self, destination_selector);
 	if (!reference)
 	{
@@ -4962,7 +5094,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 	ACTION_PARAM_FIXED(z, 2);
 	ACTION_PARAM_INT(flags, 3);
 	ACTION_PARAM_INT(destination_selector, 4);
-	
+
 	AActor *reference = COPY_AAPTR(self, destination_selector);
 	if (!reference)
 	{
@@ -5139,7 +5271,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Teleport)
 	ACTION_PARAM_FIXED(MinDist, 4);
 	ACTION_PARAM_FIXED(MaxDist, 5);
 	ACTION_PARAM_INT(destination_selector, 6);
-	
+
 	AActor *reference = COPY_AAPTR(self, destination_selector);
 	if (!reference)
 	{

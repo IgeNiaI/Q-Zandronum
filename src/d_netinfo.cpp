@@ -91,14 +91,8 @@ CVAR (String,	playerclass,			"Fighter",	CVAR_USERINFO | CVAR_ARCHIVE);
 // [BC] New userinfo entries for Skulltag.
 CVAR (Int,		railcolor,				0,			CVAR_USERINFO | CVAR_ARCHIVE);
 CVAR (Int,		handicap,				0,			CVAR_USERINFO | CVAR_ARCHIVE);
-// [Spleen] Let the user enable or disable unlagged shots for themselves. [CK] Now a bitfield.
-CVAR (Flag,		cl_unlagged,				cl_clientflags, CLIENTFLAGS_UNLAGGED );
 // [BB] Let the user decide whether he wants to respawn when pressing fire. [CK] Now a bitfield.
 CVAR (Flag, 	cl_respawnonfire, 			cl_clientflags, CLIENTFLAGS_RESPAWNONFIRE );
-// [CK] Unlagged settings where we can choose ping unlagged.
-CVAR (Flag,		cl_ping_unlagged,			cl_clientflags, CLIENTFLAGS_PING_UNLAGGED );
-// [CK] Let the user control if they want clientside puffs or not.
-CVAR (Flag,		cl_clientsidepuffs,			cl_clientflags, CLIENTFLAGS_CLIENTSIDEPUFFS );
 
 // [TP] Userinfo changes yet to be sent.
 static UserInfoChanges PendingUserinfoChanges;
@@ -106,15 +100,6 @@ static UserInfoChanges PendingUserinfoChanges;
 // [CK] CVARs that affect cl_clientflags
 CUSTOM_CVAR ( Int, cl_clientflags, CLIENTFLAGS_DEFAULT, CVAR_USERINFO | CVAR_ARCHIVE )
 {
-	// Predicted puffs will look really bad if unlagged is off, therefore anyone
-	// who turns off unlagged will also turn off clientside puffs.
-	// We will invert the clientside puff flag, then AND it to turn off the
-	// clientside puff flag since unlagged is off.
-	if ( ( ( self & CLIENTFLAGS_UNLAGGED ) == 0 ) && ( self & CLIENTFLAGS_CLIENTSIDEPUFFS ) )
-	{
-		self = ( self & ( ~CLIENTFLAGS_CLIENTSIDEPUFFS ) );
-		Printf( "Clientside puffs have been disabled as unlagged has been turned off.\n" );
-	}
 }
 
 // ============================================================================

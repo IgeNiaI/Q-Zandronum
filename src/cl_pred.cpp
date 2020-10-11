@@ -78,6 +78,7 @@ static	bool		g_bPredicting = false;
 
 // Version of gametic for normal games, as well as demos.
 static	ULONG		g_ulGameTick;
+static	ULONG		g_ulPrevUpdateTick;
 
 // Store crucial player attributes for prediction.
 static	ticcmd_t	g_SavedTiccmd[CLIENT_PREDICTION_TICS];
@@ -102,6 +103,7 @@ static	bool		g_bSavedOnFloor[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedOnMobj[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedWasJustThrustedZ[CLIENT_PREDICTION_TICS];
 static	int			g_SavedPredictable[CLIENT_PREDICTION_TICS][3];
+static	fixed_t		g_SelfThrustBonus[CLIENT_PREDICTION_TICS][3];
 
 #ifdef	_DEBUG
 CVAR( Bool, cl_showpredictionsuccess, false, 0 );
@@ -218,6 +220,15 @@ void CLIENT_PREDICT_PlayerPredict( void )
 	// Save a bunch of crucial attributes of the player that are necessary for prediction.
 	client_predict_BeginPrediction( pPlayer );
 
+	while (g_ulPrevUpdateTick < CLIENT_GetLastConsolePlayerUpdateTick())
+	{
+		g_SelfThrustBonus[g_ulPrevUpdateTick % CLIENT_PREDICTION_TICS][0] = 0;
+		g_SelfThrustBonus[g_ulPrevUpdateTick % CLIENT_PREDICTION_TICS][1] = 0;
+		g_SelfThrustBonus[g_ulPrevUpdateTick % CLIENT_PREDICTION_TICS][2] = 0;
+
+		g_ulPrevUpdateTick++;
+	}
+
 	// Predict however many ticks are necessary.
 	g_bPredicting = true;
 	client_predict_DoPrediction( pPlayer, ulPredictionTicks );
@@ -298,6 +309,13 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 
 	// [BB] Remember whether the player was standing on another actor.
 	g_bSavedOnMobj[Tick % CLIENT_PREDICTION_TICS] = !!(pPlayer->mo->flags2 & MF2_ONMOBJ);
+}
+
+void CLIENT_PREDICT_SaveSelfThrustBonus( const player_t *pPlayer, fixed_t velx, fixed_t vely, fixed_t velz )
+{
+	g_SelfThrustBonus[gametic % CLIENT_PREDICTION_TICS][0] = velx;
+	g_SelfThrustBonus[gametic % CLIENT_PREDICTION_TICS][1] = vely;
+	g_SelfThrustBonus[gametic % CLIENT_PREDICTION_TICS][2] = velz;
 }
 
 //*****************************************************************************
@@ -418,6 +436,10 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		pPlayer->mo->Predictable1 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][0];
 		pPlayer->mo->Predictable2 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][1];
 		pPlayer->mo->Predictable3 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][2];
+
+		pPlayer->mo->velx += g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][0];
+		pPlayer->mo->vely += g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][1];
+		pPlayer->mo->velz += g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][2];
 
 		// Tick the player.
 		P_PlayerThink( pPlayer, &g_SavedTiccmd[lTick % CLIENT_PREDICTION_TICS] );

@@ -733,12 +733,6 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMissile)
 			return;
 	}
 
-	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
-	{
-		return;
-	}
-
 	P_SpawnPlayerMissileWithPossibleSpread (self, PClass::FindClass("Rocket")); // [BB] Spread
 
 	// [BC] Tell all the bots that a weapon was fired.
@@ -800,12 +794,6 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireSTGrenade)
 		if (!weapon->DepleteAmmo (weapon->bAltFire))
 			return;
 	}
-		
-	// Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
-	{
-		return;
-	}
 
 	// Temporarily raise the pitch to send the grenade slightly upwards
 	fixed_t SavedPlayerPitch = self->pitch;
@@ -841,12 +829,6 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePlasma)
 		}
 	}
 
-	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
-	{
-		return;
-	}
-
 	P_SpawnPlayerMissileWithPossibleSpread (self, PClass::FindClass("PlasmaBall")); // [BB] Spread
 
 	// [BC] Tell all the bots that a weapon was fired.
@@ -878,14 +860,6 @@ static void FireRailgun(AActor *self, int offset_xy, const PClass* puffType = NU
 		{
 			P_SetSafeFlash(weapon, player, flash, (pr_firerail()&1));
 		}
-	}
-
-	// Weapons are handled by the server.
-	// [Spleen] But railgun is an exception if it's unlagged, to make it look nicer
-	if ( NETWORK_InClientMode()
-		&& !UNLAGGED_DrawRailClientside( self ) )
-	{
-		return;
 	}
 
 	damage = 200;
@@ -965,13 +939,6 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireBFG)
 		if (!weapon->DepleteAmmo (weapon->bAltFire, true, deh.BFGCells))
 			return;
 	}
-
-	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
-	{
-		return;
-	}
-
 
 	P_SpawnPlayerMissile (self,  0, 0, 0, PClass::FindClass("BFGBall"), self->angle, NULL, NULL, !(dmflags2 & DF2_YES_FREEAIMBFG));
 

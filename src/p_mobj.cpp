@@ -6399,12 +6399,6 @@ AActor *P_SpawnMapThing (FMapThing *mthing, int position)
 // [BC] Added bTellClientToSpawn.
 AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t y, fixed_t z, angle_t dir, int updown, int flags, AActor *vict, bool bTellClientToSpawn)
 {
-	// [CK] If we're a client in this function and we're supposed to be a server
-	// telling clients to spawn it, then we will get information later from the
-	// server.
-	if ( NETWORK_InClientMode() && CLIENT_ShouldPredictPuffs( ) == false )
-		return NULL;
-
 	// [CK] The client also should not be doing this puff prediction if it's not
 	// for themselves.
 	if ( NETWORK_InClientMode() )
@@ -6498,12 +6492,20 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 		// treat it as a special case.
 		if ( ulState != STATE_SPAWN )
 		{
-			SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false );
+			// [CK] If a player is the source that is firing this, check and see
+			// if the attacker is predicting and exclude them (and only them)
+			// from getting the predicted puff if the bullet puff has +NONETID.
+			if ( source && source->player )
+			{
+				SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false, (source->player - players), SVCF_SKIPTHISCLIENT );
+			}
+			else
+			{
+				// [CK] It is always sent when fired from a non-player.
+				SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false );
+			}
 		}
-		// In certain other conditions, we need to spawn the puff with a network
-		// ID so that things like sounds work.
-		else if (( (flags & PF_HITTHING) && puff->SeeSound ) ||
-				 ( puff->AttackSound ) || ( ( puff->GetClass()->Meta.GetMetaString (AMETA_Obituary) != NULL ) && ( flags & PF_TEMPORARY ) ) )
+		else
 		{
 			if ( puff->lNetID == -1 )
 			{
@@ -6511,37 +6513,14 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 				g_NetIDList.useID ( puff->lNetID , puff );
 			}
 
-			SERVERCOMMANDS_SpawnPuff( puff );
-		}
-		else
-		{
-			// [CK] If a player is the source that is firing this, check and see
-			// if the attacker is predicting and exclude them (and only them)
-			// from getting the predicted puff if the bullet puff has +NONETID.
+			// [CK] It is always sent when fired from a non-player.
+			// [BB] If the puff has a net ID, it must be spawned with one.
 			if ( source && source->player )
 			{
-				// [CK] Only spawn for players who are not predicting puffs.
-				ULONG activatorPlayerNumber = source->player - players;
-				for ( ULONG ulPlayer = 0; ulPlayer < MAXPLAYERS; ulPlayer++ )
-				{
-					// [CK] Don't send to invalid clients
-					if ( SERVER_IsValidClient( ulPlayer ) == false )
-						continue;
-
-					// [CK] If the player is the source, and the player fired a
-					// puff with +NONETID, and the player wants to predict puffs
-					// then we won't send them this command.
-					if ( ( activatorPlayerNumber == ulPlayer ) && ( puff->ulNetworkFlags & NETFL_NONETID ) && ( source->player->userinfo.GetClientFlags() & CLIENTFLAGS_CLIENTSIDEPUFFS ) )
-						continue;
-
-					// [BB] If the puff has a net ID, it must be spawned with one.
-					SERVERCOMMANDS_SpawnPuff( puff, ulPlayer, SVCF_ONLYTHISCLIENT );
-				}
+				SERVERCOMMANDS_SpawnPuff( puff, (source->player - players), SVCF_SKIPTHISCLIENT );
 			}
 			else
 			{
-				// [CK] It is always sent when fired from a non-player.
-				// [BB] If the puff has a net ID, it must be spawned with one.
 				SERVERCOMMANDS_SpawnPuff( puff );
 			}
 		}
@@ -6555,13 +6534,27 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 			puff->renderflags |= RF_INVISIBLE;
 		}
 
-		if ((flags & PF_HITTHING) && puff->SeeSound)
-		{ // Hit thing sound
-			S_Sound (puff, CHAN_BODY, puff->SeeSound, 1, ATTN_NORM, bTellClientToSpawn );	// [BC] Inform the clients.
-		}
-		else if (puff->AttackSound)
+		if ( source && source->player )
 		{
-			S_Sound (puff, CHAN_BODY, puff->AttackSound, 1, ATTN_NORM, bTellClientToSpawn );	// [BC] Inform the clients.
+			if ((flags & PF_HITTHING) && puff->SeeSound)
+			{ // Hit thing sound
+				S_Sound (puff, CHAN_BODY, puff->SeeSound, 1, ATTN_NORM, bTellClientToSpawn, (source->player - players) );	// [BC] Inform the clients.
+			}
+			else if (puff->AttackSound)
+			{
+				S_Sound (puff, CHAN_BODY, puff->AttackSound, 1, ATTN_NORM, bTellClientToSpawn, (source->player - players) );	// [BC] Inform the clients.
+			}
+		}
+		else
+		{
+			if ((flags & PF_HITTHING) && puff->SeeSound)
+			{ // Hit thing sound
+				S_Sound (puff, CHAN_BODY, puff->SeeSound, 1, ATTN_NORM, bTellClientToSpawn );	// [BC] Inform the clients.
+			}
+			else if (puff->AttackSound)
+			{
+				S_Sound (puff, CHAN_BODY, puff->AttackSound, 1, ATTN_NORM, bTellClientToSpawn );	// [BC] Inform the clients.
+			}
 		}
 	}
 
@@ -7333,7 +7326,10 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 
 	// [BB] If we're the server, tell clients to spawn the missile.
 	if ( bSpawnOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
-		SERVERCOMMANDS_SpawnMissile( pMissile );
+		if ( source->player )
+			SERVERCOMMANDS_SpawnMissile( pMissile, (source->player - players), SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_SpawnMissile( pMissile );
 
 	return pMissile;
 }
@@ -7459,9 +7455,31 @@ AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
 	// [BB]
 	AActor *pMissile = (!checkspawn || P_CheckMissileSpawn(mo, source->radius)) ? mo : NULL;
 
-	// [BB] If we're the server, tell clients to spawn the missile.
-	if ( bSpawnOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
-		SERVERCOMMANDS_SpawnMissile( pMissile );
+	if ( pMissile )
+	{
+		// [geNia] Compensate player ping when shooting missiles
+		if ( source->player )
+		{
+			int StartingTick = UNLAGGED_Gametic( source->player );
+
+			for (int Tick = StartingTick; Tick < gametic; Tick++)
+			{
+				UNLAGGED_ReconcileTick( source, Tick );
+				UNLAGGED_AddReconciliationBlocker();
+				pMissile->Tick();
+				UNLAGGED_RemoveReconciliationBlocker();
+			}
+
+			UNLAGGED_Restore( source );
+		}
+
+		// [BB] If we're the server, tell clients to spawn the missile.
+		if ( bSpawnOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ))
+			if ( source->player )
+				SERVERCOMMANDS_SpawnMissile( pMissile, (source->player - players), SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnMissile( pMissile );
+	}
 
 	return pMissile;
 }
@@ -7599,8 +7617,52 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	// [BC/BB] Possibly tell clients to spawn this missile.
 	// [WS] If we know the missile is going to explode,
 	// we need to spawn the missile for the clients.
-	if ( ( bSpawnOnClient || !bValidSpawn ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
-		SERVERCOMMANDS_SpawnMissile( MissileActor );
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
+		if ( bSpawnOnClient || !bValidSpawn )
+		{
+			if ( source->player )
+			{
+				if ( bValidSpawn )
+				{
+					// [geNia] Compensate player ping when shooting missiles
+					int StartingTick = UNLAGGED_Gametic( source->player );
+
+					for (int Tick = StartingTick; Tick < gametic; Tick++)
+					{
+						UNLAGGED_ReconcileTick( source, Tick );
+						UNLAGGED_AddReconciliationBlocker();
+						int InitialTics = MissileActor->tics;
+						MissileActor->tics = -1;
+						MissileActor->Tick();
+						MissileActor->tics = InitialTics;
+
+						if (!(MissileActor->flags & MF_MISSILE))
+						{
+							UNLAGGED_RemoveReconciliationBlocker();
+							break;
+						}
+
+						UNLAGGED_RemoveReconciliationBlocker();
+					}
+
+					UNLAGGED_Restore( source );
+				}
+
+				SERVERCOMMANDS_SpawnMissile( MissileActor, (source->player - players), SVCF_SKIPTHISCLIENT );
+
+				if (!(MissileActor->flags & MF_MISSILE))
+				{
+					SERVERCOMMANDS_MissileExplode( MissileActor, MissileActor->BlockingLine, (source->player - players), SVCF_SKIPTHISCLIENT );
+				}
+			}
+			else
+			{
+				SERVERCOMMANDS_SpawnMissile( MissileActor );
+			}
+
+		}
+	}
 	
 	if (bValidSpawn)
 	{

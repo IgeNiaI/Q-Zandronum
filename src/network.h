@@ -272,6 +272,7 @@ bool			NETWORK_IsConsolePlayerOrSpiedByConsolePlayerOrNotInClientMode( const pla
 bool			NETWORK_IsActorClientHandled( const AActor *pActor );
 bool			NETWORK_InClientModeAndActorNotClientHandled( const AActor *pActor );
 bool			NETWORK_IsClientPredictedSpecial( const int Special );
+bool			NETWORK_ShouldMissileNotBeSpawned ( const AActor *pSpawner, const PClass *pSpawnType, const bool bForceClientSide = false );
 bool			NETWORK_ShouldActorNotBeSpawned ( const AActor *pSpawner, const PClass *pSpawnType, const bool bForceClientSide = false );
 
 // [BB] Generate a checksum from a ticcmd_t.

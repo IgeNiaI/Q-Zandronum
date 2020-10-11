@@ -4166,11 +4166,9 @@ static ETraceStatus CheckForActor(FTraceResults &res, void *userdata)
 AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 	int pitch, int damage, FName damageType, const PClass *pufftype, int flags, AActor **victim, int *actualdamage)
 {
-	// [BB] The only reason the client should try to execute P_LineAttack, is the online hitscan decal fix. 
-	// [CK] And also predicted puffs and blood decals.
+	// [BB] The only reason the client should try to execute P_LineAttack, is the online hitscan decal fix.
 	if ( NETWORK_InClientMode()
-		&& cl_hitscandecalhack == false
-		&& CLIENT_ShouldPredictPuffs( ) == false )
+		&& cl_hitscandecalhack == false )
 	{
 		return NULL;
 	}
@@ -4205,19 +4203,19 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 
 	// [Spleen]
 	UNLAGGED_Reconcile( t1 );
-	
+
 	if (t1->player != NULL)
 	{
 		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
 		{
-			shootz = t1->z - t1->floorclip + (t1->height >> 1) + 
+			shootz = t1->z - t1->floorclip + (t1->height >> 1) +
 					 FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
 		}
 		else
 		{
 			shootz = t1->z - t1->floorclip + t1->player->viewheight;
 		}
-		
+
 		if (damageType == NAME_Melee || damageType == NAME_Hitscan)
 		{
 			// this is coming from a weapon attack function which needs to transfer information to the obituary code,
@@ -4262,11 +4260,6 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 
 	if (!hitSomething)
 	{ // hit nothing
-		// [BB] No decal will be spawned, so the client stops here.
-		// [CK] But continue on if we want clientside puffs since it may occur.
-		if ( NETWORK_InClientMode() && CLIENT_ShouldPredictPuffs( ) == false )
-			return NULL;
-
 		if (puffDefaults == NULL)
 		{
 		}
@@ -4298,18 +4291,13 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 
 		if (trace.HitType != TRACE_HitActor)
 		{
-			// [BB] The client only spawns decals, no puffs.
-			// [CK] Now there is an option for clientside puffs.
-			if ( ( NETWORK_InClientMode() == false ) || CLIENT_ShouldPredictPuffs( ) )
+			// position a bit closer for puffs
+			if (trace.HitType != TRACE_HitWall || trace.Line->special != Line_Horizon)
 			{
-				// position a bit closer for puffs
-				if (trace.HitType != TRACE_HitWall || trace.Line->special != Line_Horizon)
-				{
-					fixed_t closer = trace.Distance - 4 * FRACUNIT;
-					puff = P_SpawnPuff(t1, pufftype, t1->x + FixedMul(vx, closer),
-						t1->y + FixedMul(vy, closer),
-						shootz + FixedMul(vz, closer), angle - ANG90, 0, puffFlags);
-				}
+				fixed_t closer = trace.Distance - 4 * FRACUNIT;
+				puff = P_SpawnPuff(t1, pufftype, t1->x + FixedMul(vx, closer),
+					t1->y + FixedMul(vy, closer),
+					shootz + FixedMul(vz, closer), angle - ANG90, 0, puffFlags);
 			}
 
 			// [CK] If we don't want decals, stop before entering.
@@ -4373,9 +4361,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		else
 		{
 			// [BB] No decal will be spawned, so the client stops here.
-			// [CK] Also exit if we don't want puffs, or blood decals.
 			if ( NETWORK_InClientMode()
-					&& CLIENT_ShouldPredictPuffs( ) == false
 					&& cl_hitscandecalhack == false )
 				return NULL;
 
@@ -4406,8 +4392,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			// [CK] We don't want to enter here unless we're predicting puffs.
 			if (((puffDefaults != NULL && puffDefaults->flags3 & MF3_PUFFONACTORS) ||
 				(trace.Actor->flags & MF_NOBLOOD) ||
-				(trace.Actor->flags2 & (MF2_INVULNERABLE | MF2_DORMANT)))
-				&& ( NETWORK_InClientMode() == false || CLIENT_ShouldPredictPuffs( ) ) )
+				(trace.Actor->flags2 & (MF2_INVULNERABLE | MF2_DORMANT))))
 			{
 				if (!(trace.Actor->flags & MF_NOBLOOD))
 					puffFlags |= PF_HITTHINGBLEED;
@@ -4812,7 +4797,8 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	// [Spleen]
 	UNLAGGED_Reconcile( source );
 
-	if (puffclass == NULL) puffclass = PClass::FindClass(NAME_BulletPuff);
+	if (puffclass == NULL)
+		puffclass = PClass::FindClass(NAME_BulletPuff);
 
 	AActor *puffDefaults = GetDefaultByType(puffclass->GetReplacement()); //Contains all the flags such as FOILINVUL, etc.
 	int flags = (puffDefaults->flags6 & MF6_NOTRIGGER) ? 0 : TRACE_PCross | TRACE_Impact;
@@ -4907,62 +4893,57 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 
 	if (puffclass != NULL) thepuff = Spawn(puffclass, source->x, source->y, source->z, ALLOW_REPLACE);
 
-	// [Spleen] Don't do damage, don't award medals, don't spawn puffs,
-	// and don't spawn blood in clients on a network.
-	// [BB] Actually client spawn the puffs to draw decals / splashes.
-	if ( NETWORK_InClientMode() == false )
+	// [geNia] Don't do damage and don't award medals in clients on a network.
+	for (i = 0; i < rail_data.RailHits.Size(); i++)
 	{
-		for (i = 0; i < rail_data.RailHits.Size(); i++)
+		fixed_t x, y, z;
+		bool spawnpuff;
+		bool bleed = false;
+
+		int puffflags = PF_HITTHING;
+		AActor *hitactor = rail_data.RailHits[i].HitActor;
+		fixed_t hitdist = rail_data.RailHits[i].Distance;
+
+		x = x1 + FixedMul(hitdist, vx);
+		y = y1 + FixedMul(hitdist, vy);
+		z = shootz + FixedMul(hitdist, vz);
+
+		if ((hitactor->flags & MF_NOBLOOD) ||
+			(hitactor->flags2 & (MF2_DORMANT | MF2_INVULNERABLE)))
 		{
-			fixed_t x, y, z;
-			bool spawnpuff;
-			bool bleed = false;
-
-			int puffflags = PF_HITTHING;
-			AActor *hitactor = rail_data.RailHits[i].HitActor;
-			fixed_t hitdist = rail_data.RailHits[i].Distance;
-
-			x = x1 + FixedMul(hitdist, vx);
-			y = y1 + FixedMul(hitdist, vy);
-			z = shootz + FixedMul(hitdist, vz);
-
-			if ((hitactor->flags & MF_NOBLOOD) ||
-				(hitactor->flags2 & (MF2_DORMANT | MF2_INVULNERABLE)))
+			spawnpuff = (puffclass != NULL);
+		}
+		else
+		{
+			spawnpuff = (puffclass != NULL && puffDefaults->flags3 & MF3_ALWAYSPUFF);
+			puffflags |= PF_HITTHINGBLEED; // [XA] Allow for puffs to jump to XDeath state.
+			if (!(puffDefaults->flags3 & MF3_BLOODLESSIMPACT))
 			{
-				spawnpuff = (puffclass != NULL);
+				bleed = true;
 			}
-			else
+		}
+		if (spawnpuff)
+		{
+			P_SpawnPuff(source, puffclass, x, y, z, (source->angle + angleoffset) - ANG90, 1, puffflags, hitactor);
+		}
+		// [BC] Damage is server side.
+		if (NETWORK_InClientMode() == false)
+		{
+			if (puffDefaults && puffDefaults->PoisonDamage > 0 && puffDefaults->PoisonDuration != INT_MIN)
 			{
-				spawnpuff = (puffclass != NULL && puffDefaults->flags3 & MF3_ALWAYSPUFF);
-				puffflags |= PF_HITTHINGBLEED; // [XA] Allow for puffs to jump to XDeath state.
-				if (!(puffDefaults->flags3 & MF3_BLOODLESSIMPACT))
-				{
-					bleed = true;
-				}
+				P_PoisonMobj(hitactor, thepuff ? thepuff : source, source, puffDefaults->PoisonDamage, puffDefaults->PoisonDuration, puffDefaults->PoisonPeriod, puffDefaults->PoisonDamageType);
 			}
-			if (spawnpuff)
-			{
-				P_SpawnPuff(source, puffclass, x, y, z, (source->angle + angleoffset) - ANG90, 1, puffflags, hitactor);
-			}
-			// [BC] Damage is server side.
-			if ( NETWORK_InClientMode() == false )
-			{
-				if (puffDefaults && puffDefaults->PoisonDamage > 0 && puffDefaults->PoisonDuration != INT_MIN)
-				{
-					P_PoisonMobj(hitactor, thepuff ? thepuff : source, source, puffDefaults->PoisonDamage, puffDefaults->PoisonDuration, puffDefaults->PoisonPeriod, puffDefaults->PoisonDamageType);
-				}
-				// [BC/BB] Support for instagib.
-				if ( instagib )
-					damage = 999;
+			// [BC/BB] Support for instagib.
+			if (instagib)
+				damage = 999;
 
-				// [RK] If the attack source is a player, send the DMG_PLAYERATTACK flag.
-				int newdam = P_DamageMobj(hitactor, thepuff ? thepuff : source, source, damage, damagetype, DMG_INFLICTOR_IS_PUFF | (source->player ? DMG_PLAYERATTACK : 0));
+			// [RK] If the attack source is a player, send the DMG_PLAYERATTACK flag.
+			int newdam = P_DamageMobj(hitactor, thepuff ? thepuff : source, source, damage, damagetype, DMG_INFLICTOR_IS_PUFF | (source->player ? DMG_PLAYERATTACK : 0));
 
-				if (bleed)
-				{
-					P_SpawnBlood(x, y, z, (source->angle + angleoffset) - ANG180, newdam > 0 ? newdam : damage, hitactor);
-					P_TraceBleed(newdam > 0 ? newdam : damage, x, y, z, hitactor, source->angle, pitch);
-				}
+			if (bleed)
+			{
+				P_SpawnBlood(x, y, z, (source->angle + angleoffset) - ANG180, newdam > 0 ? newdam : damage, hitactor);
+				P_TraceBleed(newdam > 0 ? newdam : damage, x, y, z, hitactor, source->angle, pitch);
 			}
 
 			if (( hitactor->player ) && ( source->IsTeammate( hitactor ) == false ))
@@ -5040,7 +5021,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 		const ULONG ulPlayer = source->player ? static_cast<ULONG> ( source->player - players ) : MAXPLAYERS;
 		SERVERCOMMANDS_WeaponRailgun( source, start, end, color1, color2, maxdiff, railflags,
 			angleoffset, spawnclass, duration, sparsity, drift, ulPlayer,
-			UNLAGGED_DrawRailClientside( source ) ? SVCF_SKIPTHISCLIENT : ServerCommandFlags( 0 ) );
+			 SVCF_SKIPTHISCLIENT );
 	}
 }
 
@@ -5643,6 +5624,8 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 	FBlockThingsIterator it(FBoundingBox(bombspot->x, bombspot->y, bombdistance << FRACBITS));
 	AActor *thing;
 
+	fixed_t SelfThrustBonus[3];
+
 	if (flags & RADF_SOURCEISSPOT)
 	{ // The source is actually the same as the spot, even if that wasn't what we received.
 		bombsource = bombspot;
@@ -5792,9 +5775,12 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 								bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
 							explosionToPlayer *= pushDamage * 0.35f;
 
-							thing->velx += FLOAT2FIXED(explosionToPlayer.X);
-							thing->vely += FLOAT2FIXED(explosionToPlayer.Y);
-							thing->velz += FLOAT2FIXED(explosionToPlayer.Z);
+							SelfThrustBonus[0] = FLOAT2FIXED(explosionToPlayer.X);
+							SelfThrustBonus[1] = FLOAT2FIXED(explosionToPlayer.Y);
+							SelfThrustBonus[2] = FLOAT2FIXED(explosionToPlayer.Z);
+							thing->velx += SelfThrustBonus[0];
+							thing->vely += SelfThrustBonus[1];
+							thing->velz += SelfThrustBonus[2];
 						}
 						else
 						{
@@ -5808,14 +5794,18 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							// [BB] Potentially use the horizontal thrust of old ZDoom versions.
 							if ( zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST )
 							{
-								thing->velx = origvelx + static_cast<fixed_t>((thing->x - bombspot->x) * thrust);
-								thing->vely = origvely + static_cast<fixed_t>((thing->y - bombspot->y) * thrust);
+								SelfThrustBonus[0] = origvelx + static_cast<fixed_t>((thing->x - bombspot->x) * thrust);
+								SelfThrustBonus[1] = origvely + static_cast<fixed_t>((thing->y - bombspot->y) * thrust);
+								thing->velx = SelfThrustBonus[0];
+								thing->vely = SelfThrustBonus[1];
 							}
 							else
 							{
 								angle_t ang = R_PointToAngle2(bombspot->x, bombspot->y, thing->x, thing->y) >> ANGLETOFINESHIFT;
-								thing->velx += fixed_t(finecosine[ang] * thrust);
-								thing->vely += fixed_t(finesine[ang] * thrust);
+								SelfThrustBonus[0] = fixed_t(finecosine[ang] * thrust);
+								SelfThrustBonus[1] = fixed_t(finesine[ang] * thrust);
+								thing->velx += SelfThrustBonus[0];
+								thing->vely += SelfThrustBonus[1];
 							}
 
 							// [BB] If ZADF_NO_ROCKET_JUMPING is on, don't give players any z-velocity if the attack was made by a player.
@@ -5823,8 +5813,16 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 								( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
 							{
 								if (!(flags & RADF_NODAMAGE))
-									thing->velz += (fixed_t)velz;	// this really doesn't work well
+								{
+									SelfThrustBonus[2] = (fixed_t)velz;
+									thing->velz += SelfThrustBonus[2];	// this really doesn't work well
+								}
 							}
+						}
+
+						if ( NETWORK_InClientMode() && thing->player )
+						{
+							CLIENT_PREDICT_SaveSelfThrustBonus( thing->player, SelfThrustBonus[0], SelfThrustBonus[1], SelfThrustBonus[2] );
 						}
 
 						// [BC] If we're the server, update the thing's velocity.

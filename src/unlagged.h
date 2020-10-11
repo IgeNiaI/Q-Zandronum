@@ -58,13 +58,12 @@
 void	UNLAGGED_Tick( void );
 int		UNLAGGED_Gametic( player_t *player );
 void	UNLAGGED_Reconcile( AActor *actor );
-void	UNLAGGED_SwapSectorUnlaggedStatus( );
+void	UNLAGGED_ReconcileTick( AActor *actor, int Tick );
 void	UNLAGGED_Restore( AActor *actor );
 void	UNLAGGED_RecordPlayer( player_t *player );
 void	UNLAGGED_ResetPlayer( player_t *player );
 void	UNLAGGED_RecordSectors( );
 void	UNLAGGED_RecordPolyobj( );
-bool	UNLAGGED_DrawRailClientside ( AActor *attacker );
 void	UNLAGGED_GetHitOffset ( const AActor *attacker, const FTraceResults &trace, TVector3<fixed_t> &hitOffset );
 bool	UNLAGGED_IsReconciled ( );
 void	UNLAGGED_AddReconciliationBlocker ( );

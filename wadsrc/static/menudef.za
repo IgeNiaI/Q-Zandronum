@@ -61,20 +61,11 @@ OptionMenu ZA_MultiplayerOptions
 //
 // =================================================================================================
 
-OptionValue ZA_UnlagType
-{
-	0.0, "Gametic"
-	1.0, "Ping"
-}
-
 OptionMenu ZA_NetworkOptions
 {
 	Title "NETWORK OPTIONS"
 
-	Option		"Unlagged",					"cl_unlagged",				"OnOff"
-	Option		"Unlag Type",				"cl_ping_unlagged",			"ZA_UnlagType"
 	Option		"Hitscan decals",			"cl_hitscandecalhack",		"OnOff"
-	Option		"Clientside puffs",			"cl_clientsidepuffs",		"OnOff"
 }
 
 // =================================================================================================
