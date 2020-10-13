@@ -2609,17 +2609,17 @@ explode:
 		{
 			if (((player->onground && !player->mo->wasJustThrustedZ) || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
 			{
-				fixed_t friction = P_GetFriction(mo, NULL);
+				fixed_t friction = P_GetFriction (mo, NULL);
 
-				mo->velx = FixedMul(mo->velx, friction);
-				mo->vely = FixedMul(mo->vely, friction);
+				mo->velx = FixedMul (mo->velx, friction);
+				mo->vely = FixedMul (mo->vely, friction);
 
 				// killough 10/98: Always decrease player bobbing by ORIG_FRICTION.
 				// This prevents problems with bobbing on ice, where it was not being
 				// reduced fast enough, leading to all sorts of kludges being developed.
 
-				player->velx = FixedMul(player->velx, ORIG_FRICTION);
-				player->vely = FixedMul(player->vely, ORIG_FRICTION);
+				player->velx = FixedMul (player->velx, ORIG_FRICTION);
+				player->vely = FixedMul (player->vely, ORIG_FRICTION);
 			}
 
 			player->mo->wasJustThrustedZ = false;
@@ -3066,11 +3066,11 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		{
 			if (!mo->IsNoClip2())
 				mo->z += finesine[(FINEANGLES / 80 * level.maptime)&FINEMASK] / 8;
-			mo->velz = FixedMul(mo->velz, FRICTION_FLY);
+			mo->velz = FixedMul (mo->velz, FRICTION_FLY);
 		}
 
 		if (mo->waterlevel && !(mo->flags & MF_NOGRAVITY))
-			mo->velz = FixedMul(mo->velz, mo->Sector->friction);
+			mo->velz = FixedMul (mo->velz, mo->Sector->friction);
 	}
 
 //
@@ -3412,34 +3412,34 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 		if (mo->player->cheats & CF_PREDICTING)
 		return;
 		*/
-		P_FallingDamage(mo);
+		P_FallingDamage (mo);
 
 		// [RH] only make noise if alive
 		// [WS/BB] As client only play the sound for the consoleplayer.
-		if (!mo->player->morphTics && mo->health > 0 && NETWORK_IsConsolePlayerOrNotInClientMode(mo->player))
+		if (!mo->player->morphTics && mo->health > 0 && NETWORK_IsConsolePlayerOrNotInClientMode( mo->player ))
 		{
 			grunted = false;
 			// Why should this number vary by gravity?
 			// [BB] For unassigned voodoo dolls, mo->player->mo is NULL.
 			if (mo->player->mo && mo->health > 0 && mo->velz < -mo->player->mo->GruntSpeed)
 			{
-				S_Sound(mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM);
+				S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM);
 				grunted = true;
 
 				// [BC] Tell players that this player struck the ground (hard!)
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG(mo->player - players), SVCF_SKIPTHISCLIENT);
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SoundActor( mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
 			}
 
-			if ((onmobj != NULL || !Terrains[P_GetThingFloorType(mo)].IsLiquid) && !(mo->mvFlags & MV_SILENT))
+			if ((onmobj != NULL || !Terrains[P_GetThingFloorType (mo)].IsLiquid) && !(mo->mvFlags & MV_SILENT))
 			{
-				if (!grunted || !S_AreSoundsEquivalent(mo, "*grunt", "*land"))
+				if (!grunted || !S_AreSoundsEquivalent (mo, "*grunt", "*land"))
 				{
-					S_Sound(mo, CHAN_AUTO, "*land", 1, ATTN_NORM);
+					S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM);
 
 					// [BC] Tell players that this player struck the ground (hard!)
-					if (NETWORK_GetState() == NETSTATE_SERVER)
-						SERVERCOMMANDS_SoundActor(mo, CHAN_AUTO, "*land", 1, ATTN_NORM, ULONG(mo->player - players), SVCF_SKIPTHISCLIENT);
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+						SERVERCOMMANDS_SoundActor( mo, CHAN_AUTO, "*land", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
 				}
 			}
 		}

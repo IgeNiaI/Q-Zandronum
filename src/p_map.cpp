@@ -5656,7 +5656,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 		bombsource = bombspot;
 	}
 
-	while (thing = it.Next())
+	while ((thing = it.Next()))
 	{
 		// Vulnerable actors can be damaged by radius attacks even if not shootable
 		// Used to emulate MBF's vulnerability of non-missile bouncers to explosions.
@@ -5757,9 +5757,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 				if ( NETWORK_InClientMode() == false )
 				{
 					if (!(flags & RADF_NODAMAGE))
-					{
 						newdam = P_DamageMobj(thing, bombspot, bombsource, damage, bombmod);
-					}
 					else if (thing->player == NULL && !(flags & RADF_NOIMPACTDAMAGE))
 					{
 						thing->flags2 |= MF2_BLASTED;
@@ -5816,7 +5814,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							velz = (double)(thing->z + (thing->height >> 1) - bombspot->z) * thrust;
 
 							// [BB] Potentially use the horizontal thrust of old ZDoom versions.
-							if (zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST)
+							if ( zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST )
 							{
 								thing->velx = origvelx + static_cast<fixed_t>((thing->x - bombspot->x) * thrust);
 								thing->vely = origvely + static_cast<fixed_t>((thing->y - bombspot->y) * thrust);
@@ -5829,8 +5827,8 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							}
 
 							// [BB] If ZADF_NO_ROCKET_JUMPING is on, don't give players any z-velocity if the attack was made by a player.
-							if (((zadmflags & ZADF_NO_ROCKET_JUMPING) == false) ||
-								(bombsource == NULL) || (bombsource->player == NULL) || (thing->player == NULL))
+							if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
+								( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
 							{
 								if (!(flags & RADF_NODAMAGE))
 									thing->velz += (fixed_t)velz;	// this really doesn't work well
