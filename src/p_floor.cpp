@@ -441,9 +441,10 @@ void DFloor::SetPositionAndDirection( fixed_t Position, LONG lDirection )
 
 	if (m_Direction != lDirection)
 	{
-		SN_StopSequence(m_Sector, CHAN_CEILING);
 		if (lDirection != 0)
 			StartFloorSound();
+		else
+			SN_StopSequence(m_Sector, CHAN_FLOOR);
 
 		m_Direction = lDirection;
 	}

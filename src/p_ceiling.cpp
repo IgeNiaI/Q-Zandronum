@@ -370,9 +370,10 @@ void DCeiling::SetPositionAndDirection( LONG lPosition, LONG lDirection )
 
 	if (m_Direction != lDirection)
 	{
-		SN_StopSequence(m_Sector, CHAN_CEILING);
 		if (lDirection != 0)
 			PlayCeilingSound();
+		else
+			SN_StopSequence(m_Sector, CHAN_CEILING);
 
 		m_Direction = lDirection;
 	}
