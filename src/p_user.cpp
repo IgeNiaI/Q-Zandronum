@@ -3231,9 +3231,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (player->onground)
 	{
 		player->doubleJumpState = DJ_AVAILABLE;
-
-		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
-			player->jumpTics = player->mo->JumpDelay;
 	}
 
 	if (canClimb)
@@ -3705,9 +3702,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	if (player->onground)
 	{
 		player->doubleJumpState = DJ_AVAILABLE;
-
-		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
-			player->jumpTics = player->mo->JumpDelay;
 	}
 
 	// Water and flying have already executed jump press logic
