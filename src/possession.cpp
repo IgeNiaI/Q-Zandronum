@@ -79,6 +79,8 @@ static	ULONG			g_ulPSNCountdownTicks = 0;
 static	ULONG			g_ulPSNArtifactHoldTicks = 0;
 static	PSNSTATE_e		g_PSNState;
 
+EXTERN_CVAR( Int, sv_endleveldelay )
+
 //*****************************************************************************
 //	FUNCTIONS
 
@@ -528,7 +530,7 @@ void POSSESSION_ScorePossessionPoint( player_t *pPlayer )
 
 	// End the round, or level after seconds (depending on whether or not the pointlimit
 	// has been reached).
-	GAME_SetEndLevelDelay( 5 * TICRATE );
+	GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 }
 
 //*****************************************************************************
@@ -684,7 +686,7 @@ void POSSESSION_TimeExpired( void )
 		TEAM_SetScore( g_pPossessionArtifactCarrier->ulTeam, TEAM_GetScore( g_pPossessionArtifactCarrier->ulTeam ) + 1, true );
 
 	NETWORK_Printf( "%s\n", GStrings( "TXT_TIMELIMIT" ));
-	GAME_SetEndLevelDelay( 5 * TICRATE );
+	GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 }
 
 //*****************************************************************************

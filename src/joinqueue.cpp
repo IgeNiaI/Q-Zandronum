@@ -74,6 +74,8 @@
 static TArray<JoinSlot> g_JoinQueue;
 int g_ConsolePlayerPosition = -1;
 
+EXTERN_CVAR( Int, sv_endleveldelay )
+
 //*****************************************************************************
 //	FUNCTIONS
 
@@ -187,7 +189,7 @@ void JOINQUEUE_PlayerLeftGame( int player, bool pop )
 			// Join queue will be popped upon state change.
 			pop = false;
 
-			GAME_SetEndLevelDelay( 5 * TICRATE );
+			GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 		}
 		else if ( SERVER_CalcNumNonSpectatingPlayers( MAXPLAYERS ) <= 1 )
 			LASTMANSTANDING_SetState( LMSS_WAITINGFORPLAYERS );
@@ -222,7 +224,7 @@ void JOINQUEUE_PlayerLeftGame( int player, bool pop )
 			// Join queue will be popped upon state change.
 			pop = false;
 
-			GAME_SetEndLevelDelay( 5 * TICRATE );
+			GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 		}
 		else if ( TEAM_TeamsWithPlayersOn( ) <= 1 )
 			LASTMANSTANDING_SetState( LMSS_WAITINGFORPLAYERS );

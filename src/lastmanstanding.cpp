@@ -85,6 +85,8 @@ static	ULONG		g_ulLMSMatches = 0;
 static	bool		g_bStartNextMatchOnLevelLoad = false;
 static	LMSSTATE_e	g_LMSState;
 
+EXTERN_CVAR( Int, sv_endleveldelay )
+
 //*****************************************************************************
 //	FUNCTIONS
 
@@ -182,7 +184,7 @@ void LASTMANSTANDING_Tick( void )
 
 					// Pause for five seconds for the win sequence.
 					LASTMANSTANDING_DoWinSequence( lWinner );
-					GAME_SetEndLevelDelay( 5 * TICRATE );
+					GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 				}
 			}
 			// If NOBODY is left standing, it's a draw game!
@@ -202,7 +204,7 @@ void LASTMANSTANDING_Tick( void )
 
 					// Pause for five seconds for the win sequence.
 					LASTMANSTANDING_DoWinSequence( MAXPLAYERS );
-					GAME_SetEndLevelDelay( 5 * TICRATE );
+					GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 				}
 			}
 		}
@@ -238,7 +240,7 @@ void LASTMANSTANDING_Tick( void )
 
 					// Pause for five seconds for the win sequence.
 					LASTMANSTANDING_DoWinSequence( lWinner );
-					GAME_SetEndLevelDelay( 5 * TICRATE );
+					GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 				}
 				// If NOBODY is left standing, it's a draw game!
 				else
@@ -257,7 +259,7 @@ void LASTMANSTANDING_Tick( void )
 
 						// Pause for five seconds for the win sequence.
 						LASTMANSTANDING_DoWinSequence( teams.Size( ) );
-						GAME_SetEndLevelDelay( 5 * TICRATE );
+						GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 					}
 				}
 			}
@@ -570,7 +572,7 @@ void LASTMANSTANDING_TimeExpired( void )
 	if ( lWinner == -1 )
 	{
 		NETWORK_Printf( "%s\n", GStrings( "TXT_TIMELIMIT" ));
-		GAME_SetEndLevelDelay( 5 * TICRATE );
+		GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 		return;
 	}
 
@@ -617,7 +619,7 @@ void LASTMANSTANDING_TimeExpired( void )
 		TEAM_SetWinCount( lWinner, TEAM_GetWinCount( lWinner ) + 1, false );
 
 	NETWORK_Printf( "%s\n", GStrings( "TXT_TIMELIMIT" ));
-	GAME_SetEndLevelDelay( 5 * TICRATE );
+	GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 }
 
 //*****************************************************************************

@@ -95,6 +95,7 @@ static FRandom pr_switcher ("SwitchTarget");
 static FRandom pr_kickbackdir ("KickbackDir");
 
 EXTERN_CVAR (Bool, show_obituaries)
+EXTERN_CVAR (Int, sv_endleveldelay)
 // [BB] FIXME
 //EXTERN_CVAR( Int, menu_teamidxjointeammenu )
 
@@ -632,7 +633,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 						// Give the winner a win.
 						PLAYER_SetWins( source->player, source->player->ulWins + 1 );
 
-						GAME_SetEndLevelDelay( 5 * TICRATE );
+						GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 					}
 					// End the level after five seconds.
 					else
@@ -694,7 +695,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 							SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 0.0f, 0.0f, 0, 0, CR_WHITE, 3.0f, 2.0f, "BigFont", false, MAKE_ID('P','L','A','C') );
 						}
 
-						GAME_SetEndLevelDelay( 5 * TICRATE );
+						GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 					}
 				}
 			}
@@ -2321,7 +2322,7 @@ void PLAYER_GivePossessionPoint( player_t *pPlayer )
 			}
 
 			// End the level after five seconds.
-			GAME_SetEndLevelDelay( 5 * TICRATE );
+			GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 		}
 		else if ( teampossession && ( TEAM_GetScore( pPlayer->ulTeam ) >= pointlimit ))
 		{
@@ -2353,7 +2354,7 @@ void PLAYER_GivePossessionPoint( player_t *pPlayer )
 			}
 
 			// End the level after five seconds.
-			GAME_SetEndLevelDelay( 5 * TICRATE );
+			GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 		}
 	}
 }

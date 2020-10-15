@@ -89,6 +89,8 @@ static	ULONG			g_ulSurvivalCountdownTicks = 0;
 static	SURVIVALSTATE_e	g_SurvivalState;
 static	bool			g_SurvivalResetMap = true;
 
+EXTERN_CVAR( Int, sv_endleveldelay )
+
 //*****************************************************************************
 //	FUNCTIONS
 
@@ -264,7 +266,7 @@ void SURVIVAL_FailMission( void )
 	SURVIVAL_SetState( SURVS_MISSIONFAILED );
 
 	// Pause for five seconds for the failed sequence.
-	GAME_SetEndLevelDelay( 5 * TICRATE );
+	GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 }
 
 //*****************************************************************************

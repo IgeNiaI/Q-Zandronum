@@ -73,6 +73,7 @@
 void	SERVERCONSOLE_UpdateScoreboard( );
 
 EXTERN_CVAR( Int,  cl_respawninvuleffect )
+EXTERN_CVAR( Int, sv_endleveldelay )
 
 //*****************************************************************************
 //	VARIABLES
@@ -427,7 +428,7 @@ void DUEL_TimeExpired( void )
 	if (( lDueler1 == -1 ) || ( lDueler2 == -1 ))
 	{
 		NETWORK_Printf( "%s\n", GStrings( "TXT_TIMELIMIT" ));
-		GAME_SetEndLevelDelay( 5 * TICRATE );
+		GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 		return;
 	}
 
@@ -482,7 +483,7 @@ void DUEL_TimeExpired( void )
 	// Give the winner a win.
 	PLAYER_SetWins( &players[lWinner], players[lWinner].ulWins + 1 );
 	NETWORK_Printf( "%s\n", GStrings( "TXT_TIMELIMIT" ));
-	GAME_SetEndLevelDelay( 5 * TICRATE );
+	GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 }
 
 //*****************************************************************************

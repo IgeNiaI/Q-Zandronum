@@ -98,6 +98,8 @@ static	unsigned int		g_ulNumBossMonsters = 0;
 static	bool				g_bIncreaseNumMonstersOnSpawn = true;
 static	std::vector<AActor*> g_MonsterCorpsesFromPreviousWave;
 
+EXTERN_CVAR( Int, sv_endleveldelay )
+
 //*****************************************************************************
 //	STRUCTURES
 
@@ -728,7 +730,7 @@ void INVASION_Tick( void )
 			INVASION_SetState( IS_MISSIONFAILED );
 
 			// Pause for five seconds for the failed sequence.
-			GAME_SetEndLevelDelay( 5 * TICRATE );
+			GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 		}
 	default:
 		break;	

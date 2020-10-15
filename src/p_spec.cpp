@@ -171,6 +171,8 @@ static void P_SpawnScrollers();
 static void P_SpawnFriction ();		// phares 3/16/98
 static void P_SpawnPushers ();		// phares 3/20/98
 
+EXTERN_CVAR( Int, sv_endleveldelay )
+
 CUSTOM_CVAR ( Int, sv_killallmonsters_percentage, 100, CVAR_SERVERINFO )
 {
 	if ( self > 100 )
@@ -972,7 +974,7 @@ void P_UpdateSpecials ()
 					// Display "%s WINS!" HUD message.
 					GAMEMODE_DisplayStandardMessage ( szString, true );
 
-					GAME_SetEndLevelDelay( 5 * TICRATE );
+					GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 				}
 			}
 		}

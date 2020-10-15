@@ -286,6 +286,9 @@ extern SDWORD g_sdwCheckCmd;
 
 EXTERN_CVAR (Int, team)
 
+// [Proteh] CVAR that lets server owners set a global end level delay for all modes
+CVAR (Int, sv_endleveldelay, 5, CVAR_ARCHIVE)
+
 // [RH] Allow turbo setting anytime during game
 CUSTOM_CVAR (Float, turbo, 100.f, 0)
 {

@@ -98,6 +98,8 @@ static	bool	g_bSpawningTemporaryFlag = false;
 
 static FRandom	g_JoinTeamSeed( "JoinTeamSeed" );
 
+EXTERN_CVAR( Int, sv_endleveldelay )
+
 //*****************************************************************************
 //	CONSOLE VARIABLES
 
@@ -873,7 +875,7 @@ void TEAM_TimeExpired( void )
 	}
 
 	NETWORK_Printf( "%s\n", GStrings( "TXT_TIMELIMIT" ));
-	GAME_SetEndLevelDelay( 5 * TICRATE );
+	GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 }
 
 //*****************************************************************************
@@ -1057,7 +1059,7 @@ void TEAM_SetScore( ULONG ulTeamIdx, LONG lScore, bool bAnnouncer )
 		TEAM_DoWinSequence( ulTeamIdx );
 
 		// End the level after five seconds.
-		GAME_SetEndLevelDelay( 5 * TICRATE );
+		GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 	}
 }
 
