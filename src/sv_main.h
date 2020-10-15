@@ -290,6 +290,9 @@ struct CLIENT_s
 
 	// Last tick we received a movement command.
 	LONG			lLastMoveTick;
+	
+	// Last tick we processed a movement command.
+	LONG			lLastMoveTickProcess;
 
 	// We keep track of how many extra movement commands we get from the client. If it
 	// exceeds a certain level over time, we kick him.

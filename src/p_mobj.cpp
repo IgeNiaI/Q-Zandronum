@@ -3993,11 +3993,13 @@ void AActor::Tick ()
 	{
 		// In server mode, only allow the ticking of a player if he's a client currently
 		// having his movement commands executed.
+		// Only tick the body if we processed a movement command for this tic
 		if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 			( SERVER_GetCurrentClient( ) != ( player - players )) &&
-			( player->bIsBot == false ))
-		{
-			return;
+			( SERVER_GetClient( player - players )->lLastMoveTickProcess != gametic ) &&
+ 			( player->bIsBot == false ))
+ 		{
+ 			return;
 		}
 	}
 
