@@ -2362,6 +2362,77 @@ static FPlayerStart *SelectFarthestDeathmatchSpot( ULONG ulPlayer, size_t select
 	return bestspot;
 }
 
+// [RH] Select the deathmatch spawn spot farthest from everyone.
+static FPlayerStart *SelectOneOfSeveralFarthestDeathmatchSpot( ULONG ulPlayer, size_t selections )
+{
+	const int spotsToFind = 3;
+
+	// Not reliable if we don't have enough spawn spots, just use farthest one
+	if ( selections <= spotsToFind )
+	{
+		return SelectFarthestDeathmatchSpot(ulPlayer, selections);
+	}
+
+	fixed_t bestDistance = 0;
+	unsigned int i, j;
+	unsigned int spotsFound = 0;
+	FPlayerStart *bestSpot = NULL;
+
+	FPlayerStart *dmSpotsFound[spotsToFind];
+
+	for( i = 0; i < spotsToFind; i++ )
+	{
+		dmSpotsFound[i] = NULL;
+	}
+
+	while( spotsFound != spotsToFind )
+	{
+		bestDistance = 0;
+		bestSpot = NULL;
+
+		for ( i = 0; i < selections; i++ )
+		{
+			fixed_t distance = PlayersRangeFromSpot(&deathmatchstarts[i]);
+
+			// Did not find a spot
+			if ( distance == INT_MAX )
+			{
+				continue;
+			}
+
+			if ( G_CheckSpot(ulPlayer, &deathmatchstarts[i]) == false )
+				continue;
+
+			bool skipSpot = false;
+
+			// Skip if we already found this spot
+			for(j = 0; j < spotsToFind; j++)
+			{
+				if( dmSpotsFound[j] == &deathmatchstarts[i] )
+				{
+					skipSpot = true;
+					break;
+				}
+			}
+
+			if( skipSpot )
+			{
+				continue;
+			}
+
+			if ( distance > bestDistance )
+			{
+				bestDistance = distance;
+				bestSpot = &deathmatchstarts[i];
+			}
+		}
+
+		dmSpotsFound[spotsFound++] = bestSpot;
+	}
+
+	return dmSpotsFound[pr_dmspawn() % spotsToFind];
+}
+
 
 // Try to find a deathmatch spawn spot farthest from our enemies.
 static FPlayerStart *SelectBestTeamLMSSpot( ULONG ulPlayer, size_t selections )
@@ -2526,7 +2597,7 @@ void G_DeathMatchSpawnPlayer( int playernum, bool bClientUpdate )
 	else if ( dmflags & DF_SPAWN_FARTHEST )
 	{
 		// If we didn't find a valid spot, just pick one at random.
-		if (( spot = SelectFarthestDeathmatchSpot( playernum, selections )) == NULL )
+		if (( spot = SelectOneOfSeveralFarthestDeathmatchSpot( playernum, selections )) == NULL )
 			spot = SelectRandomDeathmatchSpot( playernum, selections );
 	}
 	else
