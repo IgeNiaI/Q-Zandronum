@@ -334,16 +334,6 @@ DFloor::DFloor (sector_t *sec)
 	m_Direction = 0;
 }
 
-player_t* DFloor::GetLastInstigator()
-{
-	return m_LastInstigator;
-}
-
-void DFloor::SetLastInstigator( player_t* player )
-{
-	m_LastInstigator = player;
-}
-
 DFloor::EFloor DFloor::GetType( void )
 {
 	return ( m_Type );
@@ -1333,16 +1323,6 @@ void DElevator::Predict()
 		Tick();
 		TicsToPredict--;
 	}
-}
-
-player_t* DElevator::GetLastInstigator()
-{
-	return m_LastInstigator;
-}
-
-void DElevator::SetLastInstigator( player_t* player )
-{
-	m_LastInstigator = player;
 }
 
 // [BC]

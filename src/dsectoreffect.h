@@ -16,10 +16,14 @@ public:
 	sector_t *GetSector() const { return m_Sector; }
 
 	virtual bool IsBusy();
+	
+	player_t* GetLastInstigator();
+	void SetLastInstigator( player_t* player );
 
 protected:
 	DSectorEffect ();
 	sector_t *m_Sector;
+	player_t *m_LastInstigator;
 };
 
 class DMover : public DSectorEffect

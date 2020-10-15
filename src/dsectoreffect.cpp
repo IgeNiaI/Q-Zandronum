@@ -74,6 +74,16 @@ bool DSectorEffect::IsBusy()
 	return true;
 }
 
+player_t* DSectorEffect::GetLastInstigator()
+{
+	return m_LastInstigator;
+}
+
+void DSectorEffect::SetLastInstigator( player_t* player )
+{
+	m_LastInstigator = player;
+}
+
 IMPLEMENT_POINTY_CLASS (DMover)
 	DECLARE_POINTER(interpolation)
 END_POINTERS

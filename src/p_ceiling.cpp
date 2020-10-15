@@ -296,16 +296,6 @@ DCeiling::DCeiling (sector_t *sec, fixed_t speedDown, fixed_t speedUp, int silen
 	m_LastInstigator = NULL;
 }
 
-player_t* DCeiling::GetLastInstigator()
-{
-	return m_LastInstigator;
-}
-
-void DCeiling::SetLastInstigator( player_t* player )
-{
-	m_LastInstigator = player;
-}
-
 fixed_t DCeiling::GetTopHeight( void )
 {
 	return ( m_TopHeight );

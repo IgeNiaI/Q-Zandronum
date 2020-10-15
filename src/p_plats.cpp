@@ -280,16 +280,6 @@ DPlat::DPlat (sector_t *sector)
 	m_LastInstigator = NULL;
 }
 
-player_t* DPlat::GetLastInstigator()
-{
-	return m_LastInstigator;
-}
-
-void DPlat::SetLastInstigator( player_t* player )
-{
-	m_LastInstigator = player;
-}
-
 // [BC]
 fixed_t DPlat::GetLow( void )
 {

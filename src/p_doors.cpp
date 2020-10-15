@@ -292,16 +292,6 @@ void DDoor::Predict()
 	}
 }
 
-player_t* DDoor::GetLastInstigator()
-{
-	return m_LastInstigator;
-}
-
-void DDoor::SetLastInstigator( player_t* player )
-{
-	m_LastInstigator = player;
-}
-
 fixed_t DDoor::GetPosition()
 {
 	return ( m_Sector->ceilingplane.d );

@@ -480,9 +480,6 @@ public:
 	bool IsBusy();
 	void Predict();
 	
-	player_t*	GetLastInstigator();
-	void	SetLastInstigator( player_t* player );
-
 	fixed_t	GetLow( void );
 	void	SetLow( fixed_t Low );
 
@@ -528,7 +525,6 @@ protected:
 	int 		m_Count;
 	int			m_Crush;
 	int 		m_Tag;
-	player_t	*m_LastInstigator;
 	bool		m_Finished;
 
 	void Reactivate ();
@@ -657,8 +653,6 @@ public:
 	void Predict();
 
 	// [BC] Access function(s).
-	player_t*	GetLastInstigator();
-	void	SetLastInstigator(player_t* player);
 	fixed_t	GetPosition( void );
 	int		GetDirection( void );
 	void	SetPositionAndDirection( fixed_t Position, int direction );
@@ -690,8 +684,6 @@ protected:
 	fixed_t		m_BotDist, m_OldFloorDist;
 	vertex_t	*m_BotSpot;
 	fixed_t 	m_Speed;
-
-	player_t	*m_LastInstigator;
 
 	// 1 = up, 0 = waiting at top, -1 = down
 	int 		m_Direction;
@@ -823,9 +815,6 @@ public:
 	// [BC] Make this public so clients can use it.
 	void PlayCeilingSound ();
 	
-	player_t*	GetLastInstigator();
-	void	SetLastInstigator( player_t* player );
-
 	fixed_t	GetTopHeight( void );
 	void	SetTopHeight( fixed_t TopHeight );
 
@@ -866,7 +855,6 @@ protected:
 	fixed_t 	m_Speed;
 	fixed_t		m_SpeedDown;	// [RH] dnspeed of crushers
 	fixed_t		m_SpeedUp;		// [RH] upspeed of crushers
-	player_t	*m_LastInstigator;
 	int 		m_Crush;
 	bool		m_Hexencrush;
 	int			m_Silent;
@@ -966,9 +954,6 @@ public:
 	void StartFloorSound ();
 	void SetFloorChangeType (sector_t *sec, int change);
 	
-	player_t*	GetLastInstigator();
-	void	SetLastInstigator( player_t* player );
-
 	EFloor	GetType( void );
 	void	SetType( EFloor Type );
 
@@ -1018,8 +1003,6 @@ protected:
 	FTextureID	m_Texture;
 	fixed_t 	m_FloorDestDist;
 	fixed_t 	m_Speed;
-
-	player_t	*m_LastInstigator;
 
 	// [RH] New parameters used to reset and delay stairs
 	int			m_ResetCount;
@@ -1091,9 +1074,6 @@ public:
 	// [BC] No longer protected so clients can call it.
 	void StartFloorSound ();
 	
-	player_t*	GetLastInstigator();
-	void	SetLastInstigator( player_t* player );
-
 	EElevator	GetType( void );
 	void	SetType( EElevator Type );
 	fixed_t	GetSpeed( void );
@@ -1118,8 +1098,6 @@ protected:
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
 	
-	player_t	*m_LastInstigator;
-
 	friend bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator type, fixed_t speed,
 		fixed_t height);
 	friend bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator type, fixed_t speed,
