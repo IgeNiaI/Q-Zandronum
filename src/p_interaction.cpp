@@ -2153,7 +2153,8 @@ void P_PoisonDamage (player_t *player, AActor *source, int damage,
 void PLAYER_SetFragcount( player_t *pPlayer, LONG lFragCount, bool bAnnounce, bool bUpdateTeamFrags )
 {
 	// Don't bother with fragcount during warm-ups.
-	if ((( duel ) && ( DUEL_GetState( ) == DS_COUNTDOWN )) ||
+	// [Proteh] added duel warmup state (/ready) check
+	if ((( duel ) && ( DUEL_GetState( ) == DS_COUNTDOWN || DUEL_GetState() == DS_WARMUP )) ||
 		(( lastmanstanding || teamlms ) && ( LASTMANSTANDING_GetState( ) == LMSS_COUNTDOWN )))
 	{
 		return;

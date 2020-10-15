@@ -80,6 +80,7 @@ EXTERN_CVAR( Int,  cl_respawninvuleffect )
 static	ULONG		g_ulDuelCountdownTicks = 0;
 static	ULONG		g_ulDuelLoser = 0;
 static	ULONG		g_ulNumDuels = 0;
+static	LONG		g_ulReadyPlayers[2] = {-1, -1};
 static	bool		g_bStartNextDuelOnLevelLoad = false;
 static	DUELSTATE_e	g_DuelState;
 
@@ -108,9 +109,29 @@ void DUEL_Tick( void )
 			break;
 		}
 
-		// Two players are here now, begin the countdown!
-		if ( DUEL_CountActiveDuelers( ) == 2 )
+		// Two players are here now, begin the countdown or warmup state
+		if ( DUEL_CountActiveDuelers( ) == 2)
 		{
+			// [Proteh] Duel warmup /ready system
+			ULONG ulIdx;
+			bool skipWarmup = false;
+
+			// If one of the players is a bot, skip the warmup
+			for (ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++)
+			{
+				if(DUEL_IsDueler(ulIdx) && players[ulIdx].pSkullBot)
+				{
+					skipWarmup = true;
+				}
+			}	
+
+			// Warmup only in non lobby maps
+			if(sv_duelwarmup && !GAMEMODE_IsLobbyMap( ) && !skipWarmup)
+			{			
+				DUEL_SetState(DS_WARMUP);
+				break;
+			}
+
 			// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
 			if ( GAMEMODE_IsLobbyMap( ) )
 				DUEL_SetState( DS_INDUEL );
@@ -119,6 +140,31 @@ void DUEL_Tick( void )
 			else
 				DUEL_StartCountdown(( 10 * TICRATE ) - 1 );
 		}
+		break;
+	case DS_WARMUP:
+		if ( NETWORK_InClientMode() )
+		{
+			break;
+		}
+		
+		DUEL_UpdateWarmupHUDMessage();
+
+		// Begin the countdown if both players are ready, or if the duel warmup system was disabled
+		if ( (DUEL_CountActiveDuelers( ) == 2 && DUEL_ArePlayersReady()) || !sv_duelwarmup)
+		{
+			// Clear warmup HUD message
+			DUEL_ClearWarmupHUDMessage();
+			SERVER_Printf("\\cf* Both players are ready to fight! Warmup ended, duel is starting...\n");
+
+			// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
+			if ( GAMEMODE_IsLobbyMap( ) )
+				DUEL_SetState( DS_INDUEL );
+			else if ( sv_duelcountdowntime > 0 )
+				DUEL_StartCountdown(( sv_duelcountdowntime * TICRATE ) - 1 );
+			else
+				DUEL_StartCountdown(( 10 * TICRATE ) - 1 );
+		}	
+
 		break;
 	case DS_COUNTDOWN:
 
@@ -440,6 +486,129 @@ void DUEL_TimeExpired( void )
 }
 
 //*****************************************************************************
+//
+void DUEL_AddPlayerReady( ULONG ulPlayer )
+{
+	if ( NETWORK_InClientMode() )
+		return;
+
+	// Player is already ready
+	if(g_ulReadyPlayers[0] == ulPlayer || g_ulReadyPlayers[1] == ulPlayer)
+	{
+		SERVER_PrintfPlayer(ulPlayer, "* You already are marked as ready!\n");
+		return;
+	}
+
+	ULONG ulIdx = (g_ulReadyPlayers[0] == -1 ? 0 : (g_ulReadyPlayers[1] == -1 ? 1 : -1));
+
+	if(ulIdx == -1)
+	{
+		return;
+	}
+
+	SERVER_Printf("* %s \\cfis ready to fight!\n", players[ulPlayer].userinfo.GetName());
+	g_ulReadyPlayers[ulIdx] = ulPlayer;
+}
+
+//*****************************************************************************
+//
+void DUEL_RemovePlayerReady( ULONG ulPlayer )
+{
+	if ( NETWORK_InClientMode() )
+		return;
+
+	ULONG ulIdx = (g_ulReadyPlayers[0] == ulPlayer ? 0 : (g_ulReadyPlayers[1] == ulPlayer ? 1 : -1));
+
+	if ( DUEL_IsDueler(ulPlayer) && ulIdx == -1 )
+	{
+		SERVER_PrintfPlayer(ulPlayer, "* You already are marked as not ready!\n");
+		return;
+	}
+
+	if ( ulIdx != -1 )
+	{
+		SERVER_Printf("* %s \\cfis not ready to fight anymore.\n", players[ulPlayer].userinfo.GetName());
+		g_ulReadyPlayers[ulIdx] = -1;
+	}
+}
+
+//*****************************************************************************
+//
+void DUEL_TogglePlayerReady( ULONG ulPlayer )
+{
+	if ( NETWORK_InClientMode() )
+		return;
+
+	ULONG ulIdx = (g_ulReadyPlayers[0] == ulPlayer ? 0 : (g_ulReadyPlayers[1] == ulPlayer ? 1 : -1));
+
+	if ( ulIdx == -1 )
+	{
+		DUEL_AddPlayerReady(ulPlayer);
+	}
+	else
+	{
+		DUEL_RemovePlayerReady(ulPlayer);
+	}
+}
+
+//*****************************************************************************
+//
+void DUEL_ResetReadyPlayers( void )
+{
+	if ( NETWORK_InClientMode() )
+		return;
+
+	g_ulReadyPlayers[0] = -1;
+	g_ulReadyPlayers[1] = -1;
+
+	DUEL_ClearWarmupHUDMessage();
+}
+
+//*****************************************************************************
+//
+bool DUEL_ArePlayersReady( void )
+{
+	if ( NETWORK_InClientMode() )
+		return true;
+
+	return (g_ulReadyPlayers[0] != -1 && g_ulReadyPlayers[1] != -1);
+}
+
+//*****************************************************************************
+//
+void DUEL_ClearWarmupHUDMessage( void )
+{
+	if ( NETWORK_InClientMode())
+		return;
+
+	SERVERCOMMANDS_PrintHUDMessage(" ", 1.5f, 0.3f, 0, 0, CR_GREEN, 0.0f, "SmallFont", false, MAKE_ID('W','A','R','M') );
+}
+
+//*****************************************************************************
+//
+void DUEL_UpdateWarmupHUDMessage( void )
+{
+	if ( NETWORK_InClientMode() )
+		return;
+
+	char warmupString[90];
+	int playersReady = 0;
+
+	if( g_ulReadyPlayers[0] != -1 )
+	{
+		playersReady++;
+	}
+
+	if( g_ulReadyPlayers[1] != -1 )
+	{
+		playersReady++;
+	}
+
+	sprintf(warmupString, "Warmup mode. Type /ready in chat to ready up.\nPlayers ready: %d / 2", playersReady);
+	SERVERCOMMANDS_PrintHUDMessage(warmupString, 1.5f, 0.3f, 0, 0, CR_GREEN, 0.0f, "SmallFont", false, MAKE_ID('W','A','R','M') );
+}
+
+//*****************************************************************************
 //*****************************************************************************
 //
 ULONG DUEL_GetCountdownTicks( void )
@@ -499,9 +668,30 @@ void DUEL_SetState( DUELSTATE_e State )
 		}
 		break;
 	case DS_WAITINGFORPLAYERS:
-
+		
+		// In case we're coming from warmup
+		DUEL_ClearWarmupHUDMessage();
+		
 		// Zero out the countdown ticker.
 		DUEL_SetCountdownTicks( 0 );
+		break;
+	case DS_WARMUP:
+		
+		// Reset the ready up counter
+		if ( NETWORK_InClientMode() == false )
+		{
+			DUEL_ResetReadyPlayers();
+
+			ULONG ulIdx;
+	
+			for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+			{
+				if(DUEL_IsDueler(ulIdx))
+				{
+					SERVER_PrintfPlayer(ulIdx, "\\cf* Duel warmup mode is enabled. Type /ready in chat to ready up, or /unready to unready.\n");
+				}
+			}
+		}
 		break;
 	default: //Satisfy GCC
 		break;
@@ -544,6 +734,7 @@ void DUEL_SetStartNextDuelOnLevelLoad( bool bStart )
 //	CONSOLE COMMANDS/VARIABLES
 
 CVAR( Int, sv_duelcountdowntime, 10, CVAR_ARCHIVE );
+CVAR( Bool, sv_duelwarmup, false, CVAR_ARCHIVE );
 CUSTOM_CVAR( Int, duellimit, 0, CVAR_CAMPAIGNLOCK )
 {
 	if ( self >= 256 )

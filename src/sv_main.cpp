@@ -141,10 +141,9 @@ EXTERN_CVAR( Bool, sv_showwarnings );
 //*****************************************************************************
 //	PROTOTYPES
 
-static	bool	server_StartChat( BYTESTREAM_s *pByteStream );
-static	bool	server_EndChat( BYTESTREAM_s *pByteStream );
 static	bool	server_Ignore( BYTESTREAM_s *pByteStream );
 static	bool	server_Say( BYTESTREAM_s *pByteStream );
+static	void	server_ProcessChatCommand(ULONG ulPlayer, const char *chatCommandString);
 static	bool	server_ClientMove( BYTESTREAM_s *pByteStream );
 static	bool	server_MissingPacket( BYTESTREAM_s *pByteStream );
 static	bool	server_UpdateClientPing( BYTESTREAM_s *pByteStream );
@@ -160,7 +159,6 @@ static	bool	server_SpectateInfo( BYTESTREAM_s *pByteStream );
 static	bool	server_GenericCheat( BYTESTREAM_s *pByteStream );
 static	bool	server_GiveCheat( BYTESTREAM_s *pByteStream, bool take );
 static	bool	server_SummonCheat( BYTESTREAM_s *pByteStream, LONG lType );
-static	bool	server_ReadyToGoOn( BYTESTREAM_s *pByteStream );
 static	bool	server_ChangeDisplayPlayer( BYTESTREAM_s *pByteStream );
 static	bool	server_AuthenticateLevel( BYTESTREAM_s *pByteStream );
 static	bool	server_CallVote( BYTESTREAM_s *pByteStream );
@@ -276,7 +274,7 @@ CVAR( Bool, sv_pure, true, CVAR_SERVERINFO | CVAR_LATCH )
 CVAR( Int, sv_maxclientsperip, 2, CVAR_ARCHIVE )
 CVAR( Int, sv_afk2spec, 0, CVAR_ARCHIVE ) // [K6]
 CVAR( Bool, sv_forcelogintojoin, false, CVAR_ARCHIVE|CVAR_NOSETBYACS )
-CVAR( Bool, sv_useticbuffer, true, CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_DEBUGONLY )
+CVAR( Bool, sv_useticbuffer, true, CVAR_ARCHIVE|CVAR_NOSETBYACS )
 
 CUSTOM_CVAR( String, sv_adminlistfile, "adminlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS )
 {
@@ -5034,6 +5032,15 @@ static bool server_Say( BYTESTREAM_s *pByteStream )
 	// Read in the chat string.
 	const char	*pszChatString = NETWORK_ReadString( pByteStream );
 
+	// [Proteh] Very very simple chat command handler, we don't need anything fancy
+	// Commands must start with the / character
+	// Skip /me command as it is handled somewhere else already
+	if ( pszChatString[0] == '/' && strnicmp("/me", pszChatString, 3) )
+	{
+		server_ProcessChatCommand(ulPlayer, pszChatString);
+		return false;
+ 	}
+
 	// [BB] If the client is flooding the server with commands, the client is
 	// kicked and we don't need to handle the command.
 	// Note: Despite the auto muting, this is necessary. Otherwise the client
@@ -5111,6 +5118,18 @@ static bool server_Say( BYTESTREAM_s *pByteStream )
 
 		SERVER_SendChatMessage( ulPlayer, ulChatMode, pszChatString );
 		return ( false );
+	}
+}
+
+//*****************************************************************************
+//
+static void server_ProcessChatCommand(ULONG ulPlayer, const char *chatCommandString)
+{
+	// Duel warmup /ready command
+	if( !strnicmp( "/ready", chatCommandString, 6 ) && duel && DUEL_IsDueler( ulPlayer ) && DUEL_GetState() == DS_WARMUP )
+	{
+		DUEL_TogglePlayerReady( ulPlayer );
+		return;
 	}
 }
 

@@ -62,6 +62,7 @@ typedef enum
 	DS_COUNTDOWN,
 	DS_INDUEL,
 	DS_WINSEQUENCE,
+	DS_WARMUP,
 
 } DUELSTATE_e;
 
@@ -78,6 +79,13 @@ void	DUEL_DoWinSequence( ULONG ulPlayer );
 void	DUEL_SendLoserToSpectators( void );
 bool	DUEL_IsDueler( ULONG ulPlayer );
 void	DUEL_TimeExpired( void );
+void	DUEL_AddPlayerReady( ULONG ulPlayer );
+void	DUEL_RemovePlayerReady( ULONG ulPlayer );
+void	DUEL_TogglePlayerReady( ULONG ulPlayer );
+void	DUEL_ResetReadyPlayers( void );
+bool	DUEL_ArePlayersReady( void );
+void	DUEL_ClearWarmupHUDMessage( void );
+void	DUEL_UpdateWarmupHUDMessage( void );
 
 // Access functions
 ULONG	DUEL_GetCountdownTicks( void );
@@ -99,6 +107,7 @@ void	DUEL_SetStartNextDuelOnLevelLoad( bool bStart );
 //  EXTERNAL CONSOLE VARIABLES
 
 EXTERN_CVAR( Int, sv_duelcountdowntime )
+EXTERN_CVAR( Bool, sv_duelwarmup )
 EXTERN_CVAR( Int, duellimit )
 
 #endif	// __DUEL_H__
