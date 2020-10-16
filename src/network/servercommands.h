@@ -1,4 +1,4 @@
-// 33560010957e325b841e822933635a39
+// 932e78ef75607593a6787ebc830c8e77
 // This file has been automatically generated. Do not edit by hand.
 #pragma once
 #include "actor.h"
@@ -656,6 +656,7 @@ namespace ServerCommands
 		MovePlayer() :
 			_playerInitialized( false ),
 			_flagsInitialized( false ),
+			_clientTicOnServerEndInitialized( false ),
 			_xInitialized( false ),
 			_yInitialized( false ),
 			_zInitialized( false ),
@@ -673,6 +674,7 @@ namespace ServerCommands
 			_ucmd_buttonsInitialized( false ) {}
 		void SetPlayer( player_t * value );
 		void SetFlags( int value );
+		void SetClientTicOnServerEnd( unsigned int value );
 		void SetX( fixed_t value );
 		void SetY( fixed_t value );
 		void SetZ( fixed_t value );
@@ -696,6 +698,7 @@ namespace ServerCommands
 		{
 			return _playerInitialized
 				&& _flagsInitialized
+				&& _clientTicOnServerEndInitialized
 				&& _xInitialized
 				&& _yInitialized
 				&& _zInitialized
@@ -718,6 +721,8 @@ namespace ServerCommands
 				Printf( "Missing: player\n" );
 			if ( _flagsInitialized == false )
 				Printf( "Missing: flags\n" );
+			if ( _clientTicOnServerEndInitialized == false )
+				Printf( "Missing: clientTicOnServerEnd\n" );
 			if ( _xInitialized == false )
 				Printf( "Missing: x\n" );
 			if ( _yInitialized == false )
@@ -753,6 +758,7 @@ namespace ServerCommands
 	protected:
 		player_t *player;
 		int flags;
+		unsigned int clientTicOnServerEnd;
 		fixed_t x;
 		fixed_t y;
 		fixed_t z;
@@ -770,6 +776,7 @@ namespace ServerCommands
 		int ucmd_buttons;
 		bool _playerInitialized;
 		bool _flagsInitialized;
+		bool _clientTicOnServerEndInitialized;
 		bool _xInitialized;
 		bool _yInitialized;
 		bool _zInitialized;

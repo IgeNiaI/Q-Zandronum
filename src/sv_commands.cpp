@@ -277,6 +277,7 @@ void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerComma
 
 	ServerCommands::MovePlayer fullCommand;
 	fullCommand.SetPlayer ( &players[ulPlayer] );
+	fullCommand.SetClientTicOnServerEnd ( players[ulPlayer].clientTicOnServerEnd );
 	fullCommand.SetFlags( ulPlayerFlags | PLAYER_VISIBLE );
 	fullCommand.SetX( players[ulPlayer].mo->ClientX );
 	fullCommand.SetY( players[ulPlayer].mo->ClientY );

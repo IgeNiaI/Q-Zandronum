@@ -28,6 +28,7 @@ Command MovePlayer
 	# The server only sends position, angle, etc. information if the player is actually visible.
 	If (flags & PLAYER_VISIBLE)
 		CheckFunction IsVisible
+		ULong clientTicOnServerEnd
 		# [BB] The x/y position has to be sent at full precision, otherwise the player may be rounded to a neighboring
 		# sector on the clients, potentially completely changing its Z position.
 		Fixed x

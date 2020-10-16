@@ -1,4 +1,4 @@
-// 007abbaae3b05a287ddb432082dc39e1
+// 2512d2eb8f67e73a8d482776222a5e48
 // This file has been automatically generated. Do not edit by hand.
 #include "cl_main.h"
 #include "servercommands.h"
@@ -298,6 +298,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			command.flags = NETWORK_ReadByte( bytestream );
 			if ( command.IsVisible() )
 			{
+				command.clientTicOnServerEnd = NETWORK_ReadLong( bytestream );
 				command.x = NETWORK_ReadLong( bytestream );
 				command.y = NETWORK_ReadLong( bytestream );
 				command.z = NETWORK_ReadLong( bytestream );
@@ -4983,6 +4984,7 @@ NetCommand ServerCommands::MovePlayer::BuildNetCommand() const
 	command.addByte( this->flags );
 	if ( IsVisible() )
 	{
+		command.addLong( this->clientTicOnServerEnd );
 		command.addLong( this->x );
 		command.addLong( this->y );
 		command.addLong( this->z );
@@ -5012,6 +5014,12 @@ void ServerCommands::MovePlayer::SetFlags( int value )
 {
 	this->flags = value;
 	this->_flagsInitialized = true;
+}
+
+void ServerCommands::MovePlayer::SetClientTicOnServerEnd( unsigned int value )
+{
+	this->clientTicOnServerEnd = value;
+	this->_clientTicOnServerEndInitialized = true;
 }
 
 void ServerCommands::MovePlayer::SetX( fixed_t value )

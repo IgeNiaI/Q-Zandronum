@@ -4419,34 +4419,30 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 
 	bool totallyfrozen = P_IsPlayerTotallyFrozen(player);
 
-	// [BB] Why should a predicting client ignore CF_TOTALLYFROZEN and CF_FROZEN?
-	//if ( CLIENT_PREDICT_IsPredicting( ) == false )
+	// [RH] Being totally frozen zeros out most input parameters.
+	if (totallyfrozen)
 	{
-		// [RH] Being totally frozen zeros out most input parameters.
-		if (totallyfrozen)
+		if (gamestate == GS_TITLELEVEL)
 		{
-			if (gamestate == GS_TITLELEVEL)
-			{
-				cmd->ucmd.buttons = 0;
-			}
-			else
-			{
-				cmd->ucmd.buttons &= BT_USE;
-			}
-			cmd->ucmd.pitch = 0;
-			cmd->ucmd.yaw = 0;
-			cmd->ucmd.roll = 0;
-			cmd->ucmd.forwardmove = 0;
-			cmd->ucmd.sidemove = 0;
-			cmd->ucmd.upmove = 0;
-			player->turnticks = 0;
+			cmd->ucmd.buttons = 0;
 		}
-		else if (player->cheats & CF_FROZEN)
+		else
 		{
-			cmd->ucmd.forwardmove = 0;
-			cmd->ucmd.sidemove = 0;
-			cmd->ucmd.upmove = 0;
+			cmd->ucmd.buttons &= BT_USE;
 		}
+		cmd->ucmd.pitch = 0;
+		cmd->ucmd.yaw = 0;
+		cmd->ucmd.roll = 0;
+		cmd->ucmd.forwardmove = 0;
+		cmd->ucmd.sidemove = 0;
+		cmd->ucmd.upmove = 0;
+		player->turnticks = 0;
+	}
+	else if (player->cheats & CF_FROZEN)
+	{
+		cmd->ucmd.forwardmove = 0;
+		cmd->ucmd.sidemove = 0;
+		cmd->ucmd.upmove = 0;
 	}
 
 	// If this is a bot, run its logic.
@@ -4753,6 +4749,8 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			}
 		}
 	}
+
+	player->clientTicOnServerEnd++;
 }
 
 /*

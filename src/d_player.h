@@ -775,6 +775,8 @@ public:
 
 	// [BC] End of ST additions.
 
+	unsigned int clientTicOnServerEnd;
+
 	fixed_t GetDeltaViewHeight() const
 	{
 		return (mo->ViewHeight + crouchviewdelta - viewheight) >> 3;
