@@ -3003,9 +3003,6 @@ void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
 		{
 			if (!CLIENT_PREDICT_IsPredicting())
 				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
-
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 		}
 	}
 	else if (!isSliding && player->isCrouchSliding)
@@ -3025,9 +3022,6 @@ void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 		{
 			if (!CLIENT_PREDICT_IsPredicting())
 				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
-
-			if (NETWORK_GetState() == NETSTATE_SERVER)
-				SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 		}
 	}
 	else if (!(canclimb % 2) && player->isWallClimbing)
@@ -3115,9 +3109,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			{
 				if (CLIENT_PREDICT_IsPredicting() == false)
 					S_Sound(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM);
-
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 		}
 
@@ -3199,7 +3190,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		velocity = float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length());
 
 	if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
-		(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED))
+		(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
 	{
 		player->stepInterval = 6;
 	}
@@ -3211,9 +3202,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			{
 				if (!CLIENT_PREDICT_IsPredicting())
 					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
-
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 
 			player->stepInterval = 12;
@@ -3353,9 +3341,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 						{
 							if (!CLIENT_PREDICT_IsPredicting())
 								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
-
-							if (NETWORK_GetState() == NETSTATE_SERVER)
-								SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 						}
 
 						doDoubleJump = true;
@@ -3370,9 +3355,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				{
 					if (!CLIENT_PREDICT_IsPredicting())
 						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
-
-					if (NETWORK_GetState() == NETSTATE_SERVER)
-						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 				}
 
 				doDoubleJump = true;
@@ -3541,9 +3523,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				{
 					if (CLIENT_PREDICT_IsPredicting() == false)
 						S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
-
-					if (NETWORK_GetState() == NETSTATE_SERVER)
-						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 				}
 			}
 
@@ -3673,7 +3652,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	if (!velocity)
 		velocity = float(FVector2(vel.X, vel.Y).Length());
 
-	if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED))
+	if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
 	{
 		player->stepInterval = 6;
 	}
@@ -3685,9 +3664,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			{
 				if (!CLIENT_PREDICT_IsPredicting())
 					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
-
-				if (NETWORK_GetState() == NETSTATE_SERVER)
-					SERVERCOMMANDS_SoundActor(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 			}
 
 			player->stepInterval = 12;
@@ -3720,22 +3696,41 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		if (player->onground && !player->jumpTics && (player->bSpectating || level.IsJumpingAllowed()))
 		{
 			fixed_t	JumpVelz = player->mo->CalcJumpVelz();
+			ULONG	ulJumpTicks;
 			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
-
-			if (!wasJustThrustedZ || isRampJumper)
+			
+			if (!player->mo->wasJustThrustedZ || isRampJumper)
 			{
+				// Set base jump velocity.
+				// [Dusk] Exported this into a function as I need it elsewhere as well.
+				JumpVelz = player->mo->CalcJumpVelz();
+
+				// Set base jump ticks.
+				// [BB] In ZDoom revision 2970 changed the jumping behavior.
+				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
+					ulJumpTicks = 18 * TICRATE / 35;
+				else
+					ulJumpTicks = -1;
+
 				if (!(player->mo->mvFlags & MV_SILENT))
 				{
-					if (!CLIENT_PREDICT_IsPredicting())
+					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+					if (CLIENT_PREDICT_IsPredicting() == false)
 						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
-
-					if (NETWORK_GetState() == NETSTATE_SERVER)
-						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 				}
 
 				player->mo->flags2 &= ~MF2_ONMOBJ;
+
+				// [BC] Increase jump delay if the player has the high jump power.
+				if (player->cheats & CF_HIGHJUMP)
+					ulJumpTicks *= 2;
+
+				// [BC] Remove jump delay if the player is on a spring pad.
+				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+					ulJumpTicks = 0;
+
 				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
-				player->jumpTics = -1;
+				player->jumpTics = ulJumpTicks;
 			}
 		}
 		else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
@@ -3765,9 +3760,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 						{
 							if (!CLIENT_PREDICT_IsPredicting())
 								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
-
-							if (NETWORK_GetState() == NETSTATE_SERVER)
-								SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 						}
 
 						doDoubleJump = true;
@@ -3782,9 +3774,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				{
 					if (!CLIENT_PREDICT_IsPredicting())
 						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
-
-					if (NETWORK_GetState() == NETSTATE_SERVER)
-						SERVERCOMMANDS_SoundActor(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM, player - players, SVCF_SKIPTHISCLIENT);
 				}
 
 				doDoubleJump = true;
