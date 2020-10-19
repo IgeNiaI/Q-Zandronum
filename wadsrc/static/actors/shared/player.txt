@@ -41,6 +41,7 @@ Actor PlayerPawn : Actor native
 	Player.MvType 0 // movement type (0 == doom, 1 == quake, 2 == quake CPM)
 	
 	Player.JumpDelay 7
+	Player.SecondJumpZ 8
 	Player.MaxWallClimbTics 70
 	Player.WallFrictionEnabled 1
 	Player.CrouchSpeedFactor 0.5

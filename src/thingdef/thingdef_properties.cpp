@@ -2895,6 +2895,15 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, jumpdelay, I, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, secondjumpz, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(i, 0);
+	defaults->SecondJumpZ = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, maxwallclimbtics, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);

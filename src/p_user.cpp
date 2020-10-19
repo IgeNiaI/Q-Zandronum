@@ -744,6 +744,7 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< CrouchChangeSpeed
 		<< MvType
 		<< JumpDelay
+		<< SecondJumpZ
 		<< MaxWallClimbTics
 		<< WallFrictionEnabled
 		<< CrouchSpeedFactor
@@ -2363,7 +2364,7 @@ fixed_t APlayerPawn::CalcJumpVelz()
 
 fixed_t APlayerPawn::CalcDoubleJumpVelz()
 {
-	fixed_t z = JumpZ * 35 / TICRATE;
+	fixed_t z = SecondJumpZ * 35 / TICRATE;
 
 	// [BC] If the player has the high jump power, double his jump velocity.
 	if (player->cheats & CF_HIGHJUMP)
@@ -3317,7 +3318,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
 			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
-			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
+			fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
 
 			// Wall proximity check
 			bool doDoubleJump = false;
@@ -3335,7 +3336,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					// it must be a wall that can be jumped on
 					if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
 					{
-						JumpVelz = (JumpVelz / 4) * 3;
+						SecondJumpVelz = (SecondJumpVelz / 4) * 3;
 
 						if (!(player->mo->mvFlags & MV_SILENT))
 						{
@@ -3364,15 +3365,13 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			{
 				if (player->mo->velz < 0)
 				{
-					JumpVelz = (JumpVelz * 6) / 5;
-					player->mo->velz = JumpVelz;
+					player->mo->velz = SecondJumpVelz;
 				}
 				else
 				{
-					player->mo->velz += JumpVelz;
+					player->mo->velz += SecondJumpVelz;
 				}
 
-				player->mo->velz = JumpVelz;
 				player->doubleJumpState = DJ_NOT_AVAILABLE;
 			}
 		}
@@ -3736,7 +3735,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
 			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
 		{
-			fixed_t	JumpVelz = player->mo->CalcDoubleJumpVelz();
+			fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
 
 			// Wall proximity check
 			bool doDoubleJump = false;
@@ -3754,7 +3753,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					// it must be a wall that can be jumped on
 					if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
 					{
-						JumpVelz = (JumpVelz / 4) * 3;
+						SecondJumpVelz = (SecondJumpVelz / 4) * 3;
 
 						if (!(player->mo->mvFlags & MV_SILENT))
 						{
@@ -3783,15 +3782,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			{
 				if (player->mo->velz < 0)
 				{
-					JumpVelz = (JumpVelz * 6) / 5;
-					player->mo->velz = JumpVelz;
+					player->mo->velz = SecondJumpVelz;
 				}
 				else
 				{
-					player->mo->velz += JumpVelz;
+					player->mo->velz += SecondJumpVelz;
 				}
 
-				player->mo->velz = JumpVelz;
 				player->doubleJumpState = DJ_NOT_AVAILABLE;
 			}
 		}

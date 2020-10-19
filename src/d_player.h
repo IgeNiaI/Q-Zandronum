@@ -179,6 +179,7 @@ public:
 
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
 	int			JumpDelay;
+	fixed_t		SecondJumpZ;
 	int			MaxWallClimbTics;
 	bool		WallFrictionEnabled;
 	float		CrouchSpeedFactor;
