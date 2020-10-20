@@ -5773,14 +5773,22 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							int pushDamage = damage;
 							if ( bombsource && bombsource->Inventory )
 								bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
-							explosionToPlayer *= pushDamage * 0.35f;
+							explosionToPlayer *= pushDamage * 0.3f;
 
 							SelfThrustBonus[0] = FLOAT2FIXED(explosionToPlayer.X);
 							SelfThrustBonus[1] = FLOAT2FIXED(explosionToPlayer.Y);
-							SelfThrustBonus[2] = FLOAT2FIXED(explosionToPlayer.Z);
 							thing->velx += SelfThrustBonus[0];
 							thing->vely += SelfThrustBonus[1];
-							thing->velz += SelfThrustBonus[2];
+
+							if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
+								( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
+							{
+								if (!(flags & RADF_NODAMAGE))
+								{
+									SelfThrustBonus[2] = FLOAT2FIXED(explosionToPlayer.Z);
+									thing->velz += SelfThrustBonus[2];
+								}
+							}
 						}
 						else
 						{
