@@ -3574,11 +3574,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6.f);
 				}
 
-
 				// set slide duration if player can do it.
-				// Duration is proportional to the velz.
+				// Duration is proportional to the velocity.
 				if (isSlider && player->mo->velz < 0)
-					player->crouchSlideTics = MIN(-FixedDiv(player->mo->velz, 1000000000), player->mo->SlideMaxTics);
+					player->crouchSlideTics = MIN(FLOAT2FIXED(float(vel.Length()) / 15258.0f), player->mo->SlideMaxTics);
 			}
 			else if (!wasJustThrustedZ)
 			{
