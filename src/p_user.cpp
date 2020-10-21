@@ -630,6 +630,56 @@ size_t player_t::PropagateMark()
 	return sizeof(*this);
 }
 
+//===========================================================================
+//
+// player_t :: AddFutureThrust
+//
+// Adds a struct with explosion details to thrust the unlagged player
+// with an proper delay
+//
+//===========================================================================
+
+void player_t::AddFutureThrust( sFUTURETHRUST* NewFutureThrust )
+{
+	if ( NewFutureThrust == NULL )
+		return;
+
+	if ( FutureThrust != NULL )
+	{
+		sFUTURETHRUST *tempFutureThrust = FutureThrust;
+
+		if ( FutureThrust->tic > NewFutureThrust->tic )
+		{
+			FutureThrust = NewFutureThrust;
+			FutureThrust->next = tempFutureThrust;
+		}
+		else
+		{
+			while ( tempFutureThrust )
+			{
+				if (tempFutureThrust->next == NULL)
+				{
+					tempFutureThrust->next = NewFutureThrust;
+				}
+				else if (tempFutureThrust->next->tic > NewFutureThrust->tic)
+				{
+					NewFutureThrust->next = tempFutureThrust->next;
+					tempFutureThrust->next = NewFutureThrust;
+				}
+				else
+				{
+					tempFutureThrust = tempFutureThrust->next;
+				}
+			}
+
+		}
+	}
+	else
+	{
+		FutureThrust = NewFutureThrust;
+	}
+}
+
 void player_t::SetLogNumber (int num)
 {
 	char lumpname[16];
@@ -4835,41 +4885,38 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 	else
 	{
-		// Servers read in the pitch value. It is not calculated.
-		if (( NETWORK_GetState( ) != NETSTATE_SERVER ) || ( player->pSkullBot != NULL ))
-		{
-			int look = cmd->ucmd.pitch << 16;
+		int look = cmd->ucmd.pitch << 16;
 
-			// The player's view pitch is clamped between -90 and +90 degrees
-			if (look)
+		// The player's view pitch is clamped between -90 and +90 degrees
+
+		if (look)
+		{
+			if (look == -32768 << 16)
+			{ // center view
+				player->mo->pitch = 0;
+			}
+			else
 			{
-				if (look == -32768 << 16)
-				{ // center view
-					player->mo->pitch = 0;
+				fixed_t oldpitch = player->mo->pitch;
+				player->mo->pitch -= look;
+				if (look > 0)
+				{ // look up
+					// [BB] Zandronum handles pitch differently.
+					const fixed_t pitchLimit = - ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) ? Renderer->GetMaxViewPitch(false) : 90 ) * ANGLE_1;
+					player->mo->pitch = MAX(player->mo->pitch, pitchLimit );
+					if (player->mo->pitch > oldpitch)
+					{
+						player->mo->pitch = pitchLimit;
+					}
 				}
 				else
-				{
-					fixed_t oldpitch = player->mo->pitch;
-					player->mo->pitch -= look;
-					if (look > 0)
-					{ // look up
-						// [BB] Zandronum handles pitch differently.
-						const fixed_t pitchLimit = - ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) ? Renderer->GetMaxViewPitch(false) : 90 ) * ANGLE_1;
-						player->mo->pitch = MAX(player->mo->pitch, pitchLimit );
-						if (player->mo->pitch > oldpitch)
-						{
-							player->mo->pitch = pitchLimit;
-						}
-					}
-					else
-					{ // look down
-						// [BB] Zandronum handles pitch differently.
-						const fixed_t pitchLimit = ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) ? Renderer->GetMaxViewPitch(true) : 90 ) * ANGLE_1;
-						player->mo->pitch = MIN(player->mo->pitch, pitchLimit );
-						if (player->mo->pitch < oldpitch)
-						{
-							player->mo->pitch = pitchLimit;
-						}
+				{ // look down
+					// [BB] Zandronum handles pitch differently.
+					const fixed_t pitchLimit = ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) ? Renderer->GetMaxViewPitch(true) : 90 ) * ANGLE_1;
+					player->mo->pitch = MIN(player->mo->pitch, pitchLimit );
+					if (player->mo->pitch < oldpitch)
+					{
+						player->mo->pitch = pitchLimit;
 					}
 				}
 			}
@@ -5066,6 +5113,18 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 				}
 			}
 		}
+	}
+
+	// Apply future thrust structs whose time has come
+	sFUTURETHRUST *tempFutureThrust;
+	while (player->FutureThrust != NULL && player->FutureThrust->tic <= gametic)
+	{
+		P_ExplosionThrust(player->mo, player->FutureThrust->bombsource,
+			player->FutureThrust->explosionX, player->FutureThrust->explosionY, player->FutureThrust->explosionZ,
+			player->FutureThrust->RocketJump, player->FutureThrust->points, player->FutureThrust->flags);
+		tempFutureThrust = player->FutureThrust;
+		player->FutureThrust = player->FutureThrust->next;
+		free(tempFutureThrust);
 	}
 }
 

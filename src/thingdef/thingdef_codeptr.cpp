@@ -766,13 +766,6 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Jump)
 	ACTION_PARAM_INT(count, 0);
 	ACTION_PARAM_INT(maxchance, 1);
 
-	// [BC] Don't jump here in client mode.
-	if ( NETWORK_InClientMode() )
-	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
-	}
-
 	if (count >= 2 && (maxchance >= 256 || pr_cajump() < maxchance))
 	{
 		int jumps = 2 + (count == 2? 0 : (pr_cajump() % (count - 1)));
@@ -916,18 +909,21 @@ void DoJumpIfInventory(AActor * owner, DECLARE_PARAMINFO)
 	ACTION_PARAM_STATE(JumpOffset, 2);
 	ACTION_PARAM_INT(setowner, 3);
 
+	ACTION_SET_RESULT(false);	// Jumps should never set the result for inventory state chains!
+	COPY_AAPTR_NOT_NULL(owner, owner, setowner); //  returns if owner ends up being NULL
+
 	// [BC] Don't jump here in client mode.
 	ClientJumpUpdateFlags clientUpdateFlags = 0;
-	if (( self->player ) &&
-		(( CallingState == self->player->psprites[ps_weapon].state ) || ( CallingState == self->player->psprites[ps_flash].state )))
+	if (( owner->player ) &&
+		(( CallingState == owner->player->psprites[ps_weapon].state ) || ( CallingState == owner->player->psprites[ps_flash].state )))
 	{
 	}
 	else
 	{
 		if ( NETWORK_InClientMode() )
 		{
-			if ((( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) &&
-				(( self->player == NULL ) || (( self->player - players ) != consoleplayer )))
+			if ((( owner->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) &&
+				(( owner->player == NULL ) || (( owner->player - players ) != consoleplayer )))
 			{
 				return;
 			}
@@ -936,16 +932,13 @@ void DoJumpIfInventory(AActor * owner, DECLARE_PARAMINFO)
 		clientUpdateFlags |= CLIENTUPDATE_FRAME;
 
 		// The player should know his own inventory.
-		if ( self->player )
+		if ( owner->player )
 			clientUpdateFlags |= CLIENTUPDATE_SKIPPLAYER;
 		else
 			clientUpdateFlags |= CLIENTUPDATE_POSITION;
 	}
 
-	ACTION_SET_RESULT(false);	// Jumps should never set the result for inventory state chains!
-
 	if (!Type) return;
-	COPY_AAPTR_NOT_NULL(owner, owner, setowner); //  returns if owner ends up being NULL
 
 	AInventory *Item = owner->FindInventory(Type);
 
@@ -965,7 +958,7 @@ void DoJumpIfInventory(AActor * owner, DECLARE_PARAMINFO)
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_JumpIfInventory)
 {
-	DoJumpIfInventory(self, PUSH_PARAMINFO);
+	DoJumpIfInventory(self->player ? self : self->target, PUSH_PARAMINFO);
 }
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_JumpIfInTargetInventory)
@@ -1716,7 +1709,7 @@ void A_FireCustomMissileHelper ( AActor *self,
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM) ? true : false, true, false);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, flags & FPF_NOAUTOAIM ? true : false, true, false, flags & FCM_NOUNLAGGED ? true : false);
 
 	// automatic handling of seeker missiles
 	if (misl)
@@ -1748,26 +1741,34 @@ void A_FireCustomMissileHelper ( AActor *self,
 			if ( self->player )
 			{
 				// [geNia] Compensate player ping when shooting missiles
-				int StartingTick = UNLAGGED_Gametic( self->player );
-
-				for (int Tick = StartingTick; Tick < gametic; Tick++)
+				if ( !(flags & FCM_NOUNLAGGED) )
 				{
-					UNLAGGED_ReconcileTick( self, Tick );
-					UNLAGGED_AddReconciliationBlocker();
-					int InitialTics = misl->tics;
-					misl->tics = -1;
-					misl->Tick();
-					misl->tics = InitialTics;
+					int StartingTick = UNLAGGED_Gametic( self->player );
 
-					if (!(misl->flags & MF_MISSILE))
+					if (StartingTick < gametic)
 					{
-						UNLAGGED_RemoveReconciliationBlocker();
-						break;
-					}
-					UNLAGGED_RemoveReconciliationBlocker();
-				}
+						for (int Tick = StartingTick; Tick < gametic; Tick++)
+						{
+							UNLAGGED_ReconcileTick( self, Tick );
+							UNLAGGED_AddReconciliationBlocker();
+							UNLAGGED_SetFutureTic( gametic + (Tick - StartingTick) );
+							int InitialTics = misl->tics;
+							misl->tics = -1;
+							misl->Tick();
+							misl->tics = InitialTics;
 
-				UNLAGGED_Restore(self);
+							if (!(misl->flags & MF_MISSILE))
+							{
+								// The missile exploded
+								UNLAGGED_RemoveReconciliationBlocker();
+								UNLAGGED_Restore( self );
+								break;
+							}
+							UNLAGGED_RemoveReconciliationBlocker();
+							UNLAGGED_Restore( self );
+						}
+					}
+				}
 
 				SERVERCOMMANDS_SpawnMissile( misl, (self->player - players), SVCF_SKIPTHISCLIENT );
 
@@ -2184,7 +2185,7 @@ static void DoGiveInventory(AActor *source, AActor *receiver, DECLARE_PARAMINFO)
 		if ( NETWORK_InClientMode() )
 		{
 			// [geNia] Clients can only give items to themselves
-			if ( ( source->player - players != consoleplayer ) || ( source == receiver ) )
+			if ( source->player - players != consoleplayer )
 				return;
 		}
 	}

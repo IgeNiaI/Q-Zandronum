@@ -27,6 +27,7 @@ const int CMF_ABSOLUTEANGLE = 128;
 
 // Flags for A_FireCustomMissile
 const int FCM_AIMATANGLE = 1;
+const int FCM_NOUNLAGGED = 2;
 
 // Flags for A_CustomBulletAttack
 const int CBAF_AIMFACING = 1;

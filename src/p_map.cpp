@@ -5614,7 +5614,11 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 {
 	if (bombdistance <= 0)
 		return;
-	fulldamagedistance = clamp<int>(fulldamagedistance, 0, bombdistance - 1);
+
+	if (fulldamagedistance < 0)
+		fulldamagedistance = 0;
+	else if (fulldamagedistance > bombdistance - 1)
+		fulldamagedistance = bombdistance - 1;
 
 	double bombdistancefloat = 1.f / (double)(bombdistance - fulldamagedistance);
 	double bombdamagefloat = (double)bombdamage;
@@ -5623,8 +5627,6 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 
 	FBlockThingsIterator it(FBoundingBox(bombspot->x, bombspot->y, bombdistance << FRACBITS));
 	AActor *thing;
-
-	fixed_t SelfThrustBonus[3];
 
 	if (flags & RADF_SOURCEISSPOT)
 	{ // The source is actually the same as the spot, even if that wasn't what we received.
@@ -5708,8 +5710,10 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 				if (len < 0.f)
 					len = 0.f;
 			}
+
 			len /= FRACUNIT;
-			len = clamp<double>(len - (double)fulldamagedistance, 0, len);
+			if (len - (double)fulldamagedistance < 0.)
+				len = 0.;
 			points = bombdamagefloat * (1.f - len * bombdistancefloat);
 			if (thing == bombsource)
 			{
@@ -5720,11 +5724,6 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 			// points and bombdamage should be the same sign
 			if ((points * bombdamage) > 0 && P_CheckSight(thing, bombspot, SF_IGNOREVISIBILITY | SF_IGNOREWATERBOUNDARY))
 			{ // OK to damage; target is in direct path
-				double velz;
-				double thrust;
-				// [BB] We need to store these values for ZACOMPATF_OLD_EXPLOSION_THRUST.
-				const fixed_t origvelx = thing->velx;
-				const fixed_t origvely = thing->vely;
 				int damage = abs((int)points);
 				int newdam = damage;
 
@@ -5762,81 +5761,30 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 
 					if (((flags & RADF_NODAMAGE) && bombsource == NULL) || !(bombspot->flags2 & MF2_NODMGTHRUST))
 					{
-						// tweaked behavior rockets, only affects players
-						if ((flags & RADF_QROCKETJUMP) && thing->player != NULL)
+						// [BB] If ZADF_NO_ROCKET_JUMPING is on, don't give players any z-velocity if the attack was made by a player.
+						bool RocketJump = ((zadmflags & ZADF_NO_ROCKET_JUMPING) == false) ||
+							(bombsource == NULL) || (bombsource->player == NULL) || (thing->player == NULL);
+
+						// Delay thrust if rocketjumping to not mess up client prediction
+						if ( NETWORK_GetState( ) == NETSTATE_SERVER && thing == bombsource && UNLAGGED_IsReconciled( ) && UNLAGGED_GetFutureTic() > gametic )
 						{
-							fixed_t heightOffset = thing == bombsource ? thing->player->viewheight : thing->height / 2; // facilitates rocket jumps and behaves intuitively against opponents
-							FVector3 thingPos = { FIXED2FLOAT(thing->x), FIXED2FLOAT(thing->y) , FIXED2FLOAT(thing->z + heightOffset) };
-							FVector3 explosionToPlayer = thingPos - FVector3(FIXED2FLOAT(bombspot->x), FIXED2FLOAT(bombspot->y), FIXED2FLOAT(bombspot->z));
-							explosionToPlayer.MakeUnit();
+							sFUTURETHRUST *FutureThrust = (struct futurethrust*) malloc(sizeof(struct futurethrust));
+							FutureThrust->tic = UNLAGGED_GetFutureTic();
+							FutureThrust->next = NULL;
+							FutureThrust->bombsource = bombsource;
+							FutureThrust->explosionX = bombspot->x;
+							FutureThrust->explosionY = bombspot->y;
+							FutureThrust->explosionZ = bombspot->z;
+							FutureThrust->RocketJump = RocketJump;
+							FutureThrust->points = points;
+							FutureThrust->flags = flags;
 
-							int pushDamage = damage;
-							if ( bombsource && bombsource->Inventory )
-								bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
-							explosionToPlayer *= pushDamage * 0.3f;
-
-							SelfThrustBonus[0] = FLOAT2FIXED(explosionToPlayer.X);
-							SelfThrustBonus[1] = FLOAT2FIXED(explosionToPlayer.Y);
-							thing->velx += SelfThrustBonus[0];
-							thing->vely += SelfThrustBonus[1];
-
-							if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
-								( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
-							{
-								if (!(flags & RADF_NODAMAGE))
-								{
-									SelfThrustBonus[2] = FLOAT2FIXED(explosionToPlayer.Z);
-									thing->velz += SelfThrustBonus[2];
-								}
-							}
+							thing->player->AddFutureThrust( FutureThrust );
 						}
 						else
 						{
-							thrust = points * 0.5f / (double)thing->Mass;
-							if (bombsource == thing)
-							{
-								thrust *= selfthrustscale;
-							}
-							velz = (double)(thing->z + (thing->height >> 1) - bombspot->z) * thrust;
-
-							// [BB] Potentially use the horizontal thrust of old ZDoom versions.
-							if ( zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST )
-							{
-								SelfThrustBonus[0] = origvelx + static_cast<fixed_t>((thing->x - bombspot->x) * thrust);
-								SelfThrustBonus[1] = origvely + static_cast<fixed_t>((thing->y - bombspot->y) * thrust);
-								thing->velx = SelfThrustBonus[0];
-								thing->vely = SelfThrustBonus[1];
-							}
-							else
-							{
-								angle_t ang = R_PointToAngle2(bombspot->x, bombspot->y, thing->x, thing->y) >> ANGLETOFINESHIFT;
-								SelfThrustBonus[0] = fixed_t(finecosine[ang] * thrust);
-								SelfThrustBonus[1] = fixed_t(finesine[ang] * thrust);
-								thing->velx += SelfThrustBonus[0];
-								thing->vely += SelfThrustBonus[1];
-							}
-
-							// [BB] If ZADF_NO_ROCKET_JUMPING is on, don't give players any z-velocity if the attack was made by a player.
-							if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
-								( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
-							{
-								if (!(flags & RADF_NODAMAGE))
-								{
-									SelfThrustBonus[2] = (fixed_t)velz;
-									thing->velz += SelfThrustBonus[2];	// this really doesn't work well
-								}
-							}
+							P_ExplosionThrust( thing, bombsource, bombspot->x, bombspot->y, bombspot->z, RocketJump, points, flags );
 						}
-
-						if ( NETWORK_InClientMode() && thing->player )
-						{
-							CLIENT_PREDICT_SaveSelfThrustBonus( thing->player, SelfThrustBonus[0], SelfThrustBonus[1], SelfThrustBonus[2] );
-						}
-
-						// [BC] If we're the server, update the thing's velocity.
-						// [BB] Use SERVER_UpdateThingVelocity to prevent sync problems.
-						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							SERVER_UpdateThingVelocity( thing, true );
 					}
 				}
 			}
@@ -5879,6 +5827,84 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 
 	// [BB] If the bombsource is a player and hit another player with his attack, potentially give him a medal.
 	PLAYER_CheckStruckPlayer( bombsource );
+}
+
+void P_ExplosionThrust( AActor *thing, AActor *bombsource, fixed_t explosionX, fixed_t explosionY, fixed_t explosionZ, bool RocketJump, double points, int flags )
+{
+	double thrust;
+	fixed_t ThingThrustValues[3];
+
+	// tweaked behavior rockets, only affects players
+	if ((flags & RADF_QROCKETJUMP) && thing->player != NULL)
+	{
+		fixed_t heightOffset = thing == bombsource ? thing->player->viewheight : thing->height / 2; // facilitates rocket jumps and behaves intuitively against opponents
+		FVector3 thingPos = { FIXED2FLOAT(thing->x), FIXED2FLOAT(thing->y) , FIXED2FLOAT(thing->z + heightOffset) };
+		FVector3 explosionToPlayer = thingPos - FVector3(FIXED2FLOAT(explosionX), FIXED2FLOAT(explosionY), FIXED2FLOAT(explosionZ));
+		explosionToPlayer.MakeUnit();
+
+		int pushDamage = abs((int)points);
+		pushDamage = MIN(pushDamage, (pushDamage * 5) / 4); // put a cap on the push force
+		explosionToPlayer *= pushDamage * 0.35f;
+
+		ThingThrustValues[0] = FLOAT2FIXED(explosionToPlayer.X);
+		ThingThrustValues[1] = FLOAT2FIXED(explosionToPlayer.Y);
+
+		if (RocketJump)
+		{
+			if (!(flags & RADF_NODAMAGE))
+			{
+				ThingThrustValues[2] = FLOAT2FIXED(explosionToPlayer.Z);
+			}
+		}
+	}
+	else
+	{
+		double velz;
+
+		thrust = points * 0.5f / (double)thing->Mass;
+		if (bombsource == thing)
+		{
+			thrust *= selfthrustscale;
+		}
+		velz = (double)(thing->z + (thing->height >> 1) - explosionZ) * thrust;
+
+		// [BB] Potentially use the horizontal thrust of old ZDoom versions.
+		if ( zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST )
+		{
+			ThingThrustValues[0] = static_cast<fixed_t>((thing->x - explosionX) * thrust);
+			ThingThrustValues[1] = static_cast<fixed_t>((thing->y - explosionY) * thrust);
+		}
+		else
+		{
+			angle_t ang = R_PointToAngle2(explosionX, explosionY, thing->x, thing->y) >> ANGLETOFINESHIFT;
+			ThingThrustValues[0] = fixed_t(finecosine[ang] * thrust);
+			ThingThrustValues[1] = fixed_t(finesine[ang] * thrust);
+		}
+
+		if (RocketJump)
+		{
+			if (!(flags & RADF_NODAMAGE))
+			{
+				ThingThrustValues[2] = (fixed_t)velz;
+			}
+		}
+	}
+
+	thing->velx += ThingThrustValues[0];
+	thing->vely += ThingThrustValues[1];
+	thing->velz += ThingThrustValues[2];
+
+	if ( NETWORK_InClientMode() && thing->player == &players[consoleplayer] )
+	{
+		CLIENT_PREDICT_SaveSelfThrustBonus( ThingThrustValues[0], ThingThrustValues[1], ThingThrustValues[2] );
+	}
+
+	// [BC] If we're the server, update the thing's velocity.
+	// [BB] Use SERVER_UpdateThingVelocity to prevent sync problems.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
+		SERVER_UpdateThingVelocity( thing, true );
+	}
 }
 
 //==========================================================================

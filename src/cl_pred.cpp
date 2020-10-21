@@ -220,15 +220,6 @@ void CLIENT_PREDICT_PlayerPredict( void )
 	// Save a bunch of crucial attributes of the player that are necessary for prediction.
 	client_predict_BeginPrediction( pPlayer );
 
-	while (g_ulPrevUpdateTick < CLIENT_GetLastConsolePlayerUpdateTick())
-	{
-		g_SelfThrustBonus[g_ulPrevUpdateTick % CLIENT_PREDICTION_TICS][0] = 0;
-		g_SelfThrustBonus[g_ulPrevUpdateTick % CLIENT_PREDICTION_TICS][1] = 0;
-		g_SelfThrustBonus[g_ulPrevUpdateTick % CLIENT_PREDICTION_TICS][2] = 0;
-
-		g_ulPrevUpdateTick++;
-	}
-
 	// Predict however many ticks are necessary.
 	g_bPredicting = true;
 	client_predict_DoPrediction( pPlayer, ulPredictionTicks );
@@ -311,7 +302,7 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 	g_bSavedOnMobj[Tick % CLIENT_PREDICTION_TICS] = !!(pPlayer->mo->flags2 & MF2_ONMOBJ);
 }
 
-void CLIENT_PREDICT_SaveSelfThrustBonus( const player_t *pPlayer, fixed_t velx, fixed_t vely, fixed_t velz )
+void CLIENT_PREDICT_SaveSelfThrustBonus( fixed_t velx, fixed_t vely, fixed_t velz )
 {
 	g_SelfThrustBonus[gametic % CLIENT_PREDICTION_TICS][0] = velx;
 	g_SelfThrustBonus[gametic % CLIENT_PREDICTION_TICS][1] = vely;
@@ -322,6 +313,10 @@ void CLIENT_PREDICT_SaveSelfThrustBonus( const player_t *pPlayer, fixed_t velx, 
 //
 static void client_predict_BeginPrediction( player_t *pPlayer )
 {
+	g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = 0;
+	g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = 0;
+	g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][2] = 0;
+
 	// Record the sectors
 	for (int i = 0; i < numsectors; ++i)
 	{

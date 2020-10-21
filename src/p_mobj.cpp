@@ -7462,15 +7462,29 @@ AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
 		{
 			int StartingTick = UNLAGGED_Gametic( source->player );
 
-			for (int Tick = StartingTick; Tick < gametic; Tick++)
+			if (StartingTick < gametic)
 			{
-				UNLAGGED_ReconcileTick( source, Tick );
-				UNLAGGED_AddReconciliationBlocker();
-				pMissile->Tick();
-				UNLAGGED_RemoveReconciliationBlocker();
-			}
+				for (int Tick = StartingTick; Tick < gametic; Tick++)
+				{
+					UNLAGGED_ReconcileTick( source, Tick );
+					UNLAGGED_AddReconciliationBlocker();
+					UNLAGGED_SetFutureTic( gametic + (Tick - StartingTick) );
+					int InitialTics = pMissile->tics;
+					pMissile->tics = -1;
+					pMissile->Tick();
+					pMissile->tics = InitialTics;
 
-			UNLAGGED_Restore( source );
+					if (!(pMissile->flags & MF_MISSILE))
+					{
+						// The missile exploded
+						UNLAGGED_RemoveReconciliationBlocker();
+						UNLAGGED_Restore( source );
+						break;
+					}
+					UNLAGGED_RemoveReconciliationBlocker();
+					UNLAGGED_Restore( source );
+				}
+			}
 		}
 
 		// [BB] If we're the server, tell clients to spawn the missile.
@@ -7508,7 +7522,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle,
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
-							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient)
+							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient, bool nounlagged)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
@@ -7626,27 +7640,34 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 				if ( bValidSpawn )
 				{
 					// [geNia] Compensate player ping when shooting missiles
-					int StartingTick = UNLAGGED_Gametic( source->player );
-
-					for (int Tick = StartingTick; Tick < gametic; Tick++)
+					if ( !nounlagged )
 					{
-						UNLAGGED_ReconcileTick( source, Tick );
-						UNLAGGED_AddReconciliationBlocker();
-						int InitialTics = MissileActor->tics;
-						MissileActor->tics = -1;
-						MissileActor->Tick();
-						MissileActor->tics = InitialTics;
+						int StartingTick = UNLAGGED_Gametic( source->player );
 
-						if (!(MissileActor->flags & MF_MISSILE))
+						if (StartingTick < gametic)
 						{
-							UNLAGGED_RemoveReconciliationBlocker();
-							break;
+							for (int Tick = StartingTick; Tick < gametic; Tick++)
+							{
+								UNLAGGED_ReconcileTick( source, Tick );
+								UNLAGGED_AddReconciliationBlocker();
+								UNLAGGED_SetFutureTic( gametic + (Tick - StartingTick) );
+								int InitialTics = MissileActor->tics;
+								MissileActor->tics = -1;
+								MissileActor->Tick();
+								MissileActor->tics = InitialTics;
+
+								if (!(MissileActor->flags & MF_MISSILE))
+								{
+									// The missile exploded
+									UNLAGGED_RemoveReconciliationBlocker();
+									UNLAGGED_Restore( source );
+									break;
+								}
+								UNLAGGED_RemoveReconciliationBlocker();
+								UNLAGGED_Restore( source );
+							}
 						}
-
-						UNLAGGED_RemoveReconciliationBlocker();
 					}
-
-					UNLAGGED_Restore( source );
 				}
 
 				SERVERCOMMANDS_SpawnMissile( MissileActor, (source->player - players), SVCF_SKIPTHISCLIENT );
@@ -7660,7 +7681,6 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 			{
 				SERVERCOMMANDS_SpawnMissile( MissileActor );
 			}
-
 		}
 	}
 	

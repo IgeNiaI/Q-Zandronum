@@ -66,6 +66,7 @@ CVAR(Flag, sv_nounlagged, zadmflags, ZADF_NOUNLAGGED);
 CVAR( Bool, sv_unlagged_debugactors, false, 0 )
 
 bool reconciledGame = false;
+int futureTic = 0;
 int reconciliationBlockers = 0;
 
 void UNLAGGED_Tick( void )
@@ -156,7 +157,7 @@ void UNLAGGED_Reconcile( AActor *actor )
 	UNLAGGED_ReconcileTick( actor, unlaggedGametic );
 }
 
-void UNLAGGED_ReconcileTick( AActor *actor, int Tick )
+void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
 {
 	//Only do anything if the actor to be reconciled is a player,
 	//it's on a server with unlagged on, and reconciliation is not being blocked
@@ -165,13 +166,13 @@ void UNLAGGED_ReconcileTick( AActor *actor, int Tick )
 
 	//Don't reconcile if the unlagged gametic is the same as the current
 	//because unlagged data for this tic may not be completely recorded yet
-	if (Tick >= gametic)
+	if (Tic >= gametic)
 		return;
 
 	reconciledGame = true;
 
 	//find the index
-	const int unlaggedIndex = Tick % UNLAGGEDTICS;
+	const int unlaggedIndex = Tic % UNLAGGEDTICS;
 
 	//reconcile the sectors
 	for (int i = 0; i < numsectors; ++i)
@@ -261,6 +262,16 @@ void UNLAGGED_ReconcileTick( AActor *actor, int Tick )
 			}
 		}
 	}
+}
+
+void UNLAGGED_SetFutureTic( int tic )
+{
+	futureTic = tic;
+}
+
+int	UNLAGGED_GetFutureTic()
+{
+	return futureTic;
 }
 
 // Restore everything that has been shifted

@@ -86,6 +86,16 @@ class player_t;
 class	CSkullBot;
 class	AFloatyIcon;
 
+typedef struct futurethrust {
+	int tic;
+	AActor *bombsource;
+	fixed_t explosionX, explosionY, explosionZ;
+	bool RocketJump;
+	double points;
+	int flags;
+	struct futurethrust *next = NULL;
+} sFUTURETHRUST;
+
 class APlayerPawn : public AActor
 {
 	DECLARE_CLASS (APlayerPawn, AActor)
@@ -525,6 +535,8 @@ public:
 	void SetLogText (const char *text);
 	void SendPitchLimits() const;
 
+	void AddFutureThrust(sFUTURETHRUST* NewFutureThrust);
+
 	APlayerPawn	*mo;
 	BYTE		playerstate;
 	ticcmd_t	cmd;
@@ -793,6 +805,8 @@ public:
 
 	fixed_t		restoreFloorZ;
 	fixed_t		restoreCeilingZ;
+
+	sFUTURETHRUST *FutureThrust;
 
 	// [BC] End of ST additions.
 
