@@ -3187,29 +3187,31 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// Footsteps
 	//*******************************************************
 
-	if (!velocity)
-		velocity = float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length());
+	if ( !CLIENT_PREDICT_IsPredicting() )
+	{
+		if (!velocity)
+			velocity = float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length());
 
-	if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
-		(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
-	{
-		player->stepInterval = 6;
-	}
-	else
-	{
-		if (player->stepInterval <= 0)
+		if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
+			(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
 		{
-			if (!(player->mo->mvFlags & MV_SILENT))
-			{
-				if (!CLIENT_PREDICT_IsPredicting())
-					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
-			}
-
-			player->stepInterval = 12;
+			player->stepInterval = 6;
 		}
 		else
 		{
-			player->stepInterval--;
+			if (player->stepInterval <= 0)
+			{
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+						S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+				}
+
+				player->stepInterval = 12;
+			}
+			else
+			{
+				player->stepInterval--;
+			}
 		}
 	}
 
@@ -3647,28 +3649,30 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	// Footsteps
 	//*******************************************************
 
-	if (!velocity)
-		velocity = float(FVector2(vel.X, vel.Y).Length());
+	if ( !CLIENT_PREDICT_IsPredicting() )
+	{
+		if (!velocity)
+			velocity = float(FVector2(vel.X, vel.Y).Length());
 
-	if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
-	{
-		player->stepInterval = 6;
-	}
-	else
-	{
-		if (player->stepInterval <= 0 && !player->isCrouchSliding)
+		if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
 		{
-			if (!(player->mo->mvFlags & MV_SILENT))
-			{
-				if (!CLIENT_PREDICT_IsPredicting())
-					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
-			}
-
-			player->stepInterval = 12;
+			player->stepInterval = 6;
 		}
 		else
 		{
-			player->stepInterval--;
+			if (player->stepInterval <= 0 && !player->isCrouchSliding)
+			{
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+				}
+
+				player->stepInterval = 12;
+			}
+			else
+			{
+				player->stepInterval--;
+			}
 		}
 	}
 
