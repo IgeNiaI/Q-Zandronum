@@ -3442,10 +3442,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 		if (CLIENT_PREDICT_IsPredicting())
 			return;
 
-		S_Sound(mo, CHAN_VOICE, "*footstep", 1, ATTN_NORM);
-
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SoundActor(mo, CHAN_VOICE, "*footstep", 1, ATTN_NORM, ULONG(mo->player - players), SVCF_SKIPTHISCLIENT);
+		S_Sound(mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
 	}
 }
 
