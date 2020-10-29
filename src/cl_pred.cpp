@@ -370,7 +370,7 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		while ((polyAction = polyActionIt.Next()))
 			polyAction->RestorePredict(lTick % CLIENT_PREDICTION_TICS);
 
-		P_AdjustFloorCeil(pPlayer);
+		//P_AdjustFloorCeil(pPlayer);
 
 		// [BB] The server moved us to a postion above the floor and into a sector without a moving floor,
 		// so don't glue us to the floor for this tic.
@@ -450,7 +450,7 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	while ((polyAction = polyActionIt.Next()))
 		polyAction->RestorePredict(g_ulGameTick % CLIENT_PREDICTION_TICS);
 
-	P_AdjustFloorCeil(pPlayer);
+	//P_AdjustFloorCeil(pPlayer);
 
 	pPlayer->mo->angle = g_SavedAngle[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->pitch = g_SavedPitch[g_ulGameTick % CLIENT_PREDICTION_TICS];
