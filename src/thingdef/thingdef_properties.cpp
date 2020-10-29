@@ -2883,6 +2883,32 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, mvtype, I, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, footstepinterval, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0)
+		i = 0;
+
+	defaults->FootstepInterval = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, footstepvolume, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+	if (f < 0.f)
+		f = 0.f;
+	else if (f > 2.f)
+		f = 2.f;
+
+	defaults->FootstepVolume = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, jumpdelay, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);

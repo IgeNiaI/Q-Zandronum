@@ -177,6 +177,8 @@ public:
 	fixed_t		CrouchScaleHalfWay;
 
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
+	int			FootstepInterval;
+	float		FootstepVolume;
 	int			JumpDelay;
 	fixed_t		SecondJumpZ;
 	int			MaxWallClimbTics;
@@ -564,6 +566,7 @@ public:
 	int			chickenPeck;			// chicken peck countdown
 	int			jumpTics;				// delay the next jump for a moment
 	bool		onground;				// Identifies if this player is on the ground or other object
+	int			stepInterval;
 
 	// [Ivory] movement additions
 	int			doubleJumpState;
@@ -574,7 +577,6 @@ public:
 	int			dashTics;
 	int			prepareTapValue;
 	int			lastTapValue;
-	int			stepInterval;
 
 	int			respawn_time;			// [RH] delay respawning until this tic
 	TObjPtr<AActor>		camera;			// [RH] Whose eyes this player sees through

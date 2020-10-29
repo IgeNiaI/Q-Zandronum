@@ -3195,7 +3195,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
 			(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
 		{
-			player->stepInterval = 6;
+			player->stepInterval = player->mo->FootstepInterval / 2;
 		}
 		else
 		{
@@ -3203,10 +3203,10 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			{
 				if (!(player->mo->mvFlags & MV_SILENT))
 				{
-						S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
 				}
 
-				player->stepInterval = 12;
+				player->stepInterval = player->mo->FootstepInterval;
 			}
 			else
 			{
@@ -3656,7 +3656,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
 		{
-			player->stepInterval = 6;
+			player->stepInterval = player->mo->FootstepInterval / 2;
 		}
 		else
 		{
@@ -3664,10 +3664,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			{
 				if (!(player->mo->mvFlags & MV_SILENT))
 				{
-					S_Sound(player->mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
 				}
 
-				player->stepInterval = 12;
+				player->stepInterval = player->mo->FootstepInterval;
 			}
 			else
 			{
