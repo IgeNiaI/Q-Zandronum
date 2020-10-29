@@ -2301,21 +2301,21 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 
 //===========================================================================
 //
-// APlayerPawn :: CrouchWalkFactor
+// CrouchWalkFactor
 //
 //===========================================================================
 
-float APlayerPawn::CrouchWalkFactor()
+float CrouchWalkFactor(player_t* player, ticcmd_t *cmd)
 {
 	if (player->CanCrouch() && player->crouchfactor < FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
 	{
 		// Interpolate current crouch speed between full crouch and no crouch
 		float LerpValue = (FIXED2FLOAT(player->crouchfactor) - FIXED2FLOAT(player->mo->CrouchScale)) / (1.f - FIXED2FLOAT(player->mo->CrouchScale));
-		return CrouchSpeedFactor + (1.f - CrouchSpeedFactor) * LerpValue;
+		return player->mo->CrouchSpeedFactor + (1.f - player->mo->CrouchSpeedFactor) * LerpValue;
 	}
-	else if (player->cmd.ucmd.buttons & BT_SPEED)
+	else if (cmd->ucmd.buttons & BT_SPEED)
 	{
-		return WalkSpeedFactor;
+		return player->mo->WalkSpeedFactor;
 	}
 
 	return 1.f;
@@ -3144,7 +3144,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			fm = FixedMul(fm, player->mo->Speed);
 			sm = FixedMul(sm, player->mo->Speed);
 
-			int crouchWalkFactor = FLOAT2FIXED(player->mo->CrouchWalkFactor());
+			int crouchWalkFactor = FLOAT2FIXED(CrouchWalkFactor(player, cmd));
 			fm = FixedMul(fm, crouchWalkFactor);
 			sm = FixedMul(sm, crouchWalkFactor);
 			bobfactor = FixedMul(bobfactor, crouchWalkFactor);
@@ -3405,7 +3405,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
-	float movefactor = 1.0f * player->mo->CrouchWalkFactor();
+	float movefactor = CrouchWalkFactor(player, cmd);
 	float maxgroundspeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.f };

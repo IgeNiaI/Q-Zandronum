@@ -324,11 +324,7 @@ void CLIENTCOMMANDS_ClientMove( void )
 	if ( pCmd->ucmd.roll )
 		ulBits |= CLIENT_UPDATE_ROLL;
 	if ( pCmd->ucmd.buttons )
-	{
 		ulBits |= CLIENT_UPDATE_BUTTONS;
-		if ( zacompatflags & ZACOMPATF_CLIENTS_SEND_FULL_BUTTON_INFO )
-			ulBits |= CLIENT_UPDATE_BUTTONS_LONG;
-	}
 	if ( pCmd->ucmd.forwardmove )
 		ulBits |= CLIENT_UPDATE_FORWARDMOVE;
 	if ( pCmd->ucmd.sidemove )
@@ -347,12 +343,7 @@ void CLIENTCOMMANDS_ClientMove( void )
 	if ( ulBits & CLIENT_UPDATE_ROLL )
 		NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.roll );
 	if ( ulBits & CLIENT_UPDATE_BUTTONS )
-	{
-		if ( ulBits & CLIENT_UPDATE_BUTTONS_LONG )
-			NETWORK_WriteLong( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.buttons );
-		else
-			NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.buttons );
-	}
+		NETWORK_WriteLong( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.buttons );
 	if ( ulBits & CLIENT_UPDATE_FORWARDMOVE )
 		NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.forwardmove );
 	if ( ulBits & CLIENT_UPDATE_SIDEMOVE )
