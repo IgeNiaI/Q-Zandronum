@@ -3259,17 +3259,35 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
+			{
 				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+			}
 			else
-				player->mo->velz = FixedMul(12 * FRACUNIT, player->mo->Speed);
+			{
+				fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
+				if (player->mo->velz < maxSpeed)
+				{
+					fixed_t velBonus = MIN(FixedMul(3 * FRACUNIT, player->mo->Speed), maxSpeed - player->mo->velz);
+					player->mo->velz += velBonus;
+				}
+			}
 		}
 		else if (cmd->ucmd.buttons & BT_CROUCH)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
+			{
 				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+			}
 			else
-				player->mo->velz = -FixedMul(12 * FRACUNIT, player->mo->Speed);
+			{
+				fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
+				if (player->mo->velz > -maxSpeed)
+				{
+					fixed_t velBonus = MIN(FixedMul(3 * FRACUNIT, player->mo->Speed), maxSpeed + player->mo->velz);
+					player->mo->velz -= velBonus;
+				}
+			}
 		}
 	}
 	// [RH] check for jump
