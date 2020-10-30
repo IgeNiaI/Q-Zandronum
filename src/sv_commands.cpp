@@ -306,6 +306,15 @@ void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerComma
 		else
 			stubCommand.sendCommandToClients( *it, SVCF_ONLYTHISCLIENT );
 	}
+
+	players[ulPlayer].mo->ClientX = players[ulPlayer].mo->x;
+	players[ulPlayer].mo->ClientY = players[ulPlayer].mo->y;
+	players[ulPlayer].mo->ClientZ = players[ulPlayer].mo->z;
+	players[ulPlayer].mo->ClientVelX = players[ulPlayer].mo->velx;
+	players[ulPlayer].mo->ClientVelY = players[ulPlayer].mo->vely;
+	players[ulPlayer].mo->ClientVelZ = players[ulPlayer].mo->velz;
+	players[ulPlayer].mo->ClientAngle = players[ulPlayer].mo->angle;
+	players[ulPlayer].mo->ClientPitch = players[ulPlayer].mo->pitch;
 }
 
 //*****************************************************************************

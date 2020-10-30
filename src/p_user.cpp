@@ -3831,18 +3831,6 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 {
 	APlayerPawn *mo = player->mo;
 
-	if (NETWORK_GetState() == NETSTATE_SERVER)
-	{
-		player->mo->ClientX = player->mo->x;
-		player->mo->ClientY = player->mo->y;
-		player->mo->ClientZ = player->mo->z;
-		player->mo->ClientVelX = player->mo->velx;
-		player->mo->ClientVelY = player->mo->vely;
-		player->mo->ClientVelZ = player->mo->velz;
-		player->mo->ClientAngle = player->mo->angle;
-		player->mo->ClientPitch = player->mo->pitch;
-	}
-
 	// [RH] 180-degree turn overrides all other yaws
 	if (player->turnticks)
 	{
