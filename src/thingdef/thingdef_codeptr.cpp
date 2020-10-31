@@ -4652,10 +4652,6 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeFlag)
 		}
 		else
 		{
-			// [BB] The server handles the flag change.
-			if ( NETWORK_InClientMode() )
-				return;
-
 			DWORD *flagp = (DWORD*) (((char*)self) + fd->structoffset);
 
 			// [EP] Store the old value in order to save bandwidth
