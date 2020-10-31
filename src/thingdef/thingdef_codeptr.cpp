@@ -2185,7 +2185,7 @@ static void DoGiveInventory(AActor *source, AActor *receiver, DECLARE_PARAMINFO)
 		if ( NETWORK_InClientMode() )
 		{
 			// [geNia] Clients can only give items to themselves
-			if ( source->player - players != consoleplayer )
+			if ( ( source->player - players != consoleplayer ) || ( source == receiver ) )
 				return;
 		}
 	}
