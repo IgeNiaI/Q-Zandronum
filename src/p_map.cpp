@@ -4206,14 +4206,14 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 	
 	if (t1->player != NULL)
 	{
-		if (flags & LAF_ACCURATE)
-		{
-			shootz = t1->z - t1->floorclip + t1->player->viewheight;
-		}
-		else
+		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
 		{
 			shootz = t1->z - t1->floorclip + (t1->height >> 1) + 
 					 FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
+		}
+		else
+		{
+			shootz = t1->z - t1->floorclip + t1->player->viewheight;
 		}
 		
 		if (damageType == NAME_Melee || damageType == NAME_Hitscan)
@@ -4815,7 +4815,29 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	x1 = source->x;
 	y1 = source->y;
 
-	if (railflags & RAF_ACCURATE)
+	if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
+	{
+		shootz = source->z - source->floorclip + (source->height >> 1) + offset_z;
+
+		pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
+		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
+		vx = FixedMul(finecosine[pitch], finecosine[angle]);
+		vy = FixedMul(finecosine[pitch], finesine[angle]);
+		vz = finesine[pitch];
+
+		if (!(railflags & RAF_CENTERZ))
+		{
+			if (source->player != NULL)
+			{
+				shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+			}
+			else
+			{
+				shootz += 8 * FRACUNIT;
+			}
+		}
+	}
+	else
 	{
 		//*************************************************************************************************************************
 		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
@@ -4863,28 +4885,6 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 		vx = FixedMul(finecosine[pitch], finecosine[angle]);
 		vy = FixedMul(finecosine[pitch], finesine[angle]);
 		vz = finesine[pitch];
-	}
-	else
-	{
-		shootz = source->z - source->floorclip + (source->height >> 1) + offset_z;
-
-		pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
-		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
-		vx = FixedMul(finecosine[pitch], finecosine[angle]);
-		vy = FixedMul(finecosine[pitch], finesine[angle]);
-		vz = finesine[pitch];
-
-		if (!(railflags & RAF_CENTERZ))
-		{
-			if (source->player != NULL)
-			{
-				shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
-			}
-			else
-			{
-				shootz += 8 * FRACUNIT;
-			}
-		}
 	}
 
 	angle = ((source->angle + angleoffset) - ANG90) >> ANGLETOFINESHIFT;

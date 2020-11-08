@@ -157,7 +157,7 @@ AActor *P_SpawnMissileZAimed (AActor *source, fixed_t z, AActor *dest, const PCl
 AActor *P_SpawnPlayerMissile (AActor* source, const PClass *type);
 AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle, bool bSpawnSound = true );
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z, const PClass *type, angle_t angle, 
-							  AActor **pLineTarget = NULL, AActor **MissileActor = NULL, bool nofreeaim = false, bool bSpawnSound = true, bool bSpawnOnClient = true, bool accurate = false);
+							  AActor **pLineTarget = NULL, AActor **MissileActor = NULL, bool nofreeaim = false, bool bSpawnSound = true, bool bSpawnOnClient = true);
 
 // [BB]
 inline void P_SpawnPlayerMissileWithPossibleSpread (AActor* source, const PClass *type)
@@ -188,8 +188,7 @@ inline void P_SpawnPlayerMissileWithPossibleSpread (AActor* source, const PClass
 // A_FireCustomMissile
 enum
 {
-	FPF_AIMATANGLE = 1,
-	FPF_ACCURATE = 256
+	FPF_AIMATANGLE = 1
 };
 
 void P_CheckFakeFloorTriggers (AActor *mo, fixed_t oldz, bool oldz_has_viewheight=false);
@@ -501,8 +500,7 @@ enum	// P_LineAttack flags
 {
 	LAF_ISMELEEATTACK = 1,
 	LAF_NORANDOMPUFFZ = 2,
-	LAF_NOIMPACTDECAL = 4,
-	LAF_ACCURATE	  = 256
+	LAF_NOIMPACTDECAL = 4
 };
 
 AActor *P_LineAttack (AActor *t1, angle_t angle, fixed_t distance, int pitch, int damage, FName damageType, const PClass *pufftype, int flags = 0, AActor **victim = NULL, int *actualdamage = NULL);
@@ -524,8 +522,7 @@ enum	// P_RailAttack / A_RailAttack / A_CustomRailgun / P_DrawRailTrail flags
 	RAF_NOPIERCE = 2,
 	RAF_EXPLICITANGLE = 4,
 	RAF_FULLBRIGHT = 8,
-	RAF_CENTERZ = 16,
-	RAF_ACCURATE = 256
+	RAF_CENTERZ = 16
 };
 
 

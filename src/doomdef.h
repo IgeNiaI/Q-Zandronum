@@ -483,6 +483,9 @@ enum
 
 	// [BB] Clients use the vanilla Doom weapon on pickup behavior.
 	ZACOMPATF_OLD_WEAPON_SWITCH		= 1 << 26,
+
+	// [geNia] Disable crosshair accurate weapons
+	ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE = 1 << 27,
 };
 
 // Emulate old bugs for select maps. These are not exposed by a cvar

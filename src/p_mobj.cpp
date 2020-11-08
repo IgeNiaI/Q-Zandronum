@@ -7458,7 +7458,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle,
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
-							  bool nofreeaim, bool bSpawnSound, bool bSpawnOnClient, bool accurate)
+							  bool nofreeaim, bool bSpawnSound, bool bSpawnOnClient)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
@@ -7513,11 +7513,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 
 	if (z != ONFLOORZ && z != ONCEILINGZ)
 	{
-		if (accurate)
-		{
-			z += source->z - source->floorclip + source->player->viewheight;
-		}
-		else
+		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
 		{
 			// Doom spawns missiles 4 units lower than hitscan attacks for players.
 			z += source->z + (source->height >> 1) - source->floorclip;
@@ -7529,6 +7525,10 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 			{
 				z += 4 * FRACUNIT;
 			}
+		}
+		else
+		{
+			z += source->z - source->floorclip + source->player->viewheight;
 		}
 		
 		// Do not fire beneath the floor.

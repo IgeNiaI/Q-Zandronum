@@ -1419,7 +1419,6 @@ enum FB_Flags
 	FBF_NOPITCH = 8,
 	FBF_NOFLASH = 16,
 	FBF_NORANDOMPUFFZ = 32,
-	FBF_ACCURATE = 64
 };
 
 // [BB] This functions is needed to keep code duplication at a minimum while applying the spread power.
@@ -1499,9 +1498,6 @@ void A_CustomFireBullets( AActor *self,
 	int bangle;
 	int bslope = 0;
 	int laflags = Flags & FBF_NORANDOMPUFFZ ? LAF_NORANDOMPUFFZ : 0;
-
-	if (Flags & FBF_ACCURATE)
-		laflags |= LAF_ACCURATE;
 
 	if ((Flags & FBF_USEAMMO) && weapon && !weapon->DepleteAmmo(weapon->bAltFire, true)) // out of ammo
 		return;
@@ -1643,7 +1639,7 @@ void A_FireCustomMissileHelper ( AActor *self,
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, false, true, false, flags & FPF_ACCURATE ? true : false);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, false, true, false);
 
 	// automatic handling of seeker missiles
 	if (misl)
@@ -1702,7 +1698,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 		fixed_t shootangle = self->angle;
 		fixed_t SavedPlayerPitch = self->pitch;
 
-		if (Flags & FPF_ACCURATE)
+		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
+		{
+			self->pitch -= pitch;
+			shootangle += Angle;
+		}
+		else
 		{
 			//*************************************************************************************************************************
 			// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
@@ -1742,11 +1743,6 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 				SpawnOfs_XY = 0;
 				SpawnHeight = 0;
 			}
-		}
-		else if (Flags & FPF_AIMATANGLE)
-		{
-			self->pitch -= pitch;
-			shootangle += Angle;
 		}
 
 		angle_t ang = (self->angle - ANGLE_90) >> ANGLETOFINESHIFT;
@@ -2068,8 +2064,9 @@ static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 	ACTION_PARAM_START(3);
 	ACTION_PARAM_CLASS(mi, 0);
 	ACTION_PARAM_INT(amount, 1);
-	bool bNeedClientUpdate;
 	ACTION_PARAM_INT(setreceiver, 2);
+
+	bool bNeedClientUpdate;
 
 	COPY_AAPTR_NOT_NULL(receiver, receiver, setreceiver);
 
