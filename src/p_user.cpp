@@ -2469,15 +2469,12 @@ DEFINE_ACTION_FUNCTION(AActor, A_PlayerScream)
 		sound = S_FindSkinnedSoundEx (self, "*death", self->player->LastDamageType);
 	}
 
-	if (chan != CHAN_VOICE)
-	{
-		for (int i = 0; i < 8; ++i)
-		{ // Stop most playing sounds from this player.
-		  // This is mainly to stop *land from messing up *splat.
-			if (i != CHAN_WEAPON && i != CHAN_VOICE)
-			{
-				S_StopSound (self, i);
-			}
+	for (int i = 0; i < 8; ++i)
+	{ // Stop most playing sounds from this player.
+	  // This is mainly to stop *land from messing up *splat.
+		if (i != CHAN_WEAPON && i != CHAN_VOICE)
+		{
+			S_StopSound (self, i);
 		}
 	}
 	S_Sound (self, chan, sound, 1, ATTN_NORM);
