@@ -381,17 +381,29 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 				// by the corresponding Doom hash.
 				// 4804c7f34b5285c334a7913dd98fae16 Doom PLAYPAL hash
 				// 061a4c0f80aa8029f2c1bc12dc2e261e Doom COLORMAP hash
-				// 2e01ae6258f2a0fdad32125537efe1af Freedoom PLAYPAL hash
 				// bb535e66cae508e3833a5d2de974267b Freedoom COLORMAP hash
 				// 4804c7f34b5285c334a7913dd98fae16 Freedoom 0.8-beta1 PLAYPAL hash
 				// 100c2c81afe87bb6dd1dbcadee9a7e58 Freedoom 0.8-beta1 COLORMAP hash
 				// 4c7d4028a88f7929d9c553f65bb265ba Freedoom 0.9 COLORMAP hash
 				// 2e01ae6258f2a0fdad32125537efe1af Freedoom 0.11.3 PLAYPAL hash
-				if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "PLAYPAL" ) == 0 ) && ( ( stricmp ( checksum.GetChars(), "2e01ae6258f2a0fdad32125537efe1af" ) == 0 ) || ( stricmp ( checksum.GetChars(), "4804c7f34b5285c334a7913dd98fae16" ) == 0 ) || ( stricmp ( checksum.GetChars(), "2e01ae6258f2a0fdad32125537efe1af" ) == 0 ) ) )
+				// 7fe3ed884aff7774526ed9b61018f6fe Freedoom 0.12.1 PLAYPAL hash
+				// 90d4527e1836e373f1cc6f2c9d5e3ba3 Freedoom 0.12.1 COLORMAP hash
+				Printf ( PRINT_BOLD, "LumpsToAuthenticate: %s is %s\n", lumpsToAuthenticate[i].c_str(), checksum.GetChars() );
+				if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "PLAYPAL" ) == 0 )
+					&& ( ( stricmp ( checksum.GetChars(), "2e01ae6258f2a0fdad32125537efe1af" ) == 0 )
+						|| ( stricmp ( checksum.GetChars(), "4804c7f34b5285c334a7913dd98fae16" ) == 0 )
+						|| ( stricmp ( checksum.GetChars(), "7fe3ed884aff7774526ed9b61018f6fe" ) == 0 )
+						) )
 					checksum = "4804c7f34b5285c334a7913dd98fae16";
-				else if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "COLORMAP" ) == 0 ) && ( ( stricmp ( checksum.GetChars(), "bb535e66cae508e3833a5d2de974267b" ) == 0 ) || ( stricmp ( checksum.GetChars(), "100c2c81afe87bb6dd1dbcadee9a7e58" ) == 0 ) || ( stricmp ( checksum.GetChars(), "4c7d4028a88f7929d9c553f65bb265ba" ) == 0 ) ) )
+				else if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "COLORMAP" ) == 0 )
+					&& ( ( stricmp ( checksum.GetChars(), "bb535e66cae508e3833a5d2de974267b" ) == 0 )
+						|| ( stricmp ( checksum.GetChars(), "100c2c81afe87bb6dd1dbcadee9a7e58" ) == 0 )
+						|| ( stricmp ( checksum.GetChars(), "4c7d4028a88f7929d9c553f65bb265ba" ) == 0 )
+						|| ( stricmp ( checksum.GetChars(), "90d4527e1836e373f1cc6f2c9d5e3ba3" ) == 0 )
+						) )
 					checksum = "061a4c0f80aa8029f2c1bc12dc2e261e";
 
+				Printf ( PRINT_BOLD, "Using checksum %s for %s\n", checksum.GetChars(), lumpsToAuthenticate[i].c_str() );
 				longChecksum += checksum;
 				break;
 
@@ -406,24 +418,29 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 
 					// [BB] To make Doom and Freedoom network compatible, we need to ignore its DEHACKED lump.
 					// Since this lump only changes some strings, this should cause no problems.
+					Printf ( PRINT_BOLD, "LumpsToAuthenticate: %s is %s\n", lumpsToAuthenticate[i].c_str(), checksum.GetChars() );
 					if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "DEHACKED" ) == 0 )
-						&& ( ( stricmp ( checksum.GetChars(), "3c48ccc87e71d791ee3df64668b3fb42" ) == 0 ) // Freedoom 0.8-beta1
-							|| ( stricmp ( checksum.GetChars(), "9de9ddd0bc435cb8572db76a13d3140f" ) == 0 ) // Freedoom 0.8
-							|| ( stricmp ( checksum.GetChars(), "90e9007b1efc1e35eeacc99c5971a15b" ) == 0 ) // Freedoom 0.9
-							|| ( stricmp ( checksum.GetChars(), "67b253fe502cbf269e2cd2f6b7e76f17" ) == 0 ) // Freedoom 0.10
-							|| ( stricmp ( checksum.GetChars(), "61f49a1c915c7ccaea016b51441bef1d" ) == 0 ) // Freedoom 0.11.3
+						&& ( ( stricmp ( checksum.GetChars(), "3c48ccc87e71d791ee3df64668b3fb42" ) == 0 ) // Freedoom2 0.8-beta1
+							|| ( stricmp ( checksum.GetChars(), "9de9ddd0bc435cb8572db76a13d3140f" ) == 0 ) // Freedoom2 0.8
+							|| ( stricmp ( checksum.GetChars(), "90e9007b1efc1e35eeacc99c5971a15b" ) == 0 ) // Freedoom2 0.9
+							|| ( stricmp ( checksum.GetChars(), "67b253fe502cbf269e2cd2f6b7e76f17" ) == 0 ) // Freedoom2 0.10
+							|| ( stricmp ( checksum.GetChars(), "61f49a1c915c7ccaea016b51441bef1d" ) == 0 ) // Freedoom2 0.11.3?
+							|| ( stricmp ( checksum.GetChars(), "3cd7bad5ca8fd6f0a12607c9c2285c79" ) == 0 ) // Freedm 0.11.3
+							|| ( stricmp ( checksum.GetChars(), "8e65672ca454e8c3f8adc2b1a3fea7d7" ) == 0 ) // Freedm 0.12.1
+							|| ( stricmp ( checksum.GetChars(), "a87016a0610d8023e6fdae013c8c001c" ) == 0 ) // Freedoom2 0.12.1
 							) )
 						continue;
-
 					// [TP] The wad that had this lump is no longer optional.
 					Wads.LumpIsMandatory( workingLump );
 
+					Printf ( PRINT_BOLD, "Using checksum %s for %s\n", checksum.GetChars(), lumpsToAuthenticate[i].c_str() );
 					longChecksum += checksum;
 				}
 				break;
 		}
 	}
 	CMD5Checksum::GetMD5( reinterpret_cast<const BYTE *>(longChecksum.GetChars()), longChecksum.Len(), g_lumpsAuthenticationChecksum );
+	Printf ( PRINT_BOLD, "Final checksum %s\n", g_lumpsAuthenticationChecksum.GetChars() );
 
 	// [BB] Warn the user about problematic auto-loaded files.
 	if ( noProtectedLumpsAutoloaded == false )
