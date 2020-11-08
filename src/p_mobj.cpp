@@ -3414,11 +3414,12 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 			// [BB] For unassigned voodoo dolls, mo->player->mo is NULL.
 			if (mo->player->mo && mo->health > 0 && mo->velz < -mo->player->mo->GruntSpeed)
 			{
-				S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM);
+				if (!(mo->mvFlags & MV_SILENT))
+					S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM);
 				grunted = true;
 
 				// [BC] Tell players that this player struck the ground (hard!)
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER && !(mo->mvFlags & MV_SILENT) )
 					SERVERCOMMANDS_SoundActor( mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
 			}
 
@@ -3426,10 +3427,11 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 			{
 				if (!grunted || !S_AreSoundsEquivalent (mo, "*grunt", "*land"))
 				{
-					S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM);
+					if (!(mo->mvFlags & MV_SILENT))
+						S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM);
 
 					// [BC] Tell players that this player struck the ground (hard!)
-					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER && !(mo->mvFlags & MV_SILENT) )
 						SERVERCOMMANDS_SoundActor( mo, CHAN_AUTO, "*land", 1, ATTN_NORM, ULONG( mo->player - players ), SVCF_SKIPTHISCLIENT );
 				}
 			}
@@ -3438,11 +3440,8 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 	}
 	else if (mo->player->mo->waterlevel < 2 && !mo->player->isCrouchSliding)
 	{
-		// [geNia] Don't do this while predicting.
-		if (CLIENT_PREDICT_IsPredicting())
-			return;
-
-		S_Sound(mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+		if (!(mo->mvFlags & MV_SILENT))
+			S_Sound(mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
 	}
 }
 

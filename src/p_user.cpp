@@ -2995,13 +2995,10 @@ bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
 {
 	// crouch slide sound start/stop
-	if (isSliding && !player->isCrouchSliding)
+	if (isSliding && !player->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
 	{
-		if (!(player->mo->mvFlags & MV_SILENT))
-		{
-			if (!CLIENT_PREDICT_IsPredicting())
-				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
-		}
+		if (!CLIENT_PREDICT_IsPredicting())
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
 	}
 	else if (!isSliding && player->isCrouchSliding)
 	{
@@ -3014,13 +3011,10 @@ void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
 void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 {
 	// Wall climb parameters and sound start/stop
-	if (canclimb && !player->isWallClimbing)
+	if (canclimb && !player->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
 	{
-		if (!(player->mo->mvFlags & MV_SILENT))
-		{
-			if (!CLIENT_PREDICT_IsPredicting())
-				S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
-		}
+		if (!CLIENT_PREDICT_IsPredicting())
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
 	}
 	else if (!(canclimb % 2) && player->isWallClimbing)
 	{
