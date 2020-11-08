@@ -1,7 +1,11 @@
-Welcome to Zandronum!
+Welcome to Q-Zandronum!
 =====================
 
-A continuation of Skulltag.
+Q-Zandronum is a Zandronum fork mainly dedicated to improve the gameplay of QC:DE mod.
+Main new features are Quake style movement and improved netcode for smoother gameplay on high ping, and also multiple minor quality of life improvements.
+
+
+Zandronum is a continuation of Skulltag.
 ---------------------------
 
 Zandronum is a multiplayer oriented port, based off Skulltag, for Doom and Doom II by [id Software](http://www.idsoftware.com/).
@@ -32,10 +36,7 @@ Here's why you should kill your time with Zandronum, versus vanilla Doom:
 Links
 -----
 
-* [Official Website](http://zandronum.com/)
-* [Community Forums](http://zandronum.com/forum/)
-* [Wiki](http://wiki.zandronum.com/)
-* [Bugtracker](http://zandronum.com/tracker/)
+* [QC:DE Discord](https://discord.com/invite/RN9hhmA)
 
 
 License
