@@ -699,7 +699,7 @@ CVAR( String, sv_hostemail, "", CVAR_ARCHIVE|CVAR_NOSETBYACS )
 
 // IP address of the master server.
 // [BB] Client and server use this now, therefore the name doesn't begin with "sv_"
-CVAR( String, masterhostname, "master.zandronum.com", CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOSETBYACS )
+CVAR( String, masterhostname, "master.qzandronum.com", CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOSETBYACS )
 
 CCMD( wads )
 {

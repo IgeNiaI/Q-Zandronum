@@ -1347,7 +1347,7 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 				if ( !!NETWORK_ReadByte( pByteStream ))
 				{
 					szErrorString = "Couldn't connect. \\cgYou have been banned from " GAMENAME "'s master server!\\c-\n"
-						"If you feel this is in error, you may contact the staff at " FORUM_URL;
+						"If you feel this is in error, you may contact the staff at " DISCORD_URL;
 				}
 				else
 				{

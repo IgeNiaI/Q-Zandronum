@@ -1977,7 +1977,7 @@ static INT_PTR CALLBACK OverviewDlgProc (HWND hDlg, UINT message, WPARAM wParam,
 		SendMessage (edit, WM_SETTEXT, 0, (LPARAM)"Please tell us about this problem.\n"
 			"The information will NOT be sent to Microsoft.\n\n"
 			"An error report has been created that you can submit to help improve " GAMENAME ". "
-			"You can either save it to disk and make a report in the bugs forum at " FORUM_URL ", "
+			"You can either save it to disk and make a report in the QC:DE discord at " DISCORD_URL ", "
 			"or you can send it directly without letting other people know about it.");
 		SendMessage (edit, EM_SETSEL, 0, 81);
 		SendMessage (edit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&charFormat);
@@ -2001,7 +2001,7 @@ static INT_PTR CALLBACK OverviewDlgProc (HWND hDlg, UINT message, WPARAM wParam,
 		{
 			if (link->msg == WM_LBUTTONDOWN)
 			{
-				ShellExecute (NULL, "open", BUGS_FORUM_URL, NULL, NULL, 0);
+				ShellExecute (NULL, "open", BUGS_URL, NULL, NULL, 0);
 				SetWindowLongPtr (hDlg, DWLP_MSGRESULT, 1);
 				return TRUE;
 			}
