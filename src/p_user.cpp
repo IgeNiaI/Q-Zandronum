@@ -4057,7 +4057,14 @@ void P_DeathThink (player_t *player)
 		{
 			player->poisoncount--;
 		}
-	}		
+	}
+
+	if ( player->isCrouchSliding || player->isWallClimbing )
+	{
+		S_StopSound( player->mo, CHAN_SEVEN );
+		player->isCrouchSliding = false;
+		player->isWallClimbing = false;
+	}
 
 	// [BC] Respawning is server-side.
 	if ( NETWORK_InClientMode() )
