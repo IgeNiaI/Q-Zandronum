@@ -388,7 +388,6 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 				// 2e01ae6258f2a0fdad32125537efe1af Freedoom 0.11.3 PLAYPAL hash
 				// 7fe3ed884aff7774526ed9b61018f6fe Freedoom 0.12.1 PLAYPAL hash
 				// 90d4527e1836e373f1cc6f2c9d5e3ba3 Freedoom 0.12.1 COLORMAP hash
-				Printf ( PRINT_BOLD, "LumpsToAuthenticate: %s is %s\n", lumpsToAuthenticate[i].c_str(), checksum.GetChars() );
 				if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "PLAYPAL" ) == 0 )
 					&& ( ( stricmp ( checksum.GetChars(), "2e01ae6258f2a0fdad32125537efe1af" ) == 0 )
 						|| ( stricmp ( checksum.GetChars(), "4804c7f34b5285c334a7913dd98fae16" ) == 0 )
@@ -403,7 +402,6 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 						) )
 					checksum = "061a4c0f80aa8029f2c1bc12dc2e261e";
 
-				Printf ( PRINT_BOLD, "Using checksum %s for %s\n", checksum.GetChars(), lumpsToAuthenticate[i].c_str() );
 				longChecksum += checksum;
 				break;
 
@@ -418,7 +416,6 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 
 					// [BB] To make Doom and Freedoom network compatible, we need to ignore its DEHACKED lump.
 					// Since this lump only changes some strings, this should cause no problems.
-					Printf ( PRINT_BOLD, "LumpsToAuthenticate: %s is %s\n", lumpsToAuthenticate[i].c_str(), checksum.GetChars() );
 					if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "DEHACKED" ) == 0 )
 						&& ( ( stricmp ( checksum.GetChars(), "3c48ccc87e71d791ee3df64668b3fb42" ) == 0 ) // Freedoom2 0.8-beta1
 							|| ( stricmp ( checksum.GetChars(), "9de9ddd0bc435cb8572db76a13d3140f" ) == 0 ) // Freedoom2 0.8
@@ -433,14 +430,12 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 					// [TP] The wad that had this lump is no longer optional.
 					Wads.LumpIsMandatory( workingLump );
 
-					Printf ( PRINT_BOLD, "Using checksum %s for %s\n", checksum.GetChars(), lumpsToAuthenticate[i].c_str() );
 					longChecksum += checksum;
 				}
 				break;
 		}
 	}
 	CMD5Checksum::GetMD5( reinterpret_cast<const BYTE *>(longChecksum.GetChars()), longChecksum.Len(), g_lumpsAuthenticationChecksum );
-	Printf ( PRINT_BOLD, "Final checksum %s\n", g_lumpsAuthenticationChecksum.GetChars() );
 
 	// [BB] Warn the user about problematic auto-loaded files.
 	if ( noProtectedLumpsAutoloaded == false )
