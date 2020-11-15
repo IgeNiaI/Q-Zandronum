@@ -3036,6 +3036,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
 	bool isDasher = player->mo->mvFlags & MV_DASH ? true : false;
+	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
+	player->mo->wasJustThrustedZ = false;
 
 	FVector2 vel;
 	float velocity = 0.f;
@@ -3291,7 +3293,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			ULONG	ulJumpTicks;
 			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
 
-			if (!player->mo->wasJustThrustedZ || isRampJumper)
+			if (!wasJustThrustedZ || isRampJumper)
 			{
 				// Set base jump velocity.
 				// [Dusk] Exported this into a function as I need it elsewhere as well.
@@ -3710,7 +3712,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			ULONG	ulJumpTicks;
 			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
 
-			if (!player->mo->wasJustThrustedZ || isRampJumper)
+			if (!wasJustThrustedZ || isRampJumper)
 			{
 				// Set base jump velocity.
 				// [Dusk] Exported this into a function as I need it elsewhere as well.
