@@ -109,6 +109,15 @@ OptionValue ZA_Modifier
 	2, "Buckshot"
 }
 
+OptionValue ZA_Skill
+{
+	0, "1 - I'm too young to die"
+	1, "2 - Hey, not too rough"
+	2, "3 - Hurt me plenty"
+	3, "4 - Ultra-violence"
+	4, "5 - NIGHTMARE!"
+}
+
 OptionMenu ZA_SkirmishMenu
 {
 	Title		"SKIRMISH"
@@ -123,8 +132,8 @@ OptionMenu ZA_SkirmishMenu
 	NumberField	"Winlimit",				"menu_skirmishwinlimit"
 	NumberField	"Wavelimit",			"menu_skirmishwavelimit", 0, 10
 	StaticText	" "
-	NumberField	"Skill",				"menu_skirmishskill", 0, 4
-	NumberField	"Botskill",				"menu_skirmishbotskill", 0, 4
+	Option		"Skill",				"menu_skirmishskill",			ZA_Skill
+	Option		"Botskill",				"menu_skirmishbotskill",		ZA_Skill
 	StaticText	" "
 	SubMenu		"Bot Setup",			"ZA_BotSetup"
 	StaticText	" "
