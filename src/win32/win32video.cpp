@@ -117,7 +117,7 @@ IDirect3DDevice9 *D3Device;
 HANDLE FPSLimitEvent;
 
 CVAR (Bool, vid_forceddraw, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
-CVAR (Int, vid_adapter, 1, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+CVAR (Int, vid_adapter, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 CUSTOM_CVAR (Int, vid_maxfps, 200, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 {
 	if (vid_maxfps < TICRATE && vid_maxfps != 0)

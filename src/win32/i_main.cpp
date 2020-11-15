@@ -820,6 +820,12 @@ void DoMain (HINSTANCE hInstance)
 	TIMECAPS tc;
 	DEVMODE displaysettings;
 
+	EXTERN_CVAR(Int, vid_defwidth)
+	EXTERN_CVAR(Int, vid_defheight)
+
+	vid_defwidth = GetSystemMetrics(SM_CXSCREEN);
+	vid_defheight = GetSystemMetrics(SM_CYSCREEN);
+
 	try
 	{
 #ifdef _MSC_VER

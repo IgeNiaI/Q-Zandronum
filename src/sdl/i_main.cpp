@@ -319,8 +319,6 @@ int main (int argc, char **argv)
 	mysnprintf(caption, countof(caption), GAMESIG " %s (%s)", GetVersionString(), GetGitTime());
 	SDL_WM_SetCaption(caption, caption);
 
-#ifdef __APPLE__
-	
 	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
 	if ( NULL != videoInfo )
 	{
@@ -336,9 +334,7 @@ int main (int argc, char **argv)
 		vid_vsync     = True;
 		fullscreen    = True;
 	}
-	
-#endif // __APPLE__
-	
+
     try
     {
 		/*
