@@ -67,6 +67,7 @@ enum
 	VOTECMD_FORCETOSPECTATE,
 	VOTECMD_MAP,
 	VOTECMD_CHANGEMAP,
+	VOTECMD_NEXTMAP,
 	VOTECMD_FRAGLIMIT,
 	VOTECMD_TIMELIMIT,
 	VOTECMD_WINLIMIT,
@@ -143,6 +144,7 @@ EXTERN_CVAR( Bool, sv_nokickvote );
 EXTERN_CVAR( Bool, sv_noforcespecvote );
 EXTERN_CVAR( Bool, sv_nomapvote );
 EXTERN_CVAR( Bool, sv_nochangemapvote );
+EXTERN_CVAR( Bool, sv_nonextmapvote );
 EXTERN_CVAR( Bool, sv_nofraglimitvote );
 EXTERN_CVAR( Bool, sv_notimelimitvote );
 EXTERN_CVAR( Bool, sv_nowinlimitvote );

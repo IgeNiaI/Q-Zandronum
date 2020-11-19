@@ -818,6 +818,9 @@ static bool callvote_CheckValidity( FString &Command, FString &Parameters )
 			}
 		}
 		break;
+	case VOTECMD_NEXTMAP:
+		
+		break;
 	case VOTECMD_FRAGLIMIT:
 	case VOTECMD_WINLIMIT:
 	case VOTECMD_DUELLIMIT:
@@ -874,6 +877,8 @@ static ULONG callvote_GetVoteType( const char *pszCommand )
 		return VOTECMD_MAP;
 	else if ( stricmp( "changemap", pszCommand ) == 0 )
 		return VOTECMD_CHANGEMAP;
+	else if ( stricmp( "nextmap", pszCommand ) == 0 )
+		return VOTECMD_NEXTMAP;
 	else if ( stricmp( "fraglimit", pszCommand ) == 0 )
 		return VOTECMD_FRAGLIMIT;
 	else if ( stricmp( "timelimit", pszCommand ) == 0 )
@@ -908,6 +913,7 @@ CVAR( Bool, sv_nokickvote, false, CVAR_ARCHIVE );
 CVAR( Bool, sv_noforcespecvote, false, CVAR_ARCHIVE );
 CVAR( Bool, sv_nomapvote, false, CVAR_ARCHIVE );
 CVAR( Bool, sv_nochangemapvote, false, CVAR_ARCHIVE );
+CVAR( Bool, sv_nonextmapvote, false, CVAR_ARCHIVE );
 CVAR( Bool, sv_nofraglimitvote, false, CVAR_ARCHIVE );
 CVAR( Bool, sv_notimelimitvote, false, CVAR_ARCHIVE );
 CVAR( Bool, sv_nowinlimitvote, false, CVAR_ARCHIVE );
@@ -931,9 +937,9 @@ CCMD( callvote )
 	if ( CLIENT_GetConnectionState( ) != CTS_ACTIVE )
 		return;
 
-	if ( argv.argc( ) < 3 )
+	if ( argv.argc( ) < 2 )
 	{
-		Printf( "callvote <command> <parameters> [reason]: Calls a vote\n" );
+		Printf( "callvote <command> [parameters] [reason]: Calls a vote\n" );
 		return;
 	}
 
@@ -953,8 +959,10 @@ CCMD( callvote )
 
 	if ( argv.argc( ) >= 4 )
 		CLIENTCOMMANDS_CallVote( ulVoteCmd, argv[2], argv[3] );
-	else
+	else if ( argv.argc( ) >= 3 )
 		CLIENTCOMMANDS_CallVote( ulVoteCmd, argv[2], "" );
+	else
+		CLIENTCOMMANDS_CallVote( ulVoteCmd, "", "" );
 /*
 	g_lBytesSent += g_LocalBuffer.cursize;
 	if ( g_lBytesSent > g_lMaxBytesSent )

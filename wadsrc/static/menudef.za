@@ -284,6 +284,8 @@ OptionMenu ZA_CallMapVote
 	StaticText	" "
 	TextField	"Reason for change",	"menu_callvotereason"
 	Command		"Vote!",				"menu_callmapvote"
+	StaticText	" "
+	Command		"Vote next map!",		"menu_callnextmapvote"
 }
 
 OptionMenu ZA_CallLimitVote

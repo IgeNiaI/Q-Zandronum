@@ -6358,6 +6358,11 @@ static bool server_CallVote( BYTESTREAM_s *pByteStream )
 		bVoteAllowed = !sv_nochangemapvote;
 		sprintf( szCommand, "changemap" );
 		break;
+	case VOTECMD_NEXTMAP:
+
+		bVoteAllowed = !sv_nonextmapvote;
+		sprintf( szCommand, "nextmap" );
+		break;
 	case VOTECMD_FRAGLIMIT:
 
 		bVoteAllowed = !sv_nofraglimitvote;

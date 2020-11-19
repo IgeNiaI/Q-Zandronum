@@ -80,6 +80,7 @@ static void M_ClearBotSlots();
 static void M_TextSizeScalarChanged();
 static void M_CallKickVote();
 static void M_CallMapVote();
+static void M_CallNextMapVote();
 static void M_CallLimitVote();
 static void M_ExecuteIgnore();
 static void M_JoinMenu();
@@ -607,6 +608,27 @@ static void M_CallMapVote()
 //
 // =================================================================================================
 
+static void M_CallNextMapVote()
+{
+	if (( menu_callvotemap >= 0 )
+		&& ( static_cast<unsigned int>( *menu_callvotemap ) < wadlevelinfos.Size() ) )
+	{
+		FString command;
+		command.Format( "callvote nextmap _ \"%s\"",
+			*menu_callvotereason );
+		C_DoCommand( command );
+		M_ClearMenus();
+	}
+}
+
+// =================================================================================================
+//
+//
+//
+//
+//
+// =================================================================================================
+
 static void M_CallLimitVote()
 {
 	static const char* votetypes[] =
@@ -840,6 +862,11 @@ CCMD ( menu_callkickvote )
 CCMD ( menu_callmapvote )
 {
 	M_CallMapVote();
+}
+
+CCMD ( menu_callnextmapvote )
+{
+	M_CallNextMapVote();
 }
 
 CCMD ( menu_calllimitvote )
