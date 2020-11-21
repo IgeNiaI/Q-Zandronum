@@ -3176,6 +3176,28 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (isClimber)
 		P_Climb_Looping_Sounds(player, canClimb);
 
+	// Limit player velocity if enabled
+	if (player->mo->VelocityLimit)
+	{
+		vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
+		velocity = float(vel.Length());
+
+		if (velocity > player->mo->VelocityLimit)
+		{
+			float scale;
+			if (velocity > player->mo->VelocityLimit + player->mo->VelocityDegenerate) {
+				scale = (velocity - player->mo->VelocityDegenerate) / velocity;
+			}
+			else
+			{
+				scale = player->mo->VelocityLimit / velocity;
+			}
+
+			player->mo->velx = FixedMul(player->mo->velx, FLOAT2FIXED(scale));
+			player->mo->vely = FixedMul(player->mo->vely, FLOAT2FIXED(scale));
+		}
+	}
+
 	//*******************************************************
 	// Footsteps
 	//*******************************************************
@@ -3654,6 +3676,28 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		player->cheats &= ~CF_REVERTPLEASE;
 		player->camera = player->mo;
+	}
+	
+	// Limit player velocity if enabled
+	if (player->mo->VelocityLimit)
+	{
+		FVector2 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
+		velocity = float(vel.Length());
+
+		if (velocity > player->mo->VelocityLimit)
+		{
+			float scale;
+			if (velocity > player->mo->VelocityLimit + player->mo->VelocityDegenerate) {
+				scale = (velocity - player->mo->VelocityDegenerate) / velocity;
+			}
+			else
+			{
+				scale = player->mo->VelocityLimit / velocity;
+			}
+
+			player->mo->velx = FixedMul(player->mo->velx, FLOAT2FIXED(scale));
+			player->mo->vely = FixedMul(player->mo->vely, FLOAT2FIXED(scale));
+		}
 	}
 
 	//*******************************************************

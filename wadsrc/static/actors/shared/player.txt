@@ -51,6 +51,8 @@ Actor PlayerPawn : Actor native
 	Player.AirAcceleration 0.25
 	Player.DashForce 10.0
 	Player.DashDelay 35
+	Player.VelocityLimit 0.0
+	Player.VelocityDegenerate 0.20
 	
 	// MvType 1 or 2 only
 	Player.GroundAcceleration 10.0

@@ -188,6 +188,8 @@ public:
 	float		AirAcceleration;
 	float		DashForce;
 	int			DashDelay;
+	float		VelocityLimit;
+	float		VelocityDegenerate;
 
 	// Quake movement only
 	float		GroundAcceleration;

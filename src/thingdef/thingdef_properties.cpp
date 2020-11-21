@@ -3000,6 +3000,30 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, dashdelay, I, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, velocitylimit, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+	if (f < 0.f)
+		f = 0.f;
+
+	defaults->VelocityLimit = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, velocitydegenerate, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+	if (f < 0.f)
+		f = 0.f;
+
+	defaults->VelocityDegenerate = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, groundacceleration, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
