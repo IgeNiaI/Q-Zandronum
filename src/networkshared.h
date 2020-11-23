@@ -165,8 +165,8 @@ enum
 #define	DEFAULT_SERVER_PORT			10666
 #define	DEFAULT_CLIENT_PORT			10667
 #define	DEFAULT_MASTER_PORT			15300
-#define	DEFAULT_BROADCAST_PORT		15101
-#define	DEFAULT_STATS_PORT			15201
+#define	DEFAULT_BROADCAST_PORT		15102
+#define	DEFAULT_STATS_PORT			15202
 
 // This is the longest possible string we can pass over the network.
 #define	MAX_NETWORK_STRING			2048
