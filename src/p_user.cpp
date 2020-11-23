@@ -882,15 +882,18 @@ void APlayerPawn::PostBeginPlay()
 		player->SendPitchLimits();
 	}
 
-	// [Ivory] no you can't haz both
-	if (player->mo->mvFlags & MV_DOUBLEJUMP)
+	if (player->mo)
 	{
-		player->mo->mvFlags &= ~MV_WALLJUMP;
-		player->mo->mvFlags &= ~MV_WALLCLIMB;
-	}
-	else if (player->mo->mvFlags & MV_WALLCLIMB)
-	{
-		player->mo->mvFlags &= ~MV_WALLJUMP;
+		// [Ivory] no you can't haz both
+		if (player->mo->mvFlags & MV_DOUBLEJUMP)
+		{
+			player->mo->mvFlags &= ~MV_WALLJUMP;
+			player->mo->mvFlags &= ~MV_WALLCLIMB;
+		}
+		else if (player->mo->mvFlags & MV_WALLCLIMB)
+		{
+			player->mo->mvFlags &= ~MV_WALLJUMP;
+		}
 	}
 }
 
