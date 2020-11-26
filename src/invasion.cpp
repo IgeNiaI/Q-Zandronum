@@ -98,6 +98,29 @@ static	unsigned int		g_ulNumBossMonsters = 0;
 static	bool				g_bIncreaseNumMonstersOnSpawn = true;
 static	std::vector<AActor*> g_MonsterCorpsesFromPreviousWave;
 
+//*****************************************************************************
+//	CONSOLE COMMANDS/VARIABLES
+
+CVAR( Int, sv_invasioncountdowntime, 10, CVAR_ARCHIVE );
+CUSTOM_CVAR( Int, wavelimit, 0, CVAR_CAMPAIGNLOCK | CVAR_SERVERINFO )
+{
+	if ( self >= 256 )
+		self = 255;
+	if ( self < 0 )
+		self = 0;
+
+	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
+	{
+		SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (int)self );
+		SERVERCOMMANDS_SetGameModeLimits( );
+
+		// Update the scoreboard.
+		SERVERCONSOLE_UpdateScoreboard( );
+	}
+}
+CVAR( Bool, sv_usemapsettingswavelimit, true, CVAR_ARCHIVE );
+CVAR( Bool, sv_respawnonnewwave, true, CVAR_ARCHIVE );
+
 EXTERN_CVAR( Int, sv_endleveldelay )
 
 //*****************************************************************************
@@ -785,6 +808,18 @@ void INVASION_StartCountdown( ULONG ulTicks )
 	if ( NETWORK_InClientMode() == false )
 	{
 		INVASION_SetState( IS_COUNTDOWN );
+
+		// If sv_respawnonnewwave then respawn dead players, pop queue and reset lives
+		if ( sv_respawnonnewwave && wavelimit <= 0 || (LONG)g_ulCurrentWave < wavelimit )
+		{
+			GAMEMODE_RespawnDeadSpectatorsAndPopQueue();
+
+			for ( int playerIdx = 0; playerIdx < MAXPLAYERS; ++playerIdx )
+			{
+				if ( playeringame[playerIdx] )
+					PLAYER_SetLivesLeft( &players[playerIdx], GAMEMODE_GetMaxLives( ) - 1 );
+			}
+		}
 	}
 
 	// Set the invasion countdown ticks.
@@ -1539,25 +1574,3 @@ static ULONG invasion_GetNumThingsThisWave( ULONG ulNumOnFirstWave, ULONG ulWave
 	return ( ulNumThingsThisWave );
 */
 }
-
-//*****************************************************************************
-//	CONSOLE COMMANDS/VARIABLES
-
-CVAR( Int, sv_invasioncountdowntime, 10, CVAR_ARCHIVE );
-CUSTOM_CVAR( Int, wavelimit, 0, CVAR_CAMPAIGNLOCK | CVAR_SERVERINFO )
-{
-	if ( self >= 256 )
-		self = 255;
-	if ( self < 0 )
-		self = 0;
-
-	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
-	{
-		SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (int)self );
-		SERVERCOMMANDS_SetGameModeLimits( );
-
-		// Update the scoreboard.
-		SERVERCONSOLE_UpdateScoreboard( );
-	}
-}
-CVAR( Bool, sv_usemapsettingswavelimit, true, CVAR_ARCHIVE );

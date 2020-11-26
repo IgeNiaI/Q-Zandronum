@@ -79,6 +79,8 @@ CVAR( Bool, buckshot, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_CAMPAIGNLOCK );
 
 CVAR( Bool, sv_suddendeath, true, CVAR_SERVERINFO | CVAR_LATCH );
 
+EXTERN_CVAR( Bool, sv_respawnonnewwave );
+
 //*****************************************************************************
 //	VARIABLES
 
@@ -415,7 +417,8 @@ bool GAMEMODE_IsGameInProgress( void )
 	if ( survival )
 		return ( SURVIVAL_GetState( ) == SURVS_INPROGRESS );
 	else if ( invasion )
-		return ( ( INVASION_GetState( ) == IS_INPROGRESS ) || ( INVASION_GetState( ) == IS_BOSSFIGHT ) || ( INVASION_GetState( ) == IS_WAVECOMPLETE ) || ( INVASION_GetState( ) == IS_COUNTDOWN ) );
+		return ( ( INVASION_GetState( ) == IS_INPROGRESS ) || ( INVASION_GetState( ) == IS_BOSSFIGHT )
+			|| ( INVASION_GetState( ) == IS_WAVECOMPLETE ) || ( !sv_respawnonnewwave && INVASION_GetState( ) == IS_COUNTDOWN ) );
 	else if ( duel )
 		return ( DUEL_GetState( ) == DS_INDUEL );
 	else if ( teamlms || lastmanstanding )
