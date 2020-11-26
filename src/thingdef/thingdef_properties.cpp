@@ -2930,6 +2930,24 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, secondjumpz, F, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, airthrustzup, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(i, 0);
+	defaults->AirThrustZUp = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, airthrustzdown, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(i, 0);
+	defaults->AirThrustZDown = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, maxwallclimbtics, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);

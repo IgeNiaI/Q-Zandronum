@@ -181,6 +181,8 @@ public:
 	float		FootstepVolume;
 	int			JumpDelay;
 	fixed_t		SecondJumpZ;
+	fixed_t		AirThrustZUp;
+	fixed_t		AirThrustZDown;
 	int			MaxWallClimbTics;
 	bool		WallFrictionEnabled;
 	float		CrouchSpeedFactor;

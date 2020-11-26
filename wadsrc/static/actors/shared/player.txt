@@ -44,6 +44,8 @@ Actor PlayerPawn : Actor native
 	Player.FootstepVolume 1.0
 	Player.JumpDelay 7
 	Player.SecondJumpZ 8
+	Player.AirThrustZUp 0
+	Player.AirThrustZDown 0
 	Player.MaxWallClimbTics 70
 	Player.WallFrictionEnabled 1
 	Player.CrouchSpeedFactor 0.5

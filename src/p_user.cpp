@@ -3309,114 +3309,127 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		}
 	}
 	// [RH] check for jump
-	else if (cmd->ucmd.buttons & BT_JUMP)
+	else
 	{
-		// [Leo] Spectators shouldn't be limited by the server settings.
-		if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && !player->jumpTics)
+		if ( cmd->ucmd.buttons & BT_JUMP )
 		{
-			fixed_t	JumpVelz;
-			ULONG	ulJumpTicks;
-			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
-
-			if (!wasJustThrustedZ || isRampJumper)
+			// [Leo] Spectators shouldn't be limited by the server settings.
+			if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && !player->jumpTics)
 			{
-				// Set base jump velocity.
-				// [Dusk] Exported this into a function as I need it elsewhere as well.
-				JumpVelz = player->mo->CalcJumpVelz();
+				fixed_t	JumpVelz;
+				ULONG	ulJumpTicks;
+				bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
 
-				// Set base jump ticks.
-				// [BB] In ZDoom revision 2970 changed the jumping behavior.
-				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
-					ulJumpTicks = 18 * TICRATE / 35;
-				else
-					ulJumpTicks = -1;
-
-				if (!(player->mo->mvFlags & MV_SILENT))
+				if (!wasJustThrustedZ || isRampJumper)
 				{
-					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-					if (CLIENT_PREDICT_IsPredicting() == false)
-						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
-				}
+					// Set base jump velocity.
+					// [Dusk] Exported this into a function as I need it elsewhere as well.
+					JumpVelz = player->mo->CalcJumpVelz();
 
-				player->mo->flags2 &= ~MF2_ONMOBJ;
+					// Set base jump ticks.
+					// [BB] In ZDoom revision 2970 changed the jumping behavior.
+					if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
+						ulJumpTicks = 18 * TICRATE / 35;
+					else
+						ulJumpTicks = -1;
 
-				// [BC] Increase jump delay if the player has the high jump power.
-				if (player->cheats & CF_HIGHJUMP)
-					ulJumpTicks *= 2;
-
-				// [BC] Remove jump delay if the player is on a spring pad.
-				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
-					ulJumpTicks = 0;
-
-				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
-				player->jumpTics = ulJumpTicks;
-			}
-		}
-		// [Ivory]: Double Jump and wall jump
-		else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
-			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
-		{
-			fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
-
-			// Wall proximity check
-			bool doDoubleJump = false;
-			if (player->mo->mvFlags & MV_WALLJUMP)
-			{
-				int angle;
-				fixed_t xDir, yDir;
-				for (int i = 0; i < 8; ++i)
-				{
-					angle = 45 * i;
-					xDir = player->mo->x + FixedMul(FRACUNIT, FLOAT2FIXED(cos(angle)));
-					yDir = player->mo->y + FixedMul(FRACUNIT, FLOAT2FIXED(sin(angle)));
-
-					// if player cannot move in a direction and a line is blocking it
-					// it must be a wall that can be jumped on
-					if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
+					if (!(player->mo->mvFlags & MV_SILENT))
 					{
-						SecondJumpVelz = (SecondJumpVelz / 4) * 3;
+						// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+						if (CLIENT_PREDICT_IsPredicting() == false)
+							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+					}
 
-						if (!(player->mo->mvFlags & MV_SILENT))
+					player->mo->flags2 &= ~MF2_ONMOBJ;
+
+					// [BC] Increase jump delay if the player has the high jump power.
+					if (player->cheats & CF_HIGHJUMP)
+						ulJumpTicks *= 2;
+
+					// [BC] Remove jump delay if the player is on a spring pad.
+					if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+						ulJumpTicks = 0;
+
+					player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
+					player->jumpTics = ulJumpTicks;
+				}
+			}
+			// [Ivory]: Double Jump and wall jump
+			else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
+				&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
+			{
+				fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
+
+				// Wall proximity check
+				bool doDoubleJump = false;
+				if (player->mo->mvFlags & MV_WALLJUMP)
+				{
+					int angle;
+					fixed_t xDir, yDir;
+					for (int i = 0; i < 8; ++i)
+					{
+						angle = 45 * i;
+						xDir = player->mo->x + FixedMul(FRACUNIT, FLOAT2FIXED(cos(angle)));
+						yDir = player->mo->y + FixedMul(FRACUNIT, FLOAT2FIXED(sin(angle)));
+
+						// if player cannot move in a direction and a line is blocking it
+						// it must be a wall that can be jumped on
+						if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
 						{
-							if (!CLIENT_PREDICT_IsPredicting())
-								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+							SecondJumpVelz = (SecondJumpVelz / 4) * 3;
+
+							if (!(player->mo->mvFlags & MV_SILENT))
+							{
+								if (!CLIENT_PREDICT_IsPredicting())
+									S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+							}
+
+							doDoubleJump = true;
+
+							break;
 						}
-
-						doDoubleJump = true;
-
-						break;
 					}
 				}
-			}
-			else
-			{
-				if (!(player->mo->mvFlags & MV_SILENT))
-				{
-					if (!CLIENT_PREDICT_IsPredicting())
-						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
-				}
-
-				doDoubleJump = true;
-			}
-
-			if (doDoubleJump)
-			{
-				if (player->mo->velz < 0)
-				{
-					player->mo->velz = SecondJumpVelz;
-				}
 				else
 				{
-					player->mo->velz += SecondJumpVelz;
+					if (!(player->mo->mvFlags & MV_SILENT))
+					{
+						if (!CLIENT_PREDICT_IsPredicting())
+							S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
+					}
+
+					doDoubleJump = true;
 				}
 
-				player->doubleJumpState = DJ_NOT_AVAILABLE;
+				if (doDoubleJump)
+				{
+					if (player->mo->velz < 0)
+					{
+						player->mo->velz = SecondJumpVelz;
+					}
+					else
+					{
+						player->mo->velz += SecondJumpVelz;
+					}
+
+					player->doubleJumpState = DJ_NOT_AVAILABLE;
+				}
 			}
 		}
-	}
-	else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
-	{
-		player->doubleJumpState = DJ_READY;
+		else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
+		{
+			player->doubleJumpState = DJ_READY;
+		}
+
+		// [geNia] Add additional vertical thrust if player is a key while in the air
+		if ( !player->onground ) {
+			if ( cmd->ucmd.buttons & BT_JUMP ) {
+				player->mo->velz += player->mo->AirThrustZUp;
+			}
+			if ( cmd->ucmd.buttons & BT_CROUCH ) {
+				player->mo->velz -= player->mo->AirThrustZDown;
+			}
+		}
 	}
 }
 
@@ -3857,6 +3870,16 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
 	{
 		player->doubleJumpState = DJ_READY;
+	}
+
+	// [geNia] Add additional vertical thrust if player is a key while in the air
+	if ( !player->onground ) {
+		if ( cmd->ucmd.buttons & BT_JUMP ) {
+			player->mo->velz += player->mo->AirThrustZUp;
+		}
+		if ( cmd->ucmd.buttons & BT_CROUCH ) {
+			player->mo->velz -= player->mo->AirThrustZDown;
+		}
 	}
 }
 
