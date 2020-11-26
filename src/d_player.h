@@ -187,11 +187,10 @@ public:
 	bool		WallFrictionEnabled;
 	float		CrouchSpeedFactor;
 	float		WalkSpeedFactor;
-	float		AirAcceleration;
-	float		DashForce;
+	fixed_t		AirAcceleration;
+	fixed_t		DashForce;
 	int			DashDelay;
-	float		VelocityLimit;
-	float		VelocityDegenerate;
+	fixed_t		VelocityCap;
 
 	// Quake movement only
 	float		GroundAcceleration;

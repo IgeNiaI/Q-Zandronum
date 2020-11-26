@@ -3042,13 +3042,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
 
-	FVector2 vel;
-	float velocity = 0.f;
-	if (isDasher || isClimber)
-	{
-		vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
-		velocity = float(vel.Length());
-	}
+	fixed_t velocity = (fixed_t) TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length();
 
 	// Wall proximity check
 	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 16.f)
@@ -3087,14 +3081,14 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	{
 		if (isDasher && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
 		{
-			FVector2 dir = FVector2(float(cmd->ucmd.forwardmove), -float(cmd->ucmd.sidemove)).Unit();
-			float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
-			VectorRotate(dir.X, dir.Y, flAngle);
+			TVector2<fixed_t> dir = TVector2<fixed_t>( cmd->ucmd.forwardmove, -cmd->ucmd.sidemove ).FixedUnit();
+			dir = TVector2<fixed_t> (
+				FixedMul(dir.X, finecosine[player->mo->angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[player->mo->angle >> ANGLETOFINESHIFT]),
+				FixedMul(dir.X, finesine[player->mo->angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[player->mo->angle >> ANGLETOFINESHIFT])
+			);
 
-			vel += dir * player->mo->DashForce * FIXED2FLOAT(player->mo->Speed);
-
-			player->mo->velx = FLOAT2FIXED(vel.X);
-			player->mo->vely = FLOAT2FIXED(vel.Y);
+			player->mo->velx += FixedMul(dir.X, player->mo->DashForce);
+			player->mo->vely += FixedMul(dir.Y, player->mo->DashForce);
 
 			// do a little jump if on ground (75% of regular jump height)
 			if (player->onground)
@@ -3116,6 +3110,11 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			int friction, movefactor;
 			int fm, sm;
 
+			fixed_t LocalVelocityCap;
+			if (player->mo->VelocityCap) {
+				LocalVelocityCap = MAX(player->mo->VelocityCap, (fixed_t)TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length());
+			}
+
 			movefactor = P_GetMoveFactor(player->mo, &friction);
 			bobfactor = friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR;
 			if (!player->onground && !(player->mo->flags & MF_NOGRAVITY) && !player->mo->waterlevel)
@@ -3128,9 +3127,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				}
 				else
 				{
-					fixed_t airacceleration = FLOAT2FIXED(player->mo->AirAcceleration);
-					movefactor = FixedMul(movefactor, airacceleration);
-					bobfactor = FixedMul(bobfactor, airacceleration);
+					movefactor = FixedMul(movefactor, player->mo->AirAcceleration);
+					bobfactor = FixedMul(bobfactor, player->mo->AirAcceleration);
 				}
 			}
 
@@ -3159,6 +3157,17 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				P_SideThrust(player, player->mo->angle, sidemove);
 			}
 
+			// Limit player velocity if enabled
+			if (player->mo->VelocityCap) {
+				velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
+
+				if (velocity > LocalVelocityCap) {
+					fixed_t scale = FixedDiv(LocalVelocityCap, velocity);
+					player->mo->velx = FixedMul(player->mo->velx, scale);
+					player->mo->vely = FixedMul(player->mo->vely, scale);
+				}
+			}
+
 			// [BB] Spectators shall stay in their spawn state and don't execute any code pointers.
 			if ((CLIENT_PREDICT_IsPredicting() == false) && (player->bSpectating == false))//(!(player->cheats & CF_PREDICTING))
 			{
@@ -3179,36 +3188,13 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (isClimber)
 		P_Climb_Looping_Sounds(player, canClimb);
 
-	// Limit player velocity if enabled
-	if (player->mo->VelocityLimit)
-	{
-		vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
-		velocity = float(vel.Length());
-
-		if (velocity > player->mo->VelocityLimit)
-		{
-			float scale;
-			if (velocity > player->mo->VelocityLimit + player->mo->VelocityDegenerate) {
-				scale = (velocity - player->mo->VelocityDegenerate) / velocity;
-			}
-			else
-			{
-				scale = player->mo->VelocityLimit / velocity;
-			}
-
-			player->mo->velx = FixedMul(player->mo->velx, FLOAT2FIXED(scale));
-			player->mo->vely = FixedMul(player->mo->vely, FLOAT2FIXED(scale));
-		}
-	}
-
 	//*******************************************************
 	// Footsteps
 	//*******************************************************
 
 	if ( !CLIENT_PREDICT_IsPredicting() )
 	{
-		if (!velocity)
-			velocity = float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length());
+		velocity = (fixed_t) TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length();
 
 		if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
 			(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
@@ -3561,7 +3547,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			{
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
-				vel += acceleration * player->mo->DashForce * FIXED2FLOAT(player->mo->Speed);
+				vel += acceleration * FIXED2FLOAT(player->mo->DashForce);
 
 				// do a little jump if on ground (75% of regular jump height)
 				if (player->onground)
@@ -3574,6 +3560,11 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					if (CLIENT_PREDICT_IsPredicting() == false)
 						S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
 				}
+			}
+
+			float LocalVelocityCap;
+			if (player->mo->VelocityCap) {
+				LocalVelocityCap = MAX(FIXED2FLOAT(player->mo->VelocityCap), float(FVector2(vel.X, vel.Y).Length()));
 			}
 
 			if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
@@ -3616,13 +3607,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 						else
 						{
 							// Both side and forward acceleration
-							player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6.f);
+							player->mo->QAcceleration(vel, acceleration, maxgroundspeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
 						}
 					}
 				}
 				else
 				{
-					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->AirAcceleration * 6.f);
+					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
 				}
 
 				// set slide duration if player can do it.
@@ -3653,6 +3644,17 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 				// Reset wall climb tics
 				player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+			}
+			
+			// Limit player velocity if enabled
+			if (player->mo->VelocityCap) {
+				velocity = float(FVector2(vel.X, vel.Y).Length());
+
+				if (velocity > LocalVelocityCap) {
+					float scale = LocalVelocityCap / velocity;
+					vel.X *= scale;
+					vel.Y *= scale;
+				}
 			}
 		}
 	}
@@ -3694,36 +3696,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		player->camera = player->mo;
 	}
 	
-	// Limit player velocity if enabled
-	if (player->mo->VelocityLimit)
-	{
-		FVector2 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely) };
-		velocity = float(vel.Length());
-
-		if (velocity > player->mo->VelocityLimit)
-		{
-			float scale;
-			if (velocity > player->mo->VelocityLimit + player->mo->VelocityDegenerate) {
-				scale = (velocity - player->mo->VelocityDegenerate) / velocity;
-			}
-			else
-			{
-				scale = player->mo->VelocityLimit / velocity;
-			}
-
-			player->mo->velx = FixedMul(player->mo->velx, FLOAT2FIXED(scale));
-			player->mo->vely = FixedMul(player->mo->vely, FLOAT2FIXED(scale));
-		}
-	}
-
 	//*******************************************************
 	// Footsteps
 	//*******************************************************
 
 	if ( !CLIENT_PREDICT_IsPredicting() )
 	{
-		if (!velocity)
-			velocity = float(FVector2(vel.X, vel.Y).Length());
+		velocity = float(FVector2(vel.X, vel.Y).Length());
 
 		if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
 		{

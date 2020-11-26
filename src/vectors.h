@@ -246,6 +246,13 @@ struct TVector2
 		return *this * len;
 	}
 
+	TVector2 FixedUnit() const
+	{
+		fixed_t len = (fixed_t) Length();
+		if (len != 0) len = 65536 / len;
+		return *this * len;
+	}
+
 	// Scales this vector into a unit vector. Returns the old length
 	double MakeUnit()
 	{

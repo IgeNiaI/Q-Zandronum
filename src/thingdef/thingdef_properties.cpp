@@ -2992,7 +2992,7 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, walkspeedfactor, F, PlayerPawn)
 //==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, airacceleration, F, PlayerPawn)
 {
-	PROP_FLOAT_PARM(f, 0);
+	PROP_FIXED_PARM(f, 0);
 
 	defaults->AirAcceleration = f;
 }
@@ -3002,7 +3002,7 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, airacceleration, F, PlayerPawn)
 //==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, dashforce, F, PlayerPawn)
 {
-	PROP_FLOAT_PARM(i, 0);
+	PROP_FIXED_PARM(i, 0);
 	defaults->DashForce = i;
 }
 
@@ -3018,25 +3018,13 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, dashdelay, I, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, velocitylimit, F, PlayerPawn)
+DEFINE_CLASS_PROPERTY_PREFIX(player, velocitycap, F, PlayerPawn)
 {
-	PROP_FLOAT_PARM(f, 0);
-	if (f < 0.f)
-		f = 0.f;
+	PROP_FIXED_PARM(f, 0);
+	if (f < 0)
+		f = 0;
 
-	defaults->VelocityLimit = f;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, velocitydegenerate, F, PlayerPawn)
-{
-	PROP_FLOAT_PARM(f, 0);
-	if (f < 0.f)
-		f = 0.f;
-
-	defaults->VelocityDegenerate = f;
+	defaults->VelocityCap = f;
 }
 
 //==========================================================================
