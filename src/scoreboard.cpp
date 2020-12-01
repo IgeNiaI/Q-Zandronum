@@ -2351,9 +2351,12 @@ static void scoreboard_RenderIndividualPlayer( ULONG ulDisplayPlayer, ULONG ulPl
 
 				// Draw a chat icon if this player is chatting.
 				// [Cata] Also shows who's in the console.
-				if (( players[ulPlayer].bChatting ) || ( players[ulPlayer].bInConsole ))
+				// [AK] Also show an icon if the player is lagging to the server.
+				if ((players[ulPlayer].bChatting) || (players[ulPlayer].bInConsole) || (players[ulPlayer].bLagging))
 				{
-					if ( players[ulPlayer].bInConsole )
+					if (players[ulPlayer].bLagging)
+						sprintf( szPatchName, "LAGMINI" );
+					else if ( players[ulPlayer].bInConsole )
 						sprintf( szPatchName, "CONSMINI" );
 					else
 						sprintf( szPatchName, "TLKMINI" );
