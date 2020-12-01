@@ -1178,9 +1178,47 @@ static void ChangeSpy (int changespy)
 	FinishChangeSpy( pnum );
 }
 
+void G_SpyPlayer( int pnum )
+{
+	// [BC] Allow view switch to players on our team.
+	if ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS )
+	{
+		// Break if the player isn't on a team.
+		if ( players[consoleplayer].bOnTeam == false )
+			return;
+
+		// Skip players not in the game.
+		if ( playeringame[pnum] == false )
+			return;
+
+		// Skip other spectators.
+		if ( players[pnum].bSpectating )
+			return;
+
+		// Skip players not on our team.
+		if (( players[pnum].bOnTeam == false ) || ( players[pnum].ulTeam != players[consoleplayer].ulTeam ))
+			return;
+	}
+	// Deathmatch and co-op.
+	else
+	{
+		// Skip players not in the game.
+		if ( playeringame[pnum] == false )
+			return;
+
+		// Skip other spectators.
+		if ( players[pnum].bSpectating )
+			return;
+	}
+
+	FinishChangeSpy( pnum );
+}
+
 // [BC] Split this out of ChangeSpy() so it can be called from within that function.
 static void FinishChangeSpy( int pnum )
 {
+	players[consoleplayer].ticsToSpyNext = 0;
+	players[consoleplayer].pnumToSpyNext = 0;
 	players[consoleplayer].camera = players[pnum].mo;
 	S_UpdateSounds(players[consoleplayer].camera);
 	StatusBar->AttachToPlayer (&players[pnum]);
@@ -1206,6 +1244,8 @@ static void FinishChangeSpy( int pnum )
 	// [BC] Also, refresh the HUD since the display player is changing.
 	SCOREBOARD_RefreshHUD( );
 }
+
+CVAR( Bool, cl_spykiller, false, CVAR_ARCHIVE );
 
 CCMD (spynext)
 {
@@ -1237,6 +1277,21 @@ CCMD (spycancel)
 {
 	// allow spy mode changes even during the demo
 	ChangeSpy (SPY_CANCEL);
+}
+
+CCMD (spykiller)
+{
+	// toggle spy killer after death
+	if ( cl_spykiller )
+	{
+		Printf ( "Switch to killer disabled\n" );
+		cl_spykiller = false;
+	}
+	else
+	{
+		Printf ( "Switch to killer enabled\n" );
+		cl_spykiller = true;
+	}
 }
 
 // [TP]

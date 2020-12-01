@@ -101,6 +101,8 @@ CUSTOM_CVAR (Float, cl_spectatormove, 1.0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG) {
 		self = -100.0;
 }
 
+EXTERN_CVAR( Bool, cl_spykiller )
+
 // [GRB] Custom player classes
 TArray<FPlayerClass> PlayerClasses;
 
@@ -1993,20 +1995,28 @@ void APlayerPawn::ActivateMorphWeapon ()
 
 void APlayerPawn::Die (AActor *source, AActor *inflictor, int dmgflags)
 {
-	// [BB] Drop any important items the player may be carrying before handling
-	// any other part of the death logic.
-	if ( NETWORK_InClientMode() == false )
-		DropImportantItems ( false, source );
-
 	Super::Die (source, inflictor, dmgflags);
 
 	if (player != NULL && player->mo == this) player->bonuscount = 0;
+
+	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
+	{
+		if ( cl_spykiller && players[consoleplayer].bSpectating && players[consoleplayer].camera == this && source && source->player )
+		{
+			players[consoleplayer].ticsToSpyNext = 70; // 2 seconds
+			players[consoleplayer].pnumToSpyNext = source->player - players;
+		}
+	}
 
 	// [BC] Nothing for the client to do here.
 	if ( NETWORK_InClientMode() )
 	{
 		return;
 	}
+	
+	// [BB] Drop any important items the player may be carrying before handling
+	// any other part of the death logic.
+	DropImportantItems ( false, source );
 
 	if (player != NULL && player->mo != this)
 	{ // Make the real player die, too
@@ -4678,12 +4688,22 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		}
 	}
 
-	P_CalcHeight (player);
+	P_CalcHeight ( player );
 
 	// [Leo] Done with spectator specific logic.
-	if (player->bSpectating)
+	if ( player->bSpectating )
 	{
 		P_SetPsprite( player, ps_weapon, NULL );
+
+		// See if anyone is set to spy next
+		if ( player->ticsToSpyNext )
+		{
+			player->ticsToSpyNext--;
+			if ( !player->ticsToSpyNext )
+			{
+				G_SpyPlayer( player->pnumToSpyNext );
+			}
+		}
 		return;
 	}
 

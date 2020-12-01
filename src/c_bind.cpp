@@ -97,8 +97,6 @@ static const FBinding DefBindings[] =
 	{ "f7", "menu_endgame" },
 	{ "f8", "togglemessages" },
 	{ "f9", "quickload" },
-	{ "f10", "menu_quit" },
-	{ "f11", "spectate" },
 	{ "m", "togglemap" },
 	{ "t", "messagemode" },
 	{ "y", "messagemode2" },
@@ -114,6 +112,11 @@ static const FBinding DefBindings[] =
 	{ "kp/", "invdrop" },
 	{ "del", "drop_upgrade" },
 
+	// Spectating
+	{ "f10", "spectate" },
+	{ "f11", "spyprev" },
+	{ "f12", "spynext" },
+
 	// Etc
 	{ "alt", "+use" },
 	{ "-", "sizedown" },
@@ -122,7 +125,6 @@ static const FBinding DefBindings[] =
 	{ "pause", "pause" },
 	{ "pgup", "vote_yes" },
 	{ "pgdn", "vote_no" },
-	{ "f12", "spynext" },
 
 	{ NULL, NULL }
 };
