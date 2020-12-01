@@ -474,8 +474,10 @@ OptionMenu "CustomizeControls"
 	Control 	"Look up",				"+lookup"
 	Control 	"Look down",			"+lookdown"
 	Control 	"Center view",			"centerview"
+	Control 	"Third person view",	"chase"
 	Control 	"Run",					"+speed"
 	Control 	"Strafe",				"+strafe"
+	Control 	"Toggle automap",		"togglemap"
 	Control 	"Show Scoreboard",		"+showscores"
 	Control		"Show medals",			"+showmedals" // [TP]
 	StaticText 	""
@@ -510,14 +512,16 @@ OptionMenu "CustomizeControls"
 	StaticText 	"Voting", 1
 	Control		"Vote yes",				"vote_yes"
 	Control		"Vote no",				"vote_no"
-	// [TP] --
+	StaticText 	""
+	StaticText 	"Spectating", 1
+	Control		"Join spectators",		"spectate" // [TP]
+	Control 	"Spectate previous player",	"spyprev"
+	Control 	"Spectate next player",	"spynext"
+	Control 	"Stop spectating player",	"spycancel"
+	Control 	"Toggle Spectate killer",		"spykiller"
 	StaticText 	""
 	StaticText 	"Other", 1
-	Control 	"Toggle automap",		"togglemap"
-	Control 	"Chasecam",				"chase"
-	Control 	"Coop spy",				"spynext"
 	Control 	"Screenshot",			"screenshot"
-	Control		"Spectate",				"spectate" // [TP]
 	Control		"Taunt",				"taunt" // [TP]
 	Option		"Join the game",		"joinmenukey", "JoinMenuKeys" // [TP]
 	Control		"Join the game (custom)", "menu_join" // [TP]

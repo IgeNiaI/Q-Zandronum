@@ -109,6 +109,8 @@ void G_WorldDone (void);
 void G_Ticker (void);
 bool G_Responder (event_t*	ev);
 
+void G_SpyPlayer (int pnum);
+
 void G_ScreenShot (char *filename);
 
 FString G_BuildSaveName (const char *prefix, int slot);

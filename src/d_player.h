@@ -766,6 +766,10 @@ public:
 	// [BL] Should the player be able to use weapons?
 	bool		bUnarmed;
 
+	// [geNia] 
+	int			ticsToSpyNext;
+	int			pnumToSpyNext;
+
 	// [Spleen] Store old information about the player for unlagged support
 	fixed_t		unlaggedX[UNLAGGEDTICS];
 	fixed_t		unlaggedY[UNLAGGEDTICS];
