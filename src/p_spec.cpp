@@ -1579,7 +1579,7 @@ void P_SpawnSpecials (void)
 			if ((sector->special & 0xff) >= Scroll_North_Slow &&
 				(sector->special & 0xff) <= Scroll_SouthWest_Fast)
 			{ // Hexen scroll special
-				static const char hexenScrollies[24][2] =
+				static const SBYTE hexenScrollies[24][2] =
 				{
 					{  0,  1 }, {  0,  2 }, {  0,  4 },
 					{ -1,  0 }, { -2,  0 }, { -4,  0 },
