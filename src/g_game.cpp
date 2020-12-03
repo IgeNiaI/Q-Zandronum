@@ -245,6 +245,7 @@ CVAR (Bool,		freelook,		true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
 CVAR (Bool,		lookstrafe,		false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
 CVAR (Float,	m_pitch,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Mouse speeds
 CVAR (Float,	m_yaw,			1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Float,	m_zoomedscale,	.5f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
 CVAR (Float,	m_forward,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
 CVAR (Float,	m_side,			2.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
  
@@ -910,6 +911,10 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 //[Graf Zahl] This really helps if the mouse update rate can't be increased!
 CVAR (Bool,		smooth_mouse,	false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
 
+float Lerp(float v0, float v1, float t) {
+	return (1 - t) * v0 + t * v1;
+}
+
 void G_AddViewPitch (int look)
 {
 	if (gamestate == GS_TITLELEVEL)
@@ -921,7 +926,7 @@ void G_AddViewPitch (int look)
 		players[consoleplayer].ReadyWeapon != NULL &&			// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)		// No adjustment if it is non-positive.
 	{
-		look = int(look * players[consoleplayer].ReadyWeapon->FOVScale);
+		look = int(look * Lerp(players[consoleplayer].ReadyWeapon->FOVScale, m_zoomedscale, 1 / players[consoleplayer].ReadyWeapon->FOVScale - 1));
 	}
 	// [BB] Allow spectators to freelook no matter what. Note: This probably causes some
 	// sky rendering errors in software mode.
@@ -970,7 +975,7 @@ void G_AddViewAngle (int yaw)
 		players[consoleplayer].ReadyWeapon != NULL &&		// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)	// No adjustment if it is non-positive.
 	{
-		yaw = int(yaw * players[consoleplayer].ReadyWeapon->FOVScale);
+		yaw = int(yaw * Lerp(players[consoleplayer].ReadyWeapon->FOVScale, m_zoomedscale, 1 / players[consoleplayer].ReadyWeapon->FOVScale - 1));
 	}
 	LocalViewAngle -= yaw;
 	if (yaw != 0)
