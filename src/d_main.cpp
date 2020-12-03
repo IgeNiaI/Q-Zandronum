@@ -346,7 +346,7 @@ void D_PostEvent (const event_t *ev)
 	{
 		if (Button_Mlook.bDown || freelook)
 		{
-			int look = int(ev->y * m_pitch * mouse_sensitivity * 16.0);
+			int look = int(ev->y * m_pitch * mouse_sensitivity * 8.0);
 			if (invertmouse)
 				look = -look;
 			G_AddViewPitch (look);
