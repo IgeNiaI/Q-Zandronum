@@ -257,29 +257,20 @@ static bool CaptureMode_InGame()
 
 void I_CheckNativeMouse(bool preferNative)
 {
-	bool windowed = (screen == NULL) || !screen->IsFullscreen();
 	bool want_native;
 
-	if (!windowed)
+	if ((GetForegroundWindow() != Window) || preferNative || !use_mouse)
 	{
-		// ungrab mouse when in the menu with mouse control on.		
-		want_native = m_use_mouse && (menuactive == MENU_On || menuactive == MENU_OnNoPause);
+		want_native = true;
+	}
+	else if (menuactive == MENU_WaitKey)
+	{
+		want_native = false;
 	}
 	else
 	{
-		if ((GetForegroundWindow() != Window) || preferNative || !use_mouse)
-		{
-			want_native = true;
-		}
-		else if (menuactive == MENU_WaitKey)
-		{
-			want_native = false;
-		}
-		else
-		{
-			want_native = ((!m_use_mouse || menuactive != MENU_WaitKey) &&
-				(!CaptureMode_InGame() || GUICapture ||	paused || demoplayback));
-		}
+		want_native = ((!m_use_mouse || menuactive != MENU_WaitKey) &&
+			(!CaptureMode_InGame() || GUICapture ||	paused || demoplayback));
 	}
 
 	//Printf ("%d %d %d\n", wantNative, preferNative, NativeMouse);
