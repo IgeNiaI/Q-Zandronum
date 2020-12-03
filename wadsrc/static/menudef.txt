@@ -582,6 +582,7 @@ OptionMenu "MouseOptions"
 	StaticText 	""
 	Slider "Turning speed",				"m_yaw", 0, 2.5, 0.1
 	Slider "Mouselook speed",			"m_pitch", 0, 2.5, 0.1
+	Slider "Speed when zoomed x2",		"m_zoomedscale", 0, 2.5, 0.1
 	Slider "Forward/Backward speed",	"m_forward", 0, 2.5, 0.1
 	Slider "Strafing speed",			"m_side", 0, 2.5, 0.1
 	StaticText 	""
