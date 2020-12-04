@@ -1896,6 +1896,18 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 				}
 				break;
 
+			case SVC2_SETPLAYERDEATHS:
+				{
+					const ULONG ulPlayer = NETWORK_ReadByte( pByteStream );
+					const int deaths = NETWORK_ReadVariable( pByteStream );
+
+					if ( PLAYER_IsValidPlayer( ulPlayer ) == false ) 
+						break;
+
+					players[ulPlayer].ulDeathCount = deaths;
+				}
+				break;
+
 			case SVC2_SRP_USER_START_AUTHENTICATION:
 			case SVC2_SRP_USER_PROCESS_CHALLENGE:
 			case SVC2_SRP_USER_VERIFY_SESSION:

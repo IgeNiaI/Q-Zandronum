@@ -108,6 +108,17 @@ typedef enum
 } GAMEEVENT_e;
 
 //*****************************************************************************
+typedef enum
+{
+	GAMELIMIT_FRAGS = 0,
+	GAMELIMIT_TIME,
+	GAMELIMIT_POINTS,
+	GAMELIMIT_DUELS,
+	GAMELIMIT_WINS,
+	GAMELIMIT_WAVES,
+} GAMELIMIT_e;
+
+//*****************************************************************************
 //	STRUCTURES
 
 typedef struct
@@ -165,6 +176,7 @@ void		GAMEMODE_ResetSpecalGamemodeStates ( void );
 bool		GAMEMODE_IsSpectatorAllowedSpecial ( const int Special );
 bool		GAMEMODE_IsHandledSpecial ( AActor *Activator, int Special );
 GAMESTATE_e	GAMEMODE_GetState ( void );
+void		GAMEMODE_SetState ( GAMESTATE_e GameState );
 void		GAMEMODE_HandleEvent ( const GAMEEVENT_e Event, AActor *pActivator = NULL, const int DataOne = 0, const int DataTwo = 0 );
 
 // [BB] This function doesn't really belong here. Find a better place for it.
@@ -176,5 +188,9 @@ GAMEMODE_e	GAMEMODE_GetCurrentMode( void );
 void		GAMEMODE_SetCurrentMode( GAMEMODE_e GameMode );
 MODIFIER_e	GAMEMODE_GetModifier( void );
 void		GAMEMODE_SetModifier( MODIFIER_e Modifier );
+
+ULONG		GAMEMODE_GetCountdownTicks( void );
+void		GAMEMODE_SetCountdownTicks( const ULONG Ticks );
+void		GAMEMODE_SetLimit( GAMELIMIT_e GameLimit, int value );
 
 #endif // __GAMEMODE_H__
