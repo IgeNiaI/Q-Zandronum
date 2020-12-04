@@ -4843,7 +4843,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
 
 		// Set origin of the trace
-		shootz = source->z - source->floorclip + source->player->viewheight;
+		shootz = source->z - source->floorclip + (source->player ? source->player->viewheight : 8 * FRACUNIT);
 
 		// Get pitch and angle, and calculate direction of the tracer
 		pitch = angle_t(-source->pitch) >> ANGLETOFINESHIFT;
