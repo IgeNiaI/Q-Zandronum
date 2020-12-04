@@ -864,6 +864,62 @@ GAMESTATE_e GAMEMODE_GetState( void )
 
 //*****************************************************************************
 //
+void GAMEMODE_SetState( GAMESTATE_e GameState )
+{
+	if( GameState == GAMESTATE_WAITFORPLAYERS )
+	{
+		if ( survival )
+			SURVIVAL_SetState( SURVS_WAITINGFORPLAYERS );
+		else if ( invasion )
+			INVASION_SetState( IS_WAITINGFORPLAYERS );
+		else if ( duel )
+			DUEL_SetState( DS_WAITINGFORPLAYERS );
+		else if ( teamlms || lastmanstanding )
+			LASTMANSTANDING_SetState( LMSS_WAITINGFORPLAYERS );
+		else if ( possession || teampossession )
+			POSSESSION_SetState( PSNS_WAITINGFORPLAYERS );
+	}
+	else if( GameState == GAMESTATE_COUNTDOWN )
+	{
+		if ( survival )
+			SURVIVAL_SetState( SURVS_COUNTDOWN );
+		else if ( invasion )
+			INVASION_SetState( IS_FIRSTCOUNTDOWN );
+		else if ( duel )
+			DUEL_SetState( DS_COUNTDOWN );
+		else if ( teamlms || lastmanstanding )
+			LASTMANSTANDING_SetState( LMSS_COUNTDOWN );
+		else if ( possession || teampossession )
+			POSSESSION_SetState( PSNS_COUNTDOWN );
+	}
+	else if( GameState == GAMESTATE_INPROGRESS )
+	{
+		if ( survival )
+			SURVIVAL_SetState( SURVS_INPROGRESS );
+		else if ( invasion )
+			INVASION_SetState( IS_INPROGRESS );
+		else if ( duel )
+			DUEL_SetState( DS_INDUEL );
+		else if ( teamlms || lastmanstanding )
+			LASTMANSTANDING_SetState( LMSS_INPROGRESS );
+		else if ( possession || teampossession )
+			POSSESSION_SetState( PSNS_INPROGRESS );
+	}
+	else if( GameState == GAMESTATE_INRESULTSEQUENCE )
+	{
+		if ( survival )
+			SURVIVAL_SetState( SURVS_MISSIONFAILED );
+		else if ( invasion )
+			INVASION_SetState( IS_MISSIONFAILED );
+		else if ( duel )
+			DUEL_SetState( DS_WINSEQUENCE );
+		else if ( teamlms || lastmanstanding )
+			LASTMANSTANDING_SetState( LMSS_WINSEQUENCE );
+	}
+}
+
+//*****************************************************************************
+//
 void GAMEMODE_HandleEvent ( const GAMEEVENT_e Event, AActor *pActivator, const int DataOne, const int DataTwo )
 {
 	// [BB] Clients don't start scripts.
@@ -1083,5 +1139,71 @@ void GAMEMODE_SetModifier( MODIFIER_e Modifier )
 		break;
 	default:
 		break;
+	}
+}
+
+//*****************************************************************************
+//
+ULONG GAMEMODE_GetCountdownTicks( void )
+{
+	if ( survival )
+		return ( SURVIVAL_GetCountdownTicks() );
+	else if ( invasion )
+		return ( INVASION_GetCountdownTicks() );
+	else if ( duel )
+		return ( DUEL_GetCountdownTicks() );
+	else if ( teamlms || lastmanstanding )
+		return ( LASTMANSTANDING_GetCountdownTicks() );
+	else if ( possession || teampossession )
+		return ( POSSESSION_GetCountdownTicks() );
+
+	// [AK] The other gamemodes don't have a countdown, so just return zero.
+	return 0;
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_SetCountdownTicks( const ULONG Ticks )
+{
+	if ( survival )
+		SURVIVAL_SetCountdownTicks( Ticks );
+	else if ( invasion )
+		INVASION_SetCountdownTicks( Ticks );
+	else if ( duel )
+		DUEL_SetCountdownTicks( Ticks );
+	else if ( teamlms || lastmanstanding )
+		LASTMANSTANDING_SetCountdownTicks( Ticks );
+	else if ( possession || teampossession )
+		POSSESSION_SetCountdownTicks( Ticks );
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_SetLimit( GAMELIMIT_e GameLimit, int value )
+{
+	UCVarValue Val;
+	Val.Int = value;
+
+	switch ( GameLimit )
+	{
+		case GAMELIMIT_FRAGS:
+			fraglimit.ForceSet( Val, CVAR_Int );
+			break;
+
+		case GAMELIMIT_POINTS:
+			pointlimit.ForceSet( Val, CVAR_Int );
+			break;
+
+		case GAMELIMIT_DUELS:
+			duellimit.ForceSet( Val, CVAR_Int );
+			break;
+
+		case GAMELIMIT_WINS:
+			winlimit.ForceSet( Val, CVAR_Int );
+			break;
+
+		case GAMELIMIT_WAVES:
+			wavelimit.ForceSet( Val, CVAR_Int );
+			break;
 	}
 }

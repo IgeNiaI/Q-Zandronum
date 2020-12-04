@@ -249,6 +249,18 @@ enum
 	WARPF_USEPTR           = 0x2000,
 };
 
+// [AK] SetPlayerScore and GetPlayerScore
+enum
+{
+	SCORE_FRAGS,
+	SCORE_POINTS,
+	SCORE_WINS,
+	SCORE_DEATHS,
+	SCORE_KILLS,
+	SCORE_ITEMS,
+	SCORE_SECRETS,
+};
+
 struct CallReturn
 {
 	CallReturn(int pc, ScriptFunction *func, FBehavior *module, SDWORD *locals, bool discard, unsigned int runaway)
@@ -4980,6 +4992,14 @@ enum EACSFunctions
 	ACSF_Strftime,
 	ACSF_SetDeadSpectator,
 	ACSF_SetActivatorToPlayer,
+	ACSF_SetCurrentGamemode,
+	ACSF_GetCurrentGamemode,
+	ACSF_SetGamemodeLimit,
+	ACSF_SetPlayerClass,
+	ACSF_SetPlayerChasecam,
+	ACSF_GetPlayerChasecam,
+	ACSF_SetPlayerScore,
+	ACSF_GetPlayerScore,
 	ACSF_InDemoMode,
 
 	// ZDaemon
@@ -6867,6 +6887,308 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				return 1;
 			}
 			break;
+
+		case ACSF_SetCurrentGamemode:
+			{
+				const char *name = FBehavior::StaticLookupString( args[0] );
+				const GAMEMODE_e oldmode = GAMEMODE_GetCurrentMode();
+				const GAMESTATE_e state = GAMEMODE_GetState();
+				GAMEMODE_e newmode;
+				ULONG ulCountdownTicks;
+
+				// [AK] Only the server should change the gamemode, but not during the result sequence.
+				if ( NETWORK_InClientMode() || state == GAMESTATE_INRESULTSEQUENCE )
+					return 0;
+
+				// [AK] No need to change the gamemode if we're already playing it.
+				if ( stricmp( name, GAMEMODE_GetName( oldmode )) == 0 )
+					return 0;
+
+				for ( int i = 0; i < NUM_GAMEMODES; i++ )
+				{
+					newmode = static_cast<GAMEMODE_e> ( i );
+					if ( stricmp( name, GAMEMODE_GetName( newmode )) != 0 )
+						continue;
+
+					// [AK] Don't change to any team game if there's no team starts on the map!
+					if (( GAMEMODE_GetFlags( newmode ) & GMF_TEAMGAME ) && TEAM_GetNumTeamsWithStarts() < 1 )
+						return 0;
+					// [AK] Don't change to deathmatch if there's no deathmatch starts on the map!
+					if ( GAMEMODE_GetFlags( newmode ) & GMF_DEATHMATCH )
+					{
+						if ( deathmatchstarts.Size() < 1 )
+							return 0;
+
+						// [AK] If we're changing to duel, don't change if there's too many active players.
+						if ( newmode == GAMEMODE_DUEL && GAME_CountActivePlayers() > 2 )
+							return 0;
+					}
+					// [AK] Don't change to cooperative if there's no cooperative starts on the map!
+					else if ( GAMEMODE_GetFlags( newmode ) & GMF_COOPERATIVE )
+					{
+						ULONG ulNumSpawns = 0;
+						for ( ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+						{
+							if ( playerstarts[ulIdx].type != 0 )
+							{
+								ulNumSpawns++;
+								break;
+							}
+						}
+
+						if ( ulNumSpawns < 1 )
+							return 0;
+					}
+
+					// [AK] Get the ticks left in the countdown and reset the gamemode, if necessary.
+					ulCountdownTicks = GAMEMODE_GetCountdownTicks();
+					GAMEMODE_SetState( GAMESTATE_WAITFORPLAYERS ); 
+
+					// [AK] If everything's okay now, change the gamemode.
+					GAMEMODE_ResetSpecalGamemodeStates();
+					GAMEMODE_SetCurrentMode( newmode );
+
+					// [AK] If we're the server, tell the clients to change the gamemode too.
+					if ( NETWORK_GetState() == NETSTATE_SERVER )
+						SERVERCOMMANDS_SetGameMode();
+
+					// [AK] Remove players from any teams if the new gamemode doesn't support them.
+					if (( GAMEMODE_GetFlags( oldmode ) & GMF_PLAYERSONTEAMS ) && ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ) == false )
+					{
+						for ( ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+							PLAYER_SetTeam( &players[ulIdx], teams.Size(), true );
+					}
+					// [AK] If we need to move players into teams instead, assign them automatically.
+					else if (( GAMEMODE_GetFlags( oldmode ) & GMF_PLAYERSONTEAMS ) == false && ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ))
+					{
+						for ( ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+						{
+							if ( playeringame[ulIdx] && players[ulIdx].bSpectating == false && players[ulIdx].bOnTeam == false )
+								PLAYER_SetTeam( &players[ulIdx], TEAM_ChooseBestTeamForPlayer(), true );
+						}
+					}
+
+					// [AK] If necessary, transfer the countdown time and state to the new gamemode.
+					if ( state > GAMESTATE_WAITFORPLAYERS )
+					{
+						GAMEMODE_SetCountdownTicks( ulCountdownTicks );
+						GAMEMODE_SetState( state );
+					}
+
+					GAMEMODE_SpawnSpecialGamemodeThings();
+					return 1;
+				}
+				return 0;
+			}
+
+		case ACSF_GetCurrentGamemode:
+			{
+				return GlobalACSStrings.AddString( GAMEMODE_GetName( GAMEMODE_GetCurrentMode() ), NULL, 0 );
+			}
+
+		case ACSF_SetGamemodeLimit:
+			{
+				GAMELIMIT_e limit = static_cast<GAMELIMIT_e> ( args[0] );
+				if ( limit == GAMELIMIT_TIME )
+				{
+					UCVarValue Val;
+					Val.Float = FIXED2FLOAT( args[1] );
+					timelimit.ForceSet( Val, CVAR_Float );
+				}
+				else
+					GAMEMODE_SetLimit( limit, args[1] );
+				break;
+			}
+
+		case ACSF_SetPlayerClass:
+			{
+				player_t *player = &players[args[0]];
+				const bool bRespawn = !!args[2];
+
+				// [AK] Don't allow the clients to change the player's class.
+				if ( NETWORK_InClientMode() )
+					return 0;
+
+				// [AK] Don't bother changing the player's class if they're actually spectating.
+				if ( PLAYER_IsTrueSpectator( player ) )
+					return 0;
+
+				const char *classname = FBehavior::StaticLookupString( args[1] );
+				const PClass *playerclass = PClass::FindClass( classname );
+
+				// [AK] Stop if the class provided doesn't exist or isn't a descendant of PlayerPawn.
+				// Also check if the player isn't already playing as the same class.
+				if ( playerclass == NULL || !playerclass->IsDescendantOf( RUNTIME_CLASS( APlayerPawn )) || player->cls == playerclass )
+					return 0;
+
+				// [AK] Don't change the player's class if it's not allowed.
+				if ( !TEAM_IsActorAllowedForPlayer( GetDefaultByType( playerclass ), player ) )
+					return 0;
+
+				player->userinfo.PlayerClassChanged( playerclass->Meta.GetMetaString( APMETA_DisplayName ));
+				// [AK] In a singleplayer game, we must also change the class the player would start as.
+				if ( NETWORK_GetState() != NETSTATE_SERVER )
+					SinglePlayerClass[args[0]] = player->userinfo.GetPlayerClassNum();
+
+				if ( bRespawn && PLAYER_IsValidPlayerWithMo( args[0] ) )
+				{
+					APlayerPawn *pmo = player->mo;
+					player->playerstate = PST_REBORNNOINVENTORY;
+
+					// [AK] Unmorph the player before respawning them with a new class.
+					if ( player->morphTics )
+						P_UndoPlayerMorph( player, player );
+
+					// [AK] If we're the server, tell the clients to destroy the body.
+					if ( NETWORK_GetState() == NETSTATE_SERVER )
+						SERVERCOMMANDS_DestroyThing( pmo );
+
+					pmo->Destroy();
+					pmo = NULL;
+					GAMEMODE_SpawnPlayer( player - players );
+				}
+
+				return 1;
+			}
+
+		case ACSF_SetPlayerChasecam:
+			{
+				const ULONG ulPlayer = static_cast<ULONG> ( args[0] );
+				const bool bEnableChasecam = !!args[1];
+
+				if ( PLAYER_IsValidPlayer( ulPlayer ) )
+				{
+					// [AK] Keep the old value of the player's cheats for comparison later.
+					int oldvalue = players[ulPlayer].cheats;
+					if ( bEnableChasecam )
+						players[ulPlayer].cheats |= CF_CHASECAM;
+					else
+						players[ulPlayer].cheats &= ~CF_CHASECAM;
+
+					// [AK] If we're the server, only notify the client if their cheats was actually changed.
+					if ( NETWORK_GetState() == NETSTATE_SERVER && players[ulPlayer].cheats != oldvalue )
+						SERVERCOMMANDS_SetPlayerCheats( ulPlayer, ulPlayer, SVCF_ONLYTHISCLIENT );
+					return 1;
+				}
+				else
+					return 0;
+			}
+
+		case ACSF_GetPlayerChasecam:
+			{
+				const ULONG ulPlayer = static_cast<ULONG> ( args[0] );
+				if ( PLAYER_IsValidPlayer( ulPlayer ) )
+					return !!( players[ulPlayer].cheats & CF_CHASECAM );
+				else
+					return 0;
+			}
+
+		case ACSF_SetPlayerScore:
+		{
+			const ULONG ulPlayer = static_cast<ULONG> (args[0]);
+			int oldvalue;
+
+			if (PLAYER_IsValidPlayer(ulPlayer))
+			{
+				switch (args[1])
+				{
+				case SCORE_FRAGS:
+				{
+					// [AK] Keep the original value of the player's frags.
+					oldvalue = players[ulPlayer].fragcount;
+					players[ulPlayer].fragcount = args[2];
+
+					// [AK] If we're the server, tell the clients the player's new frag count.
+					if ((NETWORK_GetState() == NETSTATE_SERVER) && (oldvalue != players[ulPlayer].fragcount))
+						SERVERCOMMANDS_SetPlayerFrags(ulPlayer);
+					return 1;
+				}
+
+				case SCORE_POINTS:
+				{
+					// [AK] Keep the original value of the player's points.
+					oldvalue = players[ulPlayer].lPointCount;
+					players[ulPlayer].lPointCount = args[2];
+
+					// [AK] If we're the server, tell the clients the player's new point count.
+					if ((NETWORK_GetState() == NETSTATE_SERVER) && (oldvalue != players[ulPlayer].lPointCount))
+						SERVERCOMMANDS_SetPlayerPoints(ulPlayer);
+					return 1;
+				}
+
+				case SCORE_WINS:
+				{
+					// [AK] Keep the original value of the player's wins.
+					oldvalue = players[ulPlayer].ulWins;
+					players[ulPlayer].ulWins = args[2] >= 0 ? args[2] : 0;
+
+					// [AK] If we're the server, tell the clients the player's new win count.
+					if ((NETWORK_GetState() == NETSTATE_SERVER) && (oldvalue != players[ulPlayer].ulWins))
+						SERVERCOMMANDS_SetPlayerWins(ulPlayer);
+					return 1;
+				}
+
+				case SCORE_DEATHS:
+				{
+					// [AK] Keep the original value of the player's deaths.
+					oldvalue = players[ulPlayer].ulDeathCount;
+					players[ulPlayer].ulDeathCount = args[2] >= 0 ? args[2] : 0;
+
+					// [AK] If we're the server, tell the clients the player's new death count.
+					if ((NETWORK_GetState() == NETSTATE_SERVER) && (oldvalue != players[ulPlayer].ulDeathCount))
+						SERVERCOMMANDS_SetPlayerDeaths(ulPlayer);
+					return 1;
+				}
+
+				case SCORE_KILLS:
+				{
+					// [AK] Keep the original value of the player's kills.
+					oldvalue = players[ulPlayer].killcount;
+					players[ulPlayer].killcount = args[2];
+
+					// [AK] If we're the server, tell the clients the player's new kill count.
+					if ((NETWORK_GetState() == NETSTATE_SERVER) && (oldvalue != players[ulPlayer].killcount))
+						SERVERCOMMANDS_SetPlayerKillCount(ulPlayer);
+					return 1;
+				}
+
+				case SCORE_ITEMS:
+				{
+					players[ulPlayer].itemcount = args[2];
+					return 1;
+				}
+
+				case SCORE_SECRETS:
+				{
+					players[ulPlayer].secretcount = args[2];
+					return 1;
+				}
+				}
+			}
+
+			return 0;
+		}
+
+		case ACSF_GetPlayerScore:
+		{
+			const ULONG ulPlayer = static_cast<ULONG> (args[0]);
+
+			if (PLAYER_IsValidPlayer(ulPlayer))
+			{
+				switch (args[1])
+				{
+				case SCORE_FRAGS:	return players[ulPlayer].fragcount;
+				case SCORE_POINTS:	return players[ulPlayer].lPointCount;
+				case SCORE_WINS:	return players[ulPlayer].ulWins;
+				case SCORE_DEATHS:	return players[ulPlayer].ulDeathCount;
+				case SCORE_KILLS:	return players[ulPlayer].killcount;
+				case SCORE_ITEMS:	return players[ulPlayer].itemcount;
+				case SCORE_SECRETS:	return players[ulPlayer].secretcount;
+				}
+			}
+
+			return 0;
+		}
 
 		case ACSF_InDemoMode:
 			return CLIENTDEMO_IsPlaying() ? 1 : 0;
