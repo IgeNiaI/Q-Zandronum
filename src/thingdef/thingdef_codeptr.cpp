@@ -5888,3 +5888,17 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_DropItem)
 
 	P_DropItem(self, spawntype, amount, chance);
 }
+
+//==========================================================================
+//
+// A_SetSpeed
+//
+//==========================================================================
+
+DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetSpeed)
+{
+	ACTION_PARAM_START(1);
+	ACTION_PARAM_FIXED(speed, 0);
+
+	self->Speed = speed;
+}
