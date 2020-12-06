@@ -2927,6 +2927,8 @@ void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const f
 
 	vel.X *= newvelocity;
 	vel.Y *= newvelocity;
+	player->velx = FixedMul(player->velx, FLOAT2FIXED(newvelocity));
+	player->vely = FixedMul(player->vely, FLOAT2FIXED(newvelocity));
 	if (waterflying) { vel.Z *= newvelocity; }
 }
 
@@ -2937,7 +2939,10 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 	if (addspeed <= 0.f) { return; }
 
 	float accelerationspeed = MIN(accel * wishspeed / TICRATE, addspeed);
-	vel += wishdir * accelerationspeed;
+	FVector3 velDelta = wishdir * accelerationspeed;
+	vel += velDelta;
+	player->velx += FLOAT2FIXED(velDelta.X);
+	player->vely += FLOAT2FIXED(velDelta.Y);
 }
 
 //==========================================================================
@@ -3673,19 +3678,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	player->mo->velx = FLOAT2FIXED(vel.X);
 	player->mo->vely = FLOAT2FIXED(vel.Y);
 	player->mo->velz = FLOAT2FIXED(vel.Z);
-
-	// also take care of view/weapon bobbing
-	if (isSliding)
-	{
-		// but not when sliding
-		player->velx = 0;
-		player->vely = 0;
-	}
-	else
-	{
-		player->velx = player->mo->velx;
-		player->vely = player->mo->vely;
-	}
 
 	// handle looping sounds of slide and climb
 	if (isSlider)
