@@ -58,9 +58,10 @@
 #include "gl/textures/gl_material.h"
 
 EXTERN_CVAR (Bool, r_drawplayersprites)
-EXTERN_CVAR(Float, transsouls)
+EXTERN_CVAR (Float, transsouls)
 EXTERN_CVAR (Bool, st_scale)
-EXTERN_CVAR(Int, gl_fuzztype)
+EXTERN_CVAR (Int, gl_fuzztype)
+EXTERN_CVAR (Bool, cl_weaponsway)
 
 
 //==========================================================================
@@ -197,7 +198,10 @@ void FGLRenderer::DrawPlayerSprites(sector_t * viewsector, bool hudModelStep)
 		mViewActor!=playermo || playermo->RenderStyle.BlendOp == STYLEOP_None) return;
 	*/
 
-	P_BobWeapon (player, &player->psprites[ps_weapon], &ofsx, &ofsy);
+	if (cl_weaponsway)
+		P_SwayWeapon (player, &ofsx, &ofsy);
+	else
+		P_BobWeapon (player, &ofsx, &ofsy);
 
 	// check for fullbright
 	if (player->fixedcolormap==NOFIXEDCOLORMAP)

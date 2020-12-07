@@ -425,6 +425,7 @@ OptionMenu ZA_WeaponSetup
 	Option		"Switch on pickup",		"switchonpickup",				"ZA_SwitchOnPickup"
 	Option		"Switch without ammo",	"cl_noammoswitch",				"YesNo"
 	Option		"Railgun color",		"railcolor",					"ZA_RailgunColors"
+	Option		"Weapon sway",			"cl_weaponsway",				"YesNo"
 
 	Class WeaponSetupMenu
 }

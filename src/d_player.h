@@ -329,6 +329,8 @@ enum
 // [BB] "+3" so that playernames can always be terminated by "\\c-"
 #define MAXPLAYERNAME	31+3
 
+#define MAXSWAYDIST FRACUNIT*32
+
 // [GRB] Custom player classes
 enum
 {
@@ -524,6 +526,10 @@ public:
 	// This only represents the thrust that the player applies himself.
 	// This avoids anomalies with such things as Boom ice and conveyors.
 	fixed_t		velx, vely;				// killough 10/98
+
+	// [geNia] used for realistic weapon sway when turning or changing velocity
+	fixed_t		prevswayx, prevswayy; // used to interpolate weapon sway to get > 35 fps
+	fixed_t		swayx, swayy;
 
 	bool		centering;
 	BYTE		turnticks;
