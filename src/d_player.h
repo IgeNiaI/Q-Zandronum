@@ -516,6 +516,7 @@ public:
 	fixed_t		viewz;					// focal origin above r.z
 	fixed_t		viewheight;				// base height above floor for viewz
 	fixed_t		deltaviewheight;		// squat speed.
+	fixed_t		prevbob;				// used to interpolate weapon bob to get > 35 fps
 	fixed_t		bob;					// bounded/scaled total velocity
 
 	// killough 10/98: used for realistic bobbing (i.e. not simply overall speed)
