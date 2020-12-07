@@ -100,8 +100,9 @@ extern fixed_t globaluclip, globaldclip;
 #define BASEYCENTER 	(100)
 
 EXTERN_CVAR (Bool, st_scale)
-EXTERN_CVAR(Bool, r_shadercolormaps)
-EXTERN_CVAR(Int, r_drawfuzz)
+EXTERN_CVAR (Bool, r_shadercolormaps)
+EXTERN_CVAR (Int, r_drawfuzz)
+EXTERN_CVAR (Bool, cl_weaponsway)
 
 //
 // Sprite rotation 0 is facing the viewer,
@@ -1263,7 +1264,10 @@ void R_DrawPlayerSprites ()
 		centery = viewheight >> 1;
 		centeryfrac = centery << FRACBITS;
 
-		P_BobWeapon (camera->player, &camera->player->psprites[ps_weapon], &ofsx, &ofsy);
+		if ( cl_weaponsway )
+			P_SwayWeapon (camera->player, &ofsx, &ofsy);
+		else
+			P_BobWeapon (camera->player, &ofsx, &ofsy);
 
 		// add all active psprites
 		for (i = 0, psp = camera->player->psprites;

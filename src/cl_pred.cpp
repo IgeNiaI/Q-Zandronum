@@ -66,6 +66,7 @@
 
 void P_MovePlayer (player_t *player, ticcmd_t *cmd);
 void P_CalcHeight (player_t *player);
+void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta);
 void P_DeathThink (player_t *player);
 void P_AdjustFloorCeil (player_t *player);
 

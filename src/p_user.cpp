@@ -101,7 +101,8 @@ CUSTOM_CVAR (Float, cl_spectatormove, 1.0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG) {
 		self = -100.0;
 }
 
-EXTERN_CVAR( Bool, cl_spykiller )
+EXTERN_CVAR (Bool, cl_spykiller)
+EXTERN_CVAR (Bool, cl_weaponsway)
 
 // [GRB] Custom player classes
 TArray<FPlayerClass> PlayerClasses;
@@ -2844,6 +2845,42 @@ void P_CalcHeight (player_t *player)
 	}
 }
 
+/*
+==================
+=
+= P_CalcSway
+=
+= Calculate weapon sway based on turn
+=
+==================
+*/
+
+void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta)
+{
+	AWeapon* weapon = player->ReadyWeapon;
+
+	if ( weapon && player->WeaponState & WF_WEAPONBOBBING && !(weapon->WeaponFlags & WIF_DONTBOB) )
+	{
+		// Save previous sway for sprite interpolation
+		player->prevswayx = player->swayx;
+		player->prevswayy = player->swayy;
+
+		// Add sway based on turn delta and velz
+		player->swayx += angleDelta >> 5;
+		player->swayy -= pitchDelta >> 5;
+		player->swayy += player->mo->velz << 2;
+
+		// Gradually lower sway down to 0, depending on weapon BobSpeed and current sway distance
+		player->swayx = FixedDiv(player->swayx, MAX(FixedMul(weapon->BobSpeed, abs(player->swayx) >> 7), weapon->BobSpeed));
+		player->swayy = FixedDiv(player->swayy, MAX(FixedMul(weapon->BobSpeed, abs(player->swayy) >> 7), weapon->BobSpeed));
+	}
+	else
+	{
+		player->prevswayx = player->swayx = 0;
+		player->prevswayy = player->swayy = 0;
+	}
+}
+
 CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
 {
 	level.aircontrol = (fixed_t)(self * FRACUNIT);
@@ -4073,7 +4110,7 @@ void P_DeathThink (player_t *player)
 		}
 	}
 	P_CalcHeight (player);
-		
+
 	if (player->attacker && player->attacker != player->mo)
 	{ // Watch killer
 		dir = P_FaceMobj (player->mo, player->attacker, &delta);
@@ -4355,6 +4392,8 @@ void P_CrouchMove(player_t * player, int direction)
 void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 {
 	ticcmd_t *cmd;
+	angle_t oldangle;
+	fixed_t oldpitch;
 
 	if (player->mo == NULL)
 	{
@@ -4405,6 +4444,13 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 */
 	if ( CLIENT_PREDICT_IsPredicting( ) == false )
 	{
+		if ( cl_weaponsway )
+		{
+			// Store old values to calculate deltas for weapon sway
+			oldangle = player->mo->angle;
+			oldpitch = player->mo->pitch;
+		}
+
 		// [RH] Zoom the player's FOV
 		float desired = player->DesiredFOV;
 		// Adjust FOV using on the currently held weapon.
@@ -4684,6 +4730,9 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 
 	P_CalcHeight ( player );
 
+	if ( cl_weaponsway && CLIENT_PREDICT_IsPredicting( ) == false )
+		P_CalcSway( player, player->mo->angle - oldangle, player->mo->pitch - oldpitch );
+		
 	// [Leo] Done with spectator specific logic.
 	if ( player->bSpectating )
 	{

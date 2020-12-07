@@ -525,6 +525,10 @@ public:
 	// This avoids anomalies with such things as Boom ice and conveyors.
 	fixed_t		velx, vely;				// killough 10/98
 
+	// [geNia] used for realistic weapon sway when turning or changing velocity
+	fixed_t		prevswayx, prevswayy; // used to interpolate weapon sway to get > 35 fps
+	fixed_t		swayx, swayy;
+
 	bool		centering;
 	BYTE		turnticks;
 
