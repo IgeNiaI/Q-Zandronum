@@ -1264,7 +1264,7 @@ void R_DrawPlayerSprites ()
 		centery = viewheight >> 1;
 		centeryfrac = centery << FRACBITS;
 
-		if (cl_weaponsway)
+		if ( cl_weaponsway )
 			P_SwayWeapon (camera->player, &ofsx, &ofsy);
 		else
 			P_BobWeapon (camera->player, &ofsx, &ofsy);

@@ -329,8 +329,6 @@ enum
 // [BB] "+3" so that playernames can always be terminated by "\\c-"
 #define MAXPLAYERNAME	31+3
 
-#define MAXSWAYDIST FRACUNIT*32
-
 // [GRB] Custom player classes
 enum
 {
