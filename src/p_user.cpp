@@ -2859,7 +2859,7 @@ void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta)
 {
 	AWeapon* weapon = player->ReadyWeapon;
 
-	if ( weapon )
+	if ( weapon && player->WeaponState & WF_WEAPONBOBBING && !(weapon->WeaponFlags & WIF_DONTBOB) )
 	{
 		// Save previous sway for sprite interpolation
 		player->prevswayx = player->swayx;
@@ -2873,6 +2873,11 @@ void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta)
 		// Gradually lower sway down to 0, depending on weapon BobSpeed and current sway distance
 		player->swayx = FixedDiv(player->swayx, MAX(FixedMul(weapon->BobSpeed, abs(player->swayx) >> 7), weapon->BobSpeed));
 		player->swayy = FixedDiv(player->swayy, MAX(FixedMul(weapon->BobSpeed, abs(player->swayy) >> 7), weapon->BobSpeed));
+	}
+	else
+	{
+		player->prevswayx = player->swayx = 0;
+		player->prevswayy = player->swayy = 0;
 	}
 }
 
