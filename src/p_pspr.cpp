@@ -492,8 +492,9 @@ void P_BobWeapon (player_t *player, pspdef_t *psp, fixed_t *x, fixed_t *y)
 
 	if (curbob != 0)
 	{
-		fixed_t bobx = FixedMul(player->bob, rangex);
-		fixed_t boby = FixedMul(player->bob, rangey);
+		fixed_t bobFrac = player->prevbob + FixedMul(r_TicFrac, player->bob - player->prevbob);
+		fixed_t bobx = FixedMul(bobFrac, rangex);
+		fixed_t boby = FixedMul(bobFrac, rangey);
 		switch (bobstyle)
 		{
 		case AWeapon::BobNormal:
