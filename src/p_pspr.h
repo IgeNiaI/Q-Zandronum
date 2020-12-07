@@ -87,7 +87,8 @@ void P_CalcSwing (player_t *player);
 void P_BringUpWeapon (player_t *player);
 void P_FireWeapon (player_t *player);
 void P_DropWeapon (player_t *player);
-void P_BobWeapon (player_t *player, pspdef_t *psp, fixed_t *x, fixed_t *y);
+void P_BobWeapon (player_t *player, fixed_t *x, fixed_t *y);
+void P_SwayWeapon (player_t *player, fixed_t *x, fixed_t *y);
 angle_t P_BulletSlope (AActor *mo, AActor **pLineTarget = NULL);
 void P_GunShot (AActor *mo, bool accurate, const PClass *pufftype, angle_t pitch);
 

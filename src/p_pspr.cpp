@@ -77,6 +77,8 @@ CUSTOM_CVAR( Int, sv_fastweapons, 0, CVAR_SERVERINFO )
 	}
 }
 
+CVAR (Bool, cl_weaponsway, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
 static FRandom pr_wpnreadysnd ("WpnReadySnd");
@@ -438,7 +440,7 @@ void P_DropWeapon (player_t *player)
 //
 //============================================================================
 
-void P_BobWeapon (player_t *player, pspdef_t *psp, fixed_t *x, fixed_t *y)
+void P_BobWeapon (player_t *player, fixed_t *x, fixed_t *y)
 {
 	static fixed_t curbob;
 
@@ -532,6 +534,32 @@ void P_BobWeapon (player_t *player, pspdef_t *psp, fixed_t *x, fixed_t *y)
 		*x = 0;
 		*y = 0;
 	}
+}
+
+//============================================================================
+//
+// P_SwayWeapon
+//
+// Sways the weapon sprite based on player turn and velocity change
+//
+//============================================================================
+
+void P_SwayWeapon (player_t *player, fixed_t *x, fixed_t *y)
+{
+	// [BC] Don't bob weapon if the player is spectating.
+	if ( player->bSpectating )
+		return;
+
+	AWeapon* weapon = player->ReadyWeapon;
+
+	if ( weapon == NULL || weapon->WeaponFlags & WIF_DONTBOB || !(player->WeaponState & WF_WEAPONBOBBING) )
+	{
+		*x = *y = 0;
+		return;
+	}
+
+	*x = player->prevswayx + FixedMul(r_TicFrac, player->swayx - player->prevswayx);
+	*y = player->prevswayy + FixedMul(r_TicFrac, player->swayy - player->prevswayy);
 }
 
 //============================================================================
