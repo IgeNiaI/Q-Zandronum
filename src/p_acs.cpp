@@ -4420,6 +4420,55 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 		actor->SetShade(value);
 		break;
 
+	case APROP_DoubleJump:
+		if (value)
+			actor->mvFlags |= MV_DOUBLEJUMP;
+		else
+			actor->mvFlags &= ~MV_DOUBLEJUMP;
+		break;
+
+	case APROP_CrouchSlide:
+		if (value)
+			actor->mvFlags |= MV_CROUCHSLIDE;
+		else
+			actor->mvFlags &= ~MV_CROUCHSLIDE;
+		break;
+
+	case APROP_WallJump:
+		if (value)
+			actor->mvFlags |= MV_WALLJUMP;
+		else
+			actor->mvFlags &= ~MV_WALLJUMP;
+		break;
+
+	case APROP_WallClimb:
+		if (value)
+			actor->mvFlags |= MV_WALLCLIMB;
+		else
+			actor->mvFlags &= ~MV_WALLCLIMB;
+		break;
+
+	case APROP_Dash:
+		if (value)
+			actor->mvFlags |= MV_DASH;
+		else
+			actor->mvFlags &= ~MV_DASH;
+		break;
+
+	case APROP_RampJump:
+		if (value)
+			actor->mvFlags |= MV_RAMPJUMP;
+		else
+			actor->mvFlags &= ~MV_RAMPJUMP;
+		break;
+
+	case APROP_Silent:
+		if (value)
+			actor->mvFlags |= MV_SILENT;
+		else
+			actor->mvFlags &= ~MV_SILENT;
+		break;
+
 	default:
 		// do nothing.
 		break;

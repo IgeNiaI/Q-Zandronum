@@ -280,6 +280,13 @@ enum
 	APROP_ViewHeight	= 39,
 	APROP_AttackZOffset	= 40,
 	APROP_StencilColor	= 41,
+	APROP_DoubleJump	= 42,
+	APROP_CrouchSlide	= 43,
+	APROP_WallJump		= 44,
+	APROP_WallClimb		= 45,
+	APROP_Dash			= 46,
+	APROP_RampJump		= 47,
+	APROP_Silent		= 48,
 };	
 
 // [Dusk] Enumeration for GetTeamProperty
