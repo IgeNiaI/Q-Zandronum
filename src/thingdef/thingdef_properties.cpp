@@ -2843,11 +2843,7 @@ DEFINE_CLASS_PROPERTY_PREFIX( player, maxskinsizefactor, F_F, PlayerPawn )
 DEFINE_CLASS_PROPERTY_PREFIX(player, crouchscale, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(crouchscale, 0);
-	if (crouchscale < 6553)
-		crouchscale = 6553;
-	else if (crouchscale > 58982)
-		crouchscale = 58982;
-
+	crouchscale = clamp(crouchscale, 6553, 58982);
 	defaults->CrouchScale = crouchscale;
 	defaults->CrouchScaleHalfWay = (65536 - crouchscale) / 2 + crouchscale;
 }
@@ -2858,11 +2854,7 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, crouchscale, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, crouchchangespeed, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(crouchchangespeed, 0);
-	if (crouchchangespeed < 655)
-		crouchchangespeed = 655;
-	else if (crouchchangespeed > 65536)
-		crouchchangespeed = 65536;
-
+	crouchchangespeed = clamp(crouchchangespeed, 655, 65536);
 	defaults->CrouchChangeSpeed = crouchchangespeed;
 }
 
@@ -2872,11 +2864,7 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, crouchchangespeed, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, mvtype, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);
-	if (i < 0)
-		i = 0;
-	else if (i >= MV_TYPES_END)
-		i = MV_TYPES_END - 1;
-
+	i = clamp(i, 0, MV_TYPES_END - 1);
 	defaults->MvType = i;
 }
 
@@ -2886,9 +2874,7 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, mvtype, I, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, footstepinterval, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);
-	if (i < 0)
-		i = 0;
-
+	if (i < 0) i = 0;
 	defaults->FootstepInterval = i;
 }
 
@@ -2898,11 +2884,7 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, footstepinterval, I, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, footstepvolume, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-	if (f < 0.f)
-		f = 0.f;
-	else if (f > 2.f)
-		f = 2.f;
-
+	f = clamp(f, 0.f, 2.f);
 	defaults->FootstepVolume = f;
 }
 
@@ -2912,9 +2894,7 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, footstepvolume, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, jumpdelay, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);
-	if (i < 0)
-		i = 0;
-
+	if (i < 0) i = 0;
 	defaults->JumpDelay = i;
 }
 
@@ -2951,20 +2931,8 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, airthrustzdown, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, maxwallclimbtics, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);
-	if (i < 0)
-		i = 0;
-
+	if (i < 0) i = 0;
 	defaults->MaxWallClimbTics = i;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, wallfrictionenabled, I, PlayerPawn)
-{
-	PROP_INT_PARM(i, 0);
-
-	defaults->WallFrictionEnabled = i ? true : false;
 }
 
 //==========================================================================
@@ -2973,7 +2941,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, wallfrictionenabled, I, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, crouchspeedfactor, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-
 	defaults->CrouchSpeedFactor = f;
 }
 
@@ -2983,7 +2950,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, crouchspeedfactor, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, walkspeedfactor, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-
 	defaults->WalkSpeedFactor = f;
 }
 
@@ -2993,7 +2959,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, walkspeedfactor, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, airacceleration, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(f, 0);
-
 	defaults->AirAcceleration = f;
 }
 
@@ -3021,9 +2986,7 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, dashdelay, I, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, velocitycap, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(f, 0);
-	if (f < 0)
-		f = 0;
-
+	if (f < 0) f = 0;
 	defaults->VelocityCap = f;
 }
 
@@ -3033,7 +2996,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, velocitycap, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, groundacceleration, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-
 	defaults->GroundAcceleration = f;
 }
 
@@ -3043,7 +3005,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, groundacceleration, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, groundfriction, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-
 	defaults->GroundFriction = f;
 }
 
@@ -3053,7 +3014,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, groundfriction, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, slideacceleration, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-
 	defaults->SlideAcceleration = f;
 }
 
@@ -3063,7 +3023,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, slideacceleration, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, slidefriction, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-
 	defaults->SlideFriction = f;
 }
 
@@ -3073,7 +3032,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, slidefriction, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, slidemaxtics, I, PlayerPawn)
 {
 	PROP_INT_PARM(i, 0);
-
 	defaults->SlideMaxTics = i;
 }
 
@@ -3083,7 +3041,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, slidemaxtics, I, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, cpmairacceleration, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-
 	defaults->CpmAirAcceleration = f;
 }
 
@@ -3093,6 +3050,5 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, cpmairacceleration, F, PlayerPawn)
 DEFINE_CLASS_PROPERTY_PREFIX(player, cpmmaxforwardanglerad, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
-
 	defaults->CpmMaxForwardAngleRad = f;
 }
