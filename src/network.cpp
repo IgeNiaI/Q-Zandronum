@@ -111,6 +111,7 @@ void SERVERCONSOLE_UpdateIP( NETADDRESS_s LocalAddress );
 
 static	TArray<NetworkPWAD>	g_PWADs;
 static	FString		g_IWAD; // [RC/BB] Which IWAD are we using?
+static	NetworkPWAD g_MainPWAD; // [geNia] The q-zandronum.pk3
 
 FString g_lumpsAuthenticationChecksum;
 FString g_MapCollectionChecksum;
@@ -980,6 +981,13 @@ FString NETWORK_GetCountryCodeFromAddress( NETADDRESS_s Address )
 
 //*****************************************************************************
 //
+const NetworkPWAD NETWORK_GetMainPWAD(void)
+{
+	return g_MainPWAD;
+}
+
+//*****************************************************************************
+//
 const TArray<NetworkPWAD>& NETWORK_GetPWADList( void )
 {
 	return g_PWADs;
@@ -1471,10 +1479,9 @@ static void network_InitPWADList( void )
 	// Collect all the PWADs into a list.
 	for ( ULONG ulIdx = 0; Wads.GetWadName( ulIdx ) != NULL; ulIdx++ )
 	{
-		// Skip the IWAD, zandronum.pk3, files that were automatically loaded from subdirectories (such as skin files), and WADs loaded automatically within pk3 files.
+		// Skip the IWAD, q-zandronum.pk3, files that were automatically loaded from subdirectories (such as skin files), and WADs loaded automatically within pk3 files.
 		// [BB] The latter are marked as being loaded automatically.
 		if (( ulIdx == ulRealIWADIdx ) ||
-			( stricmp( Wads.GetWadName( ulIdx ), GAMENAMELOWERCASE ".pk3" ) == 0 ) ||
 			( Wads.GetLoadedAutomatically( ulIdx )) )
 		{
 			continue;
@@ -1486,7 +1493,11 @@ static void network_InitPWADList( void )
 		pwad.name = Wads.GetWadName( ulIdx );
 		pwad.checksum = MD5Sum;
 		pwad.wadnum = ulIdx;
-		g_PWADs.Push( pwad );
+
+		if (stricmp(Wads.GetWadName(ulIdx), GAMENAMELOWERCASE ".pk3") == 0)
+			g_MainPWAD = pwad;
+		else
+			g_PWADs.Push( pwad );
 	}
 }
 

@@ -2311,6 +2311,8 @@ void SERVER_ClientError( ULONG ulClient, ULONG ulErrorCode )
 	case NETWORK_ERRORCODE_AUTHENTICATIONFAILED:
 	case NETWORK_ERRORCODE_PROTECTED_LUMP_AUTHENTICATIONFAILED:
 
+		NETWORK_WriteString( &g_aClients[ulClient].PacketBuffer.ByteStream, NETWORK_GetMainPWAD().name );
+		NETWORK_WriteString( &g_aClients[ulClient].PacketBuffer.ByteStream, NETWORK_GetMainPWAD().checksum );
 		NETWORK_WriteByte( &g_aClients[ulClient].PacketBuffer.ByteStream, NETWORK_GetPWADList().Size() );
 		for ( unsigned int i = 0; i < NETWORK_GetPWADList().Size(); ++i )
 		{

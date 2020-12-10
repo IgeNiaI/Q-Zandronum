@@ -244,6 +244,7 @@ struct NetworkPWAD
 	int wadnum; // [TP] Added wadnum
 };
 
+const NetworkPWAD	NETWORK_GetMainPWAD(void); // [geNia]
 const TArray<NetworkPWAD>&	NETWORK_GetPWADList( void ); // [RC]
 const char		*NETWORK_GetIWAD( void );
 void			NETWORK_AddLumpForAuthentication( const LONG LumpNumber );
