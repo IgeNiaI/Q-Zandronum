@@ -4469,6 +4469,127 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 			actor->mvFlags &= ~MV_SILENT;
 		break;
 
+
+	case APROP_CrouchChangeSpeed:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->CrouchChangeSpeed = value;
+		break;
+
+	case APROP_CrouchScale:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->CrouchScale = value;
+		break;
+
+	case APROP_MvType:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->MvType = value;
+		break;
+
+	case APROP_FootstepInterval:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->FootstepInterval = value;
+		break;
+
+	case APROP_FootstepVolume:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->FootstepVolume = value;
+		break;
+
+	case APROP_JumpDelay:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->JumpDelay = value;
+		break;
+
+	case APROP_SecondJumpZ:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->SecondJumpZ = value;
+		break;
+
+	case APROP_AirThrustZUp:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->AirThrustZUp = value;
+		break;
+
+	case APROP_AirThrustZDown:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->AirThrustZDown = value;
+		break;
+
+	case APROP_MaxWallClimbTics:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->MaxWallClimbTics = value;
+		break;
+
+	case APROP_WallFrictionEnabled:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->WallFrictionEnabled = value;
+		break;
+
+	case APROP_CrouchSpeedFactor:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->CrouchSpeedFactor = value;
+		break;
+
+	case APROP_WalkSpeedFactor:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->WalkSpeedFactor = value;
+		break;
+
+	case APROP_AirAcceleration:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->AirAcceleration = value;
+		break;
+
+	case APROP_DashForce:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->DashForce = value;
+		break;
+
+	case APROP_DashDelay:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->DashDelay = value;
+		break;
+
+	case APROP_VelocityCap:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->VelocityCap = value;
+		break;
+
+	case APROP_GroundAcceleration:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->GroundAcceleration = value;
+		break;
+
+	case APROP_GroundFriction:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->GroundFriction = value;
+		break;
+
+	case APROP_SlideAcceleration:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->SlideAcceleration = value;
+		break;
+
+	case APROP_SlideFriction:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->SlideFriction = value;
+		break;
+
+	case APROP_SlideMaxTics:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->SlideMaxTics = value;
+		break;
+
+	case APROP_CpmAirAcceleration:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->CpmAirAcceleration = value;
+		break;
+
+	case APROP_CpmMaxForwardAngleRad:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+			static_cast<APlayerPawn*>(actor)->CpmMaxForwardAngleRad = value;
+		break;
+
 	default:
 		// do nothing.
 		break;
