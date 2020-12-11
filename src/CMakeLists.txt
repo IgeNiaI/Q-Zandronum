@@ -53,7 +53,8 @@ endif( CMAKE_SIZEOF_VOID_P MATCHES "8" )
 # a system-wide version.
 
 # Construct version numbers for searching for the FMOD library on Linux.
-set( MINOR_VERSIONS "50" "49" "48" "47" "46" "45" "44" "43" "42" "41"
+set( MINOR_VERSIONS "64" "63" "62" "61" "60" "59" "58" "57" "56" "55" "54" 
+	"53" "52" "51" "50" "49" "48" "47" "46" "45" "44" "43" "42" "41"
 	"40" "39" "38" "37" "36" "35" "34" "33" "32" "31" "30" "29" "28"
 	"27" "26" "25" "24" "23" "22" "21" "20" "21" "19" "18" "17" "16"
 	"15" "14" "13" "12" "11" "10" "09" "08" "07" "06" "05" "04" "03"
@@ -107,6 +108,7 @@ if( WIN32 )
 		"E:/Software/Dev/FMOD/${WIN_TYPE}/api" 
 		# .. and this one for Graf Zahl
 		"D:/portable/FMOD SoundSystem 4.26/FMOD Programmers API WIN32/api"
+		"C:/Program Files (x86)/FMOD SoundSystem/FMOD Programmers API Windows/api"
 		)
 	set( FMOD_INC_PATH_SUFFIXES PATH_SUFFIXES inc )
 	set( FMOD_LIB_PATH_SUFFIXES PATH_SUFFIXES lib )
