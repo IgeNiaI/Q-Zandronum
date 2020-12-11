@@ -1406,7 +1406,7 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 					
 					if ( stricmp( NETWORK_GetMainPWAD().checksum, MainPWAD.second ) != 0 )
 					{
-						Printf ( "- Your %s is different from the server: %s vs %s\n", NETWORK_GetMainPWAD().name, NETWORK_GetMainPWAD().checksum, MainPWAD.second );
+						Printf ( "- Your %s is different from the server: %s vs %s\n", NETWORK_GetMainPWAD().name.GetChars(), NETWORK_GetMainPWAD().checksum.GetChars(), MainPWAD.second.GetChars() );
 					}
 					
 					TArray<NetworkPWAD> LocalPWADs = NETWORK_GetPWADList();
@@ -1418,7 +1418,7 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 							{
 								if ( stricmp(LocalPWADs[i].checksum, j->second ) != 0 )
 								{
-									Printf ( "- Your %s is different from the server: %s vs %s\n", LocalPWADs[i].name, LocalPWADs[i].checksum, j->second );
+									Printf ( "- Your %s is different from the server: %s vs %s\n", LocalPWADs[i].name.GetChars(), LocalPWADs[i].checksum.GetChars(), j->second.GetChars() );
 								}
 
 								serverPWADs.remove( *j );
@@ -1426,13 +1426,13 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 							}
 						}
 
-						Printf ( "- You are using %s, but the server doesn't: %s\n", LocalPWADs[i].name, LocalPWADs[i].checksum );
+						Printf ( "- You are using %s, but the server doesn't: %s\n", LocalPWADs[i].name.GetChars(), LocalPWADs[i].checksum.GetChars() );
 						cnt: ;
 					}
 
 					for ( std::list<std::pair<FString, FString> >::iterator j = serverPWADs.begin(); j != serverPWADs.end(); ++j )
 					{
-						Printf ( "- The server is using the %s, but you don't: %s\n", j->first, j->second );
+						Printf ( "- The server is using the %s, but you don't: %s\n", j->first.GetChars(), j->second.GetChars() );
 					}
 
 					break;
