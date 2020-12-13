@@ -982,7 +982,16 @@ void SERVER_CheckTimeouts( void )
 		}
 
 		if ( players[ulIdx].bSpectating )
+		{
+			// Spectators don't lag. Tell clients.
+			if ( players[ulIdx].bLagging )
+			{
+				players[ulIdx].bLagging = false;
+				SERVERCOMMANDS_SetPlayerLaggingStatus( ulIdx );
+			}
+
 			continue;
+		}
 
 		// Also check to see if the client is lagging.
 		if (( gametic - g_aClients[ulIdx].ulLastCommandTic ) >= TICRATE )
