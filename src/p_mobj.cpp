@@ -3441,7 +3441,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 		}
 		//	mo->player->centering = true;
 	}
-	else if (mo->player->mo->waterlevel < 2 && !mo->player->isCrouchSliding)
+	else if (mo->waterlevel < 2 && !mo->player->isCrouchSliding)
 	{
 		if (!(mo->mvFlags & MV_SILENT))
 			S_Sound(mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
