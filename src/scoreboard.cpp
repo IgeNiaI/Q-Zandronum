@@ -2352,14 +2352,39 @@ static void scoreboard_RenderIndividualPlayer( ULONG ulDisplayPlayer, ULONG ulPl
 				// Draw a chat icon if this player is chatting.
 				// [Cata] Also shows who's in the console.
 				// [AK] Also show an icon if the player is lagging to the server.
-				if ((players[ulPlayer].bChatting) || (players[ulPlayer].bInConsole) || (players[ulPlayer].bLagging))
+				if ( (players[ulPlayer].bChatting) || (players[ulPlayer].bInConsole) )
 				{
-					if (players[ulPlayer].bLagging)
-						sprintf(szPatchName, "LAGMINI");
-					else if (players[ulPlayer].bInConsole)
+					if ( players[ulPlayer].bInConsole )
 						sprintf( szPatchName, "CONSMINI" );
 					else
 						sprintf( szPatchName, "TLKMINI" );
+
+					lXPosOffset -= TexMan[szPatchName]->GetWidth();
+					if ( g_bScale )
+					{
+						screen->DrawTexture( TexMan[szPatchName],
+							(LONG)( g_aulColumnX[ulIdx] * g_fXScale ) + lXPosOffset,
+							g_ulCurYPos - 1,
+							DTA_VirtualWidth, g_ValWidth.Int,
+							DTA_VirtualHeight, g_ValHeight.Int,
+							TAG_DONE );
+					}
+					else
+					{
+						screen->DrawTexture( TexMan[szPatchName],
+							(LONG)( g_aulColumnX[ulIdx] / 320.0f * SCREENWIDTH ) + lXPosOffset,
+							g_ulCurYPos - 1,
+							DTA_Clean,
+							g_bScale,
+							TAG_DONE );
+					}
+					lXPosOffset -= 4;
+				}
+
+				// [AK] Show an icon if the player is lagging to the server.
+				if ( players[ulPlayer].bLagging && gamestate == GS_LEVEL )
+				{
+					sprintf( szPatchName, "LAGMINI" );
 
 					lXPosOffset -= TexMan[szPatchName]->GetWidth();
 					if ( g_bScale )
