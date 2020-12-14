@@ -749,7 +749,6 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< JumpDelay
 		<< SecondJumpZ
 		<< MaxWallClimbTics
-		<< WallFrictionEnabled
 		<< CrouchSpeedFactor
 		<< WalkSpeedFactor
 		<< AirAcceleration

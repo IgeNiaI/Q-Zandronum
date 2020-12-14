@@ -92,6 +92,12 @@ bool P_CheckUnblock ( AActor *pActor1, AActor *pActor2 )
 CVAR(Bool, cl_bloodsplats, true, CVAR_ARCHIVE)
 CVAR(Int, sv_smartaim, 0, CVAR_ARCHIVE | CVAR_SERVERINFO)
 CVAR(Bool, cl_doautoaim, false, CVAR_ARCHIVE)
+CUSTOM_CVAR(Bool, sv_wallfriction, true, CVAR_ARCHIVE | CVAR_SERVERINFO)
+{
+	// [geNia] The client also enforces command limits so this cvar must be synced.
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+		SERVERCOMMANDS_SetGameModeLimits();
+}
 
 static void CheckForPushSpecial(line_t *line, int side, AActor *mobj, bool windowcheck);
 static void SpawnShootDecal(AActor *t1, const FTraceResults &trace);
@@ -2961,7 +2967,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t xmove, ymove;
 	const secplane_t *walkplane;
 	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
-	const bool noWallFriction = playerNotVoodoo && !mo->player->mo->WallFrictionEnabled && (mo->player->velx || mo->player->vely);
+	const bool noWallFriction = playerNotVoodoo && !sv_wallfriction && (mo->player->velx || mo->player->vely);
 	int hitcount;
 
 	hitcount = 3;

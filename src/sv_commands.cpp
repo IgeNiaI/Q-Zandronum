@@ -86,6 +86,7 @@
 CVAR (Bool, sv_showwarnings, false, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
 
 EXTERN_CVAR( Float, sv_aircontrol )
+EXTERN_CVAR( Bool, sv_wallfriction )
 
 //*****************************************************************************
 //	FUNCTIONS
@@ -2144,6 +2145,8 @@ void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags f
 	command.addFloat( sv_coop_damagefactor );
 	// [WS] Send in alwaysapplydmflags.
 	command.addByte( alwaysapplydmflags );
+	// [geNia] Send in sv_wallfriction.
+	command.addByte( sv_wallfriction );
 	// [AM] Send lobby map.
 	command.addString( lobby );
 	// [TP] Send sv_limitcommands
