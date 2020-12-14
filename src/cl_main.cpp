@@ -4880,36 +4880,6 @@ void ServerCommands::SetThingTranslation::Execute()
 
 //*****************************************************************************
 //
-void ServerCommands::SetThingProperty::Execute()
-{
-	// Set one of the actor's properties, depending on what was read in.
-	switch ( property )
-	{
-	case APROP_Speed:
-		actor->Speed = value;
-		break;
-
-	case APROP_Alpha:
-		actor->alpha = value;
-		break;
-
-	case APROP_RenderStyle:
-		actor->RenderStyle.AsDWORD = value;
-		break;
-
-	case APROP_JumpZ:
-		if ( actor->IsKindOf( RUNTIME_CLASS( APlayerPawn )))
-			static_cast<APlayerPawn *>( actor )->JumpZ = value;
-		break;
-
-	default:
-		CLIENT_PrintWarning( "client_SetThingProperty: Unknown property, %d!\n", static_cast<unsigned int> (property) );
-		return;
-	}
-}
-
-//*****************************************************************************
-//
 void ServerCommands::SetThingSound::Execute()
 {
 	// Set one of the actor's sounds, depending on what was read in.
@@ -5055,6 +5025,13 @@ void ServerCommands::SetThingFrame::Execute()
 void ServerCommands::SetThingFrameNF::Execute()
 {
 	client_SetThingFrame( actor, stateOwner, offset, false );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetActorProperty::Execute()
+{
+	P_DoSetActorProperty( actor, property, value );
 }
 
 //*****************************************************************************
@@ -5541,11 +5518,11 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	sv_coop_damagefactor.ForceSet( Value, CVAR_Float );
 
 	// [WS] Read in, and set the value for alwaysapplydmflags.
-	Value.Bool = !!NETWORK_ReadByte( pByteStream );
+	Value.Bool = NETWORK_ReadBit( pByteStream );
 	alwaysapplydmflags.ForceSet( Value, CVAR_Bool );
 
 	// [geNia] Read in, and set the value for alwaysapplydmflags.
-	Value.Bool = !!NETWORK_ReadByte( pByteStream );
+	Value.Bool = NETWORK_ReadBit( pByteStream );
 	sv_wallfriction.ForceSet( Value, CVAR_Bool );
 
 	// [AM] Read in, and set the value for lobby.
@@ -5553,7 +5530,7 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	lobby.ForceSet( Value, CVAR_String );
 
 	// [TP] Yea.
-	Value.Bool = !!NETWORK_ReadByte( pByteStream );
+	Value.Bool = NETWORK_ReadBit( pByteStream );
 	sv_limitcommands.ForceSet( Value, CVAR_Bool );
 }
 

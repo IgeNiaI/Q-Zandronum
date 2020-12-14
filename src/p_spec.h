@@ -1222,6 +1222,7 @@ int  P_StartScript (AActor *who, line_t *where, int script, const char *map, con
 void P_SuspendScript (int script, char *map);
 void P_TerminateScript (int script, char *map);
 void P_DoDeferedScripts (void);
+void P_DoSetActorProperty (AActor *actor, int property, int value);
 
 //
 // [RH] p_quake.c

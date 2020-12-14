@@ -966,7 +966,6 @@ protected:
 		int r2, int g2, int b2, int a2, fixed_t time);
 	void DoSetFont (int fontnum);
 	void SetActorProperty (int tid, int property, int value);
-	void DoSetActorProperty (AActor *actor, int property, int value);
 	int GetActorProperty (int tid, int property, const SDWORD *stack, int stackdepth);
 	int CheckActorProperty (int tid, int property, int value);
 	int GetPlayerInput (int playernum, int inputnum);
