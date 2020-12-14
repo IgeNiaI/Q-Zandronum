@@ -3726,8 +3726,8 @@ void SERVERCOMMANDS_DoDoor( DDoor *Door, ULONG ulPlayerExtra, ServerCommandFlags
 	command.addLong ( Door->GetPosition() );
 	command.addByte ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
 	command.addLong ( Door->GetSpeed() );
-	command.addByte ( Door->GetTopWait() );
-	command.addByte ( Door->GetCountdown() );
+	command.addLong ( Door->GetTopWait() );
+	command.addLong ( Door->GetCountdown() );
 	command.addShort ( Door->GetLightTag() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
@@ -3750,7 +3750,7 @@ void SERVERCOMMANDS_DoFloor( DFloor *Floor, ULONG ulPlayerExtra, ServerCommandFl
 	command.addLong ( Floor->GetSpeed() );
 	command.addLong ( Floor->GetFloorDestDist() );
 	command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
-	command.addByte ( Floor->GetHexencrush() );
+	command.addBit ( Floor->GetHexencrush() );
 	command.addLong ( Floor->GetNewSpecial() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
@@ -3772,7 +3772,7 @@ void SERVERCOMMANDS_BuildStair( DFloor *Floor, ULONG ulPlayerExtra, ServerComman
 	command.addLong ( Floor->GetSpeed() );
 	command.addLong ( Floor->GetFloorDestDist() );
 	command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
-	command.addByte ( Floor->GetHexencrush() );
+	command.addBit ( Floor->GetHexencrush() );
 	command.addLong ( Floor->GetNewSpecial() );
 	command.addLong ( Floor->GetResetCount() );
 	command.addLong ( Floor->GetDelay() );
@@ -3805,7 +3805,7 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 	command.addLong ( Ceiling->GetSpeedDown() );
 	command.addLong ( Ceiling->GetSpeedUp() );
 	command.addByte ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
-	command.addByte ( Ceiling->GetHexencrush() );
+	command.addBit ( Ceiling->GetHexencrush() );
 	command.addShort ( Ceiling->GetSilent() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
@@ -3829,11 +3829,11 @@ void SERVERCOMMANDS_DoPlat( DPlat *Plat, ULONG ulPlayerExtra, ServerCommandFlags
 	command.addLong ( Plat->GetHigh() );
 	command.addLong ( Plat->GetLow() );
 	command.addLong ( Plat->GetPosition() );
-	command.addByte ( Plat->GetWait() );
-	command.addByte ( Plat->GetCount() );
-	command.addByte ( Plat->GetCrush() );
-	command.addByte ( Plat->GetTag() );
-	command.addByte ( Plat->GetFinished() ? 1 : 0 );
+	command.addLong ( Plat->GetWait() );
+	command.addLong ( Plat->GetCount() );
+	command.addLong ( Plat->GetCrush() );
+	command.addLong ( Plat->GetTag() );
+	command.addBit ( Plat->GetFinished() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
