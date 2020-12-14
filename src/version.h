@@ -129,7 +129,8 @@ unsigned int GetRevisionNumber();
 // More stuff that needs to be different for derivatives.
 #define GAMENAME "Q-Zandronum"
 #define GAMENAMELOWERCASE "q-zandronum"
-#define DOMAIN_NAME "zandronum.com"
+#define CONFIGFILE "zandronum"
+#define DOMAIN_NAME "qzandronum.com"
 #define DISCORD_URL "https://discord.com/invite/RN9hhmA"
 #define BUGS_URL	"https://github.com/IgeNiaI/Zandronum-3.0-QCDE/issues"
 

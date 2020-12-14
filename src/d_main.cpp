@@ -190,8 +190,6 @@ static const char *BaseFileSearch (const char *file, const char *ext, bool lookf
 
 EXTERN_CVAR (Float, turbo)
 EXTERN_CVAR (Bool, freelook)
-EXTERN_CVAR (Float, m_pitch)
-EXTERN_CVAR (Float, m_yaw)
 EXTERN_CVAR (Bool, invertmouse)
 EXTERN_CVAR (Bool, lookstrafe)
 EXTERN_CVAR (Int, screenblocks)
@@ -346,7 +344,7 @@ void D_PostEvent (const event_t *ev)
 	{
 		if (Button_Mlook.bDown || freelook)
 		{
-			int look = int(ev->y * m_pitch * mouse_sensitivity * 8.0);
+			int look = int(ev->y * mouse_sensitivity * 8.0);
 			if (invertmouse)
 				look = -look;
 			G_AddViewPitch (look);
@@ -354,7 +352,7 @@ void D_PostEvent (const event_t *ev)
 		}
 		if (!Button_Strafe.bDown && !lookstrafe)
 		{
-			G_AddViewAngle (int(ev->x * m_yaw * mouse_sensitivity * 8.0));
+			G_AddViewAngle (int(ev->x * mouse_sensitivity * 8.0));
 			events[eventhead].x = 0;
 		}
 		if ((events[eventhead].x | events[eventhead].y) == 0)

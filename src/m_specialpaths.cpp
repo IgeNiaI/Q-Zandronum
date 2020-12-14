@@ -204,7 +204,7 @@ FString M_GetConfigPath(bool for_reading)
 	{
 		path += "/" GAME_DIR;
 		CreatePath(path);
-		path += "/" GAMENAMELOWERCASE ".ini";
+		path += "/" CONFIGFILE ".ini";
 	}
 	else
 	{ // construct "$PROGDIR/zdoom-$USER.ini"
@@ -224,11 +224,11 @@ FString M_GetConfigPath(bool for_reading)
 					*probe = '_';
 				++probe;
 			}
-			path << GAMENAMELOWERCASE "-" << uname << ".ini";
+			path << CONFIGFILE "-" << uname << ".ini";
 		}
 		else
 		{ // Couldn't get user name, so just use zdoom.ini
-			path += GAMENAMELOWERCASE ".ini";
+			path += CONFIGFILE ".ini";
 		}
 	}
 
@@ -239,7 +239,7 @@ FString M_GetConfigPath(bool for_reading)
 		if (!FileExists(path))
 		{
 			path = progdir;
-			path << GAMENAMELOWERCASE ".ini";
+			path << CONFIGFILE ".ini";
 		}
 	}
 
@@ -411,11 +411,11 @@ FString M_GetConfigPath(bool for_reading)
 		noErr == FSRefMakePath(&folder, (UInt8*)cpath, PATH_MAX))
 	{
 		FString path;
-		path << cpath << "/" GAMENAMELOWERCASE ".ini";
+		path << cpath << "/" CONFIGFILE ".ini";
 		return path;
 	}
 	// Ungh.
-	return GAMENAMELOWERCASE ".ini";
+	return CONFIGFILE ".ini";
 }
 
 //===========================================================================
@@ -601,7 +601,7 @@ FString M_GetCajunPath(const char *botfilename)
 
 FString M_GetConfigPath(bool for_reading)
 {
-	return GetUserFile(GAMENAMELOWERCASE ".ini");
+	return GetUserFile(CONFIGFILE ".ini");
 }
 
 //===========================================================================
