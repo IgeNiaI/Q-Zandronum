@@ -238,8 +238,8 @@ int				lookspeed[2] = {450, 512};
 #define SLOWTURNTICS	6 
 
 // [BB] This is a new school port, so cl_run defaults to true.
-CVAR (Bool,		cl_run,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
-CVAR (Bool,		invertmouse,	false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look down/up?
+CVAR (Bool,		cl_run,				true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
+CVAR (Bool,		invertmouse,		false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look down/up?
 // [BB] This is a new school port, so freelook defaults to true.
 CVAR (Bool,		freelook,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
 CVAR (Bool,		lookstrafe,			false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
@@ -828,7 +828,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	// Handle mice.
 	if (!Button_Mlook.bDown && !freelook)
 	{
-		forward += (int)((float)mousey * m_forward);
+		forward += (int)((float)mousey * mouse_forward);
 	}
 
 	cmd->ucmd.pitch = LocalViewPitch >> 16;
@@ -840,7 +840,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	}
 
 	if (strafe || lookstrafe)
-		side += (int)((float)mousex * m_side);
+		side += (int)((float)mousex * mouse_side);
 
 	mousex = mousey = 0;
 
