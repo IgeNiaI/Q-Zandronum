@@ -2875,8 +2875,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeIn)
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
 	{
 		if ( renderStyleChanged )
-			SERVERCOMMANDS_SetThingProperty( self, APROP_RenderStyle );
-		SERVERCOMMANDS_SetThingProperty( self, APROP_Alpha );
+			SERVERCOMMANDS_SetActorProperty( self, APROP_RenderStyle, self->RenderStyle.AsDWORD );
+		SERVERCOMMANDS_SetActorProperty( self, APROP_Alpha, self->alpha );
 	}
 
 }
@@ -2912,8 +2912,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeOut)
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
 	{
 		if ( renderStyleChanged )
-			SERVERCOMMANDS_SetThingProperty( self, APROP_RenderStyle );
-		SERVERCOMMANDS_SetThingProperty( self, APROP_Alpha );
+			SERVERCOMMANDS_SetActorProperty( self, APROP_RenderStyle, self->RenderStyle.AsDWORD );
+		SERVERCOMMANDS_SetActorProperty( self, APROP_Alpha, self->alpha );
 	}
 
 	// [BB] Only destroy the actor if it's not needed for a map reset. Otherwise just hide it.
@@ -2982,9 +2982,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeTo)
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
 	{
 		if ( self->RenderStyle.Flags != oldrenderstyleflags )
-			SERVERCOMMANDS_SetThingProperty( self, APROP_RenderStyle );
+			SERVERCOMMANDS_SetActorProperty( self, APROP_RenderStyle, self->RenderStyle.AsDWORD );
 		if ( self->alpha != oldalpha )
-			SERVERCOMMANDS_SetThingProperty( self, APROP_Alpha );
+			SERVERCOMMANDS_SetActorProperty( self, APROP_Alpha, self->alpha );
 	}
 
 	// [EP] Only destroy the actor if it's not needed for a map reset. Otherwise just hide it.

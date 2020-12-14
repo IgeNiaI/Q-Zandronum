@@ -1,4 +1,4 @@
-// 932e78ef75607593a6787ebc830c8e77
+// 7af13607f8ccc88f48d46edf128cd7f6
 // This file has been automatically generated. Do not edit by hand.
 #pragma once
 #include "actor.h"
@@ -3577,44 +3577,6 @@ namespace ServerCommands
 		bool _translationInitialized;
 	};
 
-	class SetThingProperty : public BaseServerCommand
-	{
-	public:
-		SetThingProperty() :
-			_actorInitialized( false ),
-			_propertyInitialized( false ),
-			_valueInitialized( false ) {}
-		void SetActor( AActor * value );
-		void SetProperty( int value );
-		void SetValue( int value );
-		void Execute();
-		NetCommand BuildNetCommand() const;
-		friend bool ::CLIENT_ParseServerCommand( SVC, BYTESTREAM_s * );
-		bool AllParametersInitialized() const
-		{
-			return _actorInitialized
-				&& _propertyInitialized
-				&& _valueInitialized;
-		}
-		void PrintMissingParameters() const
-		{
-			if ( _actorInitialized == false )
-				Printf( "Missing: actor\n" );
-			if ( _propertyInitialized == false )
-				Printf( "Missing: property\n" );
-			if ( _valueInitialized == false )
-				Printf( "Missing: value\n" );
-		}
-
-	protected:
-		AActor *actor;
-		int property;
-		int value;
-		bool _actorInitialized;
-		bool _propertyInitialized;
-		bool _valueInitialized;
-	};
-
 	class SetThingSound : public BaseServerCommand
 	{
 	public:
@@ -3958,6 +3920,44 @@ namespace ServerCommands
 		bool _actorInitialized;
 		bool _stateOwnerInitialized;
 		bool _offsetInitialized;
+	};
+
+	class SetActorProperty : public BaseServerCommand
+	{
+	public:
+		SetActorProperty() :
+			_actorInitialized( false ),
+			_propertyInitialized( false ),
+			_valueInitialized( false ) {}
+		void SetActor( AActor * value );
+		void SetProperty( int value );
+		void SetValue( fixed_t value );
+		void Execute();
+		NetCommand BuildNetCommand() const;
+		friend bool ::CLIENT_ParseServerCommand( SVC, BYTESTREAM_s * );
+		bool AllParametersInitialized() const
+		{
+			return _actorInitialized
+				&& _propertyInitialized
+				&& _valueInitialized;
+		}
+		void PrintMissingParameters() const
+		{
+			if ( _actorInitialized == false )
+				Printf( "Missing: actor\n" );
+			if ( _propertyInitialized == false )
+				Printf( "Missing: property\n" );
+			if ( _valueInitialized == false )
+				Printf( "Missing: value\n" );
+		}
+
+	protected:
+		AActor *actor;
+		int property;
+		fixed_t value;
+		bool _actorInitialized;
+		bool _propertyInitialized;
+		bool _valueInitialized;
 	};
 
 	class SetWeaponAmmoGive : public BaseServerCommand

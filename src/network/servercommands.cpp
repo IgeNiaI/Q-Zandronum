@@ -1,4 +1,4 @@
-// 2512d2eb8f67e73a8d482776222a5e48
+// 4234c66da3e491ad7bd85c756e711747
 // This file has been automatically generated. Do not edit by hand.
 #include "cl_main.h"
 #include "servercommands.h"
@@ -2167,40 +2167,14 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 		}
 		return true;
 
-	case SVC_SETTHINGPROPERTY:
-		{
-			ServerCommands::SetThingProperty command;
-			int temp65;
-			temp65 = NETWORK_ReadShort( bytestream );
-			command.property = NETWORK_ReadByte( bytestream );
-			command.value = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp65, RUNTIME_CLASS( AActor ), false,
-											reinterpret_cast<AActor *&>( command.actor ),
-											"SetThingProperty", "actor" ) == false )
-			{
-				return true;
-			}
-
-
-			if ( bytestream->pbStream > bytestream->pbStreamEnd )
-			{
-				CLIENT_PrintWarning( "SetThingProperty: Packet contained %td too few bytes\n",
-					bytestream->pbStream - bytestream->pbStreamEnd );
-				return true;
-			}
-
-			command.Execute();
-		}
-		return true;
-
 	case SVC_SETTHINGSOUND:
 		{
 			ServerCommands::SetThingSound command;
-			int temp66;
-			temp66 = NETWORK_ReadShort( bytestream );
+			int temp65;
+			temp65 = NETWORK_ReadShort( bytestream );
 			command.soundType = NETWORK_ReadByte( bytestream );
 			command.sound = NETWORK_ReadString( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp66, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp65, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingSound", "actor" ) == false )
 			{
@@ -2222,12 +2196,12 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGSPAWNPOINT:
 		{
 			ServerCommands::SetThingSpawnPoint command;
-			int temp67;
-			temp67 = NETWORK_ReadShort( bytestream );
+			int temp66;
+			temp66 = NETWORK_ReadShort( bytestream );
 			command.spawnPointX = NETWORK_ReadLong( bytestream );
 			command.spawnPointY = NETWORK_ReadLong( bytestream );
 			command.spawnPointZ = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp67, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp66, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingSpawnPoint", "actor" ) == false )
 			{
@@ -2249,10 +2223,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGSPECIAL1:
 		{
 			ServerCommands::SetThingSpecial1 command;
-			int temp68;
-			temp68 = NETWORK_ReadShort( bytestream );
+			int temp67;
+			temp67 = NETWORK_ReadShort( bytestream );
 			command.special1 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp68, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp67, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingSpecial1", "actor" ) == false )
 			{
@@ -2274,10 +2248,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGSPECIAL2:
 		{
 			ServerCommands::SetThingSpecial2 command;
-			int temp69;
-			temp69 = NETWORK_ReadShort( bytestream );
+			int temp68;
+			temp68 = NETWORK_ReadShort( bytestream );
 			command.special2 = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp69, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp68, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingSpecial2", "actor" ) == false )
 			{
@@ -2299,10 +2273,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGTICS:
 		{
 			ServerCommands::SetThingTics command;
-			int temp70;
-			temp70 = NETWORK_ReadShort( bytestream );
+			int temp69;
+			temp69 = NETWORK_ReadShort( bytestream );
 			command.tics = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp70, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp69, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingTics", "actor" ) == false )
 			{
@@ -2324,10 +2298,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGTID:
 		{
 			ServerCommands::SetThingTID command;
-			int temp71;
-			temp71 = NETWORK_ReadShort( bytestream );
+			int temp70;
+			temp70 = NETWORK_ReadShort( bytestream );
 			command.tid = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp71, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp70, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingTID", "actor" ) == false )
 			{
@@ -2349,10 +2323,10 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGGRAVITY:
 		{
 			ServerCommands::SetThingGravity command;
-			int temp72;
-			temp72 = NETWORK_ReadShort( bytestream );
+			int temp71;
+			temp71 = NETWORK_ReadShort( bytestream );
 			command.gravity = NETWORK_ReadLong( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp72, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp71, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingGravity", "actor" ) == false )
 			{
@@ -2374,18 +2348,18 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGFRAME:
 		{
 			ServerCommands::SetThingFrame command;
+			int temp72;
 			int temp73;
-			int temp74;
+			temp72 = NETWORK_ReadShort( bytestream );
 			temp73 = NETWORK_ReadShort( bytestream );
-			temp74 = NETWORK_ReadShort( bytestream );
-			command.stateOwner = NETWORK_GetClassFromIdentification( temp74 );
+			command.stateOwner = NETWORK_GetClassFromIdentification( temp73 );
 
 			if ( command.stateOwner->IsDescendantOf( RUNTIME_CLASS( AActor )) == false )
 				command.stateOwner = NULL;
 
 
 			command.offset = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp73, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp72, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingFrame", "actor" ) == false )
 			{
@@ -2396,7 +2370,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.stateOwner == NULL )
 			{
-				CLIENT_PrintWarning( "SetThingFrame: unknown class ID for stateOwner: %d\n", temp74 );
+				CLIENT_PrintWarning( "SetThingFrame: unknown class ID for stateOwner: %d\n", temp73 );
 				return true;
 			}
 
@@ -2415,18 +2389,18 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 	case SVC_SETTHINGFRAMENF:
 		{
 			ServerCommands::SetThingFrameNF command;
+			int temp74;
 			int temp75;
-			int temp76;
+			temp74 = NETWORK_ReadShort( bytestream );
 			temp75 = NETWORK_ReadShort( bytestream );
-			temp76 = NETWORK_ReadShort( bytestream );
-			command.stateOwner = NETWORK_GetClassFromIdentification( temp76 );
+			command.stateOwner = NETWORK_GetClassFromIdentification( temp75 );
 
 			if ( command.stateOwner->IsDescendantOf( RUNTIME_CLASS( AActor )) == false )
 				command.stateOwner = NULL;
 
 
 			command.offset = NETWORK_ReadShort( bytestream );
-			if ( CLIENT_ReadActorFromNetID( temp75, RUNTIME_CLASS( AActor ), false,
+			if ( CLIENT_ReadActorFromNetID( temp74, RUNTIME_CLASS( AActor ), false,
 											reinterpret_cast<AActor *&>( command.actor ),
 											"SetThingFrameNF", "actor" ) == false )
 			{
@@ -2437,7 +2411,7 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 
 			if ( command.stateOwner == NULL )
 			{
-				CLIENT_PrintWarning( "SetThingFrameNF: unknown class ID for stateOwner: %d\n", temp76 );
+				CLIENT_PrintWarning( "SetThingFrameNF: unknown class ID for stateOwner: %d\n", temp75 );
 				return true;
 			}
 
@@ -2445,6 +2419,32 @@ bool CLIENT_ParseServerCommand( SVC header, BYTESTREAM_s *bytestream )
 			if ( bytestream->pbStream > bytestream->pbStreamEnd )
 			{
 				CLIENT_PrintWarning( "SetThingFrameNF: Packet contained %td too few bytes\n",
+					bytestream->pbStream - bytestream->pbStreamEnd );
+				return true;
+			}
+
+			command.Execute();
+		}
+		return true;
+
+	case SVC_SETACTORPROPERTY:
+		{
+			ServerCommands::SetActorProperty command;
+			int temp76;
+			temp76 = NETWORK_ReadShort( bytestream );
+			command.property = NETWORK_ReadByte( bytestream );
+			command.value = NETWORK_ReadLong( bytestream );
+			if ( CLIENT_ReadActorFromNetID( temp76, RUNTIME_CLASS( AActor ), false,
+											reinterpret_cast<AActor *&>( command.actor ),
+											"SetActorProperty", "actor" ) == false )
+			{
+				return true;
+			}
+
+
+			if ( bytestream->pbStream > bytestream->pbStreamEnd )
+			{
+				CLIENT_PrintWarning( "SetActorProperty: Packet contained %td too few bytes\n",
 					bytestream->pbStream - bytestream->pbStreamEnd );
 				return true;
 			}
@@ -7657,38 +7657,6 @@ void ServerCommands::SetThingTranslation::SetTranslation( int value )
 	this->_translationInitialized = true;
 }
 
-NetCommand ServerCommands::SetThingProperty::BuildNetCommand() const
-{
-	if ( AllParametersInitialized() == false )
-	{
-		Printf( "WARNING: SetThingProperty::BuildNetCommand: not all parameters were initialized:\n" );
-		PrintMissingParameters();
-	}
-	NetCommand command ( SVC_SETTHINGPROPERTY );
-	command.addShort( this->actor ? this->actor->lNetID : -1 );
-	command.addByte( this->property );
-	command.addLong( this->value );
-	return command;
-}
-
-void ServerCommands::SetThingProperty::SetActor( AActor * value )
-{
-	this->actor = value;
-	this->_actorInitialized = true;
-}
-
-void ServerCommands::SetThingProperty::SetProperty( int value )
-{
-	this->property = value;
-	this->_propertyInitialized = true;
-}
-
-void ServerCommands::SetThingProperty::SetValue( int value )
-{
-	this->value = value;
-	this->_valueInitialized = true;
-}
-
 NetCommand ServerCommands::SetThingSound::BuildNetCommand() const
 {
 	if ( AllParametersInitialized() == false )
@@ -7972,6 +7940,38 @@ void ServerCommands::SetThingFrameNF::SetOffset( int value )
 {
 	this->offset = value;
 	this->_offsetInitialized = true;
+}
+
+NetCommand ServerCommands::SetActorProperty::BuildNetCommand() const
+{
+	if ( AllParametersInitialized() == false )
+	{
+		Printf( "WARNING: SetActorProperty::BuildNetCommand: not all parameters were initialized:\n" );
+		PrintMissingParameters();
+	}
+	NetCommand command ( SVC_SETACTORPROPERTY );
+	command.addShort( this->actor ? this->actor->lNetID : -1 );
+	command.addByte( this->property );
+	command.addLong( this->value );
+	return command;
+}
+
+void ServerCommands::SetActorProperty::SetActor( AActor * value )
+{
+	this->actor = value;
+	this->_actorInitialized = true;
+}
+
+void ServerCommands::SetActorProperty::SetProperty( int value )
+{
+	this->property = value;
+	this->_propertyInitialized = true;
+}
+
+void ServerCommands::SetActorProperty::SetValue( fixed_t value )
+{
+	this->value = value;
+	this->_valueInitialized = true;
 }
 
 NetCommand ServerCommands::SetWeaponAmmoGive::BuildNetCommand() const

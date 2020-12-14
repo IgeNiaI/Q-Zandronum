@@ -1548,46 +1548,6 @@ void SERVERCOMMANDS_SetThingTranslation( AActor *pActor, ULONG ulPlayerExtra, Se
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_SetThingProperty( AActor *pActor, ULONG ulProperty, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	if ( !EnsureActorHasNetID (pActor) )
-		return;
-
-	int value = 0;
-
-	// Set one of the actor's properties, depending on what was read in.
-	switch ( ulProperty )
-	{
-	case APROP_Speed:
-		value = pActor->Speed;
-		break;
-
-	case APROP_Alpha:
-		value = pActor->alpha;
-		break;
-
-	case APROP_RenderStyle:
-		value = pActor->RenderStyle.AsDWORD;
-		break;
-
-	case APROP_JumpZ:
-		if ( pActor->IsKindOf( RUNTIME_CLASS( APlayerPawn )))
-			value = static_cast<APlayerPawn *>( pActor )->JumpZ;
-		break;
-
-	default:
-		return;
-	}
-
-	ServerCommands::SetThingProperty command;
-	command.SetActor( pActor );
-	command.SetProperty( ulProperty );
-	command.SetValue( value );
-	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
 void SERVERCOMMANDS_SetThingSound( AActor *pActor, ULONG ulSound, const char *pszSound, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( !EnsureActorHasNetID (pActor) )
@@ -1765,6 +1725,20 @@ void SERVERCOMMANDS_SetThingFrame( AActor *pActor, FState *pState, ULONG ulPlaye
 			command.sendCommandToClients( ulPlayerExtra, flags );
 		}
 	}
+}
+
+//*****************************************************************************
+//
+void SERVERCOMMANDS_SetActorProperty( AActor *pActor, int property, int value, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( pActor == NULL || pActor->lNetID == -1 )
+		return;
+
+	ServerCommands::SetActorProperty command;
+	command.SetActor( pActor );
+	command.SetProperty( property );
+	command.SetValue( value );
+	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -2144,13 +2118,13 @@ void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags f
 	// [WS] Send in sv_coop_damagefactor.
 	command.addFloat( sv_coop_damagefactor );
 	// [WS] Send in alwaysapplydmflags.
-	command.addByte( alwaysapplydmflags );
+	command.addBit( alwaysapplydmflags );
 	// [geNia] Send in sv_wallfriction.
-	command.addByte( sv_wallfriction );
+	command.addBit( sv_wallfriction );
 	// [AM] Send lobby map.
 	command.addString( lobby );
 	// [TP] Send sv_limitcommands
-	command.addByte( sv_limitcommands );
+	command.addBit( sv_limitcommands );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 

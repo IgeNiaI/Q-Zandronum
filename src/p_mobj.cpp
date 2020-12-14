@@ -3558,10 +3558,10 @@ void P_NightmareRespawn (AActor *mobj)
 
 		// [EP] Since AActor::HandleSpawnFlags has been called, we need to inform the clients about its effects.
 		SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( mo, MAXPLAYERS, 0 );
-		if ( mo->alpha != mo->GetDefault()->alpha )
-			SERVERCOMMANDS_SetThingProperty( mo, APROP_Alpha );
 		if ( mo->RenderStyle.AsDWORD != mo->GetDefault()->RenderStyle.AsDWORD )
-			SERVERCOMMANDS_SetThingProperty( mo, APROP_RenderStyle );
+			SERVERCOMMANDS_SetActorProperty( mo, APROP_RenderStyle, mo->GetDefault()->RenderStyle.AsDWORD );
+		if ( mo->alpha != mo->GetDefault()->alpha )
+			SERVERCOMMANDS_SetActorProperty( mo, APROP_Alpha, mo->alpha );
 	}
 
 	// spawn a teleport fog at old spot because of removal of the body?
