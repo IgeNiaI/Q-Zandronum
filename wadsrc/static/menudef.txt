@@ -575,16 +575,16 @@ OptionMenu "MouseOptions"
 	Option "Show back button",		"m_show_backbutton", "Corners", "use_mouse"
 	Option "Cursor",				"vid_cursor", "Cursors"
 	StaticText 	""
-	Slider "Overall sensitivity",		"mouse_sensitivity", 0.5, 2.5, 0.1
+	Slider "Overall sensitivity",		"mouse_sensitivity", 0.1, 2.5, 0.1, 4
 	Option "Prescale mouse movement",	"m_noprescale", "NoYes"
 	// [BB] smooth_mouse doesn't do anything in Skulltag (Carn deactivated it long ago), so link this to m_filter.
 	Option "Smooth mouse movement",		"m_filter", "YesNo"
 	StaticText 	""
-	Slider "Turning speed",				"m_yaw", 0, 2.5, 0.1
-	Slider "Mouselook speed",			"m_pitch", 0, 2.5, 0.1
-	Slider "Speed when zoomed x2",		"m_zoomedscale", 0, 2.5, 0.1
-	Slider "Forward/Backward speed",	"m_forward", 0, 2.5, 0.1
-	Slider "Strafing speed",			"m_side", 0, 2.5, 0.1
+	Slider "Horizontal mouse speed",	"mouse_yaw", 0.1, 2.5, 0.1, 4
+	Slider "Vertical mouse speed",		"mouse_pitch", 0.1, 2.5, 0.1, 4
+	Slider "Zoomed mouse speed scale",	"mouse_zoomedscale", 0.1, 2.5, 0.1, 4
+	Slider "Forward/Backward speed",	"mouse_forward", 0.1, 2.5, 0.1, 4
+	Slider "Strafing speed",			"mouse_side", 0.1, 2.5, 0.1, 4
 	StaticText 	""
 	Option "Always Mouselook",			"freelook", "OnOff"
 	Option "Invert Mouse",				"invertmouse", "OnOff"

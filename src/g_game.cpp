@@ -241,13 +241,19 @@ int				lookspeed[2] = {450, 512};
 CVAR (Bool,		cl_run,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
 CVAR (Bool,		invertmouse,	false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look down/up?
 // [BB] This is a new school port, so freelook defaults to true.
-CVAR (Bool,		freelook,		true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
-CVAR (Bool,		lookstrafe,		false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
-CVAR (Float,	m_pitch,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Mouse speeds
-CVAR (Float,	m_yaw,			1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_zoomedscale,	.5f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_forward,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_side,			2.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Bool,		freelook,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
+CVAR (Bool,		lookstrafe,			false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
+CVAR (Float,	mouse_pitch,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Mouse speeds
+CVAR (Float,	mouse_yaw,			1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Float,	mouse_forward,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Float,	mouse_side,			2.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CUSTOM_CVAR (Float, mouse_zoomedscale, 1.f, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+{
+	if (self < .5f)
+		self = .5f;
+	if (self > 2.f)
+		self = 2.f;
+}
  
 int 			turnheld;								// for accelerative turning 
  
@@ -926,7 +932,7 @@ void G_AddViewPitch (int look)
 		players[consoleplayer].ReadyWeapon != NULL &&			// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)		// No adjustment if it is non-positive.
 	{
-		look = int(look * Lerp(players[consoleplayer].ReadyWeapon->FOVScale, m_zoomedscale, 1 / players[consoleplayer].ReadyWeapon->FOVScale - 1));
+		look = int(look * mouse_pitch * pow(players[consoleplayer].ReadyWeapon->FOVScale, 1 / mouse_zoomedscale));
 	}
 	// [BB] Allow spectators to freelook no matter what. Note: This probably causes some
 	// sky rendering errors in software mode.
@@ -975,7 +981,7 @@ void G_AddViewAngle (int yaw)
 		players[consoleplayer].ReadyWeapon != NULL &&		// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)	// No adjustment if it is non-positive.
 	{
-		yaw = int(yaw * Lerp(players[consoleplayer].ReadyWeapon->FOVScale, m_zoomedscale, 1 / players[consoleplayer].ReadyWeapon->FOVScale - 1));
+		yaw = int(yaw * mouse_yaw * pow(players[consoleplayer].ReadyWeapon->FOVScale, 1 / mouse_zoomedscale));
 	}
 	LocalViewAngle -= yaw;
 	if (yaw != 0)
