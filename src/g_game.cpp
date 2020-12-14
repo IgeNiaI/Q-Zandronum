@@ -926,7 +926,7 @@ void G_AddViewPitch (int look)
 		players[consoleplayer].ReadyWeapon != NULL &&			// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)		// No adjustment if it is non-positive.
 	{
-		look = int(look * Lerp(players[consoleplayer].ReadyWeapon->FOVScale, m_zoomedscale, 1 / players[consoleplayer].ReadyWeapon->FOVScale - 1));
+		look = int(look * Lerp(m_zoomedscale, m_pitch, players[consoleplayer].ReadyWeapon->FOVScale));
 	}
 	// [BB] Allow spectators to freelook no matter what. Note: This probably causes some
 	// sky rendering errors in software mode.
@@ -975,7 +975,7 @@ void G_AddViewAngle (int yaw)
 		players[consoleplayer].ReadyWeapon != NULL &&		// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)	// No adjustment if it is non-positive.
 	{
-		yaw = int(yaw * Lerp(players[consoleplayer].ReadyWeapon->FOVScale, m_zoomedscale, 1 / players[consoleplayer].ReadyWeapon->FOVScale - 1));
+		yaw = int(yaw * Lerp(m_zoomedscale, m_yaw, players[consoleplayer].ReadyWeapon->FOVScale));
 	}
 	LocalViewAngle -= yaw;
 	if (yaw != 0)
