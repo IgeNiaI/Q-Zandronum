@@ -238,16 +238,16 @@ int				lookspeed[2] = {450, 512};
 #define SLOWTURNTICS	6 
 
 // [BB] This is a new school port, so cl_run defaults to true.
-CVAR (Bool,		cl_run,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
-CVAR (Bool,		invertmouse,	false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look down/up?
+CVAR (Bool,		cl_run,				true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
+CVAR (Bool,		invertmouse,		false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look down/up?
 // [BB] This is a new school port, so freelook defaults to true.
-CVAR (Bool,		freelook,		true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
-CVAR (Bool,		lookstrafe,		false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
-CVAR (Float,	m_pitch,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Mouse speeds
-CVAR (Float,	m_yaw,			1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_zoomedscale,	.5f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_forward,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_side,			2.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Bool,		freelook,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
+CVAR (Bool,		lookstrafe,			false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
+CVAR (Float,	mouse_pitch,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Mouse speeds
+CVAR (Float,	mouse_yaw,			1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Float,	mouse_zoomedscale,	.5f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Float,	mouse_forward,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Float,	mouse_side,			2.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
  
 int 			turnheld;								// for accelerative turning 
  
@@ -822,7 +822,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	// Handle mice.
 	if (!Button_Mlook.bDown && !freelook)
 	{
-		forward += (int)((float)mousey * m_forward);
+		forward += (int)((float)mousey * mouse_forward);
 	}
 
 	cmd->ucmd.pitch = LocalViewPitch >> 16;
@@ -834,7 +834,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	}
 
 	if (strafe || lookstrafe)
-		side += (int)((float)mousex * m_side);
+		side += (int)((float)mousex * mouse_side);
 
 	mousex = mousey = 0;
 
@@ -926,7 +926,7 @@ void G_AddViewPitch (int look)
 		players[consoleplayer].ReadyWeapon != NULL &&			// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)		// No adjustment if it is non-positive.
 	{
-		look = int(look * Lerp(m_zoomedscale, m_pitch, players[consoleplayer].ReadyWeapon->FOVScale));
+		look = int(look * Lerp(mouse_zoomedscale, mouse_pitch, players[consoleplayer].ReadyWeapon->FOVScale));
 	}
 	// [BB] Allow spectators to freelook no matter what. Note: This probably causes some
 	// sky rendering errors in software mode.
@@ -975,7 +975,7 @@ void G_AddViewAngle (int yaw)
 		players[consoleplayer].ReadyWeapon != NULL &&		// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)	// No adjustment if it is non-positive.
 	{
-		yaw = int(yaw * Lerp(m_zoomedscale, m_yaw, players[consoleplayer].ReadyWeapon->FOVScale));
+		yaw = int(yaw * Lerp(mouse_zoomedscale, mouse_yaw, players[consoleplayer].ReadyWeapon->FOVScale));
 	}
 	LocalViewAngle -= yaw;
 	if (yaw != 0)
