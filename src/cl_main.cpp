@@ -7165,8 +7165,8 @@ static void client_DoDoor( BYTESTREAM_s *pByteStream )
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
 	fixed_t Direction = CLIENT_AdjustDoorDirection( NETWORK_ReadByte( pByteStream ) );
 	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	int TopWait = NETWORK_ReadByte( pByteStream );
-	int Countdown = NETWORK_ReadByte( pByteStream );
+	LONG TopWait = NETWORK_ReadLong( pByteStream );
+	LONG Countdown = NETWORK_ReadLong( pByteStream );
 	int LightTag = NETWORK_ReadShort( pByteStream );
 
 	// Invalid sector.
@@ -7204,7 +7204,7 @@ static void client_DoFloor( BYTESTREAM_s *pByteStream )
 	fixed_t Speed = NETWORK_ReadLong( pByteStream );
 	int FloorDestDist = NETWORK_ReadLong( pByteStream );
 	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
+	bool Hexencrush = NETWORK_ReadBit( pByteStream );
 	int NewSpecial = NETWORK_ReadLong( pByteStream );
 
 	// Invalid sector.
@@ -7247,7 +7247,7 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 	fixed_t Speed = NETWORK_ReadLong( pByteStream );
 	fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
 	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
+	bool Hexencrush = NETWORK_ReadBit( pByteStream );
 	LONG lNewSpecial = NETWORK_ReadLong( pByteStream );
 	int ResetCount = NETWORK_ReadLong( pByteStream );
 	int Delay = NETWORK_ReadLong( pByteStream );
@@ -7309,7 +7309,7 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 	fixed_t SpeedDown = NETWORK_ReadLong( pByteStream );
 	fixed_t SpeedUp = NETWORK_ReadLong( pByteStream );
 	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
+	bool Hexencrush = NETWORK_ReadBit( pByteStream );
 	int Silent = NETWORK_ReadShort( pByteStream );
 
 	// Invalid sector.
@@ -7356,11 +7356,11 @@ static void client_DoPlat( BYTESTREAM_s *pByteStream )
 	fixed_t High = NETWORK_ReadLong( pByteStream );
 	fixed_t Low = NETWORK_ReadLong( pByteStream );
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	int Wait = NETWORK_ReadByte( pByteStream );
-	int Count = NETWORK_ReadByte( pByteStream );
-	int Crush = NETWORK_ReadByte( pByteStream );
-	int Tag = NETWORK_ReadByte( pByteStream );
-	bool Finished = NETWORK_ReadByte( pByteStream ) ? true : false;
+	LONG Wait = NETWORK_ReadLong( pByteStream );
+	LONG Count = NETWORK_ReadLong( pByteStream );
+	LONG Crush = NETWORK_ReadLong( pByteStream );
+	LONG Tag = NETWORK_ReadLong( pByteStream );
+	bool Finished = NETWORK_ReadBit( pByteStream );
 	
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
