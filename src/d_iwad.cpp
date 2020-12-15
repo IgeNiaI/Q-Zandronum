@@ -533,12 +533,12 @@ int FIWadManager::IdentifyVersion (TArray<FString> &wadfiles, const char *iwad, 
 					  "2. Edit your " CONFIGFILE "-username.ini and add the directories of your iwads\n"
 					  "to the list beneath [IWADSearch.Directories]");
 #elif defined(__APPLE__)
-					  "1. Place one or more of these wads in ~/Library/Application Support/" GAMENAMELOWERCASE "/\n"
+					  "1. Place one or more of these wads in ~/Library/Application Support/" CONFIGFILE "/\n"
 					  "2. Edit your ~/Library/Preferences/" CONFIGFILE ".ini and add the directories\n"
 					  "of your iwads to the list beneath [IWADSearch.Directories]");
 #else
-					  "1. Place one or more of these wads in ~/.config/" GAMENAMELOWERCASE "/.\n"
-					  "2. Edit your ~/.config/" GAMENAMELOWERCASE "/" CONFIGFILE ".ini and add the directories of your\n"
+					  "1. Place one or more of these wads in ~/.config/" CONFIGFILE "/.\n"
+					  "2. Edit your ~/.config/" CONFIGFILE "/" CONFIGFILE ".ini and add the directories of your\n"
 					  "iwads to the list beneath [IWADSearch.Directories]");
 #endif
 	}
