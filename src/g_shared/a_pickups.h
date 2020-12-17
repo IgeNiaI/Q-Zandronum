@@ -279,6 +279,7 @@ public:
 	int BobStyle;							// [XA] Bobbing style. Defines type of bobbing (e.g. Normal, Alpha)
 	fixed_t BobSpeed;						// [XA] Bobbing speed. Defines how quickly a weapon bobs.
 	fixed_t BobRangeX, BobRangeY;			// [XA] Bobbing range. Defines how far a weapon bobs in either direction.
+	fixed_t SwaySpeed;						// [geNia] Swaying speed. Defines how far the weapon can go and how fast it will return back.
 
 	// [BB] When a player uses this weapon and a skin with name equal to the PreferredSkin value exists for
 	// his/her player class, the player is forced to use this skin, overriding any personal skin settings.
