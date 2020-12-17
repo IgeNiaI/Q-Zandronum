@@ -2869,9 +2869,11 @@ void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta)
 		player->swayy -= pitchDelta >> 5;
 		player->swayy += player->mo->velz << 2;
 
+		fixed_t SwaySpeed = MAX(weapon->SwaySpeed * 2, 72090); // SwaySpeed is doubled and clamped below at 1.1
+
 		// Gradually lower sway down to 0, depending on weapon BobSpeed and current sway distance
-		player->swayx = FixedDiv(player->swayx, MAX(FixedMul(weapon->BobSpeed, abs(player->swayx) >> 7), weapon->BobSpeed));
-		player->swayy = FixedDiv(player->swayy, MAX(FixedMul(weapon->BobSpeed, abs(player->swayy) >> 7), weapon->BobSpeed));
+		player->swayx = FixedDiv(player->swayx, MAX(FixedMul(SwaySpeed, abs(player->swayx) >> 7), SwaySpeed));
+		player->swayy = FixedDiv(player->swayy, MAX(FixedMul(SwaySpeed, abs(player->swayy) >> 7), SwaySpeed));
 	}
 	else
 	{
