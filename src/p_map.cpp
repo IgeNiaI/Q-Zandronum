@@ -5835,7 +5835,7 @@ void P_ExplosionThrust( AActor *thing, AActor *bombsource, fixed_t explosionX, f
 	fixed_t ThingThrustValues[3];
 
 	// tweaked behavior rockets, only affects players
-	if ((flags & RADF_QROCKETJUMP) && thing->player != NULL)
+	if (( zacompatflags & ZACOMPATF_QUAKE_EXPLOSION_THRUST) && thing->player != NULL)
 	{
 		fixed_t heightOffset = thing == bombsource ? thing->player->viewheight : thing->height / 2; // facilitates rocket jumps and behaves intuitively against opponents
 		FVector3 thingPos = { FIXED2FLOAT(thing->x), FIXED2FLOAT(thing->y) , FIXED2FLOAT(thing->z + heightOffset) };
