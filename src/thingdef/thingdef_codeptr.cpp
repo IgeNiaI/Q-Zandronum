@@ -1698,12 +1698,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 		fixed_t shootangle = self->angle;
 		fixed_t SavedPlayerPitch = self->pitch;
 
-		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
-		{
-			self->pitch -= pitch;
-			shootangle += Angle;
-		}
-		else
+		if (!(zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE))
 		{
 			//*************************************************************************************************************************
 			// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
@@ -1744,6 +1739,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 				SpawnHeight = 0;
 			}
 		}
+
+		self->pitch -= pitch;
+		shootangle += Angle;
 
 		angle_t ang = (self->angle - ANGLE_90) >> ANGLETOFINESHIFT;
 		fixed_t x = SpawnOfs_XY * finecosine[ang];
