@@ -788,6 +788,7 @@ CVAR (Flag, compat_autoaim,						zacompatflags, ZACOMPATF_AUTOAIM);
 CVAR (Flag, compat_silentwestspawns,			zacompatflags, ZACOMPATF_SILENT_WEST_SPAWNS);
 CVAR (Flag, compat_skulltagjumping,				zacompatflags, ZACOMPATF_SKULLTAG_JUMPING);
 CVAR (Flag, compat_no_accurate_crosshair,		zacompatflags, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
+CVAR (Flag, compat_disable_wall_friction,		zacompatflags, ZACOMPATF_DISABLE_WALL_FRICTION);
 
 //==========================================================================
 //

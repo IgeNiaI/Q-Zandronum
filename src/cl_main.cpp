@@ -144,7 +144,6 @@ EXTERN_CVAR( Bool, cl_oldfreelooklimit )
 EXTERN_CVAR( Float, turbo )
 EXTERN_CVAR( Float, sv_gravity )
 EXTERN_CVAR( Float, sv_aircontrol )
-EXTERN_CVAR( Bool, sv_wallfriction )
 EXTERN_CVAR( Bool, cl_hideaccount )
 EXTERN_CVAR( String, name )
 
@@ -5540,10 +5539,6 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	// [WS] Read in, and set the value for alwaysapplydmflags.
 	Value.Bool = NETWORK_ReadBit( pByteStream );
 	alwaysapplydmflags.ForceSet( Value, CVAR_Bool );
-
-	// [geNia] Read in, and set the value for alwaysapplydmflags.
-	Value.Bool = NETWORK_ReadBit( pByteStream );
-	sv_wallfriction.ForceSet( Value, CVAR_Bool );
 
 	// [AM] Read in, and set the value for lobby.
 	Value.String = const_cast<char*>(NETWORK_ReadString( pByteStream ));
