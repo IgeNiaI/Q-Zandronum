@@ -3699,7 +3699,7 @@ void SERVERCOMMANDS_DoDoor( DDoor *Door, ULONG ulPlayerExtra, ServerCommandFlags
 	NetCommand command ( SVC_DODOOR );
 	command.addShort ( lSectorID );
 	command.addByte ( (BYTE)Door->GetType() );
-	command.addByte( Door->GetLastInstigator() - players );
+	command.addByte ( Door->GetLastInstigator() - players );
 	command.addLong ( Door->GetPosition() );
 	command.addByte ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
 	command.addLong ( Door->GetSpeed() );
@@ -3743,7 +3743,7 @@ void SERVERCOMMANDS_BuildStair( DFloor *Floor, ULONG ulPlayerExtra, ServerComman
 	NetCommand command ( SVC2_BUILDSTAIR );
 	command.addByte ( (ULONG) Floor->GetType() );
 	command.addShort ( SectorID );
-	command.addByte( Floor->GetLastInstigator() - players );
+	command.addByte ( Floor->GetLastInstigator() - players );
 	command.addLong ( Floor->GetPosition() );
 	command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
 	command.addLong ( Floor->GetSpeed() );
@@ -3770,7 +3770,7 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 
 	NetCommand command ( SVC_DOCEILING );
 	command.addShort ( lSectorID );
-	command.addByte( Ceiling->GetLastInstigator() - players );
+	command.addByte ( Ceiling->GetLastInstigator() - players );
 	command.addByte ( Ceiling->GetTag() );
 	command.addByte ( (ULONG)Ceiling->GetType() );
 	command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetDirection() ) );
@@ -3798,7 +3798,7 @@ void SERVERCOMMANDS_DoPlat( DPlat *Plat, ULONG ulPlayerExtra, ServerCommandFlags
 
 	NetCommand command ( SVC_DOPLAT );
 	command.addShort ( lSectorID );
-	command.addByte( Plat->GetLastInstigator() - players );
+	command.addByte ( Plat->GetLastInstigator() - players );
 	command.addByte ( (ULONG)Plat->GetType() );
 	command.addByte ( (ULONG)Plat->GetStatus() );
 	command.addByte ( (ULONG)Plat->GetOldStatus() );
@@ -3825,7 +3825,7 @@ void SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra, Server
 
 	NetCommand command ( SVC_DOELEVATOR );
 	command.addShort ( lSectorID );
-	command.addByte( Elevator->GetLastInstigator() - players );
+	command.addByte ( Elevator->GetLastInstigator() - players );
 	command.addByte ( Elevator->GetType() );
 	command.addLong ( Elevator->GetSpeed() );
 	command.addByte ( SERVER_AdjustElevatorDirection( Elevator->GetDirection() ) );
@@ -3837,33 +3837,25 @@ void SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra, Server
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoPillar( DPillar::EPillar Type, sector_t *pSector, LONG lFloorSpeed, LONG lCeilingSpeed, LONG lFloorTarget, LONG lCeilingTarget, LONG Crush, bool Hexencrush, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoPillar( DPillar *Pillar, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG	lSectorID = LONG( Pillar->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
 	NetCommand command ( SVC_DOPILLAR );
-	command.addByte ( Type );
 	command.addShort ( lSectorID );
-	command.addLong ( lFloorSpeed );
-	command.addLong ( lCeilingSpeed );
-	command.addLong ( lFloorTarget );
-	command.addLong ( lCeilingTarget );
-	command.addByte ( clamp<LONG>(Crush,-128,127) );
-	command.addByte ( Hexencrush );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyPillar( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYPILLAR );
-	command.addShort ( lID );
+	command.addByte ( Pillar->GetLastInstigator() - players );
+	command.addByte ( Pillar->GetType() );
+	command.addLong ( Pillar->GetFloorPosition() );
+	command.addLong ( Pillar->GetCeilingPosition() );
+	command.addLong ( Pillar->GetFloorSpeed() );
+	command.addLong ( Pillar->GetCeilingSpeed() );
+	command.addLong ( Pillar->GetFloorTarget() );
+	command.addLong ( Pillar->GetCeilingTarget() );
+	command.addLong ( Pillar->GetCrush() );
+	command.addBit ( Pillar->GetHexencrush() );
+	command.addBit ( Pillar->GetFinished() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
