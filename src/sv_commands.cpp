@@ -3837,33 +3837,23 @@ void SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra, Server
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoPillar( DPillar::EPillar Type, sector_t *pSector, LONG lFloorSpeed, LONG lCeilingSpeed, LONG lFloorTarget, LONG lCeilingTarget, LONG Crush, bool Hexencrush, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoPillar( DPillar *Pillar, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG	lSectorID = LONG( Pillar->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
 	NetCommand command ( SVC_DOPILLAR );
-	command.addByte ( Type );
 	command.addShort ( lSectorID );
-	command.addLong ( lFloorSpeed );
-	command.addLong ( lCeilingSpeed );
-	command.addLong ( lFloorTarget );
-	command.addLong ( lCeilingTarget );
-	command.addByte ( clamp<LONG>(Crush,-128,127) );
-	command.addByte ( Hexencrush );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyPillar( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYPILLAR );
-	command.addShort ( lID );
+	command.addByte( Pillar->GetLastInstigator() - players );
+	command.addByte ( Pillar->GetType() );
+	command.addLong ( Pillar->GetFloorSpeed() );
+	command.addLong ( Pillar->GetCeilingSpeed() );
+	command.addLong ( Pillar->GetFloorTarget() );
+	command.addLong ( Pillar->GetCeilingTarget() );
+	command.addLong ( Pillar->GetCrush() );
+	command.addBit ( Pillar->GetHexencrush() );
+	command.addBit ( Pillar->GetFinished() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 

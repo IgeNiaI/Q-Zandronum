@@ -572,6 +572,8 @@ public:
 
 	// [BC] New constructor where we just pass in the sector.
 	DPillar (sector_t *sector);
+	void Reinit ( sector_t *sector, EPillar type, fixed_t speed,
+				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush );
 
 	void Serialize (FArchive &arc);
 	void Tick ();
@@ -579,10 +581,8 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-
-	// [BC] Access function(s).
-	LONG	GetID( void );
-	void	SetID( LONG lID );
+	bool IsBusy();
+	void Predict();
 
 	void	SetType( EPillar Type );
 	EPillar	GetType( );
@@ -598,6 +598,8 @@ public:
 	void	SetCrush( LONG Crush );
 	bool	GetHexencrush( void );
 	void	SetHexencrush( bool hexencrush );
+	bool	GetFinished( void );
+	void	SetFinished( bool Finished );
 
 protected:
 	EPillar		m_Type;
@@ -607,22 +609,23 @@ protected:
 	fixed_t		m_CeilingTarget;
 	int			m_Crush;
 	bool		m_Hexencrush;
+	bool		m_Finished;
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
-
-	// [BC] This is the pillar's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lPillarID;
 
 private:
 	DPillar ();
 
 	// [BC] Make this a friend.
 	friend bool	EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
-							 fixed_t height2, int crush);
+							 fixed_t height2, int crush, bool hexencrush);
+	friend bool	EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t speed, fixed_t height,
+							 fixed_t height2, int crush, bool hexencrush);
 };
 
 bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
+				  fixed_t height2, int crush, bool hexencrush);
+bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t speed, fixed_t height,
 				  fixed_t height2, int crush, bool hexencrush);
 
 //
@@ -644,12 +647,14 @@ public:
 	DDoor (sector_t *sector);
 	// [BC] Added option to create doors soundlessly.
 	DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTag, bool bNoSound = false);
+	void Reinit(bool bNoSound);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
+	bool IsBusy();
 	void Predict();
 
 	// [BC] Access function(s).
@@ -673,9 +678,6 @@ public:
 	LONG	GetLightTag( void );
 	void	SetLightTag( LONG lTag );
 
-	bool	IsBusy();
-
-	void	Reinit(bool bNoSound);
 	void	DoorSound(bool raise, class DSeqNode *curseq = NULL) const;
 
 protected:
@@ -1235,10 +1237,9 @@ DPlat		*P_GetPlatBySectorNum( LONG sectornum );
 DFloor		*P_GetFloorBySectorNum( LONG sectorNum );
 DElevator	*P_GetElevatorBySectorNum( LONG sectorNum );
 DWaggleBase	*P_GetWaggleByID( LONG lID );
-DPillar		*P_GetPillarByID( LONG lID );
+DPillar		*P_GetPillarBySectorNum( LONG sectorNum );
 DCeiling	*P_GetCeilingBySectorNum( LONG sectorNum );
 
 LONG		P_GetFirstFreeWaggleID( void );
-LONG		P_GetFirstFreePillarID( void );
 
 #endif
