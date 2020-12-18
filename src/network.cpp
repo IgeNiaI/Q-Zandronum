@@ -1321,7 +1321,7 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 
 	return
 		// Floors, ceilings and elevators
-		( Special >= Floor_LowerByValue && Special <= Floor_RaiseAndCrush )
+		( Special >= Floor_LowerByValue && Special <= Stairs_BuildUpSync )
 		|| ( Special >= Floor_RaiseByValueTimes8 && Special <= Floor_MoveToValue )
 		|| ( Special >= Ceiling_LowerByValue && Special <= Ceiling_MoveToValue )
 		|| ( Special >= Floor_LowerInstant && Special <= Ceiling_MoveToValueTimes8 )
@@ -1331,7 +1331,6 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		|| ( Special >= Floor_Donut && Special <= Ceiling_CrushRaiseAndStaySilA )
 		|| ( Special >= Elevator_RaiseToNearest && Special <= Elevator_LowerToNearest )
 		|| ( Special == Generic_Crusher ) || ( Special == Floor_TransferTrigger ) || ( Special == Floor_TransferNumeric )
-		|| ( Special == Stairs_BuildDownSync ) || ( Special == Stairs_BuildUpSync )
 		|| ( Special == Stairs_BuildUpDoom ) || ( Special == Ceiling_LowerAndCrushDist )
 
 		// Teleports

@@ -7417,8 +7417,10 @@ static void client_DoPillar( BYTESTREAM_s *pByteStream )
 	int SectorID = NETWORK_ReadShort ( pByteStream );
 	int Instigator = NETWORK_ReadByte( pByteStream );
 	int Type = NETWORK_ReadByte( pByteStream );
-	fixed_t FloorSpeed = NETWORK_ReadLong ( pByteStream );
-	fixed_t CeilingSpeed = NETWORK_ReadLong ( pByteStream );
+	fixed_t FloorPosition = NETWORK_ReadLong ( pByteStream );
+	fixed_t CeilingPosition = NETWORK_ReadLong ( pByteStream );
+	fixed_t FloorSpeed = NETWORK_ReadLong( pByteStream );
+	fixed_t CeilingSpeed = NETWORK_ReadLong( pByteStream );
 	fixed_t FloorTarget = NETWORK_ReadLong ( pByteStream );
 	fixed_t CeilingTarget = NETWORK_ReadLong ( pByteStream );
 	LONG Crush = NETWORK_ReadLong ( pByteStream );
@@ -7440,26 +7442,30 @@ static void client_DoPillar( BYTESTREAM_s *pByteStream )
 	
 	pPillar->SetLastInstigator( &players[Instigator] );
 	pPillar->SetType( (DPillar::EPillar)Type );
+	pPillar->SetPosition( FloorPosition, CeilingPosition );
 	pPillar->SetFloorSpeed( FloorSpeed );
 	pPillar->SetCeilingSpeed( CeilingSpeed );
 	pPillar->SetFloorTarget( FloorTarget );
 	pPillar->SetCeilingTarget( CeilingTarget );
-	pPillar->SetCrush( Crush );
 	pPillar->SetHexencrush( Hexencrush );
 	pPillar->SetFinished( Finished );
 
-	if ( Instigator == consoleplayer )
+	if ( Finished )
 	{
-		pPillar->Predict();
+		SN_StopSequence ( pSector, CHAN_FLOOR );
 	}
-
-	if ( !Finished )
+	else
 	{
 		// Begin playing the sound sequence for the pillar.
 		if ( pSector->seqType >= 0 )
 			SN_StartSequence( pSector, CHAN_FLOOR, pSector->seqType, SEQ_PLATFORM, 0 );
 		else
 			SN_StartSequence( pSector, CHAN_FLOOR, "Floor", 0 );
+	}
+
+	if ( Instigator == consoleplayer )
+	{
+		pPillar->Predict();
 	}
 }
 

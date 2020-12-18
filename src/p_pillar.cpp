@@ -92,6 +92,7 @@ void DPillar::Serialize (FArchive &arc)
 {
 	Super::Serialize (arc);
 	arc << m_Type
+		<< m_Speed
 		<< m_FloorSpeed
 		<< m_CeilingSpeed
 		<< m_FloorTarget
@@ -145,57 +146,80 @@ DPillar::EPillar DPillar::GetType( )
 	return m_Type;
 }
 
-// [BC]
-void DPillar::SetFloorSpeed( LONG lSpeed )
+// [geNia]
+void DPillar::SetPosition( fixed_t FloorPosition, fixed_t CeilingPosition )
 {
-	m_FloorSpeed = lSpeed;
+	fixed_t CurrentFloorPosition = GetFloorPosition();
+	if (CurrentFloorPosition < FloorPosition)
+		MoveFloor (CurrentFloorPosition - FloorPosition, FloorPosition, m_Crush, 1, m_Hexencrush);
+	else
+		MoveFloor (FloorPosition - CurrentFloorPosition, FloorPosition, m_Crush, -1, m_Hexencrush);
+
+	fixed_t CurrentCeilingPosition = GetCeilingPosition();
+	if (CurrentCeilingPosition > CeilingPosition)
+		MoveCeiling (CurrentCeilingPosition - CeilingPosition, CeilingPosition, m_Crush, -1, m_Hexencrush);
+	else
+		MoveCeiling (CeilingPosition - CurrentCeilingPosition, CeilingPosition, m_Crush, 1, m_Hexencrush);
+}
+
+// [geNia]
+fixed_t DPillar::GetFloorPosition()
+{
+	return ( m_Sector->floorplane.d );
+}
+
+// [geNia]
+fixed_t DPillar::GetCeilingPosition()
+{
+	return ( m_Sector->ceilingplane.d );
+}
+
+// [BC]
+void DPillar::SetFloorSpeed( fixed_t Speed )
+{
+	m_FloorSpeed = Speed;
 }
 
 // [BB]
-LONG DPillar::GetFloorSpeed( )
+fixed_t DPillar::GetFloorSpeed( )
 {
 	return m_FloorSpeed;
 }
 
 // [BC]
-void DPillar::SetCeilingSpeed( LONG lSpeed )
+void DPillar::SetCeilingSpeed( fixed_t Speed )
 {
-	m_CeilingSpeed = lSpeed;
+	m_CeilingSpeed = Speed;
 }
 
 // [BB]
-LONG DPillar::GetCeilingSpeed( )
+fixed_t DPillar::GetCeilingSpeed( )
 {
 	return m_CeilingSpeed;
 }
 
 // [BC]
-void DPillar::SetFloorTarget( LONG lTarget )
+void DPillar::SetFloorTarget( fixed_t Target )
 {
-	m_FloorTarget = lTarget;
+	m_FloorTarget = Target;
 }
 
 // [BB]
-LONG DPillar::GetFloorTarget( )
+fixed_t DPillar::GetFloorTarget( )
 {
 	return m_FloorTarget;
 }
 
 // [BC]
-void DPillar::SetCeilingTarget( LONG lTarget )
+void DPillar::SetCeilingTarget( fixed_t Target )
 {
-	m_CeilingTarget = lTarget;
+	m_CeilingTarget = Target;
 }
 
 // [BB]
-LONG DPillar::GetCeilingTarget( )
+fixed_t DPillar::GetCeilingTarget( )
 {
 	return m_CeilingTarget;
-}
-
-LONG DPillar::GetCrush( void )
-{
-	return ( m_Crush );
 }
 
 void DPillar::SetCrush( LONG lCrush )
@@ -203,14 +227,19 @@ void DPillar::SetCrush( LONG lCrush )
 	m_Crush = lCrush;
 }
 
-bool DPillar::GetHexencrush( void )
+int DPillar::GetCrush( void )
 {
-	return ( m_Hexencrush );
+	return ( m_Crush );
 }
 
 void DPillar::SetHexencrush( bool Hexencrush )
 {
 	m_Hexencrush = Hexencrush;
+}
+
+bool DPillar::GetHexencrush( void )
+{
+	return ( m_Hexencrush );
 }
 
 // [geNia]
@@ -227,6 +256,9 @@ void DPillar::SetFinished( bool Finished )
 
 void DPillar::Tick ()
 {
+	if ( m_Finished )
+		return;
+
 	int r, s;
 	fixed_t oldfloor, oldceiling;
 
@@ -282,6 +314,7 @@ void DPillar::Reinit( sector_t *sector, EPillar type, fixed_t speed,
 	vertex_t *spot;
 
 	m_Type = type;
+	m_Speed = speed;
 	m_Crush = crush;
 	m_Hexencrush = hexencrush;
 	m_Finished = false;
@@ -380,6 +413,17 @@ bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator,
 		sec = &sectors[secnum];
 		pPillar = NULL;
 
+		fixed_t flor, ceil;
+
+		flor = sec->CenterFloor ();
+		ceil = sec->CenterCeiling ();
+
+		if (type == DPillar::pillarBuild && flor == ceil)
+			continue;
+
+		if (type == DPillar::pillarOpen && flor != ceil)
+			continue;
+		
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		if (sec->PlaneMoving(sector_t::floor) || sec->PlaneMoving(sector_t::ceiling))
 		{
@@ -403,18 +447,8 @@ bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator,
 			return false;
 		}
 
-		fixed_t flor, ceil;
-
-		flor = sec->CenterFloor ();
-		ceil = sec->CenterCeiling ();
-
-		if (type == DPillar::pillarBuild && flor == ceil)
-			continue;
-
-		if (type == DPillar::pillarOpen && flor != ceil)
-			continue;
-		
 		pPillar->Reinit( sec, type, speed, floordist, ceilingdist, crush, hexencrush );
+		pPillar->m_LastInstigator = instigator;
 
 		rtn = true;
 

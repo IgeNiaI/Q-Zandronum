@@ -583,26 +583,30 @@ public:
 	void UpdateToClient( ULONG ulClient );
 	bool IsBusy();
 	void Predict();
-
+	
 	void	SetType( EPillar Type );
 	EPillar	GetType( );
-	void	SetFloorSpeed( LONG lSpeed );
-	LONG	GetFloorSpeed( );
-	void	SetCeilingSpeed( LONG lSpeed );
-	LONG	GetCeilingSpeed( );
-	void	SetFloorTarget( LONG lTarget );
-	LONG	GetFloorTarget( );
-	void	SetCeilingTarget( LONG lTarget );
-	LONG	GetCeilingTarget( );
-	LONG	GetCrush( void );
+	void	SetPosition( fixed_t FloorPosition, fixed_t CeilingPosition );
+	fixed_t	GetFloorPosition( );
+	fixed_t	GetCeilingPosition( );
+	void	SetFloorSpeed(fixed_t Speed );
+	fixed_t	GetFloorSpeed( );
+	void	SetCeilingSpeed(fixed_t Speed );
+	fixed_t	GetCeilingSpeed( );
+	void	SetFloorTarget( fixed_t lTarget );
+	fixed_t	GetFloorTarget( );
+	void	SetCeilingTarget( fixed_t lTarget );
+	fixed_t	GetCeilingTarget( );
 	void	SetCrush( LONG Crush );
-	bool	GetHexencrush( void );
+	int		GetCrush( void );
 	void	SetHexencrush( bool hexencrush );
+	bool	GetHexencrush( void );
 	bool	GetFinished( void );
 	void	SetFinished( bool Finished );
 
 protected:
 	EPillar		m_Type;
+	fixed_t		m_Speed;
 	fixed_t		m_FloorSpeed;
 	fixed_t		m_CeilingSpeed;
 	fixed_t		m_FloorTarget;
