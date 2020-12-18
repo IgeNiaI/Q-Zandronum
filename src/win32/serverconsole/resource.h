@@ -201,7 +201,7 @@
 #define IDC_DMF_EXIT1                           2438
 #define IDC_NO_HEALTH1                          2440
 #define IDC_COMPATFLAGS_VALUE                   2445
-#define IDC_COMPATFLAGS2_VALUE                  2446
+#define IDC_ZACOMPATFLAGS_VALUE                 2446
 #define IDC_DMFLAGS_VALUE                       2447
 #define IDC_DMFLAGS2_VALUE                      2448
 #define ID_FILE_EXIT                            4003
