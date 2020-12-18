@@ -189,6 +189,7 @@ FONT 8, "Tahoma", 0, 0, 1
     AUTOCHECKBOX    "Sector sounds use original method",				IDC_COMPATF_SECTORSOUNDS,						20, 160, 125, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Disable shooting where crosshair is",				IDC_ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,		20, 170, 127, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Disable wall friction",							IDC_ZACOMPATF_DISABLE_WALL_FRICTION,			20, 180, 127, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Enable quake thrusts formula",						IDC_ZACOMPATF_QUAKE_THRUST,						20, 190, 132, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "NET scripts are clientside",						IDC_ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE,		169, 10, 95, 10, 0, WS_EX_LEFT
 	AUTOCHECKBOX    "Don't execute prediction ACS on client",			IDC_ZACOMPATF_NO_PREDICTION_ACS,				169, 20, 132, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Find shortest textures like Doom",					IDC_SHORTTEX,									169, 30, 116, 10, 0, WS_EX_LEFT
