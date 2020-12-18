@@ -761,7 +761,6 @@ CVAR (Flag, compat_polyobj,				compatflags,  COMPATF_POLYOBJ);
 CVAR (Flag, compat_maskedmidtex,		compatflags,  COMPATF_MASKEDMIDTEX);
 CVAR (Flag, compat_badangles,			compatflags2, COMPATF2_BADANGLES);
 CVAR (Flag, compat_floormove,			compatflags2, COMPATF2_FLOORMOVE);
-CVAR (Flag, compat_no_accurate_crosshair,	compatflags2, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
 // [BB] Out of order ZDoom backport.
 CVAR (Flag, compat_pushwindow,			compatflags2, COMPATF2_PUSHWINDOW);
 // [BB] Skulltag compat flags.
@@ -788,6 +787,7 @@ CVAR (Flag, compat_fullweaponlower,				zacompatflags, ZACOMPATF_FULL_WEAPON_LOWE
 CVAR (Flag, compat_autoaim,						zacompatflags, ZACOMPATF_AUTOAIM);
 CVAR (Flag, compat_silentwestspawns,			zacompatflags, ZACOMPATF_SILENT_WEST_SPAWNS);
 CVAR (Flag, compat_skulltagjumping,				zacompatflags, ZACOMPATF_SKULLTAG_JUMPING);
+CVAR (Flag, compat_no_accurate_crosshair,		zacompatflags, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
 
 //==========================================================================
 //
