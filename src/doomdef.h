@@ -382,6 +382,9 @@ enum
 
 	// [geNia] Enable projectile hitbox lowering to match it's sprite
 	ZADF_ENABLE_PROJECTILE_HITBOX_FIX = 1 << 20,
+
+	// [geNia] Use Quake formula for all thrusts
+	ZADF_QUAKE_THRUST = 1 << 21,
 };
 
 // [RH] Compatibility flags.

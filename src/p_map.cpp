@@ -4313,7 +4313,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			}
 
 			// [CK] If we don't want decals, stop before entering.
-			if ( NETWORK_InClientMode() && cl_hitscandecalhack == false ) 
+			if ( NETWORK_InClientMode() && cl_hitscandecalhack == false )
 				return NULL;
 
 			// [RH] Spawn a decal
@@ -4400,7 +4400,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			hity += trace.unlaggedHitOffset[1];
 			hitz += trace.unlaggedHitOffset[2];
 
-			
+
 
 			// Spawn bullet puffs or blood spots, depending on target type.
 			// [CK] We don't want to enter here unless we're predicting puffs.
@@ -4443,9 +4443,6 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 					dmgflags |= DMG_NO_ARMOR;
 				}
 
-				if (flags & LAF_QUAKETHRUST)
-					dmgflags |= DMG_QUAKETHRUST;
-				
 				if (puff == NULL)
 				{
 					// Since the puff is the damage inflictor we need it here 
@@ -5780,7 +5777,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 					if (((flags & RADF_NODAMAGE) && bombsource == NULL) || !(bombspot->flags2 & MF2_NODMGTHRUST))
 					{
 						// tweaked behavior rockets, only affects players
-						if ((flags & RADF_QROCKETJUMP) && thing->player != NULL)
+						if ((zadmflags & ZADF_QUAKE_THRUST) && thing->player != NULL)
 						{
 							fixed_t heightOffset = thing == bombsource ? thing->player->viewheight : thing->height / 2; // facilitates rocket jumps and behaves intuitively against opponents
 							FVector3 thingPos = { FIXED2FLOAT(thing->x), FIXED2FLOAT(thing->y) , FIXED2FLOAT(thing->z + heightOffset) };

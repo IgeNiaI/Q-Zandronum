@@ -117,7 +117,7 @@ static	ULONG			g_ulLMSSpectatorSettings;
 //==================================================================================
 // [RC] This big map of fun ties all of the DMFlags to their respective checkboxes.
 //==================================================================================
-#define NUMBER_OF_FLAGS 102
+#define NUMBER_OF_FLAGS 103
 
 static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] = 
 {

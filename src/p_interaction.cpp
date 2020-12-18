@@ -1483,7 +1483,7 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 					target->velz += 5*FRACUNIT;
 				}
 			}
-			else if (flags & DMG_QUAKETHRUST)
+			else if (zadmflags & ZADF_QUAKE_THRUST)
 			{
 				angle_t pitch = ((angle_t)(origin->pitch)) >> ANGLETOFINESHIFT;
 
