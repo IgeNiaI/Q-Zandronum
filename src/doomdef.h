@@ -490,6 +490,9 @@ enum
 	// [geNia] Disable executing ACS_ExecuteWithResult on client
 	// TODO add new prediction ACS type for this
 	ZACOMPATF_NO_PREDICTION_ACS = 1 << 28,
+
+	// [geNia] Disable wallfriction
+	ZACOMPATF_DISABLE_WALL_FRICTION = 1 << 29,
 };
 
 // Emulate old bugs for select maps. These are not exposed by a cvar
