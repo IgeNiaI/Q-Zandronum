@@ -497,6 +497,9 @@ enum
 
 	// [geNia] Enable projectile hitbox lowering to match it's sprite
 	ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX = 1 << 30,
+
+	// [geNia] Use Quake formula for all thrusts
+	ZACOMPATF_QUAKE_THRUST = 1 << 31,
 };
 
 // Emulate old bugs for select maps. These are not exposed by a cvar
