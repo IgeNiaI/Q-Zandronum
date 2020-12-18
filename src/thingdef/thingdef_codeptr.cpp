@@ -1432,7 +1432,6 @@ enum FB_Flags
 	FBF_NOPITCH = 8,
 	FBF_NOFLASH = 16,
 	FBF_NORANDOMPUFFZ = 32,
-	FBF_QUAKETHRUST = 64,
 };
 
 // [BB] This functions is needed to keep code duplication at a minimum while applying the spread power.
@@ -1512,8 +1511,6 @@ void A_CustomFireBullets( AActor *self,
 	int bangle;
 	int bslope = 0;
 	int laflags = Flags & FBF_NORANDOMPUFFZ ? LAF_NORANDOMPUFFZ : 0;
-	if (Flags & FBF_QUAKETHRUST)
-		laflags |= LAF_QUAKETHRUST;
 
 	if ((Flags & FBF_USEAMMO) && weapon && !weapon->DepleteAmmo(weapon->bAltFire, true)) // out of ammo
 		return;

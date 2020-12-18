@@ -611,6 +611,7 @@ CVAR (Flag, sv_deadplayerscankeepinventory,	zadmflags, ZADF_DEAD_PLAYERS_CAN_KEE
 CVAR (Flag, sv_noaccuratecrosshair,			zadmflags, ZADF_DISABLE_CROSSHAIR_ACCURATE);
 CVAR (Flag, sv_disablewallfriction,			zadmflags, ZADF_DISABLE_WALL_FRICTION);
 CVAR (Flag, sv_enableprojectilehitboxfix,	zadmflags, ZADF_ENABLE_PROJECTILE_HITBOX_FIX);
+CVAR (Flag, sv_quakethrust,					zadmflags, ZADF_QUAKE_THRUST);
 
 //==========================================================================
 //
