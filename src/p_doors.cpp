@@ -355,6 +355,11 @@ LONG DDoor::GetTopWait( void )
 	return ( m_TopWait );
 }
 
+void DDoor::SetTopWait( LONG lTopWait )
+{
+	m_TopWait = lTopWait;
+}
+
 LONG DDoor::GetCountdown( void )
 {
 	return ( m_TopCountdown );
@@ -708,7 +713,11 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 			}
 			else if ( pDoor->m_Direction == -2 )
 			{
-				pDoor->Reinit(false);
+				pDoor->SetType( type );
+				pDoor->SetSpeed( speed );
+				pDoor->SetTopWait( delay );
+				pDoor->SetLightTag( lightTag );
+				pDoor->Reinit( false );
 			}
 
 			pDoor->m_LastInstigator = instigator;
