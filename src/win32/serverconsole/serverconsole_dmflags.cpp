@@ -117,7 +117,7 @@ static	ULONG			g_ulLMSSpectatorSettings;
 //==================================================================================
 // [RC] This big map of fun ties all of the DMFlags to their respective checkboxes.
 //==================================================================================
-#define NUMBER_OF_FLAGS 102
+#define NUMBER_OF_FLAGS 103
 
 static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] = 
 {
@@ -195,6 +195,7 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ COMPATF_MISSILECLIP,								IDC_COMPATF_MISSILECLIP,						&g_ulCompatFlags, },
 	{ COMPATF_CROSSDROPOFF,								IDC_COMPATF_CROSSDROPOFF,						&g_ulCompatFlags, },
 	{ ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,				IDC_ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,		&g_ulZacompatFlags, },
+	{ ZACOMPATF_QUAKE_EXPLOSION_THRUST,					IDC_ZACOMPATF_QUAKE_EXPLOSION_THRUST,			&g_ulZacompatFlags, },
 	{ ZACOMPATF_LIMITED_AIRMOVEMENT,					IDC_LIMITED_AIRMOVEMENT,						&g_ulZacompatFlags, },
 	{ ZACOMPATF_PLASMA_BUMP_BUG,						IDC_PLASMA_BUMP_BUG,							&g_ulZacompatFlags, },
 	{ ZACOMPATF_INSTANTRESPAWN,							IDC_INSTANTRESPAWN,								&g_ulZacompatFlags, },
