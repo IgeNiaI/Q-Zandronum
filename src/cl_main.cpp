@@ -7158,6 +7158,13 @@ static void client_DoDoor( BYTESTREAM_s *pByteStream )
 		// Create the new door.
 		pDoor = new DDoor( pSector, (DDoor::EVlDoor)Type, Speed, TopWait, LightTag, g_ConnectionState != CTS_ACTIVE );
 	}
+	else
+	{
+		pDoor->SetType( (DDoor::EVlDoor)Type );
+		pDoor->SetSpeed( Speed );
+		pDoor->SetTopWait( TopWait );
+		pDoor->SetLightTag( LightTag );
+	}
 
 	pDoor->SetLastInstigator( &players[Instigator] );
 	pDoor->SetPositionAndDirection( Position, Direction );

@@ -667,6 +667,7 @@ public:
 	void	SetPositionAndDirection( fixed_t Position, int direction );
 	
 	LONG	GetTopWait( void );
+	void	SetTopWait( LONG lTopWait );
 
 	LONG	GetCountdown( void );
 	void	SetCountdown( LONG lCountdown );
