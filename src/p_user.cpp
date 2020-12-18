@@ -3422,7 +3422,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 							if (!(player->mo->mvFlags & MV_SILENT))
 							{
 								if (!CLIENT_PREDICT_IsPredicting())
-									S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+									S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
 							}
 
 							doDoubleJump = true;
@@ -3436,7 +3436,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					if (!(player->mo->mvFlags & MV_SILENT))
 					{
 						if (!CLIENT_PREDICT_IsPredicting())
-							S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
+							S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
 					}
 
 					doDoubleJump = true;
@@ -3853,7 +3853,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 						if (!(player->mo->mvFlags & MV_SILENT))
 						{
 							if (!CLIENT_PREDICT_IsPredicting())
-								S_Sound(player->mo, CHAN_BODY, "*walljump", 1, ATTN_NORM);
+								S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
 						}
 
 						doDoubleJump = true;
@@ -3867,7 +3867,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				if (!(player->mo->mvFlags & MV_SILENT))
 				{
 					if (!CLIENT_PREDICT_IsPredicting())
-						S_Sound(player->mo, CHAN_BODY, "*doublejump", 1, ATTN_NORM);
+						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
 				}
 
 				doDoubleJump = true;
