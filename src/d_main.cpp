@@ -791,6 +791,7 @@ CVAR (Flag, compat_skulltagjumping,								zacompatflags, ZACOMPATF_SKULLTAG_JUM
 CVAR (Flag, compat_noaccuratecrosshair,							zacompatflags, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
 CVAR (Flag, compat_disablewallfriction,							zacompatflags, ZACOMPATF_DISABLE_WALL_FRICTION);
 CVAR (Flag, compat_enableprojectilehitboxfix,					zacompatflags, ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX);
+CVAR (Flag, compat_quakeexplosionthrust,						zacompatflags, ZACOMPATF_QUAKE_EXPLOSION_THRUST);
 
 #ifdef _WIN32
 extern int AppActive;
