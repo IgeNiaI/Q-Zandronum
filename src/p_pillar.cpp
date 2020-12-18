@@ -43,6 +43,7 @@
 #include "cl_demo.h"
 #include "network.h"
 #include "sv_commands.h"
+#include "cl_main.h"
 
 IMPLEMENT_POINTY_CLASS (DPillar)
 	DECLARE_POINTER(m_Interp_Floor)
@@ -69,8 +70,7 @@ DPillar::DPillar(sector_t *sector)
 	sector->ceilingdata = this;
 	m_Interp_Floor = sector->SetInterpolation(sector_t::FloorMove, true);
 	m_Interp_Ceiling = sector->SetInterpolation(sector_t::CeilingMove, true);
-	// [EP]
-	m_lPillarID = -1;
+	m_LastInstigator = NULL;
 }
 
 void DPillar::Destroy()
@@ -99,27 +99,38 @@ void DPillar::Serialize (FArchive &arc)
 		<< m_Crush
 		<< m_Hexencrush
 		<< m_Interp_Floor
-		<< m_Interp_Ceiling
-		// [BC]
-		<< m_lPillarID;
+		<< m_Interp_Ceiling;
 }
 
 // [BC]
 void DPillar::UpdateToClient( ULONG ulClient )
 {
-	SERVERCOMMANDS_DoPillar( m_Type, m_Sector, m_FloorSpeed, m_CeilingSpeed, m_FloorTarget, m_CeilingTarget, m_Crush, m_Hexencrush, m_lPillarID, ulClient, SVCF_ONLYTHISCLIENT );
+	SERVERCOMMANDS_DoPillar( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
-// [BC]
-LONG DPillar::GetID( void )
+bool DPillar::IsBusy()
 {
-	return ( m_lPillarID );
+	return !m_Finished;
 }
 
-// [BC]
-void DPillar::SetID( LONG lID )
+void DPillar::Predict()
 {
-	m_lPillarID = lID;
+	// Use a version of gametic that's appropriate for both the current game and demos.
+	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
+
+	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
+	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
+	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
+		return;
+
+	// How many ticks of prediction do we need?
+	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
+
+	while (TicsToPredict)
+	{
+		Tick();
+		TicsToPredict--;
+	}
 }
 
 // [BC]
@@ -202,6 +213,18 @@ void DPillar::SetHexencrush( bool Hexencrush )
 	m_Hexencrush = Hexencrush;
 }
 
+// [geNia]
+bool DPillar::GetFinished( void )
+{
+	return ( m_Finished );
+}
+
+// [geNia]
+void DPillar::SetFinished( bool Finished )
+{
+	m_Finished = Finished;
+}
+
 void DPillar::Tick ()
 {
 	int r, s;
@@ -223,21 +246,14 @@ void DPillar::Tick ()
 
 	if (r == pastdest && s == pastdest)
 	{
+		m_Finished = true;
+
+		SN_StopSequence (m_Sector, CHAN_FLOOR);
+
 		// [BC] If we're the server, tell clients to destroy the pillar, and to stop
 		// the sector sound sequence.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			SERVERCOMMANDS_StopSectorSequence( m_Sector );
-			SERVERCOMMANDS_DestroyPillar( m_lPillarID );
-
-			// Also, since this sector has reached its destination, verify that all the clients
-			// have the correct floor/ceiling height for this sector.
-			SERVERCOMMANDS_SetSectorFloorPlane( ULONG( m_Sector - sectors ));
-			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
-		}
-
-		SN_StopSequence (m_Sector, CHAN_FLOOR);
-		Destroy ();
+			SERVERCOMMANDS_DoPillar( this );
 	}
 	else
 	{
@@ -256,18 +272,19 @@ DPillar::DPillar (sector_t *sector, EPillar type, fixed_t speed,
 				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
 	: DMover (sector)
 {
+	Reinit(sector, type, speed, floordist, ceilingdist, crush, hexencrush);
+}
+
+void DPillar::Reinit( sector_t *sector, EPillar type, fixed_t speed,
+				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush )
+{
 	fixed_t newheight;
 	vertex_t *spot;
-
-	sector->floordata = sector->ceilingdata = this;
-	m_Interp_Floor = sector->SetInterpolation(sector_t::FloorMove, true);
-	m_Interp_Ceiling = sector->SetInterpolation(sector_t::CeilingMove, true);
 
 	m_Type = type;
 	m_Crush = crush;
 	m_Hexencrush = hexencrush;
-	// [EP]
-	m_lPillarID = -1;
+	m_Finished = false;
 
 	if (type == pillarBuild)
 	{
@@ -343,20 +360,48 @@ DPillar::DPillar (sector_t *sector, EPillar type, fixed_t speed,
 	}
 }
 
-bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
-				  fixed_t height2, int crush, bool hexencrush)
+bool EV_DoPillar (DPillar::EPillar type, int tag,
+				  fixed_t speed, fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
+{
+	return EV_DoPillar(type, tag, NULL, speed, floordist, ceilingdist, crush, hexencrush);
+}
+
+bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator,
+				  fixed_t speed, fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
 {
 	bool rtn = false;
 	int secnum = -1;
 	// [BC]
-	DPillar		*pPillar;
+	DPillar	*pPillar;
+	sector_t *sec;
 
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
-		sector_t *sec = &sectors[secnum];
+		sec = &sectors[secnum];
+		pPillar = NULL;
 
+		// ALREADY MOVING?	IF SO, KEEP GOING...
 		if (sec->PlaneMoving(sector_t::floor) || sec->PlaneMoving(sector_t::ceiling))
-			continue;
+		{
+			if (sec->floordata->IsKindOf(RUNTIME_CLASS(DPillar)))
+			{
+				pPillar = barrier_cast<DPillar*>(sec->floordata);
+			}
+			else if (sec->ceilingdata->IsKindOf(RUNTIME_CLASS(DPillar)))
+			{
+				pPillar = barrier_cast<DPillar*>(sec->ceilingdata);
+			}
+		}
+		
+		if (pPillar == NULL)
+		{
+			// new pillar thinker
+			pPillar = new DPillar (sec);
+		}
+		else if ( pPillar->IsBusy() )
+		{
+			return false;
+		}
 
 		fixed_t flor, ceil;
 
@@ -368,66 +413,31 @@ bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
 
 		if (type == DPillar::pillarOpen && flor != ceil)
 			continue;
+		
+		pPillar->Reinit( sec, type, speed, floordist, ceilingdist, crush, hexencrush );
 
 		rtn = true;
-		pPillar = new DPillar (sec, type, speed, height, height2, crush, hexencrush);
 
-		if ( pPillar )
-		{
-			// [BC] Assign the mover's network ID. However, don't do this on the client end.
-			if ( NETWORK_InClientMode() == false )
-				pPillar->SetID ( P_GetFirstFreePillarID( ) );
-
-			// [BC] If we're the server, tell clients to create the pillar.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DoPillar( pPillar->GetType(), sec, pPillar->GetFloorSpeed(), pPillar->GetCeilingSpeed(), pPillar->GetFloorTarget(), pPillar->GetCeilingTarget(), pPillar->GetCrush(), pPillar->GetHexencrush(), pPillar->GetID() );
-		}
+		// [BC] If we're the server, tell clients to create the pillar.
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			SERVERCOMMANDS_DoPillar( pPillar );
 	}
 	return rtn;
 }
 
 //*****************************************************************************
 //
-DPillar *P_GetPillarByID( LONG lID )
+DPillar *P_GetPillarBySectorNum( LONG sectorNum )
 {
-	DPillar		*pPillar;
+	DPillar	*pPillar;
 
 	TThinkerIterator<DPillar>		Iterator;
 
 	while (( pPillar = Iterator.Next( )))
 	{
-		if ( pPillar->GetID( ) == lID )
+		if ( pPillar->GetSector()->sectornum == sectorNum )
 			return ( pPillar );
 	}
 
 	return ( NULL );
-}
-
-//*****************************************************************************
-//
-LONG P_GetFirstFreePillarID( void )
-{
-	LONG		lIdx;
-	DPillar		*pPillar;
-	bool		bIDIsAvailable;
-
-	for ( lIdx = 0; lIdx < 8192; lIdx++ )
-	{
-		TThinkerIterator<DPillar>		Iterator;
-
-		bIDIsAvailable = true;
-		while (( pPillar = Iterator.Next( )))
-		{
-			if ( pPillar->GetID( ) == lIdx )
-			{
-				bIDIsAvailable = false;
-				break;
-			}
-		}
-
-		if ( bIDIsAvailable )
-			return ( lIdx );
-	}
-
-	return ( -1 );
 }

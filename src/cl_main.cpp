@@ -226,7 +226,6 @@ static	void	client_DoElevator( BYTESTREAM_s *pByteStream );
 
 // Pillar commands.
 static	void	client_DoPillar( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyPillar( BYTESTREAM_s *pByteStream );
 
 // Waggle commands.
 static	void	client_DoWaggle( BYTESTREAM_s *pByteStream );
@@ -1619,10 +1618,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 	case SVC_DOPILLAR:
 
 		client_DoPillar( pByteStream );
-		break;
-	case SVC_DESTROYPILLAR:
-
-		client_DestroyPillar( pByteStream );
 		break;
 	case SVC_DOWAGGLE:
 
@@ -7401,7 +7396,8 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 		// Create the new elevator.
 		pElevator = new DElevator( pSector );
 	}
-
+	
+	pElevator->SetLastInstigator( &players[Instigator] );
 	pElevator->SetType( (DElevator::EElevator)Type );
 	pElevator->SetSpeed( Speed );
 	pElevator->SetDirection( Direction );
@@ -7418,82 +7414,53 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 //
 static void client_DoPillar( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lSectorID;
-	LONG			lFloorSpeed;
-	LONG			lCeilingSpeed;
-	LONG			lFloorTarget;
-	LONG			lCeilingTarget;
-	LONG			Crush;
-	bool			Hexencrush;
-	LONG			lPillarID;
-	sector_t		*pSector;
-	DPillar			*pPillar;
-
-	// Read in the type of pillar.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the speeds.
-	lFloorSpeed = NETWORK_ReadLong( pByteStream );
-	lCeilingSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the targets.
-	lFloorTarget = NETWORK_ReadLong( pByteStream );
-	lCeilingTarget = NETWORK_ReadLong( pByteStream );
-
-	// Read in the crush info.
-	Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-	Hexencrush = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the pillar ID.
-	lPillarID = NETWORK_ReadShort( pByteStream );
+	int SectorID = NETWORK_ReadShort ( pByteStream );
+	int Instigator = NETWORK_ReadByte( pByteStream );
+	int Type = NETWORK_ReadByte( pByteStream );
+	fixed_t FloorSpeed = NETWORK_ReadLong ( pByteStream );
+	fixed_t CeilingSpeed = NETWORK_ReadLong ( pByteStream );
+	fixed_t FloorTarget = NETWORK_ReadLong ( pByteStream );
+	fixed_t CeilingTarget = NETWORK_ReadLong ( pByteStream );
+	LONG Crush = NETWORK_ReadLong ( pByteStream );
+	bool Hexencrush = NETWORK_ReadBit ( pByteStream );
+	bool Finished = NETWORK_ReadBit ( pByteStream );
 
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
 
-	pSector = &sectors[lSectorID];
+	sector_t *pSector = &sectors[SectorID];
 
-	// Create the pillar, and set all its attributes that were read in.
-	pPillar = new DPillar( pSector );
-	pPillar->SetType( (DPillar::EPillar)lType );
-	pPillar->SetFloorSpeed( lFloorSpeed );
-	pPillar->SetCeilingSpeed( lCeilingSpeed );
-	pPillar->SetFloorTarget( lFloorTarget );
-	pPillar->SetCeilingTarget( lCeilingTarget );
+	DPillar	*pPillar = P_GetPillarBySectorNum( pSector->sectornum );
+	if (pPillar == NULL)
+	{
+		// Create the new pillar.
+		pPillar = new DPillar( pSector );
+	}
+	
+	pPillar->SetLastInstigator( &players[Instigator] );
+	pPillar->SetType( (DPillar::EPillar)Type );
+	pPillar->SetFloorSpeed( FloorSpeed );
+	pPillar->SetCeilingSpeed( CeilingSpeed );
+	pPillar->SetFloorTarget( FloorTarget );
+	pPillar->SetCeilingTarget( CeilingTarget );
 	pPillar->SetCrush( Crush );
 	pPillar->SetHexencrush( Hexencrush );
-	pPillar->SetID( lPillarID );
+	pPillar->SetFinished( Finished );
 
-	// Begin playing the sound sequence for the pillar.
-	if ( pSector->seqType >= 0 )
-		SN_StartSequence( pSector, CHAN_FLOOR, pSector->seqType, SEQ_PLATFORM, 0 );
-	else
-		SN_StartSequence( pSector, CHAN_FLOOR, "Floor", 0 );
-}
-
-//*****************************************************************************
-//
-static void client_DestroyPillar( BYTESTREAM_s *pByteStream )
-{
-	LONG		lPillarID;
-	DPillar		*pPillar;
-
-	// Read in the elevator ID.
-	lPillarID = NETWORK_ReadShort( pByteStream );
-
-	pPillar = P_GetPillarByID( lPillarID );
-	if ( pPillar == NULL )
+	if ( Instigator == consoleplayer )
 	{
-		CLIENT_PrintWarning( "client_DestroyPillar: Couldn't find pillar with ID: %ld!\n", lPillarID );
-		return;
+		pPillar->Predict();
 	}
 
-	// Finally, destroy the pillar.
-	pPillar->Destroy( );
+	if ( !Finished )
+	{
+		// Begin playing the sound sequence for the pillar.
+		if ( pSector->seqType >= 0 )
+			SN_StartSequence( pSector, CHAN_FLOOR, pSector->seqType, SEQ_PLATFORM, 0 );
+		else
+			SN_StartSequence( pSector, CHAN_FLOOR, "Floor", 0 );
+	}
 }
 
 //*****************************************************************************
