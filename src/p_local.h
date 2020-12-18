@@ -503,7 +503,6 @@ enum	// P_LineAttack flags
 	LAF_ISMELEEATTACK = 1,
 	LAF_NORANDOMPUFFZ = 2,
 	LAF_NOIMPACTDECAL = 4,
-	LAF_QUAKETHRUST	  = 8,
 };
 
 AActor *P_LineAttack (AActor *t1, angle_t angle, fixed_t distance, int pitch, int damage, FName damageType, const PClass *pufftype, int flags = 0, AActor **victim = NULL, int *actualdamage = NULL);
@@ -541,8 +540,7 @@ enum
 	RADF_HURTSOURCE = 1,
 	RADF_NOIMPACTDAMAGE = 2,
 	RADF_SOURCEISSPOT = 4,
-	RADF_NODAMAGE = 8,
-	RADF_QROCKETJUMP = 256
+	RADF_NODAMAGE = 8
 };
 void	P_RadiusAttack (AActor *spot, AActor *source, int damage, int distance, 
 						FName damageType, int flags, int fulldamagedistance=0);
@@ -607,7 +605,6 @@ enum EDmgFlags
 	DMG_NO_FACTOR = 16,
 	DMG_PLAYERATTACK = 32,
 	DMG_FOILINVUL = 64,
-	DMG_QUAKETHRUST = 128,
 };
 
 
