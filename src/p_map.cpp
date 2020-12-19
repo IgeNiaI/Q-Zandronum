@@ -5020,8 +5020,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	{
 		const ULONG ulPlayer = source->player ? static_cast<ULONG> ( source->player - players ) : MAXPLAYERS;
 		SERVERCOMMANDS_WeaponRailgun( source, start, end, color1, color2, maxdiff, railflags,
-			angleoffset, spawnclass, duration, sparsity, drift, ulPlayer,
-			 SVCF_SKIPTHISCLIENT );
+			angleoffset, spawnclass, duration, sparsity, drift, ulPlayer, SVCF_SKIPTHISCLIENT );
 	}
 }
 

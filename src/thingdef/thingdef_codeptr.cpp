@@ -2683,10 +2683,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 				// [BB] Set scale if necessary.
 				SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( mo, (self->player - players), SVCF_SKIPTHISCLIENT);
 
-			if (flags & SIXF_TRANSFERSTENCILCOL)
+			if (flags & SXF_TRANSFERSTENCILCOL)
 				SERVERCOMMANDS_SetThingFillColor( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
 
-			if (flags & SIXF_TRANSFERSPRITE)
+			if (flags & SXF_TRANSFERSPRITEFRAME)
 				SERVERCOMMANDS_SetThingSprite( mo, (self->player - players), SVCF_SKIPTHISCLIENT );
 			}
 			else
