@@ -1,2 +1,194 @@
 .idea
 protocolspec/generator/__pycache__/
+
+# /
+debug
+release
+Debug
+Release
+build
+*.ncb
+*.suo
+*.user
+*.exe
+releaseobj
+*.bak
+ccdv
+debugobj
+server-releaseobj
+server-debugobj
+fmodapi*linux*
+*.kdev4
+.kdev4
+__pycache__
+.vscode
+CMakeLists.txt.user.*
+
+# /getwad/
+getwad/*.ncb
+getwad/*.suo
+getwad/*.user
+getwad/debug
+getwad/release
+
+# /getwad/src/
+getwad/src/Debug
+getwad/src/Release
+getwad/src/*.user
+getwad/src/*.obj
+getwad/src/*.dll
+getwad/src/*.lib
+getwad/src/*.res
+
+# /hqnx/
+hqnx/Debug
+hqnx/Release
+
+# /jpeg-6b/
+jpeg-6b/Debug
+jpeg-6b/Release
+jpeg-6b/*.user
+jpeg-6b/*.a
+
+# /masterserver/
+masterserver/Debug
+masterserver/Release
+masterserver/debug
+masterserver/release
+masterserver/*.ncb
+masterserver/*.suo
+masterserver/*.user
+masterserver/master-97
+masterserver/svnrevision.h
+
+# /rcon_utility/
+rcon_utility/Debug
+rcon_utility/Release
+rcon_utility/*.user
+rcon_utility/settings.ini
+rcon_utility/svnrevision.h
+
+# /snes_spc/
+snes_spc/Debug
+snes_spc/Release
+snes_spc/*.user
+
+# /sqlite/
+sqlite/*.c
+sqlite/*.h
+sqlite/sqlite-*.tar.gz
+
+# /src/
+src/gitinfo.h
+src/sc_man_scanner.h
+src/*.orig
+
+# /src/g_doom/
+src/g_doom/*.orig
+
+# /src/g_heretic/
+src/g_heretic/*.orig
+
+# /src/g_hexen/
+src/g_hexen/*.orig
+
+# /src/g_raven/
+src/g_raven/*.orig
+
+# /src/g_shared/
+src/g_shared/*.orig
+
+# /src/g_strife/
+src/g_strife/*.orig
+
+# /src/gl/
+src/gl/*.orig
+
+# /src/gl/r_render/
+src/gl/r_render/*.orig
+
+# src/network/
+src/network/servercommands.cpp
+src/network/servercommands.h
+
+# /src/oplsynth/
+src/oplsynth/*.orig
+
+# /src/sdl/
+src/sdl/*.orig
+
+# /src/sound/
+src/sound/*.orig
+
+# /src/textures/
+src/textures/*.orig
+
+# /src/thingdef/
+src/thingdef/*.orig
+
+# /src/timidity/
+src/timidity/*.orig
+
+# /src/win32/
+src/win32/*.orig
+
+# /src/xlat/
+src/xlat/xlat_parser.c
+src/xlat/xlat_parser.h
+src/xlat/xlat_parser.out
+src/xlat/*.orig
+
+# /statsmaker/
+statsmaker/Release
+statsmaker/Debug
+statsmaker/*.user
+
+# /tools/fixrtext/
+tools/fixrtext/Release
+tools/fixrtext/Debug
+tools/fixrtext/*.user
+
+# /tools/lemon/
+tools/lemon/Build
+tools/lemon/lemon.exe
+tools/lemon/*.ilk
+tools/lemon/*.pdb
+tools/lemon/*.user
+
+# /tools/re2c/
+tools/re2c/Build
+tools/re2c/*.exe
+tools/re2c/*.user
+
+# /tools/updaterevision/
+tools/updaterevision/Debug
+tools/updaterevision/Release
+tools/updaterevision/*.user
+tools/updaterevision/*.exe
+tools/updaterevision/updaterevision
+
+# /upnpnat/
+upnpnat/Debug
+upnpnat/Release
+upnpnat/*.ncb
+upnpnat/*.suo
+upnpnat/*.user
+
+# /wadsrc/
+wadsrc/Debug
+wadsrc/*.suo
+wadsrc/*.user
+wadsrc/*.ncb
+wadsrc/zdoom.pk3
+wadsrc/Release
+wadsrc/wadmake
+wadsrc/zandronum.pk3
+
+# /wadsrc_st/
+wadsrc_st/skulltag_actors.pk3
+
+# /zlib/
+zlib/Debug
+zlib/Release
+zlib/*.user
+zlib/*.a
