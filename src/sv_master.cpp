@@ -190,7 +190,7 @@ void SERVER_MASTER_Tick( void )
 	// [BB] Also tell the master whether we are enforcing its ban list.
 	NETWORK_WriteByte( &g_MasterServerBuffer.ByteStream, sv_enforcemasterbanlist );
 	// [BB] And tell which code revision number the server was built with.
-	NETWORK_WriteLong( &g_MasterServerBuffer.ByteStream, GetRevisionNumber() );
+	NETWORK_WriteString( &g_MasterServerBuffer.ByteStream, GetGitHash() );
 
 	// Send the master server our packet.
 //	NETWORK_LaunchPacket( &g_MasterServerBuffer, g_AddressMasterServer, true );
