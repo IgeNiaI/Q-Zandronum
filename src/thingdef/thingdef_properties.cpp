@@ -2947,6 +2947,15 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, maxwallclimbtics, I, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbspeed, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(i, 0);
+	defaults->WallClimbSpeed = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, crouchspeedfactor, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);

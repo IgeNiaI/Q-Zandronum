@@ -184,6 +184,7 @@ public:
 	fixed_t		AirThrustZUp;
 	fixed_t		AirThrustZDown;
 	int			MaxWallClimbTics;
+	fixed_t		WallClimbSpeed;
 	float		CrouchSpeedFactor;
 	float		WalkSpeedFactor;
 	fixed_t		AirAcceleration;
