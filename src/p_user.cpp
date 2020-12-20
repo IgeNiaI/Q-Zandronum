@@ -749,6 +749,7 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< JumpDelay
 		<< SecondJumpZ
 		<< MaxWallClimbTics
+		<< WallClimbSpeed
 		<< CrouchSpeedFactor
 		<< WalkSpeedFactor
 		<< AirAcceleration
@@ -3050,7 +3051,7 @@ bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 //
 //==========================================================================
 
-void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
+void P_SetSlideStatus(player_t *player, const bool& isSliding)
 {
 	// crouch slide sound start/stop
 	if (isSliding && !player->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
@@ -3066,20 +3067,20 @@ void P_Slide_Looping_Sounds(player_t *player, const bool& isSliding)
 	player->isCrouchSliding = isSliding;
 }
 
-void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
+void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 {
 	// Wall climb parameters and sound start/stop
-	if (canclimb && !player->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
+	if (isClimbing && !player->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if (!CLIENT_PREDICT_IsPredicting())
 			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
 	}
-	else if (!(canclimb % 2) && player->isWallClimbing)
+	else if (!isClimbing && player->isWallClimbing)
 	{
 		S_StopSound(player->mo, CHAN_SEVEN);
 	}
 
-	player->isWallClimbing = canclimb < 2 ? canclimb != 0 : false;
+	player->isWallClimbing = isClimbing;
 }
 
 //==========================================================================
@@ -3090,7 +3091,7 @@ void P_Climb_Looping_Sounds(player_t *player, const int& canclimb)
 
 void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 {
-	int canClimb = 0;
+	bool isClimbing = false;
 	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
 	bool isDasher = player->mo->mvFlags & MV_DASH ? true : false;
@@ -3111,26 +3112,15 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			vx, vy, 0, (player->mo->radius * 7) / 5, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
 
 		if (trace.HitType == TRACE_HitWall)
-			canClimb = 1;
-		else if (player->isWallClimbing) // if over the ledge give it a final kick
-			canClimb = 2;
+			isClimbing = 1;
 	}
 
-	if (canClimb)
+	if (isClimbing)
 	{
 		player->mo->velx /= 2;
 		player->mo->vely /= 2;
-
-		if (canClimb == 1)
-		{
-			player->mo->velz = FLOAT2FIXED(5.f);
-			player->wallClimbTics--;
-		}
-		else
-		{
-			player->mo->velz = FLOAT2FIXED(8.f);
-			player->wallClimbTics = 0;
-		}
+		player->mo->velz = player->mo->WallClimbSpeed;
+		player->wallClimbTics--;
 	}
 	else
 	{
@@ -3241,7 +3231,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
 		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
 	if (isClimber)
-		P_Climb_Looping_Sounds(player, canClimb);
+		P_SetClimbStatus(player, isClimbing);
 
 	//*******************************************************
 	// Footsteps
@@ -3286,7 +3276,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			player->jumpTics = player->mo->JumpDelay;
 	}
 
-	if (canClimb)
+	if (isClimbing)
 		return;
 
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
@@ -3490,7 +3480,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	// Setup
 	bool noJump = false;
 	bool isSliding = false;
-	int canClimb = 0;
+	bool isClimbing = false;
 	bool isSlider = player->mo->mvFlags & MV_CROUCHSLIDE ? true : false;
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
@@ -3570,25 +3560,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				vx, vy, 0, (player->mo->radius * 7) / 5, MF_SOLID, ML_BLOCK_PLAYERS, player->mo, trace, TRACE_NoSky);
 
 			if (trace.HitType == TRACE_HitWall)
-				canClimb = 1;
-			else if (player->isWallClimbing) // if over the ledge give it a final kick
-				canClimb = 2;
+				isClimbing = true;
 		}
 
-		if (canClimb)
+		if (isClimbing)
 		{
 			player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction);
-			if (canClimb == 1)
-			{
-				vel.Z = 5.f;
-				player->wallClimbTics--;
-			}
-			else
-			{
-				vel.Z = 8.f;
-				player->wallClimbTics = 0;
-			}
-
+			vel.Z = FIXED2FLOAT(player->mo->WallClimbSpeed);
+			player->wallClimbTics--;
 			noJump = true;
 		}
 		else
@@ -3721,9 +3700,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	// handle looping sounds of slide and climb
 	if (isSlider)
-		P_Slide_Looping_Sounds(player, isSliding);
+		P_SetSlideStatus(player, isSliding);
 	if (isClimber)
-		P_Climb_Looping_Sounds(player, canClimb);
+		P_SetClimbStatus(player, isClimbing);
 
 	// Only play run animation when moving and not in the air
 	if (!CLIENT_PREDICT_IsPredicting() && player->onground &&

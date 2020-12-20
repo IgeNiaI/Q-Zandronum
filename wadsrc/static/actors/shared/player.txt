@@ -47,6 +47,7 @@ Actor PlayerPawn : Actor native
 	Player.AirThrustZUp 0
 	Player.AirThrustZDown 0
 	Player.MaxWallClimbTics 70
+	Player.WallClimbSpeed 5.0
 	Player.CrouchSpeedFactor 0.5
 	Player.WalkSpeedFactor 0.75
 	Player.AirAcceleration 0.25

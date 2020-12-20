@@ -4467,6 +4467,12 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
+	case APROP_WallClimbSpeed:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+			static_cast<APlayerPawn*>(actor)->WallClimbSpeed = value;
+		}
+		break;
+
 	case APROP_CrouchSpeedFactor:
 		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
 			static_cast<APlayerPawn*>(actor)->CrouchSpeedFactor = FIXED2FLOAT(value);
@@ -4743,6 +4749,15 @@ int DLevelScript::GetActorProperty (int tid, int property, const SDWORD *stack, 
 							{
 								return 0;
 							}
+	case APROP_WallClimbSpeed:
+							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
+							{
+								return static_cast<APlayerPawn *>(actor)->WallClimbSpeed;
+							}
+							else
+							{
+								return 0;
+							}
 	case APROP_CrouchSpeedFactor:
 							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
 							{
@@ -4913,6 +4928,7 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_AirThrustZUp:
 		case APROP_AirThrustZDown:
 		case APROP_MaxWallClimbTics:
+		case APROP_WallClimbSpeed:
 		case APROP_CrouchSpeedFactor:
 		case APROP_WalkSpeedFactor:
 		case APROP_AirAcceleration:
