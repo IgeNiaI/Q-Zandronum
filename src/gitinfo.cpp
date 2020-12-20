@@ -39,47 +39,25 @@
 
 const char *GetGitDescription()
 {
-	// [BB]
-	return HG_REVISION_HASH_STRING; // GIT_DESCRIPTION;
+	return GIT_DESCRIPTION;
 }
 
 const char *GetGitHash()
 {
-	// [BB]
-	return HG_REVISION_HASH_STRING; // GIT_HASH;
+	return GIT_HASH;
 }
 
 const char *GetGitTime()
 {
-	// [BB]
-	return HG_TIME; // GIT_TIME;
+	return GIT_TIME;
 }
 
 const char *GetVersionString()
 {
-	// [BB]
-	//if (GetGitDescription()[0] == '\0')
-	{
-		return VERSIONSTR;
-	}
-	/*
-	else
-	{
-		return GIT_DESCRIPTION;
-	}
-	*/
+	return VERSIONSTR;
 }
 
-// [BB]
 const char *GetVersionStringRev()
 {
-	//FString s = DOTVERSIONSTR "-r" HG_TIME;
-	//return s.GetChars();
 	return DOTVERSIONSTR_REV;
-}
-
-// [BB]
-unsigned int GetRevisionNumber()
-{
-	return HG_REVISION_NUMBER;
 }

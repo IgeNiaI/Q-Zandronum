@@ -88,8 +88,8 @@ typedef struct
 	// [BB] Is the server using the latest Skulltag version
 	bool	bNewFormatServer;
 
-	// [BB] Code revision number the server was built with
-	int		iServerRevision;
+	// [geNia] Git commit hash the server was built with
+	const char		*ServerHash;
 
 	// [BB] String the server has sent to use to verify ban list packets.
 	std::string		MasterBanlistVerificationString;

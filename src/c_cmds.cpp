@@ -685,9 +685,21 @@ CCMD (take)
 		Net_WriteWord (0);
 }
 
+CCMD (version)
+{
+	Printf("version:   %s\n", GetVersionString());
+	Printf("changeset: %s\n", GetGitHash());
+	Printf("date:      %s\n", GetGitTime());
+}
+
 CCMD (gameversion)
 {
-	Printf ("%s @ %s\nCommit %s", GetVersionString(), GetGitTime(), GetGitHash());
+	Cmd_gameversion(argv, who, key);
+}
+
+CCMD(version_info)
+{
+	Cmd_gameversion(argv, who, key);
 }
 
 CCMD (print)
@@ -1549,18 +1561,6 @@ CCMD( singleplayer )
 		NETWORK_SetState( NETSTATE_SINGLE );
 		Printf( "Single player emulation enabled.\n" );
 	}
-}
-
-//-----------------------------------------------------------------------------
-//
-// [BB]
-//
-//-----------------------------------------------------------------------------
-CCMD(version_info)
-{
-	Printf ( "changeset: %s\n", GetGitHash() );
-	const time_t hgDate = GetRevisionNumber();
-	Printf ( "date:      %s\n", asctime ( gmtime ( &hgDate ) ) );
 }
 
 //-----------------------------------------------------------------------------
