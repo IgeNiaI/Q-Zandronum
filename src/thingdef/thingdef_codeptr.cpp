@@ -1697,6 +1697,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 	{
 		fixed_t shootangle = self->angle;
 		fixed_t SavedPlayerPitch = self->pitch;
+		self->pitch -= pitch;
 
 		if (!(zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE))
 		{
@@ -1722,16 +1723,14 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 			{
 				// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
 				float distance = FIXED2FLOAT(trace.Distance);
-				if (SpawnOfs_XY)
-				{
-					float xyOffs = float(atan2(distance, SpawnOfs_XY) * 180.f / PI);
-					shootangle += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
-				}
-				if (SpawnHeight)
-				{
-					float zOffs = float(atan2(distance, FIXED2FLOAT(SpawnHeight)) * 180.f / PI);
-					self->pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
-				}
+
+				float xyOffs = float(atan2(distance, SpawnOfs_XY) * 180.f / PI);
+				shootangle += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
+
+				fixed_t offset = (player->mo->height >> 1) - player->mo->floorclip - player->viewheight
+					+ FixedMul(player->mo->AttackZOffset - 4 * FRACUNIT, player->crouchfactor);
+				float zOffs = float((atan2(distance, FIXED2FLOAT(SpawnHeight + offset))) * 180.f / PI);
+				self->pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
 			}
 			else
 			{
@@ -1740,8 +1739,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 			}
 		}
 
-		self->pitch -= pitch;
-		shootangle += Angle;
+		if (Flags & FPF_AIMATANGLE)
+			shootangle += Angle;
 
 		angle_t ang = (self->angle - ANGLE_90) >> ANGLETOFINESHIFT;
 		fixed_t x = SpawnOfs_XY * finecosine[ang];

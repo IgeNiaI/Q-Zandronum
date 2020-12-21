@@ -7515,24 +7515,17 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 
 	if (z != ONFLOORZ && z != ONCEILINGZ)
 	{
-		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
+		// Doom spawns missiles 4 units lower than hitscan attacks for players.
+		z += source->z + (source->height >> 1) - source->floorclip;
+		if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
 		{
-			// Doom spawns missiles 4 units lower than hitscan attacks for players.
-			z += source->z + (source->height >> 1) - source->floorclip;
-			if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
-			{
-				z += FixedMul(source->player->mo->AttackZOffset - 4 * FRACUNIT, source->player->crouchfactor);
-			}
-			else
-			{
-				z += 4 * FRACUNIT;
-			}
+			z += FixedMul(source->player->mo->AttackZOffset - 4 * FRACUNIT, source->player->crouchfactor);
 		}
 		else
 		{
-			z += source->z - source->floorclip + source->player->viewheight;
+			z += 4 * FRACUNIT;
 		}
-		
+
 		// Do not fire beneath the floor.
 		if (z < source->floorz)
 		{
