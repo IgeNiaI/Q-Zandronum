@@ -208,7 +208,6 @@ void DFloor::Tick ()
 				}
 			}
 
-			m_Sector->floordata = NULL; //jff 2/22/98
 			StopInterpolation();
 
 			//jff 2/26/98 implement stair retrigger lockout while still building
