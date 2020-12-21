@@ -110,6 +110,8 @@ public:
 	// [BB] We also call this when a player dies. These special items also need to be dropped then.
 	virtual void DropImportantItems( bool bLeavingGame, AActor *pSource = NULL );
 
+	virtual int WalkCrouchState ();
+	virtual bool ShouldPlayFootstep ();
 	virtual void TweakSpeeds (int &forwardmove, int &sidemove);
 	virtual void MorphPlayerThink ();
 	virtual void ActivateMorphWeapon ();
@@ -122,6 +124,7 @@ public:
 	virtual void Destroy( );
 
 	// Quake movement
+	float QCrouchWalkFactor(const float forward, const float side);
 	float QTweakSpeed();
 	void  QFriction(FVector3 &vel, const float speedlimit, const float friction);
 	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);
@@ -162,8 +165,9 @@ public:
 	fixed_t		GruntSpeed;
 	fixed_t		FallingScreamMinSpeed, FallingScreamMaxSpeed;
 	fixed_t		ViewHeight;
-	fixed_t		ForwardMove1, ForwardMove2;
-	fixed_t		SideMove1, SideMove2;
+	fixed_t		ForwardMove1, ForwardMove2, ForwardMove3, ForwardMove4;
+	fixed_t		SideMove1, SideMove2, SideMove3, SideMove4;
+	bool		FootstepsEnabled1, FootstepsEnabled2, FootstepsEnabled3, FootstepsEnabled4;
 	FTextureID	ScoreIcon;
 	int			SpawnMask;
 	FNameNoInit	MorphWeapon;
@@ -185,8 +189,6 @@ public:
 	fixed_t		AirThrustZDown;
 	int			MaxWallClimbTics;
 	fixed_t		WallClimbSpeed;
-	float		CrouchSpeedFactor;
-	float		WalkSpeedFactor;
 	fixed_t		AirAcceleration;
 	fixed_t		DashForce;
 	int			DashDelay;
