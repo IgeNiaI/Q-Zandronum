@@ -2513,28 +2513,78 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, aircapacity, F, PlayerPawn)
 //==========================================================================
 //
 //==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, forwardmove, F_f, PlayerPawn)
+DEFINE_CLASS_PROPERTY_PREFIX(player, forwardmove, F_f_f_f, PlayerPawn)
 {
 	PROP_FIXED_PARM(m, 0);
-	defaults->ForwardMove1 = defaults->ForwardMove2 = m;
+	defaults->ForwardMove1 = defaults->ForwardMove2 = defaults->ForwardMove3 = defaults->ForwardMove4 = m;
 	if (PROP_PARM_COUNT > 1)
 	{
 		PROP_FIXED_PARM(m2, 1);
 		defaults->ForwardMove2 = m2;
+
+		if (PROP_PARM_COUNT > 2)
+		{
+			PROP_FIXED_PARM(m3, 2);
+			defaults->ForwardMove3 = m3;
+
+			if (PROP_PARM_COUNT > 3)
+			{
+				PROP_FIXED_PARM(m4, 3);
+				defaults->ForwardMove4 = m4;
+			}
+		}
 	}
 }
 
 //==========================================================================
 //
 //==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, sidemove, F_f, PlayerPawn)
+DEFINE_CLASS_PROPERTY_PREFIX(player, sidemove, F_f_f_f, PlayerPawn)
 {
 	PROP_FIXED_PARM(m, 0);
-	defaults->SideMove1 = defaults->SideMove2 = m;
+	defaults->SideMove1 = defaults->SideMove2 = defaults->SideMove3 = defaults->SideMove4 = m;
 	if (PROP_PARM_COUNT > 1)
 	{
 		PROP_FIXED_PARM(m2, 1);
 		defaults->SideMove2 = m2;
+
+		if (PROP_PARM_COUNT > 2)
+		{
+			PROP_FIXED_PARM(m3, 2);
+			defaults->SideMove3 = m3;
+
+			if (PROP_PARM_COUNT > 3)
+			{
+				PROP_FIXED_PARM(m4, 3);
+				defaults->SideMove4 = m4;
+			}
+		}
+	}
+}
+
+//==========================================================================
+//
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, footstepsenabled, I_i_i_i, PlayerPawn)
+{
+	PROP_INT_PARM(m, 0);
+	defaults->FootstepsEnabled1 = defaults->FootstepsEnabled2 = defaults->FootstepsEnabled3 = defaults->FootstepsEnabled4 = m ? true : false;
+	if (PROP_PARM_COUNT > 1)
+	{
+		PROP_INT_PARM(m2, 1);
+		defaults->FootstepsEnabled2 = m2 ? true : false;
+
+		if (PROP_PARM_COUNT > 2)
+		{
+			PROP_INT_PARM(m3, 2);
+			defaults->FootstepsEnabled3 = m3 ? true : false;
+
+			if (PROP_PARM_COUNT > 3)
+			{
+				PROP_INT_PARM(m4, 3);
+				defaults->FootstepsEnabled4 = m4 ? true : false;
+			}
+		}
 	}
 }
 
@@ -2951,24 +3001,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbspeed, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(i, 0);
 	defaults->WallClimbSpeed = i;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, crouchspeedfactor, F, PlayerPawn)
-{
-	PROP_FLOAT_PARM(f, 0);
-	defaults->CrouchSpeedFactor = f;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, walkspeedfactor, F, PlayerPawn)
-{
-	PROP_FLOAT_PARM(f, 0);
-	defaults->WalkSpeedFactor = f;
 }
 
 //==========================================================================

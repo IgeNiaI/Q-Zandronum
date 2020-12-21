@@ -25,8 +25,9 @@ Actor PlayerPawn : Actor native
 	Player.FallingScreamSpeed 35,40
 	Player.ViewHeight 41
 	Player.UseRange 64
-	Player.ForwardMove 1,1
-	Player.SideMove 1,1
+	Player.ForwardMove 1,1,1,1
+	Player.SideMove 1,1,1,1
+	Player.FootstepsEnabled 1,1,1,1
 	Player.ColorRange 0,0
 	Player.SoundClass "player"
 	Player.DamageScreenColor "ff 00 00"
@@ -48,8 +49,6 @@ Actor PlayerPawn : Actor native
 	Player.AirThrustZDown 0
 	Player.MaxWallClimbTics 70
 	Player.WallClimbSpeed 5.0
-	Player.CrouchSpeedFactor 0.5
-	Player.WalkSpeedFactor 0.75
 	Player.AirAcceleration 0.25
 	Player.DashForce 10
 	Player.DashDelay 35

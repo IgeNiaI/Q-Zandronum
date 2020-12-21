@@ -227,10 +227,10 @@ short			consistancy[MAXPLAYERS][BACKUPTICS];
  
 #define TURBOTHRESHOLD	12800
 
-float	 		normforwardmove[2] = {0x19, 0x32};		// [RH] For setting turbo from console
-float	 		normsidemove[2] = {0x18, 0x28};			// [RH] Ditto
+float	 		normforwardmove[4] = {0x19, 0x32, 0xD, 0x19};		// [RH] For setting turbo from console
+float	 		normsidemove[4] = {0x18, 0x28, 0xC, 0x18};			// [RH] Ditto
 
-fixed_t			forwardmove[2], sidemove[2];
+fixed_t			forwardmove[4], sidemove[4];
 fixed_t 		angleturn[4] = {640, 1280, 320, 320};		// + slow turn
 fixed_t			flyspeed[2] = {1*256, 3*256};
 int				lookspeed[2] = {450, 512};
@@ -317,8 +317,12 @@ CUSTOM_CVAR (Float, turbo, 100.f, 0)
 
 		forwardmove[0] = (int)(normforwardmove[0]*scale);
 		forwardmove[1] = (int)(normforwardmove[1]*scale);
+		forwardmove[2] = (int)(normforwardmove[2]*scale);
+		forwardmove[3] = (int)(normforwardmove[3]*scale);
 		sidemove[0] = (int)(normsidemove[0]*scale);
 		sidemove[1] = (int)(normsidemove[1]*scale);
+		sidemove[2] = (int)(normsidemove[2]*scale);
+		sidemove[3] = (int)(normsidemove[3]*scale);
 	}
 }
 
@@ -687,7 +691,16 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	cmd->consistancy = consistancy[consoleplayer][(maketic/ticdup)%BACKUPTICS];
 
 	strafe = Button_Strafe.bDown;
-	speed = Button_Speed.bDown ^ (int)cl_run;
+	if (Button_Speed.bDown ^ (int)cl_run)
+	{
+		// player is running
+		speed = Button_Crouch.bDown ? 3 : 1;
+	}
+	else
+	{
+		// player is walking
+		speed = Button_Crouch.bDown ? 2 : 0;
+	}
 
 	forward = side = fly = 0;
 

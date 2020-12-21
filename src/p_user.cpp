@@ -101,6 +101,7 @@ CUSTOM_CVAR (Float, cl_spectatormove, 1.0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG) {
 		self = -100.0;
 }
 
+EXTERN_CVAR (Bool, cl_run)
 EXTERN_CVAR (Bool, cl_spykiller)
 EXTERN_CVAR (Bool, cl_weaponsway)
 
@@ -734,8 +735,12 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< SpawnMask
 		<< ForwardMove1
 		<< ForwardMove2
+		<< ForwardMove3
+		<< ForwardMove4
 		<< SideMove1
 		<< SideMove2
+		<< SideMove3
+		<< SideMove4
 		<< ScoreIcon
 		<< InvFirst
 		<< InvSel
@@ -750,8 +755,6 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< SecondJumpZ
 		<< MaxWallClimbTics
 		<< WallClimbSpeed
-		<< CrouchSpeedFactor
-		<< WalkSpeedFactor
 		<< AirAcceleration
 		<< DashForce
 		<< DashDelay
@@ -2275,6 +2278,54 @@ void APlayerPawn::DropImportantItems( bool bLeavingGame, AActor *pSource )
 
 //===========================================================================
 //
+// APlayerPawn :: WalkCrouchState
+//
+// Detects if a player is walking (0), running (1), crouching (2) or crouch running (3)
+//
+//===========================================================================
+
+int APlayerPawn::WalkCrouchState ()
+{
+	// Make sure this code is equal to the one found in g_game.cpp
+	if (Button_Speed.bDown ^ (int)cl_run)
+	{
+		// player is running
+		return Button_Crouch.bDown ? 3 : 1;
+	}
+	else
+	{
+		// player is walking
+		return Button_Crouch.bDown ? 2 : 0;
+	}
+}
+
+//===========================================================================
+//
+// APlayerPawn :: ShouldPlayFootstep
+//
+// Tells if should play footsteps based on walk/crouch state
+//
+//===========================================================================
+
+bool APlayerPawn::ShouldPlayFootstep ()
+{
+	switch (WalkCrouchState())
+	{
+	case 0: // player is walking
+		return FootstepsEnabled1;
+	case 1: // player is running
+		return FootstepsEnabled2;
+	case 2: // player is crouching
+		return FootstepsEnabled3;
+	case 3: // player is crouch running
+		return FootstepsEnabled4;
+	}
+
+	return true;
+}
+
+//===========================================================================
+//
 // APlayerPawn :: TweakSpeeds
 //
 //===========================================================================
@@ -2297,6 +2348,27 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 		side = clamp(side, -0x1800, 0x1800);
 	}
 
+	// [GRB]
+	int speed = WalkCrouchState();
+	switch (speed) {
+		case 0: // walking
+			forward = FixedMul(forward, ForwardMove1);
+			side = FixedMul(side, SideMove1);
+			break;
+		case 1: // running
+			forward = FixedMul(forward, ForwardMove2);
+			side = FixedMul(side, SideMove2);
+			break;
+		case 2: // crouching
+			forward = FixedMul(forward, ForwardMove3);
+			side = FixedMul(side, SideMove3);
+			break;
+		case 3: // crouch running
+			forward = FixedMul(forward, ForwardMove4);
+			side = FixedMul(side, SideMove4);
+			break;
+	}
+
 	// [BC] This comes out to 50%, so we can use this for the turbosphere.
 	if (!player->morphTics && Inventory != NULL)
 	{
@@ -2311,28 +2383,6 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 		forward = (LONG)( forward * 1.25 );
 		side = (LONG)( side * 1.25 );
 	}
-}
-
-//===========================================================================
-//
-// CrouchWalkFactor
-//
-//===========================================================================
-
-float CrouchWalkFactor(player_t* player, ticcmd_t *cmd)
-{
-	if (player->CanCrouch() && player->crouchfactor < FRACUNIT && !(player->mo->flags & MF_NOGRAVITY) && player->mo->waterlevel < 2) // player crouched
-	{
-		// Interpolate current crouch speed between full crouch and no crouch
-		float LerpValue = (FIXED2FLOAT(player->crouchfactor) - FIXED2FLOAT(player->mo->CrouchScale)) / (1.f - FIXED2FLOAT(player->mo->CrouchScale));
-		return player->mo->CrouchSpeedFactor + (1.f - player->mo->CrouchSpeedFactor) * LerpValue;
-	}
-	else if (cmd->ucmd.buttons & BT_SPEED)
-	{
-		return player->mo->WalkSpeedFactor;
-	}
-
-	return 1.f;
 }
 
 //===========================================================================
@@ -2916,6 +2966,39 @@ float DotProduct(const FVector3 &v, const FVector3 &t)
 // Quake movement specifics
 //***************************************************
 
+float APlayerPawn::QCrouchWalkFactor(const float forward, const float side)
+{
+	FVector2 acceleration = FVector2 (FIXED2FLOAT(forward), -FIXED2FLOAT(side) * 1.25f).Unit();
+	acceleration.Y /= 1.25f;
+
+	// [Dusk] Let the user move at whatever speed they desire when spectating.
+	if (player->bSpectating)
+	{
+		return (float) (acceleration.Length() * cl_spectatormove);
+	}
+
+	// Strife's player can't run when its healh is below 10
+	if (health <= RunHealth)
+	{
+		return (float) FVector2(acceleration.X * FIXED2FLOAT(0x1900), acceleration.Y * FIXED2FLOAT(0x1800)).Length();
+	}
+
+	// [GRB]
+	int speed = WalkCrouchState();
+	switch (speed) {
+		case 0: // walking
+			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove1) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove1) * 0.5f).Length();
+		case 1: // running
+			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove2),			acceleration.Y * FIXED2FLOAT(SideMove2)).Length();
+		case 2: // crouching
+			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove3) * 0.25f,	acceleration.Y * FIXED2FLOAT(SideMove3) * 0.25f).Length();
+		case 3: // crouch running
+			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove4) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove4) * 0.5f).Length();
+	}
+
+	return 1.f;
+}
+
 float APlayerPawn::QTweakSpeed()
 {
 	// Powerup speed multi
@@ -2977,13 +3060,13 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 {
 	float currentspeed = DotProduct(wishdir, vel);
 	float addspeed = wishspeed - currentspeed;
-	if (addspeed <= 0.f) { return; }
+	if (addspeed <= 0.f)
+		return;
 
 	float accelerationspeed = MIN(accel * wishspeed / TICRATE, addspeed);
 	FVector3 velDelta = wishdir * accelerationspeed;
+
 	vel += velDelta;
-	player->velx += FLOAT2FIXED(velDelta.X);
-	player->vely += FLOAT2FIXED(velDelta.Y);
 }
 
 //==========================================================================
@@ -3183,11 +3266,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			fm = FixedMul(fm, player->mo->Speed);
 			sm = FixedMul(sm, player->mo->Speed);
 
-			int crouchWalkFactor = FLOAT2FIXED(CrouchWalkFactor(player, cmd));
-			fm = FixedMul(fm, crouchWalkFactor);
-			sm = FixedMul(sm, crouchWalkFactor);
-			bobfactor = FixedMul(bobfactor, crouchWalkFactor);
-
 			forwardmove = Scale(fm, movefactor * 35, TICRATE << 8);
 			sidemove = Scale(sm, movefactor * 35, TICRATE << 8);
 
@@ -3242,7 +3320,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		velocity = (fixed_t) TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length();
 
 		if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
-			(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
+			(player->mo->flags & MF_NOGRAVITY) || !player->mo->ShouldPlayFootstep() || (cmd->ucmd.buttons & BT_JUMP))
 		{
 			player->stepInterval = player->mo->FootstepInterval / 2;
 		}
@@ -3485,7 +3563,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
-	float movefactor = CrouchWalkFactor(player, cmd);
+	float movefactor = player->mo->QCrouchWalkFactor(cmd->ucmd.forwardmove, cmd->ucmd.sidemove);
 	float maxgroundspeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.f };
@@ -3725,7 +3803,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		velocity = float(FVector2(vel.X, vel.Y).Length());
 
-		if (!player->onground || velocity <= 3.f || noJump || (cmd->ucmd.buttons & BT_SPEED) || (cmd->ucmd.buttons & BT_JUMP))
+		if (!player->onground || velocity <= 3.f || noJump || !player->mo->ShouldPlayFootstep() || (cmd->ucmd.buttons & BT_JUMP))
 		{
 			player->stepInterval = player->mo->FootstepInterval / 2;
 		}
@@ -4046,7 +4124,7 @@ void P_DeathThink (player_t *player)
 	if (player->mo->MvType > 0 && player->onground)
 	{
 		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-		player->mo->QFriction(vel, FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed(), 6.f);
+		player->mo->QFriction(vel, FIXED2FLOAT(player->mo->Speed) * 12.f, 6.f);
 		player->mo->velx = FLOAT2FIXED(vel.X);
 		player->mo->vely = FLOAT2FIXED(vel.Y);
 		player->mo->velz = FLOAT2FIXED(vel.Z);
