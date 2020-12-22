@@ -4146,6 +4146,10 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 	if ( actor->player && actor->player->bSpectating )
 		return;
 
+	APlayerPawn *playerActor = NULL;
+	if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+		playerActor = static_cast<APlayerPawn *>(actor);
+
 	// [BB]
 	int oldValue = 0;
 
@@ -4196,45 +4200,6 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 
 		break;
 
-	case APROP_Ambush:
-		if (value) actor->flags |= MF_AMBUSH; else actor->flags &= ~MF_AMBUSH;
-		break;
-
-	case APROP_Dropped:
-		if (value) actor->flags |= MF_DROPPED; else actor->flags &= ~MF_DROPPED;
-		break;
-
-	case APROP_Invulnerable:
-		if (value) actor->flags2 |= MF2_INVULNERABLE; else actor->flags2 &= ~MF2_INVULNERABLE;
-		break;
-
-	case APROP_Notarget:
-		if (value) actor->flags3 |= MF3_NOTARGET; else actor->flags3 &= ~MF3_NOTARGET;
-		break;
-
-	case APROP_Notrigger:
-		if (value) actor->flags6 |= MF6_NOTRIGGER; else actor->flags6 &= ~MF6_NOTRIGGER;
-		break;
-
-	case APROP_JumpZ:
-		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-			static_cast<APlayerPawn *>(actor)->JumpZ = value;
-		break; 	// [GRB]
-
-	case APROP_ChaseGoal:
-		if (value)
-			actor->flags5 |= MF5_CHASEGOAL;
-		else
-			actor->flags5 &= ~MF5_CHASEGOAL;
-		break;
-
-	case APROP_Frightened:
-		if (value)
-			actor->flags4 |= MF4_FRIGHTENED;
-		else
-			actor->flags4 &= ~MF4_FRIGHTENED;
-		break;
-
 	case APROP_Friendly:
 		if (value)
 		{
@@ -4248,13 +4213,6 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
-
-	case APROP_SpawnHealth:
-		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-		{
-			static_cast<APlayerPawn *>(actor)->MaxHealth = value;
-		}
-		break;
 
 	case APROP_Gravity:
 		// [BB] Save the original value.
@@ -4330,227 +4288,249 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		break;
 
 	case APROP_ViewHeight:
-		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
+		if (playerActor)
 		{
-			static_cast<APlayerPawn *>(actor)->ViewHeight = value;
-			if (actor->player != NULL)
+			playerActor->ViewHeight = value;
+			if (playerActor->player != NULL)
 			{
-				actor->player->viewheight = value;
+				playerActor->player->viewheight = value;
 			}
 		}
 		break;
 
 	case APROP_AttackZOffset:
-		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-			static_cast<APlayerPawn *>(actor)->AttackZOffset = value;
+		if (playerActor)
+			playerActor->AttackZOffset = value;
 		break;
 
 	case APROP_StencilColor:
 		actor->SetShade(value);
 		break;
 
+
+	// Flags
+		
+	case APROP_Ambush:
+		if (value) actor->flags |= MF_AMBUSH; else actor->flags &= ~MF_AMBUSH;
+		break;
+
+	case APROP_Dropped:
+		if (value) actor->flags |= MF_DROPPED; else actor->flags &= ~MF_DROPPED;
+		break;
+
+	case APROP_Invulnerable:
+		if (value) actor->flags2 |= MF2_INVULNERABLE; else actor->flags2 &= ~MF2_INVULNERABLE;
+		break;
+
+	case APROP_Notarget:
+		if (value) actor->flags3 |= MF3_NOTARGET; else actor->flags3 &= ~MF3_NOTARGET;
+		break;
+
+	case APROP_Notrigger:
+		if (value) actor->flags6 |= MF6_NOTRIGGER; else actor->flags6 &= ~MF6_NOTRIGGER;
+		break;
+
+	case APROP_ChaseGoal:
+		if (value) actor->flags5 |= MF5_CHASEGOAL; else actor->flags5 &= ~MF5_CHASEGOAL;
+		break;
+
+	case APROP_Frightened:
+		if (value) actor->flags4 |= MF4_FRIGHTENED; else actor->flags4 &= ~MF4_FRIGHTENED;
+		break;
+
 	case APROP_DoubleJump:
-		if (value)
-			actor->mvFlags |= MV_DOUBLEJUMP;
-		else
-			actor->mvFlags &= ~MV_DOUBLEJUMP;
+		if (value) actor->mvFlags |= MV_DOUBLEJUMP; else actor->mvFlags &= ~MV_DOUBLEJUMP;
 		break;
 
 	case APROP_CrouchSlide:
-		if (value)
-			actor->mvFlags |= MV_CROUCHSLIDE;
-		else
-			actor->mvFlags &= ~MV_CROUCHSLIDE;
+		if (value) actor->mvFlags |= MV_CROUCHSLIDE; else actor->mvFlags &= ~MV_CROUCHSLIDE;
 		break;
 
 	case APROP_WallJump:
-		if (value)
-			actor->mvFlags |= MV_WALLJUMP;
-		else
-			actor->mvFlags &= ~MV_WALLJUMP;
+		if (value) actor->mvFlags |= MV_WALLJUMP; else actor->mvFlags &= ~MV_WALLJUMP;
 		break;
 
 	case APROP_WallClimb:
-		if (value)
-			actor->mvFlags |= MV_WALLCLIMB;
-		else
-			actor->mvFlags &= ~MV_WALLCLIMB;
+		if (value) actor->mvFlags |= MV_WALLCLIMB; else actor->mvFlags &= ~MV_WALLCLIMB;
 		break;
 
 	case APROP_Dash:
-		if (value)
-			actor->mvFlags |= MV_DASH;
-		else
-			actor->mvFlags &= ~MV_DASH;
+		if (value) actor->mvFlags |= MV_DASH; else actor->mvFlags &= ~MV_DASH;
 		break;
 
 	case APROP_RampJump:
-		if (value)
-			actor->mvFlags |= MV_RAMPJUMP;
-		else
-			actor->mvFlags &= ~MV_RAMPJUMP;
+		if (value) actor->mvFlags |= MV_RAMPJUMP; else actor->mvFlags &= ~MV_RAMPJUMP;
 		break;
 
 	case APROP_Silent:
-		if (value)
-			actor->mvFlags |= MV_SILENT;
-		else
-			actor->mvFlags &= ~MV_SILENT;
+		if (value) actor->mvFlags |= MV_SILENT; else actor->mvFlags &= ~MV_SILENT;
 		break;
 
 
+	// Player actor specific
+
+	case APROP_JumpZ:
+		if (playerActor)
+			playerActor->JumpZ = value;
+		break; 	// [GRB]
+
+	case APROP_SpawnHealth:
+		if (playerActor)
+			playerActor->MaxHealth = value;
+		break;
+
 	case APROP_CrouchChangeSpeed:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			value = clamp(value, 655, 65536);
-			static_cast<APlayerPawn*>(actor)->CrouchChangeSpeed = value;
+			playerActor->CrouchChangeSpeed = value;
 		}
 		break;
 
 	case APROP_CrouchScale:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			value = clamp(value, 6553, 58982);
-			static_cast<APlayerPawn*>(actor)->CrouchScale = value;
-			static_cast<APlayerPawn*>(actor)->CrouchScaleHalfWay = (65536 - value) / 2 + value;
+			playerActor->CrouchScale = value;
+			playerActor->CrouchScaleHalfWay = (65536 - value) / 2 + value;
 		}
 		break;
 
 	case APROP_MvType:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			value = clamp(value, 0, MV_TYPES_END - 1);
-			static_cast<APlayerPawn*>(actor)->MvType = value;
+			playerActor->MvType = value;
 		}
 		break;
 
 	case APROP_FootstepInterval:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			if (value < 0) value = 0;
-			static_cast<APlayerPawn*>(actor)->FootstepInterval = value;
+			playerActor->FootstepInterval = value;
 		}
 		break;
 
 	case APROP_FootstepVolume:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			float fvalue = clamp(FIXED2FLOAT(value), 0.f, 2.f);
-			static_cast<APlayerPawn*>(actor)->FootstepVolume = fvalue;
+			playerActor->FootstepVolume = fvalue;
 		}
 		break;
 
 	case APROP_JumpDelay:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			if (value < 0) value = 0;
-			static_cast<APlayerPawn*>(actor)->JumpDelay = value;
+			playerActor->JumpDelay = value;
 		}
 		break;
 
 	case APROP_SecondJumpZ:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->SecondJumpZ = value;
+		if (playerActor) {
+			playerActor->SecondJumpZ = value;
 		}
 		break;
 
 	case APROP_AirThrustZUp:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->AirThrustZUp = value;
+		if (playerActor) {
+			playerActor->AirThrustZUp = value;
 		}
 		break;
 
 	case APROP_AirThrustZDown:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->AirThrustZDown = value;
+		if (playerActor) {
+			playerActor->AirThrustZDown = value;
 		}
 		break;
 
 	case APROP_WallClimbSpeed:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->WallClimbSpeed = value;
+		if (playerActor) {
+			playerActor->WallClimbSpeed = value;
 		}
 		break;
 
 	case APROP_WallClimbMaxTics:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			if (value < 0) value = 0;
-			static_cast<APlayerPawn*>(actor)->WallClimbMaxTics = FIXED2FLOAT(value);
+			playerActor->WallClimbMaxTics = FIXED2FLOAT(value);
 		}
 		break;
 
 	case APROP_WallClimbRegen:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			if (value < 0) value = 0;
-			static_cast<APlayerPawn*>(actor)->WallClimbRegen = FIXED2FLOAT(value);
+			playerActor->WallClimbRegen = FIXED2FLOAT(value);
 		}
 		break;
 
 	case APROP_AirAcceleration:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->AirAcceleration = value;
+		if (playerActor) {
+			playerActor->AirAcceleration = value;
 		}
 		break;
 
 	case APROP_DashForce:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->DashForce = value;
+		if (playerActor) {
+			playerActor->DashForce = value;
 		}
 		break;
 
 	case APROP_DashDelay:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->DashDelay = value;
+		if (playerActor) {
+			playerActor->DashDelay = value;
 		}
 		break;
 
 	case APROP_VelocityCap:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			if (value < 0) value = 0;
-			static_cast<APlayerPawn*>(actor)->VelocityCap = value;
+			playerActor->VelocityCap = value;
 		}
 		break;
 
 	case APROP_GroundAcceleration:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->GroundAcceleration = FIXED2FLOAT(value);
+		if (playerActor) {
+			playerActor->GroundAcceleration = FIXED2FLOAT(value);
 		}
 		break;
 
 	case APROP_GroundFriction:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->GroundFriction = FIXED2FLOAT(value);
+		if (playerActor) {
+			playerActor->GroundFriction = FIXED2FLOAT(value);
 		}
 		break;
 
 	case APROP_SlideAcceleration:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->SlideAcceleration = FIXED2FLOAT(value);
+		if (playerActor) {
+			playerActor->SlideAcceleration = FIXED2FLOAT(value);
 		}
 		break;
 
 	case APROP_SlideFriction:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->SlideFriction = FIXED2FLOAT(value);
+		if (playerActor) {
+			playerActor->SlideFriction = FIXED2FLOAT(value);
 		}
 		break;
 
 	case APROP_SlideMaxTics:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->SlideMaxTics = FIXED2FLOAT(value);
+		if (playerActor) {
+			playerActor->SlideMaxTics = FIXED2FLOAT(value);
 		}
 		break;
 		
 	case APROP_SlideRegen:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+		if (playerActor) {
 			if (value < 0) value = 0;
-			static_cast<APlayerPawn*>(actor)->SlideRegen = FIXED2FLOAT(value);
+			playerActor->SlideRegen = FIXED2FLOAT(value);
 		}
 		break;
 
 	case APROP_CpmAirAcceleration:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->CpmAirAcceleration = FIXED2FLOAT(value);
+		if (playerActor) {
+			playerActor->CpmAirAcceleration = FIXED2FLOAT(value);
 		}
 		break;
 
 	case APROP_CpmMaxForwardAngleRad:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->CpmMaxForwardAngleRad = FIXED2FLOAT(value);
+		if (playerActor) {
+			playerActor->CpmMaxForwardAngleRad = FIXED2FLOAT(value);
 		}
 		break;
 
@@ -4566,319 +4546,121 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 	}
 }
 
-int DLevelScript::GetActorProperty (int tid, int property, const SDWORD *stack, int stackdepth)
+int DLevelScript::GetActorProperty(int tid, int property, const SDWORD *stack, int stackdepth)
 {
-	AActor *actor = SingleActorFromTID (tid, activator);
+	AActor *actor = SingleActorFromTID(tid, activator);
+	return P_DoGetActorProperty(actor, property, stack, stackdepth);
+}
 
+int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int stackdepth)
+{
 	if (actor == NULL)
 	{
 		return 0;
 	}
+
+	APlayerPawn *playerActor = NULL;
+	if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+		playerActor = static_cast<APlayerPawn *>(actor);
+
 	switch (property)
 	{
-	case APROP_Health:		return actor->health;
-	case APROP_Speed:		return actor->Speed;
-	case APROP_Damage:		return actor->Damage;	// Should this call GetMissileDamage() instead?
-	case APROP_DamageFactor:return actor->DamageFactor;
-	case APROP_Alpha:		return actor->alpha;
-	case APROP_RenderStyle:	for (int style = STYLE_None; style < STYLE_Count; ++style)
-							{ // Check for a legacy render style that matches.
-								if (LegacyRenderStyles[style] == actor->RenderStyle)
-								{
-									return LegacyRenderStyleIndices[style];
-								}
-							}
-							// The current render style isn't expressable as a legacy style,
-							// so pretends it's normal.
-							return STYLE_Normal;
-	case APROP_Gravity:		return actor->gravity;
-	case APROP_Invulnerable:return !!(actor->flags2 & MF2_INVULNERABLE);
-	case APROP_Ambush:		return !!(actor->flags & MF_AMBUSH);
-	case APROP_Dropped:		return !!(actor->flags & MF_DROPPED);
-	case APROP_ChaseGoal:	return !!(actor->flags5 & MF5_CHASEGOAL);
-	case APROP_Frightened:	return !!(actor->flags4 & MF4_FRIGHTENED);
-	case APROP_Friendly:	return !!(actor->flags & MF_FRIENDLY);
-	case APROP_Notarget:	return !!(actor->flags3 & MF3_NOTARGET);
-	case APROP_Notrigger:	return !!(actor->flags6 & MF6_NOTRIGGER);
-	case APROP_Dormant:		return !!(actor->flags2 & MF2_DORMANT);
-	case APROP_SpawnHealth: if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->MaxHealth;
-							}
-							else
-							{
-								return actor->SpawnHealth();
-							}
+	// Generic
+	case APROP_Health:					return actor->health;
+	case APROP_Speed:					return actor->Speed;
+	case APROP_Damage:					return actor->Damage;	// Should this call GetMissileDamage() instead?
+	case APROP_DamageFactor:			return actor->DamageFactor;
+	case APROP_Alpha:					return actor->alpha;
+	case APROP_Gravity:					return actor->gravity;
+	case APROP_Score:					return actor->Score;
+	case APROP_WaterLevel:				return actor->waterlevel;
+	case APROP_ScaleX: 					return actor->scaleX;
+	case APROP_ScaleY: 					return actor->scaleY;
+	case APROP_Mass: 					return actor->Mass;
+	case APROP_Accuracy:				return actor->accuracy;
+	case APROP_Stamina:					return actor->stamina;
+	case APROP_Height:					return actor->height;
+	case APROP_Radius:					return actor->radius;
+	case APROP_ReactionTime:			return actor->reactiontime;
+	case APROP_MeleeRange:				return actor->meleerange;
+	case APROP_StencilColor:			return actor->fillcolor;
 
-	case APROP_JumpZ:		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->JumpZ;	// [GRB]
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_Score:		return actor->Score;
-	case APROP_MasterTID:	return DoGetMasterTID (actor);
-	case APROP_TargetTID:	return (actor->target != NULL)? actor->target->tid : 0;
-	case APROP_TracerTID:	return (actor->tracer != NULL)? actor->tracer->tid : 0;
-	case APROP_WaterLevel:	return actor->waterlevel;
-	case APROP_ScaleX: 		return actor->scaleX;
-	case APROP_ScaleY: 		return actor->scaleY;
-	case APROP_Mass: 		return actor->Mass;
-	case APROP_Accuracy:    return actor->accuracy;
-	case APROP_Stamina:     return actor->stamina;
-	case APROP_Height:		return actor->height;
-	case APROP_Radius:		return actor->radius;
-	case APROP_ReactionTime:return actor->reactiontime;
-	case APROP_MeleeRange:	return actor->meleerange;
-	case APROP_ViewHeight:	if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->ViewHeight;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_AttackZOffset:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->AttackZOffset;
-							}
-							else
-							{
-								return 0;
-							}
+	// Strings
+	case APROP_SeeSound:				return GlobalACSStrings.AddString(actor->SeeSound, stack, stackdepth);
+	case APROP_AttackSound:				return GlobalACSStrings.AddString(actor->AttackSound, stack, stackdepth);
+	case APROP_PainSound:				return GlobalACSStrings.AddString(actor->PainSound, stack, stackdepth);
+	case APROP_DeathSound:				return GlobalACSStrings.AddString(actor->DeathSound, stack, stackdepth);
+	case APROP_ActiveSound:				return GlobalACSStrings.AddString(actor->ActiveSound, stack, stackdepth);
+	case APROP_Species:					return GlobalACSStrings.AddString(actor->GetSpecies(), stack, stackdepth);
+	case APROP_NameTag:					return GlobalACSStrings.AddString(actor->GetTag(), stack, stackdepth);
 
-	case APROP_SeeSound:	return GlobalACSStrings.AddString(actor->SeeSound, stack, stackdepth);
-	case APROP_AttackSound:	return GlobalACSStrings.AddString(actor->AttackSound, stack, stackdepth);
-	case APROP_PainSound:	return GlobalACSStrings.AddString(actor->PainSound, stack, stackdepth);
-	case APROP_DeathSound:	return GlobalACSStrings.AddString(actor->DeathSound, stack, stackdepth);
-	case APROP_ActiveSound:	return GlobalACSStrings.AddString(actor->ActiveSound, stack, stackdepth);
-	case APROP_Species:		return GlobalACSStrings.AddString(actor->GetSpecies(), stack, stackdepth);
-	case APROP_NameTag:		return GlobalACSStrings.AddString(actor->GetTag(), stack, stackdepth);
-	case APROP_StencilColor:return actor->fillcolor;
-	case APROP_DoubleJump:	return !!(actor->mvFlags & MV_DOUBLEJUMP);
-	case APROP_CrouchSlide:	return !!(actor->mvFlags & MV_CROUCHSLIDE);
-	case APROP_WallJump:	return !!(actor->mvFlags & MV_WALLJUMP);
-	case APROP_WallClimb:	return !!(actor->mvFlags & MV_WALLCLIMB);
-	case APROP_Dash:		return !!(actor->mvFlags & MV_DASH);
-	case APROP_RampJump:	return !!(actor->mvFlags & MV_RAMPJUMP);
-	case APROP_Silent:		return !!(actor->mvFlags & MV_SILENT);
-	case APROP_CrouchChangeSpeed:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->CrouchChangeSpeed;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_CrouchScale:	if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->CrouchScale;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_MvType:		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->MvType;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_FootstepInterval:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->FootstepInterval;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_FootstepVolume:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->FootstepVolume );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_JumpDelay:	if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->JumpDelay;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_SecondJumpZ:	if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->SecondJumpZ;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_AirThrustZUp:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->AirThrustZUp;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_AirThrustZDown:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->AirThrustZDown;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_WallClimbSpeed:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->WallClimbSpeed;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_WallClimbMaxTics:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->WallClimbMaxTics );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_WallClimbRegen:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->WallClimbRegen );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_AirAcceleration:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->AirAcceleration;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_DashForce:	if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->DashForce;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_DashDelay:	if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->DashDelay;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_VelocityCap:	if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->VelocityCap;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_GroundAcceleration:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->GroundAcceleration );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_GroundFriction:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->GroundFriction );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_SlideAcceleration:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->SlideAcceleration );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_SlideFriction:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->SlideFriction );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_SlideMaxTics:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->SlideMaxTics );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_SlideRegen:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->SlideRegen );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_CpmAirAcceleration:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->CpmAirAcceleration );
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_CpmMaxForwardAngleRad:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->CpmMaxForwardAngleRad );
-							}
-							else
-							{
-								return 0;
-							}
-	default:				return 0;
+	// Flags
+	case APROP_Invulnerable:			return !!(actor->flags2 & MF2_INVULNERABLE);
+	case APROP_Ambush:					return !!(actor->flags & MF_AMBUSH);
+	case APROP_Dropped:					return !!(actor->flags & MF_DROPPED);
+	case APROP_ChaseGoal:				return !!(actor->flags5 & MF5_CHASEGOAL);
+	case APROP_Frightened:				return !!(actor->flags4 & MF4_FRIGHTENED);
+	case APROP_Friendly:				return !!(actor->flags & MF_FRIENDLY);
+	case APROP_Notarget:				return !!(actor->flags3 & MF3_NOTARGET);
+	case APROP_Notrigger:				return !!(actor->flags6 & MF6_NOTRIGGER);
+	case APROP_Dormant:					return !!(actor->flags2 & MF2_DORMANT);
+	case APROP_DoubleJump:				return !!(actor->mvFlags & MV_DOUBLEJUMP);
+	case APROP_CrouchSlide:				return !!(actor->mvFlags & MV_CROUCHSLIDE);
+	case APROP_WallJump:				return !!(actor->mvFlags & MV_WALLJUMP);
+	case APROP_WallClimb:				return !!(actor->mvFlags & MV_WALLCLIMB);
+	case APROP_Dash:					return !!(actor->mvFlags & MV_DASH);
+	case APROP_RampJump:				return !!(actor->mvFlags & MV_RAMPJUMP);
+	case APROP_Silent:					return !!(actor->mvFlags & MV_SILENT);
+
+	// Player actor specitic
+	case APROP_SpawnHealth:				return playerActor ? playerActor->MaxHealth : actor->SpawnHealth();
+	case APROP_JumpZ:					return playerActor ? playerActor->JumpZ : 0;
+	case APROP_ViewHeight:				return playerActor ? playerActor->ViewHeight : 0;
+	case APROP_AttackZOffset:			return playerActor ? playerActor->JumpZ : 0;
+	case APROP_CrouchChangeSpeed:		return playerActor ? playerActor->CrouchChangeSpeed : 0;
+	case APROP_CrouchScale:				return playerActor ? playerActor->CrouchScale : 0;
+	case APROP_MvType:					return playerActor ? playerActor->MvType : 0;
+	case APROP_FootstepInterval:		return playerActor ? playerActor->FootstepInterval : 0;
+	case APROP_FootstepVolume:			return playerActor ? playerActor->FootstepVolume : 0;
+	case APROP_JumpDelay:				return playerActor ? playerActor->JumpDelay : 0;
+	case APROP_SecondJumpZ:				return playerActor ? playerActor->SecondJumpZ : 0;
+	case APROP_AirThrustZUp:			return playerActor ? playerActor->AirThrustZUp : 0;
+	case APROP_AirThrustZDown:			return playerActor ? playerActor->AirThrustZDown : 0;
+	case APROP_WallClimbSpeed:			return playerActor ? playerActor->WallClimbSpeed : 0;
+	case APROP_WallClimbMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbMaxTics) : 0;
+	case APROP_WallClimbRegen:			return playerActor ? FLOAT2FIXED( playerActor->WallClimbRegen) : 0;
+	case APROP_AirAcceleration:			return playerActor ? playerActor->AirAcceleration : 0;
+	case APROP_DashForce:				return playerActor ? playerActor->DashForce : 0;
+	case APROP_DashDelay:				return playerActor ? playerActor->DashDelay : 0;
+	case APROP_VelocityCap:				return playerActor ? playerActor->VelocityCap : 0;
+	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration) : 0;
+	case APROP_GroundFriction:			return playerActor ? FLOAT2FIXED( playerActor->GroundFriction) : 0;
+	case APROP_SlideAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->SlideAcceleration) : 0;
+	case APROP_SlideFriction:			return playerActor ? FLOAT2FIXED( playerActor->SlideFriction) : 0;
+	case APROP_SlideMaxTics:			return playerActor ? FLOAT2FIXED( playerActor->SlideMaxTics) : 0;
+	case APROP_SlideRegen:				return playerActor ? FLOAT2FIXED( playerActor->SlideRegen ) : 0;
+	case APROP_CpmAirAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->CpmAirAcceleration ) : 0;
+	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad ) : 0;
+
+	// Misc
+	case APROP_MasterTID:				return DoGetMasterTID(actor);
+	case APROP_TargetTID:				return (actor->target != NULL) ? actor->target->tid : 0;
+	case APROP_TracerTID:				return (actor->tracer != NULL) ? actor->tracer->tid : 0;
+
+	case APROP_RenderStyle:				for (int style = STYLE_None; style < STYLE_Count; ++style)
+										{ // Check for a legacy render style that matches.
+											if (LegacyRenderStyles[style] == actor->RenderStyle)
+											{
+												return LegacyRenderStyleIndices[style];
+											}
+										}
+										// The current render style isn't expressable as a legacy style,
+										// so pretends it's normal.
+										return STYLE_Normal;
+
+	default:							return 0;
 	}
 }
-
-
 
 int DLevelScript::CheckActorProperty (int tid, int property, int value)
 {
