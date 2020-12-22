@@ -53,7 +53,6 @@ struct FTraceInfo
 	ETraceStatus (*TraceCallback)(FTraceResults &res, void *data);
 	void *TraceCallbackData;
 	DWORD TraceFlags;
-	int inshootthrough;
 
 	// These are required for 3D-floor checking
 	// to create a fake sector with a floor 
@@ -97,7 +96,6 @@ bool Trace (fixed_t x, fixed_t y, fixed_t z, sector_t *sector,
 	inf.TraceCallbackData = callbackdata;
 	inf.TraceFlags = flags;
 	inf.Results = &res;
-	inf.inshootthrough = true;
 	inf.sectorsel=0;
 	memset(&res, 0, sizeof(res));
 	/* // Redundant with the memset
@@ -171,7 +169,6 @@ bool Trace (fixed_t x, fixed_t y, fixed_t z, sector_t *sector,
 						sector->SetTexture(sector_t::ceiling, *rover->top.texture, false);
 						bc=ff_top;
 					}
-					inf.inshootthrough = false;
 				}
 			}
 		}
@@ -397,9 +394,8 @@ bool FTraceInfo::TraceTraverse (int ptflags)
 					for(unsigned int i=0;i<entersector->e->XFloor.ffloors.Size();i++)
 					{
 						F3DFloor * rover=entersector->e->XFloor.ffloors[i];
-						int entershootthrough = !!(rover->flags&FF_SHOOTTHROUGH);
 
-						if (entershootthrough != inshootthrough && rover->flags&FF_EXISTS)
+						if ((rover->flags & WallMask) && (rover->flags & FF_EXISTS))
 						{
 							fixed_t ff_bottom=rover->bottom.plane->ZatPoint(hitx, hity);
 							fixed_t ff_top=rover->top.plane->ZatPoint(hitx, hity);
