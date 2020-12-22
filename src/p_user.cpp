@@ -3152,6 +3152,19 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 	player->isCrouchSliding = isSliding;
 }
 
+bool P_IsClimbAvailable(APlayerPawn *mo) {
+	FTraceResults trace;
+	angle_t angle = mo->angle >> ANGLETOFINESHIFT;
+	fixed_t vx = finecosine[angle];
+	fixed_t vy = finesine[angle];
+	fixed_t traceZ = mo->z + MAX(1, MIN(mo->MaxStepHeight, mo->ViewHeight) - 8 * FRACUNIT);
+
+	Trace(mo->x, mo->y, traceZ, mo->Sector,
+		vx, vy, 0, mo->radius + 8 * FRACUNIT, MF_SOLID, ML_BLOCKING | ML_3DMIDTEX_IMPASS, mo, trace, TRACE_NoSky);
+
+	return (trace.HitType == TRACE_HitWall);
+}
+
 void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 {
 	// Wall climb parameters and sound start/stop
@@ -3186,19 +3199,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	fixed_t velocity = (fixed_t) TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length();
 
 	// Wall proximity check
-	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 16.f)
+	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 1048576) // 1048576 == 16.f
 	{
-		FTraceResults trace;
-		angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
-		fixed_t vx = finecosine[angle];
-		fixed_t vy = finesine[angle];
-		fixed_t traceZ = player->mo->z + MAX(0, MIN(player->mo->MaxStepHeight, player->mo->ViewHeight)) - 8 * FRACUNIT;
-
-		Trace(player->mo->x, player->mo->y, traceZ, player->mo->Sector,
-			vx, vy, 0, (player->mo->radius * 7) / 5, MF_SOLID, ML_BLOCK_PLAYERS | ML_BLOCKEVERYTHING, player->mo, trace, TRACE_NoSky);
-
-		if (trace.HitType == TRACE_HitWall)
-			isClimbing = 1;
+		isClimbing = P_IsClimbAvailable(player->mo);
 	}
 
 	if (isClimbing)
@@ -3597,8 +3600,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		noJump = true;
 
-		// Reset wall climb tics
-		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + 1);
+		// Regen wall climb tics
+		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3623,7 +3626,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		noJump = true;
 
-		// Reset wall climb tics
+		// Regen wall climb tics
 		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
 	}
 	else
@@ -3632,17 +3635,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
 			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxgroundspeed + 2.f)
 		{
-			FTraceResults trace;
-			angle_t angle = player->mo->angle >> ANGLETOFINESHIFT;
-			fixed_t vx = finecosine[angle];
-			fixed_t vy = finesine[angle];
-			fixed_t traceZ = player->mo->z + MAX(0, MIN(player->mo->MaxStepHeight, player->mo->ViewHeight)) - 8 * FRACUNIT;
-
-			Trace(player->mo->x, player->mo->y, traceZ, player->mo->Sector,
-				vx, vy, 0, (player->mo->radius * 7) / 5, MF_SOLID, ML_BLOCK_PLAYERS | ML_BLOCKEVERYTHING, player->mo, trace, TRACE_NoSky);
-
-			if (trace.HitType == TRACE_HitWall)
-				isClimbing = true;
+			isClimbing = P_IsClimbAvailable(player->mo);
 		}
 
 		if (isClimbing)
