@@ -303,7 +303,7 @@ player_t::player_t()
   chickenPeck(0),
   jumpTics(0),
   onground(0),
-  doubleJumpState(0),
+  secondJumpState(0),
   crouchSlideTics(0),
   isCrouchSliding(0),
   wallClimbTics(0),
@@ -446,7 +446,7 @@ player_t &player_t::operator=(const player_t &p)
 	chickenPeck = p.chickenPeck;
 	jumpTics = p.jumpTics;
 	onground = p.onground;
-	doubleJumpState = p.doubleJumpState;
+	secondJumpState = p.secondJumpState;
 	crouchSlideTics = p.crouchSlideTics;
 	isCrouchSliding = p.isCrouchSliding;
 	wallClimbTics = p.wallClimbTics;
@@ -3351,7 +3351,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	if (player->onground)
 	{
-		player->doubleJumpState = DJ_AVAILABLE;
+		player->secondJumpState = SJ_AVAILABLE;
 
 		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
 			player->jumpTics = player->mo->JumpDelay;
@@ -3468,7 +3468,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			}
 			// [Ivory]: Double Jump and wall jump
 			else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
-				&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
+				&& player->secondJumpState == SJ_READY && level.IsJumpingAllowed())
 			{
 				fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
 
@@ -3524,13 +3524,13 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 						player->mo->velz += SecondJumpVelz;
 					}
 
-					player->doubleJumpState = DJ_NOT_AVAILABLE;
+					player->secondJumpState = SJ_NOT_AVAILABLE;
 				}
 			}
 		}
-		else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
+		else if (!player->onground && player->secondJumpState == SJ_AVAILABLE)
 		{
-			player->doubleJumpState = DJ_READY;
+			player->secondJumpState = SJ_READY;
 		}
 
 		// [geNia] Add additional vertical thrust if player is a key while in the air
@@ -3846,7 +3846,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	if (player->onground)
 	{
-		player->doubleJumpState = DJ_AVAILABLE;
+		player->secondJumpState = SJ_AVAILABLE;
 
 		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
 			player->jumpTics = player->mo->JumpDelay;
@@ -3900,7 +3900,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 		}
 		else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
-			&& player->doubleJumpState == DJ_READY && level.IsJumpingAllowed())
+			&& player->secondJumpState == SJ_READY && level.IsJumpingAllowed())
 		{
 			fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
 
@@ -3956,13 +3956,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					player->mo->velz += SecondJumpVelz;
 				}
 
-				player->doubleJumpState = DJ_NOT_AVAILABLE;
+				player->secondJumpState = SJ_NOT_AVAILABLE;
 			}
 		}
 	}
-	else if (!player->onground && player->doubleJumpState == DJ_AVAILABLE)
+	else if (!player->onground && player->secondJumpState == SJ_AVAILABLE)
 	{
-		player->doubleJumpState = DJ_READY;
+		player->secondJumpState = SJ_READY;
 	}
 
 	// [geNia] Add additional vertical thrust if player is a key while in the air
@@ -5211,7 +5211,7 @@ void player_t::Serialize (FArchive &arc)
 		<< PremorphWeapon
 		<< chickenPeck
 		<< jumpTics
-		<< doubleJumpState
+		<< secondJumpState
 		<< crouchSlideTics
 		<< isCrouchSliding
 		<< wallClimbTics

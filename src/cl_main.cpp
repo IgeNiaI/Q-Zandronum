@@ -2763,7 +2763,7 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->PremorphWeapon = 0;
 	pPlayer->chickenPeck = 0;
 	pPlayer->jumpTics = 0;
-	pPlayer->doubleJumpState = 0;
+	pPlayer->secondJumpState = 0;
 	pPlayer->crouchSlideTics = 0;
 	pPlayer->isCrouchSliding = 0;
 	pPlayer->wallClimbTics = 0;
