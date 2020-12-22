@@ -581,7 +581,7 @@ public:
 	int			stepInterval;
 
 	// [Ivory] movement additions
-	int			doubleJumpState;
+	int			secondJumpState;
 	float		crouchSlideTics;
 	bool		isCrouchSliding;
 	float		wallClimbTics;
@@ -897,12 +897,12 @@ enum
 	MV_TYPES_END
 };
 
-// [geNia] double jump state
+// [geNia] second jump state
 enum
 {
-	DJ_NOT_AVAILABLE,
-	DJ_AVAILABLE,
-	DJ_READY
+	SJ_NOT_AVAILABLE,
+	SJ_AVAILABLE,
+	SJ_READY
 };
 
 #endif // __D_PLAYER_H__
