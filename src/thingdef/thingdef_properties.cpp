@@ -2987,11 +2987,21 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, airthrustzdown, F, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, maxwallclimbtics, I, PlayerPawn)
+DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbregen, F, PlayerPawn)
 {
-	PROP_INT_PARM(i, 0);
+	PROP_FLOAT_PARM(i, 0);
 	if (i < 0) i = 0;
-	defaults->MaxWallClimbTics = i;
+	defaults->WallClimbRegen = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbmaxtics, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->WallClimbMaxTics = i;
 }
 
 //==========================================================================
@@ -3079,9 +3089,19 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, slidefriction, F, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, slidemaxtics, I, PlayerPawn)
+DEFINE_CLASS_PROPERTY_PREFIX(player, slideregen, F, PlayerPawn)
 {
-	PROP_INT_PARM(i, 0);
+	PROP_FLOAT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->SlideRegen = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, slidemaxtics, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(i, 0);
 	defaults->SlideMaxTics = i;
 }
 

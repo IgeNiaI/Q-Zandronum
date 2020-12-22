@@ -4460,16 +4460,23 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
-	case APROP_MaxWallClimbTics:
-		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			if (value < 0) value = 0;
-			static_cast<APlayerPawn*>(actor)->MaxWallClimbTics = value;
-		}
-		break;
-
 	case APROP_WallClimbSpeed:
 		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
 			static_cast<APlayerPawn*>(actor)->WallClimbSpeed = value;
+		}
+		break;
+
+	case APROP_WallClimbMaxTics:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+			if (value < 0) value = 0;
+			static_cast<APlayerPawn*>(actor)->WallClimbMaxTics = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_WallClimbRegen:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+			if (value < 0) value = 0;
+			static_cast<APlayerPawn*>(actor)->WallClimbRegen = FIXED2FLOAT(value);
 		}
 		break;
 
@@ -4524,7 +4531,14 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 
 	case APROP_SlideMaxTics:
 		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
-			static_cast<APlayerPawn*>(actor)->SlideMaxTics = value;
+			static_cast<APlayerPawn*>(actor)->SlideMaxTics = FIXED2FLOAT(value);
+		}
+		break;
+		
+	case APROP_SlideRegen:
+		if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn))) {
+			if (value < 0) value = 0;
+			static_cast<APlayerPawn*>(actor)->SlideRegen = FIXED2FLOAT(value);
 		}
 		break;
 
@@ -4728,19 +4742,28 @@ int DLevelScript::GetActorProperty (int tid, int property, const SDWORD *stack, 
 							{
 								return 0;
 							}
-	case APROP_MaxWallClimbTics:
+	case APROP_WallClimbSpeed:
 							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
 							{
-								return static_cast<APlayerPawn *>(actor)->MaxWallClimbTics;
+								return static_cast<APlayerPawn *>(actor)->WallClimbSpeed;
 							}
 							else
 							{
 								return 0;
 							}
-	case APROP_WallClimbSpeed:
+	case APROP_WallClimbMaxTics:
 							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
 							{
-								return static_cast<APlayerPawn *>(actor)->WallClimbSpeed;
+								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->WallClimbMaxTics );
+							}
+							else
+							{
+								return 0;
+							}
+	case APROP_WallClimbRegen:
+							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
+							{
+								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->WallClimbRegen );
 							}
 							else
 							{
@@ -4818,7 +4841,16 @@ int DLevelScript::GetActorProperty (int tid, int property, const SDWORD *stack, 
 	case APROP_SlideMaxTics:
 							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
 							{
-								return static_cast<APlayerPawn *>(actor)->SlideMaxTics;
+								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->SlideMaxTics );
+							}
+							else
+							{
+								return 0;
+							}
+	case APROP_SlideRegen:
+							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
+							{
+								return FLOAT2FIXED( static_cast<APlayerPawn *>(actor)->SlideRegen );
 							}
 							else
 							{
@@ -4897,8 +4929,9 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_SecondJumpZ:
 		case APROP_AirThrustZUp:
 		case APROP_AirThrustZDown:
-		case APROP_MaxWallClimbTics:
 		case APROP_WallClimbSpeed:
+		case APROP_WallClimbMaxTics:
+		case APROP_WallClimbRegen:
 		case APROP_AirAcceleration:
 		case APROP_DashForce:
 		case APROP_DashDelay:
@@ -4908,6 +4941,7 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_SlideAcceleration:
 		case APROP_SlideFriction:
 		case APROP_SlideMaxTics:
+		case APROP_SlideRegen:
 		case APROP_CpmAirAcceleration:
 		case APROP_CpmMaxForwardAngleRad:
 			return (GetActorProperty(tid, property, NULL, 0) == value);

@@ -47,7 +47,8 @@ Actor PlayerPawn : Actor native
 	Player.SecondJumpZ 8
 	Player.AirThrustZUp 0
 	Player.AirThrustZDown 0
-	Player.MaxWallClimbTics 70
+	Player.WallClimbRegen 2.0
+	Player.WallClimbMaxTics 70
 	Player.WallClimbSpeed 5.0
 	Player.AirAcceleration 0.25
 	Player.DashForce 10
@@ -59,6 +60,7 @@ Actor PlayerPawn : Actor native
 	Player.GroundFriction 6.0
 	Player.SlideAcceleration 10.0
 	Player.SlideFriction 1.0
+	Player.SlideRegen 2.0
 	Player.SlideMaxTics 70
 	
 	// MvType 2 only
