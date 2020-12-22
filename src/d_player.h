@@ -187,7 +187,8 @@ public:
 	fixed_t		SecondJumpZ;
 	fixed_t		AirThrustZUp;
 	fixed_t		AirThrustZDown;
-	int			MaxWallClimbTics;
+	float		WallClimbMaxTics;
+	float		WallClimbRegen;
 	fixed_t		WallClimbSpeed;
 	fixed_t		AirAcceleration;
 	fixed_t		DashForce;
@@ -199,7 +200,8 @@ public:
 	float		GroundFriction;
 	float		SlideAcceleration;
 	float		SlideFriction;
-	int			SlideMaxTics;
+	float		SlideMaxTics;
+	float		SlideRegen;
 
 	// Quake CPM movement only
 	float		CpmAirAcceleration;
@@ -580,9 +582,9 @@ public:
 
 	// [Ivory] movement additions
 	int			doubleJumpState;
-	int			crouchSlideTics;
+	float		crouchSlideTics;
 	bool		isCrouchSliding;
-	int			wallClimbTics;
+	float		wallClimbTics;
 	bool		isWallClimbing;
 	int			dashTics;
 	int			prepareTapValue;

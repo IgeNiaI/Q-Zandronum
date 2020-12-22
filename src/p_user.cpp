@@ -753,8 +753,9 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< MvType
 		<< JumpDelay
 		<< SecondJumpZ
-		<< MaxWallClimbTics
 		<< WallClimbSpeed
+		<< WallClimbMaxTics
+		<< WallClimbRegen
 		<< AirAcceleration
 		<< DashForce
 		<< DashDelay
@@ -763,6 +764,7 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< SlideAcceleration
 		<< SlideFriction
 		<< SlideMaxTics
+		<< SlideRegen
 		<< CpmAirAcceleration
 		<< CpmMaxForwardAngleRad;
 
@@ -3308,7 +3310,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	// set wall climb parameters
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
-		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
 	if (isClimber)
 		P_SetClimbStatus(player, isClimbing);
 
@@ -3596,7 +3598,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb tics
-		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + 1);
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -3622,7 +3624,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Reset wall climb tics
-		player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
 	}
 	else
 	{
@@ -3730,16 +3732,19 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
 				}
 
-				// set slide duration if player can do it.
-				// Duration is proportional to the velocity.
-				if (isSlider && player->mo->velz < 0)
-					player->crouchSlideTics = MIN(FLOAT2FIXED(float(vel.Length()) / 15258.0f), player->mo->SlideMaxTics);
+				// Regen crouch slide tics
+				if (isSlider)
+				{
+					if (player->crouchSlideTics < 0)
+						player->crouchSlideTics = -player->crouchSlideTics;
+					player->crouchSlideTics = MIN(player->mo->SlideMaxTics, player->crouchSlideTics + player->mo->SlideRegen);
+				}
 			}
 			else if (!wasJustThrustedZ)
 			{
 				isSliding = isSlider &&									// player has the flag
 						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
-						   player->crouchSlideTics;						// there is crouch slide charge to spend
+						   player->crouchSlideTics > 0;						// there is crouch slide charge to spend
 
 				// Friction & Acceleration
 				if (isSliding)
@@ -3753,13 +3758,21 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					maxgroundspeed *= movefactor;
 					player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction * floorFriction);
 					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->GroundAcceleration / movefactor * floorFriction);
-					player->crouchSlideTics = 0;
+
+					// Regen crouch slide tics
+					if (isSlider && player->crouchfactor > player->mo->CrouchScaleHalfWay)
+					{
+						if (player->crouchSlideTics > 0)
+							player->crouchSlideTics = -player->crouchSlideTics;
+						player->crouchSlideTics = MAX(-player->mo->SlideMaxTics, player->crouchSlideTics - player->mo->SlideRegen);
+					}
 				}
 
-				// Reset wall climb tics
-				player->wallClimbTics = MIN(player->mo->MaxWallClimbTics, player->wallClimbTics + 1);
+				// Regen wall climb tics
+				if (isClimber)
+					player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
 			}
-			
+
 			// Limit player velocity if enabled
 			if (player->mo->VelocityCap) {
 				velocity = float(FVector2(vel.X, vel.Y).Length());
