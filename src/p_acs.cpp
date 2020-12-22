@@ -4613,39 +4613,39 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_Silent:					return !!(actor->mvFlags & MV_SILENT);
 
 	// Player actor specitic
-	case APROP_SpawnHealth:				return playerActor ? playerActor->MaxHealth : actor->SpawnHealth();
-	case APROP_JumpZ:					return playerActor ? playerActor->JumpZ : 0;
-	case APROP_ViewHeight:				return playerActor ? playerActor->ViewHeight : 0;
-	case APROP_AttackZOffset:			return playerActor ? playerActor->JumpZ : 0;
-	case APROP_CrouchChangeSpeed:		return playerActor ? playerActor->CrouchChangeSpeed : 0;
-	case APROP_CrouchScale:				return playerActor ? playerActor->CrouchScale : 0;
-	case APROP_MvType:					return playerActor ? playerActor->MvType : 0;
-	case APROP_FootstepInterval:		return playerActor ? playerActor->FootstepInterval : 0;
-	case APROP_FootstepVolume:			return playerActor ? playerActor->FootstepVolume : 0;
-	case APROP_JumpDelay:				return playerActor ? playerActor->JumpDelay : 0;
-	case APROP_SecondJumpZ:				return playerActor ? playerActor->SecondJumpZ : 0;
-	case APROP_AirThrustZUp:			return playerActor ? playerActor->AirThrustZUp : 0;
-	case APROP_AirThrustZDown:			return playerActor ? playerActor->AirThrustZDown : 0;
-	case APROP_WallClimbSpeed:			return playerActor ? playerActor->WallClimbSpeed : 0;
-	case APROP_WallClimbMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbMaxTics) : 0;
-	case APROP_WallClimbRegen:			return playerActor ? FLOAT2FIXED( playerActor->WallClimbRegen) : 0;
-	case APROP_AirAcceleration:			return playerActor ? playerActor->AirAcceleration : 0;
-	case APROP_DashForce:				return playerActor ? playerActor->DashForce : 0;
-	case APROP_DashDelay:				return playerActor ? playerActor->DashDelay : 0;
-	case APROP_VelocityCap:				return playerActor ? playerActor->VelocityCap : 0;
-	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration) : 0;
-	case APROP_GroundFriction:			return playerActor ? FLOAT2FIXED( playerActor->GroundFriction) : 0;
-	case APROP_SlideAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->SlideAcceleration) : 0;
-	case APROP_SlideFriction:			return playerActor ? FLOAT2FIXED( playerActor->SlideFriction) : 0;
-	case APROP_SlideMaxTics:			return playerActor ? FLOAT2FIXED( playerActor->SlideMaxTics) : 0;
-	case APROP_SlideRegen:				return playerActor ? FLOAT2FIXED( playerActor->SlideRegen ) : 0;
-	case APROP_CpmAirAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->CpmAirAcceleration ) : 0;
-	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad ) : 0;
+	case APROP_SpawnHealth:				return playerActor ? playerActor->MaxHealth								: actor->SpawnHealth();
+	case APROP_JumpZ:					return playerActor ? playerActor->JumpZ									: 0;
+	case APROP_ViewHeight:				return playerActor ? playerActor->ViewHeight							: 0;
+	case APROP_AttackZOffset:			return playerActor ? playerActor->JumpZ									: 0;
+	case APROP_CrouchChangeSpeed:		return playerActor ? playerActor->CrouchChangeSpeed						: 0;
+	case APROP_CrouchScale:				return playerActor ? playerActor->CrouchScale							: 0;
+	case APROP_MvType:					return playerActor ? playerActor->MvType								: 0;
+	case APROP_FootstepInterval:		return playerActor ? playerActor->FootstepInterval						: 0;
+	case APROP_FootstepVolume:			return playerActor ? FLOAT2FIXED( playerActor->FootstepVolume )			: 0;
+	case APROP_JumpDelay:				return playerActor ? playerActor->JumpDelay								: 0;
+	case APROP_SecondJumpZ:				return playerActor ? playerActor->SecondJumpZ							: 0;
+	case APROP_AirThrustZUp:			return playerActor ? playerActor->AirThrustZUp							: 0;
+	case APROP_AirThrustZDown:			return playerActor ? playerActor->AirThrustZDown						: 0;
+	case APROP_WallClimbSpeed:			return playerActor ? playerActor->WallClimbSpeed						: 0;
+	case APROP_WallClimbMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbMaxTics )		: 0;
+	case APROP_WallClimbRegen:			return playerActor ? FLOAT2FIXED( playerActor->WallClimbRegen )			: 0;
+	case APROP_AirAcceleration:			return playerActor ? playerActor->AirAcceleration						: 0;
+	case APROP_DashForce:				return playerActor ? playerActor->DashForce								: 0;
+	case APROP_DashDelay:				return playerActor ? playerActor->DashDelay								: 0;
+	case APROP_VelocityCap:				return playerActor ? playerActor->VelocityCap							: 0;
+	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration )		: 0;
+	case APROP_GroundFriction:			return playerActor ? FLOAT2FIXED( playerActor->GroundFriction )			: 0;
+	case APROP_SlideAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->SlideAcceleration )		: 0;
+	case APROP_SlideFriction:			return playerActor ? FLOAT2FIXED( playerActor->SlideFriction )			: 0;
+	case APROP_SlideMaxTics:			return playerActor ? FLOAT2FIXED( playerActor->SlideMaxTics )			: 0;
+	case APROP_SlideRegen:				return playerActor ? FLOAT2FIXED( playerActor->SlideRegen )				: 0;
+	case APROP_CpmAirAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->CpmAirAcceleration )		: 0;
+	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad )	: 0;
 
 	// Misc
 	case APROP_MasterTID:				return DoGetMasterTID(actor);
-	case APROP_TargetTID:				return (actor->target != NULL) ? actor->target->tid : 0;
-	case APROP_TracerTID:				return (actor->tracer != NULL) ? actor->tracer->tid : 0;
+	case APROP_TargetTID:				return (actor->target != NULL) ? actor->target->tid						: 0;
+	case APROP_TracerTID:				return (actor->tracer != NULL) ? actor->tracer->tid						: 0;
 
 	case APROP_RenderStyle:				for (int style = STYLE_None; style < STYLE_Count; ++style)
 										{ // Check for a legacy render style that matches.

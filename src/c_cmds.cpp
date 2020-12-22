@@ -694,12 +694,12 @@ CCMD (version)
 
 CCMD (gameversion)
 {
-	Cmd_gameversion(argv, who, key);
+	Cmd_version(argv, who, key);
 }
 
 CCMD(version_info)
 {
-	Cmd_gameversion(argv, who, key);
+	Cmd_version(argv, who, key);
 }
 
 CCMD (print)
