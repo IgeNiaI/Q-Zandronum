@@ -2426,6 +2426,15 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, attackzoffset, F, PlayerPawn)
 //==========================================================================
 //
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, jumpxy, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(z, 0);
+	defaults->JumpXY = z;
+}
+
+//==========================================================================
+//
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, jumpz, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(z, 0);
@@ -2960,10 +2969,38 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, jumpdelay, I, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, secondjumpxy, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(i, 0);
+	defaults->SecondJumpXY = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, secondjumpz, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(i, 0);
 	defaults->SecondJumpZ = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, secondjumpdelay, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->SecondJumpDelay = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, secondjumpamount, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	defaults->SecondJumpAmount = i;
 }
 
 //==========================================================================
@@ -3020,24 +3057,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, airacceleration, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(f, 0);
 	defaults->AirAcceleration = f;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, dashforce, F, PlayerPawn)
-{
-	PROP_FIXED_PARM(i, 0);
-	defaults->DashForce = i;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, dashdelay, I, PlayerPawn)
-{
-	PROP_INT_PARM(i, 0);
-	defaults->DashDelay = i;
 }
 
 //==========================================================================
