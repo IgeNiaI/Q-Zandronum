@@ -308,7 +308,6 @@ player_t::player_t()
   isCrouchSliding(0),
   wallClimbTics(0),
   isWallClimbing(0),
-  dashTics(0),
   prepareTapValue(0),
   lastTapValue(0),
   stepInterval(0),
@@ -451,7 +450,6 @@ player_t &player_t::operator=(const player_t &p)
 	isCrouchSliding = p.isCrouchSliding;
 	wallClimbTics = p.wallClimbTics;
 	isWallClimbing = p.isWallClimbing;
-	dashTics = p.dashTics;
 	prepareTapValue = p.prepareTapValue;
 	lastTapValue = p.lastTapValue;
 	stepInterval = p.stepInterval;
@@ -729,7 +727,13 @@ void APlayerPawn::Serialize (FArchive &arc)
 {
 	Super::Serialize (arc);
 
-	arc << JumpZ
+	arc << JumpXY
+		<< JumpZ
+		<< JumpDelay
+		<< SecondJumpXY
+		<< SecondJumpZ
+		<< SecondJumpDelay
+		<< SecondJumpAmount
 		<< MaxHealth
 		<< RunHealth
 		<< SpawnMask
@@ -751,14 +755,10 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< CrouchScale
 		<< CrouchChangeSpeed
 		<< MvType
-		<< JumpDelay
-		<< SecondJumpZ
 		<< WallClimbSpeed
 		<< WallClimbMaxTics
 		<< WallClimbRegen
 		<< AirAcceleration
-		<< DashForce
-		<< DashDelay
 		<< GroundAcceleration
 		<< GroundFriction
 		<< SlideAcceleration
@@ -888,20 +888,6 @@ void APlayerPawn::PostBeginPlay()
 	else
 	{
 		player->SendPitchLimits();
-
-		if (player->mo)
-		{
-			// [Ivory] no you can't haz both
-			if (player->mo->mvFlags & MV_DOUBLEJUMP)
-			{
-				player->mo->mvFlags &= ~MV_WALLJUMP;
-				player->mo->mvFlags &= ~MV_WALLCLIMB;
-			}
-			else if (player->mo->mvFlags & MV_WALLCLIMB)
-			{
-				player->mo->mvFlags &= ~MV_WALLJUMP;
-			}
-		}
 	}
 }
 
@@ -2413,9 +2399,21 @@ void APlayerPawn::Destroy( void )
 // [Dusk] This is in a separate function now.
 //
 //===========================================================================
-fixed_t APlayerPawn::CalcJumpVelz()
+void APlayerPawn::CalcJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z)
 {
-	fixed_t z = JumpZ * 35 / TICRATE;
+	if (cmd)
+	{
+		TVector2<fixed_t> dir = TVector2<fixed_t>(cmd->ucmd.forwardmove, -cmd->ucmd.sidemove).FixedUnit();
+		dir = TVector2<fixed_t>(
+			FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
+			FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
+			);
+
+		x = FixedMul(dir.X, JumpXY);
+		y = FixedMul(dir.Y, JumpXY);
+	}
+
+	z = JumpZ * 35 / TICRATE;
 
 	// [BC] If the player has the high jump power, double his jump velocity.
 	if ( player->cheats & CF_HIGHJUMP )
@@ -2424,19 +2422,27 @@ fixed_t APlayerPawn::CalcJumpVelz()
 	// [BC] If the player is standing on a spring pad, halve his jump velocity.
 	if ( player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD )
 		z /= 2;
-
-	return z;
 }
 
-fixed_t APlayerPawn::CalcDoubleJumpVelz()
+void APlayerPawn::CalcSecondJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z)
 {
-	fixed_t z = SecondJumpZ * 35 / TICRATE;
+	if (cmd)
+	{
+		TVector2<fixed_t> dir = TVector2<fixed_t>(cmd->ucmd.forwardmove, -cmd->ucmd.sidemove).FixedUnit();
+		dir = TVector2<fixed_t>(
+			FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
+			FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
+			);
+
+		x = FixedMul(dir.X, SecondJumpXY);
+		y = FixedMul(dir.Y, SecondJumpXY);
+	}
+
+	z = SecondJumpZ * 35 / TICRATE;
 
 	// [BC] If the player has the high jump power, double his jump velocity.
 	if (player->cheats & CF_HIGHJUMP)
 		z *= 2;
-
-	return z;
 }
 
 //===========================================================================
@@ -2449,9 +2455,10 @@ fixed_t APlayerPawn::CalcJumpHeight( bool bAddStepZ )
 	// To get the jump height we simulate a jump with the player's jumpZ with
 	// the environment's gravity. The grav equation was copied from p_mobj.cpp.
 	// Should it be made a function?
-	fixed_t velz = CalcJumpVelz(),
-	        grav = (fixed_t)(level.gravity * Sector->gravity * FIXED2FLOAT(gravity) * 81.92),
-	        z = 0;
+	fixed_t  _, velz;
+	CalcJumpVel(NULL, _, _, velz);
+	fixed_t grav = (fixed_t)(level.gravity * Sector->gravity * FIXED2FLOAT(gravity) * 81.92);
+	fixed_t z = 0;
 
 	// This hangs if grav is 0. I'm not sure what to return in such a scenario
 	// so we'll just return 0.
@@ -2663,7 +2670,7 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 	}
 
 	// Set the crouch sprite?
-	if (player->crouchfactor < player->mo->CrouchScaleHalfWay)
+	if (player->crouchfactor <= player->mo->CrouchScaleHalfWay)
 	{
 		if (spritenum == actor->SpawnState->sprite || spritenum == player->mo->crouchsprite) 
 		{
@@ -2685,7 +2692,7 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 		{
 			spritenum = crouchspriteno;
 		}
-		else if (player->playerstate != PST_DEAD && player->crouchfactor < player->mo->CrouchScaleHalfWay)
+		else if (player->playerstate != PST_DEAD && player->crouchfactor <= player->mo->CrouchScaleHalfWay)
 		{
 			scaley = FixedMul(scaley, player->mo->CrouchScale);
 		}
@@ -3077,16 +3084,11 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 //
 //==========================================================================
 
-#define DASH_TAPTIME -10
-
 bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 {
 	// dash cooler
-	if (player->dashTics > 0)
-	{
-		player->dashTics--;
+	if (player->secondJumpTics > 0)
 		return false;
-	}
 
 	bool success = false;
 	int tapValue = cmd->ucmd.forwardmove | cmd->ucmd.sidemove;
@@ -3096,7 +3098,7 @@ bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 	{
 		if (!player->prepareTapValue)
 		{
-			player->dashTics = DASH_TAPTIME;
+			player->secondJumpTics = -10;
 			player->prepareTapValue = tapValue;
 		}
 		else
@@ -3108,21 +3110,15 @@ bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 		}
 	}
 
-	if (secondTapValue && player->dashTics < 0)
+	if (secondTapValue && player->secondJumpTics < 0)
 	{
 		player->prepareTapValue = 0;
-		player->dashTics = player->mo->DashDelay; // set the dash cooler
 
 		success = true;
 	}
-	else
+	else if (player->secondJumpTics >= 0)
 	{
-		player->dashTics++;
-
-		if (player->dashTics >= 0)
-		{
-			player->prepareTapValue = 0;
-		}
+		player->prepareTapValue = 0;
 	}
 
 	player->lastTapValue = tapValue;
@@ -3152,17 +3148,16 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 	player->isCrouchSliding = isSliding;
 }
 
-bool P_IsClimbAvailable(APlayerPawn *mo) {
-	FTraceResults trace;
-	angle_t angle = mo->angle >> ANGLETOFINESHIFT;
+void P_TraceForWall(APlayerPawn *mo, angle_t angle, FTraceResults &trace) {
+	angle = angle >> ANGLETOFINESHIFT;
+
 	fixed_t vx = finecosine[angle];
 	fixed_t vy = finesine[angle];
 	fixed_t traceZ = mo->z + MAX(1, MIN(mo->MaxStepHeight, mo->ViewHeight) - 8 * FRACUNIT);
 
+	fixed_t distance = MAX(mo->radius + 8 * FRACUNIT, 24 * FRACUNIT); // distances below 24 FRACUNITs produce false hits at diagonal angles for some reason
 	Trace(mo->x, mo->y, traceZ, mo->Sector,
-		vx, vy, 0, mo->radius + 8 * FRACUNIT, MF_SOLID, ML_BLOCKING | ML_3DMIDTEX_IMPASS, mo, trace, TRACE_NoSky);
-
-	return (trace.HitType == TRACE_HitWall);
+		vx, vy, 0, distance, MF_SOLID, ML_BLOCKING | ML_3DMIDTEX_IMPASS, mo, trace, TRACE_NoSky);
 }
 
 void P_SetClimbStatus(player_t *player, const bool& isClimbing)
@@ -3181,6 +3176,165 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	player->isWallClimbing = isClimbing;
 }
 
+void APlayerPawn::DoJump(ticcmd_t *cmd)
+{
+	if (!player->bSpectating && !level.IsJumpingAllowed())
+		return;
+
+	if (player->onground)
+	{
+		if (!(player->mo->mvFlags & MV_DOUBLETAPJUMP))
+		{
+			player->secondJumpState = SJ_AVAILABLE;
+			player->secondJumpsRemaining = player->mo->SecondJumpAmount;
+		}
+
+		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
+			player->jumpTics = player->mo->JumpDelay;
+	}
+	else if (player->secondJumpsRemaining != 0 && !((cmd->ucmd.buttons & BT_JUMP)))
+	{
+		if (!(player->mo->mvFlags & MV_DOUBLETAPJUMP))
+		{
+			player->secondJumpState = SJ_AVAILABLE;
+		}
+	}
+
+	if ((player->mo->mvFlags & MV_DOUBLETAPJUMP) && DoubleTapCheck(player, cmd))
+	{
+		cmd->ucmd.buttons |= BT_JUMP;
+		player->onground = false;
+		player->secondJumpState = SJ_READY;
+		player->secondJumpTics = 0;
+	}
+
+	if (cmd->ucmd.buttons & BT_JUMP)
+	{
+		// [Leo] Spectators shouldn't be limited by the server settings.
+		if (player->onground && !player->jumpTics)
+		{
+			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
+
+			if (!wasJustThrustedZ || isRampJumper)
+			{
+				ULONG	ulJumpTicks;
+
+				// Set base jump velocity.
+				// [Dusk] Exported this into a function as I need it elsewhere as well.
+				fixed_t	JumpVelx, JumpVely, JumpVelz;
+				player->mo->CalcJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
+
+				// Set base jump ticks.
+				// [BB] In ZDoom revision 2970 changed the jumping behavior.
+				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
+					ulJumpTicks = 18 * TICRATE / 35;
+				else
+					ulJumpTicks = -1;
+
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+					if (CLIENT_PREDICT_IsPredicting() == false)
+						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+				}
+
+				player->mo->flags2 &= ~MF2_ONMOBJ;
+
+				// [BC] Increase jump delay if the player has the high jump power.
+				if (player->cheats & CF_HIGHJUMP)
+					ulJumpTicks *= 2;
+
+				// [BC] Remove jump delay if the player is on a spring pad.
+				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+					ulJumpTicks = 0;
+
+				player->mo->velx += JumpVelx;
+				player->mo->vely += JumpVely;
+
+				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
+				player->jumpTics = ulJumpTicks;
+			}
+		}
+		// [Ivory]: Double Jump and wall jump
+		else if (player->secondJumpState == SJ_READY && player->secondJumpTics == 0)
+		{
+			// Wall proximity check
+			bool doSecondJump = false;
+			FTraceResults secondJumpTrace;
+			if ((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_WALLJUMPV2))
+			{
+				// linetrace in 16 directions to see if there is a wall
+				for (int i = 0; i < 16; ++i)
+				{
+					// Start with int min (-2147483648) and go upward to int max
+					P_TraceForWall(player->mo, FixedMul(2147483648, -65536 + 8192 * i), secondJumpTrace);
+					if (secondJumpTrace.HitType == TRACE_HitWall)
+					{
+						doSecondJump = true;
+						break;
+					}
+				}
+			}
+			else
+			{
+				doSecondJump = true;
+			}
+
+			if (doSecondJump)
+			{
+				fixed_t	JumpVelx, JumpVely, JumpVelz;
+				player->mo->CalcSecondJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
+
+				if (player->mo->mvFlags & MV_WALLJUMPV2)
+				{
+					angle_t lineangle = R_PointToAngle2(0, 0, secondJumpTrace.Line->dx, secondJumpTrace.Line->dy) - ANG90;
+					JumpVelx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+					JumpVely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+				}
+
+				player->mo->velx += JumpVelx;
+				player->mo->vely += JumpVely;
+
+				if (player->mo->velz < 0)
+				{
+					player->mo->velz = JumpVelz;
+				}
+				else
+				{
+					player->mo->velz += JumpVelz;
+				}
+
+				if (!(player->mo->mvFlags & MV_SILENT))
+				{
+					if (!CLIENT_PREDICT_IsPredicting())
+						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
+				}
+
+				player->secondJumpTics = player->mo->SecondJumpDelay;
+
+				if (player->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
+					player->secondJumpsRemaining--;
+
+				player->secondJumpState = SJ_NOT_AVAILABLE;
+			}
+		}
+	}
+	else if (!player->onground && player->secondJumpState == SJ_AVAILABLE && player->secondJumpsRemaining != 0)
+	{
+		player->secondJumpState = SJ_READY;
+	}
+
+	// [geNia] Add additional vertical thrust if player is a key while in the air
+	if (!player->onground) {
+		if (cmd->ucmd.buttons & BT_JUMP) {
+			player->mo->velz += player->mo->AirThrustZUp;
+		}
+		if (cmd->ucmd.buttons & BT_CROUCH) {
+			player->mo->velz -= player->mo->AirThrustZDown;
+		}
+	}
+}
+
 //==========================================================================
 //
 // P_MovePlayer_Doom
@@ -3192,7 +3346,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool isClimbing = false;
 	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
-	bool isDasher = player->mo->mvFlags & MV_DASH ? true : false;
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
 
@@ -3201,7 +3354,9 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// Wall proximity check
 	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 1048576) // 1048576 == 16.f
 	{
-		isClimbing = P_IsClimbAvailable(player->mo);
+		FTraceResults secondJumpTrace;
+		P_TraceForWall(player->mo, player->mo->angle, secondJumpTrace);
+		isClimbing = secondJumpTrace.HitType == TRACE_HitWall;
 	}
 
 	if (isClimbing)
@@ -3213,30 +3368,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
-		if (isDasher && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
-		{
-			TVector2<fixed_t> dir = TVector2<fixed_t>( cmd->ucmd.forwardmove, -cmd->ucmd.sidemove ).FixedUnit();
-			dir = TVector2<fixed_t> (
-				FixedMul(dir.X, finecosine[player->mo->angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[player->mo->angle >> ANGLETOFINESHIFT]),
-				FixedMul(dir.X, finesine[player->mo->angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[player->mo->angle >> ANGLETOFINESHIFT])
-			);
-
-			player->mo->velx += FixedMul(dir.X, player->mo->DashForce);
-			player->mo->vely += FixedMul(dir.Y, player->mo->DashForce);
-
-			// do a little jump if on ground (75% of regular jump height)
-			if (player->onground)
-				player->mo->velz = (player->mo->CalcJumpVelz() / 4) * 3;
-
-			player->onground = false; // no friction to influence the dash
-
-			if (!(player->mo->mvFlags & MV_SILENT))
-			{
-				if (CLIENT_PREDICT_IsPredicting() == false)
-					S_Sound(player->mo, CHAN_SEVEN, "*dash", 1, ATTN_NORM);
-			}
-		}
-
 		if (anyMove)
 		{
 			fixed_t forwardmove, sidemove;
@@ -3352,14 +3483,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// Jumping
 	//**********************************
 
-	if (player->onground)
-	{
-		player->secondJumpState = SJ_AVAILABLE;
-
-		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
-			player->jumpTics = player->mo->JumpDelay;
-	}
-
 	if (isClimbing)
 		return;
 
@@ -3426,125 +3549,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// [RH] check for jump
 	else
 	{
-		if ( cmd->ucmd.buttons & BT_JUMP )
-		{
-			// [Leo] Spectators shouldn't be limited by the server settings.
-			if ((player->bSpectating || level.IsJumpingAllowed()) && player->onground && !player->jumpTics)
-			{
-				fixed_t	JumpVelz;
-				ULONG	ulJumpTicks;
-				bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
-
-				if (!wasJustThrustedZ || isRampJumper)
-				{
-					// Set base jump velocity.
-					// [Dusk] Exported this into a function as I need it elsewhere as well.
-					JumpVelz = player->mo->CalcJumpVelz();
-
-					// Set base jump ticks.
-					// [BB] In ZDoom revision 2970 changed the jumping behavior.
-					if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
-						ulJumpTicks = 18 * TICRATE / 35;
-					else
-						ulJumpTicks = -1;
-
-					if (!(player->mo->mvFlags & MV_SILENT))
-					{
-						// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-						if (CLIENT_PREDICT_IsPredicting() == false)
-							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
-					}
-
-					player->mo->flags2 &= ~MF2_ONMOBJ;
-
-					// [BC] Increase jump delay if the player has the high jump power.
-					if (player->cheats & CF_HIGHJUMP)
-						ulJumpTicks *= 2;
-
-					// [BC] Remove jump delay if the player is on a spring pad.
-					if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
-						ulJumpTicks = 0;
-
-					player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
-					player->jumpTics = ulJumpTicks;
-				}
-			}
-			// [Ivory]: Double Jump and wall jump
-			else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
-				&& player->secondJumpState == SJ_READY && level.IsJumpingAllowed())
-			{
-				fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
-
-				// Wall proximity check
-				bool doDoubleJump = false;
-				if (player->mo->mvFlags & MV_WALLJUMP)
-				{
-					int angle;
-					fixed_t xDir, yDir;
-					for (int i = 0; i < 8; ++i)
-					{
-						angle = 45 * i;
-						xDir = player->mo->x + FixedMul(FRACUNIT, FLOAT2FIXED(cos(angle)));
-						yDir = player->mo->y + FixedMul(FRACUNIT, FLOAT2FIXED(sin(angle)));
-
-						// if player cannot move in a direction and a line is blocking it
-						// it must be a wall that can be jumped on
-						if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
-						{
-							SecondJumpVelz = (SecondJumpVelz / 4) * 3;
-
-							if (!(player->mo->mvFlags & MV_SILENT))
-							{
-								if (!CLIENT_PREDICT_IsPredicting())
-									S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
-							}
-
-							doDoubleJump = true;
-
-							break;
-						}
-					}
-				}
-				else
-				{
-					if (!(player->mo->mvFlags & MV_SILENT))
-					{
-						if (!CLIENT_PREDICT_IsPredicting())
-							S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
-					}
-
-					doDoubleJump = true;
-				}
-
-				if (doDoubleJump)
-				{
-					if (player->mo->velz < 0)
-					{
-						player->mo->velz = SecondJumpVelz;
-					}
-					else
-					{
-						player->mo->velz += SecondJumpVelz;
-					}
-
-					player->secondJumpState = SJ_NOT_AVAILABLE;
-				}
-			}
-		}
-		else if (!player->onground && player->secondJumpState == SJ_AVAILABLE)
-		{
-			player->secondJumpState = SJ_READY;
-		}
-
-		// [geNia] Add additional vertical thrust if player is a key while in the air
-		if ( !player->onground ) {
-			if ( cmd->ucmd.buttons & BT_JUMP ) {
-				player->mo->velz += player->mo->AirThrustZUp;
-			}
-			if ( cmd->ucmd.buttons & BT_CROUCH ) {
-				player->mo->velz -= player->mo->AirThrustZDown;
-			}
-		}
+		player->mo->DoJump(cmd);
 	}
 }
 
@@ -3635,7 +3640,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
 			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxgroundspeed + 2.f)
 		{
-			isClimbing = P_IsClimbAvailable(player->mo);
+			FTraceResults secondJumpTrace;
+			P_TraceForWall(player->mo, player->mo->angle, secondJumpTrace);
+			isClimbing = secondJumpTrace.HitType == TRACE_HitWall;
 		}
 
 		if (isClimbing)
@@ -3650,26 +3657,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			// Orient inputs to view angle
 			VectorRotate(acceleration.X, acceleration.Y, flAngle);
 			acceleration.MakeUnit();
-
-			// Dashing
-			if ((player->mo->mvFlags & MV_DASH) && player->crouchfactor > player->mo->CrouchScaleHalfWay && DoubleTapCheck(player, cmd))
-			{
-				velocity = float(FVector2(vel.X, vel.Y).Length());
-
-				vel += acceleration * FIXED2FLOAT(player->mo->DashForce);
-
-				// do a little jump if on ground (75% of regular jump height)
-				if (player->onground)
-					vel.Z = FIXED2FLOAT((player->mo->CalcJumpVelz() / 4) * 3);
-
-				player->onground = false;
-
-				if (!(player->mo->mvFlags & MV_SILENT))
-				{
-					if (CLIENT_PREDICT_IsPredicting() == false)
-						S_Sound(player->mo, CHAN_BODY, "*dash", 1, ATTN_NORM);
-				}
-			}
 
 			float LocalVelocityCap;
 			if (player->mo->VelocityCap) {
@@ -3736,7 +3723,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			else if (!wasJustThrustedZ)
 			{
 				isSliding = isSlider &&									// player has the flag
-						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
+						   player->crouchfactor <= player->mo->CrouchScaleHalfWay &&	// player is crouching
 						   player->crouchSlideTics > 0;						// there is crouch slide charge to spend
 
 				// Friction & Acceleration
@@ -3833,140 +3820,12 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		}
 	}
 
-	//*******************************************************
-	// Jumping
-	//*******************************************************
-
-	if (player->onground)
-	{
-		player->secondJumpState = SJ_AVAILABLE;
-
-		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
-			player->jumpTics = player->mo->JumpDelay;
-	}
-
 	// Water and flying have already executed jump press logic
 	if (noJump)
 		return;
 
 	// Stop here if not in good condition to jump
-	if (cmd->ucmd.buttons & BT_JUMP)
-	{
-		if (player->onground && !player->jumpTics && (player->bSpectating || level.IsJumpingAllowed()))
-		{
-			fixed_t	JumpVelz = player->mo->CalcJumpVelz();
-			ULONG	ulJumpTicks;
-			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
-
-			if (!wasJustThrustedZ || isRampJumper)
-			{
-				// Set base jump velocity.
-				// [Dusk] Exported this into a function as I need it elsewhere as well.
-				JumpVelz = player->mo->CalcJumpVelz();
-
-				// Set base jump ticks.
-				// [BB] In ZDoom revision 2970 changed the jumping behavior.
-				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
-					ulJumpTicks = 18 * TICRATE / 35;
-				else
-					ulJumpTicks = -1;
-
-				if (!(player->mo->mvFlags & MV_SILENT))
-				{
-					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-					if (CLIENT_PREDICT_IsPredicting() == false)
-						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
-				}
-
-				player->mo->flags2 &= ~MF2_ONMOBJ;
-
-				// [BC] Increase jump delay if the player has the high jump power.
-				if (player->cheats & CF_HIGHJUMP)
-					ulJumpTicks *= 2;
-
-				// [BC] Remove jump delay if the player is on a spring pad.
-				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
-					ulJumpTicks = 0;
-
-				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
-				player->jumpTics = ulJumpTicks;
-			}
-		}
-		else if (((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_DOUBLEJUMP))
-			&& player->secondJumpState == SJ_READY && level.IsJumpingAllowed())
-		{
-			fixed_t	SecondJumpVelz = player->mo->CalcDoubleJumpVelz();
-
-			// Wall proximity check
-			bool doDoubleJump = false;
-			if (player->mo->mvFlags & MV_WALLJUMP)
-			{
-				int angle;
-				fixed_t xDir, yDir;
-				for (int i = 0; i < 8; ++i)
-				{
-					angle = 45 * i;
-					xDir = player->mo->x + FixedMul(FRACUNIT, FLOAT2FIXED(cos(angle)));
-					yDir = player->mo->y + FixedMul(FRACUNIT, FLOAT2FIXED(sin(angle)));
-
-					// if player cannot move in a direction and a line is blocking
-					// it must be a wall that can be jumped on
-					if (!P_CheckMove(player->mo, xDir, yDir) && player->mo->BlockingLine)
-					{
-						SecondJumpVelz = (SecondJumpVelz / 4) * 3;
-
-						if (!(player->mo->mvFlags & MV_SILENT))
-						{
-							if (!CLIENT_PREDICT_IsPredicting())
-								S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
-						}
-
-						doDoubleJump = true;
-
-						break;
-					}
-				}
-			}
-			else
-			{
-				if (!(player->mo->mvFlags & MV_SILENT))
-				{
-					if (!CLIENT_PREDICT_IsPredicting())
-						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
-				}
-
-				doDoubleJump = true;
-			}
-
-			if (doDoubleJump)
-			{
-				if (player->mo->velz < 0)
-				{
-					player->mo->velz = SecondJumpVelz;
-				}
-				else
-				{
-					player->mo->velz += SecondJumpVelz;
-				}
-
-				player->secondJumpState = SJ_NOT_AVAILABLE;
-			}
-		}
-	}
-	else if (!player->onground && player->secondJumpState == SJ_AVAILABLE)
-	{
-		player->secondJumpState = SJ_READY;
-	}
-
-	// [geNia] Add additional vertical thrust if player is a key while in the air
-	if ( !player->onground ) {
-		if ( cmd->ucmd.buttons & BT_JUMP ) {
-			player->mo->velz += player->mo->AirThrustZUp;
-		}
-		if ( cmd->ucmd.buttons & BT_CROUCH ) {
-			player->mo->velz -= player->mo->AirThrustZDown;
-		}
-	}
+	player->mo->DoJump(cmd);
 }
 
 /*
@@ -4690,6 +4549,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		player->oldbuttons = player->cmd.ucmd.buttons;
 		return;
 	}
+
 	if (player->jumpTics)
 	{
 		player->jumpTics--;
@@ -4698,6 +4558,15 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			player->jumpTics = 0;
 		}
 	}
+	if (player->secondJumpTics > 0)
+	{
+		player->secondJumpTics--;
+	}
+	else if (player->secondJumpTics < 0)
+	{
+		player->secondJumpTics++;
+	}
+
 	if (player->morphTics)// && !(player->cheats & CF_PREDICTING))
 	{
 		player->mo->MorphPlayerThink ();
