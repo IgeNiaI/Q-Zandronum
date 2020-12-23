@@ -7460,20 +7460,19 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle,
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
-							  bool nofreeaim, bool bSpawnSound, bool bSpawnOnClient)
+							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
 	angle_t pitch;
 	AActor *linetarget;
 	AActor *defaultobject = GetDefaultByType(type);
-	int vrange = nofreeaim ? ANGLE_1*35 : 0;
 
 	if (source == NULL)
 	{
 		return NULL;
 	}
-	if (source->player && source->player->ReadyWeapon && (source->player->ReadyWeapon->WeaponFlags & WIF_NOAUTOAIM))
+	if (source->player && source->player->ReadyWeapon && ((source->player->ReadyWeapon->WeaponFlags & WIF_NOAUTOAIM) || noautoaim))
 	{
 		// Keep exactly the same angle and pitch as the player's own aim
 		an = angle;
@@ -7491,10 +7490,9 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		do
 		{
 			an = angle + angdiff[i];
-			pitch = P_AimLineAttack (source, an, linetargetrange, &linetarget, vrange);
+			pitch = P_AimLineAttack (source, an, linetargetrange, &linetarget);
 	
 			if (source->player != NULL &&
-				!nofreeaim &&
 				level.IsFreelookAllowed() &&
 				source->player->userinfo.GetAimDist() <= ANGLE_1/2)
 			{
@@ -7505,7 +7503,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		if (linetarget == NULL)
 		{
 			an = angle;
-			if (nofreeaim || !level.IsFreelookAllowed())
+			if (!level.IsFreelookAllowed())
 			{
 				pitch = 0;
 			}
