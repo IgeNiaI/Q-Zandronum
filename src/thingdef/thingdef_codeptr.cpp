@@ -1639,11 +1639,14 @@ void A_FireCustomMissileHelper ( AActor *self,
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, false, true, false);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM), true, false);
 
 	// automatic handling of seeker missiles
 	if (misl)
 	{
+		if (flags & FPF_TRANSFERTRANSLATION)
+			misl->Translation = self->Translation;
+
 		if (linetarget && misl->flags2 & MF2_SEEKERMISSILE)
 			misl->tracer = linetarget;
 
