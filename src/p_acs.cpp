@@ -4338,10 +4338,6 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		if (value) actor->flags4 |= MF4_FRIGHTENED; else actor->flags4 &= ~MF4_FRIGHTENED;
 		break;
 
-	case APROP_DoubleJump:
-		if (value) actor->mvFlags |= MV_DOUBLEJUMP; else actor->mvFlags &= ~MV_DOUBLEJUMP;
-		break;
-
 	case APROP_CrouchSlide:
 		if (value) actor->mvFlags |= MV_CROUCHSLIDE; else actor->mvFlags &= ~MV_CROUCHSLIDE;
 		break;
@@ -4350,12 +4346,16 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		if (value) actor->mvFlags |= MV_WALLJUMP; else actor->mvFlags &= ~MV_WALLJUMP;
 		break;
 
-	case APROP_WallClimb:
-		if (value) actor->mvFlags |= MV_WALLCLIMB; else actor->mvFlags &= ~MV_WALLCLIMB;
+	case APROP_WallJumpV2:
+		if (value) actor->mvFlags |= MV_WALLJUMPV2; else actor->mvFlags &= ~MV_WALLJUMPV2;
 		break;
 
-	case APROP_Dash:
-		if (value) actor->mvFlags |= MV_DASH; else actor->mvFlags &= ~MV_DASH;
+	case APROP_DoubleTapJump:
+		if (value) actor->mvFlags |= MV_DOUBLETAPJUMP; else actor->mvFlags &= ~MV_DOUBLETAPJUMP;
+		break;
+
+	case APROP_WallClimb:
+		if (value) actor->mvFlags |= MV_WALLCLIMB; else actor->mvFlags &= ~MV_WALLCLIMB;
 		break;
 
 	case APROP_RampJump:
@@ -4369,10 +4369,44 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 
 	// Player actor specific
 
+	case APROP_JumpXY:
+		if (playerActor)
+			playerActor->JumpXY = value;
+		break;
+
 	case APROP_JumpZ:
 		if (playerActor)
 			playerActor->JumpZ = value;
-		break; 	// [GRB]
+		break;
+
+	case APROP_JumpDelay:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->JumpDelay = value;
+		}
+		break;
+
+	case APROP_SecondJumpXY:
+		if (playerActor)
+			playerActor->SecondJumpXY = value;
+		break;
+
+	case APROP_SecondJumpZ:
+		if (playerActor)
+			playerActor->SecondJumpZ = value;
+		break;
+
+	case APROP_SecondJumpDelay:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->SecondJumpDelay = value;
+		}
+		break;
+
+	case APROP_SecondJumpAmount:
+		if (playerActor)
+			playerActor->SecondJumpAmount = value;
+		break;
 
 	case APROP_SpawnHealth:
 		if (playerActor)
@@ -4415,19 +4449,6 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
-	case APROP_JumpDelay:
-		if (playerActor) {
-			if (value < 0) value = 0;
-			playerActor->JumpDelay = value;
-		}
-		break;
-
-	case APROP_SecondJumpZ:
-		if (playerActor) {
-			playerActor->SecondJumpZ = value;
-		}
-		break;
-
 	case APROP_AirThrustZUp:
 		if (playerActor) {
 			playerActor->AirThrustZUp = value;
@@ -4463,18 +4484,6 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 	case APROP_AirAcceleration:
 		if (playerActor) {
 			playerActor->AirAcceleration = value;
-		}
-		break;
-
-	case APROP_DashForce:
-		if (playerActor) {
-			playerActor->DashForce = value;
-		}
-		break;
-
-	case APROP_DashDelay:
-		if (playerActor) {
-			playerActor->DashDelay = value;
 		}
 		break;
 
@@ -4604,17 +4613,23 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_Notarget:				return !!(actor->flags3 & MF3_NOTARGET);
 	case APROP_Notrigger:				return !!(actor->flags6 & MF6_NOTRIGGER);
 	case APROP_Dormant:					return !!(actor->flags2 & MF2_DORMANT);
-	case APROP_DoubleJump:				return !!(actor->mvFlags & MV_DOUBLEJUMP);
 	case APROP_CrouchSlide:				return !!(actor->mvFlags & MV_CROUCHSLIDE);
 	case APROP_WallJump:				return !!(actor->mvFlags & MV_WALLJUMP);
+	case APROP_WallJumpV2:				return !!(actor->mvFlags & MV_WALLJUMPV2);
+	case APROP_DoubleTapJump:			return !!(actor->mvFlags & MV_DOUBLETAPJUMP);
 	case APROP_WallClimb:				return !!(actor->mvFlags & MV_WALLCLIMB);
-	case APROP_Dash:					return !!(actor->mvFlags & MV_DASH);
 	case APROP_RampJump:				return !!(actor->mvFlags & MV_RAMPJUMP);
 	case APROP_Silent:					return !!(actor->mvFlags & MV_SILENT);
 
 	// Player actor specitic
 	case APROP_SpawnHealth:				return playerActor ? playerActor->MaxHealth								: actor->SpawnHealth();
+	case APROP_JumpXY:					return playerActor ? playerActor->JumpXY								: 0;
 	case APROP_JumpZ:					return playerActor ? playerActor->JumpZ									: 0;
+	case APROP_JumpDelay:				return playerActor ? playerActor->JumpDelay								: 0;
+	case APROP_SecondJumpXY:			return playerActor ? playerActor->SecondJumpXY							: 0;
+	case APROP_SecondJumpZ:				return playerActor ? playerActor->SecondJumpZ							: 0;
+	case APROP_SecondJumpDelay:			return playerActor ? playerActor->SecondJumpDelay						: 0;
+	case APROP_SecondJumpAmount:		return playerActor ? playerActor->SecondJumpAmount						: 0;
 	case APROP_ViewHeight:				return playerActor ? playerActor->ViewHeight							: 0;
 	case APROP_AttackZOffset:			return playerActor ? playerActor->JumpZ									: 0;
 	case APROP_CrouchChangeSpeed:		return playerActor ? playerActor->CrouchChangeSpeed						: 0;
@@ -4622,22 +4637,18 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_MvType:					return playerActor ? playerActor->MvType								: 0;
 	case APROP_FootstepInterval:		return playerActor ? playerActor->FootstepInterval						: 0;
 	case APROP_FootstepVolume:			return playerActor ? FLOAT2FIXED( playerActor->FootstepVolume )			: 0;
-	case APROP_JumpDelay:				return playerActor ? playerActor->JumpDelay								: 0;
-	case APROP_SecondJumpZ:				return playerActor ? playerActor->SecondJumpZ							: 0;
 	case APROP_AirThrustZUp:			return playerActor ? playerActor->AirThrustZUp							: 0;
 	case APROP_AirThrustZDown:			return playerActor ? playerActor->AirThrustZDown						: 0;
 	case APROP_WallClimbSpeed:			return playerActor ? playerActor->WallClimbSpeed						: 0;
 	case APROP_WallClimbMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbMaxTics )		: 0;
 	case APROP_WallClimbRegen:			return playerActor ? FLOAT2FIXED( playerActor->WallClimbRegen )			: 0;
 	case APROP_AirAcceleration:			return playerActor ? playerActor->AirAcceleration						: 0;
-	case APROP_DashForce:				return playerActor ? playerActor->DashForce								: 0;
-	case APROP_DashDelay:				return playerActor ? playerActor->DashDelay								: 0;
 	case APROP_VelocityCap:				return playerActor ? playerActor->VelocityCap							: 0;
-	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration )		: 0;
-	case APROP_GroundFriction:			return playerActor ? FLOAT2FIXED( playerActor->GroundFriction )			: 0;
-	case APROP_SlideAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->SlideAcceleration )		: 0;
-	case APROP_SlideFriction:			return playerActor ? FLOAT2FIXED( playerActor->SlideFriction )			: 0;
-	case APROP_SlideMaxTics:			return playerActor ? FLOAT2FIXED( playerActor->SlideMaxTics )			: 0;
+	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration)		: 0;
+	case APROP_GroundFriction:			return playerActor ? FLOAT2FIXED( playerActor->GroundFriction)			: 0;
+	case APROP_SlideAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->SlideAcceleration)		: 0;
+	case APROP_SlideFriction:			return playerActor ? FLOAT2FIXED( playerActor->SlideFriction)			: 0;
+	case APROP_SlideMaxTics:			return playerActor ? FLOAT2FIXED( playerActor->SlideMaxTics)			: 0;
 	case APROP_SlideRegen:				return playerActor ? FLOAT2FIXED( playerActor->SlideRegen )				: 0;
 	case APROP_CpmAirAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->CpmAirAcceleration )		: 0;
 	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad )	: 0;
@@ -4684,7 +4695,13 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_RenderStyle:
 		case APROP_Gravity:
 		case APROP_SpawnHealth:
+		case APROP_JumpXY:
 		case APROP_JumpZ:
+		case APROP_JumpDelay:
+		case APROP_SecondJumpXY:
+		case APROP_SecondJumpZ:
+		case APROP_SecondJumpDelay:
+		case APROP_SecondJumpAmount:
 		case APROP_Score:
 		case APROP_MasterTID:
 		case APROP_TargetTID:
@@ -4707,16 +4724,12 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_MvType:
 		case APROP_FootstepInterval:
 		case APROP_FootstepVolume:
-		case APROP_JumpDelay:
-		case APROP_SecondJumpZ:
 		case APROP_AirThrustZUp:
 		case APROP_AirThrustZDown:
 		case APROP_WallClimbSpeed:
 		case APROP_WallClimbMaxTics:
 		case APROP_WallClimbRegen:
 		case APROP_AirAcceleration:
-		case APROP_DashForce:
-		case APROP_DashDelay:
 		case APROP_VelocityCap:
 		case APROP_GroundAcceleration:
 		case APROP_GroundFriction:
@@ -4738,11 +4751,11 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_Notarget:
 		case APROP_Notrigger:
 		case APROP_Dormant:
-		case APROP_DoubleJump:
 		case APROP_CrouchSlide:
 		case APROP_WallJump:
+		case APROP_WallJumpV2:
+		case APROP_DoubleTapJump:
 		case APROP_WallClimb:
-		case APROP_Dash:
 		case APROP_RampJump:
 		case APROP_Silent:
 			return (GetActorProperty(tid, property, NULL, 0) == (!!value));

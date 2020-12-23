@@ -136,8 +136,9 @@ public:
 	const char *GetSoundClass () const;
 
 	// [Dusk]
-	fixed_t CalcJumpVelz();
-	fixed_t CalcDoubleJumpVelz();
+	void	CalcJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z);
+	void	CalcSecondJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z);
+	void	DoJump(ticcmd_t *cmd);
 	fixed_t CalcJumpHeight( bool bAddStep = true );
 
 	enum EInvulState
@@ -160,7 +161,13 @@ public:
 	TObjPtr<AInventory> InvSel;			// selected inventory item
 
 	// [GRB] Player class properties
+	fixed_t		JumpXY;
 	fixed_t		JumpZ;
+	int			JumpDelay;
+	fixed_t		SecondJumpXY;
+	fixed_t		SecondJumpZ;
+	int			SecondJumpDelay;
+	int			SecondJumpAmount;
 	bool		wasJustThrustedZ;
 	fixed_t		GruntSpeed;
 	fixed_t		FallingScreamMinSpeed, FallingScreamMaxSpeed;
@@ -183,16 +190,12 @@ public:
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
 	int			FootstepInterval;
 	float		FootstepVolume;
-	int			JumpDelay;
-	fixed_t		SecondJumpZ;
 	fixed_t		AirThrustZUp;
 	fixed_t		AirThrustZDown;
 	float		WallClimbMaxTics;
 	float		WallClimbRegen;
 	fixed_t		WallClimbSpeed;
 	fixed_t		AirAcceleration;
-	fixed_t		DashForce;
-	int			DashDelay;
 	fixed_t		VelocityCap;
 
 	// Quake movement only
@@ -577,6 +580,8 @@ public:
 	TObjPtr<AWeapon>	PremorphWeapon;		// ready weapon before morphing
 	int			chickenPeck;			// chicken peck countdown
 	int			jumpTics;				// delay the next jump for a moment
+	int			secondJumpTics;			// delay the next second jump for a moment
+	int			secondJumpsRemaining;	// remaining second jump uses
 	bool		onground;				// Identifies if this player is on the ground or other object
 	int			stepInterval;
 
@@ -586,7 +591,6 @@ public:
 	bool		isCrouchSliding;
 	float		wallClimbTics;
 	bool		isWallClimbing;
-	int			dashTics;
 	int			prepareTapValue;
 	int			lastTapValue;
 
