@@ -344,6 +344,7 @@ player_t::player_t()
   ulUnrewardedDamageDealt( 0 ),
   bChatting( 0 ),
   bInConsole( 0 ),
+  bInMenu( 0 ),
   bSpectating( 0 ),
   bDeadSpectator( 0 ),
   ulLivesLeft( 0 ),
@@ -520,6 +521,7 @@ player_t &player_t::operator=(const player_t &p)
 	ulUnrewardedDamageDealt = p.ulUnrewardedDamageDealt;
 	bChatting = p.bChatting;
 	bInConsole = p.bInConsole;
+	bInMenu = p.bInMenu;
 	bSpectating = p.bSpectating;
 	bDeadSpectator = p.bDeadSpectator;
 	ulLivesLeft = p.ulLivesLeft;
@@ -5222,6 +5224,7 @@ void player_t::Serialize (FArchive &arc)
 		<< ulTeam
 		<< bChatting
 		<< bInConsole
+		<< bInMenu
 		<< ulRailgunShots
 		<< lMaxHealthBonus
 		<< cheats2

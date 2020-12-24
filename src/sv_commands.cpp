@@ -662,6 +662,16 @@ void SERVERCOMMANDS_SetPlayerConsoleStatus( ULONG ulPlayer, ULONG ulPlayerExtra,
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetPlayerMenuStatus(ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags)
+{
+	ServerCommands::SetPlayerMenuStatus command;
+	command.SetPlayer(&players[ulPlayer]);
+	command.SetInMenu(players[ulPlayer].bInMenu);
+	command.sendCommandToClients(ulPlayerExtra, flags);
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_SetPlayerReadyToGoOnStatus( ULONG ulPlayer )
 {
 	ServerCommands::SetPlayerReadyToGoOnStatus command;

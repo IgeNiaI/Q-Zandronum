@@ -112,6 +112,7 @@ enum
 {
 	SPRITE_CHAT,
 	SPRITE_INCONSOLE,
+	SPRITE_INMENU,
 	SPRITE_ALLY,
 	SPRITE_LAG,
 	SPRITE_WHITEFLAG,
@@ -1049,6 +1050,10 @@ ULONG medal_GetDesiredIcon( player_t *pPlayer, AInventory *&pTeamItem )
 	if ( pPlayer->bInConsole )
 		ulDesiredSprite = SPRITE_INCONSOLE;
 
+	// Draw a menu icon over the player if they're in the Menu.
+	if (pPlayer->bInMenu)
+		ulDesiredSprite = SPRITE_INMENU;
+
 	// Draw a lag icon over their head if they're lagging.
 	if ( pPlayer->bLagging )
 		ulDesiredSprite = SPRITE_LAG;
@@ -1145,6 +1150,21 @@ void medal_SelectIcon( ULONG ulPlayer )
 			}
 			else
 				ulActualSprite = SPRITE_INCONSOLE;
+			break;
+		// In menu icon . Delete it if the player is no longer in the menu.
+		case S_INMENU:
+		case (S_INMENU + 1):
+		case (S_INMENU + 2):
+		case (S_INMENU + 3):
+		case (S_INMENU + 4):
+
+			if (pPlayer->bInMenu == false)
+			{
+				pPlayer->pIcon->Destroy();
+				pPlayer->pIcon = NULL;
+			}
+			else
+				ulActualSprite = SPRITE_INMENU;
 			break;
 
 		// Ally icon. Delete it if the player is now our enemy or if we're spectating.
@@ -1269,6 +1289,10 @@ void medal_SelectIcon( ULONG ulPlayer )
 
 		case SPRITE_INCONSOLE:
 			ulFrame = S_INCONSOLE;
+			break;
+		
+		case SPRITE_INMENU:
+			ulFrame = S_INMENU;
 			break;
 
 		case SPRITE_LAG:
@@ -1471,7 +1495,7 @@ void medal_CheckForTermination( ULONG ulDeadPlayer, ULONG ulPlayer )
 void medal_CheckForLlama( ULONG ulDeadPlayer, ULONG ulPlayer )
 {
 	// Award a "llama" medal if the victim had been typing, lagging, or in the console.
-	if ( players[ulDeadPlayer].bChatting ||	players[ulDeadPlayer].bLagging || players[ulDeadPlayer].bInConsole )
+	if ( players[ulDeadPlayer].bChatting ||	players[ulDeadPlayer].bLagging || players[ulDeadPlayer].bInConsole || players[ulDeadPlayer].bInMenu )
 		medal_GiveMedal( ulPlayer, MEDAL_LLAMA );
 }
 
