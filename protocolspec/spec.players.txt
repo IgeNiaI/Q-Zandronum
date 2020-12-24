@@ -130,6 +130,11 @@ Command SetPlayerConsoleStatus
 	Bool inConsole
 EndCommand
 
+Command SetPlayerMenuStatus
+	Player player
+	Bool inMenu
+EndCommand
+
 Command SetPlayerLaggingStatus
 	Player player
 	Bool lagging

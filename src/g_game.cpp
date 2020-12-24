@@ -198,6 +198,7 @@ bool	 		viewactive;
 player_t		players[MAXPLAYERS + 1];	// [EP] Add 1 slot for the DummyPlayer
 bool			playeringame[MAXPLAYERS + 1];	// [EP] Add 1 slot for the DummyPlayer
 
+int 			menuplayer;				// player taking events
 int 			consoleplayer;			// player taking events
 int 			gametic;
 
@@ -2209,6 +2210,7 @@ void G_PlayerReborn (int player, bool bGiveInventory)
 	bOnTeam = p->bOnTeam;
 	const bool bChatting = p->bChatting;
 	const bool bInConsole = p->bInConsole;
+	const bool bInMenu = p->bInMenu;
 	bSpectating = p->bSpectating;
 	bDeadSpectator = p->bDeadSpectator;
 	ulLivesLeft = p->ulLivesLeft;
@@ -2252,6 +2254,7 @@ void G_PlayerReborn (int player, bool bGiveInventory)
 	p->bOnTeam = bOnTeam;
 	p->bChatting = bChatting;
 	p->bInConsole = bInConsole;
+	p->bInMenu = bInMenu;
 	p->bSpectating = bSpectating;
 	p->bDeadSpectator = bDeadSpectator;
 	p->ulLivesLeft = ulLivesLeft;
