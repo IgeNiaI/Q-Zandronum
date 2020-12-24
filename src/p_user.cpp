@@ -3183,10 +3183,11 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 
 	if (player->onground)
 	{
+		player->secondJumpsRemaining = player->mo->SecondJumpAmount;
+
 		if (!(player->mo->mvFlags & MV_DOUBLETAPJUMP))
 		{
 			player->secondJumpState = SJ_AVAILABLE;
-			player->secondJumpsRemaining = player->mo->SecondJumpAmount;
 		}
 
 		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
@@ -3200,7 +3201,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 		}
 	}
 
-	if ((player->mo->mvFlags & MV_DOUBLETAPJUMP) && DoubleTapCheck(player, cmd))
+	if ((player->mo->mvFlags & MV_DOUBLETAPJUMP) && player->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
 	{
 		cmd->ucmd.buttons |= BT_JUMP;
 		player->onground = false;
