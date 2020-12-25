@@ -2256,6 +2256,7 @@ enum SIX_Flags
 	SIXF_TRANSFERSPECIAL		= 1 << 15,
 	SIXF_CLEARCALLERSPECIAL		= 1 << 16,
 	SIXF_TRANSFERSTENCILCOL		= 1 << 17,
+	SIXF_TRANSFERSPRITE			= 1 << 18,    // [BIN]
 };
 
 // [BB] Changed return value to bool (returns false if the actor already was destroyed).
@@ -2373,6 +2374,10 @@ static bool InitSpawnedItem(AActor *self, AActor *mo, int flags)
 	{
 		mo->fillcolor = self->fillcolor;
 	}
+    if (flags & SIXF_TRANSFERSPRITE) //[BIN]
+    {
+        mo->sprite = self->sprite;
+    }
 
 	return true;
 }
