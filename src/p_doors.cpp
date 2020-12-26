@@ -172,7 +172,7 @@ void DDoor::Tick ()
 			{
 			case doorRaise:
 			case doorClose:
-				m_Direction = -2;
+				Destroy();						// unlink and free
 				break;
 				
 			case doorCloseWaitOpen:
@@ -237,7 +237,7 @@ void DDoor::Tick ()
 				
 			case doorCloseWaitOpen:
 			case doorOpen:
-				m_Direction = -2;
+				Destroy();						// unlink and free
 				break;
 				
 			default:
@@ -265,31 +265,6 @@ void DDoor::Tick ()
 void DDoor::UpdateToClient( ULONG ulClient )
 {
 	SERVERCOMMANDS_DoDoor( this, ulClient, SVCF_ONLYTHISCLIENT );
-}
-
-bool DDoor::IsBusy()
-{
-	return m_Direction != -2;
-}
-
-void DDoor::Predict()
-{
-	// Use a version of gametic that's appropriate for both the current game and demos.
-	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
-
-	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
-	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
-	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
-		return;
-
-	// How many ticks of prediction do we need?
-	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
-
-	while (TicsToPredict)
-	{
-		Tick();
-		TicsToPredict--;
-	}
 }
 
 fixed_t DDoor::GetPosition()
@@ -340,44 +315,44 @@ void DDoor::SetType( DDoor::EVlDoor Type )
 	m_Type = Type;
 }
 
-LONG DDoor::GetSpeed( void )
+fixed_t DDoor::GetSpeed( void )
 {
 	return ( m_Speed );
 }
 
-void DDoor::SetSpeed( LONG lSpeed )
+void DDoor::SetSpeed( fixed_t Speed )
 {
-	m_Speed = lSpeed;
+	m_Speed = Speed;
 }
 
-LONG DDoor::GetTopWait( void )
+int DDoor::GetTopWait( void )
 {
 	return ( m_TopWait );
 }
 
-void DDoor::SetTopWait( LONG lTopWait )
+void DDoor::SetTopWait( int TopWait )
 {
-	m_TopWait = lTopWait;
+	m_TopWait = TopWait;
 }
 
-LONG DDoor::GetCountdown( void )
+int DDoor::GetCountdown( void )
 {
 	return ( m_TopCountdown );
 }
 
-void DDoor::SetCountdown( LONG lCountdown)
+void DDoor::SetCountdown( int Countdown)
 {
-	m_TopCountdown = lCountdown;
+	m_TopCountdown = Countdown;
 }
 
-LONG DDoor::GetLightTag( void )
+int DDoor::GetLightTag( void )
 {
 	return ( m_LightTag );
 }
 
-void DDoor::SetLightTag( LONG lTag )
+void DDoor::SetLightTag( int Tag )
 {
-	m_LightTag = lTag;
+	m_LightTag = Tag;
 }
 
 //============================================================================
@@ -503,11 +478,6 @@ DDoor::DDoor (sector_t *sector)
 DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTag, bool bNoSound)
 	: DMovingCeiling (sec),
   	  m_Type (type), m_Speed (speed), m_TopWait (delay), m_LightTag (lightTag)
-{
-	Reinit( bNoSound );
-}
-
-void DDoor::Reinit( bool bNoSound )
 {
 	vertex_t *spot;
 	fixed_t height;
@@ -635,7 +605,7 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 				// ONLY FOR "RAISE" DOORS, NOT "OPEN"s
 				if (door->m_Type == DDoor::doorRaise && type == DDoor::doorRaise)
 				{
-					if (door->m_Direction == -1 || door->m_Direction == -2)
+					if (door->m_Direction == -1)
 					{
 						door->m_Direction = 1;	// go back up
 						door->DoorSound (true);	// [RH] Make noise
@@ -669,10 +639,6 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 					{
 						return false;
 					}
-				}
-				else if (door->m_Direction == -2)
-				{
-					door->Reinit( false );
 				}
 			}
 			return false;
@@ -710,14 +676,6 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 			if ( pDoor == NULL )
 			{
 				pDoor = new DDoor (sec, type, speed, delay, lightTag);
-			}
-			else if ( pDoor->m_Direction == -2 )
-			{
-				pDoor->SetType( type );
-				pDoor->SetSpeed( speed );
-				pDoor->SetTopWait( delay );
-				pDoor->SetLightTag( lightTag );
-				pDoor->Reinit( false );
 			}
 
 			pDoor->m_LastInstigator = instigator;

@@ -29,6 +29,8 @@
 #include "r_data/r_interpolate.h"
 #include "statnums.h"
 #include "farchive.h"
+#include "cl_demo.h"
+#include "cl_main.h"
 
 IMPLEMENT_CLASS (DSectorEffect)
 
@@ -69,11 +71,6 @@ void DSectorEffect::Serialize (FArchive &arc)
 	arc << m_Sector;
 }
 
-bool DSectorEffect::IsBusy()
-{
-	return true;
-}
-
 player_t* DSectorEffect::GetLastInstigator()
 {
 	return m_LastInstigator;
@@ -96,6 +93,26 @@ DMover::DMover (sector_t *sector)
 	: DSectorEffect (sector)
 {
 	interpolation = NULL;
+}
+
+void DMover::Predict()
+{
+	// Use a version of gametic that's appropriate for both the current game and demos.
+	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
+
+	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
+	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
+	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
+		return;
+
+	// How many ticks of prediction do we need?
+	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
+
+	while (TicsToPredict)
+	{
+		Tick();
+		TicsToPredict--;
+	}
 }
 
 void DMover::Destroy()
