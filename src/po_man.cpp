@@ -740,9 +740,6 @@ void DPolyDoor::SetClose (bool bClose)
 
 void DRotatePoly::Tick ()
 {
-	if (m_Dist == 0)
-		return;
-
 	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
 	if (poly == NULL)
 		return;
@@ -767,6 +764,7 @@ void DRotatePoly::Tick ()
 				SERVERCOMMANDS_DoRotatePoly( this );
 
 			SN_StopSequence (poly);
+			Destroy ();
 		}
 	}
 	else if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -859,9 +857,6 @@ bool EV_RotatePoly (line_t *line, player_t *instigator, int polyNum, int speed, 
 
 void DMovePoly::Tick ()
 {
-	if (m_Dist <= 0)
-		return;
-
 	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
 
 	if (poly == NULL)
@@ -874,6 +869,7 @@ void DMovePoly::Tick ()
 		if (m_Dist <= 0)
 		{
 			SN_StopSequence (poly);
+			Destroy ();
 
 			// [BC] Now that our destination has been reached, tell clients.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -978,9 +974,6 @@ bool EV_MovePoly (line_t *line, player_t *instigator, int polyNum, int speed, an
 
 void DMovePolyTo::Tick ()
 {
-	if (m_Dist <= 0)
-		return;
-
 	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
 
 	if (poly == NULL)
@@ -993,6 +986,7 @@ void DMovePolyTo::Tick ()
 		if (m_Dist <= 0)
 		{
 			SN_StopSequence (poly);
+			Destroy ();
 
 			// [BC] If we're the server, tell clients to create the move poly.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -1092,9 +1086,6 @@ bool EV_MovePolyTo(line_t *line, player_t *instigator, int polyNum, int speed, f
 
 void DPolyDoor::Tick ()
 {
-	if (m_Close && m_Dist <= 0)
-		return;
-
 	int absSpeed;
 	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
 
@@ -1134,6 +1125,10 @@ void DPolyDoor::Tick ()
 					m_Direction = (ANGLE_MAX>>ANGLETOFINESHIFT) - m_Direction;
 					m_xSpeed = -m_xSpeed;
 					m_ySpeed = -m_ySpeed;
+				}
+				else
+				{
+					Destroy ();
 				}
 
 				// [BC] If we're the server, tell clients to update the poly door.
@@ -1195,6 +1190,10 @@ void DPolyDoor::Tick ()
 					m_Close = true;
 					m_Tics = m_WaitTics;
 					m_Speed = -m_Speed;
+				}
+				else
+				{
+					Destroy ();
 				}
 
 				// [BC] If we're the server, tell clients to update the poly door.

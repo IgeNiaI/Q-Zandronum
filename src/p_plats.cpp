@@ -96,9 +96,6 @@ void DPlat::PlayPlatSound (const char *sound)
 //
 void DPlat::Tick ()
 {
-	if (m_Finished)
-		return;
-
 	EResult res;
 		
 	switch (m_Status)
@@ -139,7 +136,7 @@ void DPlat::Tick ()
 					case platUpByValueStay:
 					case platDownToNearestFloor:
 					case platDownToLowestCeiling:
-						m_Finished = true;
+						Destroy();
 						break;
 					default:
 						break;
@@ -175,7 +172,7 @@ void DPlat::Tick ()
 					case platUpWaitDownStay:
 					case platUpNearestWaitDownStay:
 					case platUpByValue:
-						m_Finished = true;
+						Destroy();
 						break;
 				}
 			}
@@ -207,7 +204,7 @@ void DPlat::Tick ()
 			case platUpByValueStay:
 			case platRaiseAndStay:
 			case platRaiseAndStayLockout:
-				m_Finished = true;
+				Destroy();
 			default:
 				break;
 		}
@@ -247,31 +244,6 @@ void DPlat::Tick ()
 void DPlat::UpdateToClient( ULONG ulClient )
 {
 	SERVERCOMMANDS_DoPlat( this, ulClient, SVCF_ONLYTHISCLIENT );
-}
-
-bool DPlat::IsBusy()
-{
-	return !m_Finished;
-}
-
-void DPlat::Predict()
-{
-	// Use a version of gametic that's appropriate for both the current game and demos.
-	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
-
-	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
-	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
-	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
-		return;
-
-	// How many ticks of prediction do we need?
-	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
-
-	while (TicsToPredict)
-	{
-		Tick();
-		TicsToPredict--;
-	}
 }
 
 DPlat::DPlat (sector_t *sector)
@@ -425,18 +397,6 @@ void DPlat::SetTag( LONG lTag )
 	m_Tag = lTag;
 }
 
-// [BC]
-bool DPlat::GetFinished( void )
-{
-	return ( m_Finished );
-}
-
-// [geNia]
-void DPlat::SetFinished( bool Finished )
-{
-	m_Finished = Finished;
-}
-
 
 //
 // Do Platforms
@@ -494,7 +454,7 @@ bool EV_DoPlat (line_t *line, int tag, player_t *instigator, DPlat::EPlatType ty
 manual_plat:
 		plat = P_GetPlatBySectorNum(sec->sectornum);
 
-		if (plat != NULL && !plat->m_Finished)
+		if (sec->PlaneMoving(sector_t::floor))
 		{
 			if (!manual)
 				continue;
@@ -515,7 +475,6 @@ manual_plat:
 		plat->m_Speed = speed;
 		plat->m_Wait = delay;
 		plat->m_LastInstigator = instigator;
-		plat->m_Finished = false;
 
 		//jff 1/26/98 Avoid raise plat bouncing a head off a ceiling and then
 		//going down forever -- default lower to plat height when triggered
@@ -681,7 +640,6 @@ void P_ActivateInStasis (int tag, player_t *instigator)
 		if (scan->m_Tag == tag && scan->m_Status == DPlat::in_stasis)
 		{
 			scan->m_LastInstigator = instigator;
-			scan->m_Finished = false;
 			scan->Reactivate ();
 
 			// [BC] If we're the server, tell clients that that status is changing.
@@ -713,7 +671,6 @@ void EV_StopPlat (int tag, player_t *instigator)
 	while ( (scan = iterator.Next ()) )
 	{
 		scan->m_LastInstigator = instigator;
-		scan->m_Finished = false;
 		if (scan->m_Status != DPlat::in_stasis && scan->m_Tag == tag)
 		{
 			scan->Stop ();
