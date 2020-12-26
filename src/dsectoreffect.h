@@ -15,8 +15,6 @@ public:
 
 	sector_t *GetSector() const { return m_Sector; }
 
-	virtual bool IsBusy();
-	
 	player_t* GetLastInstigator();
 	void SetLastInstigator( player_t* player );
 
@@ -43,6 +41,7 @@ protected:
 	void Serialize (FArchive &arc);
 	// [BB] Changed Destroy to public, so that it can be called in cl_main.cpp.
 public:
+	void Predict();
 	void Destroy();
 protected:
 	void StopInterpolation();

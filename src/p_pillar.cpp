@@ -109,31 +109,6 @@ void DPillar::UpdateToClient( ULONG ulClient )
 	SERVERCOMMANDS_DoPillar( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
-bool DPillar::IsBusy()
-{
-	return !m_Finished;
-}
-
-void DPillar::Predict()
-{
-	// Use a version of gametic that's appropriate for both the current game and demos.
-	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
-
-	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
-	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
-	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
-		return;
-
-	// How many ticks of prediction do we need?
-	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
-
-	while (TicsToPredict)
-	{
-		Tick();
-		TicsToPredict--;
-	}
-}
-
 // [BC]
 void DPillar::SetType( EPillar Type )
 {
@@ -242,23 +217,8 @@ bool DPillar::GetHexencrush( void )
 	return ( m_Hexencrush );
 }
 
-// [geNia]
-bool DPillar::GetFinished( void )
-{
-	return ( m_Finished );
-}
-
-// [geNia]
-void DPillar::SetFinished( bool Finished )
-{
-	m_Finished = Finished;
-}
-
 void DPillar::Tick ()
 {
-	if ( m_Finished )
-		return;
-
 	int r, s;
 	fixed_t oldfloor, oldceiling;
 
@@ -278,9 +238,8 @@ void DPillar::Tick ()
 
 	if (r == pastdest && s == pastdest)
 	{
-		m_Finished = true;
-
 		SN_StopSequence (m_Sector, CHAN_FLOOR);
+		Destroy();
 
 		// [BC] If we're the server, tell clients to destroy the pillar, and to stop
 		// the sector sound sequence.
@@ -317,7 +276,6 @@ void DPillar::Reinit( sector_t *sector, EPillar type, fixed_t speed,
 	m_Speed = speed;
 	m_Crush = crush;
 	m_Hexencrush = hexencrush;
-	m_Finished = false;
 
 	if (type == pillarBuild)
 	{
@@ -435,16 +393,16 @@ bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator,
 			{
 				pPillar = barrier_cast<DPillar*>(sec->ceilingdata);
 			}
+			else
+			{
+				return false;
+			}
 		}
 		
 		if (pPillar == NULL)
 		{
 			// new pillar thinker
 			pPillar = new DPillar (sec);
-		}
-		else if ( pPillar->IsBusy() )
-		{
-			return false;
 		}
 
 		pPillar->Reinit( sec, type, speed, floordist, ceilingdist, crush, hexencrush );

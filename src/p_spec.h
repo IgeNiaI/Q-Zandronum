@@ -477,8 +477,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	bool IsBusy();
-	void Predict();
 	
 	fixed_t	GetLow( void );
 	void	SetLow( fixed_t Low );
@@ -507,8 +505,6 @@ public:
 	void	SetCount( LONG lCount );
 	LONG	GetTag( void );
 	void	SetTag( LONG lTag );
-	bool	GetFinished( void );
-	void	SetFinished( bool Finished );
 
 	// [BC] Make this public so clients can use it.
 	void PlayPlatSound (const char *sound);
@@ -525,7 +521,6 @@ protected:
 	int 		m_Count;
 	int			m_Crush;
 	int 		m_Tag;
-	bool		m_Finished;
 
 	void Reactivate ();
 	void Stop ();
@@ -581,8 +576,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	bool IsBusy();
-	void Predict();
 	
 	void	SetType( EPillar Type );
 	EPillar	GetType( );
@@ -601,8 +594,6 @@ public:
 	int		GetCrush( void );
 	void	SetHexencrush( bool hexencrush );
 	bool	GetHexencrush( void );
-	bool	GetFinished( void );
-	void	SetFinished( bool Finished );
 
 protected:
 	EPillar		m_Type;
@@ -613,7 +604,6 @@ protected:
 	fixed_t		m_CeilingTarget;
 	int			m_Crush;
 	bool		m_Hexencrush;
-	bool		m_Finished;
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
 
@@ -651,37 +641,34 @@ public:
 	DDoor (sector_t *sector);
 	// [BC] Added option to create doors soundlessly.
 	DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTag, bool bNoSound = false);
-	void Reinit(bool bNoSound);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	bool IsBusy();
-	void Predict();
 
 	// [BC] Access function(s).
 	fixed_t	GetPosition( void );
 	int		GetDirection( void );
 	void	SetPositionAndDirection( fixed_t Position, int direction );
 	
-	LONG	GetTopWait( void );
-	void	SetTopWait( LONG lTopWait );
+	int		GetTopWait( void );
+	void	SetTopWait( int TopWait );
 
-	LONG	GetCountdown( void );
-	void	SetCountdown( LONG lCountdown );
+	int		GetCountdown( void );
+	void	SetCountdown( int Countdown );
 
 	LONG	GetSectorNum( void );
 
 	EVlDoor	GetType( void );
 	void	SetType( EVlDoor Type );
 
-	LONG	GetSpeed( void );
-	void	SetSpeed( LONG lSpeed );
+	fixed_t	GetSpeed( void );
+	void	SetSpeed( fixed_t Speed );
 
-	LONG	GetLightTag( void );
-	void	SetLightTag( LONG lTag );
+	int		GetLightTag( void );
+	void	SetLightTag( int Tag );
 
 	void	DoorSound(bool raise, class DSeqNode *curseq = NULL) const;
 
@@ -804,12 +791,9 @@ public:
 	};
 
 	DCeiling (sector_t *sec);
-	DCeiling (sector_t *sec, fixed_t speedDown, fixed_t speedUp, int silent);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
-
-	bool IsBusy();
 
 	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator,
 						fixed_t speedDown, fixed_t speedUp, fixed_t height,
@@ -817,7 +801,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	void Predict();
 
 	// [BC] Make this public so clients can use it.
 	void PlayCeilingSound ();
@@ -828,40 +811,39 @@ public:
 	fixed_t	GetBottomHeight( void );
 	void	SetBottomHeight( fixed_t BottomHeight );
 
-	fixed_t	GetSpeed( void );
 	fixed_t	GetSpeedDown( void );
+	void	SetSpeedDown( fixed_t Speed );
 	fixed_t	GetSpeedUp( void );
-	void	SetSpeed( fixed_t Speed );
+	void	SetSpeedUp( fixed_t Speed );
 	
 	fixed_t	GetPosition( void );
-	LONG	GetDirection( void );
-	void	SetPositionAndDirection( LONG lPosition, LONG lDirection );
+	int		GetDirection( void );
+	void	SetPositionAndDirection( fixed_t Position, int Direction );
 
-	LONG	GetOldDirection( void );
-	void	SetOldDirection( LONG lOldDirection );
+	int		GetOldDirection( void );
+	void	SetOldDirection( int OldDirection );
 
 	ECeiling	GetType( void );
 	void		SetType( ECeiling Type );
 	
-	LONG	GetTag( void );
-	void	SetTag( LONG lTag );
+	int		GetTag( void );
+	void	SetTag( int Tag );
 
-	LONG	GetCrush( void );
-	void	SetCrush( LONG lCrush );
+	int		GetCrush( void );
+	void	SetCrush( int Crush );
 
 	bool	GetHexencrush( void );
 	void	SetHexencrush( bool Hexencrush );
 	
-	LONG	GetSilent( void );
-	void	SetSilent( LONG lSilent );
+	int		GetSilent( void );
+	void	SetSilent( int Silent );
 
 protected:
 	ECeiling	m_Type;
 	fixed_t 	m_BottomHeight;
 	fixed_t 	m_TopHeight;
-	fixed_t 	m_Speed;
-	fixed_t		m_SpeedDown;	// [RH] dnspeed of crushers
-	fixed_t		m_SpeedUp;		// [RH] upspeed of crushers
+	fixed_t		m_SpeedDown;
+	fixed_t		m_SpeedUp;
 	int 		m_Crush;
 	bool		m_Hexencrush;
 	int			m_Silent;
@@ -954,8 +936,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	bool IsBusy();
-	void Predict();
 
 	// [BC] Make these public so clients can use them.
 	void StartFloorSound ();
@@ -1075,8 +1055,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	bool IsBusy();
-	void Predict();
 
 	// [BC] No longer protected so clients can call it.
 	void StartFloorSound ();

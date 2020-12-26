@@ -74,7 +74,6 @@ void DCeiling::Serialize (FArchive &arc)
 	arc << m_Type
 		<< m_BottomHeight
 		<< m_TopHeight
-		<< m_Speed
 		<< m_SpeedDown
 		<< m_SpeedUp
 		<< m_Crush
@@ -131,7 +130,7 @@ void DCeiling::Tick ()
 		break;
 	case 1:
 		// UP
-		res = MoveCeiling (m_Speed, m_TopHeight, m_Direction);
+		res = MoveCeiling (m_SpeedUp, m_TopHeight, m_Direction);
 		
 		if (res == pastdest)
 		{
@@ -140,7 +139,6 @@ void DCeiling::Tick ()
 			case ceilCrushAndRaise:
 			case ceilCrushAndRaiseDist:
 				m_Direction = -1;
-				m_Speed = m_SpeedDown;
 
 				if (!SN_IsMakingLoopingSound (m_Sector))
 					PlayCeilingSound ();
@@ -161,7 +159,7 @@ void DCeiling::Tick ()
 				// fall through
 			default:
 				SN_StopSequence (m_Sector, CHAN_CEILING);
-				m_Direction = 0;
+				Destroy();
 				break;
 			}
 
@@ -173,7 +171,7 @@ void DCeiling::Tick ()
 		
 	case -1:
 		// DOWN
-		res = MoveCeiling (m_Speed, m_BottomHeight, m_Crush, m_Direction, m_Hexencrush);
+		res = MoveCeiling (m_SpeedDown, m_BottomHeight, m_Crush, m_Direction, m_Hexencrush);
 		
 		if (res == pastdest)
 		{
@@ -182,7 +180,6 @@ void DCeiling::Tick ()
 			case ceilCrushAndRaise:
 			case ceilCrushAndRaiseDist:
 			case ceilCrushRaiseAndStay:
-				m_Speed = m_SpeedUp;
 				m_Direction = 1;
 
 				if (!SN_IsMakingLoopingSound (m_Sector))
@@ -206,7 +203,7 @@ void DCeiling::Tick ()
 			default:
 
 				SN_StopSequence (m_Sector, CHAN_CEILING);
-				m_Direction = 0;
+				Destroy();
 				break;
 			}
 
@@ -226,7 +223,7 @@ void DCeiling::Tick ()
 				case ceilLowerAndCrushDist:
 					if (m_SpeedDown == FRACUNIT && m_SpeedUp == FRACUNIT)
 					{
-						m_Speed = FRACUNIT / 8;
+						m_SpeedUp = FRACUNIT / 8;
 
 						// [geNia] If we are the server, update the clients
 						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -248,31 +245,6 @@ void DCeiling::UpdateToClient( ULONG ulClient )
 	SERVERCOMMANDS_DoCeiling( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
-bool DCeiling::IsBusy()
-{
-	return m_Direction != 0;
-}
-
-void DCeiling::Predict()
-{
-	// Use a version of gametic that's appropriate for both the current game and demos.
-	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
-
-	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
-	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
-	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
-		return;
-
-	// How many ticks of prediction do we need?
-	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
-
-	while (TicsToPredict)
-	{
-		Tick();
-		TicsToPredict--;
-	}
-}
-
 //============================================================================
 //
 // 
@@ -282,18 +254,7 @@ void DCeiling::Predict()
 DCeiling::DCeiling (sector_t *sec)
 	: DMovingCeiling (sec)
 {
-}
-
-DCeiling::DCeiling (sector_t *sec, fixed_t speedDown, fixed_t speedUp, int silent)
-	: DMovingCeiling (sec)
-{
-	m_Crush = -1;
-	m_Hexencrush = false;
-	m_Speed = m_SpeedDown = speedDown;
-	m_SpeedUp = speedUp;
-	m_Silent = silent;
 	m_Direction = m_OldDirection = 0;
-	m_LastInstigator = NULL;
 }
 
 fixed_t DCeiling::GetTopHeight( void )
@@ -316,14 +277,14 @@ void DCeiling::SetBottomHeight( fixed_t BottomHeight )
 	m_BottomHeight = BottomHeight;
 }
 
-fixed_t DCeiling::GetSpeed( void )
-{
-	return ( m_Speed );
-}
-
 fixed_t DCeiling::GetSpeedDown( void )
 {
 	return ( m_SpeedDown );
+}
+
+void DCeiling::SetSpeedDown( fixed_t Speed )
+{
+	m_SpeedDown = Speed;
 }
 
 fixed_t DCeiling::GetSpeedUp( void )
@@ -331,9 +292,9 @@ fixed_t DCeiling::GetSpeedUp( void )
 	return ( m_SpeedUp );
 }
 
-void DCeiling::SetSpeed( fixed_t Speed )
+void DCeiling::SetSpeedUp( fixed_t Speed )
 {
-	m_Speed = Speed;
+	m_SpeedUp = Speed;
 }
 
 fixed_t DCeiling::GetPosition( void )
@@ -341,12 +302,12 @@ fixed_t DCeiling::GetPosition( void )
 	return ( m_Sector->ceilingplane.d );
 }
 
-LONG DCeiling::GetDirection( void )
+int DCeiling::GetDirection( void )
 {
 	return ( m_Direction );
 }
 
-void DCeiling::SetPositionAndDirection( LONG lPosition, LONG lDirection )
+void DCeiling::SetPositionAndDirection( fixed_t lPosition, int lDirection )
 {
 	fixed_t diff = m_Sector->ceilingplane.d - lPosition;
 	if (diff > 0)
@@ -369,14 +330,14 @@ void DCeiling::SetPositionAndDirection( LONG lPosition, LONG lDirection )
 	}
 }
 
-LONG DCeiling::GetOldDirection( void )
+int DCeiling::GetOldDirection( void )
 {
 	return ( m_OldDirection );
 }
 
-void DCeiling::SetOldDirection( LONG lOldDirection )
+void DCeiling::SetOldDirection( int OldDirection )
 {
-	m_OldDirection = lOldDirection;
+	m_OldDirection = OldDirection;
 }
 
 DCeiling::ECeiling DCeiling::GetType( void )
@@ -389,22 +350,22 @@ void DCeiling::SetType( ECeiling Type )
 	m_Type = Type;
 }
 
-LONG DCeiling::GetTag( void )
+int DCeiling::GetTag( void )
 {
 	return ( m_Tag );
 }
 
-void DCeiling::SetTag( LONG lTag )
+void DCeiling::SetTag( int lTag )
 {
 	m_Tag = lTag;
 }
 
-LONG DCeiling::GetCrush( void )
+int DCeiling::GetCrush( void )
 {
 	return ( m_Crush );
 }
 
-void DCeiling::SetCrush( LONG lCrush )
+void DCeiling::SetCrush( int lCrush )
 {
 	m_Crush = lCrush;
 }
@@ -419,12 +380,12 @@ void DCeiling::SetHexencrush( bool Hexencrush )
 	m_Hexencrush = Hexencrush;
 }
 
-LONG DCeiling::GetSilent( void )
+int DCeiling::GetSilent( void )
 {
 	return ( m_Silent );
 }
 
-void DCeiling::SetSilent( LONG lSilent )
+void DCeiling::SetSilent( int lSilent )
 {
 	m_Silent = lSilent;
 }
@@ -468,12 +429,16 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 
 	// new ceiling thinker
 	if (ceiling == NULL)
-		ceiling = new DCeiling (sec, speedDown, speedUp, silent);
+		ceiling = new DCeiling (sec);
 
 	if (ceiling->m_Direction != 0)
 		return NULL;
 
+	ceiling->m_SpeedDown = speedDown;
+	ceiling->m_SpeedUp = speedUp;
+	ceiling->m_Silent = silent;
 	ceiling->m_LastInstigator = instigator;
+
 	vertex_t *spot = sec->lines[0]->v1;
 
 	switch (type)
@@ -549,14 +514,14 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 		targheight = sec->ceilingplane.ZatPoint (spot) - height;
 		ceiling->m_BottomHeight = sec->ceilingplane.PointToDist (spot, targheight);
 		ceiling->m_Direction = -1;
-		ceiling->m_Speed = height;
+		ceiling->m_SpeedDown = height;
 		break;
 
 	case ceilRaiseInstant:
 		targheight = sec->ceilingplane.ZatPoint (spot) + height;
 		ceiling->m_TopHeight = sec->ceilingplane.PointToDist (spot, targheight);
 		ceiling->m_Direction = 1;
-		ceiling->m_Speed = height;
+		ceiling->m_SpeedUp = height;
 		break;
 
 	case ceilLowerToNearest:
@@ -630,14 +595,18 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 	if (ceiling->m_Direction < 0)
 	{
 		movedist = sec->ceilingplane.d - ceiling->m_BottomHeight;
+		if (ceiling->m_SpeedDown >= movedist)
+		{
+			ceiling->StopInterpolation();
+		}
 	}
 	else
 	{
 		movedist = ceiling->m_TopHeight - sec->ceilingplane.d;
-	}
-	if (ceiling->m_Speed >= movedist)
-	{
-		ceiling->StopInterpolation();
+		if (ceiling->m_SpeedUp >= movedist)
+		{
+			ceiling->StopInterpolation();
+		}
 	}
 
 	// set texture/type change properties
