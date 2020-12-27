@@ -111,7 +111,7 @@ public:
 	virtual void DropImportantItems( bool bLeavingGame, AActor *pSource = NULL );
 
 	virtual int WalkCrouchState ();
-	virtual bool ShouldPlayFootstep ();
+	virtual void PlayFootsteps ();
 	virtual void TweakSpeeds (int &forwardmove, int &sidemove);
 	virtual void MorphPlayerThink ();
 	virtual void ActivateMorphWeapon ();
