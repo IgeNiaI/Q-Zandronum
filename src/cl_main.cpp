@@ -7205,6 +7205,8 @@ static void client_DoFloor( BYTESTREAM_s *pByteStream )
 		if ( pFloor )
 		{
 			// Floor is destroyed on server side
+			pFloor->SetOrgDist( Position );
+			pFloor->SetFloorDestDist( Position );
 			pFloor->SetPositionAndDirection( Position, 0 );
 			pFloor->Destroy();
 		}
@@ -7215,7 +7217,8 @@ static void client_DoFloor( BYTESTREAM_s *pByteStream )
 		int Type = NETWORK_ReadByte( pByteStream );
 		int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
 		fixed_t Speed = NETWORK_ReadLong( pByteStream );
-		int FloorDestDist = NETWORK_ReadLong( pByteStream );
+		fixed_t OrgDist = NETWORK_ReadLong( pByteStream );
+		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
 		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
 		bool Hexencrush = NETWORK_ReadBit( pByteStream );
 		int NewSpecial = NETWORK_ReadLong( pByteStream );
@@ -7230,8 +7233,9 @@ static void client_DoFloor( BYTESTREAM_s *pByteStream )
 		pFloor->SetType( (DFloor::EFloor)Type );
 		pFloor->SetCrush( Crush );
 		pFloor->SetHexencrush( Hexencrush );
-		pFloor->SetPositionAndDirection( Position, Direction );
+		pFloor->SetOrgDist( OrgDist );
 		pFloor->SetFloorDestDist( FloorDestDist );
+		pFloor->SetPositionAndDirection( Position, Direction );
 		pFloor->SetSpeed( Speed );
 		pFloor->SetNewSpecial( NewSpecial );
 
@@ -7264,6 +7268,8 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 		if ( pFloor )
 		{
 			// Floor is destroyed on server side
+			pFloor->SetOrgDist( Position );
+			pFloor->SetFloorDestDist( Position );
 			pFloor->SetPositionAndDirection( Position, 0 );
 			pFloor->Destroy();
 		}
@@ -7274,6 +7280,7 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 		int Type = NETWORK_ReadByte( pByteStream );
 		int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
 		fixed_t Speed = NETWORK_ReadLong( pByteStream );
+		fixed_t OrgDist = NETWORK_ReadLong( pByteStream );
 		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
 		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
 		bool Hexencrush = NETWORK_ReadBit( pByteStream );
@@ -7300,6 +7307,7 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 		pFloor->SetType( (DFloor::EFloor)Type );
 		pFloor->SetCrush( Crush );
 		pFloor->SetHexencrush( Hexencrush );
+		pFloor->SetOrgDist( OrgDist );
 		pFloor->SetFloorDestDist( FloorDestDist );
 		pFloor->SetPositionAndDirection( Position, Direction );
 		pFloor->SetSpeed( Speed );
@@ -7339,6 +7347,8 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 		if ( pCeiling )
 		{
 			// Ceiling is destroyed on server side
+			pCeiling->SetBottomHeight( Position );
+			pCeiling->SetTopHeight( Position );
 			pCeiling->SetPositionAndDirection( Position, 0 );
 			pCeiling->Destroy();
 		}
@@ -7456,6 +7466,8 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 {
 	int SectorID = NETWORK_ReadShort( pByteStream );
 	int Instigator = NETWORK_ReadByte( pByteStream );
+	fixed_t FloorPosition = NETWORK_ReadLong( pByteStream );
+	fixed_t CeilingPosition = NETWORK_ReadLong( pByteStream );
 	
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
@@ -7495,6 +7507,8 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 		pElevator->SetDirection( Direction );
 		pElevator->SetFloorDestDist( FloorDestDist );
 		pElevator->SetCeilingDestDist( CeilingDestDist );
+		pElevator->SetFloorPosition( FloorPosition );
+		pElevator->SetCeilingPosition( CeilingPosition );
 
 		if ( Instigator == consoleplayer )
 		{

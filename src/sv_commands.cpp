@@ -3713,7 +3713,7 @@ void SERVERCOMMANDS_DoDoor( DDoor *Door, ULONG ulPlayerExtra, ServerCommandFlags
 	}
 	else
 	{
-		command.addBit( false ); // thinker is destroyed
+		command.addBit( false ); // thinker is alive
 		command.addByte ( Door->GetLastInstigator() - players );
 		command.addByte ( (BYTE)Door->GetType() );
 		command.addByte ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
@@ -3745,11 +3745,12 @@ void SERVERCOMMANDS_DoFloor( DFloor *Floor, ULONG ulPlayerExtra, ServerCommandFl
 	}
 	else
 	{
-		command.addBit( false ); // thinker is destroyed
+		command.addBit( false ); // thinker is alive
 		command.addByte ( Floor->GetLastInstigator() - players );
 		command.addByte ( (ULONG) Floor->GetType() );
 		command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
 		command.addLong ( Floor->GetSpeed() );
+		command.addLong ( Floor->GetOrgDist() );
 		command.addLong ( Floor->GetFloorDestDist() );
 		command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
 		command.addBit ( Floor->GetHexencrush() );
@@ -3777,11 +3778,12 @@ void SERVERCOMMANDS_BuildStair( DFloor *Floor, ULONG ulPlayerExtra, ServerComman
 	}
 	else
 	{
-		command.addBit( false ); // thinker is destroyed
+		command.addBit( false ); // thinker is alive
 		command.addByte ( Floor->GetLastInstigator() - players );
 		command.addByte ( (ULONG) Floor->GetType() );
 		command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
 		command.addLong ( Floor->GetSpeed() );
+		command.addLong ( Floor->GetOrgDist() );
 		command.addLong ( Floor->GetFloorDestDist() );
 		command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
 		command.addBit ( Floor->GetHexencrush() );
@@ -3815,7 +3817,7 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 	}
 	else
 	{
-		command.addBit( false ); // thinker is destroyed
+		command.addBit( false ); // thinker is alive
 		command.addByte ( Ceiling->GetLastInstigator() - players );
 		command.addByte ( Ceiling->GetTag() );
 		command.addByte ( (ULONG)Ceiling->GetType() );
@@ -3852,7 +3854,7 @@ void SERVERCOMMANDS_DoPlat( DPlat *Plat, ULONG ulPlayerExtra, ServerCommandFlags
 	}
 	else
 	{
-		command.addBit( false ); // thinker is destroyed
+		command.addBit( false ); // thinker is alive
 		command.addByte ( Plat->GetLastInstigator() - players );
 		command.addByte ( (ULONG)Plat->GetType() );
 		command.addByte ( (ULONG)Plat->GetStatus() );
@@ -3880,6 +3882,8 @@ void SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra, Server
 
 	NetCommand command ( SVC_DOELEVATOR );
 	command.addShort ( lSectorID );
+	command.addLong ( Elevator->GetFloorPosition() );
+	command.addLong ( Elevator->GetCeilingPosition() );
 
 	if (Elevator->ObjectFlags & OF_EuthanizeMe)
 	{
@@ -3887,7 +3891,7 @@ void SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra, Server
 	}
 	else
 	{
-		command.addBit( false ); // thinker is destroyed
+		command.addBit( false ); // thinker is alive
 		command.addByte ( Elevator->GetLastInstigator() - players );
 		command.addByte ( Elevator->GetType() );
 		command.addLong ( Elevator->GetSpeed() );
@@ -3919,7 +3923,7 @@ void SERVERCOMMANDS_DoPillar( DPillar *Pillar, ULONG ulPlayerExtra, ServerComman
 	}
 	else
 	{
-		command.addBit( false ); // thinker is destroyed
+		command.addBit( false ); // thinker is alive
 		command.addByte ( Pillar->GetLastInstigator() - players );
 		command.addByte ( Pillar->GetType() );
 		command.addLong ( Pillar->GetFloorSpeed() );
@@ -3953,7 +3957,7 @@ void SERVERCOMMANDS_DoWaggle( DWaggleBase *Waggle, ULONG ulPlayerExtra, ServerCo
 	}
 	else
 	{
-		command.addBit( false ); // thinker is destroyed
+		command.addBit( false ); // thinker is alive
 		command.addByte ( Waggle->GetLastInstigator() - players );
 		command.addLong ( Waggle->GetOriginalDistance() );
 		command.addLong ( Waggle->GetAccumulator() );

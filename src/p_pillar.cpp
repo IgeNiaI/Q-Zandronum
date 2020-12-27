@@ -124,17 +124,25 @@ DPillar::EPillar DPillar::GetType( )
 // [geNia]
 void DPillar::SetPosition( fixed_t FloorPosition, fixed_t CeilingPosition )
 {
-	fixed_t CurrentFloorPosition = GetFloorPosition();
-	if (CurrentFloorPosition < FloorPosition)
-		MoveFloor (CurrentFloorPosition - FloorPosition, FloorPosition, m_Crush, 1, m_Hexencrush);
-	else
-		MoveFloor (FloorPosition - CurrentFloorPosition, FloorPosition, m_Crush, -1, m_Hexencrush);
-
-	fixed_t CurrentCeilingPosition = GetCeilingPosition();
-	if (CurrentCeilingPosition > CeilingPosition)
-		MoveCeiling (CurrentCeilingPosition - CeilingPosition, CeilingPosition, m_Crush, -1, m_Hexencrush);
-	else
-		MoveCeiling (CeilingPosition - CurrentCeilingPosition, CeilingPosition, m_Crush, 1, m_Hexencrush);
+	fixed_t diff = m_Sector->floorplane.d - FloorPosition;
+	if (diff > 0)
+	{
+		MoveFloor(diff, FloorPosition, -1, -1, m_Hexencrush);
+	}
+	else if (diff < 0)
+	{
+		MoveFloor(-diff, FloorPosition, -1, 1, m_Hexencrush);
+	}
+	
+	diff = m_Sector->ceilingplane.d - CeilingPosition;
+	if (diff > 0)
+	{
+		MoveCeiling(diff, CeilingPosition, -1, -1, m_Hexencrush);
+	}
+	else if (diff < 0)
+	{
+		MoveCeiling(-diff, CeilingPosition, -1, 1, m_Hexencrush);
+	}
 }
 
 // [geNia]
