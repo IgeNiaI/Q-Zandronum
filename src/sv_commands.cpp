@@ -3936,47 +3936,35 @@ void SERVERCOMMANDS_DoPillar( DPillar *Pillar, ULONG ulPlayerExtra, ServerComman
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoWaggle( bool bCeiling, sector_t *pSector, LONG lOriginalDistance, LONG lAccumulator, LONG lAccelerationDelta, LONG lTargetScale, LONG lScale, LONG lScaleDelta, LONG lTicker, LONG lState, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoWaggle( DWaggleBase *Waggle, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG	lSectorID = LONG( Waggle->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
 	NetCommand command ( SVC_DOWAGGLE );
-	command.addByte ( !!bCeiling );
 	command.addShort ( lSectorID );
-	command.addLong ( lOriginalDistance );
-	command.addLong ( lAccumulator );
-	command.addLong ( lAccelerationDelta );
-	command.addLong ( lTargetScale );
-	command.addLong ( lScale );
-	command.addLong ( lScaleDelta );
-	command.addLong ( lTicker );
-	command.addByte ( lState );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
+	command.addLong ( Waggle->GetPosition() );
+	command.addBit ( Waggle->GetClass( ) == RUNTIME_CLASS( DCeilingWaggle ) );
 
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyWaggle( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYWAGGLE );
-	command.addShort ( lID );
+	if (Waggle->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is destroyed
+		command.addByte ( Waggle->GetLastInstigator() - players );
+		command.addLong ( Waggle->GetOriginalDistance() );
+		command.addLong ( Waggle->GetAccumulator() );
+		command.addLong ( Waggle->GetAccelerationDelta() );
+		command.addLong ( Waggle->GetTargetScale() );
+		command.addLong ( Waggle->GetScale() );
+		command.addLong ( Waggle->GetScaleDelta() );
+		command.addLong ( Waggle->GetTicker() );
+		command.addByte ( Waggle->GetState() );
+	}
 	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_UpdateWaggle( LONG lID, LONG lAccumulator, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command( SVC_UPDATEWAGGLE );
-	command.setUnreliable( true );
-	command.addShort( lID );
-	command.addLong( lAccumulator );
-	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************

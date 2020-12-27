@@ -368,9 +368,7 @@ void	SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra = MAXPL
 void	SERVERCOMMANDS_DoPillar( DPillar *Pillar, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 
 // Waggle commands. Ditto.
-void	SERVERCOMMANDS_DoWaggle( bool bCeiling, sector_t *pSector, LONG lOriginalDistance, LONG lAccumulator, LONG lAccelerationDelta, LONG lTargetScale, LONG lScale, LONG lScaleDelta, LONG lTicker, LONG lState, LONG lID, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_DestroyWaggle( LONG lID, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_UpdateWaggle( LONG lID, LONG lAccumulator, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_DoWaggle( DWaggleBase *Waggle, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 
 // Poly commands. Ditto.
 void	SERVERCOMMANDS_DoRotatePoly( DRotatePoly *RotatePoly, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
