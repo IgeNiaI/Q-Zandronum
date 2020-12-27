@@ -2297,21 +2297,65 @@ int APlayerPawn::WalkCrouchState ()
 //
 //===========================================================================
 
-bool APlayerPawn::ShouldPlayFootstep ()
+void APlayerPawn::PlayFootsteps ()
 {
-	switch (WalkCrouchState())
+	if ( CLIENT_PREDICT_IsPredicting() )
+		return;
+
+	bool ShouldPlayerFootsteps = true;
+
+	if (!player->onground || player->mo->waterlevel >= 2 ||
+		(player->mo->flags & MF_NOGRAVITY) || Button_Jump.bDown)
 	{
-	case 0: // player is walking
-		return FootstepsEnabled1;
-	case 1: // player is running
-		return FootstepsEnabled2;
-	case 2: // player is crouching
-		return FootstepsEnabled3;
-	case 3: // player is crouch running
-		return FootstepsEnabled4;
+		ShouldPlayerFootsteps = false;
 	}
 
-	return true;
+	if ( ShouldPlayerFootsteps )
+	{
+		switch (WalkCrouchState())
+		{
+		case 0: // player is walking
+			ShouldPlayerFootsteps = FootstepsEnabled1;
+			break;
+		case 1: // player is running
+			ShouldPlayerFootsteps = FootstepsEnabled2;
+			break;
+		case 2: // player is crouching
+			ShouldPlayerFootsteps = FootstepsEnabled3;
+			break;
+		case 3: // player is crouch running
+			ShouldPlayerFootsteps = FootstepsEnabled4;
+			break;
+		}
+	}
+
+	if ( ShouldPlayerFootsteps )
+	{
+		fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
+		if (velocity < Speed * 3)
+			ShouldPlayerFootsteps = false;
+	}
+
+	if ( ShouldPlayerFootsteps )
+	{
+		if (player->stepInterval <= 0)
+		{
+			if (!(player->mo->mvFlags & MV_SILENT))
+			{
+				S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
+			}
+
+			player->stepInterval = player->mo->FootstepInterval;
+		}
+		else
+		{
+			player->stepInterval--;
+		}
+	}
+	else
+	{
+		player->stepInterval = player->mo->FootstepInterval / 2;
+	}
 }
 
 //===========================================================================
@@ -3451,36 +3495,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (isClimber)
 		P_SetClimbStatus(player, isClimbing);
 
-	//*******************************************************
-	// Footsteps
-	//*******************************************************
-
-	if ( !CLIENT_PREDICT_IsPredicting() )
-	{
-		velocity = (fixed_t) TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length();
-
-		if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
-			(player->mo->flags & MF_NOGRAVITY) || !player->mo->ShouldPlayFootstep() || (cmd->ucmd.buttons & BT_JUMP))
-		{
-			player->stepInterval = player->mo->FootstepInterval / 2;
-		}
-		else
-		{
-			if (player->stepInterval <= 0)
-			{
-				if (!(player->mo->mvFlags & MV_SILENT))
-				{
-					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
-				}
-
-				player->stepInterval = player->mo->FootstepInterval;
-			}
-			else
-			{
-				player->stepInterval--;
-			}
-		}
-	}
+	player->mo->PlayFootsteps();
 
 	//**********************************
 	// Jumping
@@ -3792,36 +3807,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		player->cheats &= ~CF_REVERTPLEASE;
 		player->camera = player->mo;
 	}
-	
-	//*******************************************************
-	// Footsteps
-	//*******************************************************
 
-	if ( !CLIENT_PREDICT_IsPredicting() )
-	{
-		velocity = float(FVector2(vel.X, vel.Y).Length());
-
-		if (!player->onground || velocity <= 3.f || noJump || !player->mo->ShouldPlayFootstep() || (cmd->ucmd.buttons & BT_JUMP))
-		{
-			player->stepInterval = player->mo->FootstepInterval / 2;
-		}
-		else
-		{
-			if (player->stepInterval <= 0 && !player->isCrouchSliding)
-			{
-				if (!(player->mo->mvFlags & MV_SILENT))
-				{
-					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
-				}
-
-				player->stepInterval = player->mo->FootstepInterval;
-			}
-			else
-			{
-				player->stepInterval--;
-			}
-		}
-	}
+	player->mo->PlayFootsteps();
 
 	// Water and flying have already executed jump press logic
 	if (noJump)
