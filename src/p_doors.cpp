@@ -172,7 +172,7 @@ void DDoor::Tick ()
 			{
 			case doorRaise:
 			case doorClose:
-				m_Direction = -2;
+				Destroy();						// unlink and free
 				break;
 				
 			case doorCloseWaitOpen:
@@ -237,7 +237,7 @@ void DDoor::Tick ()
 				
 			case doorCloseWaitOpen:
 			case doorOpen:
-				m_Direction = -2;
+				Destroy();						// unlink and free
 				break;
 				
 			default:
@@ -265,31 +265,6 @@ void DDoor::Tick ()
 void DDoor::UpdateToClient( ULONG ulClient )
 {
 	SERVERCOMMANDS_DoDoor( this, ulClient, SVCF_ONLYTHISCLIENT );
-}
-
-bool DDoor::IsBusy()
-{
-	return m_Direction != -2;
-}
-
-void DDoor::Predict()
-{
-	// Use a version of gametic that's appropriate for both the current game and demos.
-	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
-
-	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
-	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
-	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
-		return;
-
-	// How many ticks of prediction do we need?
-	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
-
-	while (TicsToPredict)
-	{
-		Tick();
-		TicsToPredict--;
-	}
 }
 
 fixed_t DDoor::GetPosition()
@@ -340,39 +315,44 @@ void DDoor::SetType( DDoor::EVlDoor Type )
 	m_Type = Type;
 }
 
-LONG DDoor::GetSpeed( void )
+fixed_t DDoor::GetSpeed( void )
 {
 	return ( m_Speed );
 }
 
-void DDoor::SetSpeed( LONG lSpeed )
+void DDoor::SetSpeed( fixed_t Speed )
 {
-	m_Speed = lSpeed;
+	m_Speed = Speed;
 }
 
-LONG DDoor::GetTopWait( void )
+int DDoor::GetTopWait( void )
 {
 	return ( m_TopWait );
 }
 
-LONG DDoor::GetCountdown( void )
+void DDoor::SetTopWait( int TopWait )
+{
+	m_TopWait = TopWait;
+}
+
+int DDoor::GetCountdown( void )
 {
 	return ( m_TopCountdown );
 }
 
-void DDoor::SetCountdown( LONG lCountdown)
+void DDoor::SetCountdown( int Countdown)
 {
-	m_TopCountdown = lCountdown;
+	m_TopCountdown = Countdown;
 }
 
-LONG DDoor::GetLightTag( void )
+int DDoor::GetLightTag( void )
 {
 	return ( m_LightTag );
 }
 
-void DDoor::SetLightTag( LONG lTag )
+void DDoor::SetLightTag( int Tag )
 {
-	m_LightTag = lTag;
+	m_LightTag = Tag;
 }
 
 //============================================================================
@@ -498,11 +478,6 @@ DDoor::DDoor (sector_t *sector)
 DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTag, bool bNoSound)
 	: DMovingCeiling (sec),
   	  m_Type (type), m_Speed (speed), m_TopWait (delay), m_LightTag (lightTag)
-{
-	Reinit( bNoSound );
-}
-
-void DDoor::Reinit( bool bNoSound )
 {
 	vertex_t *spot;
 	fixed_t height;
@@ -630,7 +605,7 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 				// ONLY FOR "RAISE" DOORS, NOT "OPEN"s
 				if (door->m_Type == DDoor::doorRaise && type == DDoor::doorRaise)
 				{
-					if (door->m_Direction == -1 || door->m_Direction == -2)
+					if (door->m_Direction == -1)
 					{
 						door->m_Direction = 1;	// go back up
 						door->DoorSound (true);	// [RH] Make noise
@@ -664,10 +639,6 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 					{
 						return false;
 					}
-				}
-				else if (door->m_Direction == -2)
-				{
-					door->Reinit( false );
 				}
 			}
 			return false;
@@ -705,10 +676,6 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 			if ( pDoor == NULL )
 			{
 				pDoor = new DDoor (sec, type, speed, delay, lightTag);
-			}
-			else if ( pDoor->m_Direction == -2 )
-			{
-				pDoor->Reinit(false);
 			}
 
 			pDoor->m_LastInstigator = instigator;
@@ -836,11 +803,22 @@ bool DAnimatedDoor::StartClosing ()
 	// [BC] If we're the server, tell clients to alter this line's blocking status.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ));
-		SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ));
+		if ( m_LastInstigator )
+		{
+			SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 
-		// Also, tell clients to move the ceiling.
-		SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
+			// Also, tell clients to move the ceiling.
+			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+		}
+		else
+		{
+			SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ));
+			SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ));
+
+			// Also, tell clients to move the ceiling.
+			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
+		}
 	}
 
 	if (m_DoorAnim->CloseSound != NAME_None)
@@ -849,7 +827,10 @@ bool DAnimatedDoor::StartClosing ()
 
 		// [BB] Tell the clients to play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_CEILING, m_DoorAnim->CloseSound.GetChars(), 1 );
+			if ( m_LastInstigator )
+				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_CEILING, m_DoorAnim->CloseSound.GetChars(), 1, ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_CEILING, m_DoorAnim->CloseSound.GetChars(), 1 );
 	}
 
 	m_Status = Closing;
@@ -891,8 +872,16 @@ void DAnimatedDoor::Tick ()
 				// [BC] If we're the server, tell clients to alter this line's blocking status.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ));
-					SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ));
+					if ( m_LastInstigator )
+					{
+						SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+						SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+					}
+					else
+					{
+						SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ));
+						SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ));
+					}
 				}
 
 				if (m_Delay == 0)
@@ -923,8 +912,16 @@ void DAnimatedDoor::Tick ()
 				// has changed.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ));
-					SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ));
+					if ( m_LastInstigator )
+					{
+						SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+						SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+					}
+					else
+					{
+						SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ));
+						SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ));
+					}
 				}
 			}
 		}
@@ -951,7 +948,10 @@ void DAnimatedDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to move the ceiling.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
+					if ( m_LastInstigator )
+						SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+					else
+						SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
 
 				m_Sector->ceilingdata = NULL;
 				Destroy ();
@@ -986,8 +986,16 @@ void DAnimatedDoor::Tick ()
 				// has changed.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ));
-					SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ));
+					if ( m_LastInstigator )
+					{
+						SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+						SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+					}
+					else
+					{
+						SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ));
+						SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ));
+					}
 				}
 			}
 		}
@@ -1001,7 +1009,7 @@ void DAnimatedDoor::Tick ()
 //
 //============================================================================
 
-DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, int speed, int delay, FDoorAnimation *anim)
+DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, player_t *instigator, int speed, int delay, FDoorAnimation *anim)
 	: DMovingCeiling (sec)
 {
 	fixed_t topdist;
@@ -1011,6 +1019,7 @@ DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, int speed, int delay,
 	// Stop it, since the ceiling is moving instantly here.
 	StopInterpolation();
 	m_DoorAnim = anim;
+	m_LastInstigator = instigator;
 
 	m_Line1 = line;
 	m_Line2 = line;
@@ -1040,8 +1049,16 @@ DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, int speed, int delay,
 	// has changed.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ));
-		SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ));
+		if ( m_LastInstigator )
+		{
+			SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+		}
+		else
+		{
+			SERVERCOMMANDS_SetLineTexture( ULONG( m_Line1 - lines ));
+			SERVERCOMMANDS_SetLineTexture( ULONG( m_Line2 - lines ));
+		}
 	}
 
 	// don't forget texture scaling here!
@@ -1064,8 +1081,16 @@ DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, int speed, int delay,
 	// has changed.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ));
-		SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ));
+		if ( m_LastInstigator )
+		{
+			SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+		}
+		else
+		{
+			SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line1 - lines ));
+			SERVERCOMMANDS_SetSomeLineFlags( ULONG( m_Line2 - lines ));
+		}
 	}
 
 	m_BotDist = m_Sector->ceilingplane.d;
@@ -1076,12 +1101,18 @@ DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, int speed, int delay,
 
 		// [BB] Tell the clients to play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_INTERIOR, m_DoorAnim->OpenSound.GetChars(), 1 );
+			if ( m_LastInstigator )
+				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_INTERIOR, m_DoorAnim->OpenSound.GetChars(), 1, ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_INTERIOR, m_DoorAnim->OpenSound.GetChars(), 1 );
 	}
 
 	// [BC] If we're the server, tell clients to move the ceiling.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
+		if ( m_LastInstigator )
+			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
 }
 
 //============================================================================
@@ -1092,6 +1123,11 @@ DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, int speed, int delay,
 //============================================================================
 
 bool EV_SlidingDoor (line_t *line, AActor *actor, int tag, int speed, int delay)
+{
+	return EV_SlidingDoor (line, NULL, actor, tag, speed, delay);
+}
+
+bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *actor, int tag, int speed, int delay)
 {
 	sector_t *sec;
 	int secnum;
@@ -1116,6 +1152,7 @@ bool EV_SlidingDoor (line_t *line, AActor *actor, int tag, int speed, int delay)
 				DAnimatedDoor *door = barrier_cast<DAnimatedDoor *>(sec->ceilingdata);
 				if (door->m_Status == DAnimatedDoor::Waiting)
 				{
+					door->m_LastInstigator = instigator;
 					return door->StartClosing();
 				}
 			}
@@ -1124,7 +1161,7 @@ bool EV_SlidingDoor (line_t *line, AActor *actor, int tag, int speed, int delay)
 		FDoorAnimation *anim = TexMan.FindAnimatedDoor (line->sidedef[0]->GetTexture(side_t::top));
 		if (anim != NULL)
 		{
-			new DAnimatedDoor (sec, line, speed, delay, anim);
+			new DAnimatedDoor (sec, line, instigator, speed, delay, anim);
 			return true;
 		}
 		return false;
@@ -1149,7 +1186,7 @@ bool EV_SlidingDoor (line_t *line, AActor *actor, int tag, int speed, int delay)
 			if (anim != NULL)
 			{
 				rtn = true;
-				new DAnimatedDoor (sec, line, speed, delay, anim);
+				new DAnimatedDoor (sec, line, instigator, speed, delay, anim);
 				break;
 			}
 		}

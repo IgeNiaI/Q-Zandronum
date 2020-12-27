@@ -662,6 +662,16 @@ void SERVERCOMMANDS_SetPlayerConsoleStatus( ULONG ulPlayer, ULONG ulPlayerExtra,
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetPlayerMenuStatus(ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags)
+{
+	ServerCommands::SetPlayerMenuStatus command;
+	command.SetPlayer(&players[ulPlayer]);
+	command.SetInMenu(players[ulPlayer].bInMenu);
+	command.sendCommandToClients(ulPlayerExtra, flags);
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_SetPlayerReadyToGoOnStatus( ULONG ulPlayer )
 {
 	ServerCommands::SetPlayerReadyToGoOnStatus command;
@@ -1547,46 +1557,6 @@ void SERVERCOMMANDS_SetThingTranslation( AActor *pActor, ULONG ulPlayerExtra, Se
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_SetThingProperty( AActor *pActor, ULONG ulProperty, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	if ( !EnsureActorHasNetID (pActor) )
-		return;
-
-	int value = 0;
-
-	// Set one of the actor's properties, depending on what was read in.
-	switch ( ulProperty )
-	{
-	case APROP_Speed:
-		value = pActor->Speed;
-		break;
-
-	case APROP_Alpha:
-		value = pActor->alpha;
-		break;
-
-	case APROP_RenderStyle:
-		value = pActor->RenderStyle.AsDWORD;
-		break;
-
-	case APROP_JumpZ:
-		if ( pActor->IsKindOf( RUNTIME_CLASS( APlayerPawn )))
-			value = static_cast<APlayerPawn *>( pActor )->JumpZ;
-		break;
-
-	default:
-		return;
-	}
-
-	ServerCommands::SetThingProperty command;
-	command.SetActor( pActor );
-	command.SetProperty( ulProperty );
-	command.SetValue( value );
-	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
 void SERVERCOMMANDS_SetThingSound( AActor *pActor, ULONG ulSound, const char *pszSound, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( !EnsureActorHasNetID (pActor) )
@@ -1764,6 +1734,20 @@ void SERVERCOMMANDS_SetThingFrame( AActor *pActor, FState *pState, ULONG ulPlaye
 			command.sendCommandToClients( ulPlayerExtra, flags );
 		}
 	}
+}
+
+//*****************************************************************************
+//
+void SERVERCOMMANDS_SetActorProperty( AActor *pActor, int property, int value, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( pActor == NULL || pActor->lNetID == -1 )
+		return;
+
+	ServerCommands::SetActorProperty command;
+	command.SetActor( pActor );
+	command.SetProperty( property );
+	command.SetValue( value );
+	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -2143,11 +2127,11 @@ void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags f
 	// [WS] Send in sv_coop_damagefactor.
 	command.addFloat( sv_coop_damagefactor );
 	// [WS] Send in alwaysapplydmflags.
-	command.addByte( alwaysapplydmflags );
+	command.addBit( alwaysapplydmflags );
 	// [AM] Send lobby map.
 	command.addString( lobby );
 	// [TP] Send sv_limitcommands
-	command.addByte( sv_limitcommands );
+	command.addBit( sv_limitcommands );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3721,14 +3705,24 @@ void SERVERCOMMANDS_DoDoor( DDoor *Door, ULONG ulPlayerExtra, ServerCommandFlags
 
 	NetCommand command ( SVC_DODOOR );
 	command.addShort ( lSectorID );
-	command.addByte ( (BYTE)Door->GetType() );
-	command.addByte( Door->GetLastInstigator() - players );
 	command.addLong ( Door->GetPosition() );
-	command.addByte ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
-	command.addLong ( Door->GetSpeed() );
-	command.addByte ( Door->GetTopWait() );
-	command.addByte ( Door->GetCountdown() );
-	command.addShort ( Door->GetLightTag() );
+
+	if (Door->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is alive
+		command.addByte ( Door->GetLastInstigator() - players );
+		command.addByte ( (BYTE)Door->GetType() );
+		command.addByte ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
+		command.addLong ( Door->GetSpeed() );
+		command.addLong ( Door->GetTopWait() );
+		command.addLong ( Door->GetCountdown() );
+		command.addShort ( Door->GetLightTag() );
+	}
+
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3742,16 +3736,27 @@ void SERVERCOMMANDS_DoFloor( DFloor *Floor, ULONG ulPlayerExtra, ServerCommandFl
 		return;
 
 	NetCommand command ( SVC_DOFLOOR );
-	command.addByte ( (ULONG) Floor->GetType() );
 	command.addShort ( lSectorID );
-	command.addByte ( Floor->GetLastInstigator() - players );
 	command.addLong ( Floor->GetPosition() );
-	command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
-	command.addLong ( Floor->GetSpeed() );
-	command.addLong ( Floor->GetFloorDestDist() );
-	command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
-	command.addByte ( Floor->GetHexencrush() );
-	command.addLong ( Floor->GetNewSpecial() );
+
+	if (Floor->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is alive
+		command.addByte ( Floor->GetLastInstigator() - players );
+		command.addByte ( (ULONG) Floor->GetType() );
+		command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
+		command.addLong ( Floor->GetSpeed() );
+		command.addLong ( Floor->GetOrgDist() );
+		command.addLong ( Floor->GetFloorDestDist() );
+		command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
+		command.addBit ( Floor->GetHexencrush() );
+		command.addLong ( Floor->GetNewSpecial() );
+	}
+
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3764,21 +3769,32 @@ void SERVERCOMMANDS_BuildStair( DFloor *Floor, ULONG ulPlayerExtra, ServerComman
 		return;
 
 	NetCommand command ( SVC2_BUILDSTAIR );
-	command.addByte ( (ULONG) Floor->GetType() );
 	command.addShort ( SectorID );
-	command.addByte( Floor->GetLastInstigator() - players );
 	command.addLong ( Floor->GetPosition() );
-	command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
-	command.addLong ( Floor->GetSpeed() );
-	command.addLong ( Floor->GetFloorDestDist() );
-	command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
-	command.addByte ( Floor->GetHexencrush() );
-	command.addLong ( Floor->GetNewSpecial() );
-	command.addLong ( Floor->GetResetCount() );
-	command.addLong ( Floor->GetDelay() );
-	command.addLong ( Floor->GetPauseTime() );
-	command.addLong ( Floor->GetStepTime() );
-	command.addLong ( Floor->GetPerStepTime() );
+
+	if (Floor->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is alive
+		command.addByte ( Floor->GetLastInstigator() - players );
+		command.addByte ( (ULONG) Floor->GetType() );
+		command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
+		command.addLong ( Floor->GetSpeed() );
+		command.addLong ( Floor->GetOrgDist() );
+		command.addLong ( Floor->GetFloorDestDist() );
+		command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
+		command.addBit ( Floor->GetHexencrush() );
+		command.addLong ( Floor->GetNewSpecial() );
+		command.addLong ( Floor->GetResetCount() );
+		command.addLong ( Floor->GetDelay() );
+		command.addLong ( Floor->GetPauseTime() );
+		command.addLong ( Floor->GetStepTime() );
+		command.addLong ( Floor->GetPerStepTime() );
+	}
+
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3793,20 +3809,29 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 
 	NetCommand command ( SVC_DOCEILING );
 	command.addShort ( lSectorID );
-	command.addByte( Ceiling->GetLastInstigator() - players );
-	command.addByte ( Ceiling->GetTag() );
-	command.addByte ( (ULONG)Ceiling->GetType() );
-	command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetDirection() ) );
-	command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetOldDirection() ) );
 	command.addLong ( Ceiling->GetPosition() );
-	command.addLong ( Ceiling->GetBottomHeight() );
-	command.addLong ( Ceiling->GetTopHeight() );
-	command.addLong ( Ceiling->GetSpeed() );
-	command.addLong ( Ceiling->GetSpeedDown() );
-	command.addLong ( Ceiling->GetSpeedUp() );
-	command.addByte ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
-	command.addByte ( Ceiling->GetHexencrush() );
-	command.addShort ( Ceiling->GetSilent() );
+
+	if (Ceiling->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is alive
+		command.addByte ( Ceiling->GetLastInstigator() - players );
+		command.addByte ( Ceiling->GetTag() );
+		command.addByte ( (ULONG)Ceiling->GetType() );
+		command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetDirection() ) );
+		command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetOldDirection() ) );
+		command.addLong ( Ceiling->GetBottomHeight() );
+		command.addLong ( Ceiling->GetTopHeight() );
+		command.addLong ( Ceiling->GetSpeedDown() );
+		command.addLong ( Ceiling->GetSpeedUp() );
+		command.addByte ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
+		command.addBit ( Ceiling->GetHexencrush() );
+		command.addShort ( Ceiling->GetSilent() );
+	}
+
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3821,19 +3846,28 @@ void SERVERCOMMANDS_DoPlat( DPlat *Plat, ULONG ulPlayerExtra, ServerCommandFlags
 
 	NetCommand command ( SVC_DOPLAT );
 	command.addShort ( lSectorID );
-	command.addByte( Plat->GetLastInstigator() - players );
-	command.addByte ( (ULONG)Plat->GetType() );
-	command.addByte ( (ULONG)Plat->GetStatus() );
-	command.addByte ( (ULONG)Plat->GetOldStatus() );
-	command.addLong ( Plat->GetSpeed() );
-	command.addLong ( Plat->GetHigh() );
-	command.addLong ( Plat->GetLow() );
 	command.addLong ( Plat->GetPosition() );
-	command.addByte ( Plat->GetWait() );
-	command.addByte ( Plat->GetCount() );
-	command.addByte ( Plat->GetCrush() );
-	command.addByte ( Plat->GetTag() );
-	command.addByte ( Plat->GetFinished() ? 1 : 0 );
+
+	if (Plat->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is alive
+		command.addByte ( Plat->GetLastInstigator() - players );
+		command.addByte ( (ULONG)Plat->GetType() );
+		command.addByte ( (ULONG)Plat->GetStatus() );
+		command.addByte ( (ULONG)Plat->GetOldStatus() );
+		command.addLong ( Plat->GetSpeed() );
+		command.addLong ( Plat->GetHigh() );
+		command.addLong ( Plat->GetLow() );
+		command.addLong ( Plat->GetWait() );
+		command.addLong ( Plat->GetCount() );
+		command.addLong ( Plat->GetCrush() );
+		command.addLong ( Plat->GetTag() );
+	}
+
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3848,92 +3882,93 @@ void SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra, Server
 
 	NetCommand command ( SVC_DOELEVATOR );
 	command.addShort ( lSectorID );
-	command.addByte( Elevator->GetLastInstigator() - players );
-	command.addByte ( Elevator->GetType() );
-	command.addLong ( Elevator->GetSpeed() );
-	command.addByte ( SERVER_AdjustElevatorDirection( Elevator->GetDirection() ) );
-	command.addLong ( Elevator->GetFloorDestDist() );
-	command.addLong ( Elevator->GetCeilingDestDist() );
+	command.addLong ( Elevator->GetFloorPosition() );
+	command.addLong ( Elevator->GetCeilingPosition() );
+
+	if (Elevator->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is alive
+		command.addByte ( Elevator->GetLastInstigator() - players );
+		command.addByte ( Elevator->GetType() );
+		command.addLong ( Elevator->GetSpeed() );
+		command.addByte ( SERVER_AdjustElevatorDirection( Elevator->GetDirection() ) );
+		command.addLong ( Elevator->GetFloorDestDist() );
+		command.addLong ( Elevator->GetCeilingDestDist() );
+	}
+
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoPillar( DPillar::EPillar Type, sector_t *pSector, LONG lFloorSpeed, LONG lCeilingSpeed, LONG lFloorTarget, LONG lCeilingTarget, LONG Crush, bool Hexencrush, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoPillar( DPillar *Pillar, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG	lSectorID = LONG( Pillar->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
 	NetCommand command ( SVC_DOPILLAR );
-	command.addByte ( Type );
 	command.addShort ( lSectorID );
-	command.addLong ( lFloorSpeed );
-	command.addLong ( lCeilingSpeed );
-	command.addLong ( lFloorTarget );
-	command.addLong ( lCeilingTarget );
-	command.addByte ( clamp<LONG>(Crush,-128,127) );
-	command.addByte ( Hexencrush );
-	command.addShort ( lID );
+	command.addLong ( Pillar->GetFloorPosition() );
+	command.addLong ( Pillar->GetCeilingPosition() );
+
+	if (Pillar->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is alive
+		command.addByte ( Pillar->GetLastInstigator() - players );
+		command.addByte ( Pillar->GetType() );
+		command.addLong ( Pillar->GetFloorSpeed() );
+		command.addLong ( Pillar->GetCeilingSpeed() );
+		command.addLong ( Pillar->GetFloorTarget() );
+		command.addLong ( Pillar->GetCeilingTarget() );
+		command.addLong ( Pillar->GetCrush() );
+		command.addBit ( Pillar->GetHexencrush() );
+	}
+
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyPillar( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYPILLAR );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DoWaggle( bool bCeiling, sector_t *pSector, LONG lOriginalDistance, LONG lAccumulator, LONG lAccelerationDelta, LONG lTargetScale, LONG lScale, LONG lScaleDelta, LONG lTicker, LONG lState, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_DoWaggle( DWaggleBase *Waggle, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	LONG	lSectorID;
-
-	lSectorID = LONG( pSector - sectors );
+	LONG	lSectorID = LONG( Waggle->GetSector() - sectors );
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
 	NetCommand command ( SVC_DOWAGGLE );
-	command.addByte ( !!bCeiling );
 	command.addShort ( lSectorID );
-	command.addLong ( lOriginalDistance );
-	command.addLong ( lAccumulator );
-	command.addLong ( lAccelerationDelta );
-	command.addLong ( lTargetScale );
-	command.addLong ( lScale );
-	command.addLong ( lScaleDelta );
-	command.addLong ( lTicker );
-	command.addByte ( lState );
-	command.addShort ( lID );
-	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
+	command.addLong ( Waggle->GetPosition() );
+	command.addBit ( Waggle->GetClass( ) == RUNTIME_CLASS( DCeilingWaggle ) );
 
-//*****************************************************************************
-//
-void SERVERCOMMANDS_DestroyWaggle( LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command ( SVC_DESTROYWAGGLE );
-	command.addShort ( lID );
+	if (Waggle->ObjectFlags & OF_EuthanizeMe)
+	{
+		command.addBit( true ); // thinker is destroyed
+	}
+	else
+	{
+		command.addBit( false ); // thinker is alive
+		command.addByte ( Waggle->GetLastInstigator() - players );
+		command.addLong ( Waggle->GetOriginalDistance() );
+		command.addLong ( Waggle->GetAccumulator() );
+		command.addLong ( Waggle->GetAccelerationDelta() );
+		command.addLong ( Waggle->GetTargetScale() );
+		command.addLong ( Waggle->GetScale() );
+		command.addLong ( Waggle->GetScaleDelta() );
+		command.addLong ( Waggle->GetTicker() );
+		command.addByte ( Waggle->GetState() );
+	}
 	command.sendCommandToClients ( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_UpdateWaggle( LONG lID, LONG lAccumulator, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	NetCommand command( SVC_UPDATEWAGGLE );
-	command.setUnreliable( true );
-	command.addShort( lID );
-	command.addLong( lAccumulator );
-	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************

@@ -21,6 +21,9 @@ ACTOR FloatyIcon native
 	INCONSOLE:
 		CNSL AB 9 bright
 		loop
+	INMENU:
+		MENU ABCBA 10 bright
+		loop
 	ALLY:
 		ALLY A -1
 		loop

@@ -110,6 +110,8 @@ public:
 	// [BB] We also call this when a player dies. These special items also need to be dropped then.
 	virtual void DropImportantItems( bool bLeavingGame, AActor *pSource = NULL );
 
+	virtual int WalkCrouchState ();
+	virtual bool ShouldPlayFootstep ();
 	virtual void TweakSpeeds (int &forwardmove, int &sidemove);
 	virtual void MorphPlayerThink ();
 	virtual void ActivateMorphWeapon ();
@@ -122,6 +124,7 @@ public:
 	virtual void Destroy( );
 
 	// Quake movement
+	float QCrouchWalkFactor(const float forward, const float side);
 	float QTweakSpeed();
 	void  QFriction(FVector3 &vel, const float speedlimit, const float friction);
 	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);
@@ -133,8 +136,9 @@ public:
 	const char *GetSoundClass () const;
 
 	// [Dusk]
-	fixed_t CalcJumpVelz();
-	fixed_t CalcDoubleJumpVelz();
+	void	CalcJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z);
+	void	CalcSecondJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z);
+	void	DoJump(ticcmd_t *cmd);
 	fixed_t CalcJumpHeight( bool bAddStep = true );
 
 	enum EInvulState
@@ -157,13 +161,20 @@ public:
 	TObjPtr<AInventory> InvSel;			// selected inventory item
 
 	// [GRB] Player class properties
+	fixed_t		JumpXY;
 	fixed_t		JumpZ;
+	int			JumpDelay;
+	fixed_t		SecondJumpXY;
+	fixed_t		SecondJumpZ;
+	int			SecondJumpDelay;
+	int			SecondJumpAmount;
 	bool		wasJustThrustedZ;
 	fixed_t		GruntSpeed;
 	fixed_t		FallingScreamMinSpeed, FallingScreamMaxSpeed;
 	fixed_t		ViewHeight;
-	fixed_t		ForwardMove1, ForwardMove2;
-	fixed_t		SideMove1, SideMove2;
+	fixed_t		ForwardMove1, ForwardMove2, ForwardMove3, ForwardMove4;
+	fixed_t		SideMove1, SideMove2, SideMove3, SideMove4;
+	bool		FootstepsEnabled1, FootstepsEnabled2, FootstepsEnabled3, FootstepsEnabled4;
 	FTextureID	ScoreIcon;
 	int			SpawnMask;
 	FNameNoInit	MorphWeapon;
@@ -179,17 +190,12 @@ public:
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
 	int			FootstepInterval;
 	float		FootstepVolume;
-	int			JumpDelay;
-	fixed_t		SecondJumpZ;
 	fixed_t		AirThrustZUp;
 	fixed_t		AirThrustZDown;
-	int			MaxWallClimbTics;
-	bool		WallFrictionEnabled;
-	float		CrouchSpeedFactor;
-	float		WalkSpeedFactor;
+	float		WallClimbMaxTics;
+	float		WallClimbRegen;
+	fixed_t		WallClimbSpeed;
 	fixed_t		AirAcceleration;
-	fixed_t		DashForce;
-	int			DashDelay;
 	fixed_t		VelocityCap;
 
 	// Quake movement only
@@ -197,7 +203,8 @@ public:
 	float		GroundFriction;
 	float		SlideAcceleration;
 	float		SlideFriction;
-	int			SlideMaxTics;
+	float		SlideMaxTics;
+	float		SlideRegen;
 
 	// Quake CPM movement only
 	float		CpmAirAcceleration;
@@ -573,16 +580,17 @@ public:
 	TObjPtr<AWeapon>	PremorphWeapon;		// ready weapon before morphing
 	int			chickenPeck;			// chicken peck countdown
 	int			jumpTics;				// delay the next jump for a moment
+	int			secondJumpTics;			// delay the next second jump for a moment
+	int			secondJumpsRemaining;	// remaining second jump uses
 	bool		onground;				// Identifies if this player is on the ground or other object
 	int			stepInterval;
 
 	// [Ivory] movement additions
-	int			doubleJumpState;
-	int			crouchSlideTics;
+	int			secondJumpState;
+	float		crouchSlideTics;
 	bool		isCrouchSliding;
-	int			wallClimbTics;
+	float		wallClimbTics;
 	bool		isWallClimbing;
-	int			dashTics;
 	int			prepareTapValue;
 	int			lastTapValue;
 
@@ -677,8 +685,11 @@ public:
 	// This player is chatting.
 	bool		bChatting;
 
-	// [RC] This player is in the console or menu.
+	// [RC] This player is in the console.
 	bool		bInConsole;
+
+	// [RC] This player is in the menu.
+	bool		bInMenu;
 
 	// This player is currently spectating.
 	bool		bSpectating;
@@ -893,12 +904,12 @@ enum
 	MV_TYPES_END
 };
 
-// [geNia] double jump state
+// [geNia] second jump state
 enum
 {
-	DJ_NOT_AVAILABLE,
-	DJ_AVAILABLE,
-	DJ_READY
+	SJ_NOT_AVAILABLE,
+	SJ_AVAILABLE,
+	SJ_READY
 };
 
 #endif // __D_PLAYER_H__

@@ -225,12 +225,9 @@ static	void	client_DoElevator( BYTESTREAM_s *pByteStream );
 
 // Pillar commands.
 static	void	client_DoPillar( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyPillar( BYTESTREAM_s *pByteStream );
 
 // Waggle commands.
 static	void	client_DoWaggle( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyWaggle( BYTESTREAM_s *pByteStream );
-static	void	client_UpdateWaggle( BYTESTREAM_s *pByteStream );
 
 // Poly commands.
 static	void	client_DoRotatePoly( BYTESTREAM_s *pByteStream );
@@ -1619,21 +1616,9 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 
 		client_DoPillar( pByteStream );
 		break;
-	case SVC_DESTROYPILLAR:
-
-		client_DestroyPillar( pByteStream );
-		break;
 	case SVC_DOWAGGLE:
 
 		client_DoWaggle( pByteStream );
-		break;
-	case SVC_DESTROYWAGGLE:
-
-		client_DestroyWaggle( pByteStream );
-		break;
-	case SVC_UPDATEWAGGLE:
-
-		client_UpdateWaggle( pByteStream );
 		break;
 	case SVC_DOROTATEPOLY:
 
@@ -2768,7 +2753,7 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->PremorphWeapon = 0;
 	pPlayer->chickenPeck = 0;
 	pPlayer->jumpTics = 0;
-	pPlayer->doubleJumpState = 0;
+	pPlayer->secondJumpState = 0;
 	pPlayer->crouchSlideTics = 0;
 	pPlayer->isCrouchSliding = 0;
 	pPlayer->wallClimbTics = 0;
@@ -2793,6 +2778,7 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	PLAYER_ResetSpecialCounters ( pPlayer );
 	pPlayer->bChatting = 0;
 	pPlayer->bInConsole = 0;
+	pPlayer->bInMenu = 0;
 	pPlayer->bSpectating = 0;
 	pPlayer->bIgnoreChat = 0;
 	pPlayer->lIgnoreChatTicks = -1;
@@ -3926,6 +3912,11 @@ void ServerCommands::SetPlayerConsoleStatus::Execute()
 	player->bInConsole = inConsole;
 }
 
+void ServerCommands::SetPlayerMenuStatus::Execute()
+{
+	player->bInMenu = inMenu;
+}
+
 //*****************************************************************************
 //
 void ServerCommands::SetPlayerLaggingStatus::Execute()
@@ -4904,36 +4895,6 @@ void ServerCommands::SetThingTranslation::Execute()
 
 //*****************************************************************************
 //
-void ServerCommands::SetThingProperty::Execute()
-{
-	// Set one of the actor's properties, depending on what was read in.
-	switch ( property )
-	{
-	case APROP_Speed:
-		actor->Speed = value;
-		break;
-
-	case APROP_Alpha:
-		actor->alpha = value;
-		break;
-
-	case APROP_RenderStyle:
-		actor->RenderStyle.AsDWORD = value;
-		break;
-
-	case APROP_JumpZ:
-		if ( actor->IsKindOf( RUNTIME_CLASS( APlayerPawn )))
-			static_cast<APlayerPawn *>( actor )->JumpZ = value;
-		break;
-
-	default:
-		CLIENT_PrintWarning( "client_SetThingProperty: Unknown property, %d!\n", static_cast<unsigned int> (property) );
-		return;
-	}
-}
-
-//*****************************************************************************
-//
 void ServerCommands::SetThingSound::Execute()
 {
 	// Set one of the actor's sounds, depending on what was read in.
@@ -5079,6 +5040,13 @@ void ServerCommands::SetThingFrame::Execute()
 void ServerCommands::SetThingFrameNF::Execute()
 {
 	client_SetThingFrame( actor, stateOwner, offset, false );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetActorProperty::Execute()
+{
+	P_DoSetActorProperty( actor, property, value );
 }
 
 //*****************************************************************************
@@ -5565,7 +5533,7 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	sv_coop_damagefactor.ForceSet( Value, CVAR_Float );
 
 	// [WS] Read in, and set the value for alwaysapplydmflags.
-	Value.Bool = !!NETWORK_ReadByte( pByteStream );
+	Value.Bool = NETWORK_ReadBit( pByteStream );
 	alwaysapplydmflags.ForceSet( Value, CVAR_Bool );
 
 	// [AM] Read in, and set the value for lobby.
@@ -5573,7 +5541,7 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	lobby.ForceSet( Value, CVAR_String );
 
 	// [TP] Yea.
-	Value.Bool = !!NETWORK_ReadByte( pByteStream );
+	Value.Bool = NETWORK_ReadBit( pByteStream );
 	sv_limitcommands.ForceSet( Value, CVAR_Bool );
 }
 
@@ -7160,35 +7128,58 @@ static void client_SetInventoryIcon( BYTESTREAM_s *pByteStream )
 static void client_DoDoor( BYTESTREAM_s *pByteStream )
 {
 	int SectorID = NETWORK_ReadShort( pByteStream );
-	int Type = NETWORK_ReadByte( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
-	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	fixed_t Direction = CLIENT_AdjustDoorDirection( NETWORK_ReadByte( pByteStream ) );
-	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	int TopWait = NETWORK_ReadByte( pByteStream );
-	int Countdown = NETWORK_ReadByte( pByteStream );
-	int LightTag = NETWORK_ReadShort( pByteStream );
+	fixed_t Position = NETWORK_ReadLong(pByteStream);
 
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
 	sector_t *pSector = &sectors[SectorID];
-
 	DDoor *pDoor = P_GetDoorBySectorNum( pSector->sectornum );
-	if (pDoor == NULL)
+	
+	// If the sector already has activity, don't override it.
+	if ( !pDoor && pSector->ceilingdata )
+		return;
+	
+	if ( NETWORK_ReadBit( pByteStream ) )
 	{
-		// Create the new door.
-		pDoor = new DDoor( pSector, (DDoor::EVlDoor)Type, Speed, TopWait, LightTag, g_ConnectionState != CTS_ACTIVE );
+		if ( pDoor )
+		{
+			// Door is destroyed on server side
+			pDoor->SetPositionAndDirection( Position, 0 );
+			pDoor->Destroy();
+		}
 	}
-
-	pDoor->SetLastInstigator( &players[Instigator] );
-	pDoor->SetPositionAndDirection( Position, Direction );
-	pDoor->SetCountdown( Countdown );
-
-	if ( Instigator == consoleplayer )
+	else
 	{
-		pDoor->Predict();
+		int Instigator = NETWORK_ReadByte( pByteStream );
+		int Type = NETWORK_ReadByte( pByteStream );
+		fixed_t Direction = CLIENT_AdjustDoorDirection( NETWORK_ReadByte( pByteStream ) );
+		fixed_t Speed = NETWORK_ReadLong( pByteStream );
+		int TopWait = NETWORK_ReadLong( pByteStream );
+		int Countdown = NETWORK_ReadLong( pByteStream );
+		int LightTag = NETWORK_ReadShort( pByteStream );
+
+		if (pDoor == NULL)
+		{
+			// Create the new door.
+			pDoor = new DDoor( pSector, (DDoor::EVlDoor)Type, Speed, TopWait, LightTag, g_ConnectionState != CTS_ACTIVE );
+		}
+		else
+		{
+			pDoor->SetType( (DDoor::EVlDoor)Type );
+			pDoor->SetSpeed( Speed );
+			pDoor->SetTopWait( TopWait );
+			pDoor->SetLightTag( LightTag );
+		}
+
+		pDoor->SetLastInstigator( &players[Instigator] );
+		pDoor->SetPositionAndDirection( Position, Direction );
+		pDoor->SetCountdown( Countdown );
+
+		if ( Instigator == consoleplayer )
+		{
+			pDoor->Predict();
+		}
 	}
 }
 
@@ -7196,42 +7187,62 @@ static void client_DoDoor( BYTESTREAM_s *pByteStream )
 //
 static void client_DoFloor( BYTESTREAM_s *pByteStream )
 {
-	int Type = NETWORK_ReadByte( pByteStream );
 	int SectorID = NETWORK_ReadShort( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
-	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	int FloorDestDist = NETWORK_ReadLong( pByteStream );
-	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
-	int NewSpecial = NETWORK_ReadLong( pByteStream );
 
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
 	sector_t *pSector = &sectors[SectorID];
-
 	DFloor *pFloor = P_GetFloorBySectorNum( pSector->sectornum );
-	if (pFloor == NULL )
+	
+	// If the sector already has activity, don't override it.
+	if ( !pFloor && pSector->floordata )
+		return;
+	
+	if ( NETWORK_ReadBit( pByteStream ) )
 	{
-		// Create the new floor.
-		pFloor = new DFloor( pSector );
+		if ( pFloor )
+		{
+			// Floor is destroyed on server side
+			pFloor->SetOrgDist( Position );
+			pFloor->SetFloorDestDist( Position );
+			pFloor->SetPositionAndDirection( Position, 0 );
+			pFloor->Destroy();
+		}
 	}
-
-	pFloor->SetLastInstigator( &players[Instigator] );
-	pFloor->SetType( (DFloor::EFloor)Type );
-	pFloor->SetCrush( Crush );
-	pFloor->SetHexencrush( Hexencrush );
-	pFloor->SetPositionAndDirection( Position, Direction );
-	pFloor->SetFloorDestDist( FloorDestDist );
-	pFloor->SetSpeed( Speed );
-	pFloor->SetNewSpecial( NewSpecial );
-
-	if ( Instigator == consoleplayer )
+	else
 	{
-		pFloor->Predict();
+		int Instigator = NETWORK_ReadByte( pByteStream );
+		int Type = NETWORK_ReadByte( pByteStream );
+		int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
+		fixed_t Speed = NETWORK_ReadLong( pByteStream );
+		fixed_t OrgDist = NETWORK_ReadLong( pByteStream );
+		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
+		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
+		bool Hexencrush = NETWORK_ReadBit( pByteStream );
+		int NewSpecial = NETWORK_ReadLong( pByteStream );
+
+		if (pFloor == NULL )
+		{
+			// Create the new floor.
+			pFloor = new DFloor( pSector );
+		}
+
+		pFloor->SetLastInstigator( &players[Instigator] );
+		pFloor->SetType( (DFloor::EFloor)Type );
+		pFloor->SetCrush( Crush );
+		pFloor->SetHexencrush( Hexencrush );
+		pFloor->SetOrgDist( OrgDist );
+		pFloor->SetFloorDestDist( FloorDestDist );
+		pFloor->SetPositionAndDirection( Position, Direction );
+		pFloor->SetSpeed( Speed );
+		pFloor->SetNewSpecial( NewSpecial );
+
+		if ( Instigator == consoleplayer )
+		{
+			pFloor->Predict();
+		}
 	}
 }
 
@@ -7239,56 +7250,78 @@ static void client_DoFloor( BYTESTREAM_s *pByteStream )
 //
 static void client_BuildStair( BYTESTREAM_s *pByteStream )
 {
-	int Type = NETWORK_ReadByte( pByteStream );
 	int SectorID = NETWORK_ReadShort( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
-	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
-	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
-	LONG lNewSpecial = NETWORK_ReadLong( pByteStream );
-	int ResetCount = NETWORK_ReadLong( pByteStream );
-	int Delay = NETWORK_ReadLong( pByteStream );
-	int PauseTime = NETWORK_ReadLong( pByteStream );
-	int StepTime = NETWORK_ReadLong( pByteStream );
-	int PerStepTime = NETWORK_ReadLong( pByteStream );
 
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
-	sector_t *sector = &sectors[SectorID];
-
+	sector_t *pSector = &sectors[SectorID];
+	DFloor *pFloor = P_GetFloorBySectorNum( pSector->sectornum );
+	
 	// If the sector already has activity, don't override it.
-	if ( sector->floordata )
+	if ( !pFloor && pSector->floordata )
 		return;
 	
-	DFloor *floor = P_GetFloorBySectorNum( sector->sectornum );
-	if (floor == NULL )
+	if ( NETWORK_ReadBit( pByteStream ) )
 	{
-		// Create the new floor.
-		floor = new DFloor( sector );
+		if ( pFloor )
+		{
+			// Floor is destroyed on server side
+			pFloor->SetOrgDist( Position );
+			pFloor->SetFloorDestDist( Position );
+			pFloor->SetPositionAndDirection( Position, 0 );
+			pFloor->Destroy();
+		}
 	}
-
-	floor->SetLastInstigator( &players[Instigator] );
-	floor->SetType( (DFloor::EFloor)Type );
-	floor->SetCrush( Crush );
-	floor->SetHexencrush( Hexencrush );
-	floor->SetPositionAndDirection( Position, Direction );
-	floor->SetFloorDestDist( FloorDestDist );
-	floor->SetSpeed( Speed );
-	floor->SetNewSpecial( lNewSpecial );
-	floor->SetResetCount( ResetCount );
-	floor->SetDelay( Delay );
-	floor->SetPauseTime( PauseTime );
-	floor->SetStepTime( StepTime );
-	floor->SetPerStepTime( PerStepTime );
-
-	if ( Instigator == consoleplayer )
+	else
 	{
-		floor->Predict();
+		int Instigator = NETWORK_ReadByte( pByteStream );
+		int Type = NETWORK_ReadByte( pByteStream );
+		int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
+		fixed_t Speed = NETWORK_ReadLong( pByteStream );
+		fixed_t OrgDist = NETWORK_ReadLong( pByteStream );
+		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
+		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
+		bool Hexencrush = NETWORK_ReadBit( pByteStream );
+		LONG lNewSpecial = NETWORK_ReadLong( pByteStream );
+		int ResetCount = NETWORK_ReadLong( pByteStream );
+		int Delay = NETWORK_ReadLong( pByteStream );
+		int PauseTime = NETWORK_ReadLong( pByteStream );
+		int StepTime = NETWORK_ReadLong( pByteStream );
+		int PerStepTime = NETWORK_ReadLong( pByteStream );
+
+		// Invalid sector.
+		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
+			return;
+
+		sector_t *sector = &sectors[SectorID];
+
+		if ( pFloor == NULL )
+		{
+			// Create the new floor.
+			pFloor = new DFloor( sector );
+		}
+
+		pFloor->SetLastInstigator( &players[Instigator] );
+		pFloor->SetType( (DFloor::EFloor)Type );
+		pFloor->SetCrush( Crush );
+		pFloor->SetHexencrush( Hexencrush );
+		pFloor->SetOrgDist( OrgDist );
+		pFloor->SetFloorDestDist( FloorDestDist );
+		pFloor->SetPositionAndDirection( Position, Direction );
+		pFloor->SetSpeed( Speed );
+		pFloor->SetNewSpecial( lNewSpecial );
+		pFloor->SetResetCount( ResetCount );
+		pFloor->SetDelay( Delay );
+		pFloor->SetPauseTime( PauseTime );
+		pFloor->SetStepTime( StepTime );
+		pFloor->SetPerStepTime( PerStepTime );
+
+		if ( Instigator == consoleplayer )
+		{
+			pFloor->Predict();
+		}
 	}
 }
 
@@ -7297,49 +7330,67 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 {
 	int SectorID = NETWORK_ReadShort( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
-	int Tag = NETWORK_ReadByte( pByteStream );
-	int Type = NETWORK_ReadByte( pByteStream );
-	int Direction = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
-	int OldDirection = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	fixed_t BottomHeight = NETWORK_ReadLong( pByteStream );
-	fixed_t TopHeight = NETWORK_ReadLong( pByteStream );
-	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	fixed_t SpeedDown = NETWORK_ReadLong( pByteStream );
-	fixed_t SpeedUp = NETWORK_ReadLong( pByteStream );
-	int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-	bool Hexencrush = !!NETWORK_ReadByte( pByteStream );
-	int Silent = NETWORK_ReadShort( pByteStream );
 
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
 	sector_t *pSector = &sectors[SectorID];
-
 	DCeiling *pCeiling = P_GetCeilingBySectorNum( pSector->sectornum );
-	if ( pCeiling == NULL )
+	
+	// If the sector already has activity, don't override it.
+	if ( !pCeiling && pSector->ceilingdata )
+		return;
+	
+	if ( NETWORK_ReadBit( pByteStream ) )
 	{
-		// Create the new ceiling.
-		pCeiling = new DCeiling( pSector, SpeedDown, SpeedUp, Silent );
+		if ( pCeiling )
+		{
+			// Ceiling is destroyed on server side
+			pCeiling->SetBottomHeight( Position );
+			pCeiling->SetTopHeight( Position );
+			pCeiling->SetPositionAndDirection( Position, 0 );
+			pCeiling->Destroy();
+		}
 	}
-
-	pCeiling->SetLastInstigator( &players[Instigator] );
-	pCeiling->SetTag( Tag );
-	pCeiling->SetType( (DCeiling::ECeiling)Type );
-	pCeiling->SetBottomHeight( BottomHeight );
-	pCeiling->SetTopHeight( TopHeight );
-	pCeiling->SetPositionAndDirection( Position, Direction );
-	pCeiling->SetOldDirection( OldDirection );
-	pCeiling->SetSpeed( Speed );
-	pCeiling->SetCrush( Crush );
-	pCeiling->SetHexencrush( Hexencrush );
-	pCeiling->SetSilent( Silent );
-
-	if ( Instigator == consoleplayer )
+	else
 	{
-		pCeiling->Predict();
+		int Instigator = NETWORK_ReadByte( pByteStream );
+		int Tag = NETWORK_ReadByte( pByteStream );
+		int Type = NETWORK_ReadByte( pByteStream );
+		int Direction = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
+		int OldDirection = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
+		fixed_t BottomHeight = NETWORK_ReadLong( pByteStream );
+		fixed_t TopHeight = NETWORK_ReadLong( pByteStream );
+		fixed_t SpeedDown = NETWORK_ReadLong( pByteStream );
+		fixed_t SpeedUp = NETWORK_ReadLong( pByteStream );
+		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
+		bool Hexencrush = NETWORK_ReadBit( pByteStream );
+		int Silent = NETWORK_ReadShort( pByteStream );
+
+		if ( pCeiling == NULL )
+		{
+			// Create the new ceiling.
+			pCeiling = new DCeiling( pSector );
+		}
+
+		pCeiling->SetLastInstigator( &players[Instigator] );
+		pCeiling->SetTag( Tag );
+		pCeiling->SetType( (DCeiling::ECeiling)Type );
+		pCeiling->SetBottomHeight( BottomHeight );
+		pCeiling->SetTopHeight( TopHeight );
+		pCeiling->SetPositionAndDirection( Position, Direction );
+		pCeiling->SetOldDirection( OldDirection );
+		pCeiling->SetSpeedDown( SpeedDown );
+		pCeiling->SetSpeedUp( SpeedUp );
+		pCeiling->SetCrush( Crush );
+		pCeiling->SetHexencrush( Hexencrush );
+		pCeiling->SetSilent( Silent );
+
+		if ( Instigator == consoleplayer )
+		{
+			pCeiling->Predict();
+		}
 	}
 }
 
@@ -7348,50 +7399,64 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 static void client_DoPlat( BYTESTREAM_s *pByteStream )
 {
 	int SectorID = NETWORK_ReadShort( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
-	int Type = NETWORK_ReadByte( pByteStream );
-	int Status = NETWORK_ReadByte( pByteStream );
-	int OldStatus = NETWORK_ReadByte( pByteStream );
-	fixed_t lSpeed = NETWORK_ReadLong( pByteStream );
-	fixed_t High = NETWORK_ReadLong( pByteStream );
-	fixed_t Low = NETWORK_ReadLong( pByteStream );
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	int Wait = NETWORK_ReadByte( pByteStream );
-	int Count = NETWORK_ReadByte( pByteStream );
-	int Crush = NETWORK_ReadByte( pByteStream );
-	int Tag = NETWORK_ReadByte( pByteStream );
-	bool Finished = NETWORK_ReadByte( pByteStream ) ? true : false;
 	
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
 	sector_t *pSector = &sectors[SectorID];
-	
 	DPlat *pPlat = P_GetPlatBySectorNum( pSector->sectornum );
-	if (pPlat == NULL)
+	
+	// If the sector already has activity, don't override it.
+	if ( !pPlat && pSector->ceilingdata )
+		return;
+	
+	if ( NETWORK_ReadBit( pByteStream ) )
 	{
-		// Create the new door.
-		pPlat = new DPlat( pSector );
+		if ( pPlat )
+		{
+			// Plat is destroyed on server side
+			pPlat->SetPosition( Position );
+			pPlat->Destroy();
+		}
 	}
-
-	pPlat->SetLastInstigator( &players[Instigator] );
-	pPlat->SetType( (DPlat::EPlatType)Type );
-	pPlat->SetStatus( Status );
-	pPlat->SetOldStatus( OldStatus );
-	pPlat->SetSpeed( lSpeed );
-	pPlat->SetHigh( High );
-	pPlat->SetLow( Low );
-	pPlat->SetPosition( Position );
-	pPlat->SetWait( Wait );
-	pPlat->SetCount( Count );
-	pPlat->SetCrush( Crush );
-	pPlat->SetTag( Tag );
-	pPlat->SetFinished( Finished );
-
-	if ( Instigator == consoleplayer )
+	else
 	{
-		pPlat->Predict();
+		int Instigator = NETWORK_ReadByte( pByteStream );
+		int Type = NETWORK_ReadByte( pByteStream );
+		int Status = NETWORK_ReadByte( pByteStream );
+		int OldStatus = NETWORK_ReadByte( pByteStream );
+		fixed_t lSpeed = NETWORK_ReadLong( pByteStream );
+		fixed_t High = NETWORK_ReadLong( pByteStream );
+		fixed_t Low = NETWORK_ReadLong( pByteStream );
+		LONG Wait = NETWORK_ReadLong( pByteStream );
+		LONG Count = NETWORK_ReadLong( pByteStream );
+		LONG Crush = NETWORK_ReadLong( pByteStream );
+		LONG Tag = NETWORK_ReadLong( pByteStream );
+	
+		if (pPlat == NULL)
+		{
+			// Create the new door.
+			pPlat = new DPlat( pSector );
+		}
+
+		pPlat->SetLastInstigator( &players[Instigator] );
+		pPlat->SetType( (DPlat::EPlatType)Type );
+		pPlat->SetStatus( Status );
+		pPlat->SetOldStatus( OldStatus );
+		pPlat->SetSpeed( lSpeed );
+		pPlat->SetHigh( High );
+		pPlat->SetLow( Low );
+		pPlat->SetPosition( Position );
+		pPlat->SetWait( Wait );
+		pPlat->SetCount( Count );
+		pPlat->SetCrush( Crush );
+		pPlat->SetTag( Tag );
+
+		if ( Instigator == consoleplayer )
+		{
+			pPlat->Predict();
+		}
 	}
 }
 
@@ -7401,34 +7466,54 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 {
 	int SectorID = NETWORK_ReadShort( pByteStream );
 	int Instigator = NETWORK_ReadByte( pByteStream );
-	int Type = NETWORK_ReadByte( pByteStream );
-	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	int Direction = CLIENT_AdjustElevatorDirection( NETWORK_ReadByte( pByteStream ) );
-	fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
-	fixed_t CeilingDestDist = NETWORK_ReadLong( pByteStream );
-
+	fixed_t FloorPosition = NETWORK_ReadLong( pByteStream );
+	fixed_t CeilingPosition = NETWORK_ReadLong( pByteStream );
+	
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
 	sector_t *pSector = &sectors[SectorID];
-	
 	DElevator *pElevator = P_GetElevatorBySectorNum( pSector->sectornum );
-	if (pElevator == NULL)
+	
+	// If the sector already has activity, don't override it.
+	if ( !pElevator && (pSector->floordata || pSector->ceilingdata) )
+		return;
+	
+	if ( NETWORK_ReadBit( pByteStream ) )
 	{
-		// Create the new elevator.
-		pElevator = new DElevator( pSector );
+		if ( pElevator )
+		{
+			// Elevator is destroyed on server side
+			pElevator->Destroy();
+		}
 	}
-
-	pElevator->SetType( (DElevator::EElevator)Type );
-	pElevator->SetSpeed( Speed );
-	pElevator->SetDirection( Direction );
-	pElevator->SetFloorDestDist( FloorDestDist );
-	pElevator->SetCeilingDestDist( CeilingDestDist );
-
-	if ( Instigator == consoleplayer )
+	else
 	{
-		pElevator->Predict();
+		int Type = NETWORK_ReadByte( pByteStream );
+		fixed_t Speed = NETWORK_ReadLong( pByteStream );
+		int Direction = CLIENT_AdjustElevatorDirection( NETWORK_ReadByte( pByteStream ) );
+		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
+		fixed_t CeilingDestDist = NETWORK_ReadLong( pByteStream );
+
+		if (pElevator == NULL)
+		{
+			// Create the new elevator.
+			pElevator = new DElevator( pSector );
+		}
+	
+		pElevator->SetLastInstigator( &players[Instigator] );
+		pElevator->SetType( (DElevator::EElevator)Type );
+		pElevator->SetSpeed( Speed );
+		pElevator->SetDirection( Direction );
+		pElevator->SetFloorDestDist( FloorDestDist );
+		pElevator->SetCeilingDestDist( CeilingDestDist );
+		pElevator->SetFloorPosition( FloorPosition );
+		pElevator->SetCeilingPosition( CeilingPosition );
+
+		if ( Instigator == consoleplayer )
+		{
+			pElevator->Predict();
+		}
 	}
 }
 
@@ -7436,189 +7521,132 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 //
 static void client_DoPillar( BYTESTREAM_s *pByteStream )
 {
-	LONG			lType;
-	LONG			lSectorID;
-	LONG			lFloorSpeed;
-	LONG			lCeilingSpeed;
-	LONG			lFloorTarget;
-	LONG			lCeilingTarget;
-	LONG			Crush;
-	bool			Hexencrush;
-	LONG			lPillarID;
-	sector_t		*pSector;
-	DPillar			*pPillar;
-
-	// Read in the type of pillar.
-	lType = NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the speeds.
-	lFloorSpeed = NETWORK_ReadLong( pByteStream );
-	lCeilingSpeed = NETWORK_ReadLong( pByteStream );
-
-	// Read in the targets.
-	lFloorTarget = NETWORK_ReadLong( pByteStream );
-	lCeilingTarget = NETWORK_ReadLong( pByteStream );
-
-	// Read in the crush info.
-	Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-	Hexencrush = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the pillar ID.
-	lPillarID = NETWORK_ReadShort( pByteStream );
-
+	int SectorID = NETWORK_ReadShort ( pByteStream );
+	fixed_t FloorPosition = NETWORK_ReadLong ( pByteStream );
+	fixed_t CeilingPosition = NETWORK_ReadLong ( pByteStream );
+	
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
-	pSector = &sectors[lSectorID];
-
-	// Create the pillar, and set all its attributes that were read in.
-	pPillar = new DPillar( pSector );
-	pPillar->SetType( (DPillar::EPillar)lType );
-	pPillar->SetFloorSpeed( lFloorSpeed );
-	pPillar->SetCeilingSpeed( lCeilingSpeed );
-	pPillar->SetFloorTarget( lFloorTarget );
-	pPillar->SetCeilingTarget( lCeilingTarget );
-	pPillar->SetCrush( Crush );
-	pPillar->SetHexencrush( Hexencrush );
-	pPillar->SetID( lPillarID );
-
-	// Begin playing the sound sequence for the pillar.
-	if ( pSector->seqType >= 0 )
-		SN_StartSequence( pSector, CHAN_FLOOR, pSector->seqType, SEQ_PLATFORM, 0 );
-	else
-		SN_StartSequence( pSector, CHAN_FLOOR, "Floor", 0 );
-}
-
-//*****************************************************************************
-//
-static void client_DestroyPillar( BYTESTREAM_s *pByteStream )
-{
-	LONG		lPillarID;
-	DPillar		*pPillar;
-
-	// Read in the elevator ID.
-	lPillarID = NETWORK_ReadShort( pByteStream );
-
-	pPillar = P_GetPillarByID( lPillarID );
-	if ( pPillar == NULL )
+	sector_t *pSector = &sectors[SectorID];
+	DPillar	*pPillar = P_GetPillarBySectorNum( pSector->sectornum );
+	
+	// If the sector already has activity, don't override it.
+	if ( !pPillar && (pSector->floordata || pSector->ceilingdata) )
+		return;
+	
+	if ( NETWORK_ReadBit( pByteStream ) )
 	{
-		CLIENT_PrintWarning( "client_DestroyPillar: Couldn't find pillar with ID: %ld!\n", lPillarID );
-		return;
+		if ( pPillar )
+		{
+			// Pillar is destroyed on server side
+			pPillar->SetPosition( FloorPosition, CeilingPosition );
+			pPillar->Destroy();
+		}
 	}
+	else
+	{
+		int Instigator = NETWORK_ReadByte( pByteStream );
+		int Type = NETWORK_ReadByte( pByteStream );
+		fixed_t FloorSpeed = NETWORK_ReadLong( pByteStream );
+		fixed_t CeilingSpeed = NETWORK_ReadLong( pByteStream );
+		fixed_t FloorTarget = NETWORK_ReadLong ( pByteStream );
+		fixed_t CeilingTarget = NETWORK_ReadLong ( pByteStream );
+		LONG Crush = NETWORK_ReadLong ( pByteStream );
+		bool Hexencrush = NETWORK_ReadBit ( pByteStream );
 
-	// Finally, destroy the pillar.
-	pPillar->Destroy( );
+		if (pPillar == NULL)
+		{
+			// Create the new pillar.
+			pPillar = new DPillar( pSector );
+		}
+
+		pPillar->SetLastInstigator( &players[Instigator] );
+		pPillar->SetType( (DPillar::EPillar)Type );
+		pPillar->SetPosition( FloorPosition, CeilingPosition );
+		pPillar->SetFloorSpeed( FloorSpeed );
+		pPillar->SetCeilingSpeed( CeilingSpeed );
+		pPillar->SetFloorTarget( FloorTarget );
+		pPillar->SetCeilingTarget( CeilingTarget );
+		pPillar->SetHexencrush( Hexencrush );
+
+		// Begin playing the sound sequence for the pillar.
+		if ( pSector->seqType >= 0 )
+			SN_StartSequence( pSector, CHAN_FLOOR, pSector->seqType, SEQ_PLATFORM, 0 );
+		else
+			SN_StartSequence( pSector, CHAN_FLOOR, "Floor", 0 );
+
+		if ( Instigator == consoleplayer )
+		{
+			pPillar->Predict();
+		}
+	}
 }
 
 //*****************************************************************************
 //
 static void client_DoWaggle( BYTESTREAM_s *pByteStream )
 {
-	bool			bCeiling;
-	LONG			lSectorID;
-	LONG			lOriginalDistance;
-	LONG			lAccumulator;
-	LONG			lAccelerationDelta;
-	LONG			lTargetScale;
-	LONG			lScale;
-	LONG			lScaleDelta;
-	LONG			lTicker;
-	LONG			lState;
-	LONG			lWaggleID;
-	sector_t		*pSector;
-	DWaggleBase		*pWaggle;
-
-	// Read in whether or not this is a ceiling waggle.
-	bCeiling = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the waggle's attributes.
-	lOriginalDistance = NETWORK_ReadLong( pByteStream );
-	lAccumulator = NETWORK_ReadLong( pByteStream );
-	lAccelerationDelta = NETWORK_ReadLong( pByteStream );
-	lTargetScale = NETWORK_ReadLong( pByteStream );
-	lScale = NETWORK_ReadLong( pByteStream );
-	lScaleDelta = NETWORK_ReadLong( pByteStream );
-	lTicker = NETWORK_ReadLong( pByteStream );
-
-	// Read in the state the waggle is in.
-	lState = NETWORK_ReadByte( pByteStream );
-
-	// Read in the waggle ID.
-	lWaggleID = NETWORK_ReadShort( pByteStream );
-
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	fixed_t Position = NETWORK_ReadLong ( pByteStream );
+	bool bCeiling = NETWORK_ReadBit( pByteStream );
+	
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
-	pSector = &sectors[lSectorID];
-
-	// Create the waggle, and set all its attributes that were read in.
-	if ( bCeiling )
-		pWaggle = static_cast<DWaggleBase *>( new DCeilingWaggle( pSector ));
+	sector_t *pSector = &sectors[SectorID];
+	DWaggleBase	*pWaggle = P_GetWaggleBySectorNum( pSector->sectornum, bCeiling );
+	
+	// If the sector already has activity, don't override it.
+	if ( !pWaggle && ( bCeiling ? pSector->ceilingdata : pSector->floordata ) )
+		return;
+	
+	if ( NETWORK_ReadBit( pByteStream ) )
+	{
+		if ( pWaggle )
+		{
+			// Waggle is destroyed on server side
+			pWaggle->SetPosition( Position );
+			pWaggle->Destroy();
+		}
+	}
 	else
-		pWaggle = static_cast<DWaggleBase *>( new DFloorWaggle( pSector ));
-	pWaggle->SetOriginalDistance( lOriginalDistance );
-	pWaggle->SetAccumulator( lAccumulator );
-	pWaggle->SetAccelerationDelta( lAccelerationDelta );
-	pWaggle->SetTargetScale( lTargetScale );
-	pWaggle->SetScale( lScale );
-	pWaggle->SetScaleDelta( lScaleDelta );
-	pWaggle->SetTicker( lTicker );
-	pWaggle->SetState( lState );
-	pWaggle->SetID( lWaggleID );
-}
-
-//*****************************************************************************
-//
-static void client_DestroyWaggle( BYTESTREAM_s *pByteStream )
-{
-	LONG			lWaggleID;
-	DWaggleBase		*pWaggle;
-
-	// Read in the waggle ID.
-	lWaggleID = NETWORK_ReadShort( pByteStream );
-
-	pWaggle = P_GetWaggleByID( lWaggleID );
-	if ( pWaggle == NULL )
 	{
-		CLIENT_PrintWarning( "client_DestroyWaggle: Couldn't find waggle with ID: %ld!\n", lWaggleID );
-		return;
+		int Instigator = NETWORK_ReadByte( pByteStream );
+		fixed_t OriginalDistance = NETWORK_ReadLong( pByteStream );
+		fixed_t Accumulator = NETWORK_ReadLong( pByteStream );
+		fixed_t AccelerationDelta = NETWORK_ReadLong( pByteStream );
+		fixed_t TargetScale = NETWORK_ReadLong( pByteStream );
+		fixed_t Scale = NETWORK_ReadLong( pByteStream );
+		fixed_t ScaleDelta = NETWORK_ReadLong( pByteStream );
+		int Ticker = NETWORK_ReadLong( pByteStream );
+		int State = NETWORK_ReadByte( pByteStream );
+		
+		if (pWaggle == NULL)
+		{
+			// Create the waggle
+			if ( bCeiling )
+				pWaggle = static_cast<DWaggleBase *>( new DCeilingWaggle( pSector ));
+			else
+				pWaggle = static_cast<DWaggleBase *>( new DFloorWaggle( pSector ));
+		}
+		
+		pWaggle->SetLastInstigator( &players[Instigator] );
+		pWaggle->SetPosition( Position );
+		pWaggle->SetOriginalDistance( OriginalDistance );
+		pWaggle->SetAccumulator( Accumulator );
+		pWaggle->SetAccelerationDelta( AccelerationDelta );
+		pWaggle->SetTargetScale( TargetScale );
+		pWaggle->SetScale( Scale );
+		pWaggle->SetScaleDelta( ScaleDelta );
+		pWaggle->SetTicker( Ticker );
+		pWaggle->SetState( State );
+
+		if ( Instigator == consoleplayer )
+		{
+			pWaggle->Predict();
+		}
 	}
-
-	// Finally, destroy the waggle.
-	pWaggle->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_UpdateWaggle( BYTESTREAM_s *pByteStream )
-{
-	LONG			lWaggleID;
-	LONG			lAccumulator;
-	DWaggleBase		*pWaggle;
-
-	// Read in the waggle ID.
-	lWaggleID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the waggle's accumulator.
-	lAccumulator = NETWORK_ReadLong( pByteStream );
-
-	pWaggle = P_GetWaggleByID( lWaggleID );
-	if ( pWaggle == NULL )
-	{
-		CLIENT_PrintWarning( "client_DestroyWaggle: Couldn't find waggle with ID: %ld!\n", lWaggleID );
-		return;
-	}
-
-	// Finally, update the waggle's accumulator.
-	pWaggle->SetAccumulator( lAccumulator );
 }
 
 //*****************************************************************************

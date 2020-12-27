@@ -222,44 +222,19 @@ int I_GetTime (void)
 //
 void MASTERSERVER_SendBanlistToServer( const SERVER_s &Server )
 {
-	// [BB] If the server supports it, potentially split the ban list over multiple packets.
-	if ( Server.iServerRevision >= 2907 )
-	{
-		BanlistPacketSender sender ( Server );
-		sender.start();
+	BanlistPacketSender sender ( Server );
+	sender.start();
 
-		// Write all the bans.
-		for ( unsigned int i = 0; i < g_BannedIPs.size( ); ++i )
-			sender.writeBanEntry ( g_BannedIPs.getEntryAsString( i, false, false, false ).c_str( ), MSB_BAN );
+	// Write all the bans.
+	for ( unsigned int i = 0; i < g_BannedIPs.size( ); ++i )
+		sender.writeBanEntry ( g_BannedIPs.getEntryAsString( i, false, false, false ).c_str( ), MSB_BAN );
 
-		// Write all the exceptions.
-		for ( unsigned int i = 0; i < g_BannedIPExemptions.size( ); ++i )
-			sender.writeBanEntry ( g_BannedIPExemptions.getEntryAsString( i, false, false, false ).c_str( ), MSB_BANEXEMPTION );
+	// Write all the exceptions.
+	for ( unsigned int i = 0; i < g_BannedIPExemptions.size( ); ++i )
+		sender.writeBanEntry ( g_BannedIPExemptions.getEntryAsString( i, false, false, false ).c_str( ), MSB_BANEXEMPTION );
 
-		sender.end();
-	}
-	else
-	{
-		g_MessageBuffer.Clear();
-		NETWORK_WriteByte( &g_MessageBuffer.ByteStream, MASTER_SERVER_BANLIST );
-		// [BB] If the server sent us a verification string, send it along with the ban list.
-		// This allows the server to verify that the list actually was sent from our master
-		// (and is not just a packet with forged source IP).
-		if ( Server.MasterBanlistVerificationString.size() )
-			NETWORK_WriteString( &g_MessageBuffer.ByteStream, Server.MasterBanlistVerificationString.c_str() );
+	sender.end();
 
-		// Write all the bans.
-		NETWORK_WriteLong( &g_MessageBuffer.ByteStream, g_BannedIPs.size( ));
-		for ( ULONG i = 0; i < g_BannedIPs.size( ); i++ )
-			NETWORK_WriteString( &g_MessageBuffer.ByteStream, g_BannedIPs.getEntryAsString( i, false, false, false ).c_str( ));
-
-		// Write all the exceptions.
-		NETWORK_WriteLong( &g_MessageBuffer.ByteStream, g_BannedIPExemptions.size( ));
-		for ( ULONG i = 0; i < g_BannedIPExemptions.size( ); i++ )
-			NETWORK_WriteString( &g_MessageBuffer.ByteStream, g_BannedIPExemptions.getEntryAsString( i, false, false, false ).c_str( ));
-
-		NETWORK_LaunchPacket( &g_MessageBuffer, Server.Address );
-	}
 	Server.bHasLatestBanList = true;
 	Server.bVerifiedLatestBanList = false;
 	printf( "-> Banlist sent to %s.\n", Server.Address.ToString() );
@@ -395,11 +370,11 @@ void MASTERSERVER_AddServer( const SERVER_s &Server, std::set<SERVER_s, SERVERCo
 		addedServer->lLastReceived = g_lCurrentTime;						
 		if ( &ServerSet == &g_Servers )
 		{
-			printf( "+ Adding %s (revision %d) to the server list.\n", addedServer->Address.ToString(), addedServer->iServerRevision );
+			printf( "+ Adding %s (revision %s) to the server list.\n", addedServer->Address.ToString(), addedServer->ServerHash );
 			MASTERSERVER_SendBanlistToServer( *addedServer );
 		}
 		else
-			printf( "+ Adding %s (revision %d) to the verification list.\n", addedServer->Address.ToString(), addedServer->iServerRevision );
+			printf( "+ Adding %s (revision %s) to the verification list.\n", addedServer->Address.ToString(), addedServer->ServerHash );
 	}
 }
 
@@ -461,7 +436,7 @@ void MASTERSERVER_ParseCommands( BYTESTREAM_s *pByteStream )
 			const int temp = NETWORK_ReadByte( pByteStream );
 			newServer.bEnforcesBanList = ( temp != 0 );
 			newServer.bNewFormatServer = ( temp != -1 );
-			newServer.iServerRevision = ( ( pByteStream->pbStreamEnd - pByteStream->pbStream ) >= 4 ) ? NETWORK_ReadLong( pByteStream ) : NETWORK_ReadShort( pByteStream );
+			newServer.ServerHash = ( pByteStream->pbStreamEnd - pByteStream->pbStream > 4 ) ? NETWORK_ReadString( pByteStream ) : "old HG";
 
 			std::set<SERVER_s, SERVERCompFunc>::iterator currentServer = g_Servers.find ( newServer );
 
@@ -481,26 +456,17 @@ void MASTERSERVER_ParseCommands( BYTESTREAM_s *pByteStream )
 					printf( "* More than 10 servers received from %s. Ignoring request...\n", AddressFrom.ToString() );
 				else
 				{
-					// [BB] 3021 is 98d, don't put those servers on the list.
-					if ( ( newServer.bNewFormatServer ) && ( newServer.iServerRevision != 3021 ) )
+					std::set<SERVER_s, SERVERCompFunc>::iterator currentUnverifiedServer = g_UnverifiedServers.find ( newServer );
+					// [BB] This is a new server, but we still need to verify it.
+					if ( currentUnverifiedServer == g_UnverifiedServers.end() )
 					{
-						std::set<SERVER_s, SERVERCompFunc>::iterator currentUnverifiedServer = g_UnverifiedServers.find ( newServer );
-						// [BB] This is a new server, but we still need to verify it.
-						if ( currentUnverifiedServer == g_UnverifiedServers.end() )
-						{
-							srand ( time(NULL) );
-							newServer.ServerVerificationInt = rand() + rand() * rand() + rand() * rand() * rand();
-							// [BB] We don't send the ban list to unverified servers, so just pretent the server already has the list.
-							newServer.bHasLatestBanList = true;
+						srand ( time(NULL) );
+						newServer.ServerVerificationInt = rand() + rand() * rand() + rand() * rand() * rand();
+						// [BB] We don't send the ban list to unverified servers, so just pretent the server already has the list.
+						newServer.bHasLatestBanList = true;
 
-							MASTERSERVER_RequestServerVerification ( newServer );
-							MASTERSERVER_AddServer( newServer, g_UnverifiedServers );
-						}
-					}
-					else
-					{
-						printf( "* Received server challenge from old server (%s). Ignoring IP for 10 seconds.\n", newServer.Address.ToString() );
-						g_queryIPQueue.addAddress( newServer.Address, g_lCurrentTime, &std::cerr );
+						MASTERSERVER_RequestServerVerification ( newServer );
+						MASTERSERVER_AddServer( newServer, g_UnverifiedServers );
 					}
 				}
 			}

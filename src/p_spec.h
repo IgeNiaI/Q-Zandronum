@@ -477,8 +477,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	bool IsBusy();
-	void Predict();
 	
 	fixed_t	GetLow( void );
 	void	SetLow( fixed_t Low );
@@ -507,8 +505,6 @@ public:
 	void	SetCount( LONG lCount );
 	LONG	GetTag( void );
 	void	SetTag( LONG lTag );
-	bool	GetFinished( void );
-	void	SetFinished( bool Finished );
 
 	// [BC] Make this public so clients can use it.
 	void PlayPlatSound (const char *sound);
@@ -525,7 +521,6 @@ protected:
 	int 		m_Count;
 	int			m_Crush;
 	int 		m_Tag;
-	bool		m_Finished;
 
 	void Reactivate ();
 	void Stop ();
@@ -572,6 +567,8 @@ public:
 
 	// [BC] New constructor where we just pass in the sector.
 	DPillar (sector_t *sector);
+	void Reinit ( sector_t *sector, EPillar type, fixed_t speed,
+				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush );
 
 	void Serialize (FArchive &arc);
 	void Tick ();
@@ -579,28 +576,28 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-
-	// [BC] Access function(s).
-	LONG	GetID( void );
-	void	SetID( LONG lID );
-
+	
 	void	SetType( EPillar Type );
 	EPillar	GetType( );
-	void	SetFloorSpeed( LONG lSpeed );
-	LONG	GetFloorSpeed( );
-	void	SetCeilingSpeed( LONG lSpeed );
-	LONG	GetCeilingSpeed( );
-	void	SetFloorTarget( LONG lTarget );
-	LONG	GetFloorTarget( );
-	void	SetCeilingTarget( LONG lTarget );
-	LONG	GetCeilingTarget( );
-	LONG	GetCrush( void );
+	void	SetPosition( fixed_t FloorPosition, fixed_t CeilingPosition );
+	fixed_t	GetFloorPosition( );
+	fixed_t	GetCeilingPosition( );
+	void	SetFloorSpeed(fixed_t Speed );
+	fixed_t	GetFloorSpeed( );
+	void	SetCeilingSpeed(fixed_t Speed );
+	fixed_t	GetCeilingSpeed( );
+	void	SetFloorTarget( fixed_t lTarget );
+	fixed_t	GetFloorTarget( );
+	void	SetCeilingTarget( fixed_t lTarget );
+	fixed_t	GetCeilingTarget( );
 	void	SetCrush( LONG Crush );
-	bool	GetHexencrush( void );
+	int		GetCrush( void );
 	void	SetHexencrush( bool hexencrush );
+	bool	GetHexencrush( void );
 
 protected:
 	EPillar		m_Type;
+	fixed_t		m_Speed;
 	fixed_t		m_FloorSpeed;
 	fixed_t		m_CeilingSpeed;
 	fixed_t		m_FloorTarget;
@@ -610,19 +607,19 @@ protected:
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
 
-	// [BC] This is the pillar's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lPillarID;
-
 private:
 	DPillar ();
 
 	// [BC] Make this a friend.
 	friend bool	EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
-							 fixed_t height2, int crush);
+							 fixed_t height2, int crush, bool hexencrush);
+	friend bool	EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t speed, fixed_t height,
+							 fixed_t height2, int crush, bool hexencrush);
 };
 
 bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
+				  fixed_t height2, int crush, bool hexencrush);
+bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t speed, fixed_t height,
 				  fixed_t height2, int crush, bool hexencrush);
 
 //
@@ -650,32 +647,29 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	void Predict();
 
 	// [BC] Access function(s).
 	fixed_t	GetPosition( void );
 	int		GetDirection( void );
 	void	SetPositionAndDirection( fixed_t Position, int direction );
 	
-	LONG	GetTopWait( void );
+	int		GetTopWait( void );
+	void	SetTopWait( int TopWait );
 
-	LONG	GetCountdown( void );
-	void	SetCountdown( LONG lCountdown );
+	int		GetCountdown( void );
+	void	SetCountdown( int Countdown );
 
 	LONG	GetSectorNum( void );
 
 	EVlDoor	GetType( void );
 	void	SetType( EVlDoor Type );
 
-	LONG	GetSpeed( void );
-	void	SetSpeed( LONG lSpeed );
+	fixed_t	GetSpeed( void );
+	void	SetSpeed( fixed_t Speed );
 
-	LONG	GetLightTag( void );
-	void	SetLightTag( LONG lTag );
+	int		GetLightTag( void );
+	void	SetLightTag( int Tag );
 
-	bool	IsBusy();
-
-	void	Reinit(bool bNoSound);
 	void	DoorSound(bool raise, class DSeqNode *curseq = NULL) const;
 
 protected:
@@ -724,7 +718,7 @@ class DAnimatedDoor : public DMovingCeiling
 	DECLARE_CLASS (DAnimatedDoor, DMovingCeiling)
 public:
 	DAnimatedDoor (sector_t *sector);
-	DAnimatedDoor (sector_t *sec, line_t *line, int speed, int delay, FDoorAnimation *anim);
+	DAnimatedDoor (sector_t *sec, line_t *line, player_t *instigator, int speed, int delay, FDoorAnimation *anim);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
@@ -749,11 +743,13 @@ protected:
 	bool m_SetBlocking1, m_SetBlocking2;
 
 	friend bool EV_SlidingDoor (line_t *line, AActor *thing, int tag, int speed, int delay);
+	friend bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *thing, int tag, int speed, int delay);
 private:
 	DAnimatedDoor ();
 };
 
 bool EV_SlidingDoor (line_t *line, AActor *thing, int tag, int speed, int delay);
+bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *thing, int tag, int speed, int delay);
 
 //
 // P_CEILNG
@@ -797,12 +793,9 @@ public:
 	};
 
 	DCeiling (sector_t *sec);
-	DCeiling (sector_t *sec, fixed_t speedDown, fixed_t speedUp, int silent);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
-
-	bool IsBusy();
 
 	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator,
 						fixed_t speedDown, fixed_t speedUp, fixed_t height,
@@ -810,7 +803,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	void Predict();
 
 	// [BC] Make this public so clients can use it.
 	void PlayCeilingSound ();
@@ -821,40 +813,39 @@ public:
 	fixed_t	GetBottomHeight( void );
 	void	SetBottomHeight( fixed_t BottomHeight );
 
-	fixed_t	GetSpeed( void );
 	fixed_t	GetSpeedDown( void );
+	void	SetSpeedDown( fixed_t Speed );
 	fixed_t	GetSpeedUp( void );
-	void	SetSpeed( fixed_t Speed );
+	void	SetSpeedUp( fixed_t Speed );
 	
 	fixed_t	GetPosition( void );
-	LONG	GetDirection( void );
-	void	SetPositionAndDirection( LONG lPosition, LONG lDirection );
+	int		GetDirection( void );
+	void	SetPositionAndDirection( fixed_t Position, int Direction );
 
-	LONG	GetOldDirection( void );
-	void	SetOldDirection( LONG lOldDirection );
+	int		GetOldDirection( void );
+	void	SetOldDirection( int OldDirection );
 
 	ECeiling	GetType( void );
 	void		SetType( ECeiling Type );
 	
-	LONG	GetTag( void );
-	void	SetTag( LONG lTag );
+	int		GetTag( void );
+	void	SetTag( int Tag );
 
-	LONG	GetCrush( void );
-	void	SetCrush( LONG lCrush );
+	int		GetCrush( void );
+	void	SetCrush( int Crush );
 
 	bool	GetHexencrush( void );
 	void	SetHexencrush( bool Hexencrush );
 	
-	LONG	GetSilent( void );
-	void	SetSilent( LONG lSilent );
+	int		GetSilent( void );
+	void	SetSilent( int Silent );
 
 protected:
 	ECeiling	m_Type;
 	fixed_t 	m_BottomHeight;
 	fixed_t 	m_TopHeight;
-	fixed_t 	m_Speed;
-	fixed_t		m_SpeedDown;	// [RH] dnspeed of crushers
-	fixed_t		m_SpeedUp;		// [RH] upspeed of crushers
+	fixed_t		m_SpeedDown;
+	fixed_t		m_SpeedUp;
 	int 		m_Crush;
 	bool		m_Hexencrush;
 	int			m_Silent;
@@ -947,8 +938,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	bool IsBusy();
-	void Predict();
 
 	// [BC] Make these public so clients can use them.
 	void StartFloorSound ();
@@ -1068,8 +1057,6 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	bool IsBusy();
-	void Predict();
 
 	// [BC] No longer protected so clients can call it.
 	void StartFloorSound ();
@@ -1122,19 +1109,25 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void	UpdateToClient( ULONG ulClient );
-
-	// [BC] Access function(s).
-	LONG	GetID( void );
-	void	SetID( LONG lID );
-
-	void	SetOriginalDistance( LONG lOriginalDistance );
-	void	SetAccumulator( LONG lAccumulator );
-	void	SetAccelerationDelta( LONG lAccelerationDelta );
-	void	SetTargetScale( LONG lTargetScale );
-	void	SetScale( LONG lScale );
-	void	SetScaleDelta( LONG lScaleDelta );
-	void	SetTicker( LONG lTicker );
-	void	SetState( LONG lState );
+	
+	virtual fixed_t	GetPosition( );
+	virtual void	SetPosition( fixed_t Position );
+	fixed_t	GetOriginalDistance( );
+	void	SetOriginalDistance( fixed_t OriginalDistance );
+	fixed_t	GetAccumulator( );
+	void	SetAccumulator( fixed_t Accumulator );
+	fixed_t	GetAccelerationDelta( );
+	void	SetAccelerationDelta( fixed_t AccelerationDelta );
+	fixed_t	GetTargetScale( );
+	void	SetTargetScale( fixed_t TargetScale );
+	fixed_t	GetScale( );
+	void	SetScale( fixed_t Scale );
+	fixed_t	GetScaleDelta( );
+	void	SetScaleDelta( fixed_t ScaleDelta );
+	fixed_t	GetTicker( );
+	void	SetTicker( int Ticker );
+	fixed_t	GetState( );
+	void	SetState( int State );
 
 protected:
 	fixed_t m_OriginalDist;
@@ -1147,11 +1140,9 @@ protected:
 	int m_State;
 	TObjPtr<DInterpolation> m_Interpolation;
 
-	// [BC] This is the waggle's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lWaggleID;
-
 	friend bool EV_StartWaggle (int tag, line_t *line, int height, int speed,
+		int offset, int timer, bool ceiling);
+	friend bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed,
 		int offset, int timer, bool ceiling);
 
 	void DoWaggle (bool ceiling);
@@ -1164,6 +1155,8 @@ protected:
 
 bool EV_StartWaggle (int tag, line_t *line, int height, int speed,
 	int offset, int timer, bool ceiling);
+bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed,
+	int offset, int timer, bool ceiling);
 
 class DFloorWaggle : public DWaggleBase
 {
@@ -1171,6 +1164,8 @@ class DFloorWaggle : public DWaggleBase
 public:
 	DFloorWaggle (sector_t *sec);
 	void Tick ();
+	fixed_t	GetPosition( );
+	void	SetPosition( fixed_t Position );
 private:
 	DFloorWaggle ();
 };
@@ -1181,6 +1176,8 @@ class DCeilingWaggle : public DWaggleBase
 public:
 	DCeilingWaggle (sector_t *sec);
 	void Tick ();
+	fixed_t	GetPosition( );
+	void	SetPosition( fixed_t Position );
 private:
 	DCeilingWaggle ();
 };
@@ -1222,6 +1219,8 @@ int  P_StartScript (AActor *who, line_t *where, int script, const char *map, con
 void P_SuspendScript (int script, char *map);
 void P_TerminateScript (int script, char *map);
 void P_DoDeferedScripts (void);
+void P_DoSetActorProperty (AActor *actor, int property, int value);
+int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int stackdepth);
 
 //
 // [RH] p_quake.c
@@ -1233,11 +1232,8 @@ DDoor		*P_GetDoorBySectorNum( LONG sectorNum );
 DPlat		*P_GetPlatBySectorNum( LONG sectornum );
 DFloor		*P_GetFloorBySectorNum( LONG sectorNum );
 DElevator	*P_GetElevatorBySectorNum( LONG sectorNum );
-DWaggleBase	*P_GetWaggleByID( LONG lID );
-DPillar		*P_GetPillarByID( LONG lID );
+DWaggleBase	*P_GetWaggleBySectorNum( LONG sectorNum, bool bCeiling );
+DPillar		*P_GetPillarBySectorNum( LONG sectorNum );
 DCeiling	*P_GetCeilingBySectorNum( LONG sectorNum );
-
-LONG		P_GetFirstFreeWaggleID( void );
-LONG		P_GetFirstFreePillarID( void );
 
 #endif

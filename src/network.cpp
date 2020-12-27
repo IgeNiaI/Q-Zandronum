@@ -1321,8 +1321,8 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 
 	return
 		// Floors, ceilings and elevators
-		( Special >= Floor_LowerByValue && Special <= Floor_RaiseAndCrush )
-		|| ( Special >= Floor_RaiseByValueTimes8 && Special <= Floor_MoveToValue )
+		( Special >= Floor_LowerByValue && Special <= Stairs_BuildUpSync )
+		|| ( Special >= Floor_RaiseByValueTimes8 && Special <= Ceiling_Waggle )
 		|| ( Special >= Ceiling_LowerByValue && Special <= Ceiling_MoveToValue )
 		|| ( Special >= Floor_LowerInstant && Special <= Ceiling_MoveToValueTimes8 )
 		|| ( Special >= FloorAndCeiling_LowerByValue && Special <= Ceiling_LowerAndCrushDist )
@@ -1331,8 +1331,7 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		|| ( Special >= Floor_Donut && Special <= Ceiling_CrushRaiseAndStaySilA )
 		|| ( Special >= Elevator_RaiseToNearest && Special <= Elevator_LowerToNearest )
 		|| ( Special == Generic_Crusher ) || ( Special == Floor_TransferTrigger ) || ( Special == Floor_TransferNumeric )
-		|| ( Special == Stairs_BuildDownSync ) || ( Special == Stairs_BuildUpSync )
-		|| ( Special == Stairs_BuildUpDoom ) || ( Special == Ceiling_LowerAndCrushDist )
+		|| ( Special == Stairs_BuildUpDoom ) || ( Special == Ceiling_LowerAndCrushDist ) || ( Special == Floor_Waggle )
 
 		// Teleports
 		|| ( Special == Teleport ) || ( Special == Teleport_NoFog ) || ( Special == Teleport_NoStop ) || ( Special == Teleport_Line )
@@ -1343,7 +1342,7 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		|| ( Special == Plat_RaiseAndStayTx0 ) || ( Special == Plat_UpByValueStayTx ) || ( Special == Plat_ToggleCeiling )
 
 		// Doors
-		|| ( Special >= Door_Close && Special <= Door_LockedRaise )
+		|| ( Special >= Door_Close && Special <= Door_Animated )
 		|| ( Special == Door_CloseWaitOpen ) || ( Special == Generic_Door )
 
 		// Polyobj

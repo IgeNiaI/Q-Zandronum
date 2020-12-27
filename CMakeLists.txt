@@ -30,7 +30,7 @@ function( add_pk3 PK3_NAME PK3_DIR )
 
 	# Generate target name. Just use "pk3" for main pk3 target.
 	string( REPLACE "." "_" PK3_TARGET ${PK3_NAME} )
-	# [BB] Replaced 'zdoom' with 'q-zandronum'
+	# [geNia] Replaced 'zdoom' with 'q-zandronum'
 	if( ${PK3_TARGET} STREQUAL "q-zandronum_pk3" )
 		set( PK3_TARGET "pk3" )
 	endif( ${PK3_TARGET} STREQUAL "q-zandronum_pk3" )

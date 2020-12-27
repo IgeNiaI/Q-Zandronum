@@ -1639,11 +1639,14 @@ void A_FireCustomMissileHelper ( AActor *self,
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, false, true, false);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM), true, false);
 
 	// automatic handling of seeker missiles
 	if (misl)
 	{
+		if (flags & FPF_TRANSFERTRANSLATION)
+			misl->Translation = self->Translation;
+
 		if (linetarget && misl->flags2 & MF2_SEEKERMISSILE)
 			misl->tracer = linetarget;
 
@@ -1697,13 +1700,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 	{
 		fixed_t shootangle = self->angle;
 		fixed_t SavedPlayerPitch = self->pitch;
+		self->pitch -= pitch;
 
-		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
-		{
-			self->pitch -= pitch;
-			shootangle += Angle;
-		}
-		else
+		if (!(zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE))
 		{
 			//*************************************************************************************************************************
 			// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
@@ -1727,16 +1726,14 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 			{
 				// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
 				float distance = FIXED2FLOAT(trace.Distance);
-				if (SpawnOfs_XY)
-				{
-					float xyOffs = float(atan2(distance, SpawnOfs_XY) * 180.f / PI);
-					shootangle += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
-				}
-				if (SpawnHeight)
-				{
-					float zOffs = float(atan2(distance, FIXED2FLOAT(SpawnHeight)) * 180.f / PI);
-					self->pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
-				}
+
+				float xyOffs = float(atan2(distance, SpawnOfs_XY) * 180.f / PI);
+				shootangle += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
+
+				fixed_t offset = (player->mo->height >> 1) - player->mo->floorclip - player->viewheight
+					+ FixedMul(player->mo->AttackZOffset - 4 * FRACUNIT, player->crouchfactor);
+				float zOffs = float((atan2(distance, FIXED2FLOAT(SpawnHeight + offset))) * 180.f / PI);
+				self->pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
 			}
 			else
 			{
@@ -1744,6 +1741,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 				SpawnHeight = 0;
 			}
 		}
+
+		if (Flags & FPF_AIMATANGLE)
+			shootangle += Angle;
 
 		angle_t ang = (self->angle - ANGLE_90) >> ANGLETOFINESHIFT;
 		fixed_t x = SpawnOfs_XY * finecosine[ang];
@@ -2875,8 +2875,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeIn)
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
 	{
 		if ( renderStyleChanged )
-			SERVERCOMMANDS_SetThingProperty( self, APROP_RenderStyle );
-		SERVERCOMMANDS_SetThingProperty( self, APROP_Alpha );
+			SERVERCOMMANDS_SetActorProperty( self, APROP_RenderStyle, self->RenderStyle.AsDWORD );
+		SERVERCOMMANDS_SetActorProperty( self, APROP_Alpha, self->alpha );
 	}
 
 }
@@ -2912,8 +2912,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeOut)
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
 	{
 		if ( renderStyleChanged )
-			SERVERCOMMANDS_SetThingProperty( self, APROP_RenderStyle );
-		SERVERCOMMANDS_SetThingProperty( self, APROP_Alpha );
+			SERVERCOMMANDS_SetActorProperty( self, APROP_RenderStyle, self->RenderStyle.AsDWORD );
+		SERVERCOMMANDS_SetActorProperty( self, APROP_Alpha, self->alpha );
 	}
 
 	// [BB] Only destroy the actor if it's not needed for a map reset. Otherwise just hide it.
@@ -2982,9 +2982,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeTo)
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
 	{
 		if ( self->RenderStyle.Flags != oldrenderstyleflags )
-			SERVERCOMMANDS_SetThingProperty( self, APROP_RenderStyle );
+			SERVERCOMMANDS_SetActorProperty( self, APROP_RenderStyle, self->RenderStyle.AsDWORD );
 		if ( self->alpha != oldalpha )
-			SERVERCOMMANDS_SetThingProperty( self, APROP_Alpha );
+			SERVERCOMMANDS_SetActorProperty( self, APROP_Alpha, self->alpha );
 	}
 
 	// [EP] Only destroy the actor if it's not needed for a map reset. Otherwise just hide it.

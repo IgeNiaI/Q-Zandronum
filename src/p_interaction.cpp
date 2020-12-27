@@ -2700,8 +2700,10 @@ void PLAYER_SetDefaultSpectatorValues( player_t *pPlayer )
 
 	// [BB] Speed and viewheight of spectators should be independent of the player class.
 	pPlayer->mo->Speed = FRACUNIT;
-	pPlayer->mo->ForwardMove1 = pPlayer->mo->ForwardMove2 = FRACUNIT;
-	pPlayer->mo->SideMove1 = pPlayer->mo->SideMove2 = FRACUNIT;
+	pPlayer->mo->ForwardMove1 = pPlayer->mo->ForwardMove3 = FRACUNIT / 2;
+	pPlayer->mo->ForwardMove2 = pPlayer->mo->ForwardMove4 = FRACUNIT;
+	pPlayer->mo->SideMove1 = pPlayer->mo->SideMove3 = FRACUNIT / 2;
+	pPlayer->mo->SideMove2 = pPlayer->mo->SideMove4 = FRACUNIT;
 	pPlayer->mo->ViewHeight = 41*FRACUNIT;
 	// [BB] Also can't hurt to reset gravity.
 	pPlayer->mo->gravity = FRACUNIT;

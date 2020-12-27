@@ -2091,7 +2091,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 		&& ((mo->player && (i_compatflags & COMPATF_WALLRUN))
 		|| (mo->waterlevel >= 1)
 		|| (mo->player && mo->player->mo
-			&& mo->player->crouchfactor < mo->player->mo->CrouchScaleHalfWay)))
+			&& mo->player->crouchfactor <= mo->player->mo->CrouchScaleHalfWay)))
 	{
 		// preserve the direction instead of clamping x and y independently.
 		xmove = clamp (mo->velx, -maxmove, maxmove);
@@ -3441,10 +3441,10 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 		}
 		//	mo->player->centering = true;
 	}
-	else if (mo->player->mo->waterlevel < 2 && !mo->player->isCrouchSliding)
+	else if (mo->waterlevel < 2 && !mo->player->isCrouchSliding)
 	{
 		if (!(mo->mvFlags & MV_SILENT))
-			S_Sound(mo, CHAN_SIX, "*footstep", 1, ATTN_NORM);
+			S_Sound(mo, CHAN_SIX, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM);
 	}
 }
 
@@ -3558,10 +3558,10 @@ void P_NightmareRespawn (AActor *mobj)
 
 		// [EP] Since AActor::HandleSpawnFlags has been called, we need to inform the clients about its effects.
 		SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( mo, MAXPLAYERS, 0 );
-		if ( mo->alpha != mo->GetDefault()->alpha )
-			SERVERCOMMANDS_SetThingProperty( mo, APROP_Alpha );
 		if ( mo->RenderStyle.AsDWORD != mo->GetDefault()->RenderStyle.AsDWORD )
-			SERVERCOMMANDS_SetThingProperty( mo, APROP_RenderStyle );
+			SERVERCOMMANDS_SetActorProperty( mo, APROP_RenderStyle, mo->GetDefault()->RenderStyle.AsDWORD );
+		if ( mo->alpha != mo->GetDefault()->alpha )
+			SERVERCOMMANDS_SetActorProperty( mo, APROP_Alpha, mo->alpha );
 	}
 
 	// spawn a teleport fog at old spot because of removal of the body?
@@ -7460,20 +7460,19 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle,
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
-							  bool nofreeaim, bool bSpawnSound, bool bSpawnOnClient)
+							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
 	angle_t pitch;
 	AActor *linetarget;
 	AActor *defaultobject = GetDefaultByType(type);
-	int vrange = nofreeaim ? ANGLE_1*35 : 0;
 
 	if (source == NULL)
 	{
 		return NULL;
 	}
-	if (source->player && source->player->ReadyWeapon && (source->player->ReadyWeapon->WeaponFlags & WIF_NOAUTOAIM))
+	if (source->player && source->player->ReadyWeapon && ((source->player->ReadyWeapon->WeaponFlags & WIF_NOAUTOAIM) || noautoaim))
 	{
 		// Keep exactly the same angle and pitch as the player's own aim
 		an = angle;
@@ -7491,10 +7490,9 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		do
 		{
 			an = angle + angdiff[i];
-			pitch = P_AimLineAttack (source, an, linetargetrange, &linetarget, vrange);
+			pitch = P_AimLineAttack (source, an, linetargetrange, &linetarget);
 	
 			if (source->player != NULL &&
-				!nofreeaim &&
 				level.IsFreelookAllowed() &&
 				source->player->userinfo.GetAimDist() <= ANGLE_1/2)
 			{
@@ -7505,7 +7503,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		if (linetarget == NULL)
 		{
 			an = angle;
-			if (nofreeaim || !level.IsFreelookAllowed())
+			if (!level.IsFreelookAllowed())
 			{
 				pitch = 0;
 			}
@@ -7515,24 +7513,17 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 
 	if (z != ONFLOORZ && z != ONCEILINGZ)
 	{
-		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
+		// Doom spawns missiles 4 units lower than hitscan attacks for players.
+		z += source->z + (source->height >> 1) - source->floorclip;
+		if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
 		{
-			// Doom spawns missiles 4 units lower than hitscan attacks for players.
-			z += source->z + (source->height >> 1) - source->floorclip;
-			if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
-			{
-				z += FixedMul(source->player->mo->AttackZOffset - 4 * FRACUNIT, source->player->crouchfactor);
-			}
-			else
-			{
-				z += 4 * FRACUNIT;
-			}
+			z += FixedMul(source->player->mo->AttackZOffset - 4 * FRACUNIT, source->player->crouchfactor);
 		}
 		else
 		{
-			z += source->z - source->floorclip + source->player->viewheight;
+			z += 4 * FRACUNIT;
 		}
-		
+
 		// Do not fire beneath the floor.
 		if (z < source->floorz)
 		{

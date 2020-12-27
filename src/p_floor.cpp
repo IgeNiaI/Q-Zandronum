@@ -33,7 +33,7 @@
 #include "p_3dmidtex.h"
 #include "r_data/r_interpolate.h"
 // [BB] New #includes.
-#include "cl_demo.h"
+#include "version.h"
 #include "network.h"
 #include "sv_commands.h"
 #include "cl_main.h"
@@ -115,9 +115,6 @@ void DFloor::Tick ()
 {
 	EResult res;
 
-	if (m_Direction == 0)
-		return;
-
 	// [RH] Handle resetting stairs
 	if (m_Type == buildStair || m_Type == waitStair)
 	{
@@ -173,10 +170,6 @@ void DFloor::Tick ()
 				case genFloorChg:
 					m_Sector->SetTexture(sector_t::floor, m_Texture);
 
-					// [BC] Update clients about this flat change.
-					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
-
 					// [BC] Also, mark this sector as having its flat changed.
 					m_Sector->bFlatChange = true;
 					break;
@@ -196,10 +189,6 @@ void DFloor::Tick ()
 				case genFloorChg:
 					m_Sector->SetTexture(sector_t::floor, m_Texture);
 
-					// [BC] Update clients about this flat change.
-					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
-
 					// [BC] Also, mark this sector as having its flat changed.
 					m_Sector->bFlatChange = true;
 					break;
@@ -208,7 +197,6 @@ void DFloor::Tick ()
 				}
 			}
 
-			m_Sector->floordata = NULL; //jff 2/22/98
 			StopInterpolation();
 
 			//jff 2/26/98 implement stair retrigger lockout while still building
@@ -238,7 +226,7 @@ void DFloor::Tick ()
 				}
 			}
 
-			m_Direction = 0;
+			Destroy();
 		}
 
 		if ( NETWORK_GetState() == NETSTATE_SERVER )
@@ -263,31 +251,6 @@ void DFloor::UpdateToClient( ULONG ulClient )
 		SERVERCOMMANDS_DoFloor( this, ulClient, SVCF_ONLYTHISCLIENT );
 	else
 		SERVERCOMMANDS_BuildStair( this, ulClient, SVCF_ONLYTHISCLIENT );
-}
-
-bool DFloor::IsBusy()
-{
-	return m_Direction != 0;
-}
-
-void DFloor::Predict()
-{
-	// Use a version of gametic that's appropriate for both the current game and demos.
-	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
-
-	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
-	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
-	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
-		return;
-
-	// How many ticks of prediction do we need?
-	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
-
-	while (TicsToPredict)
-	{
-		Tick();
-		TicsToPredict--;
-	}
 }
 
 void DFloor::SetFloorChangeType (sector_t *sec, int change)
@@ -331,7 +294,6 @@ DFloor::DFloor (sector_t *sec)
 	: DMovingFloor (sec)
 {
 	m_LastInstigator = NULL;
-	m_Direction = 0;
 }
 
 DFloor::EFloor DFloor::GetType( void )
@@ -422,11 +384,11 @@ void DFloor::SetPositionAndDirection( fixed_t Position, LONG lDirection )
 
 	if (diff > 0)
 	{
-		MoveFloor(-diff, BottomHeight, -1, -1, false);
+		MoveFloor(diff, BottomHeight, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveFloor(diff, TopHeight, -1, 1, false);
+		MoveFloor(-diff, TopHeight, -1, 1, false);
 	}
 
 	if (m_Direction != lDirection)
@@ -554,6 +516,10 @@ manual_floor:
 			{
 				floor = barrier_cast<DFloor*>(sec->floordata);
 			}
+			else
+			{
+				continue;
+			}
 		}
 		
 		if (floor == NULL)
@@ -561,9 +527,6 @@ manual_floor:
 			// new floor thinker
 			floor = new DFloor (sec);
 		}
-		
-		if (floor->IsBusy())
-			return false;
 
 		rtn = true;
 		floor->m_Type = floortype;
@@ -604,17 +567,19 @@ manual_floor:
 		case DFloor::floorLowerInstant:
 			floor->m_Speed = height;
 		case DFloor::floorLowerByValue:
+			sec->FindHighestFloorPoint(&spot);
 			floor->m_Direction = -1;
-			newheight = sec->floorplane.ZatPoint (0, 0) - height;
-			floor->m_FloorDestDist = sec->floorplane.PointToDist (0, 0, newheight);
+			newheight = sec->floorplane.ZatPoint (spot) - height;
+			floor->m_FloorDestDist = sec->floorplane.PointToDist (spot, newheight);
 			break;
 
 		case DFloor::floorRaiseInstant:
 			floor->m_Speed = height;
 		case DFloor::floorRaiseByValue:
+			sec->FindHighestFloorPoint(&spot);
 			floor->m_Direction = 1;
-			newheight = sec->floorplane.ZatPoint (0, 0) + height;
-			floor->m_FloorDestDist = sec->floorplane.PointToDist (0, 0, newheight);
+			newheight = sec->floorplane.ZatPoint (spot) + height;
+			floor->m_FloorDestDist = sec->floorplane.PointToDist (spot, newheight);
 			break;
 
 		case DFloor::floorMoveToValue:
@@ -706,10 +671,6 @@ manual_floor:
 				FTextureID oldpic = sec->GetTexture(sector_t::floor);
 				sec->SetTexture(sector_t::floor, line->frontsector->GetTexture(sector_t::floor));
 
-				// [BC] Update clients about this flat change.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
-
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
 
@@ -738,10 +699,6 @@ manual_floor:
 			{
 				floor->m_Texture = modelsec->GetTexture(sector_t::floor);
 				floor->m_NewSpecial = modelsec->special & ~SECRET_MASK;
-
-				// [BC] Update clients about this flat change.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -950,6 +907,10 @@ manual_stair:
 				{
 					floor = barrier_cast<DFloor*>(sec->floordata);
 				}
+				else
+				{
+					continue;
+				}
 			}
 			else
 			{
@@ -962,9 +923,6 @@ manual_stair:
 			// new floor thinker
 			floor = new DFloor(sec);
 		} 
-
-		if (floor->IsBusy())
-			return false;
 
 		rtn = true;
 		floor->m_Direction = (type == DFloor::buildUp) ? 1 : -1;
@@ -1078,9 +1036,16 @@ manual_stair:
 				// ALREADY MOVING?	IF SO, KEEP GOING...
 				//jff 2/26/98 add special lockout condition to wait for entire
 				//staircase to build before retriggering
-				if (sec->PlaneMoving(sector_t::floor) && sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
+				if (sec->PlaneMoving(sector_t::floor))
 				{
-					floor = barrier_cast<DFloor*>(sec->floordata);
+					if (sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
+					{
+						floor = barrier_cast<DFloor*>(sec->floordata);
+					}
+					else
+					{
+						continue;
+					}
 				}
 
 				if (floor == NULL)
@@ -1088,9 +1053,6 @@ manual_stair:
 					// new floor thinker
 					floor = new DFloor(sec);
 				}
-
-				if (floor->IsBusy())
-					continue;
 
 				// create and initialize a thinker for the next step
 				floor->StartFloorSound ();
@@ -1216,6 +1178,10 @@ manual_donut:
 				{
 					floor = barrier_cast<DFloor*>(s2->floordata);
 				}
+				else
+				{
+					continue;
+				}
 			}
 
 			if (floor == NULL)
@@ -1223,9 +1189,6 @@ manual_donut:
 				// new floor thinker
 				floor = new DFloor(s2);
 			}
-			
-			if (floor->IsBusy())
-				continue;
 
 			//	Spawn rising slime
 			floor->m_Type = DFloor::donutRaise;
@@ -1253,6 +1216,10 @@ manual_donut:
 				{
 					floor = barrier_cast<DFloor*>(s1->floordata);
 				}
+				else
+				{
+					continue;
+				}
 			}
 
 			if (floor == NULL)
@@ -1260,9 +1227,6 @@ manual_donut:
 				// new floor thinker
 				floor = new DFloor(s1);
 			}
-			
-			if (floor->IsBusy())
-				continue;
 
 			//	Spawn lowering donut-hole
 			floor = new DFloor (s1);
@@ -1298,31 +1262,6 @@ manual_donut:
 void DElevator::UpdateToClient( ULONG ulClient )
 {
 	SERVERCOMMANDS_DoElevator( this, ulClient, SVCF_ONLYTHISCLIENT );
-}
-
-bool DElevator::IsBusy()
-{
-	return m_Direction != 0;
-}
-
-void DElevator::Predict()
-{
-	// Use a version of gametic that's appropriate for both the current game and demos.
-	ULONG TicsToPredict = gametic - CLIENTDEMO_GetGameticOffset( );
-
-	// [geNia] This would mean that a negative amount of prediction tics is needed, so something is wrong.
-	// So far it looks like the "lagging at connect / map start" prevented this from happening before.
-	if ( CLIENT_GetLastConsolePlayerUpdateTick() > TicsToPredict)
-		return;
-
-	// How many ticks of prediction do we need?
-	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
-
-	while (TicsToPredict)
-	{
-		Tick();
-		TicsToPredict--;
-	}
 }
 
 // [BC]
@@ -1378,11 +1317,11 @@ void DElevator::SetFloorPosition( fixed_t Position )
 	fixed_t diff = m_Sector->floorplane.d - Position;
 	if (diff > 0)
 	{
-		MoveFloor(-diff, m_FloorDestDist, -1, -1, false);
+		MoveFloor(diff, m_FloorDestDist, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveFloor(diff, m_FloorDestDist, -1, 1, false);
+		MoveFloor(-diff, m_FloorDestDist, -1, 1, false);
 	}
 }
 
@@ -1454,7 +1393,6 @@ DElevator::DElevator (sector_t *sec)
 	sec->ceilingdata = this;
 	m_Interp_Floor = sec->SetInterpolation(sector_t::FloorMove, true);
 	m_Interp_Ceiling = sec->SetInterpolation(sector_t::CeilingMove, true);
-	m_Direction = 0;
 	m_LastInstigator = NULL;
 }
 
@@ -1508,9 +1446,6 @@ void DElevator::Destroy()
 
 void DElevator::Tick ()
 {
-	if (m_Direction == 0)
-		return;
-
 	EResult res;
 
 	fixed_t oldfloor, oldceiling;
@@ -1545,9 +1480,8 @@ void DElevator::Tick ()
 
 	if (res == pastdest)	// if destination height acheived
 	{
-		// make floor stop sound
-		SN_StopSequence (m_Sector, CHAN_FLOOR);
-		m_Direction = 0;
+		SN_StopSequence(m_Sector, CHAN_FLOOR);
+		Destroy();
 
 		// [BC] If the sector has reached its destination, this is probably a good time to verify all the clients
 		// have the correct floor/ceiling height for this sector.
@@ -1627,6 +1561,10 @@ manual_elevator:
 			{
 				elevator = barrier_cast<DElevator*>(sec->floordata);
 			}
+			else
+			{
+				return false;
+			}
 		}
 
 		if (elevator == NULL)
@@ -1634,9 +1572,6 @@ manual_elevator:
 			// new floor thinker
 			elevator = new DElevator(sec);
 		}
-		
-		if (elevator->IsBusy())
-			return false;
 
 		rtn = true;
 		elevator->m_Type = elevtype;
@@ -1814,9 +1749,7 @@ void DWaggleBase::Serialize (FArchive &arc)
 		<< m_ScaleDelta
 		<< m_Ticker
 		<< m_State
-		<< m_Interpolation
-		// [BC]
-		<< m_lWaggleID;
+		<< m_Interpolation;
 }
 
 //==========================================================================
@@ -1832,8 +1765,6 @@ void DWaggleBase::Serialize (FArchive &arc)
 DWaggleBase::DWaggleBase (sector_t *sec)
 	: Super (sec)
 {
-	// [EP]
-	m_lWaggleID = -1;
 }
 
 void DWaggleBase::Destroy()
@@ -1849,67 +1780,116 @@ void DWaggleBase::Destroy()
 // [BC]
 void DWaggleBase::UpdateToClient( ULONG ulClient )
 {
-	SERVERCOMMANDS_DoWaggle( GetClass( ) == RUNTIME_CLASS( DCeilingWaggle ), m_Sector, m_OriginalDist, m_Accumulator, m_AccDelta, m_TargetScale, m_Scale, m_ScaleDelta, m_Ticker, m_State, m_lWaggleID, ulClient, SVCF_ONLYTHISCLIENT );
+	SERVERCOMMANDS_DoWaggle( this, ulClient, SVCF_ONLYTHISCLIENT );
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetPosition( )
+{
+	Printf("WARNING: DWaggleBase::GetPosition was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+	return 0;
+}
+
+// [geNia]
+void DWaggleBase::SetPosition( fixed_t Position )
+{
+	Printf("WARNING: DWaggleBase::SetPosition was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetOriginalDistance( )
+{
+	return m_OriginalDist;
 }
 
 // [BC]
-LONG DWaggleBase::GetID( void )
+void DWaggleBase::SetOriginalDistance( fixed_t OriginalDistance )
 {
-	return ( m_lWaggleID );
+	m_OriginalDist = OriginalDistance;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetAccumulator( )
+{
+	return m_Accumulator;
 }
 
 // [BC]
-void DWaggleBase::SetID( LONG lID )
+void DWaggleBase::SetAccumulator( fixed_t Accumulator )
 {
-	m_lWaggleID = lID;
+	m_Accumulator = Accumulator;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetAccelerationDelta( )
+{
+	return m_AccDelta;
 }
 
 // [BC]
-void DWaggleBase::SetOriginalDistance( LONG lOriginalDistance )
+void DWaggleBase::SetAccelerationDelta( fixed_t AccelerationDelta )
 {
-	m_OriginalDist = lOriginalDistance;
+	m_AccDelta = AccelerationDelta;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetTargetScale( )
+{
+	return m_TargetScale;
 }
 
 // [BC]
-void DWaggleBase::SetAccumulator( LONG lAccumulator )
+void DWaggleBase::SetTargetScale( fixed_t Scale )
 {
-	m_Accumulator = lAccumulator;
+	m_TargetScale = Scale;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetScale( )
+{
+	return m_Scale;
 }
 
 // [BC]
-void DWaggleBase::SetAccelerationDelta( LONG lAccelerationDelta )
+void DWaggleBase::SetScale( fixed_t Scale )
 {
-	m_AccDelta = lAccelerationDelta;
+	m_Scale = Scale;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetScaleDelta( )
+{
+	return m_ScaleDelta;
 }
 
 // [BC]
-void DWaggleBase::SetTargetScale( LONG lScale )
+void DWaggleBase::SetScaleDelta( fixed_t ScaleDelta )
 {
-	m_TargetScale = lScale;
+	m_ScaleDelta = ScaleDelta;
+}
+
+// [geNia]
+int DWaggleBase::GetTicker( )
+{
+	return m_Ticker;
 }
 
 // [BC]
-void DWaggleBase::SetScale( LONG lScale )
+void DWaggleBase::SetTicker( int Ticker )
 {
-	m_Scale = lScale;
+	m_Ticker = Ticker;
+}
+
+// [geNia]
+int DWaggleBase::GetState( )
+{
+	return m_State;
 }
 
 // [BC]
-void DWaggleBase::SetScaleDelta( LONG lScaleDelta )
+void DWaggleBase::SetState( int State )
 {
-	m_ScaleDelta = lScaleDelta;
-}
-
-// [BC]
-void DWaggleBase::SetTicker( LONG lTicker )
-{
-	m_Ticker = lTicker;
-}
-
-// [BC]
-void DWaggleBase::SetState( LONG lState )
-{
-	m_State = lState;
+	m_State = State;
 }
 
 //==========================================================================
@@ -1968,11 +1948,12 @@ void DWaggleBase::DoWaggle (bool ceiling)
 				m_Sector->floordata = NULL;
 			}
 
+			Destroy ();
+
 			// [BC] If we're the server, tell clients to delete the waggle.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DestroyWaggle( m_lWaggleID );
+				SERVERCOMMANDS_DoWaggle( this );
 
-			Destroy ();
 			return;
 		}
 		break;
@@ -2015,7 +1996,7 @@ void DWaggleBase::DoWaggle (bool ceiling)
 				continue;
 			}
 
-			SERVERCOMMANDS_UpdateWaggle( m_lWaggleID, m_Accumulator, ulIdx, SVCF_ONLYTHISCLIENT );
+			SERVERCOMMANDS_DoWaggle( this, ulIdx, SVCF_ONLYTHISCLIENT );
 		}
 	}
 }
@@ -2042,6 +2023,27 @@ void DFloorWaggle::Tick ()
 	DoWaggle (false);
 }
 
+// [geNia]
+fixed_t DFloorWaggle::GetPosition( )
+{
+	return ( m_Sector->floorplane.d );
+}
+
+// [geNia]
+void DFloorWaggle::SetPosition( fixed_t Position )
+{
+	fixed_t diff = m_Sector->floorplane.d - Position;
+
+	if (diff > 0)
+	{
+		MoveFloor(diff, Position, -1, -1, false);
+	}
+	else if (diff < 0)
+	{
+		MoveFloor(-diff, Position, -1, 1, false);
+	}
+}
+
 //==========================================================================
 //
 // CeilingWaggle
@@ -2064,6 +2066,27 @@ void DCeilingWaggle::Tick ()
 	DoWaggle (true);
 }
 
+// [geNia]
+fixed_t DCeilingWaggle::GetPosition( )
+{
+	return ( m_Sector->ceilingplane.d );
+}
+
+// [geNia]
+void DCeilingWaggle::SetPosition( fixed_t Position )
+{
+	fixed_t diff = m_Sector->ceilingplane.d - Position;
+
+	if (diff > 0)
+	{
+		MoveCeiling(diff, Position, -1, -1, false);
+	}
+	else if (diff < 0)
+	{
+		MoveCeiling(-diff, Position, -1, 1, false);
+	}
+}
+
 //==========================================================================
 //
 // EV_StartWaggle
@@ -2073,6 +2096,15 @@ void DCeilingWaggle::Tick ()
 bool EV_StartWaggle (int tag, line_t *line, int height, int speed, int offset,
 	int timer, bool ceiling)
 {
+	return EV_StartWaggle(tag, line, NULL, height, speed, offset, timer, ceiling);
+}
+
+bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed, int offset,
+	int timer, bool ceiling)
+{
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	int sectorIndex;
 	sector_t *sector;
 	DWaggleBase *waggle;
@@ -2092,23 +2124,53 @@ bool EV_StartWaggle (int tag, line_t *line, int height, int speed, int offset,
 	while (tag && (sectorIndex = P_FindSectorFromTag(tag, sectorIndex)) >= 0)
 	{
 		sector = &sectors[sectorIndex];
+		waggle = NULL;
+
 manual_waggle:
-		if ((!ceiling && sector->PlaneMoving(sector_t::floor)) || 
-			(ceiling && sector->PlaneMoving(sector_t::ceiling)))
-		{ // Already busy with another thinker
-			continue;
-		}
-		retCode = true;
-		if (ceiling)
+		if ( ceiling )
 		{
-			waggle = new DCeilingWaggle (sector);
-			waggle->m_OriginalDist = sector->ceilingplane.d;
+			if (sector->PlaneMoving(sector_t::ceiling))
+			{
+				if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DCeilingWaggle)))
+				{
+					waggle = barrier_cast<DCeilingWaggle*>(sector->ceilingdata);
+				}
+				else
+				{
+					continue;
+				}
+			}
 		}
 		else
 		{
-			waggle = new DFloorWaggle (sector);
-			waggle->m_OriginalDist = sector->floorplane.d;
+			if (sector->PlaneMoving(sector_t::floor))
+			{
+				if (sector->floordata->IsKindOf(RUNTIME_CLASS(DFloorWaggle)))
+				{
+					waggle = barrier_cast<DFloorWaggle*>(sector->floordata);
+				}
+				else
+				{
+					continue;
+				}
+			}
 		}
+
+		retCode = true;
+		if (waggle == NULL) {
+			if (ceiling)
+			{
+				waggle = new DCeilingWaggle (sector);
+				waggle->m_OriginalDist = sector->ceilingplane.d;
+			}
+			else
+			{
+				waggle = new DFloorWaggle (sector);
+				waggle->m_OriginalDist = sector->floorplane.d;
+			}
+		}
+
+		waggle->m_LastInstigator = instigator;
 		waggle->m_Accumulator = offset*FRACUNIT;
 		waggle->m_AccDelta = speed << (FRACBITS-6);
 		waggle->m_Scale = 0;
@@ -2118,13 +2180,9 @@ manual_waggle:
 		waggle->m_Ticker = timer ? timer*TICRATE : -1;
 		waggle->m_State = WGLSTATE_EXPAND;
 
-		// [BC] Assign the waggle's network ID. However, don't do this on the client end.
-		if ( NETWORK_InClientMode() == false )
-			waggle->m_lWaggleID = P_GetFirstFreeWaggleID( );
-
 		// [BC] If we're the server, tell clients to do the waggle.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_DoWaggle( ceiling, sector, waggle->m_OriginalDist, waggle->m_Accumulator, waggle->m_AccDelta, waggle->m_TargetScale, waggle->m_Scale, waggle->m_ScaleDelta, waggle->m_Ticker, waggle->m_State, waggle->m_lWaggleID );
+			SERVERCOMMANDS_DoWaggle( waggle );
 
 	}
 	return retCode;
@@ -2166,46 +2224,32 @@ DElevator *P_GetElevatorBySectorNum( LONG sectorNum )
 
 //*****************************************************************************
 //
-DWaggleBase *P_GetWaggleByID( LONG lID )
+DWaggleBase *P_GetWaggleBySectorNum( LONG sectorNum, bool bCeiling )
 {
-	DWaggleBase	*pWaggleBase;
-
-	TThinkerIterator<DWaggleBase>		Iterator;
-
-	while (( pWaggleBase = Iterator.Next( )))
+	if ( bCeiling )
 	{
-		if ( pWaggleBase->GetID( ) == lID )
-			return ( pWaggleBase );
+		DCeilingWaggle	*pCeilingWaggle;
+	
+		TThinkerIterator<DCeilingWaggle>		Iterator;
+
+		while (( pCeilingWaggle = Iterator.Next( )))
+		{
+			if ( pCeilingWaggle->GetSector()->sectornum == sectorNum )
+				return ( pCeilingWaggle );
+		}
+	}
+	else
+	{
+		DFloorWaggle	*pFloorWaggle;
+	
+		TThinkerIterator<DFloorWaggle>		Iterator;
+
+		while (( pFloorWaggle = Iterator.Next( )))
+		{
+			if ( pFloorWaggle->GetSector()->sectornum == sectorNum )
+				return ( pFloorWaggle );
+		}
 	}
 
 	return ( NULL );
-}
-
-//*****************************************************************************
-//
-LONG P_GetFirstFreeWaggleID( void )
-{
-	LONG		lIdx;
-	DWaggleBase	*pWaggle;
-	bool		bIDIsAvailable;
-
-	for ( lIdx = 0; lIdx < 8192; lIdx++ )
-	{
-		TThinkerIterator<DWaggleBase>		Iterator;
-
-		bIDIsAvailable = true;
-		while (( pWaggle = Iterator.Next( )))
-		{
-			if ( pWaggle->GetID( ) == lIdx )
-			{
-				bIDIsAvailable = false;
-				break;
-			}
-		}
-
-		if ( bIDIsAvailable )
-			return ( lIdx );
-	}
-
-	return ( -1 );
 }

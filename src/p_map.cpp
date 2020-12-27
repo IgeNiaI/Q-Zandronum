@@ -2961,7 +2961,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t xmove, ymove;
 	const secplane_t *walkplane;
 	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
-	const bool noWallFriction = playerNotVoodoo && !mo->player->mo->WallFrictionEnabled && (mo->player->velx || mo->player->vely);
+	const bool noWallFriction = (zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION) && playerNotVoodoo && (mo->player->velx || mo->player->vely);
 	int hitcount;
 
 	hitcount = 3;
@@ -4815,35 +4815,32 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	x1 = source->x;
 	y1 = source->y;
 
-	if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
-	{
-		shootz = source->z - source->floorclip + (source->height >> 1) + offset_z;
+	shootz = source->z - source->floorclip + (source->height >> 1) + offset_z;
 
+	if (!(railflags & RAF_CENTERZ))
+	{
+		if (source->player != NULL)
+		{
+			shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+		}
+		else
+		{
+			shootz += 8 * FRACUNIT;
+		}
+	}
+
+	if ((zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE) || !source->player)
+	{
 		pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
 		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
 		vx = FixedMul(finecosine[pitch], finecosine[angle]);
 		vy = FixedMul(finecosine[pitch], finesine[angle]);
 		vz = finesine[pitch];
-
-		if (!(railflags & RAF_CENTERZ))
-		{
-			if (source->player != NULL)
-			{
-				shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
-			}
-			else
-			{
-				shootz += 8 * FRACUNIT;
-			}
-		}
 	}
 	else
 	{
 		//*************************************************************************************************************************
 		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
-
-		// Set origin of the trace
-		shootz = source->z - source->floorclip + (source->player ? source->player->viewheight : 8 * FRACUNIT);
 
 		// Get pitch and angle, and calculate direction of the tracer
 		pitch = angle_t(-source->pitch) >> ANGLETOFINESHIFT;
@@ -4853,7 +4850,8 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 		vz = finesine[pitch];
 
 		// Fire the tracer
-		Trace(x1, y1, shootz, source->Sector, vx, vy, vz, distance,
+		fixed_t viewz = source->z - source->floorclip + source->player->viewheight;
+		Trace(x1, y1, viewz, source->Sector, vx, vy, vz, distance,
 			MF_SHOOTABLE, ML_BLOCKEVERYTHING, source, trace, flags);
 
 		if (trace.Distance > MIN_TRACE_DISTANCE_4_ACCURATE)
@@ -4861,18 +4859,16 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
 			float distance = FIXED2FLOAT(trace.Distance);
 
-			if (offset_xy)
-			{
-				float xyOffs = float(atan2(FIXED2FLOAT(trace.Distance), offset_xy) * 180.f / PI);
-				angleoffset = angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
-			}
-			if (offset_z)
-			{
-				float zOffs = float(atan2(FIXED2FLOAT(trace.Distance), FIXED2FLOAT(offset_z)) * 180.f / PI);
-				pitchoffset = angle_t((zOffs - 90.f) * (ANGLE_MAX / 360));
-			}
+			float xyOffs = float(atan2(FIXED2FLOAT(trace.Distance), offset_xy) * 180.f / PI);
+			angleoffset = angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
 
-			shootz += offset_z;
+			fixed_t offset = (source->height >> 1) - source->player->viewheight;
+			if (!(railflags & RAF_CENTERZ))
+			{
+				offset += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+			}
+			float zOffs = float(atan2(distance, FIXED2FLOAT(-offset_z - offset)) * 180.f / PI);
+			pitchoffset = angle_t((90.f - zOffs) * (ANGLE_MAX / 360));
 		}
 
 		//*************************************************************************************************************************

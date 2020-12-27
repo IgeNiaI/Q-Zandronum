@@ -20,13 +20,20 @@ Actor PlayerPawn : Actor native
 	+TELESTOMP
 	+NOBLOCKMONST
 	Player.AttackZOffset 8
+	Player.JumpXY 0
 	Player.JumpZ 8
+	Player.JumpDelay 7
+	Player.SecondJumpXY 0
+	Player.SecondJumpZ 8
+	Player.SecondJumpDelay 7
+	Player.SecondJumpAmount 0
 	Player.GruntSpeed 12
 	Player.FallingScreamSpeed 35,40
 	Player.ViewHeight 41
 	Player.UseRange 64
-	Player.ForwardMove 1,1
-	Player.SideMove 1,1
+	Player.ForwardMove 1,1,1,1
+	Player.SideMove 1,1,1,1
+	Player.FootstepsEnabled 1,1,1,1
 	Player.ColorRange 0,0
 	Player.SoundClass "player"
 	Player.DamageScreenColor "ff 00 00"
@@ -42,17 +49,12 @@ Actor PlayerPawn : Actor native
 	
 	Player.FootstepInterval 12
 	Player.FootstepVolume 1.0
-	Player.JumpDelay 7
-	Player.SecondJumpZ 8
 	Player.AirThrustZUp 0
 	Player.AirThrustZDown 0
-	Player.MaxWallClimbTics 70
-	Player.WallFrictionEnabled 1
-	Player.CrouchSpeedFactor 0.5
-	Player.WalkSpeedFactor 0.75
+	Player.WallClimbRegen 2.0
+	Player.WallClimbMaxTics 70
+	Player.WallClimbSpeed 5.0
 	Player.AirAcceleration 0.25
-	Player.DashForce 10
-	Player.DashDelay 35
 	Player.VelocityCap 0
 	
 	// MvType 1 or 2 only
@@ -60,6 +62,7 @@ Actor PlayerPawn : Actor native
 	Player.GroundFriction 6.0
 	Player.SlideAcceleration 10.0
 	Player.SlideFriction 1.0
+	Player.SlideRegen 2.0
 	Player.SlideMaxTics 70
 	
 	// MvType 2 only

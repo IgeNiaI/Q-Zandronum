@@ -107,7 +107,7 @@ static	HWND			g_hDlg_LMS = NULL;
 
 // Stored values of cvars (we update them when the user hits "OK" (if they changed))
 static	ULONG			g_ulCompatFlags;
-static	ULONG			g_ulCompatFlags2;
+static	ULONG			g_ulZacompatFlags;
 static	ULONG			g_ulDMFlags;
 static	ULONG			g_ulDMFlags2;
 static	ULONG			g_ulZADMFlags;
@@ -193,23 +193,23 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ COMPATF_SECTORSOUNDS,				IDC_COMPATF_SECTORSOUNDS,		&g_ulCompatFlags, },
 	{ COMPATF_MISSILECLIP,				IDC_COMPATF_MISSILECLIP,		&g_ulCompatFlags, },
 	{ COMPATF_CROSSDROPOFF,				IDC_COMPATF_CROSSDROPOFF,		&g_ulCompatFlags, },
-	{ ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,	IDC_ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,	&g_ulCompatFlags2, },
-	{ ZACOMPATF_LIMITED_AIRMOVEMENT,		IDC_LIMITED_AIRMOVEMENT,		&g_ulCompatFlags2, },
-	{ ZACOMPATF_PLASMA_BUMP_BUG,			IDC_PLASMA_BUMP_BUG,			&g_ulCompatFlags2, },
-	{ ZACOMPATF_INSTANTRESPAWN,			IDC_INSTANTRESPAWN,				&g_ulCompatFlags2, },
-	{ ZACOMPATF_DISABLETAUNTS,			IDC_DISABLETAUNTS,				&g_ulCompatFlags2, },
-	{ ZACOMPATF_ORIGINALSOUNDCURVE,		IDC_ORIGINALSOUNDCURVE,			&g_ulCompatFlags2, },
-	{ ZACOMPATF_OLDINTERMISSION,			IDC_OLDINTERMISSION,			&g_ulCompatFlags2, },
-	{ ZACOMPATF_DISABLESTEALTHMONSTERS,	IDC_DISABLESTEALTHMONSTERS,		&g_ulCompatFlags2, },	
-	{ ZACOMPATF_OLDRADIUSDMG,				IDC_COMPATF_OLDRADIUSDMG,		&g_ulCompatFlags2, },
-	{ ZACOMPATF_NO_CROSSHAIR,				IDC_COMPATF_NO_CROSSHAIR,		&g_ulCompatFlags2, },
-	{ ZACOMPATF_OLD_WEAPON_SWITCH,		IDC_COMPATF_OLD_WEAPON_SWITCH,	&g_ulCompatFlags2, },
-	{ ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE,IDC_ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE, &g_ulCompatFlags2, },
-	{ ZACOMPATF_NO_PREDICTION_ACS,			IDC_ZACOMPATF_NO_PREDICTION_ACS,	&g_ulCompatFlags2, },
-	{ ZACOMPATF_NO_LAND,					NULL,							&g_ulCompatFlags2, },
-	{ ZACOMPATF_OLD_RANDOM_GENERATOR,					NULL,							&g_ulCompatFlags2, },
-	{ ZACOMPATF_NOGRAVITY_SPHERES,					NULL,							&g_ulCompatFlags2, },
-	{ ZACOMPATF_DONT_STOP_PLAYER_SCRIPTS_ON_DISCONNECT,					NULL,							&g_ulCompatFlags2, },
+	{ ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,	IDC_ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,	&g_ulZacompatFlags, },
+	{ ZACOMPATF_LIMITED_AIRMOVEMENT,		IDC_LIMITED_AIRMOVEMENT,		&g_ulZacompatFlags, },
+	{ ZACOMPATF_PLASMA_BUMP_BUG,			IDC_PLASMA_BUMP_BUG,			&g_ulZacompatFlags, },
+	{ ZACOMPATF_INSTANTRESPAWN,			IDC_INSTANTRESPAWN,				&g_ulZacompatFlags, },
+	{ ZACOMPATF_DISABLETAUNTS,			IDC_DISABLETAUNTS,				&g_ulZacompatFlags, },
+	{ ZACOMPATF_ORIGINALSOUNDCURVE,		IDC_ORIGINALSOUNDCURVE,			&g_ulZacompatFlags, },
+	{ ZACOMPATF_OLDINTERMISSION,			IDC_OLDINTERMISSION,			&g_ulZacompatFlags, },
+	{ ZACOMPATF_DISABLESTEALTHMONSTERS,	IDC_DISABLESTEALTHMONSTERS,		&g_ulZacompatFlags, },
+	{ ZACOMPATF_OLDRADIUSDMG,				IDC_COMPATF_OLDRADIUSDMG,		&g_ulZacompatFlags, },
+	{ ZACOMPATF_NO_CROSSHAIR,				IDC_COMPATF_NO_CROSSHAIR,		&g_ulZacompatFlags, },
+	{ ZACOMPATF_OLD_WEAPON_SWITCH,		IDC_COMPATF_OLD_WEAPON_SWITCH,	&g_ulZacompatFlags, },
+	{ ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE,IDC_ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE, &g_ulZacompatFlags, },
+	{ ZACOMPATF_NO_PREDICTION_ACS,			IDC_ZACOMPATF_NO_PREDICTION_ACS,	&g_ulZacompatFlags, },
+	{ ZACOMPATF_NO_LAND,					NULL,							&g_ulZacompatFlags, },
+	{ ZACOMPATF_OLD_RANDOM_GENERATOR,					NULL,							&g_ulZacompatFlags, },
+	{ ZACOMPATF_NOGRAVITY_SPHERES,					NULL,							&g_ulZacompatFlags, },
+	{ ZACOMPATF_DONT_STOP_PLAYER_SCRIPTS_ON_DISCONNECT,					NULL,							&g_ulZacompatFlags, },
 	{ LMS_AWF_CHAINSAW,					IDC_LMS_ALLOWCHAINSAW,			&g_ulLMSAllowedWeapons, },
 	{ LMS_AWF_PISTOL,					IDC_LMS_ALLOWPISTOL,			&g_ulLMSAllowedWeapons, },
 	{ LMS_AWF_SHOTGUN,					IDC_LMS_ALLOWSHOTGUN,			&g_ulLMSAllowedWeapons, },
@@ -303,14 +303,14 @@ BOOL CALLBACK SERVERCONSOLE_DMFlagsCallback( HWND hDlg, UINT Message, WPARAM wPa
 			g_ulDMFlags2 = dmflags2;
 			g_ulZADMFlags = zadmflags;
 			g_ulCompatFlags = compatflags;
-			g_ulCompatFlags2 = zacompatflags;
+			g_ulZacompatFlags = zacompatflags;
 			g_ulLMSAllowedWeapons = lmsallowedweapons;
 			g_ulLMSSpectatorSettings = lmsspectatorsettings;
 
 			SendDlgItemMessage( hDlg, IDC_DMFLAGS_VALUE, EM_SETLIMITTEXT, 12, 0 );
 			SendDlgItemMessage( hDlg, IDC_DMFLAGS2_VALUE, EM_SETLIMITTEXT, 12, 0 );
 			SendDlgItemMessage( hDlg, IDC_COMPATFLAGS_VALUE, EM_SETLIMITTEXT, 12, 0 );
-			SendDlgItemMessage( hDlg, IDC_COMPATFLAGS2_VALUE, EM_SETLIMITTEXT, 12, 0 );
+			SendDlgItemMessage( hDlg, IDC_ZACOMPATFLAGS_VALUE, EM_SETLIMITTEXT, 12, 0 );
 			SendMessage( GetDlgItem( hDlg, IDC_TITLE ), WM_SETFONT, (WPARAM) CreateFont( 24, 0, 0, 0, 900, 0, 0, 0, 0, 0, 0, 0, 0, "Tahoma" ), (LPARAM) 1);
 
 			// Set up the tab control.
@@ -361,9 +361,9 @@ BOOL CALLBACK SERVERCONSOLE_DMFlagsCallback( HWND hDlg, UINT Message, WPARAM wPa
 
 				flags_ReadNewValue( hDlg, LOWORD( wParam ), g_ulCompatFlags );
 				break;
-			case IDC_COMPATFLAGS2_VALUE:
+			case IDC_ZACOMPATFLAGS_VALUE:
 
-				flags_ReadNewValue( hDlg, LOWORD( wParam ), g_ulCompatFlags2 );
+				flags_ReadNewValue( hDlg, LOWORD( wParam ), g_ulZacompatFlags );
 				break;
 			}
 		}
@@ -383,8 +383,8 @@ BOOL CALLBACK SERVERCONSOLE_DMFlagsCallback( HWND hDlg, UINT Message, WPARAM wPa
 				zadmflags = g_ulZADMFlags;
 			if ( compatflags != g_ulCompatFlags )
 				compatflags = g_ulCompatFlags;
-			if ( zacompatflags != g_ulCompatFlags2 )
-				zacompatflags = g_ulCompatFlags2;
+			if ( zacompatflags != g_ulZacompatFlags )
+				zacompatflags = g_ulZacompatFlags;
 			if ( lmsallowedweapons != g_ulLMSAllowedWeapons )
 				lmsallowedweapons = g_ulLMSAllowedWeapons;
 			if ( lmsspectatorsettings != g_ulLMSSpectatorSettings )
@@ -478,7 +478,7 @@ static void flags_ReadValuesFromForm( void )
 	g_ulDMFlags = 0;
 	g_ulDMFlags2 = 0;
 	g_ulCompatFlags = 0;
-	g_ulCompatFlags2 = 0;
+	g_ulZacompatFlags = 0;
 	g_ulLMSAllowedWeapons = 0;
 	g_ulLMSSpectatorSettings = 0;
 
@@ -504,7 +504,7 @@ static void flags_ReadValuesFromForm( void )
 	flags_UpdateValueLabel( IDC_DMFLAGS_VALUE, g_hDlg, g_ulDMFlags );
 	flags_UpdateValueLabel( IDC_DMFLAGS2_VALUE, g_hDlg, g_ulDMFlags2 );
 	flags_UpdateValueLabel( IDC_COMPATFLAGS_VALUE, g_hDlg, g_ulCompatFlags );
-	flags_UpdateValueLabel( IDC_COMPATFLAGS2_VALUE, g_hDlg, g_ulCompatFlags2 );
+	flags_UpdateValueLabel( IDC_ZACOMPATFLAGS_VALUE, g_hDlg, g_ulZacompatFlags );
 	flags_UpdateValueLabel( IDC_LMSWEAPONS_VALUE, g_hDlg_LMS, g_ulLMSAllowedWeapons );
 	flags_UpdateValueLabel( IDC_LMSSPECTATORS_VALUE, g_hDlg_LMS, g_ulLMSSpectatorSettings );
 }

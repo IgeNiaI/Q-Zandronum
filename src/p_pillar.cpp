@@ -43,6 +43,7 @@
 #include "cl_demo.h"
 #include "network.h"
 #include "sv_commands.h"
+#include "cl_main.h"
 
 IMPLEMENT_POINTY_CLASS (DPillar)
 	DECLARE_POINTER(m_Interp_Floor)
@@ -69,8 +70,7 @@ DPillar::DPillar(sector_t *sector)
 	sector->ceilingdata = this;
 	m_Interp_Floor = sector->SetInterpolation(sector_t::FloorMove, true);
 	m_Interp_Ceiling = sector->SetInterpolation(sector_t::CeilingMove, true);
-	// [EP]
-	m_lPillarID = -1;
+	m_LastInstigator = NULL;
 }
 
 void DPillar::Destroy()
@@ -92,6 +92,7 @@ void DPillar::Serialize (FArchive &arc)
 {
 	Super::Serialize (arc);
 	arc << m_Type
+		<< m_Speed
 		<< m_FloorSpeed
 		<< m_CeilingSpeed
 		<< m_FloorTarget
@@ -99,27 +100,13 @@ void DPillar::Serialize (FArchive &arc)
 		<< m_Crush
 		<< m_Hexencrush
 		<< m_Interp_Floor
-		<< m_Interp_Ceiling
-		// [BC]
-		<< m_lPillarID;
+		<< m_Interp_Ceiling;
 }
 
 // [BC]
 void DPillar::UpdateToClient( ULONG ulClient )
 {
-	SERVERCOMMANDS_DoPillar( m_Type, m_Sector, m_FloorSpeed, m_CeilingSpeed, m_FloorTarget, m_CeilingTarget, m_Crush, m_Hexencrush, m_lPillarID, ulClient, SVCF_ONLYTHISCLIENT );
-}
-
-// [BC]
-LONG DPillar::GetID( void )
-{
-	return ( m_lPillarID );
-}
-
-// [BC]
-void DPillar::SetID( LONG lID )
-{
-	m_lPillarID = lID;
+	SERVERCOMMANDS_DoPillar( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
 // [BC]
@@ -134,57 +121,88 @@ DPillar::EPillar DPillar::GetType( )
 	return m_Type;
 }
 
-// [BC]
-void DPillar::SetFloorSpeed( LONG lSpeed )
+// [geNia]
+void DPillar::SetPosition( fixed_t FloorPosition, fixed_t CeilingPosition )
 {
-	m_FloorSpeed = lSpeed;
+	fixed_t diff = m_Sector->floorplane.d - FloorPosition;
+	if (diff > 0)
+	{
+		MoveFloor(diff, FloorPosition, -1, -1, m_Hexencrush);
+	}
+	else if (diff < 0)
+	{
+		MoveFloor(-diff, FloorPosition, -1, 1, m_Hexencrush);
+	}
+	
+	diff = m_Sector->ceilingplane.d - CeilingPosition;
+	if (diff > 0)
+	{
+		MoveCeiling(diff, CeilingPosition, -1, -1, m_Hexencrush);
+	}
+	else if (diff < 0)
+	{
+		MoveCeiling(-diff, CeilingPosition, -1, 1, m_Hexencrush);
+	}
+}
+
+// [geNia]
+fixed_t DPillar::GetFloorPosition()
+{
+	return ( m_Sector->floorplane.d );
+}
+
+// [geNia]
+fixed_t DPillar::GetCeilingPosition()
+{
+	return ( m_Sector->ceilingplane.d );
+}
+
+// [BC]
+void DPillar::SetFloorSpeed( fixed_t Speed )
+{
+	m_FloorSpeed = Speed;
 }
 
 // [BB]
-LONG DPillar::GetFloorSpeed( )
+fixed_t DPillar::GetFloorSpeed( )
 {
 	return m_FloorSpeed;
 }
 
 // [BC]
-void DPillar::SetCeilingSpeed( LONG lSpeed )
+void DPillar::SetCeilingSpeed( fixed_t Speed )
 {
-	m_CeilingSpeed = lSpeed;
+	m_CeilingSpeed = Speed;
 }
 
 // [BB]
-LONG DPillar::GetCeilingSpeed( )
+fixed_t DPillar::GetCeilingSpeed( )
 {
 	return m_CeilingSpeed;
 }
 
 // [BC]
-void DPillar::SetFloorTarget( LONG lTarget )
+void DPillar::SetFloorTarget( fixed_t Target )
 {
-	m_FloorTarget = lTarget;
+	m_FloorTarget = Target;
 }
 
 // [BB]
-LONG DPillar::GetFloorTarget( )
+fixed_t DPillar::GetFloorTarget( )
 {
 	return m_FloorTarget;
 }
 
 // [BC]
-void DPillar::SetCeilingTarget( LONG lTarget )
+void DPillar::SetCeilingTarget( fixed_t Target )
 {
-	m_CeilingTarget = lTarget;
+	m_CeilingTarget = Target;
 }
 
 // [BB]
-LONG DPillar::GetCeilingTarget( )
+fixed_t DPillar::GetCeilingTarget( )
 {
 	return m_CeilingTarget;
-}
-
-LONG DPillar::GetCrush( void )
-{
-	return ( m_Crush );
 }
 
 void DPillar::SetCrush( LONG lCrush )
@@ -192,14 +210,19 @@ void DPillar::SetCrush( LONG lCrush )
 	m_Crush = lCrush;
 }
 
-bool DPillar::GetHexencrush( void )
+int DPillar::GetCrush( void )
 {
-	return ( m_Hexencrush );
+	return ( m_Crush );
 }
 
 void DPillar::SetHexencrush( bool Hexencrush )
 {
 	m_Hexencrush = Hexencrush;
+}
+
+bool DPillar::GetHexencrush( void )
+{
+	return ( m_Hexencrush );
 }
 
 void DPillar::Tick ()
@@ -223,21 +246,13 @@ void DPillar::Tick ()
 
 	if (r == pastdest && s == pastdest)
 	{
+		SN_StopSequence (m_Sector, CHAN_FLOOR);
+		Destroy();
+
 		// [BC] If we're the server, tell clients to destroy the pillar, and to stop
 		// the sector sound sequence.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			SERVERCOMMANDS_StopSectorSequence( m_Sector );
-			SERVERCOMMANDS_DestroyPillar( m_lPillarID );
-
-			// Also, since this sector has reached its destination, verify that all the clients
-			// have the correct floor/ceiling height for this sector.
-			SERVERCOMMANDS_SetSectorFloorPlane( ULONG( m_Sector - sectors ));
-			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
-		}
-
-		SN_StopSequence (m_Sector, CHAN_FLOOR);
-		Destroy ();
+			SERVERCOMMANDS_DoPillar( this );
 	}
 	else
 	{
@@ -256,18 +271,19 @@ DPillar::DPillar (sector_t *sector, EPillar type, fixed_t speed,
 				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
 	: DMover (sector)
 {
+	Reinit(sector, type, speed, floordist, ceilingdist, crush, hexencrush);
+}
+
+void DPillar::Reinit( sector_t *sector, EPillar type, fixed_t speed,
+				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush )
+{
 	fixed_t newheight;
 	vertex_t *spot;
 
-	sector->floordata = sector->ceilingdata = this;
-	m_Interp_Floor = sector->SetInterpolation(sector_t::FloorMove, true);
-	m_Interp_Ceiling = sector->SetInterpolation(sector_t::CeilingMove, true);
-
 	m_Type = type;
+	m_Speed = speed;
 	m_Crush = crush;
 	m_Hexencrush = hexencrush;
-	// [EP]
-	m_lPillarID = -1;
 
 	if (type == pillarBuild)
 	{
@@ -343,20 +359,25 @@ DPillar::DPillar (sector_t *sector, EPillar type, fixed_t speed,
 	}
 }
 
-bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
-				  fixed_t height2, int crush, bool hexencrush)
+bool EV_DoPillar (DPillar::EPillar type, int tag,
+				  fixed_t speed, fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
+{
+	return EV_DoPillar(type, tag, NULL, speed, floordist, ceilingdist, crush, hexencrush);
+}
+
+bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator,
+				  fixed_t speed, fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
 {
 	bool rtn = false;
 	int secnum = -1;
 	// [BC]
-	DPillar		*pPillar;
+	DPillar	*pPillar;
+	sector_t *sec;
 
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
-		sector_t *sec = &sectors[secnum];
-
-		if (sec->PlaneMoving(sector_t::floor) || sec->PlaneMoving(sector_t::ceiling))
-			continue;
+		sec = &sectors[secnum];
+		pPillar = NULL;
 
 		fixed_t flor, ceil;
 
@@ -368,66 +389,55 @@ bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
 
 		if (type == DPillar::pillarOpen && flor != ceil)
 			continue;
+		
+		// ALREADY MOVING?	IF SO, KEEP GOING...
+		if (sec->PlaneMoving(sector_t::floor) || sec->PlaneMoving(sector_t::ceiling))
+		{
+			if (sec->floordata->IsKindOf(RUNTIME_CLASS(DPillar)))
+			{
+				pPillar = barrier_cast<DPillar*>(sec->floordata);
+			}
+			else if (sec->ceilingdata->IsKindOf(RUNTIME_CLASS(DPillar)))
+			{
+				pPillar = barrier_cast<DPillar*>(sec->ceilingdata);
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		if (pPillar == NULL)
+		{
+			// new pillar thinker
+			pPillar = new DPillar (sec);
+		}
+
+		pPillar->Reinit( sec, type, speed, floordist, ceilingdist, crush, hexencrush );
+		pPillar->m_LastInstigator = instigator;
 
 		rtn = true;
-		pPillar = new DPillar (sec, type, speed, height, height2, crush, hexencrush);
 
-		if ( pPillar )
-		{
-			// [BC] Assign the mover's network ID. However, don't do this on the client end.
-			if ( NETWORK_InClientMode() == false )
-				pPillar->SetID ( P_GetFirstFreePillarID( ) );
-
-			// [BC] If we're the server, tell clients to create the pillar.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DoPillar( pPillar->GetType(), sec, pPillar->GetFloorSpeed(), pPillar->GetCeilingSpeed(), pPillar->GetFloorTarget(), pPillar->GetCeilingTarget(), pPillar->GetCrush(), pPillar->GetHexencrush(), pPillar->GetID() );
-		}
+		// [BC] If we're the server, tell clients to create the pillar.
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			SERVERCOMMANDS_DoPillar( pPillar );
 	}
 	return rtn;
 }
 
 //*****************************************************************************
 //
-DPillar *P_GetPillarByID( LONG lID )
+DPillar *P_GetPillarBySectorNum( LONG sectorNum )
 {
-	DPillar		*pPillar;
+	DPillar	*pPillar;
 
 	TThinkerIterator<DPillar>		Iterator;
 
 	while (( pPillar = Iterator.Next( )))
 	{
-		if ( pPillar->GetID( ) == lID )
+		if ( pPillar->GetSector()->sectornum == sectorNum )
 			return ( pPillar );
 	}
 
 	return ( NULL );
-}
-
-//*****************************************************************************
-//
-LONG P_GetFirstFreePillarID( void )
-{
-	LONG		lIdx;
-	DPillar		*pPillar;
-	bool		bIDIsAvailable;
-
-	for ( lIdx = 0; lIdx < 8192; lIdx++ )
-	{
-		TThinkerIterator<DPillar>		Iterator;
-
-		bIDIsAvailable = true;
-		while (( pPillar = Iterator.Next( )))
-		{
-			if ( pPillar->GetID( ) == lIdx )
-			{
-				bIDIsAvailable = false;
-				break;
-			}
-		}
-
-		if ( bIDIsAvailable )
-			return ( lIdx );
-	}
-
-	return ( -1 );
 }

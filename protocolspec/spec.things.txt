@@ -208,12 +208,6 @@ Command SetThingTranslation
 	Long translation
 EndCommand
 
-Command SetThingProperty
-	Actor actor
-	Byte property
-	Long value
-EndCommand
-
 Command SetThingSound
 	Actor actor
 	Byte soundType
@@ -268,6 +262,12 @@ Command SetThingFrameNF
 	Actor actor
 	Class<AActor> stateOwner
 	Short offset
+EndCommand
+
+Command SetActorProperty
+	Actor actor
+	Byte property
+	fixed value
 EndCommand
 
 Command SetWeaponAmmoGive

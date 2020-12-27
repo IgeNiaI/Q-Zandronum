@@ -1326,7 +1326,7 @@ void C_DrawConsole (bool hw2d)
 	static int oldbottom = 0;
 	int lines, left, offset;
 	// [BC] String for drawing the version.
-	char	szString[84];
+	char	szString[100];
 
 	// [BC] No need to draw the console in server mode.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )

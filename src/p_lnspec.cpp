@@ -262,7 +262,7 @@ FUNC(LS_Door_Animated)
 	if (arg3 != 0 && !P_CheckKeys (it, arg3, arg0 != 0))
 		return false;
 
-	return EV_SlidingDoor (ln, it, arg0, arg1, arg2);
+	return EV_SlidingDoor (ln, GetInstigator(it, isFromAcs), it, arg0, arg1, arg2);
 }
 
 FUNC(LS_Generic_Door)
@@ -421,13 +421,13 @@ FUNC(LS_Floor_LowerToLowestTxTy)
 FUNC(LS_Floor_Waggle)
 // Floor_Waggle (tag, amplitude, frequency, delay, time)
 {
-	return EV_StartWaggle (arg0, ln, arg1, arg2, arg3, arg4, false);
+	return EV_StartWaggle (arg0, ln, GetInstigator(it, isFromAcs), arg1, arg2, arg3, arg4, false);
 }
 
 FUNC(LS_Ceiling_Waggle)
 // Ceiling_Waggle (tag, amplitude, frequency, delay, time)
 {
-	return EV_StartWaggle (arg0, ln, arg1, arg2, arg3, arg4, true);
+	return EV_StartWaggle (arg0, ln, GetInstigator(it, isFromAcs), arg1, arg2, arg3, arg4, true);
 }
 
 FUNC(LS_Floor_TransferTrigger)
@@ -537,43 +537,43 @@ FUNC(LS_Generic_Stairs)
 FUNC(LS_Pillar_Build)
 // Pillar_Build (tag, speed, height)
 {
-	return EV_DoPillar (DPillar::pillarBuild, arg0, SPEED(arg1), arg2*FRACUNIT, 0, -1, false);
+	return EV_DoPillar (DPillar::pillarBuild, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), arg2*FRACUNIT, 0, -1, false);
 }
 
 FUNC(LS_Pillar_BuildAndCrush)
 // Pillar_BuildAndCrush (tag, speed, height, crush, crushtype)
 {
-	return EV_DoPillar (DPillar::pillarBuild, arg0, SPEED(arg1), arg2*FRACUNIT, 0, arg3, CRUSHTYPE(arg4));
+	return EV_DoPillar (DPillar::pillarBuild, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), arg2*FRACUNIT, 0, arg3, CRUSHTYPE(arg4));
 }
 
 FUNC(LS_Pillar_Open)
 // Pillar_Open (tag, speed, f_height, c_height)
 {
-	return EV_DoPillar (DPillar::pillarOpen, arg0, SPEED(arg1), arg2*FRACUNIT, arg3*FRACUNIT, -1, false);
+	return EV_DoPillar (DPillar::pillarOpen, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), arg2*FRACUNIT, arg3*FRACUNIT, -1, false);
 }
 
 FUNC(LS_Ceiling_LowerByValue)
 // Ceiling_LowerByValue (tag, speed, height)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2*FRACUNIT, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilLowerByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1), arg2*FRACUNIT, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_RaiseByValue)
 // Ceiling_RaiseByValue (tag, speed, height)
 {
-	return EV_DoCeiling (DCeiling::ceilRaiseByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2*FRACUNIT, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilRaiseByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1), arg2*FRACUNIT, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_LowerByValueTimes8)
 // Ceiling_LowerByValueTimes8 (tag, speed, height)
 {
-	return EV_DoCeiling (DCeiling::ceilLowerByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2*FRACUNIT*8, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilLowerByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1), arg2*FRACUNIT*8, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_RaiseByValueTimes8)
 // Ceiling_RaiseByValueTimes8 (tag, speed, height)
 {
-	return EV_DoCeiling (DCeiling::ceilRaiseByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), 0, arg2*FRACUNIT*8, -1, 0, 0, false);
+	return EV_DoCeiling (DCeiling::ceilRaiseByValue, ln, arg0, GetInstigator(it, isFromAcs), SPEED(arg1), SPEED(arg1), arg2*FRACUNIT*8, -1, 0, 0, false);
 }
 
 FUNC(LS_Ceiling_CrushAndRaise)
@@ -2085,7 +2085,7 @@ FUNC(LS_Sector_ChangeFlags)
 // [BC] Start of new Skulltag linespecials.
 
 FUNC( LS_Player_SetTeam )
-// Player_SetTeam( team id )
+// Player_SetTeam( team id, bool nobroadcast )
 {
 	// Don't set teams on the client end.
 	if ( NETWORK_InClientMode() )
@@ -2100,7 +2100,7 @@ FUNC( LS_Player_SetTeam )
 		I_Error( "Tried to set player to bad team, %d\n", arg0 );
 
 	// Set the player's team.
-	PLAYER_SetTeam( it->player, arg0, false );
+	PLAYER_SetTeam( it->player, arg0, !!arg1 );
 	return ( true );
 }
 

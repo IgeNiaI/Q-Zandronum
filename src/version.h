@@ -40,19 +40,18 @@ const char *GetGitTime();
 const char *GetVersionString();
 // [BB]
 const char *GetVersionStringRev();
-unsigned int GetRevisionNumber();
 
 /** Lots of different version numbers **/
 
 #define GAME_MAJOR_VERSION 1
-#define GAME_MINOR_VERSION 1
-#define GAMEVER_STRING "1.1.0"
-#define NETGAMEVER_STRING "1.1"
+#define GAME_MINOR_VERSION 2
+#define GAMEVER_STRING "1.2.0"
+#define NETGAMEVER_STRING "1.2"
 #define DOTVERSIONSTR GAMEVER_STRING "-beta"
 #define VERSIONSTR DOTVERSIONSTR
 
 // [BB] The version string that includes revision / compatibility data.
-#define DOTVERSIONSTR_REV DOTVERSIONSTR "-r" HG_TIME
+#define DOTVERSIONSTR_REV DOTVERSIONSTR "-r" GIT_TIME
 
 // [geNia] What version of Zandronum is this based off of?
 #define	ZANDROVERSIONSTR	"3.0.1"
@@ -74,18 +73,6 @@ unsigned int GetRevisionNumber();
 #define BUILD_ID_STR		"Release" // Used in the exe's metadata.
 
 // Version identifier for network games.
-// Bump it every time you do a release unless you're certain you
-// didn't change anything that will affect network protocol.
-// 003 = 0.97c2
-// 004 = 0.97c3
-// 005 = 0.97d-beta4
-// 006 = 0.97d-beta4.2
-// 007 = 0.97d-RC9
-// [BB] Use the revision number to automatically make builds from
-// different revisions incompatible. Skulltag only uses one byte
-// to transfer NETGAMEVERSION, so we need to limit its value to [0,255].
-//#define NETGAMEVERSION (GetRevisionNumber() % 256)
-// [BB] Stay network compatible with 3.0.
 #define NETGAMEVERSION ((GAME_MAJOR_VERSION * 100 + GAME_MINOR_VERSION) % 256)
 
 // Version stored in the ini's [LastRun] section.
@@ -129,7 +116,8 @@ unsigned int GetRevisionNumber();
 // More stuff that needs to be different for derivatives.
 #define GAMENAME "Q-Zandronum"
 #define GAMENAMELOWERCASE "q-zandronum"
-#define DOMAIN_NAME "zandronum.com"
+#define CONFIGFILE "zandronum"
+#define DOMAIN_NAME "qzandronum.com"
 #define DISCORD_URL "https://discord.com/invite/RN9hhmA"
 #define BUGS_URL	"https://github.com/IgeNiaI/Zandronum-3.0-QCDE/issues"
 

@@ -4121,7 +4121,7 @@ void DLevelScript::SetActorProperty (int tid, int property, int value)
 {
 	if (tid == 0)
 	{
-		DoSetActorProperty (activator, property, value);
+		P_DoSetActorProperty (activator, property, value);
 	}
 	else
 	{
@@ -4130,12 +4130,12 @@ void DLevelScript::SetActorProperty (int tid, int property, int value)
 
 		while ((actor = iterator.Next()) != NULL)
 		{
-			DoSetActorProperty (actor, property, value);
+			P_DoSetActorProperty (actor, property, value);
 		}
 	}
 }
 
-void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
+void P_DoSetActorProperty (AActor *actor, int property, int value)
 {
 	if (actor == NULL)
 	{
@@ -4145,6 +4145,10 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 	// [WS/BB] Do not do this for spectators.
 	if ( actor->player && actor->player->bSpectating )
 		return;
+
+	APlayerPawn *playerActor = NULL;
+	if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+		playerActor = static_cast<APlayerPawn *>(actor);
 
 	// [BB]
 	int oldValue = 0;
@@ -4161,18 +4165,11 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 		if (actor->player != NULL)
 		{
 			actor->player->health = value;
-
-			// [BC/BB] If we're the server, tell all clients about the new health value.
-			if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
-				( SERVER_IsValidClient( actor->player - players )))
-			{
-				SERVERCOMMANDS_SetPlayerHealth( static_cast<ULONG>( actor->player - players ) );
-			}
 		}
 		// If the health is set to a non-positive value, properly kill the actor.
 		if (value <= 0)
 		{
-			actor->Die(activator, activator);
+			actor->Die(actor, actor);
 		}
 		break;
 
@@ -4181,11 +4178,6 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 		oldValue = actor->Speed;
 
 		actor->Speed = value;
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		// [BB] Only bother the clients if the speed has actually changed.
-		if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( oldValue != actor->Speed ) )
-			SERVERCOMMANDS_SetThingProperty( actor, APROP_Speed );
 		break;
 
 	case APROP_Damage:
@@ -4194,10 +4186,6 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 
 	case APROP_Alpha:
 		actor->alpha = value;
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingProperty( actor, APROP_Alpha );
 		break;
 
 	case APROP_RenderStyle:
@@ -4210,57 +4198,6 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 			}
 		}
 
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingProperty( actor, APROP_RenderStyle );
-
-		break;
-
-	case APROP_Ambush:
-		if (value) actor->flags |= MF_AMBUSH; else actor->flags &= ~MF_AMBUSH;
-		break;
-
-	case APROP_Dropped:
-		if (value) actor->flags |= MF_DROPPED; else actor->flags &= ~MF_DROPPED;
-		break;
-
-	case APROP_Invulnerable:
-		if (value) actor->flags2 |= MF2_INVULNERABLE; else actor->flags2 &= ~MF2_INVULNERABLE;
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingFlags( actor, FLAGSET_FLAGS2 );
-		break;
-
-	case APROP_Notarget:
-		if (value) actor->flags3 |= MF3_NOTARGET; else actor->flags3 &= ~MF3_NOTARGET;
-		break;
-
-	case APROP_Notrigger:
-		if (value) actor->flags6 |= MF6_NOTRIGGER; else actor->flags6 &= ~MF6_NOTRIGGER;
-		break;
-
-	case APROP_JumpZ:
-		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-			static_cast<APlayerPawn *>(actor)->JumpZ = value;
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingProperty( actor, APROP_JumpZ );
-		break; 	// [GRB]
-
-	case APROP_ChaseGoal:
-		if (value)
-			actor->flags5 |= MF5_CHASEGOAL;
-		else
-			actor->flags5 &= ~MF5_CHASEGOAL;
-		break;
-
-	case APROP_Frightened:
-		if (value)
-			actor->flags4 |= MF4_FRIGHTENED;
-		else
-			actor->flags4 &= ~MF4_FRIGHTENED;
 		break;
 
 	case APROP_Friendly:
@@ -4277,69 +4214,31 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 		break;
 
 
-	case APROP_SpawnHealth:
-		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-		{
-			static_cast<APlayerPawn *>(actor)->MaxHealth = value;
-
-			// [BB] If we're the server, tell clients to update this actor property.
-			// Note: Don't do this if the actor is a voodoo doll, the client would
-			// alter the value of the real player body in this case.
-			if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && actor->player && ( actor->player->mo == actor ) )
-				SERVERCOMMANDS_SetPlayerMaxHealth( static_cast<ULONG>( actor->player - players ) );
-		}
-		break;
-
 	case APROP_Gravity:
 		// [BB] Save the original value.
 		oldValue = actor->gravity;
 
 		actor->gravity = value;
-
-		// [BB] If we're the server, tell clients to update this actor's gravity.
-		// [BB] Only bother the clients if the gravity has actually changed.
-		if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( oldValue != actor->gravity ) )
-			SERVERCOMMANDS_SetThingGravity( actor );
 		break;
 
 	case APROP_SeeSound:
 		actor->SeeSound = FBehavior::StaticLookupString(value);
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingSound( actor, ACTORSOUND_SEESOUND, FBehavior::StaticLookupString( value ));
 		break;
 
 	case APROP_AttackSound:
 		actor->AttackSound = FBehavior::StaticLookupString(value);
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingSound( actor, ACTORSOUND_ATTACKSOUND, FBehavior::StaticLookupString( value ));
 		break;
 
 	case APROP_PainSound:
 		actor->PainSound = FBehavior::StaticLookupString(value);
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingSound( actor, ACTORSOUND_PAINSOUND, FBehavior::StaticLookupString( value ));
 		break;
 
 	case APROP_DeathSound:
 		actor->DeathSound = FBehavior::StaticLookupString(value);
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingSound( actor, ACTORSOUND_DEATHSOUND, FBehavior::StaticLookupString( value ));
 		break;
 
 	case APROP_ActiveSound:
 		actor->ActiveSound = FBehavior::StaticLookupString(value);
-
-		// [BC] If we're the server, tell clients to update this actor property.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingSound( actor, ACTORSOUND_ACTIVESOUND, FBehavior::StaticLookupString( value ));
 		break;
 
 	case APROP_Species:
@@ -4366,18 +4265,10 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 
 	case APROP_ScaleX:
 		actor->scaleX = value;
-
-		// [TP] If we're the server, tell clients to update this actor property.
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SetThingScale(actor, ACTORSCALE_X);
 		break;
 
 	case APROP_ScaleY:
 		actor->scaleY = value;
-
-		// [TP] If we're the server, tell clients to update this actor property.
-		if (NETWORK_GetState() == NETSTATE_SERVER)
-			SERVERCOMMANDS_SetThingScale(actor, ACTORSCALE_Y);
 		break;
 
 	case APROP_Mass:
@@ -4397,133 +4288,390 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 		break;
 
 	case APROP_ViewHeight:
-		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
+		if (playerActor)
 		{
-			static_cast<APlayerPawn *>(actor)->ViewHeight = value;
-			if (actor->player != NULL)
+			playerActor->ViewHeight = value;
+			if (playerActor->player != NULL)
 			{
-				actor->player->viewheight = value;
-
-				// [BB] Tell the clients about the changed view height.
-				if( NETWORK_GetState() == NETSTATE_SERVER )
-					SERVERCOMMANDS_SetPlayerViewHeight ( actor->player - players );
+				playerActor->player->viewheight = value;
 			}
 		}
 		break;
 
 	case APROP_AttackZOffset:
-		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-			static_cast<APlayerPawn *>(actor)->AttackZOffset = value;
+		if (playerActor)
+			playerActor->AttackZOffset = value;
 		break;
 
 	case APROP_StencilColor:
 		actor->SetShade(value);
 		break;
 
+
+	// Flags
+		
+	case APROP_Ambush:
+		if (value) actor->flags |= MF_AMBUSH; else actor->flags &= ~MF_AMBUSH;
+		break;
+
+	case APROP_Dropped:
+		if (value) actor->flags |= MF_DROPPED; else actor->flags &= ~MF_DROPPED;
+		break;
+
+	case APROP_Invulnerable:
+		if (value) actor->flags2 |= MF2_INVULNERABLE; else actor->flags2 &= ~MF2_INVULNERABLE;
+		break;
+
+	case APROP_Notarget:
+		if (value) actor->flags3 |= MF3_NOTARGET; else actor->flags3 &= ~MF3_NOTARGET;
+		break;
+
+	case APROP_Notrigger:
+		if (value) actor->flags6 |= MF6_NOTRIGGER; else actor->flags6 &= ~MF6_NOTRIGGER;
+		break;
+
+	case APROP_ChaseGoal:
+		if (value) actor->flags5 |= MF5_CHASEGOAL; else actor->flags5 &= ~MF5_CHASEGOAL;
+		break;
+
+	case APROP_Frightened:
+		if (value) actor->flags4 |= MF4_FRIGHTENED; else actor->flags4 &= ~MF4_FRIGHTENED;
+		break;
+
+	case APROP_CrouchSlide:
+		if (value) actor->mvFlags |= MV_CROUCHSLIDE; else actor->mvFlags &= ~MV_CROUCHSLIDE;
+		break;
+
+	case APROP_WallJump:
+		if (value) actor->mvFlags |= MV_WALLJUMP; else actor->mvFlags &= ~MV_WALLJUMP;
+		break;
+
+	case APROP_WallJumpV2:
+		if (value) actor->mvFlags |= MV_WALLJUMPV2; else actor->mvFlags &= ~MV_WALLJUMPV2;
+		break;
+
+	case APROP_DoubleTapJump:
+		if (value) actor->mvFlags |= MV_DOUBLETAPJUMP; else actor->mvFlags &= ~MV_DOUBLETAPJUMP;
+		break;
+
+	case APROP_WallClimb:
+		if (value) actor->mvFlags |= MV_WALLCLIMB; else actor->mvFlags &= ~MV_WALLCLIMB;
+		break;
+
+	case APROP_RampJump:
+		if (value) actor->mvFlags |= MV_RAMPJUMP; else actor->mvFlags &= ~MV_RAMPJUMP;
+		break;
+
+	case APROP_Silent:
+		if (value) actor->mvFlags |= MV_SILENT; else actor->mvFlags &= ~MV_SILENT;
+		break;
+
+
+	// Player actor specific
+
+	case APROP_JumpXY:
+		if (playerActor)
+			playerActor->JumpXY = value;
+		break;
+
+	case APROP_JumpZ:
+		if (playerActor)
+			playerActor->JumpZ = value;
+		break;
+
+	case APROP_JumpDelay:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->JumpDelay = value;
+		}
+		break;
+
+	case APROP_SecondJumpXY:
+		if (playerActor)
+			playerActor->SecondJumpXY = value;
+		break;
+
+	case APROP_SecondJumpZ:
+		if (playerActor)
+			playerActor->SecondJumpZ = value;
+		break;
+
+	case APROP_SecondJumpDelay:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->SecondJumpDelay = value;
+		}
+		break;
+
+	case APROP_SecondJumpAmount:
+		if (playerActor)
+			playerActor->SecondJumpAmount = value;
+		break;
+
+	case APROP_SpawnHealth:
+		if (playerActor)
+			playerActor->MaxHealth = value;
+		break;
+
+	case APROP_CrouchChangeSpeed:
+		if (playerActor) {
+			value = clamp(value, 655, 65536);
+			playerActor->CrouchChangeSpeed = value;
+		}
+		break;
+
+	case APROP_CrouchScale:
+		if (playerActor) {
+			value = clamp(value, 6553, 58982);
+			playerActor->CrouchScale = value;
+			playerActor->CrouchScaleHalfWay = (65536 - value) / 2 + value;
+		}
+		break;
+
+	case APROP_MvType:
+		if (playerActor) {
+			value = clamp(value, 0, MV_TYPES_END - 1);
+			playerActor->MvType = value;
+		}
+		break;
+
+	case APROP_FootstepInterval:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->FootstepInterval = value;
+		}
+		break;
+
+	case APROP_FootstepVolume:
+		if (playerActor) {
+			float fvalue = clamp(FIXED2FLOAT(value), 0.f, 2.f);
+			playerActor->FootstepVolume = fvalue;
+		}
+		break;
+
+	case APROP_AirThrustZUp:
+		if (playerActor) {
+			playerActor->AirThrustZUp = value;
+		}
+		break;
+
+	case APROP_AirThrustZDown:
+		if (playerActor) {
+			playerActor->AirThrustZDown = value;
+		}
+		break;
+
+	case APROP_WallClimbSpeed:
+		if (playerActor) {
+			playerActor->WallClimbSpeed = value;
+		}
+		break;
+
+	case APROP_WallClimbMaxTics:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->WallClimbMaxTics = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_WallClimbRegen:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->WallClimbRegen = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_AirAcceleration:
+		if (playerActor) {
+			playerActor->AirAcceleration = value;
+		}
+		break;
+
+	case APROP_VelocityCap:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->VelocityCap = value;
+		}
+		break;
+
+	case APROP_GroundAcceleration:
+		if (playerActor) {
+			playerActor->GroundAcceleration = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_GroundFriction:
+		if (playerActor) {
+			playerActor->GroundFriction = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_SlideAcceleration:
+		if (playerActor) {
+			playerActor->SlideAcceleration = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_SlideFriction:
+		if (playerActor) {
+			playerActor->SlideFriction = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_SlideMaxTics:
+		if (playerActor) {
+			playerActor->SlideMaxTics = FIXED2FLOAT(value);
+		}
+		break;
+		
+	case APROP_SlideRegen:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->SlideRegen = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_CpmAirAcceleration:
+		if (playerActor) {
+			playerActor->CpmAirAcceleration = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_CpmMaxForwardAngleRad:
+		if (playerActor) {
+			playerActor->CpmMaxForwardAngleRad = FIXED2FLOAT(value);
+		}
+		break;
+
 	default:
 		// do nothing.
 		break;
 	}
+
+	// [geNia] Update client property with new value
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
+		SERVERCOMMANDS_SetActorProperty( actor, property, value );
+	}
 }
 
-int DLevelScript::GetActorProperty (int tid, int property, const SDWORD *stack, int stackdepth)
+int DLevelScript::GetActorProperty(int tid, int property, const SDWORD *stack, int stackdepth)
 {
-	AActor *actor = SingleActorFromTID (tid, activator);
+	AActor *actor = SingleActorFromTID(tid, activator);
+	return P_DoGetActorProperty(actor, property, stack, stackdepth);
+}
 
+int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int stackdepth)
+{
 	if (actor == NULL)
 	{
 		return 0;
 	}
+
+	APlayerPawn *playerActor = NULL;
+	if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+		playerActor = static_cast<APlayerPawn *>(actor);
+
 	switch (property)
 	{
-	case APROP_Health:		return actor->health;
-	case APROP_Speed:		return actor->Speed;
-	case APROP_Damage:		return actor->Damage;	// Should this call GetMissileDamage() instead?
-	case APROP_DamageFactor:return actor->DamageFactor;
-	case APROP_Alpha:		return actor->alpha;
-	case APROP_RenderStyle:	for (int style = STYLE_None; style < STYLE_Count; ++style)
-							{ // Check for a legacy render style that matches.
-								if (LegacyRenderStyles[style] == actor->RenderStyle)
-								{
-									return LegacyRenderStyleIndices[style];
-								}
-							}
-							// The current render style isn't expressable as a legacy style,
-							// so pretends it's normal.
-							return STYLE_Normal;
-	case APROP_Gravity:		return actor->gravity;
-	case APROP_Invulnerable:return !!(actor->flags2 & MF2_INVULNERABLE);
-	case APROP_Ambush:		return !!(actor->flags & MF_AMBUSH);
-	case APROP_Dropped:		return !!(actor->flags & MF_DROPPED);
-	case APROP_ChaseGoal:	return !!(actor->flags5 & MF5_CHASEGOAL);
-	case APROP_Frightened:	return !!(actor->flags4 & MF4_FRIGHTENED);
-	case APROP_Friendly:	return !!(actor->flags & MF_FRIENDLY);
-	case APROP_Notarget:	return !!(actor->flags3 & MF3_NOTARGET);
-	case APROP_Notrigger:	return !!(actor->flags6 & MF6_NOTRIGGER);
-	case APROP_Dormant:		return !!(actor->flags2 & MF2_DORMANT);
-	case APROP_SpawnHealth: if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->MaxHealth;
-							}
-							else
-							{
-								return actor->SpawnHealth();
-							}
+	// Generic
+	case APROP_Health:					return actor->health;
+	case APROP_Speed:					return actor->Speed;
+	case APROP_Damage:					return actor->Damage;	// Should this call GetMissileDamage() instead?
+	case APROP_DamageFactor:			return actor->DamageFactor;
+	case APROP_Alpha:					return actor->alpha;
+	case APROP_Gravity:					return actor->gravity;
+	case APROP_Score:					return actor->Score;
+	case APROP_WaterLevel:				return actor->waterlevel;
+	case APROP_ScaleX: 					return actor->scaleX;
+	case APROP_ScaleY: 					return actor->scaleY;
+	case APROP_Mass: 					return actor->Mass;
+	case APROP_Accuracy:				return actor->accuracy;
+	case APROP_Stamina:					return actor->stamina;
+	case APROP_Height:					return actor->height;
+	case APROP_Radius:					return actor->radius;
+	case APROP_ReactionTime:			return actor->reactiontime;
+	case APROP_MeleeRange:				return actor->meleerange;
+	case APROP_StencilColor:			return actor->fillcolor;
 
-	case APROP_JumpZ:		if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->JumpZ;	// [GRB]
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_Score:		return actor->Score;
-	case APROP_MasterTID:	return DoGetMasterTID (actor);
-	case APROP_TargetTID:	return (actor->target != NULL)? actor->target->tid : 0;
-	case APROP_TracerTID:	return (actor->tracer != NULL)? actor->tracer->tid : 0;
-	case APROP_WaterLevel:	return actor->waterlevel;
-	case APROP_ScaleX: 		return actor->scaleX;
-	case APROP_ScaleY: 		return actor->scaleY;
-	case APROP_Mass: 		return actor->Mass;
-	case APROP_Accuracy:    return actor->accuracy;
-	case APROP_Stamina:     return actor->stamina;
-	case APROP_Height:		return actor->height;
-	case APROP_Radius:		return actor->radius;
-	case APROP_ReactionTime:return actor->reactiontime;
-	case APROP_MeleeRange:	return actor->meleerange;
-	case APROP_ViewHeight:	if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->ViewHeight;
-							}
-							else
-							{
-								return 0;
-							}
-	case APROP_AttackZOffset:
-							if (actor->IsKindOf (RUNTIME_CLASS (APlayerPawn)))
-							{
-								return static_cast<APlayerPawn *>(actor)->AttackZOffset;
-							}
-							else
-							{
-								return 0;
-							}
+	// Strings
+	case APROP_SeeSound:				return GlobalACSStrings.AddString(actor->SeeSound, stack, stackdepth);
+	case APROP_AttackSound:				return GlobalACSStrings.AddString(actor->AttackSound, stack, stackdepth);
+	case APROP_PainSound:				return GlobalACSStrings.AddString(actor->PainSound, stack, stackdepth);
+	case APROP_DeathSound:				return GlobalACSStrings.AddString(actor->DeathSound, stack, stackdepth);
+	case APROP_ActiveSound:				return GlobalACSStrings.AddString(actor->ActiveSound, stack, stackdepth);
+	case APROP_Species:					return GlobalACSStrings.AddString(actor->GetSpecies(), stack, stackdepth);
+	case APROP_NameTag:					return GlobalACSStrings.AddString(actor->GetTag(), stack, stackdepth);
 
-	case APROP_SeeSound:	return GlobalACSStrings.AddString(actor->SeeSound, stack, stackdepth);
-	case APROP_AttackSound:	return GlobalACSStrings.AddString(actor->AttackSound, stack, stackdepth);
-	case APROP_PainSound:	return GlobalACSStrings.AddString(actor->PainSound, stack, stackdepth);
-	case APROP_DeathSound:	return GlobalACSStrings.AddString(actor->DeathSound, stack, stackdepth);
-	case APROP_ActiveSound:	return GlobalACSStrings.AddString(actor->ActiveSound, stack, stackdepth);
-	case APROP_Species:		return GlobalACSStrings.AddString(actor->GetSpecies(), stack, stackdepth);
-	case APROP_NameTag:		return GlobalACSStrings.AddString(actor->GetTag(), stack, stackdepth);
-	case APROP_StencilColor:return actor->fillcolor;
+	// Flags
+	case APROP_Invulnerable:			return !!(actor->flags2 & MF2_INVULNERABLE);
+	case APROP_Ambush:					return !!(actor->flags & MF_AMBUSH);
+	case APROP_Dropped:					return !!(actor->flags & MF_DROPPED);
+	case APROP_ChaseGoal:				return !!(actor->flags5 & MF5_CHASEGOAL);
+	case APROP_Frightened:				return !!(actor->flags4 & MF4_FRIGHTENED);
+	case APROP_Friendly:				return !!(actor->flags & MF_FRIENDLY);
+	case APROP_Notarget:				return !!(actor->flags3 & MF3_NOTARGET);
+	case APROP_Notrigger:				return !!(actor->flags6 & MF6_NOTRIGGER);
+	case APROP_Dormant:					return !!(actor->flags2 & MF2_DORMANT);
+	case APROP_CrouchSlide:				return !!(actor->mvFlags & MV_CROUCHSLIDE);
+	case APROP_WallJump:				return !!(actor->mvFlags & MV_WALLJUMP);
+	case APROP_WallJumpV2:				return !!(actor->mvFlags & MV_WALLJUMPV2);
+	case APROP_DoubleTapJump:			return !!(actor->mvFlags & MV_DOUBLETAPJUMP);
+	case APROP_WallClimb:				return !!(actor->mvFlags & MV_WALLCLIMB);
+	case APROP_RampJump:				return !!(actor->mvFlags & MV_RAMPJUMP);
+	case APROP_Silent:					return !!(actor->mvFlags & MV_SILENT);
 
-	default:				return 0;
+	// Player actor specitic
+	case APROP_SpawnHealth:				return playerActor ? playerActor->MaxHealth								: actor->SpawnHealth();
+	case APROP_JumpXY:					return playerActor ? playerActor->JumpXY								: 0;
+	case APROP_JumpZ:					return playerActor ? playerActor->JumpZ									: 0;
+	case APROP_JumpDelay:				return playerActor ? playerActor->JumpDelay								: 0;
+	case APROP_SecondJumpXY:			return playerActor ? playerActor->SecondJumpXY							: 0;
+	case APROP_SecondJumpZ:				return playerActor ? playerActor->SecondJumpZ							: 0;
+	case APROP_SecondJumpDelay:			return playerActor ? playerActor->SecondJumpDelay						: 0;
+	case APROP_SecondJumpAmount:		return playerActor ? playerActor->SecondJumpAmount						: 0;
+	case APROP_ViewHeight:				return playerActor ? playerActor->ViewHeight							: 0;
+	case APROP_AttackZOffset:			return playerActor ? playerActor->JumpZ									: 0;
+	case APROP_CrouchChangeSpeed:		return playerActor ? playerActor->CrouchChangeSpeed						: 0;
+	case APROP_CrouchScale:				return playerActor ? playerActor->CrouchScale							: 0;
+	case APROP_MvType:					return playerActor ? playerActor->MvType								: 0;
+	case APROP_FootstepInterval:		return playerActor ? playerActor->FootstepInterval						: 0;
+	case APROP_FootstepVolume:			return playerActor ? FLOAT2FIXED( playerActor->FootstepVolume )			: 0;
+	case APROP_AirThrustZUp:			return playerActor ? playerActor->AirThrustZUp							: 0;
+	case APROP_AirThrustZDown:			return playerActor ? playerActor->AirThrustZDown						: 0;
+	case APROP_WallClimbSpeed:			return playerActor ? playerActor->WallClimbSpeed						: 0;
+	case APROP_WallClimbMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbMaxTics )		: 0;
+	case APROP_WallClimbRegen:			return playerActor ? FLOAT2FIXED( playerActor->WallClimbRegen )			: 0;
+	case APROP_AirAcceleration:			return playerActor ? playerActor->AirAcceleration						: 0;
+	case APROP_VelocityCap:				return playerActor ? playerActor->VelocityCap							: 0;
+	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration)		: 0;
+	case APROP_GroundFriction:			return playerActor ? FLOAT2FIXED( playerActor->GroundFriction)			: 0;
+	case APROP_SlideAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->SlideAcceleration)		: 0;
+	case APROP_SlideFriction:			return playerActor ? FLOAT2FIXED( playerActor->SlideFriction)			: 0;
+	case APROP_SlideMaxTics:			return playerActor ? FLOAT2FIXED( playerActor->SlideMaxTics)			: 0;
+	case APROP_SlideRegen:				return playerActor ? FLOAT2FIXED( playerActor->SlideRegen )				: 0;
+	case APROP_CpmAirAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->CpmAirAcceleration )		: 0;
+	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad )	: 0;
+
+	// Misc
+	case APROP_MasterTID:				return DoGetMasterTID(actor);
+	case APROP_TargetTID:				return (actor->target != NULL) ? actor->target->tid						: 0;
+	case APROP_TracerTID:				return (actor->tracer != NULL) ? actor->tracer->tid						: 0;
+
+	case APROP_RenderStyle:				for (int style = STYLE_None; style < STYLE_Count; ++style)
+										{ // Check for a legacy render style that matches.
+											if (LegacyRenderStyles[style] == actor->RenderStyle)
+											{
+												return LegacyRenderStyleIndices[style];
+											}
+										}
+										// The current render style isn't expressable as a legacy style,
+										// so pretends it's normal.
+										return STYLE_Normal;
+
+	default:							return 0;
 	}
 }
-
-
 
 int DLevelScript::CheckActorProperty (int tid, int property, int value)
 {
@@ -4547,7 +4695,13 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_RenderStyle:
 		case APROP_Gravity:
 		case APROP_SpawnHealth:
+		case APROP_JumpXY:
 		case APROP_JumpZ:
+		case APROP_JumpDelay:
+		case APROP_SecondJumpXY:
+		case APROP_SecondJumpZ:
+		case APROP_SecondJumpDelay:
+		case APROP_SecondJumpAmount:
 		case APROP_Score:
 		case APROP_MasterTID:
 		case APROP_TargetTID:
@@ -4565,6 +4719,26 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_ViewHeight:
 		case APROP_AttackZOffset:
 		case APROP_StencilColor:
+		case APROP_CrouchChangeSpeed:
+		case APROP_CrouchScale:
+		case APROP_MvType:
+		case APROP_FootstepInterval:
+		case APROP_FootstepVolume:
+		case APROP_AirThrustZUp:
+		case APROP_AirThrustZDown:
+		case APROP_WallClimbSpeed:
+		case APROP_WallClimbMaxTics:
+		case APROP_WallClimbRegen:
+		case APROP_AirAcceleration:
+		case APROP_VelocityCap:
+		case APROP_GroundAcceleration:
+		case APROP_GroundFriction:
+		case APROP_SlideAcceleration:
+		case APROP_SlideFriction:
+		case APROP_SlideMaxTics:
+		case APROP_SlideRegen:
+		case APROP_CpmAirAcceleration:
+		case APROP_CpmMaxForwardAngleRad:
 			return (GetActorProperty(tid, property, NULL, 0) == value);
 
 		// Boolean values need to compare to a binary version of value
@@ -4577,6 +4751,13 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_Notarget:
 		case APROP_Notrigger:
 		case APROP_Dormant:
+		case APROP_CrouchSlide:
+		case APROP_WallJump:
+		case APROP_WallJumpV2:
+		case APROP_DoubleTapJump:
+		case APROP_WallClimb:
+		case APROP_RampJump:
+		case APROP_Silent:
 			return (GetActorProperty(tid, property, NULL, 0) == (!!value));
 
 		// Strings are covered by GetActorProperty, but they're fairly
@@ -7274,7 +7455,7 @@ int DLevelScript::RunScript ()
 		int secnum = -1;
 
 		while ((secnum = P_FindSectorFromTag (statedata, secnum)) >= 0)
-			if ((sectors[secnum].floordata && sectors[secnum].floordata->IsBusy()) || (sectors[secnum].ceilingdata && sectors[secnum].ceilingdata->IsBusy()))
+			if (sectors[secnum].floordata || sectors[secnum].ceilingdata)
 				return resultValue;
 
 		// If we got here, none of the tagged sectors were busy

@@ -190,8 +190,6 @@ static const char *BaseFileSearch (const char *file, const char *ext, bool lookf
 
 EXTERN_CVAR (Float, turbo)
 EXTERN_CVAR (Bool, freelook)
-EXTERN_CVAR (Float, m_pitch)
-EXTERN_CVAR (Float, m_yaw)
 EXTERN_CVAR (Bool, invertmouse)
 EXTERN_CVAR (Bool, lookstrafe)
 EXTERN_CVAR (Int, screenblocks)
@@ -346,7 +344,7 @@ void D_PostEvent (const event_t *ev)
 	{
 		if (Button_Mlook.bDown || freelook)
 		{
-			int look = int(ev->y * m_pitch * mouse_sensitivity * 8.0);
+			int look = int(ev->y * mouse_sensitivity * 8.0);
 			if (invertmouse)
 				look = -look;
 			G_AddViewPitch (look);
@@ -354,7 +352,7 @@ void D_PostEvent (const event_t *ev)
 		}
 		if (!Button_Strafe.bDown && !lookstrafe)
 		{
-			G_AddViewAngle (int(ev->x * m_yaw * mouse_sensitivity * 8.0));
+			G_AddViewAngle (int(ev->x * mouse_sensitivity * 8.0));
 			events[eventhead].x = 0;
 		}
 		if ((events[eventhead].x | events[eventhead].y) == 0)
@@ -763,7 +761,6 @@ CVAR (Flag, compat_polyobj,				compatflags,  COMPATF_POLYOBJ);
 CVAR (Flag, compat_maskedmidtex,		compatflags,  COMPATF_MASKEDMIDTEX);
 CVAR (Flag, compat_badangles,			compatflags2, COMPATF2_BADANGLES);
 CVAR (Flag, compat_floormove,			compatflags2, COMPATF2_FLOORMOVE);
-CVAR (Flag, compat_no_accurate_crosshair,	compatflags2, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
 // [BB] Out of order ZDoom backport.
 CVAR (Flag, compat_pushwindow,			compatflags2, COMPATF2_PUSHWINDOW);
 // [BB] Skulltag compat flags.
@@ -790,6 +787,8 @@ CVAR (Flag, compat_fullweaponlower,				zacompatflags, ZACOMPATF_FULL_WEAPON_LOWE
 CVAR (Flag, compat_autoaim,						zacompatflags, ZACOMPATF_AUTOAIM);
 CVAR (Flag, compat_silentwestspawns,			zacompatflags, ZACOMPATF_SILENT_WEST_SPAWNS);
 CVAR (Flag, compat_skulltagjumping,				zacompatflags, ZACOMPATF_SKULLTAG_JUMPING);
+CVAR (Flag, compat_no_accurate_crosshair,		zacompatflags, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
+CVAR (Flag, compat_disable_wall_friction,		zacompatflags, ZACOMPATF_DISABLE_WALL_FRICTION);
 
 //==========================================================================
 //

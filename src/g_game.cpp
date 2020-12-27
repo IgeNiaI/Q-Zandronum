@@ -198,6 +198,7 @@ bool	 		viewactive;
 player_t		players[MAXPLAYERS + 1];	// [EP] Add 1 slot for the DummyPlayer
 bool			playeringame[MAXPLAYERS + 1];	// [EP] Add 1 slot for the DummyPlayer
 
+int 			menuplayer;				// player taking events
 int 			consoleplayer;			// player taking events
 int 			gametic;
 
@@ -227,10 +228,10 @@ short			consistancy[MAXPLAYERS][BACKUPTICS];
  
 #define TURBOTHRESHOLD	12800
 
-float	 		normforwardmove[2] = {0x19, 0x32};		// [RH] For setting turbo from console
-float	 		normsidemove[2] = {0x18, 0x28};			// [RH] Ditto
+float	 		normforwardmove[4] = {0x19, 0x32, 0xD, 0x19};		// [RH] For setting turbo from console
+float	 		normsidemove[4] = {0x18, 0x28, 0xC, 0x18};			// [RH] Ditto
 
-fixed_t			forwardmove[2], sidemove[2];
+fixed_t			forwardmove[4], sidemove[4];
 fixed_t 		angleturn[4] = {640, 1280, 320, 320};		// + slow turn
 fixed_t			flyspeed[2] = {1*256, 3*256};
 int				lookspeed[2] = {450, 512};
@@ -238,16 +239,22 @@ int				lookspeed[2] = {450, 512};
 #define SLOWTURNTICS	6 
 
 // [BB] This is a new school port, so cl_run defaults to true.
-CVAR (Bool,		cl_run,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
-CVAR (Bool,		invertmouse,	false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look down/up?
+CVAR (Bool,		cl_run,				true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
+CVAR (Bool,		invertmouse,		false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look down/up?
 // [BB] This is a new school port, so freelook defaults to true.
-CVAR (Bool,		freelook,		true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
-CVAR (Bool,		lookstrafe,		false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
-CVAR (Float,	m_pitch,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Mouse speeds
-CVAR (Float,	m_yaw,			1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_zoomedscale,	.5f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_forward,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
-CVAR (Float,	m_side,			2.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Bool,		freelook,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
+CVAR (Bool,		lookstrafe,			false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
+CVAR (Float,	mouse_pitch,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Mouse speeds
+CVAR (Float,	mouse_yaw,			1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Float,	mouse_forward,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CVAR (Float,	mouse_side,			2.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+CUSTOM_CVAR (Float, mouse_zoomedscale, 1.f, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+{
+	if (self < .5f)
+		self = .5f;
+	if (self > 2.f)
+		self = 2.f;
+}
  
 int 			turnheld;								// for accelerative turning 
  
@@ -311,8 +318,12 @@ CUSTOM_CVAR (Float, turbo, 100.f, 0)
 
 		forwardmove[0] = (int)(normforwardmove[0]*scale);
 		forwardmove[1] = (int)(normforwardmove[1]*scale);
+		forwardmove[2] = (int)(normforwardmove[2]*scale);
+		forwardmove[3] = (int)(normforwardmove[3]*scale);
 		sidemove[0] = (int)(normsidemove[0]*scale);
 		sidemove[1] = (int)(normsidemove[1]*scale);
+		sidemove[2] = (int)(normsidemove[2]*scale);
+		sidemove[3] = (int)(normsidemove[3]*scale);
 	}
 }
 
@@ -681,7 +692,16 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	cmd->consistancy = consistancy[consoleplayer][(maketic/ticdup)%BACKUPTICS];
 
 	strafe = Button_Strafe.bDown;
-	speed = Button_Speed.bDown ^ (int)cl_run;
+	if (Button_Speed.bDown ^ (int)cl_run)
+	{
+		// player is running
+		speed = Button_Crouch.bDown ? 3 : 1;
+	}
+	else
+	{
+		// player is walking
+		speed = Button_Crouch.bDown ? 2 : 0;
+	}
 
 	forward = side = fly = 0;
 
@@ -822,7 +842,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	// Handle mice.
 	if (!Button_Mlook.bDown && !freelook)
 	{
-		forward += (int)((float)mousey * m_forward);
+		forward += (int)((float)mousey * mouse_forward);
 	}
 
 	cmd->ucmd.pitch = LocalViewPitch >> 16;
@@ -834,7 +854,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	}
 
 	if (strafe || lookstrafe)
-		side += (int)((float)mousex * m_side);
+		side += (int)((float)mousex * mouse_side);
 
 	mousex = mousey = 0;
 
@@ -926,7 +946,7 @@ void G_AddViewPitch (int look)
 		players[consoleplayer].ReadyWeapon != NULL &&			// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)		// No adjustment if it is non-positive.
 	{
-		look = int(look * Lerp(players[consoleplayer].ReadyWeapon->FOVScale, m_zoomedscale, 1 / players[consoleplayer].ReadyWeapon->FOVScale - 1));
+		look = int(look * mouse_pitch * pow(players[consoleplayer].ReadyWeapon->FOVScale, 1 / mouse_zoomedscale));
 	}
 	// [BB] Allow spectators to freelook no matter what. Note: This probably causes some
 	// sky rendering errors in software mode.
@@ -975,7 +995,7 @@ void G_AddViewAngle (int yaw)
 		players[consoleplayer].ReadyWeapon != NULL &&		// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)	// No adjustment if it is non-positive.
 	{
-		yaw = int(yaw * Lerp(players[consoleplayer].ReadyWeapon->FOVScale, m_zoomedscale, 1 / players[consoleplayer].ReadyWeapon->FOVScale - 1));
+		yaw = int(yaw * mouse_yaw * pow(players[consoleplayer].ReadyWeapon->FOVScale, 1 / mouse_zoomedscale));
 	}
 	LocalViewAngle -= yaw;
 	if (yaw != 0)
@@ -2190,6 +2210,7 @@ void G_PlayerReborn (int player, bool bGiveInventory)
 	bOnTeam = p->bOnTeam;
 	const bool bChatting = p->bChatting;
 	const bool bInConsole = p->bInConsole;
+	const bool bInMenu = p->bInMenu;
 	bSpectating = p->bSpectating;
 	bDeadSpectator = p->bDeadSpectator;
 	ulLivesLeft = p->ulLivesLeft;
@@ -2233,6 +2254,7 @@ void G_PlayerReborn (int player, bool bGiveInventory)
 	p->bOnTeam = bOnTeam;
 	p->bChatting = bChatting;
 	p->bInConsole = bInConsole;
+	p->bInMenu = bInMenu;
 	p->bSpectating = bSpectating;
 	p->bDeadSpectator = bDeadSpectator;
 	p->ulLivesLeft = ulLivesLeft;
@@ -4128,10 +4150,10 @@ void GAME_ResetMap( bool bRunEnterScripts )
 				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( pNewActor, MAXPLAYERS, 0 );
 
 				// [EP] AActor::HandleSpawnFlags might have changed the actor's alpha and the RenderStyle, too. If so, inform the clients.
-				if ( pNewActor->alpha != pNewActor->GetDefault()->alpha )
-					SERVERCOMMANDS_SetThingProperty( pNewActor, APROP_Alpha );
 				if ( pNewActor->RenderStyle.AsDWORD != pNewActor->GetDefault()->RenderStyle.AsDWORD )
-					SERVERCOMMANDS_SetThingProperty( pNewActor, APROP_RenderStyle );
+					SERVERCOMMANDS_SetActorProperty( pNewActor, APROP_RenderStyle, pNewActor->GetDefault()->RenderStyle.AsDWORD );
+				if ( pNewActor->alpha != pNewActor->GetDefault()->alpha )
+					SERVERCOMMANDS_SetActorProperty( pNewActor, APROP_Alpha, pNewActor->alpha );
 			}
 
 			pActor->Destroy( );
