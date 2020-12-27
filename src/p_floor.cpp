@@ -384,11 +384,11 @@ void DFloor::SetPositionAndDirection( fixed_t Position, LONG lDirection )
 
 	if (diff > 0)
 	{
-		MoveFloor(-diff, BottomHeight, -1, -1, false);
+		MoveFloor(diff, BottomHeight, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveFloor(diff, TopHeight, -1, 1, false);
+		MoveFloor(-diff, TopHeight, -1, 1, false);
 	}
 
 	if (m_Direction != lDirection)
@@ -1317,11 +1317,11 @@ void DElevator::SetFloorPosition( fixed_t Position )
 	fixed_t diff = m_Sector->floorplane.d - Position;
 	if (diff > 0)
 	{
-		MoveFloor(-diff, m_FloorDestDist, -1, -1, false);
+		MoveFloor(diff, m_FloorDestDist, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveFloor(diff, m_FloorDestDist, -1, 1, false);
+		MoveFloor(-diff, m_FloorDestDist, -1, 1, false);
 	}
 }
 
@@ -2036,11 +2036,11 @@ void DFloorWaggle::SetPosition( fixed_t Position )
 
 	if (diff > 0)
 	{
-		MoveFloor(-diff, Position, -1, -1, false);
+		MoveFloor(diff, Position, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveFloor(diff, Position, -1, 1, false);
+		MoveFloor(-diff, Position, -1, 1, false);
 	}
 }
 
