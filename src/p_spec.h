@@ -1107,19 +1107,25 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void	UpdateToClient( ULONG ulClient );
-
-	// [BC] Access function(s).
-	LONG	GetID( void );
-	void	SetID( LONG lID );
-
-	void	SetOriginalDistance( LONG lOriginalDistance );
-	void	SetAccumulator( LONG lAccumulator );
-	void	SetAccelerationDelta( LONG lAccelerationDelta );
-	void	SetTargetScale( LONG lTargetScale );
-	void	SetScale( LONG lScale );
-	void	SetScaleDelta( LONG lScaleDelta );
-	void	SetTicker( LONG lTicker );
-	void	SetState( LONG lState );
+	
+	virtual fixed_t	GetPosition( );
+	virtual void	SetPosition( fixed_t Position );
+	fixed_t	GetOriginalDistance( );
+	void	SetOriginalDistance( fixed_t OriginalDistance );
+	fixed_t	GetAccumulator( );
+	void	SetAccumulator( fixed_t Accumulator );
+	fixed_t	GetAccelerationDelta( );
+	void	SetAccelerationDelta( fixed_t AccelerationDelta );
+	fixed_t	GetTargetScale( );
+	void	SetTargetScale( fixed_t TargetScale );
+	fixed_t	GetScale( );
+	void	SetScale( fixed_t Scale );
+	fixed_t	GetScaleDelta( );
+	void	SetScaleDelta( fixed_t ScaleDelta );
+	fixed_t	GetTicker( );
+	void	SetTicker( int Ticker );
+	fixed_t	GetState( );
+	void	SetState( int State );
 
 protected:
 	fixed_t m_OriginalDist;
@@ -1132,11 +1138,9 @@ protected:
 	int m_State;
 	TObjPtr<DInterpolation> m_Interpolation;
 
-	// [BC] This is the waggle's unique network ID.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
-	int			m_lWaggleID;
-
 	friend bool EV_StartWaggle (int tag, line_t *line, int height, int speed,
+		int offset, int timer, bool ceiling);
+	friend bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed,
 		int offset, int timer, bool ceiling);
 
 	void DoWaggle (bool ceiling);
@@ -1149,6 +1153,8 @@ protected:
 
 bool EV_StartWaggle (int tag, line_t *line, int height, int speed,
 	int offset, int timer, bool ceiling);
+bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed,
+	int offset, int timer, bool ceiling);
 
 class DFloorWaggle : public DWaggleBase
 {
@@ -1156,6 +1162,8 @@ class DFloorWaggle : public DWaggleBase
 public:
 	DFloorWaggle (sector_t *sec);
 	void Tick ();
+	fixed_t	GetPosition( );
+	void	SetPosition( fixed_t Position );
 private:
 	DFloorWaggle ();
 };
@@ -1166,6 +1174,8 @@ class DCeilingWaggle : public DWaggleBase
 public:
 	DCeilingWaggle (sector_t *sec);
 	void Tick ();
+	fixed_t	GetPosition( );
+	void	SetPosition( fixed_t Position );
 private:
 	DCeilingWaggle ();
 };
@@ -1220,10 +1230,8 @@ DDoor		*P_GetDoorBySectorNum( LONG sectorNum );
 DPlat		*P_GetPlatBySectorNum( LONG sectornum );
 DFloor		*P_GetFloorBySectorNum( LONG sectorNum );
 DElevator	*P_GetElevatorBySectorNum( LONG sectorNum );
-DWaggleBase	*P_GetWaggleByID( LONG lID );
+DWaggleBase	*P_GetWaggleBySectorNum( LONG sectorNum, bool bCeiling );
 DPillar		*P_GetPillarBySectorNum( LONG sectorNum );
 DCeiling	*P_GetCeilingBySectorNum( LONG sectorNum );
-
-LONG		P_GetFirstFreeWaggleID( void );
 
 #endif

@@ -228,8 +228,6 @@ static	void	client_DoPillar( BYTESTREAM_s *pByteStream );
 
 // Waggle commands.
 static	void	client_DoWaggle( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyWaggle( BYTESTREAM_s *pByteStream );
-static	void	client_UpdateWaggle( BYTESTREAM_s *pByteStream );
 
 // Poly commands.
 static	void	client_DoRotatePoly( BYTESTREAM_s *pByteStream );
@@ -1621,14 +1619,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 	case SVC_DOWAGGLE:
 
 		client_DoWaggle( pByteStream );
-		break;
-	case SVC_DESTROYWAGGLE:
-
-		client_DestroyWaggle( pByteStream );
-		break;
-	case SVC_UPDATEWAGGLE:
-
-		client_UpdateWaggle( pByteStream );
 		break;
 	case SVC_DOROTATEPOLY:
 
@@ -7556,7 +7546,7 @@ static void client_DoPillar( BYTESTREAM_s *pByteStream )
 			// Create the new pillar.
 			pPillar = new DPillar( pSector );
 		}
-	
+
 		pPillar->SetLastInstigator( &players[Instigator] );
 		pPillar->SetType( (DPillar::EPillar)Type );
 		pPillar->SetPosition( FloorPosition, CeilingPosition );
@@ -7583,107 +7573,66 @@ static void client_DoPillar( BYTESTREAM_s *pByteStream )
 //
 static void client_DoWaggle( BYTESTREAM_s *pByteStream )
 {
-	bool			bCeiling;
-	LONG			lSectorID;
-	LONG			lOriginalDistance;
-	LONG			lAccumulator;
-	LONG			lAccelerationDelta;
-	LONG			lTargetScale;
-	LONG			lScale;
-	LONG			lScaleDelta;
-	LONG			lTicker;
-	LONG			lState;
-	LONG			lWaggleID;
-	sector_t		*pSector;
-	DWaggleBase		*pWaggle;
-
-	// Read in whether or not this is a ceiling waggle.
-	bCeiling = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the sector ID.
-	lSectorID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the waggle's attributes.
-	lOriginalDistance = NETWORK_ReadLong( pByteStream );
-	lAccumulator = NETWORK_ReadLong( pByteStream );
-	lAccelerationDelta = NETWORK_ReadLong( pByteStream );
-	lTargetScale = NETWORK_ReadLong( pByteStream );
-	lScale = NETWORK_ReadLong( pByteStream );
-	lScaleDelta = NETWORK_ReadLong( pByteStream );
-	lTicker = NETWORK_ReadLong( pByteStream );
-
-	// Read in the state the waggle is in.
-	lState = NETWORK_ReadByte( pByteStream );
-
-	// Read in the waggle ID.
-	lWaggleID = NETWORK_ReadShort( pByteStream );
-
+	int SectorID = NETWORK_ReadShort( pByteStream );
+	fixed_t Position = NETWORK_ReadLong ( pByteStream );
+	bool bCeiling = NETWORK_ReadBit( pByteStream );
+	
 	// Invalid sector.
-	if (( lSectorID >= numsectors ) || ( lSectorID < 0 ))
+	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-
-	pSector = &sectors[lSectorID];
-
-	// Create the waggle, and set all its attributes that were read in.
-	if ( bCeiling )
-		pWaggle = static_cast<DWaggleBase *>( new DCeilingWaggle( pSector ));
+	sector_t *pSector = &sectors[SectorID];
+	DWaggleBase	*pWaggle = P_GetWaggleBySectorNum( pSector->sectornum, bCeiling );
+	
+	// If the sector already has activity, don't override it.
+	if ( !pWaggle && ( bCeiling ? pSector->ceilingdata : pSector->floordata ) )
+		return;
+	
+	if ( NETWORK_ReadBit( pByteStream ) )
+	{
+		if ( pWaggle )
+		{
+			// Waggle is destroyed on server side
+			pWaggle->SetPosition( Position );
+			pWaggle->Destroy();
+		}
+	}
 	else
-		pWaggle = static_cast<DWaggleBase *>( new DFloorWaggle( pSector ));
-	pWaggle->SetOriginalDistance( lOriginalDistance );
-	pWaggle->SetAccumulator( lAccumulator );
-	pWaggle->SetAccelerationDelta( lAccelerationDelta );
-	pWaggle->SetTargetScale( lTargetScale );
-	pWaggle->SetScale( lScale );
-	pWaggle->SetScaleDelta( lScaleDelta );
-	pWaggle->SetTicker( lTicker );
-	pWaggle->SetState( lState );
-	pWaggle->SetID( lWaggleID );
-}
-
-//*****************************************************************************
-//
-static void client_DestroyWaggle( BYTESTREAM_s *pByteStream )
-{
-	LONG			lWaggleID;
-	DWaggleBase		*pWaggle;
-
-	// Read in the waggle ID.
-	lWaggleID = NETWORK_ReadShort( pByteStream );
-
-	pWaggle = P_GetWaggleByID( lWaggleID );
-	if ( pWaggle == NULL )
 	{
-		CLIENT_PrintWarning( "client_DestroyWaggle: Couldn't find waggle with ID: %ld!\n", lWaggleID );
-		return;
+		int Instigator = NETWORK_ReadByte( pByteStream );
+		fixed_t OriginalDistance = NETWORK_ReadLong( pByteStream );
+		fixed_t Accumulator = NETWORK_ReadLong( pByteStream );
+		fixed_t AccelerationDelta = NETWORK_ReadLong( pByteStream );
+		fixed_t TargetScale = NETWORK_ReadLong( pByteStream );
+		fixed_t Scale = NETWORK_ReadLong( pByteStream );
+		fixed_t ScaleDelta = NETWORK_ReadLong( pByteStream );
+		int Ticker = NETWORK_ReadLong( pByteStream );
+		int State = NETWORK_ReadByte( pByteStream );
+		
+		if (pWaggle == NULL)
+		{
+			// Create the waggle
+			if ( bCeiling )
+				pWaggle = static_cast<DWaggleBase *>( new DCeilingWaggle( pSector ));
+			else
+				pWaggle = static_cast<DWaggleBase *>( new DFloorWaggle( pSector ));
+		}
+		
+		pWaggle->SetLastInstigator( &players[Instigator] );
+		pWaggle->SetPosition( Position );
+		pWaggle->SetOriginalDistance( OriginalDistance );
+		pWaggle->SetAccumulator( Accumulator );
+		pWaggle->SetAccelerationDelta( AccelerationDelta );
+		pWaggle->SetTargetScale( TargetScale );
+		pWaggle->SetScale( Scale );
+		pWaggle->SetScaleDelta( ScaleDelta );
+		pWaggle->SetTicker( Ticker );
+		pWaggle->SetState( State );
+
+		if ( Instigator == consoleplayer )
+		{
+			pWaggle->Predict();
+		}
 	}
-
-	// Finally, destroy the waggle.
-	pWaggle->Destroy( );
-}
-
-//*****************************************************************************
-//
-static void client_UpdateWaggle( BYTESTREAM_s *pByteStream )
-{
-	LONG			lWaggleID;
-	LONG			lAccumulator;
-	DWaggleBase		*pWaggle;
-
-	// Read in the waggle ID.
-	lWaggleID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the waggle's accumulator.
-	lAccumulator = NETWORK_ReadLong( pByteStream );
-
-	pWaggle = P_GetWaggleByID( lWaggleID );
-	if ( pWaggle == NULL )
-	{
-		CLIENT_PrintWarning( "client_DestroyWaggle: Couldn't find waggle with ID: %ld!\n", lWaggleID );
-		return;
-	}
-
-	// Finally, update the waggle's accumulator.
-	pWaggle->SetAccumulator( lAccumulator );
 }
 
 //*****************************************************************************

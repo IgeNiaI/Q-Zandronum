@@ -33,6 +33,7 @@
 #include "p_3dmidtex.h"
 #include "r_data/r_interpolate.h"
 // [BB] New #includes.
+#include "version.h"
 #include "network.h"
 #include "sv_commands.h"
 #include "cl_main.h"
@@ -1748,9 +1749,7 @@ void DWaggleBase::Serialize (FArchive &arc)
 		<< m_ScaleDelta
 		<< m_Ticker
 		<< m_State
-		<< m_Interpolation
-		// [BC]
-		<< m_lWaggleID;
+		<< m_Interpolation;
 }
 
 //==========================================================================
@@ -1766,8 +1765,6 @@ void DWaggleBase::Serialize (FArchive &arc)
 DWaggleBase::DWaggleBase (sector_t *sec)
 	: Super (sec)
 {
-	// [EP]
-	m_lWaggleID = -1;
 }
 
 void DWaggleBase::Destroy()
@@ -1783,67 +1780,116 @@ void DWaggleBase::Destroy()
 // [BC]
 void DWaggleBase::UpdateToClient( ULONG ulClient )
 {
-	SERVERCOMMANDS_DoWaggle( GetClass( ) == RUNTIME_CLASS( DCeilingWaggle ), m_Sector, m_OriginalDist, m_Accumulator, m_AccDelta, m_TargetScale, m_Scale, m_ScaleDelta, m_Ticker, m_State, m_lWaggleID, ulClient, SVCF_ONLYTHISCLIENT );
+	SERVERCOMMANDS_DoWaggle( this, ulClient, SVCF_ONLYTHISCLIENT );
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetPosition( )
+{
+	Printf("WARNING: DWaggleBase::GetPosition was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+	return 0;
+}
+
+// [geNia]
+void DWaggleBase::SetPosition( fixed_t Position )
+{
+	Printf("WARNING: DWaggleBase::SetPosition was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetOriginalDistance( )
+{
+	return m_OriginalDist;
 }
 
 // [BC]
-LONG DWaggleBase::GetID( void )
+void DWaggleBase::SetOriginalDistance( fixed_t OriginalDistance )
 {
-	return ( m_lWaggleID );
+	m_OriginalDist = OriginalDistance;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetAccumulator( )
+{
+	return m_Accumulator;
 }
 
 // [BC]
-void DWaggleBase::SetID( LONG lID )
+void DWaggleBase::SetAccumulator( fixed_t Accumulator )
 {
-	m_lWaggleID = lID;
+	m_Accumulator = Accumulator;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetAccelerationDelta( )
+{
+	return m_AccDelta;
 }
 
 // [BC]
-void DWaggleBase::SetOriginalDistance( LONG lOriginalDistance )
+void DWaggleBase::SetAccelerationDelta( fixed_t AccelerationDelta )
 {
-	m_OriginalDist = lOriginalDistance;
+	m_AccDelta = AccelerationDelta;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetTargetScale( )
+{
+	return m_TargetScale;
 }
 
 // [BC]
-void DWaggleBase::SetAccumulator( LONG lAccumulator )
+void DWaggleBase::SetTargetScale( fixed_t Scale )
 {
-	m_Accumulator = lAccumulator;
+	m_TargetScale = Scale;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetScale( )
+{
+	return m_Scale;
 }
 
 // [BC]
-void DWaggleBase::SetAccelerationDelta( LONG lAccelerationDelta )
+void DWaggleBase::SetScale( fixed_t Scale )
 {
-	m_AccDelta = lAccelerationDelta;
+	m_Scale = Scale;
+}
+
+// [geNia]
+fixed_t DWaggleBase::GetScaleDelta( )
+{
+	return m_ScaleDelta;
 }
 
 // [BC]
-void DWaggleBase::SetTargetScale( LONG lScale )
+void DWaggleBase::SetScaleDelta( fixed_t ScaleDelta )
 {
-	m_TargetScale = lScale;
+	m_ScaleDelta = ScaleDelta;
+}
+
+// [geNia]
+int DWaggleBase::GetTicker( )
+{
+	return m_Ticker;
 }
 
 // [BC]
-void DWaggleBase::SetScale( LONG lScale )
+void DWaggleBase::SetTicker( int Ticker )
 {
-	m_Scale = lScale;
+	m_Ticker = Ticker;
+}
+
+// [geNia]
+int DWaggleBase::GetState( )
+{
+	return m_State;
 }
 
 // [BC]
-void DWaggleBase::SetScaleDelta( LONG lScaleDelta )
+void DWaggleBase::SetState( int State )
 {
-	m_ScaleDelta = lScaleDelta;
-}
-
-// [BC]
-void DWaggleBase::SetTicker( LONG lTicker )
-{
-	m_Ticker = lTicker;
-}
-
-// [BC]
-void DWaggleBase::SetState( LONG lState )
-{
-	m_State = lState;
+	m_State = State;
 }
 
 //==========================================================================
@@ -1902,11 +1948,12 @@ void DWaggleBase::DoWaggle (bool ceiling)
 				m_Sector->floordata = NULL;
 			}
 
+			Destroy ();
+
 			// [BC] If we're the server, tell clients to delete the waggle.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DestroyWaggle( m_lWaggleID );
+				SERVERCOMMANDS_DoWaggle( this );
 
-			Destroy ();
 			return;
 		}
 		break;
@@ -1949,7 +1996,7 @@ void DWaggleBase::DoWaggle (bool ceiling)
 				continue;
 			}
 
-			SERVERCOMMANDS_UpdateWaggle( m_lWaggleID, m_Accumulator, ulIdx, SVCF_ONLYTHISCLIENT );
+			SERVERCOMMANDS_DoWaggle( this, ulIdx, SVCF_ONLYTHISCLIENT );
 		}
 	}
 }
@@ -1976,6 +2023,27 @@ void DFloorWaggle::Tick ()
 	DoWaggle (false);
 }
 
+// [geNia]
+fixed_t DFloorWaggle::GetPosition( )
+{
+	return ( m_Sector->floorplane.d );
+}
+
+// [geNia]
+void DFloorWaggle::SetPosition( fixed_t Position )
+{
+	fixed_t diff = m_Sector->floorplane.d - Position;
+
+	if (diff > 0)
+	{
+		MoveFloor(-diff, Position, -1, -1, false);
+	}
+	else if (diff < 0)
+	{
+		MoveFloor(diff, Position, -1, 1, false);
+	}
+}
+
 //==========================================================================
 //
 // CeilingWaggle
@@ -1998,6 +2066,27 @@ void DCeilingWaggle::Tick ()
 	DoWaggle (true);
 }
 
+// [geNia]
+fixed_t DCeilingWaggle::GetPosition( )
+{
+	return ( m_Sector->ceilingplane.d );
+}
+
+// [geNia]
+void DCeilingWaggle::SetPosition( fixed_t Position )
+{
+	fixed_t diff = m_Sector->ceilingplane.d - Position;
+
+	if (diff > 0)
+	{
+		MoveCeiling(diff, Position, -1, -1, false);
+	}
+	else if (diff < 0)
+	{
+		MoveCeiling(-diff, Position, -1, 1, false);
+	}
+}
+
 //==========================================================================
 //
 // EV_StartWaggle
@@ -2007,6 +2096,15 @@ void DCeilingWaggle::Tick ()
 bool EV_StartWaggle (int tag, line_t *line, int height, int speed, int offset,
 	int timer, bool ceiling)
 {
+	return EV_StartWaggle(tag, line, NULL, height, speed, offset, timer, ceiling);
+}
+
+bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed, int offset,
+	int timer, bool ceiling)
+{
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	int sectorIndex;
 	sector_t *sector;
 	DWaggleBase *waggle;
@@ -2026,23 +2124,53 @@ bool EV_StartWaggle (int tag, line_t *line, int height, int speed, int offset,
 	while (tag && (sectorIndex = P_FindSectorFromTag(tag, sectorIndex)) >= 0)
 	{
 		sector = &sectors[sectorIndex];
+		waggle = NULL;
+
 manual_waggle:
-		if ((!ceiling && sector->PlaneMoving(sector_t::floor)) || 
-			(ceiling && sector->PlaneMoving(sector_t::ceiling)))
-		{ // Already busy with another thinker
-			continue;
-		}
-		retCode = true;
-		if (ceiling)
+		if ( ceiling )
 		{
-			waggle = new DCeilingWaggle (sector);
-			waggle->m_OriginalDist = sector->ceilingplane.d;
+			if (sector->PlaneMoving(sector_t::ceiling))
+			{
+				if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DCeilingWaggle)))
+				{
+					waggle = barrier_cast<DCeilingWaggle*>(sector->ceilingdata);
+				}
+				else
+				{
+					continue;
+				}
+			}
 		}
 		else
 		{
-			waggle = new DFloorWaggle (sector);
-			waggle->m_OriginalDist = sector->floorplane.d;
+			if (sector->PlaneMoving(sector_t::floor))
+			{
+				if (sector->floordata->IsKindOf(RUNTIME_CLASS(DFloorWaggle)))
+				{
+					waggle = barrier_cast<DFloorWaggle*>(sector->floordata);
+				}
+				else
+				{
+					continue;
+				}
+			}
 		}
+
+		retCode = true;
+		if (waggle == NULL) {
+			if (ceiling)
+			{
+				waggle = new DCeilingWaggle (sector);
+				waggle->m_OriginalDist = sector->ceilingplane.d;
+			}
+			else
+			{
+				waggle = new DFloorWaggle (sector);
+				waggle->m_OriginalDist = sector->floorplane.d;
+			}
+		}
+
+		waggle->m_LastInstigator = instigator;
 		waggle->m_Accumulator = offset*FRACUNIT;
 		waggle->m_AccDelta = speed << (FRACBITS-6);
 		waggle->m_Scale = 0;
@@ -2052,13 +2180,9 @@ manual_waggle:
 		waggle->m_Ticker = timer ? timer*TICRATE : -1;
 		waggle->m_State = WGLSTATE_EXPAND;
 
-		// [BC] Assign the waggle's network ID. However, don't do this on the client end.
-		if ( NETWORK_InClientMode() == false )
-			waggle->m_lWaggleID = P_GetFirstFreeWaggleID( );
-
 		// [BC] If we're the server, tell clients to do the waggle.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_DoWaggle( ceiling, sector, waggle->m_OriginalDist, waggle->m_Accumulator, waggle->m_AccDelta, waggle->m_TargetScale, waggle->m_Scale, waggle->m_ScaleDelta, waggle->m_Ticker, waggle->m_State, waggle->m_lWaggleID );
+			SERVERCOMMANDS_DoWaggle( waggle );
 
 	}
 	return retCode;
@@ -2100,46 +2224,32 @@ DElevator *P_GetElevatorBySectorNum( LONG sectorNum )
 
 //*****************************************************************************
 //
-DWaggleBase *P_GetWaggleByID( LONG lID )
+DWaggleBase *P_GetWaggleBySectorNum( LONG sectorNum, bool bCeiling )
 {
-	DWaggleBase	*pWaggleBase;
-
-	TThinkerIterator<DWaggleBase>		Iterator;
-
-	while (( pWaggleBase = Iterator.Next( )))
+	if ( bCeiling )
 	{
-		if ( pWaggleBase->GetID( ) == lID )
-			return ( pWaggleBase );
+		DCeilingWaggle	*pCeilingWaggle;
+	
+		TThinkerIterator<DCeilingWaggle>		Iterator;
+
+		while (( pCeilingWaggle = Iterator.Next( )))
+		{
+			if ( pCeilingWaggle->GetSector()->sectornum == sectorNum )
+				return ( pCeilingWaggle );
+		}
+	}
+	else
+	{
+		DFloorWaggle	*pFloorWaggle;
+	
+		TThinkerIterator<DFloorWaggle>		Iterator;
+
+		while (( pFloorWaggle = Iterator.Next( )))
+		{
+			if ( pFloorWaggle->GetSector()->sectornum == sectorNum )
+				return ( pFloorWaggle );
+		}
 	}
 
 	return ( NULL );
-}
-
-//*****************************************************************************
-//
-LONG P_GetFirstFreeWaggleID( void )
-{
-	LONG		lIdx;
-	DWaggleBase	*pWaggle;
-	bool		bIDIsAvailable;
-
-	for ( lIdx = 0; lIdx < 8192; lIdx++ )
-	{
-		TThinkerIterator<DWaggleBase>		Iterator;
-
-		bIDIsAvailable = true;
-		while (( pWaggle = Iterator.Next( )))
-		{
-			if ( pWaggle->GetID( ) == lIdx )
-			{
-				bIDIsAvailable = false;
-				break;
-			}
-		}
-
-		if ( bIDIsAvailable )
-			return ( lIdx );
-	}
-
-	return ( -1 );
 }
