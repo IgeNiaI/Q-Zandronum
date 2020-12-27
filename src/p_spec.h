@@ -718,7 +718,7 @@ class DAnimatedDoor : public DMovingCeiling
 	DECLARE_CLASS (DAnimatedDoor, DMovingCeiling)
 public:
 	DAnimatedDoor (sector_t *sector);
-	DAnimatedDoor (sector_t *sec, line_t *line, int speed, int delay, FDoorAnimation *anim);
+	DAnimatedDoor (sector_t *sec, line_t *line, player_t *instigator, int speed, int delay, FDoorAnimation *anim);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
@@ -743,11 +743,13 @@ protected:
 	bool m_SetBlocking1, m_SetBlocking2;
 
 	friend bool EV_SlidingDoor (line_t *line, AActor *thing, int tag, int speed, int delay);
+	friend bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *thing, int tag, int speed, int delay);
 private:
 	DAnimatedDoor ();
 };
 
 bool EV_SlidingDoor (line_t *line, AActor *thing, int tag, int speed, int delay);
+bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *thing, int tag, int speed, int delay);
 
 //
 // P_CEILNG

@@ -1342,7 +1342,7 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		|| ( Special == Plat_RaiseAndStayTx0 ) || ( Special == Plat_UpByValueStayTx ) || ( Special == Plat_ToggleCeiling )
 
 		// Doors
-		|| ( Special >= Door_Close && Special <= Door_LockedRaise )
+		|| ( Special >= Door_Close && Special <= Door_Animated )
 		|| ( Special == Door_CloseWaitOpen ) || ( Special == Generic_Door )
 
 		// Polyobj

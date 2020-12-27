@@ -262,7 +262,7 @@ FUNC(LS_Door_Animated)
 	if (arg3 != 0 && !P_CheckKeys (it, arg3, arg0 != 0))
 		return false;
 
-	return EV_SlidingDoor (ln, it, arg0, arg1, arg2);
+	return EV_SlidingDoor (ln, GetInstigator(it, isFromAcs), it, arg0, arg1, arg2);
 }
 
 FUNC(LS_Generic_Door)
