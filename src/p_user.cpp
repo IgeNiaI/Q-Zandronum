@@ -3229,25 +3229,25 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 
 	if (player->onground)
 	{
-		player->secondJumpsRemaining = player->mo->SecondJumpAmount;
+		player->secondJumpsRemaining = SecondJumpAmount;
 
-		if (!(player->mo->mvFlags & MV_DOUBLETAPJUMP))
+		if (!(mvFlags & MV_DOUBLETAPJUMP))
 		{
 			player->secondJumpState = SJ_AVAILABLE;
 		}
 
-		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
-			player->jumpTics = player->mo->JumpDelay;
+		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || velz < -8 * FRACUNIT)
+			player->jumpTics = JumpDelay;
 	}
 	else if (player->secondJumpsRemaining != 0 && !((cmd->ucmd.buttons & BT_JUMP)))
 	{
-		if (!(player->mo->mvFlags & MV_DOUBLETAPJUMP))
+		if (!(mvFlags & MV_DOUBLETAPJUMP))
 		{
 			player->secondJumpState = SJ_AVAILABLE;
 		}
 	}
 
-	if ((player->mo->mvFlags & MV_DOUBLETAPJUMP) && player->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
+	if ((mvFlags & MV_DOUBLETAPJUMP) && player->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
 	{
 		cmd->ucmd.buttons |= BT_JUMP;
 		player->onground = false;
@@ -3255,12 +3255,13 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 		player->secondJumpTics = 0;
 	}
 
-	if (cmd->ucmd.buttons & BT_JUMP)
+	bool isClimbingLedge = player->onground && velz > 0 && cmd->ucmd.buttons & BT_CROUCH;
+	if (cmd->ucmd.buttons & BT_JUMP || isClimbingLedge)
 	{
 		// [Leo] Spectators shouldn't be limited by the server settings.
 		if (player->onground && !player->jumpTics)
 		{
-			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
+			bool isRampJumper = (mvFlags & MV_RAMPJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
 			if (!wasJustThrustedZ || isRampJumper)
 			{
@@ -3269,7 +3270,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				// Set base jump velocity.
 				// [Dusk] Exported this into a function as I need it elsewhere as well.
 				fixed_t	JumpVelx, JumpVely, JumpVelz;
-				player->mo->CalcJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
+				CalcJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
 
 				// Set base jump ticks.
 				// [BB] In ZDoom revision 2970 changed the jumping behavior.
@@ -3278,27 +3279,27 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				else
 					ulJumpTicks = -1;
 
-				if (!(player->mo->mvFlags & MV_SILENT))
+				if (!(mvFlags & MV_SILENT) && !isClimbingLedge)
 				{
 					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
 					if (CLIENT_PREDICT_IsPredicting() == false)
 						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 				}
 
-				player->mo->flags2 &= ~MF2_ONMOBJ;
+				flags2 &= ~MF2_ONMOBJ;
 
 				// [BC] Increase jump delay if the player has the high jump power.
 				if (player->cheats & CF_HIGHJUMP)
 					ulJumpTicks *= 2;
 
 				// [BC] Remove jump delay if the player is on a spring pad.
-				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+				if (floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
 					ulJumpTicks = 0;
 
-				player->mo->velx += JumpVelx;
-				player->mo->vely += JumpVely;
+				velx += JumpVelx;
+				vely += JumpVely;
 
-				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
+				velz = (isRampJumper ? velz : 0) + JumpVelz;
 				player->jumpTics = ulJumpTicks;
 			}
 		}
@@ -3308,7 +3309,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 			// Wall proximity check
 			bool doSecondJump = false;
 			FTraceResults secondJumpTrace;
-			if ((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_WALLJUMPV2))
+			if ((mvFlags & MV_WALLJUMP) || (mvFlags & MV_WALLJUMPV2))
 			{
 				// linetrace in 16 directions to see if there is a wall
 				for (int i = 0; i < 16; ++i)
@@ -3330,34 +3331,34 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 			if (doSecondJump)
 			{
 				fixed_t	JumpVelx, JumpVely, JumpVelz;
-				player->mo->CalcSecondJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
+				CalcSecondJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
 
-				if (player->mo->mvFlags & MV_WALLJUMPV2)
+				if (mvFlags & MV_WALLJUMPV2)
 				{
 					angle_t lineangle = R_PointToAngle2(0, 0, secondJumpTrace.Line->dx, secondJumpTrace.Line->dy) - ANG90;
 					JumpVelx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
 					JumpVely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
 				}
 
-				player->mo->velx += JumpVelx;
-				player->mo->vely += JumpVely;
+				velx += JumpVelx;
+				vely += JumpVely;
 
-				if (player->mo->velz < 0)
+				if (velz < 0)
 				{
-					player->mo->velz = JumpVelz;
+					velz = JumpVelz;
 				}
 				else
 				{
-					player->mo->velz += JumpVelz;
+					velz += JumpVelz;
 				}
 
-				if (!(player->mo->mvFlags & MV_SILENT))
+				if (!(mvFlags & MV_SILENT))
 				{
 					if (!CLIENT_PREDICT_IsPredicting())
 						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
 				}
 
-				player->secondJumpTics = player->mo->SecondJumpDelay;
+				player->secondJumpTics = SecondJumpDelay;
 
 				if (player->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
 					player->secondJumpsRemaining--;
@@ -3374,10 +3375,10 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 	// [geNia] Add additional vertical thrust if player is a key while in the air
 	if (!player->onground) {
 		if (cmd->ucmd.buttons & BT_JUMP) {
-			player->mo->velz += player->mo->AirThrustZUp;
+			velz += AirThrustZUp;
 		}
 		if (cmd->ucmd.buttons & BT_CROUCH) {
-			player->mo->velz -= player->mo->AirThrustZDown;
+			velz -= AirThrustZDown;
 		}
 	}
 }
