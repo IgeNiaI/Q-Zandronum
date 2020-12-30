@@ -364,6 +364,8 @@ static FFlagDef WeaponFlags[] =
 {
 	// Weapon flags
 	DEFINE_FLAG(WIF, NOAUTOFIRE, AWeapon, WeaponFlags),
+	DEFINE_FLAG(WIF, NOPRIMAUTOFIRE, AWeapon, WeaponFlags),
+	DEFINE_FLAG(WIF, NOALTAUTOFIRE, AWeapon, WeaponFlags),
 	DEFINE_FLAG(WIF, READYSNDHALF, AWeapon, WeaponFlags),
 	DEFINE_FLAG(WIF, DONTBOB, AWeapon, WeaponFlags),
 	DEFINE_FLAG(WIF, AXEBLOOD, AWeapon, WeaponFlags),
