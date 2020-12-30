@@ -3029,7 +3029,7 @@ float APlayerPawn::QCrouchWalkFactor(const float forward, const float side)
 	// [Dusk] Let the user move at whatever speed they desire when spectating.
 	if (player->bSpectating)
 	{
-		return (float) (acceleration.Length() * cl_spectatormove);
+		return (float) acceleration.Length();
 	}
 
 	// Strife's player can't run when its healh is below 10
@@ -3045,10 +3045,25 @@ float APlayerPawn::QCrouchWalkFactor(const float forward, const float side)
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove1) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove1) * 0.5f).Length();
 		case 1: // running
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove2),			acceleration.Y * FIXED2FLOAT(SideMove2)).Length();
-		case 2: // crouching
+		case 2: // crouch walking
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove3) * 0.25f,	acceleration.Y * FIXED2FLOAT(SideMove3) * 0.25f).Length();
 		case 3: // crouch running
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove4) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove4) * 0.5f).Length();
+	}
+
+	return 1.f;
+}
+
+float APlayerPawn::QVerticalFactor()
+{
+	int speed = WalkCrouchState();
+	switch (speed) {
+		case 0: // walking
+		case 2: // crouch walking
+			return 0.5f;
+		case 1: // running
+		case 3: // crouch running
+			return 1.f;
 	}
 
 	return 1.f;
@@ -3513,7 +3528,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
-				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+				player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
 			else
 				player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
@@ -3521,7 +3536,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
-				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+				player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
 			else
 				player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
@@ -3534,7 +3549,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 			{
-				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+				player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
 			}
 			else
 			{
@@ -3551,7 +3566,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 			{
-				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+				player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
 			}
 			else
 			{
@@ -3592,8 +3607,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
-	float movefactor = player->mo->QCrouchWalkFactor(cmd->ucmd.forwardmove, cmd->ucmd.sidemove);
-	float maxgroundspeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
+	float moveFactor = player->mo->QCrouchWalkFactor(cmd->ucmd.forwardmove, cmd->ucmd.sidemove);
+	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.f };
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
@@ -3602,15 +3617,16 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	if (player->mo->waterlevel >= 2)
 	{
+		FVector3 accelerationZ = { 0.f, 0.f, 0.f };
 		// Calculate the vertical push according to the view pitch
 		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
 		{
-			acceleration.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
+			accelerationZ.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
 		}
 		else
 		{
 			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
-			acceleration.Z = acceleration.X * sin(-pitch);
+			accelerationZ.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
 		//Friction
@@ -3618,8 +3634,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		acceleration.MakeUnit();
-		maxgroundspeed *= movefactor;
-		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
+		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor();
+		maxGroundSpeed *= moveFactor;
+		player->mo->QAcceleration(vel, acceleration, (maxGroundSpeed * 3.f) / 5.f, 6.f);
+		player->mo->QAcceleration(vel, accelerationZ, maxVerticalSpeed, 8.f);
 
 		noJump = true;
 
@@ -3628,15 +3646,16 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
+		FVector3 accelerationZ = { 0.f, 0.f, 0.f };
 		// Calculate the vertical push according to the view pitch
 		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
 		{
-			acceleration.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
+			accelerationZ.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
 		}
 		else
 		{
 			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
-			acceleration.Z = acceleration.X * sin(-pitch);
+			accelerationZ.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
 		//Friction
@@ -3644,8 +3663,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		acceleration.MakeUnit();
-		maxgroundspeed *= movefactor;
-		player->mo->QAcceleration(vel, acceleration, maxgroundspeed, 8.f);
+		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor();
+		maxGroundSpeed *= moveFactor;
+		player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, 8.f);
+		player->mo->QAcceleration(vel, accelerationZ, maxVerticalSpeed, 8.f);
 
 		noJump = true;
 
@@ -3656,7 +3677,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		// Wall proximity check
 		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
-			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxgroundspeed + 2.f)
+			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxGroundSpeed + 2.f)
 		{
 			FTraceResults secondJumpTrace;
 			P_TraceForWall(player->mo, player->mo->angle, secondJumpTrace);
@@ -3665,7 +3686,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		if (isClimbing)
 		{
-			player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction);
+			player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction);
 			vel.Z = FIXED2FLOAT(player->mo->WallClimbSpeed);
 			player->wallClimbTics--;
 			noJump = true;
@@ -3683,13 +3704,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
 			{
-				maxgroundspeed *= movefactor;
+				maxGroundSpeed *= moveFactor;
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
 				// Acceleration
 				if (player->mo->MvType == MV_QUAKE_CPM)
 				{
-					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
+					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxGroundSpeed)
 					{
 						// Side acceleration only
 						player->mo->QAcceleration(vel, acceleration, 1.5f, player->mo->CpmAirAcceleration * 6.f);
@@ -3721,13 +3742,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 						else
 						{
 							// Both side and forward acceleration
-							player->mo->QAcceleration(vel, acceleration, maxgroundspeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
+							player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
 						}
 					}
 				}
 				else
 				{
-					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
+					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
 				}
 
 				// Regen crouch slide tics
@@ -3748,14 +3769,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				if (isSliding)
 				{
 					player->mo->QFriction(vel, 0.f, player->mo->SlideFriction * floorFriction);
-					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->SlideAcceleration * floorFriction);
+					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->SlideAcceleration * floorFriction);
 					player->crouchSlideTics--;
 				}
 				else
 				{
-					maxgroundspeed *= movefactor;
-					player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction * floorFriction);
-					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->GroundAcceleration / movefactor * floorFriction);
+					maxGroundSpeed *= moveFactor;
+					player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction * floorFriction);
+					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->GroundAcceleration / moveFactor * floorFriction);
 
 					// Regen crouch slide tics
 					if (isSlider && player->crouchfactor > player->mo->CrouchScaleHalfWay)
@@ -3788,6 +3809,15 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	player->mo->velx = FLOAT2FIXED(vel.X);
 	player->mo->vely = FLOAT2FIXED(vel.Y);
 	player->mo->velz = FLOAT2FIXED(vel.Z);
+
+	// [geNia] Apply cl_spectatormove here.
+	if (player->bSpectating)
+	{
+		fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
+		player->mo->velx = FixedMul(player->mo->velx, spectatormove);
+		player->mo->vely = FixedMul(player->mo->vely, spectatormove);
+		player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+	}
 
 	// handle looping sounds of slide and climb
 	if (isSlider)
