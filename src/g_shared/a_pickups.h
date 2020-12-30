@@ -368,6 +368,9 @@ enum
 	WIF_NOLMS						= 0x00010000,	// Don't give this weapon in LMS games.
 
 	WIF_CHEATNOTWEAPON	=	0x08000000,	// Give cheat considers this not a weapon (used by Sigil)
+	
+	WIF_NOPRIMAUTOFIRE	=	0x10000000,	// weapon primary fire does not autofire
+	WIF_NOALTAUTOFIRE	=	0x20000000,	// weapon alt fire does not autofire
 
 	// Flags used only by bot AI:
 
