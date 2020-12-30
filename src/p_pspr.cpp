@@ -720,7 +720,7 @@ void P_CheckWeaponFire (player_t *player)
 	// Check for fire. Some weapons do not auto fire.
 	if ((player->WeaponState & WF_WEAPONREADY) && (player->cmd.ucmd.buttons & BT_ATTACK))
 	{
-		if (!player->attackdown || !(weapon->WeaponFlags & WIF_NOAUTOFIRE))
+		if (!player->attackdown || !((weapon->WeaponFlags & WIF_NOAUTOFIRE) || (weapon->WeaponFlags & WIF_NOPRIMAUTOFIRE)))
 		{
 			player->attackdown = true;
 			P_FireWeapon (player, NULL);
@@ -729,7 +729,7 @@ void P_CheckWeaponFire (player_t *player)
 	}
 	else if ((player->WeaponState & WF_WEAPONREADYALT) && (player->cmd.ucmd.buttons & BT_ALTATTACK))
 	{
-		if (!player->attackdown || !(weapon->WeaponFlags & WIF_NOAUTOFIRE))
+		if (!player->attackdown || !((weapon->WeaponFlags & WIF_NOAUTOFIRE) || (weapon->WeaponFlags & WIF_NOALTAUTOFIRE)))
 		{
 			player->attackdown = true;
 			P_FireWeaponAlt (player, NULL);
