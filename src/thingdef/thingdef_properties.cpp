@@ -3141,3 +3141,14 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, cpmmaxforwardanglerad, F, PlayerPawn)
 	PROP_FLOAT_PARM(f, 0);
 	defaults->CpmMaxForwardAngleRad = f;
 }
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, actionscript, S_S, PlayerPawn)
+{
+	PROP_STRING_PARM(buttonName, 0);
+	PROP_STRING_PARM(script, 1);
+
+	defaults->SetActionScript(defaults->ActionNameToNumber(buttonName), script);
+}

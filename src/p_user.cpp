@@ -1435,6 +1435,185 @@ int APlayerPawn::GetMaxHealth() const
 
 //===========================================================================
 //
+// APlayerPawn :: GetActionScript
+//
+// get ACS script assigned to a specified action
+//
+//===========================================================================
+
+FName APlayerPawn::GetActionScript(int button) 
+{
+	switch (button)
+	{
+	case BT_ATTACK:		return BT_ATTACK_Script;
+	case BT_USE:		return BT_USE_Script;
+	case BT_JUMP:		return BT_JUMP_Script;
+	case BT_CROUCH:		return BT_CROUCH_Script;
+	case BT_TURN180:	return BT_TURN180_Script;
+	case BT_ALTATTACK:	return BT_ALTATTACK_Script;
+	case BT_RELOAD:		return BT_RELOAD_Script;
+	case BT_ZOOM:		return BT_ZOOM_Script;
+	case BT_SPEED:		return BT_SPEED_Script;
+	case BT_STRAFE:		return BT_STRAFE_Script;
+	case BT_MOVERIGHT:	return BT_MOVERIGHT_Script;
+	case BT_MOVELEFT:	return BT_MOVELEFT_Script;
+	case BT_BACK:		return BT_BACK_Script;
+	case BT_FORWARD:	return BT_FORWARD_Script;
+	case BT_RIGHT:		return BT_RIGHT_Script;
+	case BT_LEFT:		return BT_LEFT_Script;
+	case BT_LOOKUP:		return BT_LOOKUP_Script;
+	case BT_LOOKDOWN:	return BT_LOOKDOWN_Script;
+	case BT_MOVEUP:		return BT_MOVEUP_Script;
+	case BT_MOVEDOWN:	return BT_MOVEDOWN_Script;
+	case BT_SHOWSCORES:	return BT_SHOWSCORES_Script;
+	case BT_USER1:		return BT_USER1_Script;
+	case BT_USER2:		return BT_USER2_Script;
+	case BT_USER3:		return BT_USER3_Script;
+	case BT_USER4:		return BT_USER4_Script;
+	default:			return NULL;
+	}
+}
+
+//===========================================================================
+//
+// APlayerPawn :: ActionNameToNumber
+//
+// convert action name to action button number
+//
+//===========================================================================
+
+int strcicmp(char const *a, char const *b)
+{
+	for (;; a++, b++) {
+		int d = tolower((unsigned char)*a) - tolower((unsigned char)*b);
+		if (d != 0 || !*a)
+			return d;
+	}
+}
+
+int APlayerPawn::ActionNameToNumber(const char* actionName)
+{
+	if		(!strcicmp(actionName, "attack"))		return BT_ATTACK;
+	else if (!strcicmp(actionName, "use"))			return BT_USE;
+	else if (!strcicmp(actionName, "jump"))			return BT_JUMP;
+	else if (!strcicmp(actionName, "crouch"))		return BT_CROUCH;
+	else if (!strcicmp(actionName, "turn180"))		return BT_TURN180;
+	else if (!strcicmp(actionName, "altattack"))	return BT_ALTATTACK;
+	else if (!strcicmp(actionName, "reload"))		return BT_RELOAD;
+	else if (!strcicmp(actionName, "zoom"))			return BT_ZOOM;
+	else if (!strcicmp(actionName, "speed"))		return BT_SPEED;
+	else if (!strcicmp(actionName, "strafe"))		return BT_STRAFE;
+	else if (!strcicmp(actionName, "moveright"))	return BT_MOVERIGHT;
+	else if (!strcicmp(actionName, "moveleft"))		return BT_MOVELEFT;
+	else if (!strcicmp(actionName, "back"))			return BT_BACK;
+	else if (!strcicmp(actionName, "forward"))		return BT_FORWARD;
+	else if (!strcicmp(actionName, "right"))		return BT_RIGHT;
+	else if (!strcicmp(actionName, "left"))			return BT_LEFT;
+	else if (!strcicmp(actionName, "lookup"))		return BT_LOOKUP;
+	else if (!strcicmp(actionName, "lookdown"))		return BT_LOOKDOWN;
+	else if (!strcicmp(actionName, "moveup"))		return BT_MOVEUP;
+	else if (!strcicmp(actionName, "movedown"))		return BT_MOVEDOWN;
+	else if (!strcicmp(actionName, "showscores"))	return BT_SHOWSCORES;
+	else if (!strcicmp(actionName, "user1"))		return BT_USER1;
+	else if (!strcicmp(actionName, "user2"))		return BT_USER2;
+	else if (!strcicmp(actionName, "user3"))		return BT_USER3;
+	else if (!strcicmp(actionName, "user4"))		return BT_USER4;
+	else											return 0;
+}
+
+//===========================================================================
+//
+// APlayerPawn :: SetActionScript
+//
+// assign an ACS script to a specified action
+//
+//===========================================================================
+
+void APlayerPawn::SetActionScript(int button, const char* scriptName) 
+{
+	switch (button)
+	{
+	case BT_ATTACK:		BT_ATTACK_Script = scriptName;		break;
+	case BT_USE:		BT_USE_Script = scriptName;			break;
+	case BT_JUMP:		BT_JUMP_Script = scriptName;		break;
+	case BT_CROUCH:		BT_CROUCH_Script = scriptName;		break;
+	case BT_TURN180:	BT_TURN180_Script = scriptName;		break;
+	case BT_ALTATTACK:	BT_ALTATTACK_Script = scriptName;	break;
+	case BT_RELOAD:		BT_RELOAD_Script = scriptName;		break;
+	case BT_ZOOM:		BT_ZOOM_Script = scriptName;		break;
+	case BT_SPEED:		BT_SPEED_Script = scriptName;		break;
+	case BT_STRAFE:		BT_STRAFE_Script = scriptName;		break;
+	case BT_MOVERIGHT:	BT_MOVERIGHT_Script = scriptName;	break;
+	case BT_MOVELEFT:	BT_MOVELEFT_Script = scriptName;	break;
+	case BT_BACK:		BT_BACK_Script = scriptName;		break;
+	case BT_FORWARD:	BT_FORWARD_Script = scriptName;		break;
+	case BT_RIGHT:		BT_RIGHT_Script = scriptName;		break;
+	case BT_LEFT:		BT_LEFT_Script = scriptName;		break;
+	case BT_LOOKUP:		BT_LOOKUP_Script = scriptName;		break;
+	case BT_LOOKDOWN:	BT_LOOKDOWN_Script = scriptName;	break;
+	case BT_MOVEUP:		BT_MOVEUP_Script = scriptName;		break;
+	case BT_MOVEDOWN:	BT_MOVEDOWN_Script = scriptName;	break;
+	case BT_SHOWSCORES:	BT_SHOWSCORES_Script = scriptName;	break;
+	case BT_USER1:		BT_USER1_Script = scriptName;		break;
+	case BT_USER2:		BT_USER2_Script = scriptName;		break;
+	case BT_USER3:		BT_USER3_Script = scriptName;		break;
+	case BT_USER4:		BT_USER4_Script = scriptName;		break;
+	}
+}
+
+//==========================================================================
+//
+// ExecuteUserScript
+//
+//==========================================================================
+
+void APlayerPawn::ExecuteActionScript(ticcmd_t *cmd, int button)
+{
+	int script = 0;
+	if (cmd->ucmd.buttons & button)
+	{
+		switch (button)
+		{
+		case BT_ATTACK:		script = BT_ATTACK_Script;		break;
+		case BT_USE:		script = BT_USE_Script;			break;
+		case BT_JUMP:		script = BT_JUMP_Script;		break;
+		case BT_CROUCH:		script = BT_CROUCH_Script;		break;
+		case BT_TURN180:	script = BT_TURN180_Script;		break;
+		case BT_ALTATTACK:	script = BT_ALTATTACK_Script;	break;
+		case BT_RELOAD:		script = BT_RELOAD_Script;		break;
+		case BT_ZOOM:		script = BT_ZOOM_Script;		break;
+		case BT_SPEED:		script = BT_SPEED_Script;		break;
+		case BT_STRAFE:		script = BT_STRAFE_Script;		break;
+		case BT_MOVERIGHT:	script = BT_MOVERIGHT_Script;	break;
+		case BT_MOVELEFT:	script = BT_MOVELEFT_Script;	break;
+		case BT_BACK:		script = BT_BACK_Script;		break;
+		case BT_FORWARD:	script = BT_FORWARD_Script;		break;
+		case BT_RIGHT:		script = BT_RIGHT_Script;		break;
+		case BT_LEFT:		script = BT_LEFT_Script;		break;
+		case BT_LOOKUP:		script = BT_LOOKUP_Script;		break;
+		case BT_LOOKDOWN:	script = BT_LOOKDOWN_Script;	break;
+		case BT_MOVEUP:		script = BT_MOVEUP_Script;		break;
+		case BT_MOVEDOWN:	script = BT_MOVEDOWN_Script;	break;
+		case BT_SHOWSCORES:	script = BT_SHOWSCORES_Script;	break;
+		case BT_USER1:		script = BT_USER1_Script;		break;
+		case BT_USER2:		script = BT_USER2_Script;		break;
+		case BT_USER3:		script = BT_USER3_Script;		break;
+		case BT_USER4:		script = BT_USER4_Script;		break;
+		default:			script = 0;
+		}
+	}
+
+	if (script != 0)
+	{
+		int flags = ACS_ALWAYS | ACS_WANTRESULT;
+		int args[1] = { CLIENT_PREDICT_IsPredicting() ? 1 : 0 };
+
+		P_StartScript(player->mo, NULL, -script, level.mapname, args, 1, flags);
+	}
+}
+
+//===========================================================================
+//
 // APlayerPawn :: UpdateWaterLevel
 //
 // Plays surfacing and diving sounds, as appropriate.
@@ -3888,6 +4067,33 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 
 	player->onground = player->mo->z <= player->mo->floorz || (player->mo->flags2 & MF2_ONMOBJ) ||
 					   (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
+
+	// Execute ACS scripts assigned to action buttons
+	player->mo->ExecuteActionScript(cmd, BT_ATTACK);
+	player->mo->ExecuteActionScript(cmd, BT_USE);
+	player->mo->ExecuteActionScript(cmd, BT_JUMP);
+	player->mo->ExecuteActionScript(cmd, BT_CROUCH);
+	player->mo->ExecuteActionScript(cmd, BT_TURN180);
+	player->mo->ExecuteActionScript(cmd, BT_ALTATTACK);
+	player->mo->ExecuteActionScript(cmd, BT_RELOAD);
+	player->mo->ExecuteActionScript(cmd, BT_ZOOM);
+	player->mo->ExecuteActionScript(cmd, BT_SPEED);
+	player->mo->ExecuteActionScript(cmd, BT_STRAFE);
+	player->mo->ExecuteActionScript(cmd, BT_MOVERIGHT);
+	player->mo->ExecuteActionScript(cmd, BT_MOVELEFT);
+	player->mo->ExecuteActionScript(cmd, BT_BACK);
+	player->mo->ExecuteActionScript(cmd, BT_FORWARD);
+	player->mo->ExecuteActionScript(cmd, BT_RIGHT);
+	player->mo->ExecuteActionScript(cmd, BT_LEFT);
+	player->mo->ExecuteActionScript(cmd, BT_LOOKUP);
+	player->mo->ExecuteActionScript(cmd, BT_LOOKDOWN);
+	player->mo->ExecuteActionScript(cmd, BT_MOVEUP);
+	player->mo->ExecuteActionScript(cmd, BT_MOVEDOWN);
+	player->mo->ExecuteActionScript(cmd, BT_SHOWSCORES);
+	player->mo->ExecuteActionScript(cmd, BT_USER1);
+	player->mo->ExecuteActionScript(cmd, BT_USER2);
+	player->mo->ExecuteActionScript(cmd, BT_USER3);
+	player->mo->ExecuteActionScript(cmd, BT_USER4);
 
 	if (player->mo->MvType)
 	{

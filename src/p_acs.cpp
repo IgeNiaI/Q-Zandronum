@@ -5182,6 +5182,8 @@ enum EACSFunctions
 	ACSF_SetPlayerScore,
 	ACSF_GetPlayerScore,
 	ACSF_InDemoMode,
+	ACSF_SetActionScript,
+	ACSF_GetActionScript,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7373,6 +7375,40 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 		case ACSF_InDemoMode:
 			return CLIENTDEMO_IsPlaying() ? 1 : 0;
+
+		case ACSF_SetActionScript:
+			if (args[0] == 0)
+			{
+				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				{
+					static_cast<APlayerPawn *>(&*activator)->SetActionScript(args[1], FBehavior::StaticLookupString(args[2]));
+				}
+			}
+			else
+			{
+				AActor *actor;
+				FActorIterator iterator(args[0]);
+
+				const char* actionName = FBehavior::StaticLookupString(args[2]);
+				while ((actor = iterator.Next()) != NULL)
+				{
+					if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+					{
+						static_cast<APlayerPawn *>(actor)->SetActionScript(args[1], actionName);
+					}
+				}
+			}
+			return 0;
+
+		case ACSF_GetActionScript:
+			{
+				AActor *actor = SingleActorFromTID(args[0], activator);
+				if (actor && actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				{
+					return static_cast<APlayerPawn *>(actor)->GetActionScript(args[1]);
+				}
+			}
+			return 0;
 
 		case ACSF_GetActorFloorTexture:
 		{
