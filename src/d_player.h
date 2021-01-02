@@ -211,6 +211,15 @@ public:
 	float		CpmAirAcceleration;
 	float		CpmMaxForwardAngleRad;
 
+	// Scripts to execute when the player presses the action buttons
+	FNameNoInit
+		BT_ATTACK_Script, BT_USE_Script, BT_JUMP_Script, BT_CROUCH_Script,
+		BT_TURN180_Script, BT_ALTATTACK_Script, BT_RELOAD_Script, BT_ZOOM_Script,
+		BT_SPEED_Script, BT_STRAFE_Script, BT_MOVERIGHT_Script, BT_MOVELEFT_Script,
+		BT_BACK_Script, BT_FORWARD_Script, BT_RIGHT_Script, BT_LEFT_Script,
+		BT_LOOKUP_Script, BT_LOOKDOWN_Script, BT_MOVEUP_Script, BT_MOVEDOWN_Script, BT_SHOWSCORES_Script,
+		BT_USER1_Script, BT_USER2_Script, BT_USER3_Script, BT_USER4_Script;
+
 	// [geNia] The server updates player data before sending it to clients, but the player input is still old.
 	// That results in player input being one tic behind position, so we need to remember last position to send it to other clients.
 	fixed_t		ClientX, ClientY, ClientZ;
@@ -225,6 +234,11 @@ public:
 	bool ResetAirSupply (bool playgasp = true);
 
 	int GetMaxHealth() const;
+
+	FName GetActionScript(int button);
+	int ActionNameToNumber(const char* actionName);
+	void SetActionScript(int button, const char* scriptName);
+	void ExecuteActionScript(ticcmd_t *cmd, int button);
 };
 
 class APlayerChunk : public APlayerPawn
