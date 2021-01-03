@@ -66,6 +66,7 @@
 #include "sv_commands.h"
 #include "team.h"
 #include "v_video.h"
+#include "c_dispatch.h"
 
 //*****************************************************************************
 //	MISC CRAP THAT SHOULDN'T BE HERE BUT HAS TO BE BECAUSE OF SLOPPY CODING
@@ -751,4 +752,35 @@ CUSTOM_CVAR( Int, duellimit, 0, CVAR_CAMPAIGNLOCK )
 		// Update the scoreboard.
 		SERVERCONSOLE_UpdateScoreboard( );
 	}
+}
+
+CCMD(start_duel)
+{
+	if ( NETWORK_GetState() == NETSTATE_CLIENT )
+	{
+		Printf("Only the server can start the duel.\n");
+		return;
+	}
+
+	if ( !duel || DUEL_GetState() != DS_WARMUP )
+	{
+		Printf("The game is not in duel warmup state\n");
+		return;
+	}
+
+	if ( DUEL_CountActiveDuelers( ) != 2)
+	{
+		Printf("Not enough duelers\n");
+		return;
+	}
+
+	DUEL_ClearWarmupHUDMessage();
+	SERVER_Printf("\\cf* Server administrator started the match! Warmup ended, duel is starting...\n");
+	// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
+	if ( GAMEMODE_IsLobbyMap( ) )
+		DUEL_SetState( DS_INDUEL );
+	else if ( sv_duelcountdowntime > 0 )
+		DUEL_StartCountdown(( sv_duelcountdowntime * TICRATE ) - 1 );
+	else
+		DUEL_StartCountdown(( 10 * TICRATE ) - 1 );
 }
