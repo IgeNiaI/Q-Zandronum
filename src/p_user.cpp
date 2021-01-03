@@ -2297,46 +2297,57 @@ int APlayerPawn::WalkCrouchState ()
 //
 //===========================================================================
 
-void APlayerPawn::PlayFootsteps ()
+bool APlayerPawn::ShouldPlayFootsteps()
 {
 	if ( CLIENT_PREDICT_IsPredicting() )
-		return;
+		return false;
 
-	bool ShouldPlayerFootsteps = true;
+	bool ShouldPlayFootsteps = true;
 
 	if (!player->onground || player->mo->waterlevel >= 2 ||
 		(player->mo->flags & MF_NOGRAVITY) || Button_Jump.bDown)
 	{
-		ShouldPlayerFootsteps = false;
+		return false;
 	}
 
-	if ( ShouldPlayerFootsteps )
+	switch (WalkCrouchState())
 	{
-		switch (WalkCrouchState())
-		{
-		case 0: // player is walking
-			ShouldPlayerFootsteps = FootstepsEnabled1;
-			break;
-		case 1: // player is running
-			ShouldPlayerFootsteps = FootstepsEnabled2;
-			break;
-		case 2: // player is crouching
-			ShouldPlayerFootsteps = FootstepsEnabled3;
-			break;
-		case 3: // player is crouch running
-			ShouldPlayerFootsteps = FootstepsEnabled4;
-			break;
-		}
+	case 0: // player is walking
+		if ( !FootstepsEnabled1 )
+			return false;
+		break;
+	case 1: // player is running
+		if ( !FootstepsEnabled2 )
+			return false;
+		break;
+	case 2: // player is crouching
+		if ( !FootstepsEnabled3 )
+			return false;
+		break;
+	case 3: // player is crouch running
+		if ( !FootstepsEnabled4 )
+			return false;
+		break;
 	}
 
-	if ( ShouldPlayerFootsteps )
-	{
-		fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
-		if (velocity < Speed * 3)
-			ShouldPlayerFootsteps = false;
-	}
+	fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
+	if (velocity < Speed * 3)
+		return false;
 
-	if ( ShouldPlayerFootsteps )
+	return true;
+}
+
+//===========================================================================
+//
+// APlayerPawn :: PlayFootstep
+//
+// Plays footsteps if should
+//
+//===========================================================================
+
+void APlayerPawn::PlayFootsteps ()
+{
+	if ( ShouldPlayFootsteps() )
 	{
 		if (player->stepInterval <= 0)
 		{
