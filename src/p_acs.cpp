@@ -4449,18 +4449,6 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
-	case APROP_AirThrustZUp:
-		if (playerActor) {
-			playerActor->AirThrustZUp = value;
-		}
-		break;
-
-	case APROP_AirThrustZDown:
-		if (playerActor) {
-			playerActor->AirThrustZDown = value;
-		}
-		break;
-
 	case APROP_WallClimbSpeed:
 		if (playerActor) {
 			playerActor->WallClimbSpeed = value;
@@ -4637,8 +4625,6 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_MvType:					return playerActor ? playerActor->MvType								: 0;
 	case APROP_FootstepInterval:		return playerActor ? playerActor->FootstepInterval						: 0;
 	case APROP_FootstepVolume:			return playerActor ? FLOAT2FIXED( playerActor->FootstepVolume )			: 0;
-	case APROP_AirThrustZUp:			return playerActor ? playerActor->AirThrustZUp							: 0;
-	case APROP_AirThrustZDown:			return playerActor ? playerActor->AirThrustZDown						: 0;
 	case APROP_WallClimbSpeed:			return playerActor ? playerActor->WallClimbSpeed						: 0;
 	case APROP_WallClimbMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbMaxTics )		: 0;
 	case APROP_WallClimbRegen:			return playerActor ? FLOAT2FIXED( playerActor->WallClimbRegen )			: 0;
@@ -4724,8 +4710,6 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_MvType:
 		case APROP_FootstepInterval:
 		case APROP_FootstepVolume:
-		case APROP_AirThrustZUp:
-		case APROP_AirThrustZDown:
 		case APROP_WallClimbSpeed:
 		case APROP_WallClimbMaxTics:
 		case APROP_WallClimbRegen:
@@ -5183,7 +5167,6 @@ enum EACSFunctions
 	ACSF_GetPlayerScore,
 	ACSF_InDemoMode,
 	ACSF_SetActionScript,
-	ACSF_GetActionScript,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7396,16 +7379,6 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 					{
 						static_cast<APlayerPawn *>(actor)->SetActionScript(args[1], actionName);
 					}
-				}
-			}
-			return 0;
-
-		case ACSF_GetActionScript:
-			{
-				AActor *actor = SingleActorFromTID(args[0], activator);
-				if (actor && actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
-				{
-					return static_cast<APlayerPawn *>(actor)->GetActionScript(args[1]);
 				}
 			}
 			return 0;
