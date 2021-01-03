@@ -192,8 +192,6 @@ public:
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
 	int			FootstepInterval;
 	float		FootstepVolume;
-	fixed_t		AirThrustZUp;
-	fixed_t		AirThrustZDown;
 	float		WallClimbMaxTics;
 	float		WallClimbRegen;
 	fixed_t		WallClimbSpeed;
@@ -236,7 +234,6 @@ public:
 
 	int GetMaxHealth() const;
 
-	FName GetActionScript(int button);
 	int ActionNameToNumber(const char* actionName);
 	void SetActionScript(int button, const char* scriptName);
 	void ExecuteActionScript(ticcmd_t *cmd, int button);

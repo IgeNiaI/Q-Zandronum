@@ -1435,47 +1435,6 @@ int APlayerPawn::GetMaxHealth() const
 
 //===========================================================================
 //
-// APlayerPawn :: GetActionScript
-//
-// get ACS script assigned to a specified action
-//
-//===========================================================================
-
-FName APlayerPawn::GetActionScript(int button) 
-{
-	switch (button)
-	{
-	case BT_ATTACK:		return BT_ATTACK_Script;
-	case BT_USE:		return BT_USE_Script;
-	case BT_JUMP:		return BT_JUMP_Script;
-	case BT_CROUCH:		return BT_CROUCH_Script;
-	case BT_TURN180:	return BT_TURN180_Script;
-	case BT_ALTATTACK:	return BT_ALTATTACK_Script;
-	case BT_RELOAD:		return BT_RELOAD_Script;
-	case BT_ZOOM:		return BT_ZOOM_Script;
-	case BT_SPEED:		return BT_SPEED_Script;
-	case BT_STRAFE:		return BT_STRAFE_Script;
-	case BT_MOVERIGHT:	return BT_MOVERIGHT_Script;
-	case BT_MOVELEFT:	return BT_MOVELEFT_Script;
-	case BT_BACK:		return BT_BACK_Script;
-	case BT_FORWARD:	return BT_FORWARD_Script;
-	case BT_RIGHT:		return BT_RIGHT_Script;
-	case BT_LEFT:		return BT_LEFT_Script;
-	case BT_LOOKUP:		return BT_LOOKUP_Script;
-	case BT_LOOKDOWN:	return BT_LOOKDOWN_Script;
-	case BT_MOVEUP:		return BT_MOVEUP_Script;
-	case BT_MOVEDOWN:	return BT_MOVEDOWN_Script;
-	case BT_SHOWSCORES:	return BT_SHOWSCORES_Script;
-	case BT_USER1:		return BT_USER1_Script;
-	case BT_USER2:		return BT_USER2_Script;
-	case BT_USER3:		return BT_USER3_Script;
-	case BT_USER4:		return BT_USER4_Script;
-	default:			return NULL;
-	}
-}
-
-//===========================================================================
-//
 // APlayerPawn :: ActionNameToNumber
 //
 // convert action name to action button number
@@ -3575,16 +3534,6 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 	else if (!player->onground && player->secondJumpState == SJ_AVAILABLE && player->secondJumpsRemaining != 0)
 	{
 		player->secondJumpState = SJ_READY;
-	}
-
-	// [geNia] Add additional vertical thrust if player is a key while in the air
-	if (!player->onground) {
-		if (cmd->ucmd.buttons & BT_JUMP) {
-			velz += AirThrustZUp;
-		}
-		if (cmd->ucmd.buttons & BT_CROUCH) {
-			velz -= AirThrustZDown;
-		}
 	}
 }
 
