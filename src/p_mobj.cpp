@@ -419,6 +419,7 @@ void AActor::Serialize (FArchive &arc)
 		PrevY = y;
 		PrevZ = z;
 		PrevAngle = angle;
+		PrevPitch = pitch;
 		UpdateWaterLevel(z, false);
 	}
 }
@@ -4038,6 +4039,7 @@ void AActor::Tick ()
 	PrevY = y;
 	PrevZ = z;
 	PrevAngle = angle;
+	PrevPitch = pitch;
 
 	// [BC] There are times when we don't want to tick this actor if it's a player.
 	// [BB] Voodoo dolls are an exemption.
@@ -5242,6 +5244,7 @@ void AActor::PostBeginPlay ()
 		Renderer->StateChanged(this);
 	}
 	PrevAngle = angle;
+	PrevPitch = pitch;
 	flags7 |= MF7_HANDLENODELAY;
 }
 
@@ -5571,7 +5574,7 @@ APlayerPawn *P_SpawnPlayer (FPlayerStart *mthing, int playernum, int flags)
 	}
 
 	mobj->angle = spawn_angle;
-	mobj->pitch = mobj->roll = 0;
+	mobj->PrevPitch = mobj->pitch = mobj->roll = 0;
 	mobj->health = p->health;
 	mobj->lFixedColormap = NOFIXEDCOLORMAP;
 
@@ -6306,6 +6309,7 @@ AActor *P_SpawnMapThing (FMapThing *mthing, int position)
 	mobj->SavedTID = mobj->tid;
 
 	mobj->PrevAngle = mobj->angle = (DWORD)((mthing->angle * CONST64(0x100000000)) / 360);
+	mobj->PrevPitch = mobj->pitch;
 
 	// Check if this actor's mapthing has a conversation defined
 	if (mthing->Conversation > 0)

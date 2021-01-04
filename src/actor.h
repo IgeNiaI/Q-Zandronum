@@ -1169,7 +1169,7 @@ public:
 	// [BC] End of ST stuff.
 
 	// [RH] Used to interpolate the view to get >35 FPS
-	fixed_t PrevX, PrevY, PrevZ;
+	fixed_t PrevX, PrevY, PrevZ, PrevPitch;
 	angle_t PrevAngle;
 
 	// [BB] Last tic in which the server sent a xyz-position / movedir update about this actor to the clients.

@@ -793,19 +793,21 @@ void R_SetupFrame (AActor *actor)
 	}
 	else
 	{
-		iview->nviewx = camera->x;
-		iview->nviewy = camera->y;
-		iview->nviewz = camera->player ? camera->player->viewz : camera->z + camera->GetClass()->Meta.GetMetaFixed(AMETA_CameraHeight);
+		iview->nviewx = camera->PrevX + FixedMul(r_TicFrac, camera->x - camera->PrevX);
+		iview->nviewy = camera->PrevY + FixedMul(r_TicFrac, camera->y - camera->PrevY);
+		fixed_t newZ = camera->player ? camera->player->viewz : camera->z + camera->GetClass()->Meta.GetMetaFixed(AMETA_CameraHeight);
+		fixed_t prevZ = camera->player ? camera->PrevZ + camera->player->viewheight : camera->PrevZ + camera->GetClass()->Meta.GetMetaFixed(AMETA_CameraHeight);
+		iview->nviewz = prevZ + FixedMul(r_TicFrac, newZ - prevZ);
 		viewsector = camera->Sector;
 		r_showviewer = false;
 	}
-	iview->nviewpitch = camera->pitch;
+	iview->nviewpitch = camera->PrevPitch + FixedMul(r_TicFrac, camera->pitch - camera->PrevPitch);
 	if (camera->player != 0)
 	{
 		player = camera->player;
 	}
 
-	iview->nviewangle = camera->angle;
+	iview->nviewangle = camera->PrevAngle + FixedMul(r_TicFrac, camera->angle - camera->PrevAngle);
 	if (iview->otic == -1 || r_NoInterpolate)
 	{
 		R_ResetViewInterpolation ();

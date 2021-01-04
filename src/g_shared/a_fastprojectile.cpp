@@ -32,6 +32,7 @@ void AFastProjectile::Tick ()
 	PrevZ = z;
 	fixed_t oldz = z;
 	PrevAngle = angle;
+	PrevPitch = pitch;
 
 	if (!(flags5 & MF5_NOTIMEFREEZE))
 	{

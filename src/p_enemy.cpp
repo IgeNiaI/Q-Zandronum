@@ -2818,6 +2818,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 		// CANTLEAVEFLOORPIC handling was completely missing in the non-serpent functions.
 		fixed_t oldX = actor->x;
 		fixed_t oldY = actor->y;
+		fixed_t oldZ = actor->z;
 		FTextureID oldFloor = actor->floorpic;
 
 		// [BC] In client mode, just keep walking until the server tells us to
@@ -2850,6 +2851,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 					{
 						actor->PrevX = oldX;
 						actor->PrevY = oldY;
+						actor->PrevZ = oldZ;
 					}
 				}
 				P_NewChaseDir (actor);
