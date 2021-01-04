@@ -1731,7 +1731,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 				shootangle += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
 
 				fixed_t offset = (player->mo->height >> 1) - player->mo->floorclip - player->viewheight
-					+ FixedMul(player->mo->AttackZOffset - 4 * FRACUNIT, player->crouchfactor);
+					+ player->mo->AttackZOffset - 4 * FRACUNIT - FixedMul(12 * FRACUNIT, FRACUNIT - player->crouchfactor);
 				float zOffs = float((atan2(distance, FIXED2FLOAT(SpawnHeight + offset))) * 180.f / PI);
 				self->pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
 			}
