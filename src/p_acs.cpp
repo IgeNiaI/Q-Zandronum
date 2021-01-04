@@ -5167,6 +5167,8 @@ enum EACSFunctions
 	ACSF_GetPlayerScore,
 	ACSF_InDemoMode,
 	ACSF_SetActionScript,
+	ACSF_SetPredictableValue,
+	ACSF_GetPredictableValue,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7378,6 +7380,70 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 					if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 					{
 						static_cast<APlayerPawn *>(actor)->SetActionScript(args[1], actionName);
+					}
+				}
+			}
+			return 0;
+
+		case ACSF_SetPredictableValue:
+			if (args[0] == 0)
+			{
+				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				{
+					switch (args[1])
+					{
+					case 1:
+						static_cast<APlayerPawn *>(&*activator)->Predictable1 = args[2];
+						break;
+					case 2:
+						static_cast<APlayerPawn *>(&*activator)->Predictable2 = args[2];
+						break;
+					case 3:
+						static_cast<APlayerPawn *>(&*activator)->Predictable3 = args[2];
+						break;
+					}
+				}
+			}
+			else
+			{
+				AActor *actor;
+				FActorIterator iterator(args[0]);
+
+				const char* actionName = FBehavior::StaticLookupString(args[2]);
+				while ((actor = iterator.Next()) != NULL)
+				{
+					if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+					{
+						switch (args[1])
+						{
+						case 1:
+							static_cast<APlayerPawn *>(actor)->Predictable1 = args[2];
+							break;
+						case 2:
+							static_cast<APlayerPawn *>(actor)->Predictable2 = args[2];
+							break;
+						case 3:
+							static_cast<APlayerPawn *>(actor)->Predictable3 = args[2];
+							break;
+						}
+					}
+				}
+			}
+			return 0;
+
+		case ACSF_GetPredictableValue:
+			{
+				AActor* actor = SingleActorFromTID(args[0], activator);
+				if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				{
+					switch (args[1])
+					{
+					case 1:
+						return static_cast<APlayerPawn *>(actor)->Predictable1;
+					case 2:
+						return static_cast<APlayerPawn *>(actor)->Predictable2;
+					case 3:
+						return static_cast<APlayerPawn *>(actor)->Predictable3;
 					}
 				}
 			}

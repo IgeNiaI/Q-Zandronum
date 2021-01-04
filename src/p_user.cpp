@@ -1565,9 +1565,9 @@ void APlayerPawn::ExecuteActionScript(ticcmd_t *cmd, int button)
 	if (script != 0)
 	{
 		int flags = ACS_ALWAYS | ACS_WANTRESULT;
-		int args[1] = { CLIENT_PREDICT_IsPredicting() ? 1 : 0 };
+		int args[4] = { CLIENT_PREDICT_IsPredicting() ? 1 : 0, Predictable1, Predictable2, Predictable3 };
 
-		P_StartScript(player->mo, NULL, -script, level.mapname, args, 1, flags);
+		P_StartScript(player->mo, NULL, -script, level.mapname, args, 4, flags);
 	}
 }
 
