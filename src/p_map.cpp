@@ -4821,7 +4821,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	{
 		if (source->player != NULL)
 		{
-			shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+			shootz += source->player->mo->AttackZOffset - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
 		}
 		else
 		{
@@ -4865,7 +4865,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			fixed_t offset = (source->height >> 1) - source->player->viewheight;
 			if (!(railflags & RAF_CENTERZ))
 			{
-				offset += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+				offset += source->player->mo->AttackZOffset - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
 			}
 			float zOffs = float(atan2(distance, FIXED2FLOAT(-offset_z - offset)) * 180.f / PI);
 			pitchoffset = angle_t((90.f - zOffs) * (ANGLE_MAX / 360));

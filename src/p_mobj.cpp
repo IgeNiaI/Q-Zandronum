@@ -7517,7 +7517,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		z += source->z + (source->height >> 1) - source->floorclip;
 		if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
 		{
-			z += FixedMul(source->player->mo->AttackZOffset - 4 * FRACUNIT, source->player->crouchfactor);
+			z += source->player->mo->AttackZOffset - 4 * FRACUNIT - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
 		}
 		else
 		{
