@@ -1460,7 +1460,10 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y, FCheckPosition &tm, bo
 		for (unsigned i = 0; i<newsec->e->XFloor.ffloors.Size(); i++)
 		{
 			rover = newsec->e->XFloor.ffloors[i];
-			if (!(rover->flags & FF_SOLID) || !(rover->flags & FF_EXISTS)) continue;
+			if (!(rover->flags & FF_SOLID)
+				|| !(rover->flags & FF_EXISTS)
+				|| (thing->flags & MF_MISSILE) && (rover->flags & FF_SHOOTTHROUGH))
+				continue;
 
 			fixed_t ff_bottom = rover->bottom.plane->ZatPoint(x, y);
 			fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
