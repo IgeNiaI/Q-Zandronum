@@ -101,6 +101,7 @@ static	LONG		g_lSavedWaterLevel[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedOnFloor[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedOnMobj[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedWasJustThrustedZ[CLIENT_PREDICTION_TICS];
+static	int			g_SavedPredictable[CLIENT_PREDICTION_TICS][3];
 
 #ifdef	_DEBUG
 CVAR( Bool, cl_showpredictionsuccess, false, 0 );
@@ -341,6 +342,9 @@ static void client_predict_BeginPrediction( player_t *pPlayer )
 	g_lSavedReactionTime[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->reactiontime;
 	g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->waterlevel;
 	g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->wasJustThrustedZ;
+	g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = pPlayer->mo->Predictable1;
+	g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = pPlayer->mo->Predictable2;
+	g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][2] = pPlayer->mo->Predictable3;
 	memcpy( &g_SavedTiccmd[g_ulGameTick % CLIENT_PREDICTION_TICS], &pPlayer->cmd, sizeof( ticcmd_t ));
 }
 
@@ -416,6 +420,9 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		pPlayer->mo->reactiontime = g_lSavedReactionTime[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->waterlevel = g_lSavedWaterLevel[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[lTick % CLIENT_PREDICTION_TICS] != 0;
+		pPlayer->mo->Predictable1 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][0];
+		pPlayer->mo->Predictable2 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][1];
+		pPlayer->mo->Predictable3 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][2];
 
 		// Tick the player.
 		P_PlayerThink( pPlayer, &g_SavedTiccmd[lTick % CLIENT_PREDICTION_TICS] );
@@ -474,4 +481,7 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->mo->reactiontime = g_lSavedReactionTime[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->waterlevel = g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] != 0;
+	pPlayer->mo->Predictable1 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][0];
+	pPlayer->mo->Predictable2 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][1];
+	pPlayer->mo->Predictable3 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][2];
 }

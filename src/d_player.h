@@ -226,6 +226,9 @@ public:
 	angle_t		ClientAngle;
 	fixed_t		ClientPitch;
 
+	// Values that can be set from ACS and then passed to assigned action scripts
+	int	Predictable1, Predictable2, Predictable3;
+
 	// [CW] Fades for when you are being damaged.
 	PalEntry DamageFade;
 
