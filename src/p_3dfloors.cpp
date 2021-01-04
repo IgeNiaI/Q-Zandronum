@@ -730,6 +730,7 @@ void P_LineOpening_XFloors (FLineOpening &open, AActor * thing, const line_t *li
 
 					if (!(rover->flags & FF_EXISTS)) continue;
 					if (!(rover->flags & FF_SOLID)) continue;
+					if ((thing->flags & MF_MISSILE) && (rover->flags & FF_SHOOTTHROUGH)) continue;
 					
 					fixed_t ff_bottom=rover->bottom.plane->ZatPoint(x, y);
 					fixed_t ff_top=rover->top.plane->ZatPoint(x, y);
