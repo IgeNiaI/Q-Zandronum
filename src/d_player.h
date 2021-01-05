@@ -110,10 +110,10 @@ public:
 	// [BB] We also call this when a player dies. These special items also need to be dropped then.
 	virtual void DropImportantItems( bool bLeavingGame, AActor *pSource = NULL );
 
-	virtual int WalkCrouchState ();
-	virtual bool ShouldPlayFootsteps();
-	virtual void PlayFootsteps ();
-	virtual void TweakSpeeds (int &forwardmove, int &sidemove);
+	virtual int WalkCrouchState (ticcmd_t *cmd);
+	virtual bool ShouldPlayFootsteps(ticcmd_t *cmd);
+	virtual void PlayFootsteps (ticcmd_t *cmd);
+	virtual void TweakSpeeds (ticcmd_t *cmd, int &forwardmove, int &sidemove);
 	virtual void MorphPlayerThink ();
 	virtual void ActivateMorphWeapon ();
 	AWeapon *PickNewWeapon (const PClass *ammotype);
@@ -125,8 +125,8 @@ public:
 	virtual void Destroy( );
 
 	// Quake movement
-	float QCrouchWalkFactor(const float forward, const float side);
-	float QVerticalFactor();
+	float QCrouchWalkFactor( ticcmd_t *cmd );
+	float QVerticalFactor(ticcmd_t *cmd);
 	float QTweakSpeed();
 	void  QFriction(FVector3 &vel, const float speedlimit, const float friction);
 	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);

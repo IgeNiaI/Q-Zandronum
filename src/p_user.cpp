@@ -2412,18 +2412,18 @@ void APlayerPawn::DropImportantItems( bool bLeavingGame, AActor *pSource )
 //
 //===========================================================================
 
-int APlayerPawn::WalkCrouchState ()
+int APlayerPawn::WalkCrouchState (ticcmd_t *cmd)
 {
-	// Make sure this code is equal to the one found in g_game.cpp
-	if (Button_Speed.bDown ^ (int)cl_run)
+	// [geNia] BT_SPEED is considered pressed when the player is walking, regardless of whether the button is actually pressed
+	if (cmd->ucmd.buttons & BT_SPEED)
 	{
-		// player is running
-		return Button_Crouch.bDown ? 3 : 1;
+		// player is walking
+		return (cmd->ucmd.buttons & BT_CROUCH) ? 2 : 0;
 	}
 	else
 	{
-		// player is walking
-		return Button_Crouch.bDown ? 2 : 0;
+		// player is running
+		return (cmd->ucmd.buttons & BT_CROUCH) ? 3 : 1;
 	}
 }
 
@@ -2435,20 +2435,18 @@ int APlayerPawn::WalkCrouchState ()
 //
 //===========================================================================
 
-bool APlayerPawn::ShouldPlayFootsteps()
+bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd)
 {
 	if ( CLIENT_PREDICT_IsPredicting() )
 		return false;
 
-	bool ShouldPlayFootsteps = true;
-
 	if (!player->onground || player->mo->waterlevel >= 2 ||
-		(player->mo->flags & MF_NOGRAVITY) || Button_Jump.bDown)
+		(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_JUMP))
 	{
 		return false;
 	}
 
-	switch (WalkCrouchState())
+	switch (WalkCrouchState(cmd))
 	{
 	case 0: // player is walking
 		if ( !FootstepsEnabled1 )
@@ -2483,9 +2481,12 @@ bool APlayerPawn::ShouldPlayFootsteps()
 //
 //===========================================================================
 
-void APlayerPawn::PlayFootsteps ()
+void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 {
-	if ( ShouldPlayFootsteps() )
+	if ( CLIENT_PREDICT_IsPredicting() )
+		return;
+
+	if ( ShouldPlayFootsteps( cmd ) )
 	{
 		if (player->stepInterval <= 0)
 		{
@@ -2513,7 +2514,7 @@ void APlayerPawn::PlayFootsteps ()
 //
 //===========================================================================
 
-void APlayerPawn::TweakSpeeds (int &forward, int &side)
+void APlayerPawn::TweakSpeeds (ticcmd_t *cmd, int &forward, int &side)
 {
 	// [Dusk] Let the user move at whatever speed they desire when spectating.
 	if (player->bSpectating)
@@ -2532,7 +2533,7 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 	}
 
 	// [GRB]
-	int speed = WalkCrouchState();
+	int speed = WalkCrouchState(cmd);
 	switch (speed) {
 		case 0: // walking
 			forward = FixedMul(forward, ForwardMove1);
@@ -3174,9 +3175,9 @@ float DotProduct(const FVector3 &v, const FVector3 &t)
 // Quake movement specifics
 //***************************************************
 
-float APlayerPawn::QCrouchWalkFactor(const float forward, const float side)
+float APlayerPawn::QCrouchWalkFactor( ticcmd_t *cmd )
 {
-	FVector2 acceleration = FVector2 (FIXED2FLOAT(forward), -FIXED2FLOAT(side) * 1.25f).Unit();
+	FVector2 acceleration = FVector2 (FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f).Unit();
 	acceleration.Y /= 1.25f;
 
 	// [Dusk] Let the user move at whatever speed they desire when spectating.
@@ -3192,7 +3193,7 @@ float APlayerPawn::QCrouchWalkFactor(const float forward, const float side)
 	}
 
 	// [GRB]
-	int speed = WalkCrouchState();
+	int speed = WalkCrouchState(cmd);
 	switch (speed) {
 		case 0: // walking
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove1) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove1) * 0.5f).Length();
@@ -3207,9 +3208,9 @@ float APlayerPawn::QCrouchWalkFactor(const float forward, const float side)
 	return 1.f;
 }
 
-float APlayerPawn::QVerticalFactor()
+float APlayerPawn::QVerticalFactor( ticcmd_t *cmd )
 {
-	int speed = WalkCrouchState();
+	int speed = WalkCrouchState( cmd );
 	switch (speed) {
 		case 0: // walking
 		case 2: // crouch walking
@@ -3605,7 +3606,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 			fm = cmd->ucmd.forwardmove;
 			sm = cmd->ucmd.sidemove;
-			player->mo->TweakSpeeds(fm, sm);
+			player->mo->TweakSpeeds(cmd, fm, sm);
 			fm = FixedMul(fm, player->mo->Speed);
 			sm = FixedMul(sm, player->mo->Speed);
 
@@ -3654,7 +3655,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (isClimber)
 		P_SetClimbStatus(player, isClimbing);
 
-	player->mo->PlayFootsteps();
+	player->mo->PlayFootsteps(cmd);
 
 	//**********************************
 	// Jumping
@@ -3751,7 +3752,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
-	float moveFactor = player->mo->QCrouchWalkFactor(cmd->ucmd.forwardmove, cmd->ucmd.sidemove);
+	float moveFactor = player->mo->QCrouchWalkFactor( cmd );
 	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.f };
@@ -3778,7 +3779,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		acceleration.MakeUnit();
-		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor();
+		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor(cmd);
 		maxGroundSpeed *= moveFactor;
 		player->mo->QAcceleration(vel, acceleration, (maxGroundSpeed * 3.f) / 5.f, 6.f);
 		player->mo->QAcceleration(vel, accelerationZ, maxVerticalSpeed, 8.f);
@@ -3807,7 +3808,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		acceleration.MakeUnit();
-		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor();
+		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor(cmd);
 		maxGroundSpeed *= moveFactor;
 		player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, 8.f);
 		player->mo->QAcceleration(vel, accelerationZ, maxVerticalSpeed, 8.f);
@@ -3982,7 +3983,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		player->camera = player->mo;
 	}
 
-	player->mo->PlayFootsteps();
+	player->mo->PlayFootsteps(cmd);
 
 	// Water and flying have already executed jump press logic
 	if (noJump)
