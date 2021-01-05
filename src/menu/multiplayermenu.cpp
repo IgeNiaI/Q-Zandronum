@@ -74,6 +74,7 @@
 #include "duel.h"
 #include "invasion.h"
 #include "lastmanstanding.h"
+#include <cl_commands.h>
 
 static void M_StartSkirmishGame();
 static void M_ClearBotSlots();
@@ -752,6 +753,19 @@ static void M_DoJoinFromMenu()
 		if ( static_cast<unsigned>( menu_jointeamidx ) == teams.Size() )
 		{
 			C_DoCommand( "team random" );
+
+			// [BB] We are not in menu anymore, so set bInMenu if necessary.
+			if (players[consoleplayer].bInMenu)
+			{
+
+				// [BB] Don't change the displayed menu status when a demo is played.
+				if (CLIENTDEMO_IsPlaying() == false)
+					players[consoleplayer].bInMenu = false;
+
+				// [RC] Tell the server so our "in Menu" icon is removed.
+				if (NETWORK_GetState() == NETSTATE_CLIENT)
+					CLIENTCOMMANDS_ExitMenu();
+			}
 		}
 		else
 		{
@@ -759,11 +773,37 @@ static void M_DoJoinFromMenu()
 			mysnprintf( command, sizeof command, "team \"%s\"",
 				teams[menu_jointeamidx].Name.GetChars() );
 			AddCommandString( command );
+
+			// [BB] We are not in menu anymore, so set bInMenu if necessary.
+			if (players[consoleplayer].bInMenu)
+			{
+
+				// [BB] Don't change the displayed menu status when a demo is played.
+				if (CLIENTDEMO_IsPlaying() == false)
+					players[consoleplayer].bInMenu = false;
+
+				// [RC] Tell the server so our "in Menu" icon is removed.
+				if (NETWORK_GetState() == NETSTATE_CLIENT)
+					CLIENTCOMMANDS_ExitMenu();
+			}
 		}
 	}
 	else
 	{
 		C_DoCommand( "join" );
+
+		// [BB] We are not in menu anymore, so set bInMenu if necessary.
+		if (players[consoleplayer].bInMenu)
+		{
+
+			// [BB] Don't change the displayed menu status when a demo is played.
+			if (CLIENTDEMO_IsPlaying() == false)
+				players[consoleplayer].bInMenu = false;
+
+			// [RC] Tell the server so our "in Menu" icon is removed.
+			if (NETWORK_GetState() == NETSTATE_CLIENT)
+				CLIENTCOMMANDS_ExitMenu();
+		}
 	}
 }
 
@@ -779,6 +819,18 @@ static void M_AutoSelect()
 {
 	M_ClearMenus();
 	C_DoCommand( "team autoselect" );
+	// [BB] We are not in menu anymore, so set bInMenu if necessary.
+	if (players[consoleplayer].bInMenu)
+	{
+
+		// [BB] Don't change the displayed menu status when a demo is played.
+		if (CLIENTDEMO_IsPlaying() == false)
+			players[consoleplayer].bInMenu = false;
+
+		// [RC] Tell the server so our "in Menu" icon is removed.
+		if (NETWORK_GetState() == NETSTATE_CLIENT)
+			CLIENTCOMMANDS_ExitMenu();
+	}
 }
 
 // =================================================================================================
