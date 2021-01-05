@@ -831,17 +831,20 @@ void R_SetupFrame (AActor *actor)
 
 	interpolator.DoInterpolations (r_TicFrac);
 
-	// Keep the view within the sector's floor and ceiling
-	fixed_t theZ = viewsector->ceilingplane.ZatPoint (viewx, viewy) - 4*FRACUNIT;
-	if (viewz > theZ)
+	if ( !players[consoleplayer].bSpectating || actor != players[consoleplayer].mo )
 	{
-		viewz = theZ;
-	}
+		// Keep the view within the sector's floor and ceiling
+		fixed_t theZ = viewsector->ceilingplane.ZatPoint (viewx, viewy) - 4*FRACUNIT;
+		if (viewz > theZ)
+		{
+			viewz = theZ;
+		}
 
-	theZ = viewsector->floorplane.ZatPoint (viewx, viewy) + 4*FRACUNIT;
-	if (viewz < theZ)
-	{
-		viewz = theZ;
+		theZ = viewsector->floorplane.ZatPoint (viewx, viewy) + 4*FRACUNIT;
+		if (viewz < theZ)
+		{
+			viewz = theZ;
+		}
 	}
 
 	if (!paused)

@@ -2989,7 +2989,7 @@ void P_CalcHeight (player_t *player)
 	// it causes bobbing jerkiness when the player moves from ice to non-ice,
 	// and vice-versa.
 
-	if (player->cheats & CF_NOCLIP2)
+	if (player->cheats & CF_NOCLIP2 || (player->bSpectating && player->mo == players[consoleplayer].mo))
 	{
 		player->bob = 0;
 	}
@@ -3084,6 +3084,10 @@ void P_CalcHeight (player_t *player)
 		bob = 0;
 	}
 	player->viewz = player->mo->z + player->viewheight + bob;
+
+	if (player->bSpectating && player->mo == players[consoleplayer].mo)
+		return;
+
 	if (player->mo->floorclip && player->playerstate != PST_DEAD
 		&& player->mo->z <= player->mo->floorz)
 	{
@@ -3551,7 +3555,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
 
-	fixed_t velocity = (fixed_t) TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length();
+	fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
 
 	// Wall proximity check
 	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 1048576) // 1048576 == 16.f
@@ -4044,13 +4048,13 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	player->mo->ExecuteActionScript(cmd, BT_USER3);
 	player->mo->ExecuteActionScript(cmd, BT_USER4);
 
-	if (player->mo->MvType)
-	{
-		P_MovePlayer_Quake(player, cmd);
-	}
-	else // default Doom movement
+	if (player->mo->MvType == 0 || player->bSpectating)
 	{
 		P_MovePlayer_Doom(player, cmd);
+	}
+	else
+	{
+		P_MovePlayer_Quake(player, cmd);
 	}
 }
 
@@ -4627,6 +4631,11 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	{
 		player->mo->flags &= ~MF_NOGRAVITY;
 	}
+
+	if (player->bSpectating && player->mo == players[consoleplayer].mo)
+		player->mo->flags5 |= MF5_NOINTERACTION;
+	else
+		player->mo->flags5 &= ~MF5_NOINTERACTION;
 
 	// If we're predicting, use the ticcmd we pass in.
 	if ( CLIENT_PREDICT_IsPredicting( ))

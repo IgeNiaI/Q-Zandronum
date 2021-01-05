@@ -4078,6 +4078,14 @@ void AActor::Tick ()
 
 		UnlinkFromWorld ();
 		flags |= MF_NOBLOCKMAP;
+
+		if (this->player && this->player->bSpectating && this == players[consoleplayer].mo)
+		{
+			velx = FixedMul(velx, FRICTION_FLY);
+			vely = FixedMul(vely, FRICTION_FLY);
+			velz = FixedMul(velz, FRICTION_FLY);
+		}
+
 		x += velx;
 		y += vely;
 		z += velz;
