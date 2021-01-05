@@ -142,7 +142,7 @@ CVAR (Bool, cl_alwaysplayfragsleft, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool, cl_allowmultipleannouncersounds, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
 // [WS] Adjusts the announcer's volume.
-CUSTOM_CVAR (Float, snd_announcervolume, 1.f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CUSTOM_CVAR (Float, snd_announcervolume, .5f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
 	if (self < 0.f)
 		self = 0.f;
