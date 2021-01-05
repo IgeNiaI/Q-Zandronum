@@ -7205,8 +7205,6 @@ static void client_DoFloor( BYTESTREAM_s *pByteStream )
 		if ( pFloor )
 		{
 			// Floor is destroyed on server side
-			pFloor->SetOrgDist( Position );
-			pFloor->SetFloorDestDist( Position );
 			pFloor->SetPositionAndDirection( Position, 0 );
 			pFloor->Destroy();
 		}
@@ -7268,8 +7266,6 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 		if ( pFloor )
 		{
 			// Floor is destroyed on server side
-			pFloor->SetOrgDist( Position );
-			pFloor->SetFloorDestDist( Position );
 			pFloor->SetPositionAndDirection( Position, 0 );
 			pFloor->Destroy();
 		}
@@ -7347,8 +7343,6 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 		if ( pCeiling )
 		{
 			// Ceiling is destroyed on server side
-			pCeiling->SetBottomHeight( Position );
-			pCeiling->SetTopHeight( Position );
 			pCeiling->SetPositionAndDirection( Position, 0 );
 			pCeiling->Destroy();
 		}
@@ -7362,6 +7356,7 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 		int OldDirection = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
 		fixed_t BottomHeight = NETWORK_ReadLong( pByteStream );
 		fixed_t TopHeight = NETWORK_ReadLong( pByteStream );
+		fixed_t Speed = NETWORK_ReadLong( pByteStream );
 		fixed_t SpeedDown = NETWORK_ReadLong( pByteStream );
 		fixed_t SpeedUp = NETWORK_ReadLong( pByteStream );
 		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
@@ -7381,6 +7376,7 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 		pCeiling->SetTopHeight( TopHeight );
 		pCeiling->SetPositionAndDirection( Position, Direction );
 		pCeiling->SetOldDirection( OldDirection );
+		pCeiling->SetSpeed( Speed );
 		pCeiling->SetSpeedDown( SpeedDown );
 		pCeiling->SetSpeedUp( SpeedUp );
 		pCeiling->SetCrush( Crush );
@@ -7465,7 +7461,6 @@ static void client_DoPlat( BYTESTREAM_s *pByteStream )
 static void client_DoElevator( BYTESTREAM_s *pByteStream )
 {
 	int SectorID = NETWORK_ReadShort( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
 	fixed_t FloorPosition = NETWORK_ReadLong( pByteStream );
 	fixed_t CeilingPosition = NETWORK_ReadLong( pByteStream );
 	
@@ -7484,11 +7479,14 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 		if ( pElevator )
 		{
 			// Elevator is destroyed on server side
+			pElevator->SetFloorPosition( FloorPosition );
+			pElevator->SetCeilingPosition( CeilingPosition );
 			pElevator->Destroy();
 		}
 	}
 	else
 	{
+		int Instigator = NETWORK_ReadByte( pByteStream );
 		int Type = NETWORK_ReadByte( pByteStream );
 		fixed_t Speed = NETWORK_ReadLong( pByteStream );
 		int Direction = CLIENT_AdjustElevatorDirection( NETWORK_ReadByte( pByteStream ) );
@@ -7505,10 +7503,10 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 		pElevator->SetType( (DElevator::EElevator)Type );
 		pElevator->SetSpeed( Speed );
 		pElevator->SetDirection( Direction );
-		pElevator->SetFloorDestDist( FloorDestDist );
-		pElevator->SetCeilingDestDist( CeilingDestDist );
 		pElevator->SetFloorPosition( FloorPosition );
 		pElevator->SetCeilingPosition( CeilingPosition );
+		pElevator->SetFloorDestDist( FloorDestDist );
+		pElevator->SetCeilingDestDist( CeilingDestDist );
 
 		if ( Instigator == consoleplayer )
 		{
