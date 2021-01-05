@@ -282,11 +282,11 @@ void DDoor::SetPositionAndDirection ( fixed_t Position, int direction )
 	fixed_t diff = m_Sector->ceilingplane.d - Position;
 	if (diff > 0)
 	{
-		MoveCeiling(diff, m_BotDist, -1, -1, false);
+		MoveCeiling(diff, Position, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveCeiling(-diff, m_TopDist, -1, 1, false);
+		MoveCeiling(-diff, Position, -1, 1, false);
 	}
 
 	if (m_Direction != direction)

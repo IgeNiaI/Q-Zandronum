@@ -3825,6 +3825,7 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 		command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetOldDirection() ) );
 		command.addLong ( Ceiling->GetBottomHeight() );
 		command.addLong ( Ceiling->GetTopHeight() );
+		command.addLong ( Ceiling->GetSpeed() );
 		command.addLong ( Ceiling->GetSpeedDown() );
 		command.addLong ( Ceiling->GetSpeedUp() );
 		command.addByte ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );

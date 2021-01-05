@@ -812,7 +812,9 @@ public:
 
 	fixed_t	GetBottomHeight( void );
 	void	SetBottomHeight( fixed_t BottomHeight );
-
+	
+	fixed_t	GetSpeed( void );
+	void	SetSpeed( fixed_t Speed );
 	fixed_t	GetSpeedDown( void );
 	void	SetSpeedDown( fixed_t Speed );
 	fixed_t	GetSpeedUp( void );
@@ -844,6 +846,7 @@ protected:
 	ECeiling	m_Type;
 	fixed_t 	m_BottomHeight;
 	fixed_t 	m_TopHeight;
+	fixed_t		m_Speed;
 	fixed_t		m_SpeedDown;
 	fixed_t		m_SpeedUp;
 	int 		m_Crush;
