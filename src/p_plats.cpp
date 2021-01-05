@@ -288,11 +288,11 @@ void DPlat::SetPosition( fixed_t Position )
 	fixed_t diff = m_Sector->floorplane.d - Position;
 	if (diff > 0)
 	{
-		MoveFloor(diff, m_Low, -1, -1, false);
+		MoveFloor(diff, Position, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveFloor(-diff, m_High, -1, 1, false);
+		MoveFloor(-diff, Position, -1, 1, false);
 	}
 }
 
