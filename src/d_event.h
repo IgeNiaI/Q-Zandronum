@@ -94,7 +94,7 @@ typedef enum
 	BT_ZOOM			= 1<<7,	// [XA] Zoom key. Ditto.
 
 	// The rest are all ignored by the play simulation and are for scripts.
-	BT_SPEED		= 1<<8,
+	BT_SPEED		= 1<<8, // [geNia] This actually means the opposite. BT_SPEED is always pressed when walking and never when running, regardless of actual button state
 	BT_STRAFE		= 1<<9,
 
 	BT_MOVERIGHT	= 1<<10,
