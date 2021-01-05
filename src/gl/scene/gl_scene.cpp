@@ -134,17 +134,20 @@ void FGLRenderer::SetViewArea()
 	// The render_sector is better suited to represent the current position in GL
 	viewsector = R_PointInSubsector(viewx, viewy)->render_sector;
 
-	// keep the view within the render sector's floor and ceiling
-	fixed_t theZ = viewsector->ceilingplane.ZatPoint (viewx, viewy) - 4*FRACUNIT;
-	if (viewz > theZ)
+	if ( !players[consoleplayer].bSpectating || mViewActor != players[consoleplayer].mo )
 	{
-		viewz = theZ;
-	}
+		// keep the view within the render sector's floor and ceiling
+		fixed_t theZ = viewsector->ceilingplane.ZatPoint (viewx, viewy) - 4*FRACUNIT;
+		if (viewz > theZ)
+		{
+			viewz = theZ;
+		}
 
-	theZ = viewsector->floorplane.ZatPoint (viewx, viewy) + 4*FRACUNIT;
-	if (viewz < theZ)
-	{
-		viewz = theZ;
+		theZ = viewsector->floorplane.ZatPoint (viewx, viewy) + 4*FRACUNIT;
+		if (viewz < theZ)
+		{
+			viewz = theZ;
+		}
 	}
 
 	// Get the heightsec state from the render sector, not the current one!
