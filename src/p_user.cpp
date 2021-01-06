@@ -2969,6 +2969,7 @@ Calculate the walking / running height adjustment
 ==================
 */
 
+CVAR(Bool, cl_spectsource, true, CVAR_ARCHIVE)
 void P_CalcHeight (player_t *player) 
 {
 	int 		angle;
@@ -2990,7 +2991,7 @@ void P_CalcHeight (player_t *player)
 	// it causes bobbing jerkiness when the player moves from ice to non-ice,
 	// and vice-versa.
 
-	if (player->cheats & CF_NOCLIP2 || (player->bSpectating && player->mo == players[consoleplayer].mo))
+	if (player->cheats & CF_NOCLIP2 || (cl_spectsource && player->bSpectating && player->mo == players[consoleplayer].mo))
 	{
 		player->bob = 0;
 	}
@@ -3086,7 +3087,7 @@ void P_CalcHeight (player_t *player)
 	}
 	player->viewz = player->mo->z + player->viewheight + bob;
 
-	if (player->bSpectating && player->mo == players[consoleplayer].mo)
+	if (cl_spectsource && player->bSpectating && player->mo == players[consoleplayer].mo)
 		return;
 
 	if (player->mo->floorclip && player->playerstate != PST_DEAD
@@ -4633,7 +4634,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		player->mo->flags &= ~MF_NOGRAVITY;
 	}
 
-	if (player->bSpectating && player->mo == players[consoleplayer].mo)
+	if (cl_spectsource && player->bSpectating && player->mo == players[consoleplayer].mo)
 		player->mo->flags5 |= MF5_NOINTERACTION;
 	else
 		player->mo->flags5 &= ~MF5_NOINTERACTION;
