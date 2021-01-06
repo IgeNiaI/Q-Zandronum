@@ -2051,7 +2051,7 @@ void D_AddSubdirectory (const char *Subdirectory)
 		{
 			dirName += '/';
 		}
-		dirName += "." GAMENAMELOWERCASE "/";
+		dirName += "." CONFIGFILE "/";
 		dirName += Subdirectory;
 		D_AddDirectory (dirName);
 	}
