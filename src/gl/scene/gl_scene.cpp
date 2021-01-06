@@ -129,12 +129,13 @@ angle_t FGLRenderer::FrustumAngle()
 // Sets the area the camera is in
 //
 //-----------------------------------------------------------------------------
+EXTERN_CVAR(Bool, cl_spectsource)
 void FGLRenderer::SetViewArea()
 {
 	// The render_sector is better suited to represent the current position in GL
 	viewsector = R_PointInSubsector(viewx, viewy)->render_sector;
 
-	if ( !players[consoleplayer].bSpectating || mViewActor != players[consoleplayer].mo )
+	if ( !cl_spectsource || !players[consoleplayer].bSpectating || mViewActor != players[consoleplayer].mo )
 	{
 		// keep the view within the render sector's floor and ceiling
 		fixed_t theZ = viewsector->ceilingplane.ZatPoint (viewx, viewy) - 4*FRACUNIT;

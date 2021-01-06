@@ -3995,6 +3995,7 @@ void AActor::SetAngle(angle_t ang, bool interpolate)
 //
 // P_MobjThinker
 //
+EXTERN_CVAR(Bool, cl_spectsource)
 void AActor::Tick ()
 {
 	// [BB] Start to measure how much outbound net traffic this call of AActor::Tick() needs.
@@ -4079,7 +4080,7 @@ void AActor::Tick ()
 		UnlinkFromWorld ();
 		flags |= MF_NOBLOCKMAP;
 
-		if (this->player && this->player->bSpectating && this == players[consoleplayer].mo)
+		if (cl_spectsource && this->player && this->player->bSpectating && this == players[consoleplayer].mo)
 		{
 			velx = FixedMul(velx, FRICTION_FLY);
 			vely = FixedMul(vely, FRICTION_FLY);
