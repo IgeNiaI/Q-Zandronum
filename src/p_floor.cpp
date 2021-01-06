@@ -1562,6 +1562,7 @@ manual_elevator:
 		}
 
 		rtn = true;
+		elevator->m_LastInstigator = instigator;
 		elevator->m_Type = elevtype;
 		elevator->m_Speed = speed;
 		elevator->StartFloorSound ();
