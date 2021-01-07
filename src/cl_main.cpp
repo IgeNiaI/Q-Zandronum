@@ -7357,8 +7357,8 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 		fixed_t BottomHeight = NETWORK_ReadLong( pByteStream );
 		fixed_t TopHeight = NETWORK_ReadLong( pByteStream );
 		fixed_t Speed = NETWORK_ReadLong( pByteStream );
-		fixed_t SpeedDown = NETWORK_ReadLong( pByteStream );
-		fixed_t SpeedUp = NETWORK_ReadLong( pByteStream );
+		fixed_t Speed1 = NETWORK_ReadLong( pByteStream );
+		fixed_t Speed2 = NETWORK_ReadLong( pByteStream );
 		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
 		bool Hexencrush = NETWORK_ReadBit( pByteStream );
 		int Silent = NETWORK_ReadShort( pByteStream );
@@ -7377,8 +7377,8 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 		pCeiling->SetPositionAndDirection( Position, Direction );
 		pCeiling->SetOldDirection( OldDirection );
 		pCeiling->SetSpeed( Speed );
-		pCeiling->SetSpeedDown( SpeedDown );
-		pCeiling->SetSpeedUp( SpeedUp );
+		pCeiling->SetSpeed1( Speed1 );
+		pCeiling->SetSpeed2( Speed2 );
 		pCeiling->SetCrush( Crush );
 		pCeiling->SetHexencrush( Hexencrush );
 		pCeiling->SetSilent( Silent );
@@ -7463,7 +7463,7 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 	int SectorID = NETWORK_ReadShort( pByteStream );
 	fixed_t FloorPosition = NETWORK_ReadLong( pByteStream );
 	fixed_t CeilingPosition = NETWORK_ReadLong( pByteStream );
-	
+
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
@@ -7498,7 +7498,7 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 			// Create the new elevator.
 			pElevator = new DElevator( pSector );
 		}
-	
+
 		pElevator->SetLastInstigator( &players[Instigator] );
 		pElevator->SetType( (DElevator::EElevator)Type );
 		pElevator->SetSpeed( Speed );
@@ -7522,7 +7522,7 @@ static void client_DoPillar( BYTESTREAM_s *pByteStream )
 	int SectorID = NETWORK_ReadShort ( pByteStream );
 	fixed_t FloorPosition = NETWORK_ReadLong ( pByteStream );
 	fixed_t CeilingPosition = NETWORK_ReadLong ( pByteStream );
-	
+
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
@@ -7532,7 +7532,7 @@ static void client_DoPillar( BYTESTREAM_s *pByteStream )
 	// If the sector already has activity, don't override it.
 	if ( !pPillar && (pSector->floordata || pSector->ceilingdata) )
 		return;
-	
+
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
 		if ( pPillar )

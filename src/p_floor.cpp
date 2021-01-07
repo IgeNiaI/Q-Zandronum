@@ -229,7 +229,7 @@ void DFloor::Tick ()
 			Destroy();
 		}
 
-		if ( NETWORK_GetState() == NETSTATE_SERVER )
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
 			if ( (m_Type != buildStair) && (m_Type != waitStair) && (m_Type != resetStair) )
 				SERVERCOMMANDS_DoFloor( this );
@@ -909,7 +909,7 @@ manual_stair:
 		if (floor == NULL)
 		{
 			// new floor thinker
-			floor = new DFloor(sec);
+			floor = new DFloor (sec);
 		} 
 
 		rtn = true;
@@ -1287,7 +1287,7 @@ void DElevator::SetDirection( LONG lDirection )
 {
 	if (m_Direction == 0 && lDirection != 0)
 		StartFloorSound();
-	else if (m_Direction != 0 && lDirection == 0)
+	else if (lDirection == 0)
 		SN_StopSequence (m_Sector, CHAN_FLOOR);
 
 	m_Direction = lDirection;
@@ -1502,14 +1502,14 @@ void DElevator::StartFloorSound ()
 //
 //==========================================================================
 
-bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator elevtype,
-					fixed_t speed, fixed_t height)
+bool EV_DoElevator (line_t *line, DElevator::EElevator elevtype,
+					fixed_t speed, fixed_t height, int tag)
 {
-	return EV_DoElevator(line, tag, NULL, elevtype, speed, height);
+	return EV_DoElevator(line, NULL, elevtype, speed, height, tag);
 }
 
-bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator elevtype,
-					fixed_t speed, fixed_t height)
+bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator elevtype,
+					fixed_t speed, fixed_t height, int tag)
 {
 	if (CLIENT_PREDICT_IsPredicting())
 		return false;

@@ -136,7 +136,7 @@ void DPlat::Tick ()
 					case platUpByValueStay:
 					case platDownToNearestFloor:
 					case platDownToLowestCeiling:
-						Destroy();
+						Destroy ();
 						break;
 					default:
 						break;
@@ -172,7 +172,7 @@ void DPlat::Tick ()
 					case platUpWaitDownStay:
 					case platUpNearestWaitDownStay:
 					case platUpByValue:
-						Destroy();
+						Destroy ();
 						break;
 				}
 			}
@@ -204,7 +204,7 @@ void DPlat::Tick ()
 			case platUpByValueStay:
 			case platRaiseAndStay:
 			case platRaiseAndStayLockout:
-				Destroy();
+				Destroy ();
 			default:
 				break;
 		}
@@ -403,13 +403,13 @@ void DPlat::SetTag( LONG lTag )
 //	[RH] Changed amount to height and added delay,
 //		 lip, change, tag, and speed parameters.
 //
-bool EV_DoPlat(line_t *line, int tag, DPlat::EPlatType type, int height,
-	int speed, int delay, int lip, int change)
+bool EV_DoPlat (int tag, line_t *line, DPlat::EPlatType type, int height,
+				int speed, int delay, int lip, int change)
 {
-	return EV_DoPlat(line, tag, NULL, type, height, speed, delay, lip, change);
+	return EV_DoPlat(tag, line, NULL, type, height, speed, delay, lip, change);
 }
 
-bool EV_DoPlat (line_t *line, int tag, player_t *instigator, DPlat::EPlatType type, int height,
+bool EV_DoPlat (int tag, line_t *line, player_t *instigator, DPlat::EPlatType type, int height,
 				int speed, int delay, int lip, int change)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -451,6 +451,7 @@ bool EV_DoPlat (line_t *line, int tag, player_t *instigator, DPlat::EPlatType ty
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
 		sec = &sectors[secnum];
+
 manual_plat:
 		plat = P_GetPlatBySectorNum(sec->sectornum);
 
@@ -466,7 +467,7 @@ manual_plat:
 		rtn = true;
 		if ( plat == NULL )
 		{
-			plat = new DPlat(sec);
+			plat = new DPlat (sec);
 		}
 
 		plat->m_Type = type;
@@ -655,7 +656,7 @@ void DPlat::Stop ()
 	m_Status = in_stasis;
 }
 
-void EV_StopPlat(int tag)
+void EV_StopPlat (int tag)
 {
 	EV_StopPlat(tag, NULL);
 }
