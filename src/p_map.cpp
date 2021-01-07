@@ -4832,25 +4832,16 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 		}
 	}
 
-	if ((zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE) || !source->player)
-	{
-		pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
-		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
-		vx = FixedMul(finecosine[pitch], finecosine[angle]);
-		vy = FixedMul(finecosine[pitch], finesine[angle]);
-		vz = finesine[pitch];
-	}
-	else
+	pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
+	angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
+	vx = FixedMul(finecosine[pitch], finecosine[angle]);
+	vy = FixedMul(finecosine[pitch], finesine[angle]);
+	vz = finesine[pitch];
+
+	if (!(zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE) && source->player)
 	{
 		//*************************************************************************************************************************
 		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
-
-		// Get pitch and angle, and calculate direction of the tracer
-		pitch = angle_t(-source->pitch) >> ANGLETOFINESHIFT;
-		angle = source->angle >> ANGLETOFINESHIFT;
-		vx = FixedMul(finecosine[pitch], finecosine[angle]);
-		vy = FixedMul(finecosine[pitch], finesine[angle]);
-		vz = finesine[pitch];
 
 		// Fire the tracer
 		fixed_t viewz = source->z - source->floorclip + source->player->viewheight;
@@ -4863,7 +4854,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			float distance = FIXED2FLOAT(trace.Distance);
 
 			float xyOffs = float(atan2(FIXED2FLOAT(trace.Distance), offset_xy) * 180.f / PI);
-			angleoffset = angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
+			angleoffset += angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
 
 			fixed_t offset = (source->height >> 1) - source->player->viewheight;
 			if (!(railflags & RAF_CENTERZ))
@@ -4871,7 +4862,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 				offset += source->player->mo->AttackZOffset - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
 			}
 			float zOffs = float(atan2(distance, FIXED2FLOAT(-offset_z - offset)) * 180.f / PI);
-			pitchoffset = angle_t((90.f - zOffs) * (ANGLE_MAX / 360));
+			pitchoffset += angle_t((90.f - zOffs) * (ANGLE_MAX / 360));
 		}
 
 		//*************************************************************************************************************************
