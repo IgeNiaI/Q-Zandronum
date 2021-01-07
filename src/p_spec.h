@@ -528,9 +528,9 @@ protected:
 private:
 	DPlat ();
 
-	friend bool	EV_DoPlat (line_t *line, int tag, EPlatType type,
+	friend bool	EV_DoPlat (int tag, line_t *line, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
-	friend bool	EV_DoPlat (line_t *line, int tag, player_t *instigator, EPlatType type,
+	friend bool	EV_DoPlat (int tag, line_t *line, player_t *instigator, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
 	friend void EV_StopPlat (int tag);
 	friend void EV_StopPlat (int tag, player_t *instigator);
@@ -815,10 +815,10 @@ public:
 	
 	fixed_t	GetSpeed( void );
 	void	SetSpeed( fixed_t Speed );
-	fixed_t	GetSpeedDown( void );
-	void	SetSpeedDown( fixed_t Speed );
-	fixed_t	GetSpeedUp( void );
-	void	SetSpeedUp( fixed_t Speed );
+	fixed_t	GetSpeed1( void );
+	void	SetSpeed1( fixed_t Speed );
+	fixed_t	GetSpeed2( void );
+	void	SetSpeed2( fixed_t Speed );
 	
 	fixed_t	GetPosition( void );
 	int		GetDirection( void );
@@ -846,9 +846,9 @@ protected:
 	ECeiling	m_Type;
 	fixed_t 	m_BottomHeight;
 	fixed_t 	m_TopHeight;
-	fixed_t		m_Speed;
-	fixed_t		m_SpeedDown;
-	fixed_t		m_SpeedUp;
+	fixed_t 	m_Speed;
+	fixed_t		m_Speed1;		// [RH] dnspeed of crushers
+	fixed_t		m_Speed2;		// [RH] upspeed of crushers
 	int 		m_Crush;
 	bool		m_Hexencrush;
 	int			m_Silent;
@@ -1088,18 +1088,14 @@ protected:
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
 	
-	friend bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator type, fixed_t speed,
-		fixed_t height);
-	friend bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator type, fixed_t speed,
-		fixed_t height);
+	friend bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
+	friend bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
 private:
 	DElevator ();
 };
 
-bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator type, fixed_t speed,
-	fixed_t height);
-bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator type, fixed_t speed,
-	fixed_t height);
+bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
+bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
 
 class DWaggleBase : public DMover
 {
