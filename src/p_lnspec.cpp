@@ -735,13 +735,13 @@ FUNC(LS_Generic_Crusher2)
 FUNC(LS_Plat_PerpetualRaise)
 // Plat_PerpetualRaise (tag, speed, delay)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platPerpetualRaise, 0, SPEED(arg1), TICS(arg2), 8, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platPerpetualRaise, 0, SPEED(arg1), TICS(arg2), 8, 0);
 }
 
 FUNC(LS_Plat_PerpetualRaiseLip)
 // Plat_PerpetualRaiseLip (tag, speed, delay, lip)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platPerpetualRaise, 0, SPEED(arg1), TICS(arg2), arg3, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platPerpetualRaise, 0, SPEED(arg1), TICS(arg2), arg3, 0);
 }
 
 FUNC(LS_Plat_Stop)
@@ -754,13 +754,13 @@ FUNC(LS_Plat_Stop)
 FUNC(LS_Plat_DownWaitUpStay)
 // Plat_DownWaitUpStay (tag, speed, delay)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platDownWaitUpStay, 0, SPEED(arg1), TICS(arg2), 8, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platDownWaitUpStay, 0, SPEED(arg1), TICS(arg2), 8, 0);
 }
 
 FUNC(LS_Plat_DownWaitUpStayLip)
 // Plat_DownWaitUpStayLip (tag, speed, delay, lip, floor-sound?)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs),
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs),
 		arg4 ? DPlat::platDownWaitUpStayStone : DPlat::platDownWaitUpStay,
 		0, SPEED(arg1), TICS(arg2), arg3, 0);
 }
@@ -768,25 +768,25 @@ FUNC(LS_Plat_DownWaitUpStayLip)
 FUNC(LS_Plat_DownByValue)
 // Plat_DownByValue (tag, speed, delay, height)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platDownByValue, FRACUNIT*arg3*8, SPEED(arg1), TICS(arg2), 0, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platDownByValue, FRACUNIT*arg3*8, SPEED(arg1), TICS(arg2), 0, 0);
 }
 
 FUNC(LS_Plat_UpByValue)
 // Plat_UpByValue (tag, speed, delay, height)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platUpByValue, FRACUNIT*arg3*8, SPEED(arg1), TICS(arg2), 0, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platUpByValue, FRACUNIT*arg3*8, SPEED(arg1), TICS(arg2), 0, 0);
 }
 
 FUNC(LS_Plat_UpWaitDownStay)
 // Plat_UpWaitDownStay (tag, speed, delay)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platUpWaitDownStay, 0, SPEED(arg1), TICS(arg2), 0, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platUpWaitDownStay, 0, SPEED(arg1), TICS(arg2), 0, 0);
 }
 
 FUNC(LS_Plat_UpNearestWaitDownStay)
 // Plat_UpNearestWaitDownStay (tag, speed, delay)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platUpNearestWaitDownStay, 0, SPEED(arg1), TICS(arg2), 0, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platUpNearestWaitDownStay, 0, SPEED(arg1), TICS(arg2), 0, 0);
 }
 
 FUNC(LS_Plat_RaiseAndStayTx0)
@@ -808,19 +808,19 @@ FUNC(LS_Plat_RaiseAndStayTx0)
 	}
 
 
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), type, 0, SPEED(arg1), 0, 0, 1);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), type, 0, SPEED(arg1), 0, 0, 1);
 }
 
 FUNC(LS_Plat_UpByValueStayTx)
 // Plat_UpByValueStayTx (tag, speed, height)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platUpByValueStay, FRACUNIT*arg2*8, SPEED(arg1), 0, 0, 2);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platUpByValueStay, FRACUNIT*arg2*8, SPEED(arg1), 0, 0, 2);
 }
 
 FUNC(LS_Plat_ToggleCeiling)
 // Plat_ToggleCeiling (tag)
 {
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), DPlat::platToggle, 0, 0, 0, 0, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), DPlat::platToggle, 0, 0, 0, 0, 0);
 }
 
 FUNC(LS_Generic_Lift)
@@ -847,7 +847,7 @@ FUNC(LS_Generic_Lift)
 			break;
 	}
 
-	return EV_DoPlat (ln, arg0, GetInstigator(it, isFromAcs), type, arg4*8*FRACUNIT, SPEED(arg1), OCTICS(arg2), 0, 0);
+	return EV_DoPlat (arg0, ln, GetInstigator(it, isFromAcs), type, arg4*8*FRACUNIT, SPEED(arg1), OCTICS(arg2), 0, 0);
 }
 
 FUNC(LS_Exit_Normal)
@@ -1884,13 +1884,13 @@ FUNC(LS_ACS_Terminate)
 FUNC(LS_FloorAndCeiling_LowerByValue)
 // FloorAndCeiling_LowerByValue (tag, speed, height)
 {
-	return EV_DoElevator (ln, arg0, DElevator::elevateLower, SPEED(arg1), arg2*FRACUNIT);
+	return EV_DoElevator (ln, DElevator::elevateLower, SPEED(arg1), arg2*FRACUNIT, arg0);
 }
 
 FUNC(LS_FloorAndCeiling_RaiseByValue)
 // FloorAndCeiling_RaiseByValue (tag, speed, height)
 {
-	return EV_DoElevator (ln, arg0, DElevator::elevateRaise, SPEED(arg1), arg2*FRACUNIT);
+	return EV_DoElevator (ln, DElevator::elevateRaise, SPEED(arg1), arg2*FRACUNIT, arg0);
 }
 
 FUNC(LS_FloorAndCeiling_LowerRaise)
@@ -1911,19 +1911,19 @@ FUNC(LS_FloorAndCeiling_LowerRaise)
 FUNC(LS_Elevator_MoveToFloor)
 // Elevator_MoveToFloor (tag, speed)
 {
-	return EV_DoElevator (ln, arg0, DElevator::elevateCurrent, SPEED(arg1), 0);
+	return EV_DoElevator (ln, DElevator::elevateCurrent, SPEED(arg1), 0, arg0);
 }
 
 FUNC(LS_Elevator_RaiseToNearest)
 // Elevator_RaiseToNearest (tag, speed)
 {
-	return EV_DoElevator (ln, arg0, DElevator::elevateUp, SPEED(arg1), 0);
+	return EV_DoElevator (ln, DElevator::elevateUp, SPEED(arg1), 0, arg0);
 }
 
 FUNC(LS_Elevator_LowerToNearest)
 // Elevator_LowerToNearest (tag, speed)
 {
-	return EV_DoElevator (ln, arg0, DElevator::elevateDown, SPEED(arg1), 0);
+	return EV_DoElevator (ln, DElevator::elevateDown, SPEED(arg1), 0, arg0);
 }
 
 FUNC(LS_Light_ForceLightning)

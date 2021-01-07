@@ -271,6 +271,10 @@ DPillar::DPillar (sector_t *sector, EPillar type, fixed_t speed,
 				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
 	: DMover (sector)
 {
+	sector->floordata = sector->ceilingdata = this;
+	m_Interp_Floor = sector->SetInterpolation(sector_t::FloorMove, true);
+	m_Interp_Ceiling = sector->SetInterpolation(sector_t::CeilingMove, true);
+
 	Reinit(sector, type, speed, floordist, ceilingdist, crush, hexencrush);
 }
 
@@ -359,19 +363,19 @@ void DPillar::Reinit( sector_t *sector, EPillar type, fixed_t speed,
 	}
 }
 
-bool EV_DoPillar (DPillar::EPillar type, int tag,
-				  fixed_t speed, fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
+bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
+				  fixed_t height2, int crush, bool hexencrush)
 {
-	return EV_DoPillar(type, tag, NULL, speed, floordist, ceilingdist, crush, hexencrush);
+	return EV_DoPillar(type, tag, NULL, speed, height, height2, crush, hexencrush);
 }
 
-bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator,
-				  fixed_t speed, fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
+bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t height,
+				  fixed_t height2, fixed_t ceilingdist, int crush, bool hexencrush)
 {
 	bool rtn = false;
 	int secnum = -1;
 	// [BC]
-	DPillar	*pPillar;
+	DPillar		*pPillar;
 	sector_t *sec;
 
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
@@ -413,7 +417,7 @@ bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator,
 			pPillar = new DPillar (sec);
 		}
 
-		pPillar->Reinit( sec, type, speed, floordist, ceilingdist, crush, hexencrush );
+		pPillar->Reinit( sec, type, height, height2, ceilingdist, crush, hexencrush );
 		pPillar->m_LastInstigator = instigator;
 
 		rtn = true;

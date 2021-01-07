@@ -172,7 +172,7 @@ void DDoor::Tick ()
 			{
 			case doorRaise:
 			case doorClose:
-				Destroy();						// unlink and free
+				Destroy ();						// unlink and free
 				break;
 				
 			case doorCloseWaitOpen:
@@ -237,7 +237,7 @@ void DDoor::Tick ()
 				
 			case doorCloseWaitOpen:
 			case doorOpen:
-				Destroy();						// unlink and free
+				Destroy ();						// unlink and free
 				break;
 				
 			default:
@@ -267,12 +267,12 @@ void DDoor::UpdateToClient( ULONG ulClient )
 	SERVERCOMMANDS_DoDoor( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
-fixed_t DDoor::GetPosition()
+fixed_t DDoor::GetPosition ()
 {
 	return ( m_Sector->ceilingplane.d );
 }
 
-int DDoor::GetDirection()
+int DDoor::GetDirection ()
 {
 	return ( m_Direction );
 }
@@ -465,7 +465,6 @@ void DDoor::DoorSound(bool raise, DSeqNode *curseq) const
 DDoor::DDoor (sector_t *sector)
 	: DMovingCeiling (sector)
 {
-
 }
 
 //============================================================================
@@ -487,39 +486,39 @@ DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTa
 		m_LightTag = 0;
 	}
 
-	switch (m_Type)
+	switch (type)
 	{
 	case doorClose:
 		m_Direction = -1;
-		height = m_Sector->FindLowestCeilingSurrounding(&spot);
-		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
+		height = sec->FindLowestCeilingSurrounding (&spot);
+		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
 		// [BC] Added option to create the door soundlessly.
-		if (bNoSound == false)
-			DoorSound(false);
+		if ( bNoSound == false )
+			DoorSound (false);
 		break;
 
 	case doorOpen:
 	case doorRaise:
 		m_Direction = 1;
-		height = m_Sector->FindLowestCeilingSurrounding(&spot);
-		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
+		height = sec->FindLowestCeilingSurrounding (&spot);
+		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
 		// [BC] Added option to create the door soundlessly.
-		if ((m_TopDist != m_Sector->ceilingplane.d) && (bNoSound == false))
-			DoorSound(true);
+		if ((m_TopDist != sec->ceilingplane.d) && ( bNoSound == false ))
+			DoorSound (true);
 		break;
 
 	case doorCloseWaitOpen:
-		m_TopDist = m_Sector->ceilingplane.d;
+		m_TopDist = sec->ceilingplane.d;
 		m_Direction = -1;
 		// [BC] Added option to create the door soundlessly.
-		if (bNoSound == false)
-			DoorSound(false);
+		if ( bNoSound == false )
+			DoorSound (false);
 		break;
 
 	case doorRaiseIn5Mins:
 		m_Direction = 2;
-		height = m_Sector->FindLowestCeilingSurrounding(&spot);
-		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
+		height = sec->FindLowestCeilingSurrounding (&spot);
+		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
 		m_TopCountdown = 5 * 60 * TICRATE;
 		break;
 	}
@@ -527,15 +526,15 @@ DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTa
 	if (!m_Sector->floordata || !m_Sector->floordata->IsKindOf(RUNTIME_CLASS(DPlat)) ||
 		!(barrier_cast<DPlat*>(m_Sector->floordata))->IsLift())
 	{
-		height = m_Sector->FindHighestFloorPoint(&m_BotSpot);
-		m_BotDist = m_Sector->ceilingplane.PointToDist(m_BotSpot, height);
+		height = sec->FindHighestFloorPoint (&m_BotSpot);
+		m_BotDist = sec->ceilingplane.PointToDist (m_BotSpot, height);
 	}
 	else
 	{
-		height = m_Sector->FindLowestCeilingPoint(&m_BotSpot);
-		m_BotDist = m_Sector->ceilingplane.PointToDist(m_BotSpot, height);
+		height = sec->FindLowestCeilingPoint(&m_BotSpot);
+		m_BotDist = sec->ceilingplane.PointToDist (m_BotSpot, height);
 	}
-	m_OldFloorDist = m_Sector->floorplane.d;
+	m_OldFloorDist = sec->floorplane.d;
 }
 
 //============================================================================

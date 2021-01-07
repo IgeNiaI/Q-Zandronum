@@ -75,8 +75,8 @@ void DCeiling::Serialize (FArchive &arc)
 		<< m_BottomHeight
 		<< m_TopHeight
 		<< m_Speed
-		<< m_SpeedDown
-		<< m_SpeedUp
+		<< m_Speed1
+		<< m_Speed2
 		<< m_Crush
 		<< m_Silent
 		<< m_Direction
@@ -140,7 +140,7 @@ void DCeiling::Tick ()
 			case ceilCrushAndRaise:
 			case ceilCrushAndRaiseDist:
 				m_Direction = -1;
-				m_Speed = m_SpeedDown;
+				m_Speed = m_Speed1;
 				if (!SN_IsMakingLoopingSound (m_Sector))
 					PlayCeilingSound ();
 
@@ -181,7 +181,7 @@ void DCeiling::Tick ()
 			case ceilCrushAndRaise:
 			case ceilCrushAndRaiseDist:
 			case ceilCrushRaiseAndStay:
-				m_Speed = m_SpeedUp;
+				m_Speed = m_Speed2;
 				m_Direction = 1;
 				if (!SN_IsMakingLoopingSound (m_Sector))
 					PlayCeilingSound ();
@@ -222,7 +222,7 @@ void DCeiling::Tick ()
 				case ceilCrushAndRaiseDist:
 				case ceilLowerAndCrush:
 				case ceilLowerAndCrushDist:
-					if (m_SpeedDown == FRACUNIT && m_SpeedUp == FRACUNIT)
+					if (m_Speed1 == FRACUNIT && m_Speed2 == FRACUNIT)
 					{
 						m_Speed = FRACUNIT / 8;
 
@@ -287,24 +287,24 @@ void DCeiling::SetSpeed( fixed_t Speed )
 	m_Speed = Speed;
 }
 
-fixed_t DCeiling::GetSpeedDown( void )
+fixed_t DCeiling::GetSpeed1( void )
 {
-	return ( m_SpeedDown );
+	return ( m_Speed1 );
 }
 
-void DCeiling::SetSpeedDown( fixed_t Speed )
+void DCeiling::SetSpeed1( fixed_t Speed )
 {
-	m_SpeedDown = Speed;
+	m_Speed1 = Speed;
 }
 
-fixed_t DCeiling::GetSpeedUp( void )
+fixed_t DCeiling::GetSpeed2( void )
 {
-	return ( m_SpeedUp );
+	return ( m_Speed2 );
 }
 
-void DCeiling::SetSpeedUp( fixed_t Speed )
+void DCeiling::SetSpeed2( fixed_t Speed )
 {
-	m_SpeedUp = Speed;
+	m_Speed2 = Speed;
 }
 
 fixed_t DCeiling::GetPosition( void )
@@ -407,7 +407,7 @@ void DCeiling::SetSilent( int lSilent )
 //============================================================================
 
 DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator, 
-				   fixed_t speedDown, fixed_t speedUp, fixed_t height,
+				   fixed_t speed, fixed_t speed2, fixed_t height,
 				   int crush, int silent, int change, bool hexencrush)
 {
 	fixed_t		targheight = 0;	// Silence, GCC
@@ -444,8 +444,8 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 	if (ceiling->m_Direction != 0)
 		return NULL;
 
-	ceiling->m_SpeedDown = speedDown;
-	ceiling->m_SpeedUp = speedUp;
+	ceiling->m_Speed = ceiling->m_Speed1 = speed;
+	ceiling->m_Speed2 = speed2;
 	ceiling->m_Silent = silent;
 	ceiling->m_LastInstigator = instigator;
 
