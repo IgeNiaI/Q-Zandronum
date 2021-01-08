@@ -5795,7 +5795,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							explosionToPlayer.MakeUnit();
 
 							int pushDamage = damage;
-							if ( bombsource )
+							if ( bombsource && bombsource->Inventory )
 								bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
 							explosionToPlayer *= pushDamage * 0.35f;
 
