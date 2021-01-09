@@ -2048,7 +2048,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 {
 	static int pushtime = 0;
 	bool bForceSlide = scrollx || scrolly;
-	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType; // only apply to non voodoo dolls players
+	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType && !mo->player->bSpectating; // only apply to non voodoo dolls players
 	angle_t angle;
 	fixed_t ptryx, ptryy;
 	player_t *player;
@@ -2922,7 +2922,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 //
 // apply gravity
 //
-	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType;
+	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType && !mo->player->bSpectating;
 
 	if (mo->z > mo->floorz && !(mo->flags & MF_NOGRAVITY))
 	{

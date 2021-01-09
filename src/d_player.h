@@ -834,7 +834,7 @@ public:
 	
 	bool CanCrouch() const
 	{
-		return morphTics == 0 || mo->PlayerFlags & PPF_CROUCHABLEMORPH;
+		return (morphTics == 0 || mo->PlayerFlags & PPF_CROUCHABLEMORPH) && !bSpectating;
 	}
 
 	int GetSpawnClass();
