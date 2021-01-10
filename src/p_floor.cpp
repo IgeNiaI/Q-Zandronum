@@ -1289,6 +1289,7 @@ DElevator::DElevator (sector_t *sec)
 	sec->ceilingdata = this;
 	m_Interp_Floor = sec->SetInterpolation(sector_t::FloorMove, true);
 	m_Interp_Ceiling = sec->SetInterpolation(sector_t::CeilingMove, true);
+	m_Direction = 0;
 	m_LastInstigator = NULL;
 }
 

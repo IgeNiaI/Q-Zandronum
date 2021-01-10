@@ -7493,6 +7493,7 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 		if ( pElevator )
 		{
 			// Elevator is destroyed on server side
+			pElevator->SetDirection( 0 );
 			pElevator->SetFloorPosition( FloorPosition );
 			pElevator->SetCeilingPosition( CeilingPosition );
 			pElevator->Destroy();
