@@ -555,6 +555,7 @@ manual_floor:
 
 		case DFloor::floorLowerInstant:
 			floor->m_Speed = height;
+			// fall through
 		case DFloor::floorLowerByValue:
 			floor->m_Direction = -1;
 			newheight = sec->floorplane.ZatPoint (0, 0) - height;
@@ -563,6 +564,7 @@ manual_floor:
 
 		case DFloor::floorRaiseInstant:
 			floor->m_Speed = height;
+			// fall through
 		case DFloor::floorRaiseByValue:
 			floor->m_Direction = 1;
 			newheight = sec->floorplane.ZatPoint (0, 0) + height;
@@ -577,6 +579,7 @@ manual_floor:
 
 		case DFloor::floorRaiseAndCrushDoom:
 			floor->m_Crush = crush;
+			// fall through
 		case DFloor::floorRaiseToLowestCeiling:
 			floor->m_Direction = 1;
 			newheight = sec->FindLowestCeilingSurrounding (&spot);

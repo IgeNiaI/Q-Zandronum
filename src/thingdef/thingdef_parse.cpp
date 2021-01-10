@@ -1305,6 +1305,7 @@ void ParseDecorate (FScanner &sc)
 				ParseDamageDefinition(sc);
 				break;
 			}
+			// fall through
 		default:
 			sc.RestorePos(pos);
 			ParseOldDecoration(sc, DEF_Decoration);

@@ -667,7 +667,7 @@ void WI_LoadBackground(bool isenterpic)
 					an.levelname[8] = 0;
 					sc.MustGetString();
 					caseval=sc.MustMatchString(WI_Cmd);
-
+					// fall through
 				default:
 					switch (caseval)
 					{

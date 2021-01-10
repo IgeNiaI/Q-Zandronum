@@ -222,6 +222,7 @@ DFrameBuffer *SDLGLVideo::CreateFrameBuffer (int width, int height, bool fullscr
 		case 0:
 			owidth = width;
 			oheight = height;
+			// fall through
 		case 2:
 			// Try a different resolution. Hopefully that will work.
 			I_ClosestResolution (&width, &height, 8);

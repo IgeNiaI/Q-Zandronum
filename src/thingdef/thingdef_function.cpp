@@ -250,6 +250,7 @@ class FxGlobalFunctionCall_CheckClass : public FxGlobalFunctionCall
 			switch (ArgList->Size())
 			{
 				case 3: match_superclass = (*ArgList)[2]->EvalExpression(self).GetBool();
+					// fall through
 				case 2: pick_pointer = (*ArgList)[1]->EvalExpression(self).GetInt();
 			}
 			

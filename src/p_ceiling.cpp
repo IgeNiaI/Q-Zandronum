@@ -452,6 +452,7 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 	case ceilCrushAndRaiseDist:
 	case ceilCrushRaiseAndStay:
 		ceiling->m_TopHeight = sec->ceilingplane.d;
+		// fall through
 	case ceilLowerAndCrush:
 	case ceilLowerAndCrushDist:
 		targheight = sec->FindHighestFloorPoint (&spot);
