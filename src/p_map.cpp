@@ -2964,7 +2964,6 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t xmove, ymove;
 	const secplane_t *walkplane;
 	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
-	const bool noWallFriction = (zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION) && playerNotVoodoo && (mo->player->velx || mo->player->vely);
 	int hitcount;
 
 	hitcount = 3;
@@ -2975,7 +2974,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	{
 		if (mo->reactiontime > 0) // player coming right out of a teleporter.
 			return;
-		else if(noWallFriction)
+		else if(zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION)
 			preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };
 	}
 
@@ -3067,7 +3066,7 @@ retry:
 	if (playerNotVoodoo)
 	{
 		// [Ivory]: Quake like wall friction
-		if (noWallFriction && (mo->velx || mo->vely))
+		if ((zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION) && (mo->velx || mo->vely))
 		{
 			FVector2 slideVel = FVector2(FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely)).Unit();
 			FVector2 velUnit = preSlideVel.Unit();
