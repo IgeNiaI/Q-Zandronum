@@ -4806,6 +4806,8 @@ void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor )
 
 	if ( pActor->angle != 0 )
 		ulBits |= CM_ANGLE;
+	if ( pActor->pitch != 0 )
+		ulBits |= CM_PITCH;
 	if ( pActor->velx != 0 )
 		ulBits |= CM_VELX;
 	if ( pActor->vely != 0 )

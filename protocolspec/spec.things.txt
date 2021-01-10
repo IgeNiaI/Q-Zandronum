@@ -290,6 +290,18 @@ Command SetThingScale
 	EndIf
 EndCommand
 
+Command SetThingFillColor
+	ExtendedCommand
+	Actor actor
+	Long fillcolor
+EndCommand
+
+Command SetThingSprite
+	ExtendedCommand
+	Actor actor
+	Long sprite
+EndCommand
+
 Command ThingIsCorpse
 	Actor actor
 	# [TP] TODO: Does this really need to be sent? The client should be able to deduce this.
