@@ -496,28 +496,21 @@ bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag, player_t *inst
 		sec = &sectors[secnum];
 
 manual_floor:
-		floor = NULL;
-
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		if (sec->PlaneMoving(sector_t::floor))
 		{
-			if (sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
-			{
-				floor = barrier_cast<DFloor*>(sec->floordata);
-			}
-			else
-			{
-				continue;
-			}
+			// There was a test for 0/non-0 here, supposed to prevent 0-tags from executing "continue" and searching for unrelated sectors
+			// Unfortunately, the condition had been reversed, so that searches for tag-0 would continue,
+			// while numbered tags would abort (return false, even if some floors have been successfully triggered)
+
+			// All occurences of the condition (faulty or not) have been replaced by a looping condition: Looping only occurs if we're looking for a non-0 tag.
+			continue;
 		}
 		
-		if (floor == NULL)
-		{
-			// new floor thinker
-			floor = new DFloor (sec);
-		}
 
+		// new floor thinker
 		rtn = true;
+		floor = new DFloor (sec);
 		floor->m_Type = floortype;
 		floor->m_Crush = -1;
 		floor->m_Hexencrush = hexencrush;
@@ -780,23 +773,19 @@ bool EV_FloorCrushStop (int tag, player_t *instigator)
 		return false;
 
 	int secnum = -1;
-	DFloor *floor;
 
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
 		sector_t *sec = sectors + secnum;
 
-		if (sec->floordata && sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
+		if (sec->floordata && sec->floordata->IsKindOf (RUNTIME_CLASS(DFloor)) &&
+			barrier_cast<DFloor *>(sec->floordata)->m_Type == DFloor::floorRaiseAndCrush)
 		{
-			floor = barrier_cast<DFloor *>( sec->floordata );
-
-			if (floor->m_Type == DFloor::floorRaiseAndCrush)
-			{
-				floor->Destroy ();
-				SERVERCOMMANDS_DoFloor( floor );
-
 			SN_StopSequence (sec, CHAN_FLOOR);
-			}
+			sec->floordata->Destroy ();
+
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				SERVERCOMMANDS_DoFloor( barrier_cast<DFloor *>( sec->floordata ) );
 		}
 	}
 	return true;
@@ -888,37 +877,20 @@ bool EV_BuildStairs (int tag, player_t *instigator, DFloor::EStair type, line_t 
 		sec = &sectors[secnum];
 
 manual_stair:
-		floor = NULL;
-
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		//jff 2/26/98 add special lockout condition to wait for entire
 		//staircase to build before retriggering
 		if (sec->PlaneMoving(sector_t::floor) || sec->stairlock)
 		{
 			if (!manual)
-			{
-				if (sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
-				{
-					floor = barrier_cast<DFloor*>(sec->floordata);
-				}
-				else
-				{
-					continue;
-				}
-			}
+				continue;
 			else
-			{
 				return rtn;
-			}
 		}
 		
-		if (floor == NULL)
-		{
-			// new floor thinker
-			floor = new DFloor (sec);
-		} 
-
+		// new floor thinker
 		rtn = true;
+		floor = new DFloor (sec);
 		floor->m_Direction = (type == DFloor::buildUp) ? 1 : -1;
 		stairstep = stairsize * floor->m_Direction;
 		floor->m_Type = DFloor::buildStair;	//jff 3/31/98 do not leave uninited
@@ -1025,30 +997,8 @@ manual_stair:
 				sec = tsec;
 				secnum = newsecnum;
 
-				floor = NULL;
-
-				// ALREADY MOVING?	IF SO, KEEP GOING...
-				//jff 2/26/98 add special lockout condition to wait for entire
-				//staircase to build before retriggering
-				if (sec->PlaneMoving(sector_t::floor))
-				{
-					if (sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
-					{
-						floor = barrier_cast<DFloor*>(sec->floordata);
-					}
-					else
-					{
-						continue;
-					}
-				}
-
-				if (floor == NULL)
-				{
-					// new floor thinker
-					floor = new DFloor(sec);
-				}
-
 				// create and initialize a thinker for the next step
+				floor = new DFloor (sec);
 				floor->StartFloorSound ();
 				floor->m_Direction = (type == DFloor::buildUp) ? 1 : -1;
 				floor->m_FloorDestDist = sec->floorplane.PointToDist (0, 0, height);
@@ -1138,12 +1088,7 @@ bool EV_DoDonut (int tag, player_t *instigator, line_t *line, fixed_t pillarspee
 manual_donut:
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		if (s1->PlaneMoving(sector_t::floor))
-		{
-			if (!s1->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
-			{
-				continue; // safe now, because we check that tag is non-0 in the looping condition [fdari]
-			}
-		}
+			continue; // safe now, because we check that tag is non-0 in the looping condition [fdari]
 
 		rtn = true;
 		s2 = getNextSector (s1->lines[0], s1);	// s2 is pool's sector
@@ -1151,12 +1096,7 @@ manual_donut:
 			continue;							// pillar must be two-sided
 
 		if (s2->PlaneMoving(sector_t::floor))
-		{
-			if (!s2->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
-			{
-				continue; // safe now, because we check that tag is non-0 in the looping condition [fdari]
-			}
-		}
+			continue;
 
 		for (i = 0; i < s2->linecount; i++)
 		{
@@ -1164,27 +1104,9 @@ manual_donut:
 				(s2->lines[i]->backsector == s1))
 				continue;
 			s3 = s2->lines[i]->backsector;
-			floor = NULL;
-
-			if (s2->PlaneMoving(sector_t::floor))
-			{
-				if (s2->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
-				{
-					floor = barrier_cast<DFloor*>(s2->floordata);
-				}
-				else
-				{
-					continue;
-				}
-			}
-
-			if (floor == NULL)
-			{
-				// new floor thinker
-				floor = new DFloor(s2);
-			}
 
 			//	Spawn rising slime
+			floor = new DFloor (s2);
 			floor->m_Type = DFloor::donutRaise;
 			floor->m_Crush = -1;
 			floor->m_Hexencrush = false;
@@ -1201,26 +1123,6 @@ manual_donut:
 			// [BC] If we're the server, tell clients to create the floor.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				SERVERCOMMANDS_DoFloor( floor );
-
-			floor = NULL;
-			
-			if (s1->PlaneMoving(sector_t::floor))
-			{
-				if (s1->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
-				{
-					floor = barrier_cast<DFloor*>(s1->floordata);
-				}
-				else
-				{
-					continue;
-				}
-			}
-
-			if (floor == NULL)
-			{
-				// new floor thinker
-				floor = new DFloor(s1);
-			}
 
 			//	Spawn lowering donut-hole
 			floor = new DFloor (s1);
@@ -1546,33 +1448,18 @@ bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator ele
 	while (tag && (secnum = P_FindSectorFromTag (tag, secnum)) >= 0) // never loop for a non-0 tag (condition moved to beginning of loop) [FDARI]
 	{
 		sec = &sectors[secnum];
-
 manual_elevator:
-		elevator = NULL;
+		// If either floor or ceiling is already activated, skip it
+		if (sec->PlaneMoving(sector_t::floor) || sec->ceilingdata) //jff 2/22/98
+			continue; // the loop used to break at the end if tag were 0, but would miss that step if "continue" occured [FDARI]
 
-		if (sec->PlaneMoving(sector_t::floor))
-		{
-			if (sec->floordata->IsKindOf(RUNTIME_CLASS(DElevator)))
-			{
-				elevator = barrier_cast<DElevator*>(sec->floordata);
-			}
-			else
-			{
-				return false;
-			}
-		}
-
-		if (elevator == NULL)
-		{
-			// new floor thinker
-			elevator = new DElevator (sec);
-		}
-
+		// create and initialize new elevator thinker
 		rtn = true;
-		elevator->m_LastInstigator = instigator;
+		elevator = new DElevator (sec);
 		elevator->m_Type = elevtype;
 		elevator->m_Speed = speed;
 		elevator->StartFloorSound ();
+		elevator->m_LastInstigator = instigator;
 
 		floorheight = sec->CenterFloor ();
 		ceilingheight = sec->CenterCeiling ();
@@ -2124,50 +2011,22 @@ bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, in
 	while (tag && (sectorIndex = P_FindSectorFromTag(tag, sectorIndex)) >= 0)
 	{
 		sector = &sectors[sectorIndex];
-		waggle = NULL;
-
 manual_waggle:
-		if ( ceiling )
+		if ((!ceiling && sector->PlaneMoving(sector_t::floor)) ||
+			(ceiling && sector->PlaneMoving(sector_t::ceiling)))
+		{ // Already busy with another thinker
+			continue;
+		}
+		retCode = true;
+		if (ceiling)
 		{
-			if (sector->PlaneMoving(sector_t::ceiling))
-			{
-				if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DCeilingWaggle)))
-				{
-					waggle = barrier_cast<DCeilingWaggle*>(sector->ceilingdata);
-				}
-				else
-				{
-					continue;
-				}
-			}
+			waggle = new DCeilingWaggle (sector);
+			waggle->m_OriginalDist = sector->ceilingplane.d;
 		}
 		else
 		{
-			if (sector->PlaneMoving(sector_t::floor))
-			{
-				if (sector->floordata->IsKindOf(RUNTIME_CLASS(DFloorWaggle)))
-				{
-					waggle = barrier_cast<DFloorWaggle*>(sector->floordata);
-				}
-				else
-				{
-					continue;
-				}
-			}
-		}
-
-		retCode = true;
-		if (waggle == NULL) {
-			if (ceiling)
-			{
-				waggle = new DCeilingWaggle (sector);
-				waggle->m_OriginalDist = sector->ceilingplane.d;
-			}
-			else
-			{
-				waggle = new DFloorWaggle (sector);
-				waggle->m_OriginalDist = sector->floorplane.d;
-			}
+			waggle = new DFloorWaggle (sector);
+			waggle->m_OriginalDist = sector->floorplane.d;
 		}
 
 		waggle->m_LastInstigator = instigator;
