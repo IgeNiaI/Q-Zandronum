@@ -5062,6 +5062,20 @@ void ServerCommands::SetThingScale::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetThingFillColor::Execute()
+{
+	actor->fillcolor = fillcolor;
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetThingSprite::Execute()
+{
+	actor->sprite = sprite;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetWeaponAmmoGive::Execute()
 {
 	weapon->AmmoGive1 = ammoGive1;

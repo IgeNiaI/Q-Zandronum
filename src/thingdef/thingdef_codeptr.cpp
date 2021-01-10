@@ -2563,6 +2563,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 
 			// [BB] Set scale if necessary.
 			SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( mo );
+
+			if (flags & SIXF_TRANSFERSTENCILCOL)
+				SERVERCOMMANDS_SetThingFillColor( mo );
+
+			if (flags & SIXF_TRANSFERSPRITE)
+				SERVERCOMMANDS_SetThingSprite( mo );
 		}
 
 		// [BC] Flag this actor as being client-spawned.
