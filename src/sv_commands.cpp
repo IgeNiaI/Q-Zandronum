@@ -3620,6 +3620,34 @@ void SERVERCOMMANDS_UpdateThingScaleNotAtDefault( AActor* pActor, ULONG ulPlayer
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetThingFillColor( AActor* pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	// [BB] Sanity check.
+	if ( pActor == NULL )
+		return;
+	
+	NetCommand command( SVC2_SETTHINGFILLCOLOR );
+	command.addShort( pActor->lNetID );
+	command.addLong( pActor->fillcolor );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
+void SERVERCOMMANDS_SetThingSprite( AActor* pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	// [BB] Sanity check.
+	if ( pActor == NULL )
+		return;
+	
+	NetCommand command( SVC2_SETTHINGSPRITE );
+	command.addShort( pActor->lNetID );
+	command.addLong( pActor->sprite );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_FlashStealthMonster( AActor* pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( EnsureActorHasNetID( pActor ) == false )
