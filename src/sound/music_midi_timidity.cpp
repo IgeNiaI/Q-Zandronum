@@ -442,6 +442,7 @@ bool TimidityPPMIDIDevice::LaunchTimidity ()
 		
 	case WRDE_NOSPACE:
 		wordfree (&words);
+		// fall through
 	default:
 		return false;
 	}

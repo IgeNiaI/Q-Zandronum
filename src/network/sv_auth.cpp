@@ -268,7 +268,7 @@ void SERVER_AUTH_ParsePacket( BYTESTREAM_s *pByteStream )
 	{  
 		const unsigned int commandNum = NETWORK_ReadLong( pByteStream );
 
-		if ( commandNum == -1u )
+		if ( commandNum == UINT_MAX )
 			break;
 
 		switch ( commandNum )

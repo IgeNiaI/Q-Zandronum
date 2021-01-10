@@ -319,7 +319,7 @@ bool DOptionMenu::MenuEvent (int mkey, bool fromcontroller)
 		{
 			return true;
 		}
-		// fall through to default
+		// fall through
 	default:
 		if (mDesc->mSelectedItem >= 0 && 
 			mDesc->mItems[mDesc->mSelectedItem]->MenuEvent(mkey, fromcontroller)) return true;

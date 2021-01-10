@@ -2685,7 +2685,7 @@ void P_ProcessSideTextures(bool checktranmap, side_t *sd, sector_t *sec, mapside
 			SetTexture(sd, side_t::bottom, msd->bottomtexture, missingtex);
 			break;
 		}
-		// Fallthrough for Hexen maps is intentional
+		// fall through
 
 	default:			// normal cases
 

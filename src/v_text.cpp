@@ -587,7 +587,7 @@ bool v_IsCharacterWhitespace ( char c )
 		return true;
 
 	// Ascii 255.
-	if ( c == static_cast<char> (255) ) //[BL] 255 is supposedly out of range for a char
+	if ( c == 255 ) //[BL] 255 is supposedly out of range for a char
 		return true;
 
 	return false;

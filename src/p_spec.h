@@ -877,6 +877,7 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 	int tag, player_t *instigator, fixed_t speed, fixed_t speed2, fixed_t height,
 	int crush, int silent, int change, bool hexencrush);
 bool EV_CeilingCrushStop (int tag);
+bool EV_CeilingCrushStop (int tag, player_t *instigator);
 void P_ActivateInStasisCeiling (int tag, player_t *instigator);
 
 

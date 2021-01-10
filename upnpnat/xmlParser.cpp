@@ -430,6 +430,7 @@ static NextToken GetNextToken(XML *pXML, int *pcbToken, enum TokenTypeTag *pType
             // text process
 
         // Other characters
+		// fall through
         default:
             nIsText = TRUE;
         }

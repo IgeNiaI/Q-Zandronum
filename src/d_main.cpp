@@ -1603,7 +1603,7 @@ void D_DoAdvanceDemo (void)
 			pagetic = (int)(gameinfo.advisoryTime * TICRATE);
 			break;
 		}
-		// fall through to case 1 if no advisory notice
+		// fall through
 
 	case 1:
 		Advisory = NULL;
@@ -1625,6 +1625,7 @@ void D_DoAdvanceDemo (void)
 				break;
 			}
 		}
+		// fall through
 
 	default:
 	case 0:

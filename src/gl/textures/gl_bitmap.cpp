@@ -244,7 +244,7 @@ void FGLBitmap::CopyPixelData(int originx, int originy, const BYTE * patch, int 
 					break;
 				}
 			}
-
+			// fall through
 			case 0:
 				memcpy(penew, palette, 256*sizeof(PalEntry));
 				break;
