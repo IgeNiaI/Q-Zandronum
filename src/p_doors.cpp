@@ -660,30 +660,20 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 		secnum = -1;
 		while ((secnum = P_FindSectorFromTag (tag,secnum)) >= 0)
 		{
-			pDoor = NULL;
-
 			sec = &sectors[secnum];
 			// if the ceiling is already moving, don't start the door action
 			if (sec->PlaneMoving(sector_t::ceiling))
+				continue;
+
+			if ( (pDoor = new DDoor (sec, type, speed, delay, lightTag)))
 			{
-				if (sec->ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)))
-				{
-					pDoor = barrier_cast<DDoor *>(sec->ceilingdata);
-				}
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_DoDoor( pDoor );
+
+				rtn = true;
 			}
-
-			if ( pDoor == NULL )
-			{
-				pDoor = new DDoor (sec, type, speed, delay, lightTag);
-			}
-
-			pDoor->m_LastInstigator = instigator;
-			rtn = true;
-
-			// [geNia] If we are the server, update the clients
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DoDoor( pDoor );
 		}
+
 	}
 	return rtn;
 }

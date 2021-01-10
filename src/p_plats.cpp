@@ -455,8 +455,6 @@ bool EV_DoPlat (int tag, line_t *line, player_t *instigator, DPlat::EPlatType ty
 		sec = &sectors[secnum];
 
 manual_plat:
-		plat = P_GetPlatBySectorNum(sec->sectornum);
-
 		if (sec->PlaneMoving(sector_t::floor))
 		{
 			if (!manual)
@@ -467,10 +465,7 @@ manual_plat:
 
 		// Find lowest & highest floors around sector
 		rtn = true;
-		if ( plat == NULL )
-		{
-			plat = new DPlat (sec);
-		}
+		plat = new DPlat (sec);
 
 		plat->m_Type = type;
 		plat->m_Crush = -1;

@@ -271,21 +271,14 @@ DPillar::DPillar (sector_t *sector, EPillar type, fixed_t speed,
 				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush)
 	: DMover (sector)
 {
+	fixed_t newheight;
+	vertex_t *spot;
+
 	sector->floordata = sector->ceilingdata = this;
 	m_Interp_Floor = sector->SetInterpolation(sector_t::FloorMove, true);
 	m_Interp_Ceiling = sector->SetInterpolation(sector_t::CeilingMove, true);
 
-	Reinit(sector, type, speed, floordist, ceilingdist, crush, hexencrush);
-}
-
-void DPillar::Reinit( sector_t *sector, EPillar type, fixed_t speed,
-				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush )
-{
-	fixed_t newheight;
-	vertex_t *spot;
-
 	m_Type = type;
-	m_Speed = speed;
 	m_Crush = crush;
 	m_Hexencrush = hexencrush;
 
@@ -369,19 +362,20 @@ bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
 	return EV_DoPillar(type, tag, NULL, speed, height, height2, crush, hexencrush);
 }
 
-bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t height,
-				  fixed_t height2, fixed_t ceilingdist, int crush, bool hexencrush)
+bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t speed, fixed_t height,
+				  fixed_t height2, int crush, bool hexencrush)
 {
 	bool rtn = false;
 	int secnum = -1;
 	// [BC]
 	DPillar		*pPillar;
-	sector_t *sec;
 
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
-		sec = &sectors[secnum];
-		pPillar = NULL;
+		sector_t *sec = &sectors[secnum];
+
+		if (sec->PlaneMoving(sector_t::floor) || sec->PlaneMoving(sector_t::ceiling))
+			continue;
 
 		fixed_t flor, ceil;
 
@@ -393,38 +387,18 @@ bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t 
 
 		if (type == DPillar::pillarOpen && flor != ceil)
 			continue;
-		
-		// ALREADY MOVING?	IF SO, KEEP GOING...
-		if (sec->PlaneMoving(sector_t::floor) || sec->PlaneMoving(sector_t::ceiling))
-		{
-			if (sec->floordata->IsKindOf(RUNTIME_CLASS(DPillar)))
-			{
-				pPillar = barrier_cast<DPillar*>(sec->floordata);
-			}
-			else if (sec->ceilingdata->IsKindOf(RUNTIME_CLASS(DPillar)))
-			{
-				pPillar = barrier_cast<DPillar*>(sec->ceilingdata);
-			}
-			else
-			{
-				return false;
-			}
-		}
-		
-		if (pPillar == NULL)
-		{
-			// new pillar thinker
-			pPillar = new DPillar (sec);
-		}
-
-		pPillar->Reinit( sec, type, height, height2, ceilingdist, crush, hexencrush );
-		pPillar->m_LastInstigator = instigator;
 
 		rtn = true;
+		pPillar = new DPillar (sec, type, speed, height, height2, crush, hexencrush);
 
-		// [BC] If we're the server, tell clients to create the pillar.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_DoPillar( pPillar );
+		if ( pPillar )
+		{
+			pPillar->m_LastInstigator = instigator;
+
+			// [BC] If we're the server, tell clients to create the pillar.
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				SERVERCOMMANDS_DoPillar( pPillar );
+		}
 	}
 	return rtn;
 }
