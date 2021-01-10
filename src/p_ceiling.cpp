@@ -255,6 +255,12 @@ void DCeiling::UpdateToClient( ULONG ulClient )
 DCeiling::DCeiling (sector_t *sec)
 	: DMovingCeiling (sec)
 {
+	m_Crush = -1;
+	m_Hexencrush = false;
+	m_LastInstigator = NULL;
+	m_BottomHeight = 0;
+	m_TopHeight = 0;
+	m_OldDirection = 0;
 }
 
 fixed_t DCeiling::GetTopHeight( void )
@@ -317,7 +323,7 @@ int DCeiling::GetDirection( void )
 	return ( m_Direction );
 }
 
-void DCeiling::SetPositionAndDirection( fixed_t Position, int lDirection )
+void DCeiling::SetPositionAndDirection( fixed_t Position, int Direction )
 {
 	fixed_t diff = m_Sector->ceilingplane.d - Position;
 	if (diff > 0)
@@ -329,14 +335,14 @@ void DCeiling::SetPositionAndDirection( fixed_t Position, int lDirection )
 		MoveCeiling(-diff, Position, -1, 1, false);
 	}
 
-	if (m_Direction != lDirection)
+	if (m_Direction != Direction)
 	{
-		if (lDirection != 0)
+		if (Direction != 0)
 			PlayCeilingSound();
 		else
 			SN_StopSequence(m_Sector, CHAN_CEILING);
 
-		m_Direction = lDirection;
+		m_Direction = Direction;
 	}
 }
 
@@ -365,9 +371,9 @@ int DCeiling::GetTag( void )
 	return ( m_Tag );
 }
 
-void DCeiling::SetTag( int lTag )
+void DCeiling::SetTag( int Tag )
 {
-	m_Tag = lTag;
+	m_Tag = Tag;
 }
 
 int DCeiling::GetCrush( void )
@@ -375,9 +381,9 @@ int DCeiling::GetCrush( void )
 	return ( m_Crush );
 }
 
-void DCeiling::SetCrush( int lCrush )
+void DCeiling::SetCrush( int Crush )
 {
-	m_Crush = lCrush;
+	m_Crush = Crush;
 }
 
 bool DCeiling::GetHexencrush( void )
@@ -395,9 +401,9 @@ int DCeiling::GetSilent( void )
 	return ( m_Silent );
 }
 
-void DCeiling::SetSilent( int lSilent )
+void DCeiling::SetSilent( int Silent )
 {
-	m_Silent = lSilent;
+	m_Silent = Silent;
 }
 
 //============================================================================
@@ -420,29 +426,18 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 		{
 			ceiling = barrier_cast<DCeiling*>(sec->ceilingdata);
 
-			//	Reactivate in-stasis ceilings...for certain types.
-			// This restarts a crusher after it has been stopped
-			if ((type == DCeiling::ceilCrushAndRaise || type == DCeiling::ceilCrushAndRaiseDist) && ceiling->m_Direction == 0)
-			{
-				ceiling->m_Direction = ceiling->m_OldDirection;
-				ceiling->m_LastInstigator = instigator;
-				ceiling->PlayCeilingSound ();
-
-				// [geNia] If we are the server, update the clients
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_DoCeiling( ceiling );
-
-				return ceiling;
-			}
+			if (ceiling->m_Direction != 0)
+				return NULL;
+		}
+		else
+		{
+			return NULL;
 		}
 	}
 
 	// new ceiling thinker
 	if (ceiling == NULL)
 		ceiling = new DCeiling (sec);
-
-	if (ceiling->m_Direction != 0)
-		return NULL;
 
 	ceiling->m_Speed = ceiling->m_Speed1 = speed;
 	ceiling->m_Speed2 = speed2;
@@ -615,6 +610,10 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 		ceiling->StopInterpolation();
 	}
 
+	// [geNia] If we are the server, update the clients
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_DoCeiling( ceiling );
+
 	// set texture/type change properties
 	if (change & 3)		// if a texture change is indicated
 	{
@@ -671,10 +670,6 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 
 	ceiling->PlayCeilingSound ();
 
-	// [geNia] If we are the server, update the clients
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_DoCeiling( ceiling );
-
 	return ceiling;
 }
 
@@ -717,7 +712,15 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 		secnum = (int)(sec-sectors);
 		// [RH] Hack to let manual crushers be retriggerable, too
 		tag ^= secnum | 0x1000000;
+		P_ActivateInStasisCeiling (tag, instigator);
 		return !!DCeiling::Create(sec, type, line, tag, instigator, speed, speed2, height, crush, silent, change, hexencrush);
+	}
+
+	//	Reactivate in-stasis ceilings...for certain types.
+	// This restarts a crusher after it has been stopped
+	if (type == DCeiling::ceilCrushAndRaise || type == DCeiling::ceilCrushAndRaiseDist)
+	{
+		P_ActivateInStasisCeiling (tag, instigator);
 	}
 
 	secnum = -1;
@@ -727,6 +730,37 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 		rtn |= !!DCeiling::Create(&sectors[secnum], type, line, tag, instigator, speed, speed2, height, crush, silent, change, hexencrush);
 	}
 	return rtn;
+}
+
+
+//============================================================================
+//
+// Restart a ceiling that's in-stasis
+// [RH] Passed a tag instead of a line and rewritten to use a list
+//
+//============================================================================
+
+void P_ActivateInStasisCeiling (int tag, player_t *instigator)
+{
+	DCeiling *scan;
+	TThinkerIterator<DCeiling> iterator;
+
+	while ( (scan = iterator.Next ()) )
+	{
+		if (scan->m_Tag == tag && scan->m_Direction == 0)
+		{
+			scan->m_LastInstigator = instigator;
+			scan->m_Direction = scan->m_OldDirection;
+			scan->PlayCeilingSound ();
+
+			// [BC] If we're the server, tell clients to change the ceiling direction, and
+			// play the ceiling sound.
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
+				SERVERCOMMANDS_DoCeiling ( scan );
+			}
+		}
+	}
 }
 
 //============================================================================

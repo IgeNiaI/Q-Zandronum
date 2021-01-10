@@ -400,7 +400,7 @@ void DFloor::SetFloorDestDist( fixed_t FloorDestDist )
 	m_FloorDestDist = FloorDestDist;
 }
 
-fixed_t DFloor::GetNewSpecial( void ) 
+int DFloor::GetNewSpecial( void ) 
 {
 	return ( m_NewSpecial );
 }
@@ -459,7 +459,7 @@ void DFloor::SetPerStepTime( int PerStepTime )
 //==========================================================================
 
 bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
-	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower)
+				 fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower)
 {
 	return EV_DoFloor(floortype, line, tag, NULL,
 		speed, height, crush, change, hexencrush, hereticlower);
@@ -494,9 +494,10 @@ bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag, player_t *inst
 	while (tag && (secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
 		sec = &sectors[secnum];
-		floor = NULL;
 
 manual_floor:
+		floor = NULL;
+
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		if (sec->PlaneMoving(sector_t::floor))
 		{
@@ -555,19 +556,17 @@ manual_floor:
 		case DFloor::floorLowerInstant:
 			floor->m_Speed = height;
 		case DFloor::floorLowerByValue:
-			sec->FindHighestFloorPoint(&spot);
 			floor->m_Direction = -1;
-			newheight = sec->floorplane.ZatPoint (spot) - height;
-			floor->m_FloorDestDist = sec->floorplane.PointToDist (spot, newheight);
+			newheight = sec->floorplane.ZatPoint (0, 0) - height;
+			floor->m_FloorDestDist = sec->floorplane.PointToDist (0, 0, newheight);
 			break;
 
 		case DFloor::floorRaiseInstant:
 			floor->m_Speed = height;
 		case DFloor::floorRaiseByValue:
-			sec->FindHighestFloorPoint(&spot);
 			floor->m_Direction = 1;
-			newheight = sec->floorplane.ZatPoint (spot) + height;
-			floor->m_FloorDestDist = sec->floorplane.PointToDist (spot, newheight);
+			newheight = sec->floorplane.ZatPoint (0, 0) + height;
+			floor->m_FloorDestDist = sec->floorplane.PointToDist (0, 0, newheight);
 			break;
 
 		case DFloor::floorMoveToValue:
@@ -786,12 +785,15 @@ bool EV_FloorCrushStop (int tag, player_t *instigator)
 
 		if (sec->floordata && sec->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
 		{
-			floor = barrier_cast<DFloor *>(sec->floordata);
+			floor = barrier_cast<DFloor *>( sec->floordata );
 
 			if (floor->m_Type == DFloor::floorRaiseAndCrush)
+			{
+				floor->Destroy ();
 				SERVERCOMMANDS_DoFloor( floor );
 
-			SN_StopSequence(sec, CHAN_FLOOR);
+			SN_StopSequence (sec, CHAN_FLOOR);
+			}
 		}
 	}
 	return true;
@@ -823,8 +825,8 @@ static int P_FindSectorFromTagLinear (int tag, int start)
 //==========================================================================
 
 bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
-	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
-	int usespecials)
+					 fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
+					 int usespecials)
 {
 	return EV_BuildStairs(tag, NULL, type, line,
 		stairsize, speed, delay, reset, igntxt,
@@ -881,9 +883,10 @@ bool EV_BuildStairs (int tag, player_t *instigator, DFloor::EStair type, line_t 
 	while ((secnum = FindSector (tag, secnum)) >= 0)
 	{
 		sec = &sectors[secnum];
-		floor = NULL;
 
 manual_stair:
+		floor = NULL;
+
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		//jff 2/26/98 add special lockout condition to wait for entire
 		//staircase to build before retriggering
@@ -959,7 +962,7 @@ manual_stair:
 
 					// if sector's floor already moving, look for another
 					//jff 2/26/98 special lockout condition for retriggering
-					if (tsec->stairlock)
+					if (tsec->PlaneMoving(sector_t::floor) || tsec->stairlock)
 					{
 						prev = sec;
 						sec = tsec;
@@ -995,7 +998,7 @@ manual_stair:
 
 					// if sector's floor already moving, look for another
 					//jff 2/26/98 special lockout condition for retriggering
-					if (tsec->stairlock)
+					if (tsec->PlaneMoving(sector_t::floor) || tsec->stairlock)
 						continue;
 
 					if (!(i_compatflags & COMPATF_STAIRINDEX)) height += stairstep;
@@ -1133,7 +1136,7 @@ manual_donut:
 		// ALREADY MOVING?	IF SO, KEEP GOING...
 		if (s1->PlaneMoving(sector_t::floor))
 		{
-			if (s1->floordata->IsKindOf(RUNTIME_CLASS(DFloor)) || barrier_cast<DFloor*>(s1->floordata)->m_Direction != 0)
+			if (!s1->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
 			{
 				continue; // safe now, because we check that tag is non-0 in the looping condition [fdari]
 			}
@@ -1143,10 +1146,10 @@ manual_donut:
 		s2 = getNextSector (s1->lines[0], s1);	// s2 is pool's sector
 		if (!s2)								// note lowest numbered line around
 			continue;							// pillar must be two-sided
-		
+
 		if (s2->PlaneMoving(sector_t::floor))
 		{
-			if (s2->floordata->IsKindOf(RUNTIME_CLASS(DFloor)) || barrier_cast<DFloor*>(s2->floordata)->m_Direction != 0)
+			if (!s2->floordata->IsKindOf(RUNTIME_CLASS(DFloor)))
 			{
 				continue; // safe now, because we check that tag is non-0 in the looping condition [fdari]
 			}
@@ -1540,9 +1543,10 @@ bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator ele
 	while (tag && (secnum = P_FindSectorFromTag (tag, secnum)) >= 0) // never loop for a non-0 tag (condition moved to beginning of loop) [FDARI]
 	{
 		sec = &sectors[secnum];
-		elevator = NULL;
 
 manual_elevator:
+		elevator = NULL;
+
 		if (sec->PlaneMoving(sector_t::floor))
 		{
 			if (sec->floordata->IsKindOf(RUNTIME_CLASS(DElevator)))
@@ -1558,7 +1562,7 @@ manual_elevator:
 		if (elevator == NULL)
 		{
 			// new floor thinker
-			elevator = new DElevator(sec);
+			elevator = new DElevator (sec);
 		}
 
 		rtn = true;
@@ -1648,6 +1652,9 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag)
 
 bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigator)
 {
+	if (CLIENT_PREDICT_IsPredicting())
+		return false;
+
 	int			secnum;
 	bool		rtn;
 	sector_t	*sec;
@@ -1754,6 +1761,7 @@ void DWaggleBase::Serialize (FArchive &arc)
 DWaggleBase::DWaggleBase (sector_t *sec)
 	: Super (sec)
 {
+	m_LastInstigator = NULL;
 }
 
 void DWaggleBase::Destroy()
