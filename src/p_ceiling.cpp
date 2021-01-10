@@ -255,12 +255,20 @@ void DCeiling::UpdateToClient( ULONG ulClient )
 DCeiling::DCeiling (sector_t *sec)
 	: DMovingCeiling (sec)
 {
+}
+
+DCeiling::DCeiling (sector_t *sec, fixed_t speed1, fixed_t speed2, int silent, player_t *instigator)
+	: DMovingCeiling (sec)
+{
 	m_Crush = -1;
 	m_Hexencrush = false;
-	m_LastInstigator = NULL;
+	m_Speed = m_Speed1 = speed1;
+	m_Speed2 = speed2;
+	m_Silent = silent;
 	m_BottomHeight = 0;
 	m_TopHeight = 0;
 	m_OldDirection = 0;
+	m_LastInstigator = instigator;
 }
 
 fixed_t DCeiling::GetTopHeight( void )
@@ -417,33 +425,15 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 				   int crush, int silent, int change, bool hexencrush)
 {
 	fixed_t		targheight = 0;	// Silence, GCC
-	DCeiling	*ceiling = NULL;
 
 	// if ceiling already moving, don't start a second function on it
 	if (sec->PlaneMoving(sector_t::ceiling))
 	{
-		if (sec->ceilingdata->IsKindOf(RUNTIME_CLASS(DCeiling)))
-		{
-			ceiling = barrier_cast<DCeiling*>(sec->ceilingdata);
-
-			if (ceiling->m_Direction != 0)
-				return NULL;
-		}
-		else
-		{
-			return NULL;
-		}
+		return NULL;
 	}
 
-	// new ceiling thinker
-	if (ceiling == NULL)
-		ceiling = new DCeiling (sec);
-
-	ceiling->m_Speed = ceiling->m_Speed1 = speed;
-	ceiling->m_Speed2 = speed2;
-	ceiling->m_Silent = silent;
-	ceiling->m_LastInstigator = instigator;
-
+	// new door thinker
+	DCeiling *ceiling = new DCeiling (sec, speed, speed2, silent, instigator);
 	vertex_t *spot = sec->lines[0]->v1;
 
 	switch (type)

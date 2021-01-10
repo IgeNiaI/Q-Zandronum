@@ -793,6 +793,7 @@ public:
 	};
 
 	DCeiling (sector_t *sec);
+	DCeiling (sector_t *sec, fixed_t speed1, fixed_t speed2, int silent, player_t *instigator);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
