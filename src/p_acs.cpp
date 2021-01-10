@@ -6476,6 +6476,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				switch (argCount)
 				{
 				case 4: tid2 = args[3];
+				// fall through
 				case 3: tid1 = args[2];
 				}
 
@@ -7254,7 +7255,6 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 		case ACSF_SetPlayerScore:
 		{
 			const ULONG ulPlayer = static_cast<ULONG> (args[0]);
-			int oldvalue;
 
 			if (PLAYER_IsValidPlayer(ulPlayer))
 			{
@@ -7263,7 +7263,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_FRAGS:
 				{
 					// [AK] Keep the original value of the player's frags.
-					oldvalue = players[ulPlayer].fragcount;
+					int oldvalue = players[ulPlayer].fragcount;
 					players[ulPlayer].fragcount = args[2];
 
 					// [AK] If we're the server, tell the clients the player's new frag count.
@@ -7275,7 +7275,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_POINTS:
 				{
 					// [AK] Keep the original value of the player's points.
-					oldvalue = players[ulPlayer].lPointCount;
+					LONG oldvalue = players[ulPlayer].lPointCount;
 					players[ulPlayer].lPointCount = args[2];
 
 					// [AK] If we're the server, tell the clients the player's new point count.
@@ -7287,7 +7287,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_WINS:
 				{
 					// [AK] Keep the original value of the player's wins.
-					oldvalue = players[ulPlayer].ulWins;
+					ULONG oldvalue = players[ulPlayer].ulWins;
 					players[ulPlayer].ulWins = args[2] >= 0 ? args[2] : 0;
 
 					// [AK] If we're the server, tell the clients the player's new win count.
@@ -7299,7 +7299,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_DEATHS:
 				{
 					// [AK] Keep the original value of the player's deaths.
-					oldvalue = players[ulPlayer].ulDeathCount;
+					ULONG oldvalue = players[ulPlayer].ulDeathCount;
 					players[ulPlayer].ulDeathCount = args[2] >= 0 ? args[2] : 0;
 
 					// [AK] If we're the server, tell the clients the player's new death count.
@@ -7311,7 +7311,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_KILLS:
 				{
 					// [AK] Keep the original value of the player's kills.
-					oldvalue = players[ulPlayer].killcount;
+					int oldvalue = players[ulPlayer].killcount;
 					players[ulPlayer].killcount = args[2];
 
 					// [AK] If we're the server, tell the clients the player's new kill count.
@@ -8698,7 +8698,8 @@ int DLevelScript::RunScript ()
 
 		case PCD_SETRESULTVALUE:
 			resultValue = STACK(1);
-		case PCD_DROP: //fall through.
+			// fall through
+		case PCD_DROP:
 			sp--;
 			break;
 

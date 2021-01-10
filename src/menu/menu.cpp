@@ -445,7 +445,7 @@ void M_SetMenu(FName menu, int param)
 		// sent either from skill menu or confirmation screen. Skill gets only set if sent from skill menu
 		// Now we can finally start the game. Ugh...
 		GameStartupInfo.Skill = param;
-	// [BB] Sneak in the bot skill with fall through to avoid copy and paste.
+		// fall through
 	case NAME_ChooseBotSkill:
 		if ( menu == NAME_ChooseBotSkill )
 		{
@@ -456,6 +456,7 @@ void M_SetMenu(FName menu, int param)
 				return;
 			}
 		}
+		// fall through
 	case NAME_StartgameConfirmed:
 
 		// [BC/BB] Put us back in single player mode, and reset our dmflags.

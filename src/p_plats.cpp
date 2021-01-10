@@ -129,6 +129,7 @@ void DPlat::Tick ()
 						// better use a flag to avoid problems elsewhere. For example,
 						// keeping the thinker would make tagwait wait indefinitely.
 						m_Sector->planes[sector_t::floor].Flags |= PLANEF_BLOCKED; 
+						// fall through
 					case platRaiseAndStay:
 					case platDownByValue:
 					case platDownWaitUpStay:
@@ -439,6 +440,7 @@ bool EV_DoPlat (int tag, line_t *line, player_t *instigator, DPlat::EPlatType ty
 	{
 	case DPlat::platToggle:
 		rtn = true;
+		// fall through
 	case DPlat::platPerpetualRaise:
 		P_ActivateInStasis (tag, instigator);
 		break;

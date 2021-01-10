@@ -826,10 +826,12 @@ bool DAnimatedDoor::StartClosing ()
 
 		// [BB] Tell the clients to play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		{
 			if ( m_LastInstigator )
 				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_CEILING, m_DoorAnim->CloseSound.GetChars(), 1, ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 			else
 				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_CEILING, m_DoorAnim->CloseSound.GetChars(), 1 );
+		}
 	}
 
 	m_Status = Closing;
@@ -947,10 +949,12 @@ void DAnimatedDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to move the ceiling.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				{
 					if ( m_LastInstigator )
 						SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 					else
 						SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
+				}
 
 				m_Sector->ceilingdata = NULL;
 				Destroy ();
@@ -1100,18 +1104,22 @@ DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, player_t *instigator,
 
 		// [BB] Tell the clients to play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		{
 			if ( m_LastInstigator )
 				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_INTERIOR, m_DoorAnim->OpenSound.GetChars(), 1, ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 			else
 				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_INTERIOR, m_DoorAnim->OpenSound.GetChars(), 1 );
+		}
 	}
 
 	// [BC] If we're the server, tell clients to move the ceiling.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
 		if ( m_LastInstigator )
 			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 		else
 			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
+	}
 }
 
 //============================================================================
