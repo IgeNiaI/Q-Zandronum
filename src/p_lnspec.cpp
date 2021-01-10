@@ -1884,13 +1884,13 @@ FUNC(LS_ACS_Terminate)
 FUNC(LS_FloorAndCeiling_LowerByValue)
 // FloorAndCeiling_LowerByValue (tag, speed, height)
 {
-	return EV_DoElevator (ln, DElevator::elevateLower, SPEED(arg1), arg2*FRACUNIT, arg0);
+	return EV_DoElevator (ln, GetInstigator(it, isFromAcs), DElevator::elevateLower, SPEED(arg1), arg2*FRACUNIT, arg0);
 }
 
 FUNC(LS_FloorAndCeiling_RaiseByValue)
 // FloorAndCeiling_RaiseByValue (tag, speed, height)
 {
-	return EV_DoElevator (ln, DElevator::elevateRaise, SPEED(arg1), arg2*FRACUNIT, arg0);
+	return EV_DoElevator (ln, GetInstigator(it, isFromAcs), DElevator::elevateRaise, SPEED(arg1), arg2*FRACUNIT, arg0);
 }
 
 FUNC(LS_FloorAndCeiling_LowerRaise)
@@ -1911,19 +1911,19 @@ FUNC(LS_FloorAndCeiling_LowerRaise)
 FUNC(LS_Elevator_MoveToFloor)
 // Elevator_MoveToFloor (tag, speed)
 {
-	return EV_DoElevator (ln, DElevator::elevateCurrent, SPEED(arg1), 0, arg0);
+	return EV_DoElevator (ln, GetInstigator(it, isFromAcs), DElevator::elevateCurrent, SPEED(arg1), 0, arg0);
 }
 
 FUNC(LS_Elevator_RaiseToNearest)
 // Elevator_RaiseToNearest (tag, speed)
 {
-	return EV_DoElevator (ln, DElevator::elevateUp, SPEED(arg1), 0, arg0);
+	return EV_DoElevator (ln, GetInstigator(it, isFromAcs), DElevator::elevateUp, SPEED(arg1), 0, arg0);
 }
 
 FUNC(LS_Elevator_LowerToNearest)
 // Elevator_LowerToNearest (tag, speed)
 {
-	return EV_DoElevator (ln, DElevator::elevateDown, SPEED(arg1), 0, arg0);
+	return EV_DoElevator (ln, GetInstigator(it, isFromAcs), DElevator::elevateDown, SPEED(arg1), 0, arg0);
 }
 
 FUNC(LS_Light_ForceLightning)
