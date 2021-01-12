@@ -1,7 +1,8 @@
 Welcome to Q-Zandronum!
 =====================
 
-Q-Zandronum is a Zandronum fork mainly dedicated to improve the gameplay of QC:DE mod.
+Q-Zandronum is a Zandronum fork mainly dedicated to improve the gameplay of QC:DE mod. Don't worry, you can still use it for any other mod you would like and still benefit from Q-Zandronum improvements.
+
 Main new features are Quake style movement and improved netcode for smoother gameplay on high ping, and also multiple minor quality of life improvements.
 
 
