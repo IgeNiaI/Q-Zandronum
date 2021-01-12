@@ -698,15 +698,36 @@ void R_InitSkins (void)
 				}
 				else if (0 == stricmp (key, "class"))
 				{ // [GRB] Define the skin for a specific player class
-					int pclass = D_PlayerClassToInt (sc.String);
+					// [AK] Store the display name into a string, we might need it later.
+					const char *displayname = sc.String;
+					int pclass = D_PlayerClassToInt (displayname);
 
 					if (pclass < 0)
 					{
 						remove = true;
-						break;
-					}
 
-					basetype = transtype = PlayerClasses[pclass].Type;
+						// [AK] Check the player class list, and see if they're descendents of
+						// a class using this display name. This is important, since these classes must
+						// must still inherit all their parent's skins. Otherwise, bad things may happen.
+						for (j = 0; j < (int)PlayerClasses.Size(); j++)
+						{
+							PClass *parent = PlayerClasses[j].Type->ParentClass;
+							if (stricmp (parent->Meta.GetMetaString(APMETA_DisplayName), displayname) == 0)
+							{
+								basetype = transtype = parent;
+								remove = false;
+								break;
+							}
+						}
+
+						if (remove)
+							break;
+					}
+					// [AK] Only execute this block if the class was on the list.
+					else
+					{
+						basetype = transtype = PlayerClasses[pclass].Type;
+					}
 				}
 				// [BL] Skulltag additions
 				else if (0 == stricmp (key, "hidden"))
