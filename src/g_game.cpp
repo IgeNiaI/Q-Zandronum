@@ -790,7 +790,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	if (Button_User3.bDown)			cmd->ucmd.buttons |= BT_USER3;
 	if (Button_User4.bDown)			cmd->ucmd.buttons |= BT_USER4;
 
-	if (Button_Speed.bDown)			cmd->ucmd.buttons |= BT_SPEED;
+	if (!(Button_Speed.bDown ^ (int)cl_run))			cmd->ucmd.buttons |= BT_SPEED; // [geNia] Always consider BT_SPEED pressed when walking
 	if (Button_Strafe.bDown)		cmd->ucmd.buttons |= BT_STRAFE;
 	if (Button_MoveRight.bDown)		cmd->ucmd.buttons |= BT_MOVERIGHT;
 	if (Button_MoveLeft.bDown)		cmd->ucmd.buttons |= BT_MOVELEFT;

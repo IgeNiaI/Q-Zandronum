@@ -129,6 +129,7 @@ void DPlat::Tick ()
 						// better use a flag to avoid problems elsewhere. For example,
 						// keeping the thinker would make tagwait wait indefinitely.
 						m_Sector->planes[sector_t::floor].Flags |= PLANEF_BLOCKED; 
+						// fall through
 					case platRaiseAndStay:
 					case platDownByValue:
 					case platDownWaitUpStay:
@@ -136,7 +137,7 @@ void DPlat::Tick ()
 					case platUpByValueStay:
 					case platDownToNearestFloor:
 					case platDownToLowestCeiling:
-						Destroy();
+						Destroy ();
 						break;
 					default:
 						break;
@@ -172,7 +173,7 @@ void DPlat::Tick ()
 					case platUpWaitDownStay:
 					case platUpNearestWaitDownStay:
 					case platUpByValue:
-						Destroy();
+						Destroy ();
 						break;
 				}
 			}
@@ -204,7 +205,7 @@ void DPlat::Tick ()
 			case platUpByValueStay:
 			case platRaiseAndStay:
 			case platRaiseAndStayLockout:
-				Destroy();
+				Destroy ();
 			default:
 				break;
 		}
@@ -288,11 +289,11 @@ void DPlat::SetPosition( fixed_t Position )
 	fixed_t diff = m_Sector->floorplane.d - Position;
 	if (diff > 0)
 	{
-		MoveFloor(diff, m_Low, -1, -1, false);
+		MoveFloor(diff, Position, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveFloor(-diff, m_High, -1, 1, false);
+		MoveFloor(-diff, Position, -1, 1, false);
 	}
 }
 
@@ -403,13 +404,13 @@ void DPlat::SetTag( LONG lTag )
 //	[RH] Changed amount to height and added delay,
 //		 lip, change, tag, and speed parameters.
 //
-bool EV_DoPlat(line_t *line, int tag, DPlat::EPlatType type, int height,
-	int speed, int delay, int lip, int change)
+bool EV_DoPlat (int tag, line_t *line, DPlat::EPlatType type, int height,
+				int speed, int delay, int lip, int change)
 {
-	return EV_DoPlat(line, tag, NULL, type, height, speed, delay, lip, change);
+	return EV_DoPlat(tag, line, NULL, type, height, speed, delay, lip, change);
 }
 
-bool EV_DoPlat (line_t *line, int tag, player_t *instigator, DPlat::EPlatType type, int height,
+bool EV_DoPlat (int tag, line_t *line, player_t *instigator, DPlat::EPlatType type, int height,
 				int speed, int delay, int lip, int change)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -439,6 +440,7 @@ bool EV_DoPlat (line_t *line, int tag, player_t *instigator, DPlat::EPlatType ty
 	{
 	case DPlat::platToggle:
 		rtn = true;
+		// fall through
 	case DPlat::platPerpetualRaise:
 		P_ActivateInStasis (tag, instigator);
 		break;
@@ -451,9 +453,8 @@ bool EV_DoPlat (line_t *line, int tag, player_t *instigator, DPlat::EPlatType ty
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
 		sec = &sectors[secnum];
-manual_plat:
-		plat = P_GetPlatBySectorNum(sec->sectornum);
 
+manual_plat:
 		if (sec->PlaneMoving(sector_t::floor))
 		{
 			if (!manual)
@@ -464,10 +465,7 @@ manual_plat:
 
 		// Find lowest & highest floors around sector
 		rtn = true;
-		if ( plat == NULL )
-		{
-			plat = new DPlat(sec);
-		}
+		plat = new DPlat (sec);
 
 		plat->m_Type = type;
 		plat->m_Crush = -1;
@@ -655,7 +653,7 @@ void DPlat::Stop ()
 	m_Status = in_stasis;
 }
 
-void EV_StopPlat(int tag)
+void EV_StopPlat (int tag)
 {
 	EV_StopPlat(tag, NULL);
 }

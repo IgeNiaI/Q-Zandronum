@@ -1639,7 +1639,7 @@ void A_FireCustomMissileHelper ( AActor *self,
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM), true, false);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM) ? true : false, true, false);
 
 	// automatic handling of seeker missiles
 	if (misl)
@@ -1731,7 +1731,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 				shootangle += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
 
 				fixed_t offset = (player->mo->height >> 1) - player->mo->floorclip - player->viewheight
-					+ FixedMul(player->mo->AttackZOffset - 4 * FRACUNIT, player->crouchfactor);
+					+ player->mo->AttackZOffset - 4 * FRACUNIT - FixedMul(12 * FRACUNIT, FRACUNIT - player->crouchfactor);
 				float zOffs = float((atan2(distance, FIXED2FLOAT(SpawnHeight + offset))) * 180.f / PI);
 				self->pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
 			}
@@ -2256,6 +2256,7 @@ enum SIX_Flags
 	SIXF_TRANSFERSPECIAL		= 1 << 15,
 	SIXF_CLEARCALLERSPECIAL		= 1 << 16,
 	SIXF_TRANSFERSTENCILCOL		= 1 << 17,
+	SIXF_TRANSFERSPRITE			= 1 << 18,    // [BIN]
 };
 
 // [BB] Changed return value to bool (returns false if the actor already was destroyed).
@@ -2373,6 +2374,10 @@ static bool InitSpawnedItem(AActor *self, AActor *mo, int flags)
 	{
 		mo->fillcolor = self->fillcolor;
 	}
+    if (flags & SIXF_TRANSFERSPRITE) //[BIN]
+    {
+        mo->sprite = self->sprite;
+    }
 
 	return true;
 }
@@ -2558,6 +2563,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 
 			// [BB] Set scale if necessary.
 			SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( mo );
+
+			if (flags & SIXF_TRANSFERSTENCILCOL)
+				SERVERCOMMANDS_SetThingFillColor( mo );
+
+			if (flags & SIXF_TRANSFERSPRITE)
+				SERVERCOMMANDS_SetThingSprite( mo );
 		}
 
 		// [BC] Flag this actor as being client-spawned.

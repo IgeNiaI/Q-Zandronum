@@ -2048,7 +2048,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 {
 	static int pushtime = 0;
 	bool bForceSlide = scrollx || scrolly;
-	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType; // only apply to non voodoo dolls players
+	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType && !mo->player->bSpectating; // only apply to non voodoo dolls players
 	angle_t angle;
 	fixed_t ptryx, ptryy;
 	player_t *player;
@@ -2922,7 +2922,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 //
 // apply gravity
 //
-	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType;
+	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType && !mo->player->bSpectating;
 
 	if (mo->z > mo->floorz && !(mo->flags & MF_NOGRAVITY))
 	{
@@ -3443,7 +3443,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 	}
 	else if (mo->waterlevel < 2 && !mo->player->isCrouchSliding)
 	{
-		if (!(mo->mvFlags & MV_SILENT))
+		if (!(mo->mvFlags & MV_SILENT) && mo->player->mo->ShouldPlayFootsteps(&(mo->player->cmd)))
 			S_Sound(mo, CHAN_SIX, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM);
 	}
 }
@@ -3995,6 +3995,7 @@ void AActor::SetAngle(angle_t ang, bool interpolate)
 //
 // P_MobjThinker
 //
+EXTERN_CVAR(Bool, cl_spectsource)
 void AActor::Tick ()
 {
 	// [BB] Start to measure how much outbound net traffic this call of AActor::Tick() needs.
@@ -4078,6 +4079,14 @@ void AActor::Tick ()
 
 		UnlinkFromWorld ();
 		flags |= MF_NOBLOCKMAP;
+
+		if (cl_spectsource && this->player && this->player->bSpectating && this == players[consoleplayer].mo)
+		{
+			velx = FixedMul(velx, FRICTION_FLY);
+			vely = FixedMul(vely, FRICTION_FLY);
+			velz = FixedMul(velz, FRICTION_FLY);
+		}
+
 		x += velx;
 		y += vely;
 		z += velz;
@@ -7517,7 +7526,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		z += source->z + (source->height >> 1) - source->floorclip;
 		if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
 		{
-			z += FixedMul(source->player->mo->AttackZOffset - 4 * FRACUNIT, source->player->crouchfactor);
+			z += source->player->mo->AttackZOffset - 4 * FRACUNIT - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
 		}
 		else
 		{

@@ -1908,7 +1908,7 @@ static bool C_HandleKey (event_t *ev, BYTE *buffer, int len)
 				break;
 			}
 			// Intentional fall-through for command(s) added with Ctrl-D
-
+			// fall through
 		case '\r':
 			// Execute command line (ENTER)
 
@@ -1974,6 +1974,7 @@ static bool C_HandleKey (event_t *ev, BYTE *buffer, int len)
 			{
 				break;
 			}
+			// fall through
 		case GK_ESCAPE:
 			// Close console and clear command line. But if we're in the
 			// fullscreen console mode, there's nothing to fall back on

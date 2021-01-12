@@ -110,9 +110,10 @@ public:
 	// [BB] We also call this when a player dies. These special items also need to be dropped then.
 	virtual void DropImportantItems( bool bLeavingGame, AActor *pSource = NULL );
 
-	virtual int WalkCrouchState ();
-	virtual bool ShouldPlayFootstep ();
-	virtual void TweakSpeeds (int &forwardmove, int &sidemove);
+	virtual int WalkCrouchState (ticcmd_t *cmd);
+	virtual bool ShouldPlayFootsteps(ticcmd_t *cmd);
+	virtual void PlayFootsteps (ticcmd_t *cmd);
+	virtual void TweakSpeeds (ticcmd_t *cmd, int &forwardmove, int &sidemove);
 	virtual void MorphPlayerThink ();
 	virtual void ActivateMorphWeapon ();
 	AWeapon *PickNewWeapon (const PClass *ammotype);
@@ -124,7 +125,8 @@ public:
 	virtual void Destroy( );
 
 	// Quake movement
-	float QCrouchWalkFactor(const float forward, const float side);
+	float QCrouchWalkFactor( ticcmd_t *cmd );
+	float QVerticalFactor(ticcmd_t *cmd);
 	float QTweakSpeed();
 	void  QFriction(FVector3 &vel, const float speedlimit, const float friction);
 	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);
@@ -190,8 +192,6 @@ public:
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
 	int			FootstepInterval;
 	float		FootstepVolume;
-	fixed_t		AirThrustZUp;
-	fixed_t		AirThrustZDown;
 	float		WallClimbMaxTics;
 	float		WallClimbRegen;
 	fixed_t		WallClimbSpeed;
@@ -210,12 +210,24 @@ public:
 	float		CpmAirAcceleration;
 	float		CpmMaxForwardAngleRad;
 
+	// Scripts to execute when the player presses the action buttons
+	FNameNoInit
+		BT_ATTACK_Script, BT_USE_Script, BT_JUMP_Script, BT_CROUCH_Script,
+		BT_TURN180_Script, BT_ALTATTACK_Script, BT_RELOAD_Script, BT_ZOOM_Script,
+		BT_SPEED_Script, BT_STRAFE_Script, BT_MOVERIGHT_Script, BT_MOVELEFT_Script,
+		BT_BACK_Script, BT_FORWARD_Script, BT_RIGHT_Script, BT_LEFT_Script,
+		BT_LOOKUP_Script, BT_LOOKDOWN_Script, BT_MOVEUP_Script, BT_MOVEDOWN_Script, BT_SHOWSCORES_Script,
+		BT_USER1_Script, BT_USER2_Script, BT_USER3_Script, BT_USER4_Script;
+
 	// [geNia] The server updates player data before sending it to clients, but the player input is still old.
 	// That results in player input being one tic behind position, so we need to remember last position to send it to other clients.
 	fixed_t		ClientX, ClientY, ClientZ;
 	fixed_t		ClientVelX, ClientVelY, ClientVelZ;
 	angle_t		ClientAngle;
 	fixed_t		ClientPitch;
+
+	// Values that can be set from ACS and then passed to assigned action scripts
+	int	Predictable1, Predictable2, Predictable3;
 
 	// [CW] Fades for when you are being damaged.
 	PalEntry DamageFade;
@@ -224,6 +236,10 @@ public:
 	bool ResetAirSupply (bool playgasp = true);
 
 	int GetMaxHealth() const;
+
+	int ActionNameToNumber(const char* actionName);
+	void SetActionScript(int button, const char* scriptName);
+	void ExecuteActionScript(ticcmd_t *cmd, int button);
 };
 
 class APlayerChunk : public APlayerPawn
@@ -818,7 +834,7 @@ public:
 	
 	bool CanCrouch() const
 	{
-		return morphTics == 0 || mo->PlayerFlags & PPF_CROUCHABLEMORPH;
+		return (morphTics == 0 || mo->PlayerFlags & PPF_CROUCHABLEMORPH) && !bSpectating;
 	}
 
 	int GetSpawnClass();

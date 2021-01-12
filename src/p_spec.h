@@ -477,7 +477,7 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	
+
 	fixed_t	GetLow( void );
 	void	SetLow( fixed_t Low );
 
@@ -510,7 +510,7 @@ public:
 	void PlayPlatSound (const char *sound);
 
 protected:
-	
+
 	EPlatType	m_Type;
 	EPlatState	m_Status;
 	EPlatState	m_OldStatus;
@@ -528,9 +528,9 @@ protected:
 private:
 	DPlat ();
 
-	friend bool	EV_DoPlat (line_t *line, int tag, EPlatType type,
+	friend bool	EV_DoPlat (int tag, line_t *line, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
-	friend bool	EV_DoPlat (line_t *line, int tag, player_t *instigator, EPlatType type,
+	friend bool	EV_DoPlat (int tag, line_t *line, player_t *instigator, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
 	friend void EV_StopPlat (int tag);
 	friend void EV_StopPlat (int tag, player_t *instigator);
@@ -576,7 +576,7 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void UpdateToClient( ULONG ulClient );
-	
+
 	void	SetType( EPillar Type );
 	EPillar	GetType( );
 	void	SetPosition( fixed_t FloorPosition, fixed_t CeilingPosition );
@@ -793,12 +793,13 @@ public:
 	};
 
 	DCeiling (sector_t *sec);
+	DCeiling (sector_t *sec, fixed_t speed1, fixed_t speed2, int silent, player_t *instigator);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
 
 	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator,
-						fixed_t speedDown, fixed_t speedUp, fixed_t height,
+						fixed_t speed, fixed_t speed2, fixed_t height,
 						int crush, int silent, int change, bool hexencrush);
 
 	// [BC] Create this object for this new client entering the game.
@@ -806,17 +807,19 @@ public:
 
 	// [BC] Make this public so clients can use it.
 	void PlayCeilingSound ();
-	
+
 	fixed_t	GetTopHeight( void );
 	void	SetTopHeight( fixed_t TopHeight );
 
 	fixed_t	GetBottomHeight( void );
 	void	SetBottomHeight( fixed_t BottomHeight );
 
-	fixed_t	GetSpeedDown( void );
-	void	SetSpeedDown( fixed_t Speed );
-	fixed_t	GetSpeedUp( void );
-	void	SetSpeedUp( fixed_t Speed );
+	fixed_t	GetSpeed( void );
+	void	SetSpeed( fixed_t Speed );
+	fixed_t	GetSpeed1( void );
+	void	SetSpeed1( fixed_t Speed );
+	fixed_t	GetSpeed2( void );
+	void	SetSpeed2( fixed_t Speed );
 	
 	fixed_t	GetPosition( void );
 	int		GetDirection( void );
@@ -827,7 +830,7 @@ public:
 
 	ECeiling	GetType( void );
 	void		SetType( ECeiling Type );
-	
+
 	int		GetTag( void );
 	void	SetTag( int Tag );
 
@@ -836,7 +839,7 @@ public:
 
 	bool	GetHexencrush( void );
 	void	SetHexencrush( bool Hexencrush );
-	
+
 	int		GetSilent( void );
 	void	SetSilent( int Silent );
 
@@ -844,8 +847,9 @@ protected:
 	ECeiling	m_Type;
 	fixed_t 	m_BottomHeight;
 	fixed_t 	m_TopHeight;
-	fixed_t		m_SpeedDown;
-	fixed_t		m_SpeedUp;
+	fixed_t 	m_Speed;
+	fixed_t		m_Speed1;		// [RH] dnspeed of crushers
+	fixed_t		m_Speed2;		// [RH] upspeed of crushers
 	int 		m_Crush;
 	bool		m_Hexencrush;
 	int			m_Silent;
@@ -864,6 +868,7 @@ private:
 
 	friend bool EV_CeilingCrushStop (int tag);
 	friend bool EV_CeilingCrushStop (int tag, player_t *instigator);
+	friend void P_ActivateInStasisCeiling (int tag, player_t *instigator);
 };
 
 bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
@@ -874,6 +879,7 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 	int crush, int silent, int change, bool hexencrush);
 bool EV_CeilingCrushStop (int tag);
 bool EV_CeilingCrushStop (int tag, player_t *instigator);
+void P_ActivateInStasisCeiling (int tag, player_t *instigator);
 
 
 
@@ -942,7 +948,7 @@ public:
 	// [BC] Make these public so clients can use them.
 	void StartFloorSound ();
 	void SetFloorChangeType (sector_t *sec, int change);
-	
+
 	EFloor	GetType( void );
 	void	SetType( EFloor Type );
 
@@ -968,7 +974,7 @@ public:
 	fixed_t	GetFloorDestDist( void );
 	void	SetFloorDestDist( fixed_t FloorDestDist );
 	
-	fixed_t	GetNewSpecial( void );
+	int		GetNewSpecial( void );
 	void	SetNewSpecial( int NewSpecial );
 
 	int		GetDelay( void );
@@ -1060,7 +1066,7 @@ public:
 
 	// [BC] No longer protected so clients can call it.
 	void StartFloorSound ();
-	
+
 	EElevator	GetType( void );
 	void	SetType( EElevator Type );
 	fixed_t	GetSpeed( void );
@@ -1084,19 +1090,15 @@ protected:
 	fixed_t		m_Speed;
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
-	
-	friend bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator type, fixed_t speed,
-		fixed_t height);
-	friend bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator type, fixed_t speed,
-		fixed_t height);
+
+	friend bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
+	friend bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
 private:
 	DElevator ();
 };
 
-bool EV_DoElevator (line_t *line, int tag, DElevator::EElevator type, fixed_t speed,
-	fixed_t height);
-bool EV_DoElevator (line_t *line, int tag, player_t *instigator, DElevator::EElevator type, fixed_t speed,
-	fixed_t height);
+bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
+bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
 
 class DWaggleBase : public DMover
 {
@@ -1109,7 +1111,7 @@ public:
 
 	// [BC] Create this object for this new client entering the game.
 	void	UpdateToClient( ULONG ulClient );
-	
+
 	virtual fixed_t	GetPosition( );
 	virtual void	SetPosition( fixed_t Position );
 	fixed_t	GetOriginalDistance( );

@@ -499,12 +499,12 @@ FString GetUserFile (const char *file)
 		bool moved = false;
 // [BB] Don't move the config if we are using a beta build.
 #if ( BUILD_ID == BUILD_RELEASE )
-		FString oldpath = NicePath("~/." GAMENAMELOWERCASE "/");
+		FString oldpath = NicePath("~/." CONFIGFILE "/");
 		if (stat (oldpath, &extrainfo) != -1)
 		{
 			if (rename(oldpath, path) == -1)
 			{
-				I_Error ("Failed to move old " GAMENAMELOWERCASE " directory (%s) to new location (%s).",
+				I_Error ("Failed to move old " CONFIGFILE " directory (%s) to new location (%s).",
 					oldpath.GetChars(), path.GetChars());
 			}
 			else

@@ -2010,7 +2010,7 @@ FxExpression *FxGlobalVariable::Resolve(FCompileContext&)
 	case VAL_Fixed:
 	case VAL_Angle:
 		ValueType = VAL_Float;
-
+		// fall through
 	case VAL_Object:
 	case VAL_Class:
 		ValueType = var->ValueType;

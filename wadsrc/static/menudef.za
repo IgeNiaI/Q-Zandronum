@@ -36,6 +36,7 @@ OptionMenu ZA_MultiplayerOptions
 	SubMenu		"Ignore a player",			"ZA_IgnoreMenu"
 	StaticText	" "
 	Option		"Start as spectator",		"cl_startasspectator",		"YesNo"
+	Option		"Source-like spectating",	"cl_spectsource",			"YesNo"
 	TextField	"Server password",			"cl_password"
 	TextField	"Server join password",		"cl_joinpassword"
 	Option		"Reset frags at join",		"cl_dontrestorefrags",		"YesNo"

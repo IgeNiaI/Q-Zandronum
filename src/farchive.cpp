@@ -1209,7 +1209,7 @@ FArchive &FArchive::ReadObject (DObject* &obj, PClass *wanttype)
 			}
 			break;
 		}
-		/* fallthrough when not travelling to a previous level */
+		// fall through
 	case NEW_CLS_OBJ:
 		type = ReadClass (wanttype);
 //		Printf ("New class: %s (%u)\n", type->Name, m_File->Tell());
@@ -1249,7 +1249,7 @@ FArchive &FArchive::ReadObject (DObject* &obj, PClass *wanttype)
 			}
 			break;
 		}
-		/* fallthrough when not travelling to a previous level */
+		// fall through
 	case NEW_OBJ:
 		type = ReadStoredClass (wanttype);
 //		Printf ("Use class: %s (%u)\n", type->Name, m_File->Tell());

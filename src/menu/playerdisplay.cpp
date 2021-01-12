@@ -491,7 +491,7 @@ bool FListMenuItemPlayerDisplay::SetValue(int i, int value)
 
 	case PDF_TRANSLATE:
 		mTranslate = value;
-
+		// fall through
 	case PDF_CLASS:
 		SetPlayerClass(value, true);
 		break;

@@ -2461,7 +2461,7 @@ SoundHandle FMODSoundRenderer::LoadSoundRaw(BYTE *sfxdata, int length, int frequ
 		{
 			sfxdata[i] = sfxdata[i] - 128;
 		}
-
+		// fall through
 	case -8:
 		exinfo.format = FMOD_SOUND_FORMAT_PCM8;
 		numsamples = length;

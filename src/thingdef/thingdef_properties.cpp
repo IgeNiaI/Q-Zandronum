@@ -3006,24 +3006,6 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, secondjumpamount, I, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, airthrustzup, F, PlayerPawn)
-{
-	PROP_FIXED_PARM(i, 0);
-	defaults->AirThrustZUp = i;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
-DEFINE_CLASS_PROPERTY_PREFIX(player, airthrustzdown, F, PlayerPawn)
-{
-	PROP_FIXED_PARM(i, 0);
-	defaults->AirThrustZDown = i;
-}
-
-//==========================================================================
-// [geNia]
-//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbregen, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(i, 0);
@@ -3140,4 +3122,15 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, cpmmaxforwardanglerad, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);
 	defaults->CpmMaxForwardAngleRad = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, actionscript, S_S, PlayerPawn)
+{
+	PROP_STRING_PARM(buttonName, 0);
+	PROP_STRING_PARM(script, 1);
+
+	defaults->SetActionScript(defaults->ActionNameToNumber(buttonName), script);
 }

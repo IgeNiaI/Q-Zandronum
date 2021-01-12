@@ -741,6 +741,7 @@ void R_ClearPastViewer (AActor *actor)
 //
 //==========================================================================
 
+EXTERN_CVAR(Bool, cl_spectsource)
 void R_SetupFrame (AActor *actor)
 {
 	if (actor == NULL)
@@ -831,17 +832,20 @@ void R_SetupFrame (AActor *actor)
 
 	interpolator.DoInterpolations (r_TicFrac);
 
-	// Keep the view within the sector's floor and ceiling
-	fixed_t theZ = viewsector->ceilingplane.ZatPoint (viewx, viewy) - 4*FRACUNIT;
-	if (viewz > theZ)
+	if ( !cl_spectsource || !players[consoleplayer].bSpectating || actor != players[consoleplayer].mo )
 	{
-		viewz = theZ;
-	}
+		// Keep the view within the sector's floor and ceiling
+		fixed_t theZ = viewsector->ceilingplane.ZatPoint (viewx, viewy) - 4*FRACUNIT;
+		if (viewz > theZ)
+		{
+			viewz = theZ;
+		}
 
-	theZ = viewsector->floorplane.ZatPoint (viewx, viewy) + 4*FRACUNIT;
-	if (viewz < theZ)
-	{
-		viewz = theZ;
+		theZ = viewsector->floorplane.ZatPoint (viewx, viewy) + 4*FRACUNIT;
+		if (viewz < theZ)
+		{
+			viewz = theZ;
+		}
 	}
 
 	if (!paused)

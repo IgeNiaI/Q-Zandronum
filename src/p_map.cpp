@@ -1460,7 +1460,10 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y, FCheckPosition &tm, bo
 		for (unsigned i = 0; i<newsec->e->XFloor.ffloors.Size(); i++)
 		{
 			rover = newsec->e->XFloor.ffloors[i];
-			if (!(rover->flags & FF_SOLID) || !(rover->flags & FF_EXISTS)) continue;
+			if (!(rover->flags & FF_SOLID)
+				|| !(rover->flags & FF_EXISTS)
+				|| (thing->flags & MF_MISSILE) && (rover->flags & FF_SHOOTTHROUGH))
+				continue;
 
 			fixed_t ff_bottom = rover->bottom.plane->ZatPoint(x, y);
 			fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
@@ -2961,7 +2964,6 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	fixed_t xmove, ymove;
 	const secplane_t *walkplane;
 	const bool playerNotVoodoo = mo->player && mo->player->mo == mo;
-	const bool noWallFriction = (zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION) && playerNotVoodoo && (mo->player->velx || mo->player->vely);
 	int hitcount;
 
 	hitcount = 3;
@@ -2972,7 +2974,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	{
 		if (mo->reactiontime > 0) // player coming right out of a teleporter.
 			return;
-		else if(noWallFriction)
+		else if(zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION)
 			preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };
 	}
 
@@ -3064,7 +3066,7 @@ retry:
 	if (playerNotVoodoo)
 	{
 		// [Ivory]: Quake like wall friction
-		if (noWallFriction && (mo->velx || mo->vely))
+		if ((zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION) && (mo->velx || mo->vely))
 		{
 			FVector2 slideVel = FVector2(FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely)).Unit();
 			FVector2 velUnit = preSlideVel.Unit();
@@ -4821,7 +4823,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	{
 		if (source->player != NULL)
 		{
-			shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+			shootz += source->player->mo->AttackZOffset - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
 		}
 		else
 		{
@@ -4829,25 +4831,16 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 		}
 	}
 
-	if ((zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE) || !source->player)
-	{
-		pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
-		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
-		vx = FixedMul(finecosine[pitch], finecosine[angle]);
-		vy = FixedMul(finecosine[pitch], finesine[angle]);
-		vz = finesine[pitch];
-	}
-	else
+	pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
+	angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
+	vx = FixedMul(finecosine[pitch], finecosine[angle]);
+	vy = FixedMul(finecosine[pitch], finesine[angle]);
+	vz = finesine[pitch];
+
+	if (!(zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE) && source->player)
 	{
 		//*************************************************************************************************************************
 		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
-
-		// Get pitch and angle, and calculate direction of the tracer
-		pitch = angle_t(-source->pitch) >> ANGLETOFINESHIFT;
-		angle = source->angle >> ANGLETOFINESHIFT;
-		vx = FixedMul(finecosine[pitch], finecosine[angle]);
-		vy = FixedMul(finecosine[pitch], finesine[angle]);
-		vz = finesine[pitch];
 
 		// Fire the tracer
 		fixed_t viewz = source->z - source->floorclip + source->player->viewheight;
@@ -4860,15 +4853,15 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			float distance = FIXED2FLOAT(trace.Distance);
 
 			float xyOffs = float(atan2(FIXED2FLOAT(trace.Distance), offset_xy) * 180.f / PI);
-			angleoffset = angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
+			angleoffset += angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
 
 			fixed_t offset = (source->height >> 1) - source->player->viewheight;
 			if (!(railflags & RAF_CENTERZ))
 			{
-				offset += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+				offset += source->player->mo->AttackZOffset - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
 			}
 			float zOffs = float(atan2(distance, FIXED2FLOAT(-offset_z - offset)) * 180.f / PI);
-			pitchoffset = angle_t((90.f - zOffs) * (ANGLE_MAX / 360));
+			pitchoffset += angle_t((90.f - zOffs) * (ANGLE_MAX / 360));
 		}
 
 		//*************************************************************************************************************************
@@ -5792,7 +5785,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							explosionToPlayer.MakeUnit();
 
 							int pushDamage = damage;
-							if ( bombsource )
+							if ( bombsource && bombsource->Inventory )
 								bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
 							explosionToPlayer *= pushDamage * 0.35f;
 

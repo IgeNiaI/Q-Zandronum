@@ -3620,6 +3620,34 @@ void SERVERCOMMANDS_UpdateThingScaleNotAtDefault( AActor* pActor, ULONG ulPlayer
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetThingFillColor( AActor* pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	// [BB] Sanity check.
+	if ( pActor == NULL )
+		return;
+	
+	NetCommand command( SVC2_SETTHINGFILLCOLOR );
+	command.addShort( pActor->lNetID );
+	command.addLong( pActor->fillcolor );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
+void SERVERCOMMANDS_SetThingSprite( AActor* pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	// [BB] Sanity check.
+	if ( pActor == NULL )
+		return;
+	
+	NetCommand command( SVC2_SETTHINGSPRITE );
+	command.addShort( pActor->lNetID );
+	command.addLong( pActor->sprite );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_FlashStealthMonster( AActor* pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( EnsureActorHasNetID( pActor ) == false )
@@ -3825,8 +3853,9 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 		command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetOldDirection() ) );
 		command.addLong ( Ceiling->GetBottomHeight() );
 		command.addLong ( Ceiling->GetTopHeight() );
-		command.addLong ( Ceiling->GetSpeedDown() );
-		command.addLong ( Ceiling->GetSpeedUp() );
+		command.addLong ( Ceiling->GetSpeed() );
+		command.addLong ( Ceiling->GetSpeed1() );
+		command.addLong ( Ceiling->GetSpeed2() );
 		command.addByte ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
 		command.addBit ( Ceiling->GetHexencrush() );
 		command.addShort ( Ceiling->GetSilent() );

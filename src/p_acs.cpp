@@ -4449,18 +4449,6 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
-	case APROP_AirThrustZUp:
-		if (playerActor) {
-			playerActor->AirThrustZUp = value;
-		}
-		break;
-
-	case APROP_AirThrustZDown:
-		if (playerActor) {
-			playerActor->AirThrustZDown = value;
-		}
-		break;
-
 	case APROP_WallClimbSpeed:
 		if (playerActor) {
 			playerActor->WallClimbSpeed = value;
@@ -4637,8 +4625,6 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_MvType:					return playerActor ? playerActor->MvType								: 0;
 	case APROP_FootstepInterval:		return playerActor ? playerActor->FootstepInterval						: 0;
 	case APROP_FootstepVolume:			return playerActor ? FLOAT2FIXED( playerActor->FootstepVolume )			: 0;
-	case APROP_AirThrustZUp:			return playerActor ? playerActor->AirThrustZUp							: 0;
-	case APROP_AirThrustZDown:			return playerActor ? playerActor->AirThrustZDown						: 0;
 	case APROP_WallClimbSpeed:			return playerActor ? playerActor->WallClimbSpeed						: 0;
 	case APROP_WallClimbMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbMaxTics )		: 0;
 	case APROP_WallClimbRegen:			return playerActor ? FLOAT2FIXED( playerActor->WallClimbRegen )			: 0;
@@ -4724,8 +4710,6 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_MvType:
 		case APROP_FootstepInterval:
 		case APROP_FootstepVolume:
-		case APROP_AirThrustZUp:
-		case APROP_AirThrustZDown:
 		case APROP_WallClimbSpeed:
 		case APROP_WallClimbMaxTics:
 		case APROP_WallClimbRegen:
@@ -5182,6 +5166,9 @@ enum EACSFunctions
 	ACSF_SetPlayerScore,
 	ACSF_GetPlayerScore,
 	ACSF_InDemoMode,
+	ACSF_SetActionScript,
+	ACSF_SetPredictableValue,
+	ACSF_GetPredictableValue,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -6489,6 +6476,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				switch (argCount)
 				{
 				case 4: tid2 = args[3];
+				// fall through
 				case 3: tid1 = args[2];
 				}
 
@@ -7267,7 +7255,6 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 		case ACSF_SetPlayerScore:
 		{
 			const ULONG ulPlayer = static_cast<ULONG> (args[0]);
-			int oldvalue;
 
 			if (PLAYER_IsValidPlayer(ulPlayer))
 			{
@@ -7276,7 +7263,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_FRAGS:
 				{
 					// [AK] Keep the original value of the player's frags.
-					oldvalue = players[ulPlayer].fragcount;
+					int oldvalue = players[ulPlayer].fragcount;
 					players[ulPlayer].fragcount = args[2];
 
 					// [AK] If we're the server, tell the clients the player's new frag count.
@@ -7288,7 +7275,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_POINTS:
 				{
 					// [AK] Keep the original value of the player's points.
-					oldvalue = players[ulPlayer].lPointCount;
+					LONG oldvalue = players[ulPlayer].lPointCount;
 					players[ulPlayer].lPointCount = args[2];
 
 					// [AK] If we're the server, tell the clients the player's new point count.
@@ -7300,7 +7287,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_WINS:
 				{
 					// [AK] Keep the original value of the player's wins.
-					oldvalue = players[ulPlayer].ulWins;
+					ULONG oldvalue = players[ulPlayer].ulWins;
 					players[ulPlayer].ulWins = args[2] >= 0 ? args[2] : 0;
 
 					// [AK] If we're the server, tell the clients the player's new win count.
@@ -7312,7 +7299,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_DEATHS:
 				{
 					// [AK] Keep the original value of the player's deaths.
-					oldvalue = players[ulPlayer].ulDeathCount;
+					ULONG oldvalue = players[ulPlayer].ulDeathCount;
 					players[ulPlayer].ulDeathCount = args[2] >= 0 ? args[2] : 0;
 
 					// [AK] If we're the server, tell the clients the player's new death count.
@@ -7324,7 +7311,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				case SCORE_KILLS:
 				{
 					// [AK] Keep the original value of the player's kills.
-					oldvalue = players[ulPlayer].killcount;
+					int oldvalue = players[ulPlayer].killcount;
 					players[ulPlayer].killcount = args[2];
 
 					// [AK] If we're the server, tell the clients the player's new kill count.
@@ -7373,6 +7360,94 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 		case ACSF_InDemoMode:
 			return CLIENTDEMO_IsPlaying() ? 1 : 0;
+
+		case ACSF_SetActionScript:
+			if (args[0] == 0)
+			{
+				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				{
+					static_cast<APlayerPawn *>(&*activator)->SetActionScript(args[1], FBehavior::StaticLookupString(args[2]));
+				}
+			}
+			else
+			{
+				AActor *actor;
+				FActorIterator iterator(args[0]);
+
+				const char* actionName = FBehavior::StaticLookupString(args[2]);
+				while ((actor = iterator.Next()) != NULL)
+				{
+					if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+					{
+						static_cast<APlayerPawn *>(actor)->SetActionScript(args[1], actionName);
+					}
+				}
+			}
+			return 0;
+
+		case ACSF_SetPredictableValue:
+			if (args[0] == 0)
+			{
+				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				{
+					switch (args[1])
+					{
+					case 1:
+						static_cast<APlayerPawn *>(&*activator)->Predictable1 = args[2];
+						break;
+					case 2:
+						static_cast<APlayerPawn *>(&*activator)->Predictable2 = args[2];
+						break;
+					case 3:
+						static_cast<APlayerPawn *>(&*activator)->Predictable3 = args[2];
+						break;
+					}
+				}
+			}
+			else
+			{
+				AActor *actor;
+				FActorIterator iterator(args[0]);
+
+				const char* actionName = FBehavior::StaticLookupString(args[2]);
+				while ((actor = iterator.Next()) != NULL)
+				{
+					if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+					{
+						switch (args[1])
+						{
+						case 1:
+							static_cast<APlayerPawn *>(actor)->Predictable1 = args[2];
+							break;
+						case 2:
+							static_cast<APlayerPawn *>(actor)->Predictable2 = args[2];
+							break;
+						case 3:
+							static_cast<APlayerPawn *>(actor)->Predictable3 = args[2];
+							break;
+						}
+					}
+				}
+			}
+			return 0;
+
+		case ACSF_GetPredictableValue:
+			{
+				AActor* actor = SingleActorFromTID(args[0], activator);
+				if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				{
+					switch (args[1])
+					{
+					case 1:
+						return static_cast<APlayerPawn *>(actor)->Predictable1;
+					case 2:
+						return static_cast<APlayerPawn *>(actor)->Predictable2;
+					case 3:
+						return static_cast<APlayerPawn *>(actor)->Predictable3;
+					}
+				}
+			}
+			return 0;
 
 		case ACSF_GetActorFloorTexture:
 		{
@@ -8623,7 +8698,8 @@ int DLevelScript::RunScript ()
 
 		case PCD_SETRESULTVALUE:
 			resultValue = STACK(1);
-		case PCD_DROP: //fall through.
+			// fall through
+		case PCD_DROP:
 			sp--;
 			break;
 

@@ -482,6 +482,7 @@ bool P_TestActivateLine (line_t *line, AActor *mo, int side, int activationType)
 					{
 						break;
 					}
+				// fall through
 				case Teleport:
 				case Teleport_NoFog:
 				case Teleport_Line:

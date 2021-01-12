@@ -244,7 +244,7 @@ public:
 		if (Count + amount > Most)
 		{
 			const unsigned int choicea = Count + amount;
-			const unsigned int choiceb = Most = (Most >= 16) ? Most + Most / 2 : 16;
+			const unsigned int choiceb = (Most >= 16) ? Most + Most / 2 : 16;
 			Most = (choicea > choiceb ? choicea : choiceb);
 			DoResize ();
 		}

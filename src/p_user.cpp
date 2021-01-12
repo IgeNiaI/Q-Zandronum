@@ -1435,6 +1435,144 @@ int APlayerPawn::GetMaxHealth() const
 
 //===========================================================================
 //
+// APlayerPawn :: ActionNameToNumber
+//
+// convert action name to action button number
+//
+//===========================================================================
+
+int strcicmp(char const *a, char const *b)
+{
+	for (;; a++, b++) {
+		int d = tolower((unsigned char)*a) - tolower((unsigned char)*b);
+		if (d != 0 || !*a)
+			return d;
+	}
+}
+
+int APlayerPawn::ActionNameToNumber(const char* actionName)
+{
+	if		(!strcicmp(actionName, "attack"))		return BT_ATTACK;
+	else if (!strcicmp(actionName, "use"))			return BT_USE;
+	else if (!strcicmp(actionName, "jump"))			return BT_JUMP;
+	else if (!strcicmp(actionName, "crouch"))		return BT_CROUCH;
+	else if (!strcicmp(actionName, "turn180"))		return BT_TURN180;
+	else if (!strcicmp(actionName, "altattack"))	return BT_ALTATTACK;
+	else if (!strcicmp(actionName, "reload"))		return BT_RELOAD;
+	else if (!strcicmp(actionName, "zoom"))			return BT_ZOOM;
+	else if (!strcicmp(actionName, "speed"))		return BT_SPEED;
+	else if (!strcicmp(actionName, "strafe"))		return BT_STRAFE;
+	else if (!strcicmp(actionName, "moveright"))	return BT_MOVERIGHT;
+	else if (!strcicmp(actionName, "moveleft"))		return BT_MOVELEFT;
+	else if (!strcicmp(actionName, "back"))			return BT_BACK;
+	else if (!strcicmp(actionName, "forward"))		return BT_FORWARD;
+	else if (!strcicmp(actionName, "right"))		return BT_RIGHT;
+	else if (!strcicmp(actionName, "left"))			return BT_LEFT;
+	else if (!strcicmp(actionName, "lookup"))		return BT_LOOKUP;
+	else if (!strcicmp(actionName, "lookdown"))		return BT_LOOKDOWN;
+	else if (!strcicmp(actionName, "moveup"))		return BT_MOVEUP;
+	else if (!strcicmp(actionName, "movedown"))		return BT_MOVEDOWN;
+	else if (!strcicmp(actionName, "showscores"))	return BT_SHOWSCORES;
+	else if (!strcicmp(actionName, "user1"))		return BT_USER1;
+	else if (!strcicmp(actionName, "user2"))		return BT_USER2;
+	else if (!strcicmp(actionName, "user3"))		return BT_USER3;
+	else if (!strcicmp(actionName, "user4"))		return BT_USER4;
+	else											return 0;
+}
+
+//===========================================================================
+//
+// APlayerPawn :: SetActionScript
+//
+// assign an ACS script to a specified action
+//
+//===========================================================================
+
+void APlayerPawn::SetActionScript(int button, const char* scriptName) 
+{
+	switch (button)
+	{
+	case BT_ATTACK:		BT_ATTACK_Script = scriptName;		break;
+	case BT_USE:		BT_USE_Script = scriptName;			break;
+	case BT_JUMP:		BT_JUMP_Script = scriptName;		break;
+	case BT_CROUCH:		BT_CROUCH_Script = scriptName;		break;
+	case BT_TURN180:	BT_TURN180_Script = scriptName;		break;
+	case BT_ALTATTACK:	BT_ALTATTACK_Script = scriptName;	break;
+	case BT_RELOAD:		BT_RELOAD_Script = scriptName;		break;
+	case BT_ZOOM:		BT_ZOOM_Script = scriptName;		break;
+	case BT_SPEED:		BT_SPEED_Script = scriptName;		break;
+	case BT_STRAFE:		BT_STRAFE_Script = scriptName;		break;
+	case BT_MOVERIGHT:	BT_MOVERIGHT_Script = scriptName;	break;
+	case BT_MOVELEFT:	BT_MOVELEFT_Script = scriptName;	break;
+	case BT_BACK:		BT_BACK_Script = scriptName;		break;
+	case BT_FORWARD:	BT_FORWARD_Script = scriptName;		break;
+	case BT_RIGHT:		BT_RIGHT_Script = scriptName;		break;
+	case BT_LEFT:		BT_LEFT_Script = scriptName;		break;
+	case BT_LOOKUP:		BT_LOOKUP_Script = scriptName;		break;
+	case BT_LOOKDOWN:	BT_LOOKDOWN_Script = scriptName;	break;
+	case BT_MOVEUP:		BT_MOVEUP_Script = scriptName;		break;
+	case BT_MOVEDOWN:	BT_MOVEDOWN_Script = scriptName;	break;
+	case BT_SHOWSCORES:	BT_SHOWSCORES_Script = scriptName;	break;
+	case BT_USER1:		BT_USER1_Script = scriptName;		break;
+	case BT_USER2:		BT_USER2_Script = scriptName;		break;
+	case BT_USER3:		BT_USER3_Script = scriptName;		break;
+	case BT_USER4:		BT_USER4_Script = scriptName;		break;
+	}
+}
+
+//==========================================================================
+//
+// ExecuteUserScript
+//
+//==========================================================================
+
+void APlayerPawn::ExecuteActionScript(ticcmd_t *cmd, int button)
+{
+	int script = 0;
+	if (cmd->ucmd.buttons & button)
+	{
+		switch (button)
+		{
+		case BT_ATTACK:		script = BT_ATTACK_Script;		break;
+		case BT_USE:		script = BT_USE_Script;			break;
+		case BT_JUMP:		script = BT_JUMP_Script;		break;
+		case BT_CROUCH:		script = BT_CROUCH_Script;		break;
+		case BT_TURN180:	script = BT_TURN180_Script;		break;
+		case BT_ALTATTACK:	script = BT_ALTATTACK_Script;	break;
+		case BT_RELOAD:		script = BT_RELOAD_Script;		break;
+		case BT_ZOOM:		script = BT_ZOOM_Script;		break;
+		case BT_SPEED:		script = BT_SPEED_Script;		break;
+		case BT_STRAFE:		script = BT_STRAFE_Script;		break;
+		case BT_MOVERIGHT:	script = BT_MOVERIGHT_Script;	break;
+		case BT_MOVELEFT:	script = BT_MOVELEFT_Script;	break;
+		case BT_BACK:		script = BT_BACK_Script;		break;
+		case BT_FORWARD:	script = BT_FORWARD_Script;		break;
+		case BT_RIGHT:		script = BT_RIGHT_Script;		break;
+		case BT_LEFT:		script = BT_LEFT_Script;		break;
+		case BT_LOOKUP:		script = BT_LOOKUP_Script;		break;
+		case BT_LOOKDOWN:	script = BT_LOOKDOWN_Script;	break;
+		case BT_MOVEUP:		script = BT_MOVEUP_Script;		break;
+		case BT_MOVEDOWN:	script = BT_MOVEDOWN_Script;	break;
+		case BT_SHOWSCORES:	script = BT_SHOWSCORES_Script;	break;
+		case BT_USER1:		script = BT_USER1_Script;		break;
+		case BT_USER2:		script = BT_USER2_Script;		break;
+		case BT_USER3:		script = BT_USER3_Script;		break;
+		case BT_USER4:		script = BT_USER4_Script;		break;
+		default:			script = 0;
+		}
+	}
+
+	if (script != 0)
+	{
+		int flags = ACS_ALWAYS | ACS_WANTRESULT;
+		int args[4] = { CLIENT_PREDICT_IsPredicting() ? 1 : 0, Predictable1, Predictable2, Predictable3 };
+
+		P_StartScript(player->mo, NULL, -script, level.mapname, args, 4, flags);
+	}
+}
+
+//===========================================================================
+//
 // APlayerPawn :: UpdateWaterLevel
 //
 // Plays surfacing and diving sounds, as appropriate.
@@ -2274,18 +2412,18 @@ void APlayerPawn::DropImportantItems( bool bLeavingGame, AActor *pSource )
 //
 //===========================================================================
 
-int APlayerPawn::WalkCrouchState ()
+int APlayerPawn::WalkCrouchState (ticcmd_t *cmd)
 {
-	// Make sure this code is equal to the one found in g_game.cpp
-	if (Button_Speed.bDown ^ (int)cl_run)
+	// [geNia] BT_SPEED is considered pressed when the player is walking, regardless of whether the button is actually pressed
+	if (cmd->ucmd.buttons & BT_SPEED)
 	{
-		// player is running
-		return Button_Crouch.bDown ? 3 : 1;
+		// player is walking
+		return (cmd->ucmd.buttons & BT_CROUCH) ? 2 : 0;
 	}
 	else
 	{
-		// player is walking
-		return Button_Crouch.bDown ? 2 : 0;
+		// player is running
+		return (cmd->ucmd.buttons & BT_CROUCH) ? 3 : 1;
 	}
 }
 
@@ -2297,21 +2435,77 @@ int APlayerPawn::WalkCrouchState ()
 //
 //===========================================================================
 
-bool APlayerPawn::ShouldPlayFootstep ()
+bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd)
 {
-	switch (WalkCrouchState())
+	if ( CLIENT_PREDICT_IsPredicting() )
+		return false;
+
+	if (!player->onground || player->mo->waterlevel >= 2 ||
+		(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_JUMP))
 	{
-	case 0: // player is walking
-		return FootstepsEnabled1;
-	case 1: // player is running
-		return FootstepsEnabled2;
-	case 2: // player is crouching
-		return FootstepsEnabled3;
-	case 3: // player is crouch running
-		return FootstepsEnabled4;
+		return false;
 	}
 
+	switch (WalkCrouchState(cmd))
+	{
+	case 0: // player is walking
+		if ( !FootstepsEnabled1 )
+			return false;
+		break;
+	case 1: // player is running
+		if ( !FootstepsEnabled2 )
+			return false;
+		break;
+	case 2: // player is crouching
+		if ( !FootstepsEnabled3 )
+			return false;
+		break;
+	case 3: // player is crouch running
+		if ( !FootstepsEnabled4 )
+			return false;
+		break;
+	}
+
+	fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
+	if (velocity < Speed * 3)
+		return false;
+
 	return true;
+}
+
+//===========================================================================
+//
+// APlayerPawn :: PlayFootstep
+//
+// Plays footsteps if should
+//
+//===========================================================================
+
+void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
+{
+	if ( CLIENT_PREDICT_IsPredicting() )
+		return;
+
+	if ( ShouldPlayFootsteps( cmd ) )
+	{
+		if (player->stepInterval <= 0)
+		{
+			if (!(player->mo->mvFlags & MV_SILENT))
+			{
+				S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
+			}
+
+			player->stepInterval = player->mo->FootstepInterval;
+		}
+		else
+		{
+			player->stepInterval--;
+		}
+	}
+	else
+	{
+		player->stepInterval = player->mo->FootstepInterval / 2;
+	}
 }
 
 //===========================================================================
@@ -2320,7 +2514,7 @@ bool APlayerPawn::ShouldPlayFootstep ()
 //
 //===========================================================================
 
-void APlayerPawn::TweakSpeeds (int &forward, int &side)
+void APlayerPawn::TweakSpeeds (ticcmd_t *cmd, int &forward, int &side)
 {
 	// [Dusk] Let the user move at whatever speed they desire when spectating.
 	if (player->bSpectating)
@@ -2339,7 +2533,7 @@ void APlayerPawn::TweakSpeeds (int &forward, int &side)
 	}
 
 	// [GRB]
-	int speed = WalkCrouchState();
+	int speed = WalkCrouchState(cmd);
 	switch (speed) {
 		case 0: // walking
 			forward = FixedMul(forward, ForwardMove1);
@@ -2775,6 +2969,7 @@ Calculate the walking / running height adjustment
 ==================
 */
 
+CVAR(Bool, cl_spectsource, true, CVAR_ARCHIVE)
 void P_CalcHeight (player_t *player) 
 {
 	int 		angle;
@@ -2796,7 +2991,7 @@ void P_CalcHeight (player_t *player)
 	// it causes bobbing jerkiness when the player moves from ice to non-ice,
 	// and vice-versa.
 
-	if (player->cheats & CF_NOCLIP2)
+	if (player->cheats & CF_NOCLIP2 || (cl_spectsource && player->bSpectating && player->mo == players[consoleplayer].mo))
 	{
 		player->bob = 0;
 	}
@@ -2891,6 +3086,10 @@ void P_CalcHeight (player_t *player)
 		bob = 0;
 	}
 	player->viewz = player->mo->z + player->viewheight + bob;
+
+	if (cl_spectsource && player->bSpectating && player->mo == players[consoleplayer].mo)
+		return;
+
 	if (player->mo->floorclip && player->playerstate != PST_DEAD
 		&& player->mo->z <= player->mo->floorz)
 	{
@@ -2977,15 +3176,15 @@ float DotProduct(const FVector3 &v, const FVector3 &t)
 // Quake movement specifics
 //***************************************************
 
-float APlayerPawn::QCrouchWalkFactor(const float forward, const float side)
+float APlayerPawn::QCrouchWalkFactor( ticcmd_t *cmd )
 {
-	FVector2 acceleration = FVector2 (FIXED2FLOAT(forward), -FIXED2FLOAT(side) * 1.25f).Unit();
+	FVector2 acceleration = FVector2 (FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f).Unit();
 	acceleration.Y /= 1.25f;
 
 	// [Dusk] Let the user move at whatever speed they desire when spectating.
 	if (player->bSpectating)
 	{
-		return (float) (acceleration.Length() * cl_spectatormove);
+		return (float) acceleration.Length();
 	}
 
 	// Strife's player can't run when its healh is below 10
@@ -2995,16 +3194,31 @@ float APlayerPawn::QCrouchWalkFactor(const float forward, const float side)
 	}
 
 	// [GRB]
-	int speed = WalkCrouchState();
+	int speed = WalkCrouchState(cmd);
 	switch (speed) {
 		case 0: // walking
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove1) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove1) * 0.5f).Length();
 		case 1: // running
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove2),			acceleration.Y * FIXED2FLOAT(SideMove2)).Length();
-		case 2: // crouching
+		case 2: // crouch walking
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove3) * 0.25f,	acceleration.Y * FIXED2FLOAT(SideMove3) * 0.25f).Length();
 		case 3: // crouch running
 			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove4) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove4) * 0.5f).Length();
+	}
+
+	return 1.f;
+}
+
+float APlayerPawn::QVerticalFactor( ticcmd_t *cmd )
+{
+	int speed = WalkCrouchState( cmd );
+	switch (speed) {
+		case 0: // walking
+		case 2: // crouch walking
+			return 0.5f;
+		case 1: // running
+		case 3: // crouch running
+			return 1.f;
 	}
 
 	return 1.f;
@@ -3185,25 +3399,25 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 
 	if (player->onground)
 	{
-		player->secondJumpsRemaining = player->mo->SecondJumpAmount;
+		player->secondJumpsRemaining = SecondJumpAmount;
 
-		if (!(player->mo->mvFlags & MV_DOUBLETAPJUMP))
+		if (!(mvFlags & MV_DOUBLETAPJUMP))
 		{
 			player->secondJumpState = SJ_AVAILABLE;
 		}
 
-		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || player->mo->velz < -8 * FRACUNIT)
-			player->jumpTics = player->mo->JumpDelay;
+		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || velz < -8 * FRACUNIT)
+			player->jumpTics = JumpDelay;
 	}
 	else if (player->secondJumpsRemaining != 0 && !((cmd->ucmd.buttons & BT_JUMP)))
 	{
-		if (!(player->mo->mvFlags & MV_DOUBLETAPJUMP))
+		if (!(mvFlags & MV_DOUBLETAPJUMP))
 		{
 			player->secondJumpState = SJ_AVAILABLE;
 		}
 	}
 
-	if ((player->mo->mvFlags & MV_DOUBLETAPJUMP) && player->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
+	if ((mvFlags & MV_DOUBLETAPJUMP) && player->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
 	{
 		cmd->ucmd.buttons |= BT_JUMP;
 		player->onground = false;
@@ -3211,12 +3425,13 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 		player->secondJumpTics = 0;
 	}
 
-	if (cmd->ucmd.buttons & BT_JUMP)
+	bool isClimbingLedge = player->onground && velz > 0 && cmd->ucmd.buttons & BT_CROUCH;
+	if (cmd->ucmd.buttons & BT_JUMP || isClimbingLedge)
 	{
 		// [Leo] Spectators shouldn't be limited by the server settings.
 		if (player->onground && !player->jumpTics)
 		{
-			bool isRampJumper = player->mo->mvFlags & MV_RAMPJUMP ? true : false;
+			bool isRampJumper = (mvFlags & MV_RAMPJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
 			if (!wasJustThrustedZ || isRampJumper)
 			{
@@ -3225,7 +3440,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				// Set base jump velocity.
 				// [Dusk] Exported this into a function as I need it elsewhere as well.
 				fixed_t	JumpVelx, JumpVely, JumpVelz;
-				player->mo->CalcJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
+				CalcJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
 
 				// Set base jump ticks.
 				// [BB] In ZDoom revision 2970 changed the jumping behavior.
@@ -3234,27 +3449,27 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				else
 					ulJumpTicks = -1;
 
-				if (!(player->mo->mvFlags & MV_SILENT))
+				if (!(mvFlags & MV_SILENT) && !isClimbingLedge)
 				{
 					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
 					if (CLIENT_PREDICT_IsPredicting() == false)
 						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 				}
 
-				player->mo->flags2 &= ~MF2_ONMOBJ;
+				flags2 &= ~MF2_ONMOBJ;
 
 				// [BC] Increase jump delay if the player has the high jump power.
 				if (player->cheats & CF_HIGHJUMP)
 					ulJumpTicks *= 2;
 
 				// [BC] Remove jump delay if the player is on a spring pad.
-				if (player->mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+				if (floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
 					ulJumpTicks = 0;
 
-				player->mo->velx += JumpVelx;
-				player->mo->vely += JumpVely;
+				velx += JumpVelx;
+				vely += JumpVely;
 
-				player->mo->velz = (isRampJumper ? player->mo->velz : 0) + JumpVelz;
+				velz = (isRampJumper ? velz : 0) + JumpVelz;
 				player->jumpTics = ulJumpTicks;
 			}
 		}
@@ -3264,7 +3479,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 			// Wall proximity check
 			bool doSecondJump = false;
 			FTraceResults secondJumpTrace;
-			if ((player->mo->mvFlags & MV_WALLJUMP) || (player->mo->mvFlags & MV_WALLJUMPV2))
+			if ((mvFlags & MV_WALLJUMP) || (mvFlags & MV_WALLJUMPV2))
 			{
 				// linetrace in 16 directions to see if there is a wall
 				for (int i = 0; i < 16; ++i)
@@ -3286,34 +3501,34 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 			if (doSecondJump)
 			{
 				fixed_t	JumpVelx, JumpVely, JumpVelz;
-				player->mo->CalcSecondJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
+				CalcSecondJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
 
-				if (player->mo->mvFlags & MV_WALLJUMPV2)
+				if (mvFlags & MV_WALLJUMPV2)
 				{
 					angle_t lineangle = R_PointToAngle2(0, 0, secondJumpTrace.Line->dx, secondJumpTrace.Line->dy) - ANG90;
 					JumpVelx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
 					JumpVely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
 				}
 
-				player->mo->velx += JumpVelx;
-				player->mo->vely += JumpVely;
+				velx += JumpVelx;
+				vely += JumpVely;
 
-				if (player->mo->velz < 0)
+				if (velz < 0)
 				{
-					player->mo->velz = JumpVelz;
+					velz = JumpVelz;
 				}
 				else
 				{
-					player->mo->velz += JumpVelz;
+					velz += JumpVelz;
 				}
 
-				if (!(player->mo->mvFlags & MV_SILENT))
+				if (!(mvFlags & MV_SILENT))
 				{
 					if (!CLIENT_PREDICT_IsPredicting())
 						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
 				}
 
-				player->secondJumpTics = player->mo->SecondJumpDelay;
+				player->secondJumpTics = SecondJumpDelay;
 
 				if (player->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
 					player->secondJumpsRemaining--;
@@ -3325,16 +3540,6 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 	else if (!player->onground && player->secondJumpState == SJ_AVAILABLE && player->secondJumpsRemaining != 0)
 	{
 		player->secondJumpState = SJ_READY;
-	}
-
-	// [geNia] Add additional vertical thrust if player is a key while in the air
-	if (!player->onground) {
-		if (cmd->ucmd.buttons & BT_JUMP) {
-			player->mo->velz += player->mo->AirThrustZUp;
-		}
-		if (cmd->ucmd.buttons & BT_CROUCH) {
-			player->mo->velz -= player->mo->AirThrustZDown;
-		}
 	}
 }
 
@@ -3352,7 +3557,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
 
-	fixed_t velocity = (fixed_t) TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length();
+	fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
 
 	// Wall proximity check
 	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 1048576) // 1048576 == 16.f
@@ -3402,7 +3607,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 			fm = cmd->ucmd.forwardmove;
 			sm = cmd->ucmd.sidemove;
-			player->mo->TweakSpeeds(fm, sm);
+			player->mo->TweakSpeeds(cmd, fm, sm);
 			fm = FixedMul(fm, player->mo->Speed);
 			sm = FixedMul(sm, player->mo->Speed);
 
@@ -3451,36 +3656,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	if (isClimber)
 		P_SetClimbStatus(player, isClimbing);
 
-	//*******************************************************
-	// Footsteps
-	//*******************************************************
-
-	if ( !CLIENT_PREDICT_IsPredicting() )
-	{
-		velocity = (fixed_t) TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length();
-
-		if (!player->onground || velocity <= 3.f || player->mo->waterlevel >= 2 ||
-			(player->mo->flags & MF_NOGRAVITY) || !player->mo->ShouldPlayFootstep() || (cmd->ucmd.buttons & BT_JUMP))
-		{
-			player->stepInterval = player->mo->FootstepInterval / 2;
-		}
-		else
-		{
-			if (player->stepInterval <= 0)
-			{
-				if (!(player->mo->mvFlags & MV_SILENT))
-				{
-					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
-				}
-
-				player->stepInterval = player->mo->FootstepInterval;
-			}
-			else
-			{
-				player->stepInterval--;
-			}
-		}
-	}
+	player->mo->PlayFootsteps(cmd);
 
 	//**********************************
 	// Jumping
@@ -3498,7 +3674,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
-				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+				player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
 			else
 				player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
@@ -3506,7 +3682,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
-				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+				player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
 			else
 				player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
@@ -3519,7 +3695,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 			{
-				player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+				player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
 			}
 			else
 			{
@@ -3536,7 +3712,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
 			{
-				player->mo->velz = -FixedMul(player->mo->velz, spectatormove);
+				player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
 			}
 			else
 			{
@@ -3577,8 +3753,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
-	float movefactor = player->mo->QCrouchWalkFactor(cmd->ucmd.forwardmove, cmd->ucmd.sidemove);
-	float maxgroundspeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
+	float moveFactor = player->mo->QCrouchWalkFactor( cmd );
+	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.f };
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
@@ -3587,15 +3763,16 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	if (player->mo->waterlevel >= 2)
 	{
+		FVector3 accelerationZ = { 0.f, 0.f, 0.f };
 		// Calculate the vertical push according to the view pitch
 		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
 		{
-			acceleration.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
+			accelerationZ.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
 		}
 		else
 		{
 			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
-			acceleration.Z = acceleration.X * sin(-pitch);
+			accelerationZ.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
 		//Friction
@@ -3603,8 +3780,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		acceleration.MakeUnit();
-		maxgroundspeed *= movefactor;
-		player->mo->QAcceleration(vel, acceleration, (maxgroundspeed * 3.f) / 5.f, 6.f);
+		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor(cmd);
+		maxGroundSpeed *= moveFactor;
+		player->mo->QAcceleration(vel, acceleration, (maxGroundSpeed * 3.f) / 5.f, 6.f);
+		player->mo->QAcceleration(vel, accelerationZ, maxVerticalSpeed, 8.f);
 
 		noJump = true;
 
@@ -3613,15 +3792,16 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
+		FVector3 accelerationZ = { 0.f, 0.f, 0.f };
 		// Calculate the vertical push according to the view pitch
 		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
 		{
-			acceleration.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
+			accelerationZ.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
 		}
 		else
 		{
 			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
-			acceleration.Z = acceleration.X * sin(-pitch);
+			accelerationZ.Z = acceleration.X * sin(-pitch);
 			acceleration.X *= cos(pitch);
 		}
 		//Friction
@@ -3629,8 +3809,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		acceleration.MakeUnit();
-		maxgroundspeed *= movefactor;
-		player->mo->QAcceleration(vel, acceleration, maxgroundspeed, 8.f);
+		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor(cmd);
+		maxGroundSpeed *= moveFactor;
+		player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, 8.f);
+		player->mo->QAcceleration(vel, accelerationZ, maxVerticalSpeed, 8.f);
 
 		noJump = true;
 
@@ -3641,7 +3823,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		// Wall proximity check
 		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
-			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxgroundspeed + 2.f)
+			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxGroundSpeed + 2.f)
 		{
 			FTraceResults secondJumpTrace;
 			P_TraceForWall(player->mo, player->mo->angle, secondJumpTrace);
@@ -3650,7 +3832,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		if (isClimbing)
 		{
-			player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction);
+			player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction);
 			vel.Z = FIXED2FLOAT(player->mo->WallClimbSpeed);
 			player->wallClimbTics--;
 			noJump = true;
@@ -3668,13 +3850,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
 			{
-				maxgroundspeed *= movefactor;
+				maxGroundSpeed *= moveFactor;
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
 				// Acceleration
 				if (player->mo->MvType == MV_QUAKE_CPM)
 				{
-					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxgroundspeed)
+					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxGroundSpeed)
 					{
 						// Side acceleration only
 						player->mo->QAcceleration(vel, acceleration, 1.5f, player->mo->CpmAirAcceleration * 6.f);
@@ -3706,13 +3888,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 						else
 						{
 							// Both side and forward acceleration
-							player->mo->QAcceleration(vel, acceleration, maxgroundspeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
+							player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
 						}
 					}
 				}
 				else
 				{
-					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
+					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
 				}
 
 				// Regen crouch slide tics
@@ -3733,14 +3915,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				if (isSliding)
 				{
 					player->mo->QFriction(vel, 0.f, player->mo->SlideFriction * floorFriction);
-					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->SlideAcceleration * floorFriction);
+					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->SlideAcceleration * floorFriction);
 					player->crouchSlideTics--;
 				}
 				else
 				{
-					maxgroundspeed *= movefactor;
-					player->mo->QFriction(vel, maxgroundspeed, player->mo->GroundFriction * floorFriction);
-					player->mo->QAcceleration(vel, acceleration, maxgroundspeed, player->mo->GroundAcceleration / movefactor * floorFriction);
+					maxGroundSpeed *= moveFactor;
+					player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction * floorFriction);
+					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->GroundAcceleration / moveFactor * floorFriction);
 
 					// Regen crouch slide tics
 					if (isSlider && player->crouchfactor > player->mo->CrouchScaleHalfWay)
@@ -3774,6 +3956,15 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	player->mo->vely = FLOAT2FIXED(vel.Y);
 	player->mo->velz = FLOAT2FIXED(vel.Z);
 
+	// [geNia] Apply cl_spectatormove here.
+	if (player->bSpectating)
+	{
+		fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
+		player->mo->velx = FixedMul(player->mo->velx, spectatormove);
+		player->mo->vely = FixedMul(player->mo->vely, spectatormove);
+		player->mo->velz = FixedMul(player->mo->velz, spectatormove);
+	}
+
 	// handle looping sounds of slide and climb
 	if (isSlider)
 		P_SetSlideStatus(player, isSliding);
@@ -3792,36 +3983,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		player->cheats &= ~CF_REVERTPLEASE;
 		player->camera = player->mo;
 	}
-	
-	//*******************************************************
-	// Footsteps
-	//*******************************************************
 
-	if ( !CLIENT_PREDICT_IsPredicting() )
-	{
-		velocity = float(FVector2(vel.X, vel.Y).Length());
-
-		if (!player->onground || velocity <= 3.f || noJump || !player->mo->ShouldPlayFootstep() || (cmd->ucmd.buttons & BT_JUMP))
-		{
-			player->stepInterval = player->mo->FootstepInterval / 2;
-		}
-		else
-		{
-			if (player->stepInterval <= 0 && !player->isCrouchSliding)
-			{
-				if (!(player->mo->mvFlags & MV_SILENT))
-				{
-					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM);
-				}
-
-				player->stepInterval = player->mo->FootstepInterval;
-			}
-			else
-			{
-				player->stepInterval--;
-			}
-		}
-	}
+	player->mo->PlayFootsteps(cmd);
 
 	// Water and flying have already executed jump press logic
 	if (noJump)
@@ -3860,13 +4023,40 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	player->onground = player->mo->z <= player->mo->floorz || (player->mo->flags2 & MF2_ONMOBJ) ||
 					   (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
-	if (player->mo->MvType)
-	{
-		P_MovePlayer_Quake(player, cmd);
-	}
-	else // default Doom movement
+	// Execute ACS scripts assigned to action buttons
+	player->mo->ExecuteActionScript(cmd, BT_ATTACK);
+	player->mo->ExecuteActionScript(cmd, BT_USE);
+	player->mo->ExecuteActionScript(cmd, BT_JUMP);
+	player->mo->ExecuteActionScript(cmd, BT_CROUCH);
+	player->mo->ExecuteActionScript(cmd, BT_TURN180);
+	player->mo->ExecuteActionScript(cmd, BT_ALTATTACK);
+	player->mo->ExecuteActionScript(cmd, BT_RELOAD);
+	player->mo->ExecuteActionScript(cmd, BT_ZOOM);
+	player->mo->ExecuteActionScript(cmd, BT_SPEED);
+	player->mo->ExecuteActionScript(cmd, BT_STRAFE);
+	player->mo->ExecuteActionScript(cmd, BT_MOVERIGHT);
+	player->mo->ExecuteActionScript(cmd, BT_MOVELEFT);
+	player->mo->ExecuteActionScript(cmd, BT_BACK);
+	player->mo->ExecuteActionScript(cmd, BT_FORWARD);
+	player->mo->ExecuteActionScript(cmd, BT_RIGHT);
+	player->mo->ExecuteActionScript(cmd, BT_LEFT);
+	player->mo->ExecuteActionScript(cmd, BT_LOOKUP);
+	player->mo->ExecuteActionScript(cmd, BT_LOOKDOWN);
+	player->mo->ExecuteActionScript(cmd, BT_MOVEUP);
+	player->mo->ExecuteActionScript(cmd, BT_MOVEDOWN);
+	player->mo->ExecuteActionScript(cmd, BT_SHOWSCORES);
+	player->mo->ExecuteActionScript(cmd, BT_USER1);
+	player->mo->ExecuteActionScript(cmd, BT_USER2);
+	player->mo->ExecuteActionScript(cmd, BT_USER3);
+	player->mo->ExecuteActionScript(cmd, BT_USER4);
+
+	if (player->mo->MvType == 0 || player->bSpectating)
 	{
 		P_MovePlayer_Doom(player, cmd);
+	}
+	else
+	{
+		P_MovePlayer_Quake(player, cmd);
 	}
 }
 
@@ -4443,6 +4633,11 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	{
 		player->mo->flags &= ~MF_NOGRAVITY;
 	}
+
+	if (cl_spectsource && player->bSpectating && player->mo == players[consoleplayer].mo)
+		player->mo->flags5 |= MF5_NOINTERACTION;
+	else
+		player->mo->flags5 &= ~MF5_NOINTERACTION;
 
 	// If we're predicting, use the ticcmd we pass in.
 	if ( CLIENT_PREDICT_IsPredicting( ))

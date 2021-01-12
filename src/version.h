@@ -125,9 +125,9 @@ const char *GetVersionStringRev();
 #define	SERVERCONSOLE_TITLESTRING	GAMENAME " v" DOTVERSIONSTR " Server"
 
 #if defined(__APPLE__) || defined(_WIN32)
-#define GAME_DIR GAMENAME
+#define GAME_DIR CONFIGFILE
 #else
-#define GAME_DIR ".config/" GAMENAMELOWERCASE
+#define GAME_DIR ".config/" CONFIGFILE
 #endif
 
 

@@ -172,7 +172,7 @@ void DDoor::Tick ()
 			{
 			case doorRaise:
 			case doorClose:
-				Destroy();						// unlink and free
+				Destroy ();						// unlink and free
 				break;
 				
 			case doorCloseWaitOpen:
@@ -237,7 +237,7 @@ void DDoor::Tick ()
 				
 			case doorCloseWaitOpen:
 			case doorOpen:
-				Destroy();						// unlink and free
+				Destroy ();						// unlink and free
 				break;
 				
 			default:
@@ -267,12 +267,12 @@ void DDoor::UpdateToClient( ULONG ulClient )
 	SERVERCOMMANDS_DoDoor( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
-fixed_t DDoor::GetPosition()
+fixed_t DDoor::GetPosition ()
 {
 	return ( m_Sector->ceilingplane.d );
 }
 
-int DDoor::GetDirection()
+int DDoor::GetDirection ()
 {
 	return ( m_Direction );
 }
@@ -282,11 +282,11 @@ void DDoor::SetPositionAndDirection ( fixed_t Position, int direction )
 	fixed_t diff = m_Sector->ceilingplane.d - Position;
 	if (diff > 0)
 	{
-		MoveCeiling(diff, m_BotDist, -1, -1, false);
+		MoveCeiling(diff, Position, -1, -1, false);
 	}
 	else if (diff < 0)
 	{
-		MoveCeiling(-diff, m_TopDist, -1, 1, false);
+		MoveCeiling(-diff, Position, -1, 1, false);
 	}
 
 	if (m_Direction != direction)
@@ -465,7 +465,6 @@ void DDoor::DoorSound(bool raise, DSeqNode *curseq) const
 DDoor::DDoor (sector_t *sector)
 	: DMovingCeiling (sector)
 {
-
 }
 
 //============================================================================
@@ -487,39 +486,39 @@ DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTa
 		m_LightTag = 0;
 	}
 
-	switch (m_Type)
+	switch (type)
 	{
 	case doorClose:
 		m_Direction = -1;
-		height = m_Sector->FindLowestCeilingSurrounding(&spot);
-		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
+		height = sec->FindLowestCeilingSurrounding (&spot);
+		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
 		// [BC] Added option to create the door soundlessly.
-		if (bNoSound == false)
-			DoorSound(false);
+		if ( bNoSound == false )
+			DoorSound (false);
 		break;
 
 	case doorOpen:
 	case doorRaise:
 		m_Direction = 1;
-		height = m_Sector->FindLowestCeilingSurrounding(&spot);
-		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
+		height = sec->FindLowestCeilingSurrounding (&spot);
+		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
 		// [BC] Added option to create the door soundlessly.
-		if ((m_TopDist != m_Sector->ceilingplane.d) && (bNoSound == false))
-			DoorSound(true);
+		if ((m_TopDist != sec->ceilingplane.d) && ( bNoSound == false ))
+			DoorSound (true);
 		break;
 
 	case doorCloseWaitOpen:
-		m_TopDist = m_Sector->ceilingplane.d;
+		m_TopDist = sec->ceilingplane.d;
 		m_Direction = -1;
 		// [BC] Added option to create the door soundlessly.
-		if (bNoSound == false)
-			DoorSound(false);
+		if ( bNoSound == false )
+			DoorSound (false);
 		break;
 
 	case doorRaiseIn5Mins:
 		m_Direction = 2;
-		height = m_Sector->FindLowestCeilingSurrounding(&spot);
-		m_TopDist = m_Sector->ceilingplane.PointToDist(spot, height - 4 * FRACUNIT);
+		height = sec->FindLowestCeilingSurrounding (&spot);
+		m_TopDist = sec->ceilingplane.PointToDist (spot, height - 4*FRACUNIT);
 		m_TopCountdown = 5 * 60 * TICRATE;
 		break;
 	}
@@ -527,15 +526,15 @@ DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTa
 	if (!m_Sector->floordata || !m_Sector->floordata->IsKindOf(RUNTIME_CLASS(DPlat)) ||
 		!(barrier_cast<DPlat*>(m_Sector->floordata))->IsLift())
 	{
-		height = m_Sector->FindHighestFloorPoint(&m_BotSpot);
-		m_BotDist = m_Sector->ceilingplane.PointToDist(m_BotSpot, height);
+		height = sec->FindHighestFloorPoint (&m_BotSpot);
+		m_BotDist = sec->ceilingplane.PointToDist (m_BotSpot, height);
 	}
 	else
 	{
-		height = m_Sector->FindLowestCeilingPoint(&m_BotSpot);
-		m_BotDist = m_Sector->ceilingplane.PointToDist(m_BotSpot, height);
+		height = sec->FindLowestCeilingPoint(&m_BotSpot);
+		m_BotDist = sec->ceilingplane.PointToDist (m_BotSpot, height);
 	}
-	m_OldFloorDist = m_Sector->floorplane.d;
+	m_OldFloorDist = sec->floorplane.d;
 }
 
 //============================================================================
@@ -661,30 +660,20 @@ bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *insti
 		secnum = -1;
 		while ((secnum = P_FindSectorFromTag (tag,secnum)) >= 0)
 		{
-			pDoor = NULL;
-
 			sec = &sectors[secnum];
 			// if the ceiling is already moving, don't start the door action
 			if (sec->PlaneMoving(sector_t::ceiling))
+				continue;
+
+			if ( (pDoor = new DDoor (sec, type, speed, delay, lightTag)))
 			{
-				if (sec->ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)))
-				{
-					pDoor = barrier_cast<DDoor *>(sec->ceilingdata);
-				}
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_DoDoor( pDoor );
+
+				rtn = true;
 			}
-
-			if ( pDoor == NULL )
-			{
-				pDoor = new DDoor (sec, type, speed, delay, lightTag);
-			}
-
-			pDoor->m_LastInstigator = instigator;
-			rtn = true;
-
-			// [geNia] If we are the server, update the clients
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_DoDoor( pDoor );
 		}
+
 	}
 	return rtn;
 }
@@ -827,10 +816,12 @@ bool DAnimatedDoor::StartClosing ()
 
 		// [BB] Tell the clients to play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		{
 			if ( m_LastInstigator )
 				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_CEILING, m_DoorAnim->CloseSound.GetChars(), 1, ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 			else
 				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_CEILING, m_DoorAnim->CloseSound.GetChars(), 1 );
+		}
 	}
 
 	m_Status = Closing;
@@ -948,10 +939,12 @@ void DAnimatedDoor::Tick ()
 
 				// [BC] If we're the server, tell clients to move the ceiling.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				{
 					if ( m_LastInstigator )
 						SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 					else
 						SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
+				}
 
 				m_Sector->ceilingdata = NULL;
 				Destroy ();
@@ -1101,18 +1094,22 @@ DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, player_t *instigator,
 
 		// [BB] Tell the clients to play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		{
 			if ( m_LastInstigator )
 				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_INTERIOR, m_DoorAnim->OpenSound.GetChars(), 1, ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 			else
 				SERVERCOMMANDS_StartSectorSequence( m_Sector, CHAN_INTERIOR, m_DoorAnim->OpenSound.GetChars(), 1 );
+		}
 	}
 
 	// [BC] If we're the server, tell clients to move the ceiling.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
 		if ( m_LastInstigator )
 			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT );
 		else
 			SERVERCOMMANDS_SetSectorCeilingPlane( ULONG( m_Sector - sectors ));
+	}
 }
 
 //============================================================================
