@@ -6463,6 +6463,19 @@ void ServerCommands::ACSScriptExecute::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::ACSSendString::Execute()
+{
+	// [AK] Resolve the script netid into a script number
+	int scriptNum = NETWORK_ACSScriptFromNetID( netid );
+
+	// [AK] Add the string to the ACS string table.
+	int args[4] = { GlobalACSStrings.AddString( string, NULL, 0 ), 0, 0, 0 };
+
+	P_StartScript( activator, NULL, scriptNum, NULL, args, 4, ACS_ALWAYS );
+}
+
+//*****************************************************************************
+//
 void ServerCommands::Sound::Execute()
 {
 	if ( volume > 127 )

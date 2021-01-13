@@ -11,6 +11,13 @@ Command ACSScriptExecute
 	Bool always
 EndCommand
 
+Command ACSSendString
+	ExtendedCommand
+	Short netid
+	Actor activator with NullAllowed
+	String string
+EndCommand
+
 Struct JoinSlot
 	Byte player
 	Byte team
