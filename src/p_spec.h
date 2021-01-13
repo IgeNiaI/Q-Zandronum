@@ -1126,9 +1126,9 @@ public:
 	void	SetScale( fixed_t Scale );
 	fixed_t	GetScaleDelta( );
 	void	SetScaleDelta( fixed_t ScaleDelta );
-	fixed_t	GetTicker( );
+	int		GetTicker( );
 	void	SetTicker( int Ticker );
-	fixed_t	GetState( );
+	int		GetState( );
 	void	SetState( int State );
 
 protected:
