@@ -1664,6 +1664,144 @@ static int RequestScriptPuke ( FBehavior* module, int script, int* args, int arg
 	return 1;
 }
 
+// ================================================================================================
+//
+// [AK] ExecuteClientScript
+//
+// Executes a clientside script for only one client if called from the server.
+//
+// ================================================================================================
+
+static int ExecuteClientScript ( AActor* activator, int script, int client, int* args, int argCount )
+{
+	FString rep = FBehavior::RepresentScript( script );
+
+	// [AK] Don't execute during demo playback.
+	if ( CLIENTDEMO_IsPlaying() )
+		return 1;
+
+	// [AK] If we're in singleplayer, execute the script like normal.
+	if (( NETWORK_GetState() == NETSTATE_SINGLE ) || ( NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER ))
+	{
+		P_StartScript( activator, NULL, script, NULL, args, argCount, ACS_ALWAYS );
+		return 1;
+	}
+
+	// [AK] Don't let the client do anything here.
+	if ( NETWORK_GetState() == NETSTATE_CLIENT )
+	{
+		Printf( "ExecuteClientScript can only be invoked from serversided scripts "
+			"(attempted to call script %s).\n", rep.GetChars() );
+		return 0;
+	}
+
+	// [AK] If we're the server, execute the script but only for the specified client.
+	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( PLAYER_IsValidPlayer( client ) ))
+	{
+		// [AK] Don't send a command to the client if the script doesn't exist.
+		if ( ACS_ExistsScript( script ) == false )
+		{
+			Printf( "ExecuteClientScript: Script %s doesn't exist.\n", rep.GetChars() );
+			return 0;
+		}
+
+		// [AK] Don't execute the script if it isn't clientside.
+		if ( ACS_IsScriptClientSide( script ) == false )
+		{
+			Printf( "ExecuteClientScript: Script %s must be CLIENTSIDE but isn't.\n", rep.GetChars() );
+			return 0;
+		}
+
+		int scriptArgs[4] = { 0, 0, 0, 0 };
+
+		for ( int i = 0; i < MIN( argCount, 4 ); i++ )
+			scriptArgs[i] = args[i];
+
+		SERVERCOMMANDS_ACSScriptExecute( script, activator, NULL, NULL, NULL, scriptArgs, 4, true, client, SVCF_ONLYTHISCLIENT );
+		return 1;
+	}
+
+	return 0;
+}
+
+// ================================================================================================
+//
+// [AK] SendNetworkString
+//
+// Sends a string across the network then executes a script with the string's id as an argument.
+//
+// ================================================================================================
+
+static int SendNetworkString ( FBehavior* module, AActor* activator, int script, int index, int client )
+{
+	const ScriptPtr* scriptdata = FBehavior::StaticFindScript( script, module );
+	FString rep = FBehavior::RepresentScript( script );
+
+	// [AK] Don't execute during demo playback.
+	if ( CLIENTDEMO_IsPlaying() )
+		return 1;
+
+	// [AK] If we're in singleplayer, execute the script like normal.
+	if (( NETWORK_GetState() == NETSTATE_SINGLE ) || ( NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER ))
+	{
+		int scriptArgs[4] = { index, 0, 0, 0 };
+
+		P_StartScript( activator, NULL, script, NULL, scriptArgs, 4, ACS_ALWAYS );
+		return 1;
+	}
+
+	// [AK] Don't execute any network commands if the script doesn't exist.
+	if ( ACS_ExistsScript( script ) == false )
+	{
+		Printf( "SendNetworkString: Script %s doesn't exist.\n", rep.GetChars() );
+		return 0;
+	}
+
+	const char *string = FBehavior::StaticLookupString( index );
+
+	// [AK] Don't send empty strings across the network.
+	if (( string == NULL ) || ( strlen( string ) < 1 ))
+		return 0;
+
+	if ( NETWORK_GetState() == NETSTATE_CLIENT )
+	{
+		// [AK] Don't have the client send the string if the script is non-pukable.
+		if (( scriptdata->Flags & SCRIPTF_Net ) == 0 )
+		{
+			Printf( "SendNetworkString: Script %s must be NET but isn't.\n", rep.GetChars() );
+			return 0;
+		}
+
+		CLIENTCOMMANDS_ACSSendString( script, string );
+		return 1;
+	}
+
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+	{
+		// [AK] Don't send the string to a client that doesn't exist.
+		if (( client >= 0 ) && ( PLAYER_IsValidPlayer( client ) == false ))
+			return 0;
+
+		// [AK] Don't send the string to the client(s) if the script isn't clientside.
+		if ( ACS_IsScriptClientSide( script ) == false )
+		{
+			Printf( "SendNetworkString: Script %s must be CLIENTSIDE but isn't.\n", rep.GetChars() );
+			return 0;
+		}
+
+		// [AK] We want to send the string to all the clients.
+		if ( client < 0 )
+			SERVERCOMMANDS_ACSSendString( script, activator, string );
+		// [AK] Otherwise, we're sending the string to only this client.
+		else
+			SERVERCOMMANDS_ACSSendString( script, activator, string, client, SVCF_ONLYTHISCLIENT );
+
+		return 1;
+	}
+
+	return 0;
+}
+
 //---- Plane watchers ----//
 
 class DPlaneWatcher : public DThinker
@@ -5169,6 +5307,10 @@ enum EACSFunctions
 	ACSF_SetActionScript,
 	ACSF_SetPredictableValue,
 	ACSF_GetPredictableValue,
+	ACSF_ExecuteClientScript,
+	ACSF_NamedExecuteClientScript,
+	ACSF_SendNetworkString,
+	ACSF_NamedSendNetworkString,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7448,6 +7590,31 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				}
 			}
 			return 0;
+
+		case ACSF_ExecuteClientScript:
+			{
+				return ExecuteClientScript( activator, args[0], args[1], &args[2], argCount - 2 );
+			}
+
+		case ACSF_NamedExecuteClientScript:
+			{
+				FName scriptName = FBehavior::StaticLookupString( args[0] );
+				return ExecuteClientScript( activator, -scriptName, args[1], &args[2], argCount - 2 );
+			}
+
+		case ACSF_SendNetworkString:
+			{
+				const int client = argCount > 2 ? args[2] : -1;
+				return SendNetworkString( activeBehavior, activator, args[0], args[1], client );
+			}
+
+			case ACSF_NamedSendNetworkString:
+			{
+				FName scriptName = FBehavior::StaticLookupString( args[0] );
+				const int client = argCount > 2 ? args[2] : -1;
+
+				return SendNetworkString( activeBehavior, activator, -scriptName, args[1], client );
+			}
 
 		case ACSF_GetActorFloorTexture:
 		{

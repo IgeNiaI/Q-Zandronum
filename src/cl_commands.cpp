@@ -678,6 +678,22 @@ void CLIENTCOMMANDS_Puke ( int scriptNum, int args[4], bool always )
 
 //*****************************************************************************
 //
+void CLIENTCOMMANDS_ACSSendString ( int scriptNum, const char *pszString )
+{
+	const int scriptNetID = NETWORK_ACSScriptToNetID( scriptNum );
+
+	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_ACSSENDSTRING );
+	NETWORK_WriteLong( &CLIENT_GetLocalBuffer( )->ByteStream, scriptNetID );
+
+	// [AK] If we don't have a netID on file for this script, we send the name as a string.
+	if ( scriptNetID == NO_SCRIPT_NETID )
+		NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, FName( ENamedName( -scriptNum )));
+
+	NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, pszString );
+}
+
+//*****************************************************************************
+//
 void CLIENTCOMMANDS_MorphCheat ( const char *pszMorphClass )
 {
 	if ( pszMorphClass == NULL )

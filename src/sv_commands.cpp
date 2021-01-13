@@ -3049,6 +3049,30 @@ void SERVERCOMMANDS_ACSScriptExecute( int ScriptNum, AActor *pActivator, LONG lL
 }
 
 //*****************************************************************************
+//
+void SERVERCOMMANDS_ACSSendString( int ScriptNum, AActor *pActivator, const char *pszString, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	int netid = NETWORK_ACSScriptToNetID( ScriptNum );
+
+	if ( netid == NO_SCRIPT_NETID )
+	{
+		// [AK] This shouldn't happen.
+		if ( sv_showwarnings )
+		{
+			Printf( "SERVERCOMMANDS_ACSSendString: Failed to find a netid for script %s!\n",
+				FName( ENamedName( -ScriptNum )).GetChars() );
+		}
+		return;
+	}
+
+	ServerCommands::ACSSendString command;
+	command.SetNetid( netid );
+	command.SetActivator( pActivator );
+	command.SetString( pszString );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
 //*****************************************************************************
 //
 void SERVERCOMMANDS_SetSideFlags( ULONG ulSide, ULONG ulPlayerExtra, ServerCommandFlags flags )

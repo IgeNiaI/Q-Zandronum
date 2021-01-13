@@ -303,6 +303,7 @@ void	SERVERCOMMANDS_SetSideFlags( ULONG ulSide, ULONG ulPlayerExtra = MAXPLAYERS
 
 // ACS commands. These have something to do with ACS scripts.
 void	SERVERCOMMANDS_ACSScriptExecute( int ScriptNum, AActor *pActivator, LONG lLineIdx, int levelnum, bool bBackSide, const int *args, int argcount, bool bAlways, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_ACSSendString( int ScriptNum, AActor *pActivator, const char *pszString, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 
 // Sound commands. These play a sound.
 void	SERVERCOMMANDS_Sound( LONG lChannel, const char *pszSound, float fVolume, float fAttenuation, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
