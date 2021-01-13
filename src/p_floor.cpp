@@ -1875,18 +1875,7 @@ void DWaggleBase::DoWaggle (bool ceiling)
 	// [BC] At the peak and troughs of the waggle, update the clients with the current
 	// position of the floor/ceiling.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-	{
-		for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
-		{
-			if (( SERVER_IsValidClient( ulIdx ) == false ) ||
-				(( players[ulIdx].ulTime % ( 5 * TICRATE )) != 0 ))
-			{
-				continue;
-			}
-
-			SERVERCOMMANDS_DoWaggle( this, ulIdx, SVCF_ONLYTHISCLIENT );
-		}
-	}
+		SERVERCOMMANDS_DoWaggle( this );
 }
 
 //==========================================================================
