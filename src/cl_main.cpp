@@ -7144,15 +7144,7 @@ static void client_DoDoor( BYTESTREAM_s *pByteStream )
 	int SectorID = NETWORK_ReadShort( pByteStream );
 	fixed_t Position = NETWORK_ReadLong(pByteStream);
 
-	// Invalid sector.
-	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
-		return;
-	sector_t *pSector = &sectors[SectorID];
-	DDoor *pDoor = P_GetDoorBySectorNum( pSector->sectornum );
-	
-	// If the sector already has activity, don't override it.
-	if ( !pDoor && pSector->ceilingdata )
-		return;
+	DDoor *pDoor = P_GetDoorBySectorNum( SectorID );
 	
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
@@ -7172,7 +7164,17 @@ static void client_DoDoor( BYTESTREAM_s *pByteStream )
 		int TopWait = NETWORK_ReadLong( pByteStream );
 		int Countdown = NETWORK_ReadLong( pByteStream );
 		int LightTag = NETWORK_ReadShort( pByteStream );
+		
+		// Invalid sector.
+		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
+			return;
 
+		sector_t *pSector = &sectors[SectorID];
+
+		// If the sector already has activity, don't override it.
+		if ( !pDoor && pSector->ceilingdata )
+			return;
+	
 		if (pDoor == NULL)
 		{
 			// Create the new door.
@@ -7204,15 +7206,7 @@ static void client_DoFloor( BYTESTREAM_s *pByteStream )
 	int SectorID = NETWORK_ReadShort( pByteStream );
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
 
-	// Invalid sector.
-	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
-		return;
-	sector_t *pSector = &sectors[SectorID];
-	DFloor *pFloor = P_GetFloorBySectorNum( pSector->sectornum );
-	
-	// If the sector already has activity, don't override it.
-	if ( !pFloor && pSector->floordata )
-		return;
+	DFloor *pFloor = P_GetFloorBySectorNum( SectorID );
 	
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
@@ -7234,7 +7228,17 @@ static void client_DoFloor( BYTESTREAM_s *pByteStream )
 		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
 		bool Hexencrush = NETWORK_ReadBit( pByteStream );
 		int NewSpecial = NETWORK_ReadLong( pByteStream );
+		
+		// Invalid sector.
+		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
+			return;
 
+		sector_t *pSector = &sectors[SectorID];
+
+		// If the sector already has activity, don't override it.
+		if ( !pFloor && pSector->floordata )
+			return;
+	
 		if (pFloor == NULL )
 		{
 			// Create the new floor.
@@ -7268,12 +7272,7 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 	// Invalid sector.
 	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 		return;
-	sector_t *pSector = &sectors[SectorID];
-	DFloor *pFloor = P_GetFloorBySectorNum( pSector->sectornum );
-	
-	// If the sector already has activity, don't override it.
-	if ( !pFloor && pSector->floordata )
-		return;
+	DFloor *pFloor = P_GetFloorBySectorNum( SectorID );
 	
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
@@ -7305,12 +7304,16 @@ static void client_BuildStair( BYTESTREAM_s *pByteStream )
 		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
 			return;
 
-		sector_t *sector = &sectors[SectorID];
+		sector_t *pSector = &sectors[SectorID];
 
+		// If the sector already has activity, don't override it.
+		if ( !pFloor && pSector->floordata )
+			return;
+	
 		if ( pFloor == NULL )
 		{
 			// Create the new floor.
-			pFloor = new DFloor( sector );
+			pFloor = new DFloor( pSector );
 		}
 
 		pFloor->SetLastInstigator( &players[Instigator] );
@@ -7342,15 +7345,7 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 	int SectorID = NETWORK_ReadShort( pByteStream );
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
 
-	// Invalid sector.
-	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
-		return;
-	sector_t *pSector = &sectors[SectorID];
-	DCeiling *pCeiling = P_GetCeilingBySectorNum( pSector->sectornum );
-	
-	// If the sector already has activity, don't override it.
-	if ( !pCeiling && pSector->ceilingdata )
-		return;
+	DCeiling *pCeiling = P_GetCeilingBySectorNum( SectorID );
 	
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
@@ -7376,7 +7371,17 @@ static void client_DoCeiling( BYTESTREAM_s *pByteStream )
 		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
 		bool Hexencrush = NETWORK_ReadBit( pByteStream );
 		int Silent = NETWORK_ReadShort( pByteStream );
+		
+		// Invalid sector.
+		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
+			return;
 
+		sector_t *pSector = &sectors[SectorID];
+
+		// If the sector already has activity, don't override it.
+		if ( !pCeiling && pSector->ceilingdata )
+			return;
+	
 		if ( pCeiling == NULL )
 		{
 			// Create the new ceiling.
@@ -7411,15 +7416,7 @@ static void client_DoPlat( BYTESTREAM_s *pByteStream )
 	int SectorID = NETWORK_ReadShort( pByteStream );
 	fixed_t Position = NETWORK_ReadLong( pByteStream );
 	
-	// Invalid sector.
-	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
-		return;
-	sector_t *pSector = &sectors[SectorID];
-	DPlat *pPlat = P_GetPlatBySectorNum( pSector->sectornum );
-	
-	// If the sector already has activity, don't override it.
-	if ( !pPlat && pSector->ceilingdata )
-		return;
+	DPlat *pPlat = P_GetPlatBySectorNum( SectorID );
 	
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
@@ -7443,6 +7440,16 @@ static void client_DoPlat( BYTESTREAM_s *pByteStream )
 		LONG Count = NETWORK_ReadLong( pByteStream );
 		LONG Crush = NETWORK_ReadLong( pByteStream );
 		LONG Tag = NETWORK_ReadLong( pByteStream );
+	
+		// Invalid sector.
+		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
+			return;
+
+		sector_t *pSector = &sectors[SectorID];
+
+		// If the sector already has activity, don't override it.
+		if ( !pPlat && pSector->ceilingdata )
+			return;
 	
 		if (pPlat == NULL)
 		{
@@ -7478,15 +7485,7 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 	fixed_t FloorPosition = NETWORK_ReadLong( pByteStream );
 	fixed_t CeilingPosition = NETWORK_ReadLong( pByteStream );
 
-	// Invalid sector.
-	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
-		return;
-	sector_t *pSector = &sectors[SectorID];
-	DElevator *pElevator = P_GetElevatorBySectorNum( pSector->sectornum );
-	
-	// If the sector already has activity, don't override it.
-	if ( !pElevator && (pSector->floordata || pSector->ceilingdata) )
-		return;
+	DElevator *pElevator = P_GetElevatorBySectorNum( SectorID );
 	
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
@@ -7507,7 +7506,17 @@ static void client_DoElevator( BYTESTREAM_s *pByteStream )
 		int Direction = CLIENT_AdjustElevatorDirection( NETWORK_ReadByte( pByteStream ) );
 		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
 		fixed_t CeilingDestDist = NETWORK_ReadLong( pByteStream );
+		
+		// Invalid sector.
+		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
+			return;
 
+		sector_t *pSector = &sectors[SectorID];
+
+		// If the sector already has activity, don't override it.
+		if ( !pElevator && (pSector->floordata || pSector->ceilingdata) )
+			return;
+	
 		if (pElevator == NULL)
 		{
 			// Create the new elevator.
@@ -7538,16 +7547,8 @@ static void client_DoPillar( BYTESTREAM_s *pByteStream )
 	fixed_t FloorPosition = NETWORK_ReadLong ( pByteStream );
 	fixed_t CeilingPosition = NETWORK_ReadLong ( pByteStream );
 
-	// Invalid sector.
-	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
-		return;
-	sector_t *pSector = &sectors[SectorID];
-	DPillar	*pPillar = P_GetPillarBySectorNum( pSector->sectornum );
+	DPillar	*pPillar = P_GetPillarBySectorNum( SectorID );
 	
-	// If the sector already has activity, don't override it.
-	if ( !pPillar && (pSector->floordata || pSector->ceilingdata) )
-		return;
-
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
 		if ( pPillar )
@@ -7567,6 +7568,16 @@ static void client_DoPillar( BYTESTREAM_s *pByteStream )
 		fixed_t CeilingTarget = NETWORK_ReadLong ( pByteStream );
 		LONG Crush = NETWORK_ReadLong ( pByteStream );
 		bool Hexencrush = NETWORK_ReadBit ( pByteStream );
+		
+		// Invalid sector.
+		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
+			return;
+
+		sector_t *pSector = &sectors[SectorID];
+
+		// If the sector already has activity, don't override it.
+		if ( !pPillar && (pSector->floordata || pSector->ceilingdata) )
+			return;
 
 		if (pPillar == NULL)
 		{
@@ -7604,16 +7615,8 @@ static void client_DoWaggle( BYTESTREAM_s *pByteStream )
 	fixed_t Position = NETWORK_ReadLong ( pByteStream );
 	bool bCeiling = NETWORK_ReadBit( pByteStream );
 	
-	// Invalid sector.
-	if (( SectorID >= numsectors ) || ( SectorID < 0 ))
-		return;
-	sector_t *pSector = &sectors[SectorID];
-	DWaggleBase	*pWaggle = P_GetWaggleBySectorNum( pSector->sectornum, bCeiling );
-	
-	// If the sector already has activity, don't override it.
-	if ( !pWaggle && ( bCeiling ? pSector->ceilingdata : pSector->floordata ) )
-		return;
-	
+	DWaggleBase	*pWaggle = P_GetWaggleBySectorNum( SectorID, bCeiling );
+
 	if ( NETWORK_ReadBit( pByteStream ) )
 	{
 		if ( pWaggle )
@@ -7634,7 +7637,17 @@ static void client_DoWaggle( BYTESTREAM_s *pByteStream )
 		fixed_t ScaleDelta = NETWORK_ReadLong( pByteStream );
 		int Ticker = NETWORK_ReadLong( pByteStream );
 		int State = NETWORK_ReadByte( pByteStream );
-		
+
+		// Invalid sector.
+		if (( SectorID >= numsectors ) || ( SectorID < 0 ))
+			return;
+
+		sector_t *pSector = &sectors[SectorID];
+
+		// If the sector already has activity, don't override it.
+		if ( !pWaggle && ( bCeiling ? pSector->ceilingdata : pSector->floordata ))
+			return;
+
 		if (pWaggle == NULL)
 		{
 			// Create the waggle
