@@ -2435,12 +2435,12 @@ int APlayerPawn::WalkCrouchState (ticcmd_t *cmd)
 //
 //===========================================================================
 
-bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd)
+bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd, bool landing)
 {
 	if ( CLIENT_PREDICT_IsPredicting() )
 		return false;
 
-	if (!player->onground || player->mo->waterlevel >= 2 ||
+	if ((!player->onground && !landing) || player->mo->waterlevel >= 2 ||
 		(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_JUMP))
 	{
 		return false;
@@ -2467,7 +2467,7 @@ bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd)
 	}
 
 	fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
-	if (velocity < Speed * 3)
+	if (velocity < Speed * 3 && !landing)
 		return false;
 
 	return true;
@@ -2486,7 +2486,7 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 	if ( CLIENT_PREDICT_IsPredicting() )
 		return;
 
-	if ( ShouldPlayFootsteps( cmd ) )
+	if ( ShouldPlayFootsteps( cmd, false ) )
 	{
 		if (player->stepInterval <= 0)
 		{
