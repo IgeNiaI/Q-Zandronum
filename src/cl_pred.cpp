@@ -209,6 +209,11 @@ void CLIENT_PREDICT_PlayerPredict( void )
 		pPlayer->ServerXYZ[1],
 		pPlayer->ServerXYZ[2] );
 
+	if ( pPlayer->mo->z < pPlayer->mo->floorz )
+		pPlayer->mo->z = pPlayer->mo->floorz;
+	if ( pPlayer->mo->z > pPlayer->mo->ceilingz - pPlayer->mo->height )
+		pPlayer->mo->z = pPlayer->mo->ceilingz - pPlayer->mo->height;
+
 	// Set the player's velocity as told to him by the server.
 	pPlayer->mo->velx = pPlayer->ServerXYZVel[0];
 	pPlayer->mo->vely = pPlayer->ServerXYZVel[1];
