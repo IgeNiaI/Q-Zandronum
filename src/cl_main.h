@@ -196,7 +196,6 @@ bool				CLIENT_PREDICT_IsPredicting( void );
 //*****************************************************************************
 //	EXTERNAL CONSOLE VARIABLES
 
-EXTERN_CVAR( Bool, cl_predict_players )
 //EXTERN_CVAR( Int, cl_maxmonstercorpses )
 EXTERN_CVAR( Float, cl_motdtime )
 EXTERN_CVAR( Bool, cl_taunts )
