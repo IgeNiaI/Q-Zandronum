@@ -115,6 +115,7 @@ static	void	client_predict_BeginPrediction( player_t *pPlayer );
 static	void	client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks );
 static	void	client_predict_EndPrediction( player_t *pPlayer );
 static	void	client_predict_SaveOnGroundStatus( const player_t *pPlayer, const ULONG Tick );
+static	void	client_predict_AdjustZ( APlayerPawn *mo );
 
 //*****************************************************************************
 //	FUNCTIONS
@@ -209,11 +210,6 @@ void CLIENT_PREDICT_PlayerPredict( void )
 		pPlayer->ServerXYZ[1],
 		pPlayer->ServerXYZ[2] );
 
-	if ( pPlayer->mo->z < pPlayer->mo->floorz )
-		pPlayer->mo->z = pPlayer->mo->floorz;
-	if ( pPlayer->mo->z > pPlayer->mo->ceilingz - pPlayer->mo->height )
-		pPlayer->mo->z = pPlayer->mo->ceilingz - pPlayer->mo->height;
-
 	// Set the player's velocity as told to him by the server.
 	pPlayer->mo->velx = pPlayer->ServerXYZVel[0];
 	pPlayer->mo->vely = pPlayer->ServerXYZVel[1];
@@ -229,6 +225,8 @@ void CLIENT_PREDICT_PlayerPredict( void )
 
 	// Restore crucial attributes for this tick.
 	client_predict_EndPrediction( pPlayer );
+	
+	client_predict_AdjustZ( pPlayer->mo );
 
 #ifdef	_DEBUG
 	if ( cl_showpredictionsuccess )
@@ -291,11 +289,11 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 	// [BB] Standing on an actor (like a bridge) needs special treatment.
 	const AActor *pActor = (pPlayer->mo->flags2 & MF2_ONMOBJ) ? P_CheckOnmobj ( pPlayer->mo ) : NULL;
 	if ( pActor == NULL ) {
-		g_bSavedOnFloor[tickIndex] = pPlayer->mo->z == pPlayer->mo->floorz;
+		g_bSavedOnFloor[tickIndex] = pPlayer->mo->z <= pPlayer->mo->floorz;
 	}
 	else
 	{
-		g_bSavedOnFloor[tickIndex] = ( pPlayer->mo->z == pActor->z + pActor->height );
+		g_bSavedOnFloor[tickIndex] = ( pPlayer->mo->z <= pActor->z + pActor->height );
 	}
 
 	// [BB] Remember whether the player was standing on another actor.
@@ -374,7 +372,7 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		while ((polyAction = polyActionIt.Next()))
 			polyAction->RestorePredict(lTick % CLIENT_PREDICTION_TICS);
 
-		//P_AdjustFloorCeil(pPlayer);
+		client_predict_AdjustZ( pPlayer->mo );
 
 		// [BB] The server moved us to a postion above the floor and into a sector without a moving floor,
 		// so don't glue us to the floor for this tic.
@@ -458,8 +456,6 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	while ((polyAction = polyActionIt.Next()))
 		polyAction->RestorePredict(g_ulGameTick % CLIENT_PREDICTION_TICS);
 
-	//P_AdjustFloorCeil(pPlayer);
-
 	pPlayer->mo->angle = g_SavedAngle[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->pitch = g_SavedPitch[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->Speed = g_SavedSpeed[g_ulGameTick % CLIENT_PREDICTION_TICS];
@@ -481,4 +477,22 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->mo->Predictable1 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][0];
 	pPlayer->mo->Predictable2 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][1];
 	pPlayer->mo->Predictable3 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][2];
+}
+
+static void client_predict_AdjustZ( APlayerPawn *mo )
+{
+	FCheckPosition tm;
+	bool isgood = P_CheckPosition (mo, mo->x, mo->y, tm);
+	mo->floorz = tm.floorz;
+	mo->ceilingz = tm.ceilingz;
+	mo->dropoffz = tm.dropoffz;		// killough 11/98: remember dropoffs
+	mo->floorpic = tm.floorpic;
+	mo->floorsector = tm.floorsector;
+	mo->ceilingpic = tm.ceilingpic;
+	mo->ceilingsector = tm.ceilingsector;
+
+	if ( mo->z < mo->floorz )
+		mo->z = mo->floorz;
+	if ( mo->z > mo->ceilingz - mo->height )
+		mo->z = mo->ceilingz - mo->height;
 }
