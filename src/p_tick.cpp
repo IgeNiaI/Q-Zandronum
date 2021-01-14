@@ -167,13 +167,6 @@ void P_Ticker (void)
 		}
 	}
 
-	// Predict the console player's position.
-	if ( NETWORK_InClientMode() )
-	{
-		if (( CLIENT_GetServerLagging( ) == false ) && ( CLIENT_GetClientLagging( ) == false ))
-			CLIENT_PREDICT_PlayerPredict( );
-	}
-
 	if (( botdebug_showcosts ) && ( players[consoleplayer].camera ))
 	{
 		POS_t	Position;
@@ -377,11 +370,14 @@ void P_Ticker (void)
 		if (( static_cast<signed> (ulIdx) == consoleplayer ) &&
 			NETWORK_InClientMode() )
 		{
-			continue;
+			if (( CLIENT_GetServerLagging( ) == false ) && ( CLIENT_GetClientLagging( ) == false ))
+				CLIENT_PREDICT_PlayerPredict( );
 		}
-
-		if ( playeringame[ulIdx] )
-			P_PlayerThink( &players[ulIdx] );
+		else
+		{
+			if ( playeringame[ulIdx] )
+				P_PlayerThink( &players[ulIdx] );
+		}
 	}
 
 	// [BB] If we are playing a demo in free spectate mode, we also need to let the special free
