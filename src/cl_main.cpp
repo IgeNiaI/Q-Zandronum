@@ -8530,7 +8530,6 @@ CCMD( motd ) {CLIENT_DisplayMOTD();}
 //*****************************************************************************
 //	CONSOLE VARIABLES
 
-CVAR( Bool, cl_predict_players, true, CVAR_ARCHIVE )
 //CVAR( Int, cl_maxmonstercorpses, 0, CVAR_ARCHIVE )
 CVAR( Float, cl_motdtime, 5.0, CVAR_ARCHIVE )
 CVAR( Bool, cl_taunts, true, CVAR_ARCHIVE )

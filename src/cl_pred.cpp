@@ -214,14 +214,6 @@ void CLIENT_PREDICT_PlayerPredict( void )
 	pPlayer->mo->vely = pPlayer->ServerXYZVel[1];
 	pPlayer->mo->velz = pPlayer->ServerXYZVel[2];
 
-	// If we don't want to do any prediction, just tick the player and get out.
-	if ( cl_predict_players == false )
-	{
-		P_PlayerThink( pPlayer );
-		pPlayer->mo->Tick( );
-		return;
-	}
-
 	// Save a bunch of crucial attributes of the player that are necessary for prediction.
 	client_predict_BeginPrediction( pPlayer );
 
