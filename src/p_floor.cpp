@@ -366,19 +366,8 @@ LONG DFloor::GetDirection( void )
 	return ( m_Direction );
 }
 
-void DFloor::SetPositionAndDirection( fixed_t Position, LONG lDirection )
+void DFloor::SetDirection( LONG lDirection )
 {
-	fixed_t diff = m_Sector->floorplane.d - Position;
-
-	if (diff > 0)
-	{
-		MoveFloor(diff, Position, -1, -1, false);
-	}
-	else if (diff < 0)
-	{
-		MoveFloor(-diff, Position, -1, 1, false);
-	}
-
 	if (m_Direction != lDirection)
 	{
 		if (lDirection != 0)
@@ -461,11 +450,11 @@ void DFloor::SetPerStepTime( int PerStepTime )
 bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
 				 fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower)
 {
-	return EV_DoFloor(floortype, line, tag, NULL,
+	return EV_DoFloor(NULL, floortype, line, tag,
 		speed, height, crush, change, hexencrush, hereticlower);
 }
 
-bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
+bool EV_DoFloor (player_t *instigator, DFloor::EFloor floortype, line_t *line, int tag,
 				 fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -762,12 +751,7 @@ manual_floor:
 //
 //==========================================================================
 
-bool EV_FloorCrushStop (int tag)
-{
-	return EV_FloorCrushStop(tag, NULL);
-}
-
-bool EV_FloorCrushStop (int tag, player_t *instigator)
+bool EV_FloorCrushStop (player_t *instigator, int tag)
 {
 	if (CLIENT_PREDICT_IsPredicting())
 		return false;
@@ -816,16 +800,7 @@ static int P_FindSectorFromTagLinear (int tag, int start)
 //
 //==========================================================================
 
-bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
-					 fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
-					 int usespecials)
-{
-	return EV_BuildStairs(tag, NULL, type, line,
-		stairsize, speed, delay, reset, igntxt,
-		usespecials);
-}
-
-bool EV_BuildStairs (int tag, player_t *instigator, DFloor::EStair type, line_t *line,
+bool EV_BuildStairs (player_t *instigator, int tag, DFloor::EStair type, line_t *line,
 					 fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 					 int usespecials)
 {
@@ -1051,12 +1026,7 @@ manual_stair:
 //
 //==========================================================================
 
-bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
-{
-	return EV_DoDonut(tag, NULL, line, pillarspeed, slimespeed);
-}
-
-bool EV_DoDonut (int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
+bool EV_DoDonut (player_t *instigator, int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
 {
 	if (CLIENT_PREDICT_IsPredicting())
 		return false;
@@ -1207,20 +1177,6 @@ fixed_t	DElevator::GetFloorPosition( void )
 	return ( m_Sector->floorplane.d );
 }
 
-// [geNia]
-void DElevator::SetFloorPosition( fixed_t Position )
-{
-	fixed_t diff = m_Sector->floorplane.d - Position;
-	if (diff > 0)
-	{
-		MoveFloor(diff, Position, -1, -1, false);
-	}
-	else if (diff < 0)
-	{
-		MoveFloor(-diff, Position, -1, 1, false);
-	}
-}
-
 // [BC]
 fixed_t DElevator::GetFloorDestDist( void )
 {
@@ -1237,20 +1193,6 @@ void DElevator::SetFloorDestDist( fixed_t DestDist )
 fixed_t	DElevator::GetCeilingPosition( void )
 {
 	return ( m_Sector->ceilingplane.d );
-}
-
-// [geNia]
-void DElevator::SetCeilingPosition( fixed_t Position )
-{
-	fixed_t diff = m_Sector->ceilingplane.d - Position;
-	if (diff > 0)
-	{
-		MoveCeiling(diff, Position, -1, -1, false);
-	}
-	else if (diff < 0)
-	{
-		MoveCeiling(-diff, Position, -1, 1, false);
-	}
 }
 
 // [BC]
@@ -1411,13 +1353,7 @@ void DElevator::StartFloorSound ()
 //
 //==========================================================================
 
-bool EV_DoElevator (line_t *line, DElevator::EElevator elevtype,
-					fixed_t speed, fixed_t height, int tag)
-{
-	return EV_DoElevator(line, NULL, elevtype, speed, height, tag);
-}
-
-bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator elevtype,
+bool EV_DoElevator (player_t *instigator, line_t *line, DElevator::EElevator elevtype,
 					fixed_t speed, fixed_t height, int tag)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -1536,12 +1472,7 @@ manual_elevator:
 //
 //==========================================================================
 
-bool EV_DoChange (line_t *line, EChange changetype, int tag)
-{
-	return EV_DoChange(line, changetype, tag, NULL);
-}
-
-bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigator)
+bool EV_DoChange (player_t *instigator, line_t *line, EChange changetype, int tag)
 {
 	if (CLIENT_PREDICT_IsPredicting())
 		return false;
@@ -1679,12 +1610,6 @@ fixed_t DWaggleBase::GetPosition( )
 }
 
 // [geNia]
-void DWaggleBase::SetPosition( fixed_t Position )
-{
-	Printf("WARNING: DWaggleBase::SetPosition was called. This should never happen! Please report this at the %s bug tracker!\n", GAMENAME);
-}
-
-// [geNia]
 fixed_t DWaggleBase::GetOriginalDistance( )
 {
 	return m_OriginalDist;
@@ -1790,8 +1715,6 @@ void DWaggleBase::DoWaggle (bool ceiling)
 	secplane_t *plane;
 	int pos;
 	fixed_t dist;
-	// [BC]
-	ULONG	ulIdx;
 
 	if (ceiling)
 	{
@@ -1906,21 +1829,6 @@ fixed_t DFloorWaggle::GetPosition( )
 	return ( m_Sector->floorplane.d );
 }
 
-// [geNia]
-void DFloorWaggle::SetPosition( fixed_t Position )
-{
-	fixed_t diff = m_Sector->floorplane.d - Position;
-
-	if (diff > 0)
-	{
-		MoveFloor(diff, Position, -1, -1, false);
-	}
-	else if (diff < 0)
-	{
-		MoveFloor(-diff, Position, -1, 1, false);
-	}
-}
-
 //==========================================================================
 //
 // CeilingWaggle
@@ -1949,34 +1857,13 @@ fixed_t DCeilingWaggle::GetPosition( )
 	return ( m_Sector->ceilingplane.d );
 }
 
-// [geNia]
-void DCeilingWaggle::SetPosition( fixed_t Position )
-{
-	fixed_t diff = m_Sector->ceilingplane.d - Position;
-
-	if (diff > 0)
-	{
-		MoveCeiling(diff, Position, -1, -1, false);
-	}
-	else if (diff < 0)
-	{
-		MoveCeiling(-diff, Position, -1, 1, false);
-	}
-}
-
 //==========================================================================
 //
 // EV_StartWaggle
 //
 //==========================================================================
 
-bool EV_StartWaggle (int tag, line_t *line, int height, int speed, int offset,
-	int timer, bool ceiling)
-{
-	return EV_StartWaggle(tag, line, NULL, height, speed, offset, timer, ceiling);
-}
-
-bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed, int offset,
+bool EV_StartWaggle (player_t *instigator, int tag, line_t *line, int height, int speed, int offset,
 	int timer, bool ceiling)
 {
 	if (CLIENT_PREDICT_IsPredicting())

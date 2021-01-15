@@ -122,30 +122,6 @@ DPillar::EPillar DPillar::GetType( )
 }
 
 // [geNia]
-void DPillar::SetPosition( fixed_t FloorPosition, fixed_t CeilingPosition )
-{
-	fixed_t diff = m_Sector->floorplane.d - FloorPosition;
-	if (diff > 0)
-	{
-		MoveFloor(diff, FloorPosition, -1, -1, m_Hexencrush);
-	}
-	else if (diff < 0)
-	{
-		MoveFloor(-diff, FloorPosition, -1, 1, m_Hexencrush);
-	}
-	
-	diff = m_Sector->ceilingplane.d - CeilingPosition;
-	if (diff > 0)
-	{
-		MoveCeiling(diff, CeilingPosition, -1, -1, m_Hexencrush);
-	}
-	else if (diff < 0)
-	{
-		MoveCeiling(-diff, CeilingPosition, -1, 1, m_Hexencrush);
-	}
-}
-
-// [geNia]
 fixed_t DPillar::GetFloorPosition()
 {
 	return ( m_Sector->floorplane.d );
@@ -356,13 +332,7 @@ DPillar::DPillar (sector_t *sector, EPillar type, fixed_t speed,
 	}
 }
 
-bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
-				  fixed_t height2, int crush, bool hexencrush)
-{
-	return EV_DoPillar(type, tag, NULL, speed, height, height2, crush, hexencrush);
-}
-
-bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t speed, fixed_t height,
+bool EV_DoPillar (player_t *instigator, DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
 				  fixed_t height2, int crush, bool hexencrush)
 {
 	bool rtn = false;
