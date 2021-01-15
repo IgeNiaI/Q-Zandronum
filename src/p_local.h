@@ -618,15 +618,11 @@ typedef enum
 	PODOOR_SWING,
 } podoortype_t;
 
-bool EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
-bool EV_RotatePoly (line_t *line, player_t *instigator, int polyNum, int speed, int byteAngle, int direction, bool overRide);
-bool EV_MovePoly (line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
-bool EV_MovePoly (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
-bool EV_MovePolyTo (line_t *line, int polyNum, int speed, fixed_t x, fixed_t y, bool overRide);
-bool EV_MovePolyTo (line_t *line, player_t *instigator, int polyNum, int speed, fixed_t x, fixed_t y, bool overRide);
-bool EV_OpenPolyDoor (line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
-bool EV_OpenPolyDoor (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
-bool EV_StopPoly (int polyNum);
+bool EV_RotatePoly (player_t *instigator, line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
+bool EV_MovePoly (player_t *instigator, line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
+bool EV_MovePolyTo (player_t *instigator, line_t *line, int polyNum, int speed, fixed_t x, fixed_t y, bool overRide);
+bool EV_OpenPolyDoor (player_t *instigator, line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
+bool EV_StopPoly (player_t *instigator, int polyNum);
 
 
 // [RH] Data structure for P_SpawnMapThing() to keep track
@@ -737,8 +733,7 @@ private:
 	angle_t		m_restoreAngle;
 	angle_t		m_predictAngle[CLIENT_PREDICTION_TICS];
 
-	friend bool EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
-	friend bool EV_RotatePoly (line_t *line, player_t *instigator, int polyNum, int speed, int byteAngle, int direction, bool overRide);
+	friend bool EV_RotatePoly (player_t *instigator, line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
 };
 
 
@@ -779,8 +774,7 @@ protected:
 	fixed_t		m_predictX[CLIENT_PREDICTION_TICS];
 	fixed_t		m_predictY[CLIENT_PREDICTION_TICS];
 
-	friend bool EV_MovePoly (line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
-	friend bool EV_MovePoly (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
+	friend bool EV_MovePoly (player_t *instigator, line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
 };
 
 class DMovePolyTo : public DPolyAction
@@ -811,8 +805,7 @@ protected:
 	fixed_t m_xTarget;
 	fixed_t m_yTarget;
 	
-	friend bool EV_MovePolyTo (line_t *line, int polyNum, int speed, int x, int y, bool overRide);
-	friend bool EV_MovePolyTo (line_t *line, player_t *instigator, int polyNum, int speed, int x, int y, bool overRide);
+	friend bool EV_MovePolyTo (player_t *instigator, line_t *line, int polyNum, int speed, int x, int y, bool overRide);
 };
 
 
@@ -854,8 +847,7 @@ protected:
 	podoortype_t m_Type;
 	bool m_Close;
 
-	friend bool EV_OpenPolyDoor (line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
-	friend bool EV_OpenPolyDoor (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
+	friend bool EV_OpenPolyDoor (player_t *instigator, line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
 private:
 	DPolyDoor ();
 };

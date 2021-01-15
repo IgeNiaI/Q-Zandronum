@@ -283,20 +283,6 @@ fixed_t DPlat::GetPosition( void )
 	return ( m_Sector->floorplane.d );
 }
 
-// [geNia]
-void DPlat::SetPosition( fixed_t Position )
-{
-	fixed_t diff = m_Sector->floorplane.d - Position;
-	if (diff > 0)
-	{
-		MoveFloor(diff, Position, -1, -1, false);
-	}
-	else if (diff < 0)
-	{
-		MoveFloor(-diff, Position, -1, 1, false);
-	}
-}
-
 // [BC]
 DPlat::EPlatState DPlat::GetStatus( void )
 {
@@ -404,13 +390,7 @@ void DPlat::SetTag( LONG lTag )
 //	[RH] Changed amount to height and added delay,
 //		 lip, change, tag, and speed parameters.
 //
-bool EV_DoPlat (int tag, line_t *line, DPlat::EPlatType type, int height,
-				int speed, int delay, int lip, int change)
-{
-	return EV_DoPlat(tag, line, NULL, type, height, speed, delay, lip, change);
-}
-
-bool EV_DoPlat (int tag, line_t *line, player_t *instigator, DPlat::EPlatType type, int height,
+bool EV_DoPlat (player_t *instigator, int tag, line_t *line, DPlat::EPlatType type, int height,
 				int speed, int delay, int lip, int change)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -442,7 +422,7 @@ bool EV_DoPlat (int tag, line_t *line, player_t *instigator, DPlat::EPlatType ty
 		rtn = true;
 		// fall through
 	case DPlat::platPerpetualRaise:
-		P_ActivateInStasis (tag, instigator);
+		P_ActivateInStasis (instigator, tag);
 		break;
 
 	default:
@@ -628,7 +608,7 @@ void DPlat::Reactivate ()
 		m_Status = m_OldStatus;
 }
 
-void P_ActivateInStasis (int tag, player_t *instigator)
+void P_ActivateInStasis (player_t *instigator, int tag)
 {
 	DPlat *scan;
 	TThinkerIterator<DPlat> iterator;
@@ -653,12 +633,7 @@ void DPlat::Stop ()
 	m_Status = in_stasis;
 }
 
-void EV_StopPlat (int tag)
-{
-	EV_StopPlat(tag, NULL);
-}
-
-void EV_StopPlat (int tag, player_t *instigator)
+void EV_StopPlat (player_t *instigator, int tag)
 {
 	if (CLIENT_PREDICT_IsPredicting())
 		return;

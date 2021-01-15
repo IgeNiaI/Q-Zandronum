@@ -277,18 +277,8 @@ int DDoor::GetDirection ()
 	return ( m_Direction );
 }
 
-void DDoor::SetPositionAndDirection ( fixed_t Position, int direction )
+void DDoor::SetDirection ( int direction )
 {
-	fixed_t diff = m_Sector->ceilingplane.d - Position;
-	if (diff > 0)
-	{
-		MoveCeiling(diff, Position, -1, -1, false);
-	}
-	else if (diff < 0)
-	{
-		MoveCeiling(-diff, Position, -1, 1, false);
-	}
-
 	if (m_Direction != direction)
 	{
 		if (direction == 1)
@@ -547,10 +537,10 @@ DDoor::DDoor (sector_t *sec, EVlDoor type, fixed_t speed, int delay, int lightTa
 bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 				int tag, int speed, int delay, int lock, int lightTag, bool boomgen)
 {
-	return EV_DoDoor(type, line, thing, NULL, tag, speed, delay, lock, lightTag, boomgen);
+	return EV_DoDoor(NULL, type, line, thing, tag, speed, delay, lock, lightTag, boomgen);
 }
 
-bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
+bool EV_DoDoor(player_t *instigator, DDoor::EVlDoor type, line_t *line, AActor *thing,
 	int tag, int speed, int delay, int lock, int lightTag, bool boomgen)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -1002,7 +992,7 @@ void DAnimatedDoor::Tick ()
 //
 //============================================================================
 
-DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, player_t *instigator, int speed, int delay, FDoorAnimation *anim)
+DAnimatedDoor::DAnimatedDoor (player_t *instigator, sector_t *sec, line_t *line, int speed, int delay, FDoorAnimation *anim)
 	: DMovingCeiling (sec)
 {
 	fixed_t topdist;
@@ -1119,12 +1109,7 @@ DAnimatedDoor::DAnimatedDoor (sector_t *sec, line_t *line, player_t *instigator,
 //
 //============================================================================
 
-bool EV_SlidingDoor (line_t *line, AActor *actor, int tag, int speed, int delay)
-{
-	return EV_SlidingDoor (line, NULL, actor, tag, speed, delay);
-}
-
-bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *actor, int tag, int speed, int delay)
+bool EV_SlidingDoor (player_t *instigator, line_t *line, AActor *actor, int tag, int speed, int delay)
 {
 	sector_t *sec;
 	int secnum;
@@ -1158,7 +1143,7 @@ bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *actor, int tag,
 		FDoorAnimation *anim = TexMan.FindAnimatedDoor (line->sidedef[0]->GetTexture(side_t::top));
 		if (anim != NULL)
 		{
-			new DAnimatedDoor (sec, line, instigator, speed, delay, anim);
+			new DAnimatedDoor (instigator, sec, line, speed, delay, anim);
 			return true;
 		}
 		return false;
@@ -1183,7 +1168,7 @@ bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *actor, int tag,
 			if (anim != NULL)
 			{
 				rtn = true;
-				new DAnimatedDoor (sec, line, instigator, speed, delay, anim);
+				new DAnimatedDoor (instigator, sec, line, speed, delay, anim);
 				break;
 			}
 		}

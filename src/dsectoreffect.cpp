@@ -430,3 +430,42 @@ DMover::EResult DMover::MovePlane (fixed_t speed, fixed_t dest, int crush,
 	}
 	return ok;
 }
+
+void P_SetFloorPlane (sector_t *sector, fixed_t dest)
+{
+	// Calculate the change in floor height.
+	fixed_t delta = dest - sector->floorplane.d;
+
+	// Store the original height position.
+	fixed_t lastPos = sector->floorplane.d;
+
+	// Change the height.
+	sector->floorplane.ChangeHeight(-delta);
+
+	// Call this to update various actor's within the sector.
+	P_ChangeSector(sector, false, -delta, 0, false);
+
+	// Finally, adjust textures.
+	sector->SetPlaneTexZ(sector_t::floor, sector->GetPlaneTexZ(sector_t::floor) + sector->floorplane.HeightDiff(lastPos));
+
+	// [BB] We also need to move any linked sectors.
+	P_MoveLinkedSectors(sector, false, -delta, false);
+}
+
+void P_SetCeilingPlane(sector_t *sector, fixed_t dest)
+{
+	// Calculate the change in ceiling height.
+	fixed_t delta = dest - sector->ceilingplane.d;
+
+	// Store the original height position.
+	fixed_t lastPos = sector->ceilingplane.d;
+
+	// Change the height.
+	sector->ceilingplane.ChangeHeight(delta);
+
+	// Finally, adjust textures.
+	sector->SetPlaneTexZ(sector_t::ceiling, sector->GetPlaneTexZ(sector_t::ceiling) + sector->ceilingplane.HeightDiff(lastPos));
+
+	// [BB] We also need to move any linked sectors.
+	P_MoveLinkedSectors(sector, false, delta, true);
+}

@@ -420,8 +420,6 @@ void	EV_LightTurnOnPartway (int tag, fixed_t frac);	// killough 10/98
 void	EV_LightChange (int tag, int value);
 void	EV_StopLightEffect (int tag);
 
-void	P_SpawnGlowingLight (sector_t *sector);
-
 void	EV_StartLightGlowing (int tag, int upper, int lower, int tics);
 void	EV_StartLightFading (int tag, int value, int tics);
 
@@ -485,7 +483,6 @@ public:
 	void	SetHigh( fixed_t High );
 	
 	fixed_t	GetPosition( void );
-	void	SetPosition( fixed_t Position );
 
 	EPlatState	GetStatus( void );
 	void		SetStatus( LONG lStatus );
@@ -528,22 +525,16 @@ protected:
 private:
 	DPlat ();
 
-	friend bool	EV_DoPlat (int tag, line_t *line, EPlatType type,
+	friend bool	EV_DoPlat (player_t *instigator, int tag, line_t *line, EPlatType type,
 						   int height, int speed, int delay, int lip, int change);
-	friend bool	EV_DoPlat (int tag, line_t *line, player_t *instigator, EPlatType type,
-						   int height, int speed, int delay, int lip, int change);
-	friend void EV_StopPlat (int tag);
-	friend void EV_StopPlat (int tag, player_t *instigator);
-	friend void P_ActivateInStasis (int tag, player_t *instigator);
+	friend void EV_StopPlat (player_t *instigator, int tag);
+	friend void P_ActivateInStasis (player_t *instigator, int tag);
 };
 
-bool EV_DoPlat (line_t *line, int tag, DPlat::EPlatType type,
+bool EV_DoPlat (player_t *instigator, int tag, line_t *line, DPlat::EPlatType type,
 				int height, int speed, int delay, int lip, int change);
-bool EV_DoPlat (line_t *line, int tag, player_t *instigator, DPlat::EPlatType type,
-				int height, int speed, int delay, int lip, int change);
-void EV_StopPlat (int tag);
-void EV_StopPlat (int tag, player_t *instigator);
-void P_ActivateInStasis (int tag, player_t *instigator);
+void EV_StopPlat (player_t *instigator, int tag);
+void P_ActivateInStasis (player_t *instigator, int tag);
 
 //
 // [RH]
@@ -567,8 +558,6 @@ public:
 
 	// [BC] New constructor where we just pass in the sector.
 	DPillar (sector_t *sector);
-	void Reinit ( sector_t *sector, EPillar type, fixed_t speed,
-				  fixed_t floordist, fixed_t ceilingdist, int crush, bool hexencrush );
 
 	void Serialize (FArchive &arc);
 	void Tick ();
@@ -579,7 +568,6 @@ public:
 
 	void	SetType( EPillar Type );
 	EPillar	GetType( );
-	void	SetPosition( fixed_t FloorPosition, fixed_t CeilingPosition );
 	fixed_t	GetFloorPosition( );
 	fixed_t	GetCeilingPosition( );
 	void	SetFloorSpeed(fixed_t Speed );
@@ -611,15 +599,11 @@ private:
 	DPillar ();
 
 	// [BC] Make this a friend.
-	friend bool	EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
-							 fixed_t height2, int crush, bool hexencrush);
-	friend bool	EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t speed, fixed_t height,
+	friend bool	EV_DoPillar (player_t *instigator, DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
 							 fixed_t height2, int crush, bool hexencrush);
 };
 
-bool EV_DoPillar (DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
-				  fixed_t height2, int crush, bool hexencrush);
-bool EV_DoPillar (DPillar::EPillar type, int tag, player_t *instigator, fixed_t speed, fixed_t height,
+bool EV_DoPillar (player_t *instigator, DPillar::EPillar type, int tag, fixed_t speed, fixed_t height,
 				  fixed_t height2, int crush, bool hexencrush);
 
 //
@@ -651,7 +635,7 @@ public:
 	// [BC] Access function(s).
 	fixed_t	GetPosition( void );
 	int		GetDirection( void );
-	void	SetPositionAndDirection( fixed_t Position, int direction );
+	void	SetDirection( int direction );
 	
 	int		GetTopWait( void );
 	void	SetTopWait( int TopWait );
@@ -694,7 +678,7 @@ protected:
 	friend bool	EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 						   int tag, int speed, int delay, int lock,
 						   int lightTag, bool boomgen);
-	friend bool	EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
+	friend bool	EV_DoDoor (player_t *instigator, DDoor::EVlDoor type, line_t *line, AActor *thing,
 						   int tag, int speed, int delay, int lock,
 						   int lightTag, bool boomgen);
 	friend void P_SpawnDoorCloseIn30 (sector_t *sec);
@@ -707,7 +691,7 @@ private:
 bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing,
 				int tag, int speed, int delay, int lock,
 				int lightTag, bool boomgen = false);
-bool EV_DoDoor (DDoor::EVlDoor type, line_t *line, AActor *thing, player_t *instigator,
+bool EV_DoDoor (player_t *instigator, DDoor::EVlDoor type, line_t *line, AActor *thing,
 				int tag, int speed, int delay, int lock,
 				int lightTag, bool boomgen = false);
 void P_SpawnDoorCloseIn30 (sector_t *sec);
@@ -718,7 +702,7 @@ class DAnimatedDoor : public DMovingCeiling
 	DECLARE_CLASS (DAnimatedDoor, DMovingCeiling)
 public:
 	DAnimatedDoor (sector_t *sector);
-	DAnimatedDoor (sector_t *sec, line_t *line, player_t *instigator, int speed, int delay, FDoorAnimation *anim);
+	DAnimatedDoor (player_t *instigator, sector_t *sec, line_t *line, int speed, int delay, FDoorAnimation *anim);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
@@ -742,14 +726,12 @@ protected:
 	int m_Delay;
 	bool m_SetBlocking1, m_SetBlocking2;
 
-	friend bool EV_SlidingDoor (line_t *line, AActor *thing, int tag, int speed, int delay);
-	friend bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *thing, int tag, int speed, int delay);
+	friend bool EV_SlidingDoor (player_t *instigator, line_t *line, AActor *thing, int tag, int speed, int delay);
 private:
 	DAnimatedDoor ();
 };
 
-bool EV_SlidingDoor (line_t *line, AActor *thing, int tag, int speed, int delay);
-bool EV_SlidingDoor (line_t *line, player_t *instigator, AActor *thing, int tag, int speed, int delay);
+bool EV_SlidingDoor (player_t *instigator, line_t *line, AActor *thing, int tag, int speed, int delay);
 
 //
 // P_CEILNG
@@ -793,12 +775,12 @@ public:
 	};
 
 	DCeiling (sector_t *sec);
-	DCeiling (sector_t *sec, fixed_t speed1, fixed_t speed2, int silent, player_t *instigator);
+	DCeiling (player_t *instigator, sector_t *sec, fixed_t speed1, fixed_t speed2, int silent);
 
 	void Serialize (FArchive &arc);
 	void Tick ();
 
-	static DCeiling *Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator,
+	static DCeiling *Create(player_t *instigator, sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag,
 						fixed_t speed, fixed_t speed2, fixed_t height,
 						int crush, int silent, int change, bool hexencrush);
 
@@ -823,7 +805,7 @@ public:
 	
 	fixed_t	GetPosition( void );
 	int		GetDirection( void );
-	void	SetPositionAndDirection( fixed_t Position, int Direction );
+	void	SetDirection( int Direction );
 
 	int		GetOldDirection( void );
 	void	SetOldDirection( int OldDirection );
@@ -866,20 +848,15 @@ protected:
 private:
 	DCeiling ();
 
-	friend bool EV_CeilingCrushStop (int tag);
-	friend bool EV_CeilingCrushStop (int tag, player_t *instigator);
-	friend void P_ActivateInStasisCeiling (int tag, player_t *instigator);
+	friend bool EV_CeilingCrushStop (player_t *instigator, int tag);
+	friend void P_ActivateInStasisCeiling (player_t *instigator, int tag);
 };
 
-bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
+bool EV_DoCeiling (player_t *instigator, DCeiling::ECeiling type, line_t *line,
 	int tag, fixed_t speed, fixed_t speed2, fixed_t height,
 	int crush, int silent, int change, bool hexencrush);
-bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
-	int tag, player_t *instigator, fixed_t speed, fixed_t speed2, fixed_t height,
-	int crush, int silent, int change, bool hexencrush);
-bool EV_CeilingCrushStop (int tag);
-bool EV_CeilingCrushStop (int tag, player_t *instigator);
-void P_ActivateInStasisCeiling (int tag, player_t *instigator);
+bool EV_CeilingCrushStop (player_t *instigator, int tag);
+void P_ActivateInStasisCeiling (player_t *instigator, int tag);
 
 
 
@@ -969,7 +946,7 @@ public:
 
 	fixed_t	GetPosition( void );
 	LONG	GetDirection( void );
-	void	SetPositionAndDirection( fixed_t Position, LONG lDirection );
+	void	SetDirection( LONG lDirection );
 
 	fixed_t	GetFloorDestDist( void );
 	void	SetFloorDestDist( fixed_t FloorDestDist );
@@ -1007,38 +984,28 @@ protected:
 	int			m_StepTime;
 	int			m_PerStepTime;
 
-	friend bool EV_BuildStairs (int tag, DFloor::EStair type, line_t *line,
-		fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
-		int usespecials);
-	friend bool EV_BuildStairs (int tag, player_t *instigator, DFloor::EStair type, line_t *line,
+	friend bool EV_BuildStairs (player_t *instigator, int tag, DFloor::EStair type, line_t *line,
 		fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 		int usespecials);
 	friend bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag,
 		fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower);
-	friend bool EV_DoFloor (DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
+	friend bool EV_DoFloor (player_t *instigator, DFloor::EFloor floortype, line_t *line, int tag,
 		fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower);
-	friend bool EV_FloorCrushStop (int tag);
-	friend bool EV_FloorCrushStop (int tag, player_t *instigator);
-	friend bool EV_DoDonut (int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
-	friend bool EV_DoDonut (int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+	friend bool EV_FloorCrushStop (player_t *instigator, int tag);
+	friend bool EV_DoDonut (player_t *instigator, int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
 private:
 	DFloor ();
 };
 
-bool EV_BuildStairs(int tag, DFloor::EStair type, line_t *line,
-	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
-	int usespecials);
-bool EV_BuildStairs(int tag, player_t *instigator, DFloor::EStair type, line_t *line,
+bool EV_BuildStairs(player_t *instigator, int tag, DFloor::EStair type, line_t *line,
 	fixed_t stairsize, fixed_t speed, int delay, int reset, int igntxt,
 	int usespecials);
 bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag,
 	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower=false);
-bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, player_t *instigator,
+bool EV_DoFloor(player_t *instigator, DFloor::EFloor floortype, line_t *line, int tag,
 	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower=false);
-bool EV_FloorCrushStop(int tag);
-bool EV_FloorCrushStop(int tag, player_t *instigator);
-bool EV_DoDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
-bool EV_DoDonut(int tag, player_t *instigator, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+bool EV_FloorCrushStop(player_t *instigator, int tag);
+bool EV_DoDonut(player_t *instigator, int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
 
 class DElevator : public DMover
 {
@@ -1074,11 +1041,9 @@ public:
 	LONG	GetDirection( void );
 	void	SetDirection( LONG lDirection );
 	fixed_t	GetFloorPosition( void );
-	void	SetFloorPosition( fixed_t Position );
 	fixed_t	GetFloorDestDist( void );
 	void	SetFloorDestDist( fixed_t DestDist );
 	fixed_t	GetCeilingPosition( void );
-	void	SetCeilingPosition( fixed_t Position );
 	fixed_t	GetCeilingDestDist( void );
 	void	SetCeilingDestDist( fixed_t DestDist );
 
@@ -1091,14 +1056,12 @@ protected:
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
 
-	friend bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
-	friend bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
+	friend bool EV_DoElevator (player_t *instigator, line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
 private:
 	DElevator ();
 };
 
-bool EV_DoElevator (line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
-bool EV_DoElevator (line_t *line, player_t *instigator, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
+bool EV_DoElevator (player_t *instigator, line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
 
 class DWaggleBase : public DMover
 {
@@ -1113,7 +1076,6 @@ public:
 	void	UpdateToClient( ULONG ulClient );
 
 	virtual fixed_t	GetPosition( );
-	virtual void	SetPosition( fixed_t Position );
 	fixed_t	GetOriginalDistance( );
 	void	SetOriginalDistance( fixed_t OriginalDistance );
 	fixed_t	GetAccumulator( );
@@ -1142,9 +1104,7 @@ protected:
 	int m_State;
 	TObjPtr<DInterpolation> m_Interpolation;
 
-	friend bool EV_StartWaggle (int tag, line_t *line, int height, int speed,
-		int offset, int timer, bool ceiling);
-	friend bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed,
+	friend bool EV_StartWaggle (player_t *instigator, int tag, line_t *line, int height, int speed,
 		int offset, int timer, bool ceiling);
 
 	void DoWaggle (bool ceiling);
@@ -1155,9 +1115,7 @@ protected:
 	DWaggleBase ();
 };
 
-bool EV_StartWaggle (int tag, line_t *line, int height, int speed,
-	int offset, int timer, bool ceiling);
-bool EV_StartWaggle (int tag, line_t *line, player_t *instigator, int height, int speed,
+bool EV_StartWaggle (player_t *instigator, int tag, line_t *line, int height, int speed,
 	int offset, int timer, bool ceiling);
 
 class DFloorWaggle : public DWaggleBase
@@ -1167,7 +1125,6 @@ public:
 	DFloorWaggle (sector_t *sec);
 	void Tick ();
 	fixed_t	GetPosition( );
-	void	SetPosition( fixed_t Position );
 private:
 	DFloorWaggle ();
 };
@@ -1179,7 +1136,6 @@ public:
 	DCeilingWaggle (sector_t *sec);
 	void Tick ();
 	fixed_t	GetPosition( );
-	void	SetPosition( fixed_t Position );
 private:
 	DCeilingWaggle ();
 };
@@ -1191,8 +1147,7 @@ enum EChange
 	numChangeOnly,
 };
 
-bool EV_DoChange (line_t *line, EChange changetype, int tag);
-bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigator);
+bool EV_DoChange (player_t *instigator, line_t *line, EChange changetype, int tag);
 
 
 
@@ -1200,8 +1155,8 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag, player_t *instigato
 // P_TELEPT
 //
 bool P_Teleport (AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle, bool useFog, bool sourceFog, bool keepOrientation, bool haltVelocity = true, bool keepHeight = false);
-bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixed_t z, angle_t angle, bool useFog, bool sourceFog, bool keepOrientation, bool haltVelocity = true, bool keepHeight = false);
-bool EV_Teleport (int tid, int tag, line_t *line, int side, AActor *thing, player_t *instigator, bool fog, bool sourceFog, bool keepOrientation, bool haltVelocity = true, bool keepHeight = false);
+bool P_Teleport (player_t *instigator, AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle, bool useFog, bool sourceFog, bool keepOrientation, bool haltVelocity = true, bool keepHeight = false);
+bool EV_Teleport (player_t *instigator, int tid, int tag, line_t *line, int side, AActor *thing, bool fog, bool sourceFog, bool keepOrientation, bool haltVelocity = true, bool keepHeight = false);
 bool EV_SilentLineTeleport (line_t *line, int side, AActor *thing, int id, INTBOOL reverse);
 bool EV_TeleportOther (int other_tid, int dest_tid, bool fog);
 bool EV_TeleportGroup (int group_tid, AActor *victim, int source_tid, int dest_tid, bool moveSource, bool fog);

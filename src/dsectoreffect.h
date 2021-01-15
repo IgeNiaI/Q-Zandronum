@@ -4,6 +4,9 @@
 #include "dthinker.h"
 #include "r_defs.h"
 
+void P_SetFloorPlane (sector_t *sector, fixed_t dest);
+void P_SetCeilingPlane (sector_t *sector, fixed_t dest);
+
 class DSectorEffect : public DThinker
 {
 	DECLARE_CLASS (DSectorEffect, DThinker)
