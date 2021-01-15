@@ -165,6 +165,7 @@ public:
 	// [GRB] Player class properties
 	fixed_t		JumpXY;
 	fixed_t		JumpZ;
+	int			JumpSoundDelay;
 	int			JumpDelay;
 	fixed_t		SecondJumpXY;
 	fixed_t		SecondJumpZ;

@@ -3452,8 +3452,18 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				if (!(mvFlags & MV_SILENT) && !isClimbingLedge)
 				{
 					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-					if (CLIENT_PREDICT_IsPredicting() == false)
-						S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+					if ( CLIENT_PREDICT_IsPredicting() == false )
+					{
+						if (!player->mo->JumpSoundDelay)
+							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+
+						player->mo->JumpSoundDelay = 3;
+					}
+				}
+				else
+				{
+					if ( player->mo->JumpSoundDelay > 0 )
+						player->mo->JumpSoundDelay--;
 				}
 
 				flags2 &= ~MF2_ONMOBJ;
@@ -3536,10 +3546,21 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				player->secondJumpState = SJ_NOT_AVAILABLE;
 			}
 		}
+		else
+		{
+			if ( player->mo->JumpSoundDelay > 0 )
+				player->mo->JumpSoundDelay--;
+		}
 	}
-	else if (!player->onground && player->secondJumpState == SJ_AVAILABLE && player->secondJumpsRemaining != 0)
+	else
 	{
-		player->secondJumpState = SJ_READY;
+		if ( player->mo->JumpSoundDelay > 0 )
+			player->mo->JumpSoundDelay--;
+
+		if ( !player->onground && player->secondJumpState == SJ_AVAILABLE && player->secondJumpsRemaining != 0 )
+		{
+			player->secondJumpState = SJ_READY;
+		}
 	}
 }
 
