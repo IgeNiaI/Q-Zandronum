@@ -257,7 +257,7 @@ DCeiling::DCeiling (sector_t *sec)
 {
 }
 
-DCeiling::DCeiling (sector_t *sec, fixed_t speed1, fixed_t speed2, int silent, player_t *instigator)
+DCeiling::DCeiling (player_t *instigator, sector_t *sec, fixed_t speed1, fixed_t speed2, int silent)
 	: DMovingCeiling (sec)
 {
 	m_Crush = -1;
@@ -331,18 +331,8 @@ int DCeiling::GetDirection( void )
 	return ( m_Direction );
 }
 
-void DCeiling::SetPositionAndDirection( fixed_t Position, int Direction )
+void DCeiling::SetDirection( int Direction )
 {
-	fixed_t diff = m_Sector->ceilingplane.d - Position;
-	if (diff > 0)
-	{
-		MoveCeiling(diff, Position, -1, -1, false);
-	}
-	else if (diff < 0)
-	{
-		MoveCeiling(-diff, Position, -1, 1, false);
-	}
-
 	if (m_Direction != Direction)
 	{
 		if (Direction != 0)
@@ -420,7 +410,7 @@ void DCeiling::SetSilent( int Silent )
 //
 //============================================================================
 
-DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag, player_t *instigator, 
+DCeiling *DCeiling::Create(player_t *instigator, sector_t *sec, DCeiling::ECeiling type, line_t *line, int tag,
 				   fixed_t speed, fixed_t speed2, fixed_t height,
 				   int crush, int silent, int change, bool hexencrush)
 {
@@ -433,7 +423,7 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 	}
 
 	// new door thinker
-	DCeiling *ceiling = new DCeiling (sec, speed, speed2, silent, instigator);
+	DCeiling *ceiling = new DCeiling (instigator, sec, speed, speed2, silent);
 	vertex_t *spot = sec->lines[0]->v1;
 
 	switch (type)
@@ -673,17 +663,8 @@ DCeiling *DCeiling::Create(sector_t *sec, DCeiling::ECeiling type, line_t *line,
 //
 //============================================================================
 
-bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
+bool EV_DoCeiling (player_t *instigator, DCeiling::ECeiling type, line_t *line,
 				   int tag, fixed_t speed, fixed_t speed2, fixed_t height,
-				   int crush, int silent, int change, bool hexencrush)
-{
-	return EV_DoCeiling(type, line,
-		tag, NULL, speed, speed2, height,
-		crush, silent, change, hexencrush);
-}
-
-bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
-				   int tag, player_t *instigator, fixed_t speed, fixed_t speed2, fixed_t height,
 				   int crush, int silent, int change, bool hexencrush)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -703,22 +684,22 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 		secnum = (int)(sec-sectors);
 		// [RH] Hack to let manual crushers be retriggerable, too
 		tag ^= secnum | 0x1000000;
-		P_ActivateInStasisCeiling (tag, instigator);
-		return !!DCeiling::Create(sec, type, line, tag, instigator, speed, speed2, height, crush, silent, change, hexencrush);
+		P_ActivateInStasisCeiling (instigator, tag);
+		return !!DCeiling::Create(instigator, sec, type, line, tag, speed, speed2, height, crush, silent, change, hexencrush);
 	}
 
 	//	Reactivate in-stasis ceilings...for certain types.
 	// This restarts a crusher after it has been stopped
 	if (type == DCeiling::ceilCrushAndRaise || type == DCeiling::ceilCrushAndRaiseDist)
 	{
-		P_ActivateInStasisCeiling (tag, instigator);
+		P_ActivateInStasisCeiling (instigator, tag);
 	}
 
 	secnum = -1;
 	// affects all sectors with the same tag as the linedef
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
-		rtn |= !!DCeiling::Create(&sectors[secnum], type, line, tag, instigator, speed, speed2, height, crush, silent, change, hexencrush);
+		rtn |= !!DCeiling::Create(instigator, &sectors[secnum], type, line, tag, speed, speed2, height, crush, silent, change, hexencrush);
 	}
 	return rtn;
 }
@@ -731,7 +712,7 @@ bool EV_DoCeiling (DCeiling::ECeiling type, line_t *line,
 //
 //============================================================================
 
-void P_ActivateInStasisCeiling (int tag, player_t *instigator)
+void P_ActivateInStasisCeiling (player_t *instigator, int tag)
 {
 	DCeiling *scan;
 	TThinkerIterator<DCeiling> iterator;
@@ -762,12 +743,7 @@ void P_ActivateInStasisCeiling (int tag, player_t *instigator)
 //
 //============================================================================
 
-bool EV_CeilingCrushStop (int tag)
-{
-	return EV_CeilingCrushStop(tag, NULL);
-}
-
-bool EV_CeilingCrushStop (int tag, player_t *instigator)
+bool EV_CeilingCrushStop (player_t *instigator, int tag)
 {
 	if (CLIENT_PREDICT_IsPredicting())
 		return false;

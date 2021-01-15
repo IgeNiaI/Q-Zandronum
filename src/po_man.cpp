@@ -780,15 +780,7 @@ void DRotatePoly::Tick ()
 //
 //==========================================================================
 
-
-bool EV_RotatePoly(line_t *line, int polyNum, int speed, int byteAngle,
-	int direction, bool overRide)
-{
-	return EV_RotatePoly(line, NULL, polyNum, speed, byteAngle,
-		direction, overRide);
-}
-
-bool EV_RotatePoly (line_t *line, player_t *instigator, int polyNum, int speed, int byteAngle,
+bool EV_RotatePoly (player_t *instigator, line_t *line, int polyNum, int speed, int byteAngle,
 					int direction, bool overRide)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -895,14 +887,7 @@ void DMovePoly::Tick ()
 //
 //==========================================================================
 
-bool EV_MovePoly(line_t *line, int polyNum, int speed, angle_t angle,
-	fixed_t dist, bool overRide)
-{
-	return EV_MovePoly(line, NULL, polyNum, speed, angle,
-		dist, overRide);
-}
-
-bool EV_MovePoly (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle,
+bool EV_MovePoly (player_t *instigator, line_t *line, int polyNum, int speed, angle_t angle,
 				  fixed_t dist, bool overRide)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -1012,12 +997,7 @@ void DMovePolyTo::Tick ()
 //
 //==========================================================================
 
-bool EV_MovePolyTo(line_t *line, int polyNum, int speed, fixed_t targx, fixed_t targy, bool overRide)
-{
-	return EV_MovePolyTo(line, NULL, polyNum, speed, targx, targy, overRide);
-}
-
-bool EV_MovePolyTo(line_t *line, player_t *instigator, int polyNum, int speed, fixed_t targx, fixed_t targy, bool overRide)
+bool EV_MovePolyTo(player_t *instigator, line_t *line, int polyNum, int speed, fixed_t targx, fixed_t targy, bool overRide)
 {
 	if (CLIENT_PREDICT_IsPredicting())
 		return false;
@@ -1237,14 +1217,7 @@ void DPolyDoor::Tick ()
 //
 //==========================================================================
 
-bool EV_OpenPolyDoor(line_t *line, int polyNum, int speed, angle_t angle,
-	int delay, int distance, podoortype_t type)
-{
-	return EV_OpenPolyDoor(line, NULL, polyNum, speed, angle,
-		delay, distance, type);
-}
-
-bool EV_OpenPolyDoor (line_t *line, player_t *instigator, int polyNum, int speed, angle_t angle,
+bool EV_OpenPolyDoor (player_t *instigator, line_t *line, int polyNum, int speed, angle_t angle,
 					  int delay, int distance, podoortype_t type)
 {
 	if (CLIENT_PREDICT_IsPredicting())
@@ -1320,7 +1293,7 @@ bool EV_OpenPolyDoor (line_t *line, player_t *instigator, int polyNum, int speed
 //
 //==========================================================================
 
-bool EV_StopPoly(int polynum)
+bool EV_StopPoly(player_t *instigator, int polynum)
 {
 	if (CLIENT_PREDICT_IsPredicting())
 		return false;
@@ -1331,6 +1304,7 @@ bool EV_StopPoly(int polynum)
 	{
 		if (poly->specialdata != NULL)
 		{
+			poly->specialdata->SetLastInstigator(instigator);
 			poly->specialdata->Stop();
 		}
 		return true;

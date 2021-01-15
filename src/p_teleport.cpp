@@ -100,11 +100,11 @@ void P_SpawnTeleportFog(fixed_t x, fixed_t y, fixed_t z, int spawnid)
 bool P_Teleport(AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
 	bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
 {
-	return P_Teleport(thing, NULL, x, y, z, angle,
+	return P_Teleport(NULL, thing, x, y, z, angle,
 		useFog, sourceFog, keepOrientation, bHaltVelocity, keepHeight);
 }
 
-bool P_Teleport (AActor *thing, player_t *instigator, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
+bool P_Teleport (player_t *instigator, AActor *thing, fixed_t x, fixed_t y, fixed_t z, angle_t angle,
 				 bool useFog, bool sourceFog, bool keepOrientation, bool bHaltVelocity, bool keepHeight)
 {
 	fixed_t oldx;
@@ -364,7 +364,7 @@ static AActor *SelectTeleDest (int tid, int tag)
 	return NULL;
 }
 
-bool EV_Teleport (int tid, int tag, line_t *line, int side, AActor *thing, player_t *instigator, bool fog,
+bool EV_Teleport (player_t *instigator, int tid, int tag, line_t *line, int side, AActor *thing, bool fog,
 				  bool sourceFog, bool keepOrientation, bool haltVelocity, bool keepHeight)
 {
 	AActor *searcher;
@@ -427,7 +427,7 @@ bool EV_Teleport (int tid, int tag, line_t *line, int side, AActor *thing, playe
 	{
 		badangle = 1 << ANGLETOFINESHIFT;
 	}
-	if (P_Teleport (thing, instigator, searcher->x, searcher->y, z, searcher->angle + badangle, fog, sourceFog, keepOrientation, haltVelocity, keepHeight))
+	if (P_Teleport (instigator, thing, searcher->x, searcher->y, z, searcher->angle + badangle, fog, sourceFog, keepOrientation, haltVelocity, keepHeight))
 	{
 		// [RH] Lee Killough's changes for silent teleporters from BOOM
 		if (!fog && line && keepOrientation)
@@ -679,7 +679,7 @@ bool EV_TeleportOther (int other_tid, int dest_tid, bool fog)
 
 		while ( (victim = iterator.Next ()) )
 		{
-			didSomething |= EV_Teleport (dest_tid, 0, NULL, 0, victim, NULL, fog, fog, !fog);
+			didSomething |= EV_Teleport (NULL, dest_tid, 0, NULL, 0, victim, NULL, fog, fog, !fog);
 		}
 	}
 
@@ -696,7 +696,7 @@ static bool DoGroupForOne (AActor *victim, AActor *source, AActor *dest, bool fl
 	fixed_t newY = DMulScale16 (offX, finesine[an], offY, finecosine[an]);
 
 	bool res =
-		P_Teleport (victim, dest->x + newX,
+		P_Teleport (NULL, victim, dest->x + newX,
 							dest->y + newY,
 							floorz ? ONFLOORZ : dest->z + victim->z - source->z,
 							0, fog, fog, !fog);
@@ -770,7 +770,7 @@ bool EV_TeleportGroup (int group_tid, AActor *victim, int source_tid, int dest_t
 	if (moveSource && didSomething)
 	{
 		didSomething |=
-			P_Teleport (sourceOrigin, destOrigin->x, destOrigin->y,
+			P_Teleport (NULL, sourceOrigin, destOrigin->x, destOrigin->y,
 				floorz ? ONFLOORZ : destOrigin->z, 0, false, false, true);
 		sourceOrigin->angle = destOrigin->angle;
 	}
