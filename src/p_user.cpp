@@ -2441,7 +2441,7 @@ bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd, bool landing)
 		return false;
 
 	if ((!player->onground && !landing) || player->mo->waterlevel >= 2 ||
-		(player->mo->flags & MF_NOGRAVITY) || (cmd->ucmd.buttons & BT_JUMP))
+		(player->mo->flags & MF_NOGRAVITY))
 	{
 		return false;
 	}
