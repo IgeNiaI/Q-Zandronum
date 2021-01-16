@@ -108,7 +108,7 @@ void DMover::Predict()
 	// How many ticks of prediction do we need?
 	TicsToPredict = TicsToPredict - CLIENT_GetLastConsolePlayerUpdateTick( );
 
-	while (TicsToPredict)
+	while (TicsToPredict && !(ObjectFlags & OF_EuthanizeMe))
 	{
 		Tick();
 		TicsToPredict--;
