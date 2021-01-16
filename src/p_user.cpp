@@ -5031,8 +5031,6 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			}
 		}
 	}
-
-	player->clientTicOnServerEnd++;
 }
 
 /*

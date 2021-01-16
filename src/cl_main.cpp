@@ -3540,17 +3540,7 @@ void ServerCommands::MovePlayer::Execute()
 	player->cmd.ucmd.upmove = ucmd_upmove;
 	player->cmd.ucmd.yaw = ucmd_yaw;
 	player->cmd.ucmd.pitch = ucmd_pitch;
-	// player->cmd.ucmd.roll = ucmd_roll;
-	player->cmd.ucmd.roll = player->cmd.ucmd.roll;
 	player->cmd.ucmd.buttons = ucmd_buttons;
-	
-	// [geNia] Predict one tic if we are ahead
-	if (player->clientTicOnServerEnd > clientTicOnServerEnd)
-	{
-		P_PlayerThink(player);
-	}
-
-	player->clientTicOnServerEnd = clientTicOnServerEnd - 1;
 }
 
 //*****************************************************************************
