@@ -554,10 +554,10 @@ void SERVER_Tick( void )
 	ULONG			ulIdx;
 
 	I_DoSelect();
-	lPreviousTics = static_cast<LONG> ( g_lGameTime / (( 1.0 / (double)35.75 ) * 1000.0 ) );
+	lPreviousTics = static_cast<LONG> ( g_lGameTime / (( 1.0 / TICRATE ) * 1000.0 ) );
 
 	lNowTime = I_MSTime( );
-	lNewTics = static_cast<LONG> ( lNowTime / (( 1.0 / (double)35.75 ) * 1000.0 ) );
+	lNewTics = static_cast<LONG> ( lNowTime / (( 1.0 / TICRATE ) * 1000.0 ) );
 
 	lCurTics = lNewTics - lPreviousTics;
 	while ( lCurTics <= 0 )
@@ -568,7 +568,7 @@ void SERVER_Tick( void )
 
 		I_Sleep( 1 );
 		lNowTime = I_MSTime( );
-		lNewTics = static_cast<LONG> ( lNowTime / (( 1.0 / (double)35.75 ) * 1000.0 ) );
+		lNewTics = static_cast<LONG> ( lNowTime / (( 1.0 / TICRATE ) * 1000.0 ) );
 		lCurTics = lNewTics - lPreviousTics;
 	}
 

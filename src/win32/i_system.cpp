@@ -286,18 +286,9 @@ static void I_SelectTimer()
 	// Get the current time as the basetime.
 	basetime = timeGetTime();
 	// Set timer functions.
-	if (TimerEventID != 0)
-	{
-		I_GetTime = I_GetTimeEventDriven;
-		I_WaitForTic = I_WaitForTicEvent;
-		I_FreezeTime = I_FreezeTimeEventDriven;
-	}
-	else
-	{
-		I_GetTime = I_GetTimePolled;
-		I_WaitForTic = I_WaitForTicPolled;
-		I_FreezeTime = I_FreezeTimePolled;
-	}
+	I_GetTime = I_GetTimePolled;
+	I_WaitForTic = I_WaitForTicPolled;
+	I_FreezeTime = I_FreezeTimePolled;
 }
 
 //==========================================================================
