@@ -3262,6 +3262,17 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				mo->FloorBounceMissile (mo->ceilingsector->ceilingplane);
 				/*if (!(mo->flags6 & MF6_CANJUMP))*/ return;
 			}
+			else if (mo->flags7 & MF7_NOEXPLODECEILING)
+			{
+				P_HitFloor (mo);
+				mo->velz = 0;
+
+				// [TP] Tell clients the missile stopped moving vertically
+				if ( NETWORK_GetState() == NETSTATE_SERVER )
+					SERVERCOMMANDS_MoveThing( mo, CM_VELZ );
+
+				return;
+			}
 			if (mo->flags & MF_SKULLFLY)
 			{	// the skull slammed into something
 				mo->velz = -mo->velz;
