@@ -334,6 +334,10 @@ void DRotatePoly::RestorePredict (LONG lTick)
 // [BC]
 void DRotatePoly::UpdateToClient(ULONG ulClient)
 {
+	FPolyObj *poly = PO_GetPolyobj(m_PolyObj);
+	if (poly == NULL)
+		return;
+
 	SERVERCOMMANDS_DoRotatePoly( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
@@ -396,6 +400,10 @@ DMovePoly::DMovePoly (int polyNum)
 
 void DMovePoly::UpdateToClient(ULONG ulClient)
 {
+	FPolyObj *poly = PO_GetPolyobj(m_PolyObj);
+	if (poly == NULL)
+		return;
+
 	SERVERCOMMANDS_DoMovePoly( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
@@ -536,6 +544,10 @@ DMovePolyTo::DMovePolyTo(int polyNum)
 
 void DMovePolyTo::UpdateToClient(ULONG ulClient)
 {
+	FPolyObj *poly = PO_GetPolyobj(m_PolyObj);
+	if (poly == NULL)
+		return;
+
 	SERVERCOMMANDS_DoMovePolyTo( this, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
@@ -1130,8 +1142,7 @@ void DPolyDoor::Tick ()
 			else
 			{ // open back up
 				m_Dist = m_TotalDist - m_Dist;
-				m_Direction = (ANGLE_MAX>>ANGLETOFINESHIFT)-
-					m_Direction;
+				m_Direction = (ANGLE_MAX>>ANGLETOFINESHIFT) - m_Direction;
 				m_xSpeed = -m_xSpeed;
 				m_ySpeed = -m_ySpeed;
 				m_Close = false;
