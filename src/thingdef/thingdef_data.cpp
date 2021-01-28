@@ -252,6 +252,8 @@ static FFlagDef ActorFlags[]=
 	// [BB] Out of order ZDoom backport.
 	DEFINE_FLAG(MF7, USEKILLSCRIPTS, AActor, flags7),
 	DEFINE_FLAG(MF7, NOKILLSCRIPTS, AActor, flags7),
+		
+	DEFINE_FLAG(MF7, NOEXPLODECEILING, AActor, flags7),
 
 	// [Ivory] extra movement flags
 	DEFINE_FLAG(MV, CROUCHSLIDE, AActor, mvFlags),
