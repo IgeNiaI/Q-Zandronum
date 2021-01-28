@@ -350,6 +350,7 @@ enum
 	// [BB] Out of order ZDoom backport.
 	MF7_USEKILLSCRIPTS	= 0x00800000,	// [JM] Use "KILL" Script on death if not forced by GameInfo.
 	MF7_NOKILLSCRIPTS	= 0x01000000,	// [JM] No "KILL" Script on death whatsoever, even if forced by GameInfo.
+	MF7_NOEXPLODECEILING= 0x02000000,	// Missile stops at ceiling instead of exploding
 
 	// [Ivory] extra movement flags
 	MV_CROUCHSLIDE		= 0x00000001,
