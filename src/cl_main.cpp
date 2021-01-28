@@ -7713,14 +7713,17 @@ static void client_DoRotatePoly( BYTESTREAM_s *pByteStream )
 		// Create the polyobject.
 		pRotatePoly = new DRotatePoly(lPolyNum);
 		pPoly->specialdata = pRotatePoly;
+		
+		if ( Instigator != consoleplayer )
+		{
+			// Start the sound sequence associated with this polyobject.
+			SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
+		}
 	}
 	
 	pRotatePoly->SetLastInstigator( &players[Instigator] );
 	pRotatePoly->SetSpeed( Speed );
 	pRotatePoly->SetDist( lDist );
-
-	// Also, start the sound sequence associated with this polyobject.
-	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
 
 	if ( Instigator == consoleplayer )
 	{
@@ -7765,6 +7768,12 @@ static void client_DoMovePoly( BYTESTREAM_s *pByteStream )
 		// Create the polyobject.
 		pMovePoly = new DMovePoly(lPolyNum);
 		pPoly->specialdata = pMovePoly;
+		
+		if ( Instigator != consoleplayer )
+		{
+			// Start the sound sequence associated with this polyobject.
+			SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
+		}
 	}
 	
 	pMovePoly->SetLastInstigator( &players[Instigator] );
@@ -7773,9 +7782,6 @@ static void client_DoMovePoly( BYTESTREAM_s *pByteStream )
 	pMovePoly->SetSpeed( Speed );
 	pMovePoly->SetAngle( Angle );
 	pMovePoly->SetDist( lDist );
-
-	// Also, start the sound sequence associated with this polyobject.
-	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
 
 	if ( Instigator == consoleplayer )
 	{
@@ -7821,6 +7827,12 @@ static void client_DoMovePolyTo( BYTESTREAM_s *pByteStream )
 		// Create the polyobject.
 		pMovePolyTo = new DMovePolyTo(lPolyNum);
 		pPoly->specialdata = pMovePolyTo;
+		
+		if ( Instigator != consoleplayer )
+		{
+			// Start the sound sequence associated with this polyobject.
+			SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
+		}
 	}
 	
 	pMovePolyTo->SetLastInstigator( &players[Instigator] );
@@ -7830,9 +7842,6 @@ static void client_DoMovePolyTo( BYTESTREAM_s *pByteStream )
 	pMovePolyTo->SetYSpeed( YSpeed );
 	pMovePolyTo->SetSpeed( Speed );
 	pMovePolyTo->SetDist( lDist );
-
-	// Also, start the sound sequence associated with this polyobject.
-	SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
 
 	if ( Instigator == consoleplayer )
 	{
@@ -7902,16 +7911,28 @@ static void client_DoPolyDoor( BYTESTREAM_s *pByteStream )
 
 	pPolyDoor->SetDist( lDist );
 	pPolyDoor->SetTotalDist( lTotalDist );
+
+	pPolyDoor->SetTics( lTics );
+	pPolyDoor->SetWaitTics( lWaitTics );
 	
 	pPolyDoor->SetClose( bClose );
 	pPolyDoor->SetDirection( lDirection );
 
-	pPolyDoor->SetTics( lTics );
-	pPolyDoor->SetWaitTics( lWaitTics );
-
 	if ( Instigator == consoleplayer )
 	{
 		pPolyDoor->Predict();
+	}
+	else
+	{
+		// Start the sound sequence associated with this polyobject.
+		if ( lTics == 0 )
+		{
+			SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
+		}
+		else
+		{
+			SN_StopSequence( pPoly );
+		}
 	}
 }
 
