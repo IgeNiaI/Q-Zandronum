@@ -957,8 +957,10 @@ void P_DrawRailTrail (AActor *source, const FVector3 &start, const FVector3 &end
 			FVector3 postmp = pos + diff;
 
 			AActor *thing = Spawn (spawnclass, FLOAT2FIXED(postmp.X), FLOAT2FIXED(postmp.Y), FLOAT2FIXED(postmp.Z), ALLOW_REPLACE);
-			if (thing)
+			if (thing) {
 				thing->angle = angle;
+				thing->target = source;
+			}
 			pos += trail_step;
 		}
 	}
