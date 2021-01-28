@@ -289,19 +289,9 @@ void I_SelectTimer()
 	itv.it_interval.tv_sec = itv.it_value.tv_sec = 0;
 	itv.it_interval.tv_usec = itv.it_value.tv_usec = 1000000/TICRATE;
 
-	// [BB] For now I_WaitForTicSignaled doesn't work on the client.
-	if ( NETWORK_InClientMode() || ( setitimer(ITIMER_REAL, &itv, NULL) != 0 ) )
-	{
-		I_GetTime = I_GetTimePolled;
-		I_FreezeTime = I_FreezeTimePolled;
-		I_WaitForTic = I_WaitForTicPolled;
-	}
-	else
-	{
-		I_GetTime = I_GetTimeSignaled;
-		I_FreezeTime = I_FreezeTimeSignaled;
-		I_WaitForTic = I_WaitForTicSignaled;
-	}
+	I_GetTime = I_GetTimePolled;
+	I_FreezeTime = I_FreezeTimePolled;
+	I_WaitForTic = I_WaitForTicPolled;
 }
 
 // Returns the fractional amount of a tic passed since the most recent tic
