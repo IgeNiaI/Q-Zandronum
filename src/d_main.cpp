@@ -790,6 +790,10 @@ CVAR (Flag, compat_skulltagjumping,				zacompatflags, ZACOMPATF_SKULLTAG_JUMPING
 CVAR (Flag, compat_no_accurate_crosshair,		zacompatflags, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
 CVAR (Flag, compat_disable_wall_friction,		zacompatflags, ZACOMPATF_DISABLE_WALL_FRICTION);
 
+#ifdef _WIN32
+extern int AppActive;
+#endif
+
 //==========================================================================
 //
 // D_Display
@@ -810,6 +814,11 @@ void D_Display ()
 	if (nodrawers || screen == NULL)
 		return; 				// for comparative timing / profiling
 	
+#ifdef _WIN32
+	if (!AppActive)
+		return;
+#endif
+
 	cycle_t cycles;
 	
 	cycles.Reset();
