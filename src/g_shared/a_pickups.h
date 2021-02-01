@@ -263,7 +263,13 @@ class AWeapon : public AInventory
 public:
 	DWORD WeaponFlags;
 	const PClass *AmmoType1, *AmmoType2;	// Types of ammo used by this weapon
-	int AmmoGive1, AmmoGive2;				// Amount of each ammo to get when picking up weapon
+	// Amount of each ammo to get when picking up weapon
+	// If AmmoRefill is above 0 and current ammo is below AmmoGive, then ammo will refill to AmmoGive value first
+	int AmmoGive1, AmmoGive2;
+	// Amount of each ammo to get when picking up weapon that the player already has
+	// and if the player has more or equal to AmmoGive ammo
+	int AmmoSpRefill1, AmmoSpRefill2;
+	int AmmoDmRefill1, AmmoDmRefill2;
 	float AmmoDmScale;						// How much to scale pickup ammo in deathmatch
 	int MinAmmo1, MinAmmo2;					// Minimum ammo needed to switch to this weapon
 	int AmmoUse1, AmmoUse2;					// How much ammo to use with each shot
@@ -298,6 +304,7 @@ public:
 	virtual void MarkPrecacheSounds() const;
 	virtual void Serialize (FArchive &arc);
 	virtual bool ShouldStay ();
+	virtual void UpdateRefillTics ();
 	virtual void AttachToOwner (AActor *other);
 	virtual bool HandlePickup (AInventory *item);
 	virtual AInventory *CreateCopy (AActor *other);
@@ -306,6 +313,7 @@ public:
 	virtual bool TryPickupRestricted (AActor *&toucher);
 	virtual bool PickupForAmmo (AWeapon *ownedWeapon);
 	virtual bool Use (bool pickup);
+	virtual void Tick ();
 	virtual void Destroy();
 
 	virtual FState *GetUpState ();
