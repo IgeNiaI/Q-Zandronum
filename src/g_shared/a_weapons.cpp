@@ -465,10 +465,10 @@ AAmmo *AWeapon::AddAmmo (AActor *other, const PClass *ammotype, int amount)
 		return NULL;
 	}
 
-	// [BC] This behavior is from the original Doom. Give 5/2 times as much ammo when
+	// [BC] This behavior is from the original Doom. Give AmmoDmScale (5/2 by default) times as much ammo when
 	// we pick up a weapon in deathmatch.
 	if (( deathmatch || teamgame ) && ( gameinfo.gametype & GAME_DoomChex ))
-		amount = amount * 5 / 2;
+		amount = (int) (amount * AmmoDmScale);
 
 	// extra ammo in baby mode and nightmare mode
 	if (!(this->ItemFlags&IF_IGNORESKILL))
