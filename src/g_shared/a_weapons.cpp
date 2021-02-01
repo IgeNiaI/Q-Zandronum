@@ -250,18 +250,40 @@ bool AWeapon::PickupForAmmo (AWeapon *ownedWeapon)
 		if (ownedWeapon->Ammo1 != NULL) oldamount1 = ownedWeapon->Ammo1->Amount;
 		if (ownedWeapon->Ammo2 != NULL) oldamount2 = ownedWeapon->Ammo2->Amount;
 
-		if (AmmoGive1 > 0)
+		int AmmoRefill1, AmmoRefill2;
+		if ((deathmatch || teamgame) && (gameinfo.gametype & GAME_DoomChex))
 		{
-			gotstuff = AddExistingAmmo (ownedWeapon->Ammo1, AmmoGive1);
+			AmmoRefill1 = AmmoDmRefill1;
+			AmmoRefill2 = AmmoDmRefill2;
+		}
+		else
+		{
+			AmmoRefill1 = AmmoSpRefill1;
+			AmmoRefill2 = AmmoSpRefill2;
+		}
+
+		if (AmmoGive1 > 0 || AmmoRefill1 > 0)
+		{
+			int AmmoToGive;
+			if (AmmoRefill1 > 0)
+				AmmoToGive = oldamount1 < AmmoGive1 ? AmmoGive1 - oldamount1 : AmmoRefill1;
+			else
+				AmmoToGive = AmmoGive1;
+			gotstuff = AddExistingAmmo (ownedWeapon->Ammo1, AmmoToGive);
 
 			// [BC] If we're the server, tell clients that they just received ammo.
 			if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( ownedWeapon->Owner ) && ( ownedWeapon->Owner->player ) && ( ownedWeapon->Ammo1 ))
 				SERVERCOMMANDS_GiveInventory( ownedWeapon->Owner->player - players, static_cast<AInventory *>( ownedWeapon->Ammo1 ));
 		}
 
-		if (AmmoGive2 > 0)
+		if (AmmoGive2 > 0 || AmmoRefill2 > 0)
 		{
-			gotstuff |= AddExistingAmmo (ownedWeapon->Ammo2, AmmoGive2);
+			int AmmoToGive;
+			if (AmmoRefill2 > 0)
+				AmmoToGive = oldamount1 < AmmoGive2 ? AmmoGive2 - oldamount2 : AmmoRefill2;
+			else
+				AmmoToGive = AmmoGive2;
+			gotstuff |= AddExistingAmmo (ownedWeapon->Ammo2, AmmoToGive);
 
 			// [BC] If we're the server, tell clients that they just received ammo.
 			if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( ownedWeapon->Owner ) && ( ownedWeapon->Owner->player ) && ( ownedWeapon->Ammo2 ))
@@ -464,7 +486,7 @@ AAmmo *AWeapon::AddAmmo (AActor *other, const PClass *ammotype, int amount)
 	{
 		return NULL;
 	}
-
+	
 	// [BC] This behavior is from the original Doom. Give AmmoDmScale (5/2 by default) times as much ammo when
 	// we pick up a weapon in deathmatch.
 	if (( deathmatch || teamgame ) && ( gameinfo.gametype & GAME_DoomChex ))
