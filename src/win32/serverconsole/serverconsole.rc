@@ -249,13 +249,14 @@ FONT 8, "Tahoma", 0, 0, 1
     COMBOBOX        IDC_DMF_EXIT1, 20, 80, 115, 17, WS_TABSTOP | CBS_DROPDOWNLIST | CBS_HASSTRINGS, WS_EX_LEFT
     AUTOCHECKBOX    "Keep frags after a map change", IDC_DF2_YES_KEEP_FRAGS, 20, 100, 115, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Stay after pickup", IDC_WEAPONS_STAY, 158, 78, 71, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Give double ammo", IDC_YES_DOUBLEAMMO, 158, 88, 74, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Always refill ammo on pickup", IDC_WEAPONS_STAY_REFILL, 158, 88, 71, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Give double ammo", IDC_YES_DOUBLEAMMO, 158, 98, 74, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Health", IDC_NO_HEALTH1, 262, 78, 37, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Armor", IDC_NO_ARMOR, 262, 88, 35, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Runes", IDC_NO_RUNES, 262, 98, 36, 10, 0, WS_EX_LEFT
     GROUPBOX        "When players die, they...", IDC_STATIC, 10, 10, 320, 50, 0, WS_EX_LEFT
     GROUPBOX        "When someone exits the level...", IDC_STATIC, 10, 65, 135, 55, 0, WS_EX_LEFT
-    GROUPBOX        "Weapons...", IDC_STATIC, 150, 65, 90, 40, 0, WS_EX_LEFT
+    GROUPBOX        "Weapons...", IDC_STATIC, 150, 65, 90, 51, 0, WS_EX_LEFT
     GROUPBOX        "Don't spawn...", IDC_STATIC, 250, 65, 80, 51, 0, WS_EX_LEFT
 }
 
