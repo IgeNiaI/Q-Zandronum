@@ -434,6 +434,7 @@ CUSTOM_CVAR (Int, dmflags, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK)
 CVAR (Flag, sv_nohealth,		dmflags, DF_NO_HEALTH);
 CVAR (Flag, sv_noitems,			dmflags, DF_NO_ITEMS);
 CVAR (Flag, sv_weaponstay,		dmflags, DF_WEAPONS_STAY);
+CVAR (Flag, sv_weaponstayrefill,dmflags2,DF2_WEAPONS_STAY_REFILL);
 CVAR (Flag, sv_falldamage,		dmflags, DF_FORCE_FALLINGHX);
 CVAR (Flag, sv_oldfalldamage,	dmflags, DF_FORCE_FALLINGZD);
 CVAR (Flag, sv_samelevel,		dmflags, DF_SAME_LEVEL);

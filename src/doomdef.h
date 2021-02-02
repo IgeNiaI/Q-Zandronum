@@ -307,6 +307,7 @@ enum
 	DF2_DONTCHECKAMMO		= 1 << 24,	// Don't Check ammo when switching weapons.
 	DF2_KILLBOSSMONST		= 1 << 25,	// Kills all monsters spawned by a boss cube when the boss dies
 	DF2_NOCOUNTENDMONST		= 1 << 26,	// Do not count monsters in 'end level when dying' sectors towards kill count
+	DF2_WEAPONS_STAY_REFILL	= 1 << 27,	// Refill ammo when sv_weaponstay is on
 };
 
 // [BB] Zandronum dmflags.

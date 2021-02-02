@@ -117,7 +117,7 @@ static	ULONG			g_ulLMSSpectatorSettings;
 //==================================================================================
 // [RC] This big map of fun ties all of the DMFlags to their respective checkboxes.
 //==================================================================================
-#define NUMBER_OF_FLAGS 99
+#define NUMBER_OF_FLAGS 100
 
 static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] = 
 {
@@ -125,6 +125,7 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	// { DF_NO_ITEMS,					NULL,							&g_ulDMFlags, },
 	{ DF_NO_HEALTH,						IDC_NO_HEALTH1,					&g_ulDMFlags, },	
 	{ DF_WEAPONS_STAY,					IDC_WEAPONS_STAY,				&g_ulDMFlags, },		
+	{ DF2_WEAPONS_STAY_REFILL,			IDC_WEAPONS_STAY_REFILL,		&g_ulDMFlags2, },		
 	{ DF_SPAWN_FARTHEST,				IDC_SPAWN_FARTHEST,				&g_ulDMFlags, },	
 	{ DF_FORCE_RESPAWN,					IDC_FORCE_RESPAWN,				&g_ulDMFlags, },	
 	{ DF_NO_ARMOR,						IDC_NO_ARMOR,					&g_ulDMFlags, },
