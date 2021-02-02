@@ -83,6 +83,19 @@ void AWeapon::Serialize (FArchive &arc)
 
 //===========================================================================
 //
+// AWeapon :: Tick
+//
+//===========================================================================
+
+void AWeapon::Tick()
+{
+	Super::Tick ();
+	if (WeaponStayRefillTics > 0)
+		WeaponStayRefillTics--;
+}
+
+//===========================================================================
+//
 // AWeapon :: MarkPrecacheSounds
 //
 //===========================================================================
@@ -241,9 +254,10 @@ bool AWeapon::PickupForAmmo (AWeapon *ownedWeapon)
 		return false;
 
 	bool gotstuff = false;
+	bool shouldstay = ShouldStay();
 
 	// Don't take ammo if the weapon sticks around.
-	if (!ShouldStay ())
+	if (!shouldstay || ((dmflags2 & DF2_WEAPONS_STAY_REFILL) && !ownedWeapon->WeaponStayRefillTics))
 	{
 		int oldamount1 = 0;
 		int oldamount2 = 0;
@@ -290,16 +304,21 @@ bool AWeapon::PickupForAmmo (AWeapon *ownedWeapon)
 				SERVERCOMMANDS_GiveInventory( ownedWeapon->Owner->player - players, static_cast<AInventory *>( ownedWeapon->Ammo2 ));
 		}
 
-		AActor *Owner = ownedWeapon->Owner;
-		if (gotstuff && Owner != NULL && Owner->player != NULL)
+		ownedWeapon->UpdateRefillTics();
+
+		if (!shouldstay)
 		{
-			if (ownedWeapon->Ammo1 != NULL && oldamount1 == 0)
+			AActor *Owner = ownedWeapon->Owner;
+			if (gotstuff && Owner != NULL && Owner->player != NULL)
 			{
-				static_cast<APlayerPawn *>(Owner)->CheckWeaponSwitch(ownedWeapon->Ammo1->GetClass());
-			}
-			else if (ownedWeapon->Ammo2 != NULL && oldamount2 == 0)
-			{
-				static_cast<APlayerPawn *>(Owner)->CheckWeaponSwitch(ownedWeapon->Ammo2->GetClass());
+				if (ownedWeapon->Ammo1 != NULL && oldamount1 == 0)
+				{
+					static_cast<APlayerPawn *>(Owner)->CheckWeaponSwitch(ownedWeapon->Ammo1->GetClass());
+				}
+				else if (ownedWeapon->Ammo2 != NULL && oldamount2 == 0)
+				{
+					static_cast<APlayerPawn *>(Owner)->CheckWeaponSwitch(ownedWeapon->Ammo2->GetClass());
+				}
 			}
 		}
 	}
@@ -389,6 +408,8 @@ void AWeapon::AttachToOwner (AActor *other)
 			if ( Ammo2 && ( AmmoGive2 > 0 ) )
 				SERVERCOMMANDS_GiveInventory( Owner->player - players, static_cast<AInventory *>( Ammo2 ));
 		}
+
+		UpdateRefillTics();
 	}
 	else
 	{
@@ -583,6 +604,48 @@ bool AWeapon::ShouldStay ()
 		return true;
 	}
 	return false;
+}
+
+//===========================================================================
+//
+// AWeapon :: UpdateRefillTics
+//
+// Update WeaponStayRefillTics value to be a 1/4 of weapon respawn delay
+//
+//===========================================================================
+
+void AWeapon::UpdateRefillTics ()
+{
+	FState *HideSpecialState = NULL, *HideDoomishState = NULL;
+	if (gameinfo.gametype & GAME_Raven)
+	{
+		HideSpecialState = FindState("HideSpecial");
+		if (HideSpecialState == NULL)
+		{
+			HideDoomishState = FindState("HideDoomish");
+		}
+	}
+	else
+	{
+		HideDoomishState = FindState("HideDoomish");
+		if (HideDoomishState == NULL)
+		{
+			HideSpecialState = FindState("HideSpecial");
+		}
+	}
+
+	if (HideSpecialState != NULL)
+	{
+		WeaponStayRefillTics = 1400 / 4;
+	}
+	else if (HideDoomishState != NULL)
+	{
+		WeaponStayRefillTics = 1050 / 4;
+	}
+	if (RespawnTics != 0)
+	{
+		WeaponStayRefillTics = RespawnTics / 4;
+	}
 }
 
 //===========================================================================

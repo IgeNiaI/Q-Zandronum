@@ -270,6 +270,7 @@ public:
 	// and if the player has more or equal to AmmoGive ammo
 	int AmmoSpRefill1, AmmoSpRefill2;
 	int AmmoDmRefill1, AmmoDmRefill2;
+	fixed_t WeaponStayRefillTics;			// Tics till weapon ammo refill becomes available when sv_weaponstayrefill is enabled
 	float AmmoDmScale;						// How much to scale pickup ammo in deathmatch
 	int MinAmmo1, MinAmmo2;					// Minimum ammo needed to switch to this weapon
 	int AmmoUse1, AmmoUse2;					// How much ammo to use with each shot
