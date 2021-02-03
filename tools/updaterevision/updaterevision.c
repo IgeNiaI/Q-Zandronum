@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 	if (gotrev)
 	{
 		// Use git log to get the time of the latest commit in ISO 8601 format and its full hash.
-		stream = popen("git log -1 \"--format=%ai\"", "r");
+		stream = popen("git log -1 \"--format=%ci\"", "r");
 
 		if (NULL != stream)
 		{
