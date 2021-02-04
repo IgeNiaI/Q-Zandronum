@@ -633,7 +633,7 @@ void GLSkyboxPortal::DrawContents()
 	validcount++;
 	inskybox=true;
 	GLRenderer->SetupView(viewx, viewy, viewz, viewangle, !!(MirrorFlag&1), !!(PlaneMirrorFlag&1));
-	GLRenderer->SetViewArea();
+	GLRenderer->SetViewArea(origin);
 	ClearClipper();
 
 	int mapsection = R_PointInSubsector(viewx, viewy)->mapsection;
