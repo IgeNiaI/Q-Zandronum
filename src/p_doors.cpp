@@ -657,6 +657,8 @@ bool EV_DoDoor(player_t *instigator, DDoor::EVlDoor type, line_t *line, AActor *
 
 			if ( (pDoor = new DDoor (sec, type, speed, delay, lightTag)))
 			{
+				pDoor->SetLastInstigator( instigator );
+
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 					SERVERCOMMANDS_DoDoor( pDoor );
 
