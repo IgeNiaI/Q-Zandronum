@@ -75,7 +75,7 @@ public:
 	~FGLRenderer() ;
 
 	angle_t FrustumAngle();
-	void SetViewArea();
+	void SetViewArea(AActor *camera);
 	void ResetViewport();
 	void SetViewport(GL_IRECT *bounds);
 	sector_t *RenderViewpoint (AActor * camera, GL_IRECT * bounds, float fov, float ratio, float fovratio, bool mainview, bool toscreen);
