@@ -130,12 +130,12 @@ angle_t FGLRenderer::FrustumAngle()
 //
 //-----------------------------------------------------------------------------
 EXTERN_CVAR(Bool, cl_spectsource)
-void FGLRenderer::SetViewArea()
+void FGLRenderer::SetViewArea(AActor *camera)
 {
 	// The render_sector is better suited to represent the current position in GL
 	viewsector = R_PointInSubsector(viewx, viewy)->render_sector;
 
-	if ( !cl_spectsource || !players[consoleplayer].bSpectating || mViewActor != players[consoleplayer].mo )
+	if ( !cl_spectsource || camera == NULL || !camera->player->bSpectating )
 	{
 		// keep the view within the render sector's floor and ceiling
 		fixed_t theZ = viewsector->ceilingplane.ZatPoint (viewx, viewy) - 4*FRACUNIT;
@@ -890,7 +890,7 @@ sector_t * FGLRenderer::RenderViewpoint (AActor * camera, GL_IRECT * bounds, flo
 
 	sector_t * retval;
 	R_SetupFrame (camera);
-	SetViewArea();
+	SetViewArea (camera);
 	mAngles.Pitch = clamp<float>((float)((double)(int)(viewpitch))/ANGLE_1, -90, 90);
 
 	// Scroll the sky
