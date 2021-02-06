@@ -4442,6 +4442,9 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 				{
 					dmgflags |= DMG_NO_ARMOR;
 				}
+
+				if (flags & LAF_QUAKETHRUST)
+					dmgflags |= DMG_QUAKETHRUST;
 				
 				if (puff == NULL)
 				{

@@ -1482,6 +1482,14 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 					target->velz += 5*FRACUNIT;
 				}
 			}
+			else if (flags & DMG_QUAKETHRUST)
+			{
+				angle_t pitch = ((angle_t)(origin->pitch)) >> ANGLETOFINESHIFT;
+
+				target->velx += FixedMul (FixedMul (thrust, finecosine[ang]), finecosine[pitch]);
+				target->vely += FixedMul (FixedMul (thrust, finesine[ang]), finecosine[pitch]);
+				target->velz += FixedMul(thrust, -finesine[pitch]);
+			}
 			else
 			{
 				target->velx += FixedMul (thrust, finecosine[ang]);
