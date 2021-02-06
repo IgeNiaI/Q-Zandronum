@@ -45,6 +45,7 @@ const int FBF_EXPLICITANGLE = 4;
 const int FBF_NOPITCH = 8;
 const int FBF_NOFLASH = 16;
 const int FBF_NORANDOMPUFFZ = 32;
+const int FBF_QUAKETHRUST = 64;
 
 // Flags for A_SpawnItemEx
 const int SXF_TRANSFERTRANSLATION = 1;
