@@ -353,6 +353,7 @@ enum
 
 	// [geNia] New Q-Zandronum flags
 	MF8_NOEXPLODECEILING= 0x00010000,	// Missile stops at ceiling instead of exploding
+	MF8_SEEKERMISSILENOZ= 0x00020000,	// [geNia] Same as MF2_SEEKERMISSILE, but doesn't trace along Z axis
 
 	// [Ivory] extra movement flags
 	MV_CROUCHSLIDE		= 0x00000001,
