@@ -350,7 +350,9 @@ enum
 	// [BB] Out of order ZDoom backport.
 	MF7_USEKILLSCRIPTS	= 0x00800000,	// [JM] Use "KILL" Script on death if not forced by GameInfo.
 	MF7_NOKILLSCRIPTS	= 0x01000000,	// [JM] No "KILL" Script on death whatsoever, even if forced by GameInfo.
-	MF7_NOEXPLODECEILING= 0x02000000,	// Missile stops at ceiling instead of exploding
+
+	// [geNia] New Q-Zandronum flags
+	MF8_NOEXPLODECEILING= 0x00010000,	// Missile stops at ceiling instead of exploding
 
 	// [Ivory] extra movement flags
 	MV_CROUCHSLIDE		= 0x00000001,
@@ -998,6 +1000,7 @@ public:
 	DWORD			flags5;			// OMG! We need another one.
 	DWORD			flags6;			// Shit! Where did all the flags go?
 	DWORD			flags7;			// 
+	DWORD			flags8;			// 
 	DWORD			mvFlags;
 
 	// [BB] If 0, everybody can see the actor, if > 0, only members of team (VisibleToTeam-1) can see it.

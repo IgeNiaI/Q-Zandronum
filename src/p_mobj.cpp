@@ -254,6 +254,7 @@ void AActor::Serialize (FArchive &arc)
 	if (SaveVersion >= 4504)
 	{
 		arc << flags7
+			<< flags8
 			<< mvFlags;
 	}
 	arc	<< special1
@@ -3262,7 +3263,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				mo->FloorBounceMissile (mo->ceilingsector->ceilingplane);
 				/*if (!(mo->flags6 & MF6_CANJUMP))*/ return;
 			}
-			else if (mo->flags7 & MF7_NOEXPLODECEILING)
+			else if (mo->flags7 & MF8_NOEXPLODECEILING)
 			{
 				P_HitFloor (mo);
 				mo->velz = 0;
@@ -7901,6 +7902,7 @@ void AActor::Revive()
 	flags5 = info->flags5;
 	flags6 = info->flags6;
 	flags7 = info->flags7;
+	flags8 = info->flags8;
 	mvFlags = info->mvFlags;
 
 	// [BC] Apply new ST flags as well.
@@ -8101,6 +8103,9 @@ void PrintMiscActorInfo(AActor *query)
 		Printf("\n   flags7: %x", query->flags7);
 		for (flagi = 0; flagi <= 31; flagi++)
 			if (query->flags7 & 1<<flagi) Printf(" %s", FLAG_NAME(1<<flagi, flags7));
+		Printf("\n   flags8: %x", query->flags8);
+		for (flagi = 0; flagi <= 31; flagi++)
+			if (query->flags8 & 1<<flagi) Printf(" %s", FLAG_NAME(1<<flagi, flags8));
 		Printf("\n   mvFlags: %x", query->mvFlags);
 		for (flagi = 0; flagi <= 31; flagi++)
 			if (query->mvFlags & 1<<flagi) Printf(" %s", FLAG_NAME(1<<flagi, mvFlags));
