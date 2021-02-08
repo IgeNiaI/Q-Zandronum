@@ -444,6 +444,12 @@ nolead:						mobj->angle = R_PointToAngle2 (mobj->x, mobj->y, targ->x, targ->y);
 							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS4 );
 						if ( mobj->flags5 != mobj->GetDefault( )->flags5 )
 							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS5 );
+						if ( mobj->flags6 != mobj->GetDefault( )->flags6 )
+							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS6 );
+						if ( mobj->flags7 != mobj->GetDefault( )->flags7 )
+							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS7 );
+						if ( mobj->flags8 != mobj->GetDefault( )->flags8 )
+							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS8 );
 						if ( mobj->ulSTFlags != mobj->GetDefault( )->ulSTFlags )
 							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGSST );
 						if ( mobj->ulSTFlags != mobj->GetDefault( )->mvFlags)

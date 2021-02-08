@@ -1317,6 +1317,7 @@ DEFINE_PROPERTY(clearflags, 0, Actor)
 		defaults->flags5 =
 		defaults->flags6 =
 		defaults->flags7 =
+		defaults->flags8 =
 		defaults->mvFlags = 0;
 	defaults->flags2 &= MF2_ARGSDEFINED;	// this flag must not be cleared
 
