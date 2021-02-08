@@ -4841,6 +4841,10 @@ void ServerCommands::SetThingFlags::Execute()
 
 		actor->flags7 = flags;
 		break;
+	case FLAGSET_FLAGS8:
+
+		actor->flags8 = flags;
+		break;
 	case FLAGSET_FLAGSST:
 
 		actor->ulSTFlags = flags;

@@ -253,7 +253,8 @@ static FFlagDef ActorFlags[]=
 	DEFINE_FLAG(MF7, USEKILLSCRIPTS, AActor, flags7),
 	DEFINE_FLAG(MF7, NOKILLSCRIPTS, AActor, flags7),
 		
-	DEFINE_FLAG(MF7, NOEXPLODECEILING, AActor, flags7),
+	// [geNia] New flags
+	DEFINE_FLAG(MF8, NOEXPLODECEILING, AActor, flags8),
 
 	// [Ivory] extra movement flags
 	DEFINE_FLAG(MV, CROUCHSLIDE, AActor, mvFlags),

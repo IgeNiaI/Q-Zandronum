@@ -1478,6 +1478,7 @@ void SERVERCOMMANDS_SetThingFlags( AActor *pActor, FlagSet flagset, ULONG ulPlay
 		case FLAGSET_FLAGS5:	actorFlags = pActor->flags5; break;
 		case FLAGSET_FLAGS6:	actorFlags = pActor->flags6; break;
 		case FLAGSET_FLAGS7:	actorFlags = pActor->flags7; break;
+		case FLAGSET_FLAGS8:	actorFlags = pActor->flags8; break;
 		case FLAGSET_FLAGSST:	actorFlags = pActor->ulSTFlags; break;
 		case FLAGSET_MVFLAGS:	actorFlags = pActor->mvFlags; break;
 		default: return;
