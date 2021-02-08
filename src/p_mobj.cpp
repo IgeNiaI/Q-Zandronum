@@ -1991,7 +1991,7 @@ bool P_SeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax, bool preci
 		actor->velx = FixedMul (speed, finecosine[angle]);
 		actor->vely = FixedMul (speed, finesine[angle]);
 
-		if (!(actor->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)))
+		if (!(actor->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)) && !(actor->flags8 & MF8_SEEKERMISSILENOZ))
 		{
 			if (actor->z + actor->height < target->z ||
 				target->z + target->height < actor->z)
@@ -2009,7 +2009,7 @@ bool P_SeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax, bool preci
 	else
 	{
 		angle_t pitch = 0;
-		if (!(actor->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)))
+		if (!(actor->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)) && !(actor->flags8 & MF8_SEEKERMISSILENOZ))
 		{ // Need to seek vertically
 			double dist = MAX(1.0, FVector2(target->x - actor->x, target->y - actor->y).Length());
 			// Aim at a player's eyes and at the middle of the actor for everything else.
@@ -2406,7 +2406,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 					mo->velx = FixedMul (mo->Speed>>1, finecosine[angle]);
 					mo->vely = FixedMul (mo->Speed>>1, finesine[angle]);
 					mo->velz = -mo->velz/2;
-					if (mo->flags2 & MF2_SEEKERMISSILE)
+					if ((mo->flags2 & MF2_SEEKERMISSILE) || (mo->flags8 & MF8_SEEKERMISSILENOZ))
 					{
 						mo->tracer = mo->target;
 					}
@@ -3914,7 +3914,8 @@ bool AActor::IsOkayToAttack (AActor *link)
 	if (!(player							// Original AActor::IsOkayToAttack was only for players
 	//	|| (flags  & MF_FRIENDLY)			// Maybe let friendly monsters use the function as well?
 		|| (flags5 & MF5_SUMMONEDMONSTER)	// AMinotaurFriend has its own version, generalized to other summoned monsters
-		|| (flags2 & MF2_SEEKERMISSILE)))	// AHolySpirit and AMageStaffFX2 as well, generalized to other seeker missiles
+		|| (flags2 & MF2_SEEKERMISSILE)
+		|| (flags8 & MF8_SEEKERMISSILENOZ)))	// AHolySpirit and AMageStaffFX2 as well, generalized to other seeker missiles
 	{	// Normal monsters and other actors always return false.
 		return false;
 	}
@@ -3932,6 +3933,7 @@ bool AActor::IsOkayToAttack (AActor *link)
 	if (player)											Friend = this;
 	else if (flags5 & MF5_SUMMONEDMONSTER)				Friend = tracer;
 	else if (flags2 & MF2_SEEKERMISSILE)				Friend = target;
+	else if (flags8 & MF8_SEEKERMISSILENOZ)				Friend = target;
 	else if ((flags & MF_FRIENDLY) && FriendPlayer)		Friend = players[FriendPlayer-1].mo;
 
 	// Friend checks
@@ -7285,7 +7287,7 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 
 	FVector3 velocity(dest->x - source->x, dest->y - source->y, dest->z - source->z);
 	// Floor and ceiling huggers should never have a vertical component to their velocity
-	if (th->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER))
+	if ((th->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)) || (th->flags8 & MF8_SEEKERMISSILENOZ))
 	{
 		velocity.Z = 0;
 	}
@@ -7570,7 +7572,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 
 	FVector3 vec(vx, vy, vz);
 
-	if (MissileActor->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER))
+	if ((MissileActor->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)) || (MissileActor->flags8 & MF8_SEEKERMISSILENOZ))
 	{
 		vec.Z = 0;
 	}
