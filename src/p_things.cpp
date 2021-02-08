@@ -378,7 +378,7 @@ nolead:						mobj->angle = R_PointToAngle2 (mobj->x, mobj->y, targ->x, targ->y);
 							mobj->vely = fixed_t(aim[1]);
 							mobj->velz = fixed_t(aim[2]);
 						}
-						if (mobj->flags2 & MF2_SEEKERMISSILE)
+						if ((mobj->flags2 & MF2_SEEKERMISSILE) || (mobj->flags8 & MF8_SEEKERMISSILENOZ))
 						{
 							mobj->tracer = targ;
 						}
@@ -396,7 +396,7 @@ nolead:						mobj->angle = R_PointToAngle2 (mobj->x, mobj->y, targ->x, targ->y);
 						mobj->Speed = fixed_t (sqrt (double(mobj->velx)*mobj->velx + double(mobj->vely)*mobj->vely + double(mobj->velz)*mobj->velz));
 					}
 					// Hugger missiles don't have any vertical velocity
-					if (mobj->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER))
+					if ((mobj->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)) || (mobj->flags8 & MF8_SEEKERMISSILENOZ))
 					{
 						mobj->velz = 0;
 					}

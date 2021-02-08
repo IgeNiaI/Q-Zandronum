@@ -381,7 +381,7 @@ static void DoAttack (AActor *self, bool domelee, bool domissile,
 		if (missile)
 		{
 			// automatic handling of seeker missiles
-			if (missile->flags2&MF2_SEEKERMISSILE)
+			if ((missile->flags2 & MF2_SEEKERMISSILE) || (missile->flags8 & MF8_SEEKERMISSILENOZ))
 			{
 				missile->tracer=self->target;
 			}
@@ -1191,12 +1191,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMissile)
                 	targ=owner;
                 	missile->target=owner;
 					// automatic handling of seeker missiles
-					if (self->flags & missile->flags2 & MF2_SEEKERMISSILE)
+					if ((self->flags & missile->flags2 & MF2_SEEKERMISSILE)
+						|| (self->flags & missile->flags8 & MF8_SEEKERMISSILENOZ))
 					{
 						missile->tracer=self->tracer;
 					}
                 }
-				else if (missile->flags2&MF2_SEEKERMISSILE)
+				else if ((missile->flags2 & MF2_SEEKERMISSILE) || (missile->flags8 & MF8_SEEKERMISSILENOZ))
 				{
 					// automatic handling of seeker missiles
 					missile->tracer=self->target;
@@ -1380,7 +1381,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomComboAttack)
 		if (missile)
 		{
 			// automatic handling of seeker missiles
-			if (missile->flags2&MF2_SEEKERMISSILE)
+			if ((missile->flags2 & MF2_SEEKERMISSILE) || (missile->flags8 & MF8_SEEKERMISSILENOZ))
 			{
 				missile->tracer=self->target;
 			}
@@ -1658,7 +1659,7 @@ void A_FireCustomMissileHelper ( AActor *self,
 		if (flags & FPF_TRANSFERTRANSLATION)
 			misl->Translation = self->Translation;
 
-		if (linetarget && misl->flags2 & MF2_SEEKERMISSILE)
+		if (linetarget && ((misl->flags2 & MF2_SEEKERMISSILE) || (misl->flags8 & MF8_SEEKERMISSILENOZ)))
 			misl->tracer = linetarget;
 
 		if (!(flags & FPF_AIMATANGLE))
@@ -4138,7 +4139,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_JumpIfTargetInLOS)
 		}
 		else if (self->flags & MF_MISSILE && (flags & JLOSF_PROJECTILE))
 		{
-			if (self->flags2 & MF2_SEEKERMISSILE)
+			if ((self->flags2 & MF2_SEEKERMISSILE) || (self->flags8 & MF8_SEEKERMISSILENOZ))
 				target = self->tracer;
 			else
 				target = NULL;
@@ -4269,7 +4270,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_JumpIfInTargetLOS)
 	}
 	else if (self->flags & MF_MISSILE && (flags & JLOSF_PROJECTILE))
 	{
-		if (self->flags2 & MF2_SEEKERMISSILE)
+		if ((self->flags2 & MF2_SEEKERMISSILE) || (self->flags8 & MF8_SEEKERMISSILENOZ))
 			target = self->tracer;
 		else
 			target = NULL;
@@ -4550,6 +4551,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeFlag)
 					flagset = FLAGSET_FLAGS6;
 				else if ( flagp == &self->flags7 )
 					flagset = FLAGSET_FLAGS7;
+				else if ( flagp == &self->flags8 )
+					flagset = FLAGSET_FLAGS8;
 				else if ( flagp == &self->ulSTFlags )
 					flagset = FLAGSET_FLAGSST;
 				else if ( flagp == &self->mvFlags)
