@@ -720,18 +720,26 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Jump)
 //==========================================================================
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_JumpIfHealthLower)
 {
-	ACTION_PARAM_START(2);
+	ACTION_PARAM_START(3);
 	ACTION_PARAM_INT(health, 0);
 	ACTION_PARAM_STATE(jump, 1);
+	ACTION_PARAM_INT(destination_selector, 2);
+	
+	AActor *reference = COPY_AAPTR(self, destination_selector);
+	if (!reference)
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
 	// [BC] Don't jump here in client mode.
 	if ( NETWORK_InClientMode() )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
+		if (( reference->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
 			return;
 	}
 
-	if (self->health < health) ACTION_JUMP(jump, CLIENTUPDATE_FRAME);	// [BC] Clients don't know what the actor's health is.
+	if (reference->health < health) ACTION_JUMP(jump, CLIENTUPDATE_FRAME);	// [BC] Clients don't know what the actor's health is.
 
 	ACTION_SET_RESULT(false);	// Jumps should never set the result for inventory state chains!
 }
@@ -3028,32 +3036,41 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeTo)
 //===========================================================================
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetScale)
 {
-	ACTION_PARAM_START(2);
+	ACTION_PARAM_START(4);
 	ACTION_PARAM_FIXED(scalex, 0);
 	ACTION_PARAM_FIXED(scaley, 1);
+	ACTION_PARAM_INT(destination_selector, 2);
+	ACTION_PARAM_BOOL(usezero, 3);
+
+	AActor *reference = COPY_AAPTR(self, destination_selector);
+	if (!reference)
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
 	// [EP] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	if ( NETWORK_InClientModeAndActorNotClientHandled( reference ) )
 		return;
 
 	// [EP] Save the previous scale values.
-	fixed_t savedScaleX = self->scaleX;
-	fixed_t savedScaleY = self->scaleY;
+	fixed_t savedScaleX = reference->scaleX;
+	fixed_t savedScaleY = reference->scaleY;
 
-	self->scaleX = scalex;
-	self->scaleY = scaley ? scaley : scalex;
+	reference->scaleX = scalex;
+	reference->scaleY = scaley != 0 || usezero ? scaley : scalex;
 
 	// [EP] Tell the clients to change the scale if anything changed.
-	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
+	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( reference ) == false ))
 	{
 		unsigned int scaleFlags = 0;
-		if ( savedScaleX != self->scaleX )
+		if ( savedScaleX != reference->scaleX )
 			scaleFlags |= ACTORSCALE_X;
-		if ( savedScaleY != self->scaleY )
+		if ( savedScaleY != reference->scaleY )
 			scaleFlags |= ACTORSCALE_Y;
 
 		if ( scaleFlags != 0 )
-			SERVERCOMMANDS_SetThingScale( self, scaleFlags );
+			SERVERCOMMANDS_SetThingScale( reference, scaleFlags );
 	}
 }
 
@@ -4828,10 +4845,19 @@ enum
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetAngle)
 {
-	ACTION_PARAM_START(2);
+	ACTION_PARAM_START(3);
 	ACTION_PARAM_ANGLE(angle, 0);
 	ACTION_PARAM_INT(flags, 1)
-	self->SetAngle(angle, !!(flags & SPF_INTERPOLATE));
+	ACTION_PARAM_INT(destination_selector, 2);
+	
+	AActor *reference = COPY_AAPTR(self, destination_selector);
+	if (!reference)
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
+
+	reference->SetAngle(angle, !!(flags & SPF_INTERPOLATE));
 }
 
 //===========================================================================
@@ -4844,18 +4870,26 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetAngle)
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetPitch)
 {
-	ACTION_PARAM_START(2);
+	ACTION_PARAM_START(3);
 	ACTION_PARAM_ANGLE(pitch, 0);
 	ACTION_PARAM_INT(flags, 1);
+	ACTION_PARAM_INT(destination_selector, 2);
+	
+	AActor *reference = COPY_AAPTR(self, destination_selector);
+	if (!reference)
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
-	if (self->player != NULL || (flags & SPF_FORCECLAMP))
+	if (reference->player != NULL || (flags & SPF_FORCECLAMP))
 	{ // clamp the pitch we set
 		int min, max;
 
-		if (self->player != NULL)
+		if (reference->player != NULL)
 		{
-			min = self->player->MinPitch;
-			max = self->player->MaxPitch;
+			min = reference->player->MinPitch;
+			max = reference->player->MaxPitch;
 		}
 		else
 		{
@@ -4864,7 +4898,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetPitch)
 		}
 		pitch = clamp<int>(pitch, min, max);
 	}
-	self->SetPitch(pitch, !!(flags & SPF_INTERPOLATE));
+	reference->SetPitch(pitch, !!(flags & SPF_INTERPOLATE));
 }
 
 //===========================================================================
@@ -4877,28 +4911,36 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetPitch)
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ScaleVelocity)
 {
-	ACTION_PARAM_START(1);
+	ACTION_PARAM_START(2);
 	ACTION_PARAM_FIXED(scale, 0);
+	ACTION_PARAM_INT(destination_selector, 1);
+	
+	AActor *reference = COPY_AAPTR(self, destination_selector);
+	if (!reference)
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
 	// [TP] This is handled by the server.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	if ( NETWORK_InClientModeAndActorNotClientHandled( reference ) )
 		return;
 
-	INTBOOL was_moving = self->velx | self->vely | self->velz;
+	INTBOOL was_moving = reference->velx | reference->vely | reference->velz;
 
-	self->velx = FixedMul(self->velx, scale);
-	self->vely = FixedMul(self->vely, scale);
-	self->velz = FixedMul(self->velz, scale);
+	reference->velx = FixedMul(reference->velx, scale);
+	reference->vely = FixedMul(reference->vely, scale);
+	reference->velz = FixedMul(reference->velz, scale);
 
 	// If the actor was previously moving but now is not, and is a player,
 	// update its player variables. (See A_Stop.)
 	if (was_moving)
 	{
-		CheckStopped(self);
+		CheckStopped(reference);
 	}
 
 	// [TP] Inform the clients about the velocity change.
-	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
+	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( reference ) == false ))
 		SERVERCOMMANDS_MoveThingExact( self, CM_VELX|CM_VELY|CM_VELZ );
 }
 
@@ -4910,21 +4952,29 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ScaleVelocity)
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 {
-	ACTION_PARAM_START(4);
+	ACTION_PARAM_START(5);
 	ACTION_PARAM_FIXED(x, 0);
 	ACTION_PARAM_FIXED(y, 1);
 	ACTION_PARAM_FIXED(z, 2);
 	ACTION_PARAM_INT(flags, 3);
+	ACTION_PARAM_INT(destination_selector, 4);
+	
+	AActor *reference = COPY_AAPTR(self, destination_selector);
+	if (!reference)
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
 	// [TP] This is handled by the server.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	if ( NETWORK_InClientModeAndActorNotClientHandled( reference ) )
 		return;
 
-	INTBOOL was_moving = self->velx | self->vely | self->velz;
+	INTBOOL was_moving = reference->velx | reference->vely | reference->velz;
 
 	fixed_t vx = x, vy = y, vz = z;
-	fixed_t sina = finesine[self->angle >> ANGLETOFINESHIFT];
-	fixed_t cosa = finecosine[self->angle >> ANGLETOFINESHIFT];
+	fixed_t sina = finesine[reference->angle >> ANGLETOFINESHIFT];
+	fixed_t cosa = finecosine[reference->angle >> ANGLETOFINESHIFT];
 
 	if (flags & 1)	// relative axes - make x, y relative to actor's current angle
 	{
@@ -4933,25 +4983,25 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 	}
 	if (flags & 2)	// discard old velocity - replace old velocity with new velocity
 	{
-		self->velx = vx;
-		self->vely = vy;
-		self->velz = vz;
+		reference->velx = vx;
+		reference->vely = vy;
+		reference->velz = vz;
 	}
 	else	// add new velocity to old velocity
 	{
-		self->velx += vx;
-		self->vely += vy;
-		self->velz += vz;
+		reference->velx += vx;
+		reference->vely += vy;
+		reference->velz += vz;
 	}
 
 	if (was_moving)
 	{
-		CheckStopped(self);
+		CheckStopped(reference);
 	}
 
 	// [TP] Inform the clients about the velocity change.
-	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
-		SERVERCOMMANDS_MoveThingExact( self, CM_VELX|CM_VELY|CM_VELZ );
+	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( reference ) == false ))
+		SERVERCOMMANDS_MoveThingExact( reference, CM_VELX|CM_VELY|CM_VELZ );
 }
 
 //===========================================================================
@@ -5077,16 +5127,24 @@ enum T_Flags
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Teleport)
 {
-	ACTION_PARAM_START(6);
+	ACTION_PARAM_START(7);
 	ACTION_PARAM_STATE(TeleportState, 0);
 	ACTION_PARAM_CLASS(TargetType, 1);
 	ACTION_PARAM_CLASS(FogType, 2);
 	ACTION_PARAM_INT(Flags, 3);
 	ACTION_PARAM_FIXED(MinDist, 4);
 	ACTION_PARAM_FIXED(MaxDist, 5);
+	ACTION_PARAM_INT(destination_selector, 6);
+	
+	AActor *reference = COPY_AAPTR(self, destination_selector);
+	if (!reference)
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
 	// [BB] This is handled by the server.
-	if ( NETWORK_InClientMode() && ( ( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) )
+	if ( NETWORK_InClientMode() && ( ( reference->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) )
 		return;
 
 	// Randomly choose not to teleport like A_Srcr2Decide.
@@ -5097,7 +5155,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Teleport)
 			192, 120, 120, 120, 64, 64, 32, 16, 0
 		};
 
-		unsigned int chanceindex = self->health / ((self->SpawnHealth()/8 == 0) ? 1 : self->SpawnHealth()/8);
+		unsigned int chanceindex = reference->health / ((reference->SpawnHealth()/8 == 0) ? 1 : reference->SpawnHealth()/8);
 
 		if (chanceindex >= countof(chance))
 		{
@@ -5110,7 +5168,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Teleport)
 	if (TeleportState == NULL)
 	{
 		// Default to Teleport.
-		TeleportState = self->FindState("Teleport");
+		TeleportState = reference->FindState("Teleport");
 		// If still nothing, then return.
 		if (!TeleportState) return;
 	}
@@ -5120,13 +5178,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Teleport)
 
 	if (!TargetType) TargetType = PClass::FindClass("BossSpot");
 
-	AActor * spot = state->GetSpotWithMinMaxDistance(TargetType, self->x, self->y, MinDist, MaxDist);
+	AActor * spot = state->GetSpotWithMinMaxDistance(TargetType, reference->x, reference->y, MinDist, MaxDist);
 	if (spot == NULL) return;
 
-	fixed_t prevX = self->x;
-	fixed_t prevY = self->y;
-	fixed_t prevZ = self->z;
-	if (P_TeleportMove (self, spot->x, spot->y, spot->z, Flags & TF_TELEFRAG))
+	fixed_t prevX = reference->x;
+	fixed_t prevY = reference->y;
+	fixed_t prevZ = reference->z;
+	if (P_TeleportMove (reference, spot->x, spot->y, spot->z, Flags & TF_TELEFRAG))
 	{
 		ACTION_SET_RESULT(false);	// Jumps should never set the result for inventory state chains!
 
@@ -5137,9 +5195,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Teleport)
 
 		ACTION_JUMP(TeleportState, CLIENTUPDATE_FRAME);	// [BB] This may involve randomness.
 
-		self->z = self->floorz;
-		self->angle = spot->angle;
-		self->velx = self->vely = self->velz = 0;
+		reference->z = reference->floorz;
+		reference->angle = spot->angle;
+		reference->velx = reference->vely = reference->velz = 0;
 	}
 }
 
