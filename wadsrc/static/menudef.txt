@@ -1514,10 +1514,10 @@ OptionString SoundOutputsWindows
 
 OptionString SoundOutputsUnix
 {
+	"SDL",			"SDL"
 	"Default",		"Default"
 	"OSS",			"OSS"
-	"ALSA",			"ALSA"
-	"SDL",			"SDL"
+	//"ALSA",			"ALSA"
 	"ESD",			"ESD"
 	"PulseAudio",	"PulseAudio"
 	"No sound",		"No sound"
