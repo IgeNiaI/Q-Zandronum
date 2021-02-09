@@ -2687,22 +2687,16 @@ void SERVER_SendFullUpdate( ULONG ulClient )
 			// Update the water level of the actor, but not if it's a player!
 			if (( pActor->waterlevel > 0 ) && ( pActor->player == NULL ))
 				SERVERCOMMANDS_SetThingWaterLevel( pActor, ulClient, SVCF_ONLYTHISCLIENT );
-
-			// [WS] Update the actor's properties if they changed.
-			SERVER_UpdateActorProperties( pActor, ulClient );
-
-			// If any of this actor's flags have changed during the course of the level, notify
-			// the client.
-			// [BB] InterpolationPoint abuses the MF_AMBUSH flag, so we have to exclude this class here.
-			if ( pActor->IsKindOf( PClass::FindClass( "InterpolationPoint" ) ) == false )
-				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( pActor, ulClient, SVCF_ONLYTHISCLIENT );
-
-			// [BB] Now that the ammo amount from weapon pickups is handled on the server
-			// this shouldn't be necessary anymore. Remove after thorough testing.
-			// If this is a weapon, tell the client how much ammo it gives.
-			//if ( pActor->IsKindOf( RUNTIME_CLASS( AWeapon )))
-			//	SERVERCOMMANDS_SetWeaponAmmoGive( pActor, ulClient, SVCF_ONLYTHISCLIENT );
 		}
+
+		// [WS] Update the actor's properties if they changed.
+		SERVER_UpdateActorProperties( pActor, ulClient );
+
+		// If any of this actor's flags have changed during the course of the level, notify
+		// the client.
+		// [BB] InterpolationPoint abuses the MF_AMBUSH flag, so we have to exclude this class here.
+		if ( pActor->IsKindOf( PClass::FindClass( "InterpolationPoint" ) ) == false )
+			SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( pActor, ulClient, SVCF_ONLYTHISCLIENT );
 
 		// Check and see if it's important that the client know the angle of the object.
 		if ( pActor->angle != 0 )
@@ -3440,6 +3434,12 @@ void SERVER_UpdateActorProperties( AActor *pActor, ULONG ulClient )
 
 	// [EP] Update the actor's scale if it's changed.
 	SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( pActor, ulClient, SVCF_ONLYTHISCLIENT );
+
+	// [geNia] Update the actor's fill color
+	SERVERCOMMANDS_SetThingFillColor( pActor, ulClient, SVCF_ONLYTHISCLIENT );
+
+	// [geNia] Update the actor's sprite and frame
+	SERVERCOMMANDS_SetThingSprite( pActor, ulClient, SVCF_ONLYTHISCLIENT );
 }
 
 //*****************************************************************************
