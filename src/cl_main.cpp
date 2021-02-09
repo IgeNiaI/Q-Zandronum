@@ -5066,6 +5066,7 @@ void ServerCommands::SetThingFillColor::Execute()
 void ServerCommands::SetThingSprite::Execute()
 {
 	actor->sprite = sprite;
+	actor->frame = frame;
 }
 
 //*****************************************************************************

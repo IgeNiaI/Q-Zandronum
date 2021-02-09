@@ -2250,25 +2250,25 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_TakeFromTarget)
 
 enum SIX_Flags
 {
-	SIXF_TRANSFERTRANSLATION	= 1 << 0,
-	SIXF_ABSOLUTEPOSITION		= 1 << 1,
-	SIXF_ABSOLUTEANGLE			= 1 << 2,
-	SIXF_ABSOLUTEVELOCITY		= 1 << 3,
-	SIXF_SETMASTER				= 1 << 4,
-	SIXF_NOCHECKPOSITION		= 1 << 5,
-	SIXF_TELEFRAG				= 1 << 6,
-	SIXF_CLIENTSIDE				= 1 << 7,	// only used by Skulldronum
-	SIXF_TRANSFERAMBUSHFLAG		= 1 << 8,
-	SIXF_TRANSFERPITCH			= 1 << 9,
-	SIXF_TRANSFERPOINTERS		= 1 << 10,
-	SIXF_USEBLOODCOLOR			= 1 << 11,
-	SIXF_CLEARCALLERTID			= 1 << 12,
-	SIXF_MULTIPLYSPEED			= 1 << 13,
-	SIXF_TRANSFERSCALE			= 1 << 14,
-	SIXF_TRANSFERSPECIAL		= 1 << 15,
-	SIXF_CLEARCALLERSPECIAL		= 1 << 16,
-	SIXF_TRANSFERSTENCILCOL		= 1 << 17,
-	SIXF_TRANSFERSPRITE			= 1 << 18,    // [BIN]
+	SXF_TRANSFERTRANSLATION		= 1 << 0,
+	SXF_ABSOLUTEPOSITION		= 1 << 1,
+	SXF_ABSOLUTEANGLE			= 1 << 2,
+	SXF_ABSOLUTEVELOCITY		= 1 << 3,
+	SXF_SETMASTER				= 1 << 4,
+	SXF_NOCHECKPOSITION			= 1 << 5,
+	SXF_TELEFRAG				= 1 << 6,
+	SXF_CLIENTSIDE				= 1 << 7,	// only used by Skulldronum
+	SXF_TRANSFERAMBUSHFLAG		= 1 << 8,
+	SXF_TRANSFERPITCH			= 1 << 9,
+	SXF_TRANSFERPOINTERS		= 1 << 10,
+	SXF_USEBLOODCOLOR			= 1 << 11,
+	SXF_CLEARCALLERTID			= 1 << 12,
+	SXF_MULTIPLYSPEED			= 1 << 13,
+	SXF_TRANSFERSCALE			= 1 << 14,
+	SXF_TRANSFERSPECIAL			= 1 << 15,
+	SXF_CLEARCALLERSPECIAL		= 1 << 16,
+	SXF_TRANSFERSTENCILCOL		= 1 << 17,
+	SXF_TRANSFERSPRITEFRAME		= 1 << 24,    // [BIN]
 };
 
 // [BB] Changed return value to bool (returns false if the actor already was destroyed).
@@ -2282,18 +2282,18 @@ static bool InitSpawnedItem(AActor *self, AActor *mo, int flags)
 
 	if (!(mo->flags2 & MF2_DONTTRANSLATE))
 	{
-		if (flags & SIXF_TRANSFERTRANSLATION)
+		if (flags & SXF_TRANSFERTRANSLATION)
 		{
 			mo->Translation = self->Translation;
 		}
-		else if (flags & SIXF_USEBLOODCOLOR)
+		else if (flags & SXF_USEBLOODCOLOR)
 		{
 			// [XA] Use the spawning actor's BloodColor to translate the newly-spawned object.
 			PalEntry bloodcolor = self->GetBloodColor();
 			mo->Translation = TRANSLATION(TRANSLATION_Blood, bloodcolor.a);
 		}
 	}
-	if (flags & SIXF_TRANSFERPOINTERS)
+	if (flags & SXF_TRANSFERPOINTERS)
 	{
 		mo->target = self->target;
 		mo->master = self->master; // This will be overridden later if SIXF_SETMASTER is set
@@ -2301,7 +2301,7 @@ static bool InitSpawnedItem(AActor *self, AActor *mo, int flags)
 	}
 
 	mo->angle = self->angle;
-	if (flags & SIXF_TRANSFERPITCH)
+	if (flags & SXF_TRANSFERPITCH)
 	{
 		mo->pitch = self->pitch;
 	}
@@ -2310,16 +2310,16 @@ static bool InitSpawnedItem(AActor *self, AActor *mo, int flags)
 		originator = originator->target;
 	}
 
-	if (flags & SIXF_TELEFRAG) 
+	if (flags & SXF_TELEFRAG)
 	{
 		P_TeleportMove(mo, mo->x, mo->y, mo->z, true);
 		// This is needed to ensure consistent behavior.
 		// Otherwise it will only spawn if nothing gets telefragged
-		flags |= SIXF_NOCHECKPOSITION;	
+		flags |= SXF_NOCHECKPOSITION;
 	}
 	if (mo->flags3 & MF3_ISMONSTER)
 	{
-		if (!(flags & SIXF_NOCHECKPOSITION) && !P_TestMobjLocation(mo))
+		if (!(flags & SXF_NOCHECKPOSITION) && !P_TestMobjLocation(mo))
 		{
 			// The monster is blocked so don't spawn it at all!
 			mo->ClearCounters();
@@ -2332,7 +2332,7 @@ static bool InitSpawnedItem(AActor *self, AActor *mo, int flags)
 			{
 				// If this is a monster transfer all friendliness information
 				mo->CopyFriendliness(originator, true);
-				if (flags & SIXF_SETMASTER) mo->master = originator;	// don't let it attack you (optional)!
+				if (flags & SXF_SETMASTER) mo->master = originator;	// don't let it attack you (optional)!
 			}
 			else if (originator->player)
 			{
@@ -2353,42 +2353,43 @@ static bool InitSpawnedItem(AActor *self, AActor *mo, int flags)
 			}
 		}
 	}
-	else if (!(flags & SIXF_TRANSFERPOINTERS))
+	else if (!(flags & SXF_TRANSFERPOINTERS))
 	{
 		// If this is a missile or something else set the target to the originator
 		mo->target = originator ? originator : self;
 	}
-	if (flags & SIXF_TRANSFERSCALE)
+	if (flags & SXF_TRANSFERSCALE)
 	{
 		mo->scaleX = self->scaleX;
 		mo->scaleY = self->scaleY;
 	}
-	if (flags & SIXF_TRANSFERAMBUSHFLAG)
+	if (flags & SXF_TRANSFERAMBUSHFLAG)
 	{
 		mo->flags = (mo->flags & ~MF_AMBUSH) | (self->flags & MF_AMBUSH);
 	}
-	if (flags & SIXF_CLEARCALLERTID)
+	if (flags & SXF_CLEARCALLERTID)
 	{
 		self->RemoveFromHash();
 		self->tid = 0;
 	}
-	if (flags & SIXF_TRANSFERSPECIAL)
+	if (flags & SXF_TRANSFERSPECIAL)
 	{
 		mo->special = self->special;
 		memcpy(mo->args, self->args, sizeof(self->args));
 	}
-	if (flags & SIXF_CLEARCALLERSPECIAL)
+	if (flags & SXF_CLEARCALLERSPECIAL)
 	{
 		self->special = 0;
 		memset(self->args, 0, sizeof(self->args));
 	}
-	if (flags & SIXF_TRANSFERSTENCILCOL)
+	if (flags & SXF_TRANSFERSTENCILCOL)
 	{
 		mo->fillcolor = self->fillcolor;
 	}
-    if (flags & SIXF_TRANSFERSPRITE) //[BIN]
+    if (flags & SXF_TRANSFERSPRITEFRAME) //[BIN]
     {
         mo->sprite = self->sprite;
+		mo->frame = self->frame;
     }
 
 	return true;
@@ -2444,7 +2445,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItem)
 					self->y + FixedMul(distance, finesine[self->angle>>ANGLETOFINESHIFT]), 
 					self->z - self->floorclip + self->GetBobOffset() + zheight, ALLOW_REPLACE);
 
-	int flags = (transfer_translation ? SIXF_TRANSFERTRANSLATION : 0) + (useammo ? SIXF_SETMASTER : 0);
+	int flags = (transfer_translation ? SXF_TRANSFERTRANSLATION : 0) + (useammo ? SXF_SETMASTER : 0);
 	bool res = InitSpawnedItem(self, mo, flags);
 	if ( mo && res )
 	{
@@ -2501,14 +2502,14 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 
 	fixed_t x,y;
 
-	if (!(flags & SIXF_ABSOLUTEANGLE))
+	if (!(flags & SXF_ABSOLUTEANGLE))
 	{
 		Angle += self->angle;
 	}
 
 	angle_t ang = Angle >> ANGLETOFINESHIFT;
 
-	if (flags & SIXF_ABSOLUTEPOSITION)
+	if (flags & SXF_ABSOLUTEPOSITION)
 	{
 		x = self->x + xofs;
 		y = self->y + yofs;
@@ -2521,7 +2522,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 		y = self->y + FixedMul(xofs, finesine[ang]) - FixedMul(yofs, finecosine[ang]);
 	}
 
-	if (!(flags & SIXF_ABSOLUTEVELOCITY))
+	if (!(flags & SXF_ABSOLUTEVELOCITY))
 	{
 		// Same orientation issue here!
 		fixed_t newxvel = FixedMul(xvel, finecosine[ang]) + FixedMul(yvel, finesine[ang]);
@@ -2530,7 +2531,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 	}
 
 	// [BB] Should the actor not be spawned, taking in account client side only actors?
-	if ( NETWORK_ShouldActorNotBeSpawned ( self, missile, !!( flags & SIXF_CLIENTSIDE ) ) )
+	if ( NETWORK_ShouldActorNotBeSpawned ( self, missile, !!( flags & SXF_CLIENTSIDE ) ) )
 		return;
 
 	AActor *mo = Spawn(missile, x, y, self->z - self->floorclip + self->GetBobOffset() + zofs, ALLOW_REPLACE);
@@ -2544,7 +2545,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 			mo->tid = tid;
 			mo->AddToHash();
 		}
-		if (flags & SIXF_MULTIPLYSPEED)
+		if (flags & SXF_MULTIPLYSPEED)
 		{
 			mo->velx = FixedMul(xvel, mo->Speed);
 			mo->vely = FixedMul(yvel, mo->Speed);
@@ -2576,10 +2577,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 			// [BB] Set scale if necessary.
 			SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( mo );
 
-			if (flags & SIXF_TRANSFERSTENCILCOL)
+			if (flags & SXF_TRANSFERSTENCILCOL)
 				SERVERCOMMANDS_SetThingFillColor( mo );
 
-			if (flags & SIXF_TRANSFERSPRITE)
+			if (flags & SXF_TRANSFERSPRITEFRAME)
 				SERVERCOMMANDS_SetThingSprite( mo );
 		}
 
