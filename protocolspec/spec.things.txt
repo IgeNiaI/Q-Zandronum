@@ -300,6 +300,7 @@ Command SetThingSprite
 	ExtendedCommand
 	Actor actor
 	Long sprite
+	Byte frame
 EndCommand
 
 Command ThingIsCorpse
