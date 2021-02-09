@@ -3431,6 +3431,14 @@ void SERVER_UpdateActorProperties( AActor *pActor, ULONG ulClient )
 	// [WS] Update the actor's reaction time if it's changed.
 	if ( pActor->reactiontime != pActor->GetDefault()->reactiontime )
 		SERVERCOMMANDS_SetThingReactionTime( pActor, ulClient, SVCF_ONLYTHISCLIENT );
+	
+	// [geNia] Update the actor's translation
+	if ( pActor->Translation )
+		SERVERCOMMANDS_SetThingTranslation( pActor );
+
+	// [BB] To properly handle actor-actor bouncing, the client must know the target.
+	if ( pActor->BounceFlags != BOUNCE_None )
+		SERVERCOMMANDS_SetThingTarget ( pActor );
 
 	// [EP] Update the actor's scale if it's changed.
 	SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( pActor, ulClient, SVCF_ONLYTHISCLIENT );
