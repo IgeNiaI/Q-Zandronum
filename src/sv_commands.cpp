@@ -3668,6 +3668,7 @@ void SERVERCOMMANDS_SetThingSprite( AActor* pActor, ULONG ulPlayerExtra, ServerC
 	NetCommand command( SVC2_SETTHINGSPRITE );
 	command.addShort( pActor->lNetID );
 	command.addLong( pActor->sprite );
+	command.addByte( pActor->frame );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
