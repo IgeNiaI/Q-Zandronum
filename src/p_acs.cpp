@@ -3935,6 +3935,15 @@ int DLevelScript::DoSpawn (int type, fixed_t x, fixed_t y, fixed_t z, int tid, i
 				{
 					SERVERCOMMANDS_SpawnThing( actor );
 
+					// [BB] If the thing is not at its spawn point, let the client know about the spawn point.
+					if ( ( actor->x != actor->SpawnPoint[0] )
+						|| ( actor->y != actor->SpawnPoint[1] )
+						|| ( actor->z != actor->SpawnPoint[2] )
+						)
+					{
+						SERVERCOMMANDS_SetThingSpawnPoint( actor );
+					}
+
 					if ( actor->angle != 0 )
 						SERVERCOMMANDS_SetThingAngle( actor );
 
