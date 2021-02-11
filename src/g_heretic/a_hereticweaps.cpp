@@ -110,7 +110,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_StaffAttack)
 
 		// [BC] If we're the server, tell clients to adjust the player's angle.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingAngleExact( player->mo );
+			SERVERCOMMANDS_SetThingAngle( player->mo );
 	}
 }
 
@@ -532,7 +532,7 @@ void FireMacePL1B (AActor *actor)
 	// [BC] If we're the server, spawn the ball and play the sound.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_SpawnMissileExact( ball );
+		SERVERCOMMANDS_SpawnMissile( ball );
 		SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
 	}
 
@@ -555,7 +555,7 @@ void FireMacePL1B (AActor *actor)
 		// [BC] If we're the server, spawn the ball and play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			SERVERCOMMANDS_SpawnMissileExact( ball );
+			SERVERCOMMANDS_SpawnMissile( ball );
 			SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
 		}
 
@@ -575,7 +575,7 @@ void FireMacePL1B (AActor *actor)
 		// [BC] If we're the server, spawn the ball and play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			SERVERCOMMANDS_SpawnMissileExact( ball );
+			SERVERCOMMANDS_SpawnMissile( ball );
 			SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
 		}
 	}
@@ -691,7 +691,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MacePL1Check)
 	{
 		SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS );
 		SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
-		SERVERCOMMANDS_MoveThingExact( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 		SERVERCOMMANDS_SetThingGravity( self );
 	}
 }
@@ -725,7 +725,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact)
 		{
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
 			SERVERCOMMANDS_SetThingState( self, STATE_SPAWN );
-			SERVERCOMMANDS_MoveThingExact( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM );
 		}
 
@@ -744,7 +744,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact)
 		{
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS );
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
-			SERVERCOMMANDS_MoveThingExact( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 			SERVERCOMMANDS_SetThingGravity( self );
 			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM );
 		}
@@ -812,7 +812,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 
 		// [BC] If we're the server, send the state change and move it.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThingExact( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 
 		tiny = Spawn("MaceFX3", self->x, self->y, self->z, ALLOW_REPLACE);
 		angle = self->angle+ANG90;
@@ -825,7 +825,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 
 		// [BC] If we're the server, spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissileExact( tiny );
+			SERVERCOMMANDS_SpawnMissile( tiny );
 
 		P_CheckMissileSpawn (tiny, self->radius);
 
@@ -840,7 +840,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 
 		// [BC] If we're the server, spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissileExact( tiny );
+			SERVERCOMMANDS_SpawnMissile( tiny );
 
 		P_CheckMissileSpawn (tiny, self->radius);
 	}
@@ -856,7 +856,7 @@ boom:
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
 			SERVERCOMMANDS_SetThingState( self, STATE_DEATH );
-			SERVERCOMMANDS_MoveThingExact( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS );
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
 			SERVERCOMMANDS_SetThingGravity( self );
@@ -912,7 +912,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 	// [BC] If we're the server, play the sound.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_MoveThingExact( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/maceshoot", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
 	}
 
@@ -932,7 +932,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 
 			// [BC] If we're the server, play the sound.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThingExact( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 		}
 
 		mo = P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AMaceFX4), self->angle - ( ANGLE_45 / 3 ), &linetarget);
@@ -949,7 +949,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 
 			// [BC] If we're the server, play the sound.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThingExact( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 		}
 	}
 }
@@ -1063,7 +1063,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_DeathBallImpact)
 		// [BC] If we're the server, send the state change and move it.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			SERVERCOMMANDS_MoveThingExact( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macestop", 1, ATTN_NORM );
 		}
 	}

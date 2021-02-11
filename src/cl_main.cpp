@@ -4481,20 +4481,6 @@ void ServerCommands::SpawnThingNoNetID::Execute()
 
 //*****************************************************************************
 //
-void ServerCommands::SpawnThingExact::Execute()
-{
-	CLIENT_SpawnThing( type, x, y, z, id );
-}
-
-//*****************************************************************************
-//
-void ServerCommands::SpawnThingExactNoNetID::Execute()
-{
-	CLIENT_SpawnThing( type, x, y, z, -1 );
-}
-
-//*****************************************************************************
-//
 void ServerCommands::LevelSpawnThing::Execute()
 {
 	CLIENT_SpawnThing( type, x, y, z, id, SPAWNFLAG_LEVELTHING );
@@ -4518,80 +4504,6 @@ void ServerCommands::MoveThing::Execute()
 	fixed_t y = ContainsNewY() ? newY : actor->y;
 	fixed_t z = ContainsNewZ() ? newZ : actor->z;
 
-	if ( ContainsNewX() && (( bits & CM_NOLAST ) == 0 ))
-		actor->lastX = x;
-	if ( ContainsNewY() && (( bits & CM_NOLAST ) == 0 ))
-		actor->lastY = y;
-	if ( ContainsNewZ() && (( bits & CM_NOLAST ) == 0 ))
-		actor->lastZ = z;
-
-	// Read in the last position data.
-	if ( ContainsLastX() )
-		actor->lastX = lastX;
-	if ( ContainsLastY() )
-		actor->lastY = lastY;
-	if ( ContainsLastZ() )
-		actor->lastZ = lastZ;
-
-	// [WS] Clients will reuse their last updated position.
-	if ( bits & CM_REUSE_X )
-		x = actor->lastX;
-	if ( bits & CM_REUSE_Y )
-		y = actor->lastY;
-	if ( bits & CM_REUSE_Z )
-		z = actor->lastZ;
-
-	// Update the thing's position.
-	if ( bits & ( CM_X|CM_Y|CM_Z|CM_REUSE_X|CM_REUSE_Y|CM_REUSE_Z ))
-		CLIENT_MoveThing( actor, x, y, z );
-
-	// Read in the angle data.
-	if ( ContainsAngle() )
-		actor->angle = angle;
-
-	// Read in the momentum data.
-	if ( ContainsVelX() )
-		actor->velx = velX;
-	if ( ContainsVelY() )
-		actor->vely = velY;
-	if ( ContainsVelZ() )
-		actor->velz = velZ;
-
-	// [TP] If this is a player that's being moved around, and his velocity becomes zero,
-	// we need to stop his bobbing as well.
-	if ( actor->player && ( actor->velx == 0 ) && ( actor->vely == 0 ))
-		actor->player->velx = actor->player->vely = 0;
-
-	// Read in the pitch data.
-	if ( ContainsPitch() )
-		actor->pitch = pitch;
-
-	// Read in the movedir data.
-	if ( ContainsMovedir() )
-		actor->movedir = movedir;
-
-	// If the server is moving us, don't let our prediction get messed up.
-	if ( actor == players[consoleplayer].mo )
-	{
-		players[consoleplayer].ServerXYZ[0] = x;
-		players[consoleplayer].ServerXYZ[1] = y;
-		players[consoleplayer].ServerXYZ[2] = z;
-		CLIENT_PREDICT_PlayerTeleported( );
-	}
-}
-
-//*****************************************************************************
-//
-void ServerCommands::MoveThingExact::Execute()
-{
-	if (( actor == NULL ) || gamestate != GS_LEVEL )
-		return;
-
-	fixed_t x = ContainsNewX() ? newX : actor->x;
-	fixed_t y = ContainsNewY() ? newY : actor->y;
-	fixed_t z = ContainsNewZ() ? newZ : actor->z;
-
-	// Read in the position data.
 	if ( ContainsNewX() && (( bits & CM_NOLAST ) == 0 ))
 		actor->lastX = x;
 	if ( ContainsNewY() && (( bits & CM_NOLAST ) == 0 ))
@@ -4778,13 +4690,6 @@ void ServerCommands::DestroyThing::Execute()
 //*****************************************************************************
 //
 void ServerCommands::SetThingAngle::Execute()
-{
-	actor->angle = angle;
-}
-
-//*****************************************************************************
-//
-void ServerCommands::SetThingAngleExact::Execute()
 {
 	actor->angle = angle;
 }
@@ -5948,13 +5853,6 @@ static void client_TeamFlagDropped( BYTESTREAM_s *pByteStream )
 //*****************************************************************************
 //
 void ServerCommands::SpawnMissile::Execute()
-{
-	CLIENT_SpawnMissile( missileType, x, y, z, velX, velY, velZ, netID, targetNetID );
-}
-
-//*****************************************************************************
-//
-void ServerCommands::SpawnMissileExact::Execute()
 {
 	CLIENT_SpawnMissile( missileType, x, y, z, velX, velY, velZ, netID, targetNetID );
 }

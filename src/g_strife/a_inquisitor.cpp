@@ -132,7 +132,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_InquisitorJump)
 	// [BC] If we're the server, update the thing's position.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_MoveThingExact( self, CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( self, CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 
 		// [CW] Also, set the flags to ensure the actor can fly.
 		SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS );

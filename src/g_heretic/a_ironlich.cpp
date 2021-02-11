@@ -131,7 +131,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_LichAttack)
 				fire->health = (i+1) * 2;
 
 				// [BB] If we're the server, tell the clients to spawn the fire as missle using SERVERCOMMANDS_SpawnMissile
-				// (just using SERVERCOMMANDS_SpawnThing + SERVERCOMMANDS_MoveThingExact doesn't work properly).
+				// (just using SERVERCOMMANDS_SpawnThing + SERVERCOMMANDS_MoveThing doesn't work properly).
 				if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
 					SERVERCOMMANDS_SpawnMissile( fire );
 
@@ -233,7 +233,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_LichFireGrow)
 
 	// [BB] Tell clients of the changed z coord.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThingExact( self, CM_Z );
+		SERVERCOMMANDS_MoveThing( self, CM_Z );
 
 	if (self->health == 0)
 	{

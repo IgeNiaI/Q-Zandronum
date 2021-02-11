@@ -85,7 +85,7 @@ static void DragonSeek (AActor *actor, angle_t thresh, angle_t turnMax)
 	// Unfortunately there are sync issues, if we don't also update the actual position.
 	// Is there a way to fix this without sending the position?
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThingExact( actor, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( actor, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
 
 	if (target->flags&MF_SHOOTABLE && pr_dragonseek() < 64)
 	{ // attack the destination mobj if it's attackable

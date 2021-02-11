@@ -367,27 +367,7 @@ class FixedParameter(SpecParameter):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-class AproxfixedParameter(SpecParameter):
-	def __init__(self, **args):
-		super().__init__(**args)
-		self.cxxtypename = 'fixed_t'
-
-	def writeread(self, writer, command, reference, **args):
-		writer.writeline('command.{reference} = NETWORK_ReadShort( bytestream ) << FRACBITS;'.format(**locals()))
-
-	def writesend(self, writer, command, reference, **args):
-		writer.writeline('command.addShort( this->{reference} >> FRACBITS );'.format(**locals()))
-
-# ----------------------------------------------------------------------------------------------------------------------
-
 class AngleParameter(FixedParameter):
-	def __init__(self, **args):
-		super().__init__(**args)
-		self.cxxtypename = 'angle_t'
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-class AproxangleParameter(AproxfixedParameter):
 	def __init__(self, **args):
 		super().__init__(**args)
 		self.cxxtypename = 'angle_t'

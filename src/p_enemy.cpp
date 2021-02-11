@@ -602,7 +602,7 @@ bool P_Move (AActor *actor)
 			{
 				// [BB] If we're the server, tell clients to update the thing's Z position.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_MoveThingExact( actor, CM_Z );
+					SERVERCOMMANDS_MoveThing( actor, CM_Z );
 
 				actor->flags |= MF_INFLOAT;
 				return true;
@@ -2718,8 +2718,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 			// [BC] If we're the server, update the thing's velocity.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				SERVERCOMMANDS_MoveThing( actor, CM_X|CM_Y|CM_Z );
-				SERVERCOMMANDS_MoveThingExact( actor, CM_VELX|CM_VELY );
+				SERVERCOMMANDS_MoveThing( actor, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY );
 			}
 		}
 
@@ -3539,7 +3538,7 @@ void P_TossItem (AActor *item)
 		item->vely += pr_dropitem.Random2(7) << FRACBITS;
 
 		if ( NETWORK_GetState() == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThingExact( item, CM_VELX|CM_VELY, MAXPLAYERS );
+			SERVERCOMMANDS_MoveThing( item, CM_VELX|CM_VELY, MAXPLAYERS );
 	}
 	else
 	{
@@ -3548,7 +3547,7 @@ void P_TossItem (AActor *item)
 		item->velz = FRACUNIT*5 + (pr_dropitem() << 10);
 
 		if ( NETWORK_GetState() == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThingExact( item, CM_VELX|CM_VELY|CM_VELZ, MAXPLAYERS );
+			SERVERCOMMANDS_MoveThing( item, CM_VELX|CM_VELY|CM_VELZ, MAXPLAYERS );
 	}
 }
 

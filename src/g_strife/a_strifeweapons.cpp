@@ -147,7 +147,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_JabDagger)
 		// [BC] Ensure the clients have the correct thing angle.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			SERVERCOMMANDS_SetThingAngleExact( self );
+			SERVERCOMMANDS_SetThingAngle( self );
 		}
 	}
 	else
@@ -497,7 +497,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireFlamer)
 
 	// [Dusk] Update the player's angle now.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThingExact( self, CM_ANGLE );
+		SERVERCOMMANDS_MoveThing( self, CM_ANGLE );
 
 	self = P_SpawnPlayerMissile (self, PClass::FindClass("FlameMissile"));
 	if (self != NULL)
@@ -506,7 +506,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireFlamer)
 
 		// [BC] If we're the server, update the thing's velocity.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThingExact( self, CM_VELZ );
+			SERVERCOMMANDS_MoveThing( self, CM_VELZ );
 	}
 }
 
@@ -757,7 +757,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Burnination)
 
 		// [Dusk] Update velocity to clients
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThingExact( self, CM_VELX | CM_VELY | CM_VELZ );
+			SERVERCOMMANDS_MoveThing( self, CM_VELX | CM_VELY | CM_VELZ );
 	}
 
 	S_Sound (self, CHAN_VOICE, "world/largefire", 1, ATTN_NORM);
@@ -812,7 +812,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Burnination)
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
 				SERVERCOMMANDS_SpawnThing( drop );
-				SERVERCOMMANDS_MoveThingExact( drop, CM_VELX | CM_VELY | CM_VELZ );
+				SERVERCOMMANDS_MoveThing( drop, CM_VELX | CM_VELY | CM_VELZ );
 				SERVERCOMMANDS_SetThingFlags( drop, FLAGSET_FLAGS );
 			}
 		}
@@ -883,7 +883,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireGrenade)
 		grenade->y += FixedMul (finesine[an], 15*FRACUNIT);
 
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThingExact( grenade, CM_X|CM_Y|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( grenade, CM_X|CM_Y|CM_VELZ );
 	}
 }
 
