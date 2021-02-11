@@ -3478,7 +3478,7 @@ void P_NightmareRespawn (AActor *mobj)
 		z = ONCEILINGZ;
 	else if (info->flags2 & MF2_SPAWNFLOAT)
 		z = FLOATRANDZ;
-	else if (info->flags2 & MF2_FLOATBOB)
+	else if (info->flags & MF_NOGRAVITY)
 		z = mobj->SpawnPoint[2];
 	else
 		z = ONFLOORZ;
@@ -8209,7 +8209,7 @@ CCMD( respawnactors )
 				Z = ONCEILINGZ;
 			else if ( pActorInfo->flags2 & MF2_SPAWNFLOAT )
 				Z = FLOATRANDZ;
-			else if ( pActorInfo->flags2 & MF2_FLOATBOB )
+			else if ( pActorInfo->flags & MF_NOGRAVITY )
 				Z = pActor->SpawnPoint[2];
 			else
 				Z = ONFLOORZ;

@@ -3905,7 +3905,7 @@ void GAME_ResetMap( bool bRunEnterScripts )
 					Z = ONCEILINGZ;
 				else if ( pActorInfo->flags2 & MF2_SPAWNFLOAT )
 					Z = FLOATRANDZ;
-				else if ( pActorInfo->flags2 & MF2_FLOATBOB )
+				else if ( pActorInfo->flags & MF_NOGRAVITY )
 					Z = pActor->SpawnPoint[2];
 				else
 					Z = ONFLOORZ;
@@ -4040,7 +4040,7 @@ void GAME_ResetMap( bool bRunEnterScripts )
 			Z = ONCEILINGZ;
 		else if ( pActorInfo->flags2 & MF2_SPAWNFLOAT )
 			Z = FLOATRANDZ;
-		else if ( pActorInfo->flags2 & MF2_FLOATBOB )
+		else if ( pActorInfo->flags & MF_NOGRAVITY )
 			Z = pActor->SpawnPoint[2];
 		else
 			Z = ONFLOORZ;
