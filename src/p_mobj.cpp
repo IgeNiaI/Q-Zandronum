@@ -2031,7 +2031,7 @@ bool P_SeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax, bool preci
 
 	// [BC] Update the thing's angle and velocity.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThingExact( actor, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( actor, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
 
 	return true;
 }
@@ -3049,7 +3049,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				// [BC] If we're the server, tell clients to update the thing's Z position.
 				// [WS] Inform clients of the velocity.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_MoveThingExact( mo, CM_Z|CM_VELZ );
+					SERVERCOMMANDS_MoveThing( mo, CM_Z|CM_VELZ );
 			}
 			else if (delta > 0 && dist < (delta*3))
 			{
@@ -3058,7 +3058,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				// [BC] If we're the server, tell clients to update the thing's Z position.
 				// [WS] Inform clients of the velocity.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_MoveThingExact( mo, CM_Z|CM_VELZ );
+					SERVERCOMMANDS_MoveThing( mo, CM_Z|CM_VELZ );
 			}
 		}
 	}
@@ -3315,7 +3315,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 	// [TIHan/BB] If it's a missile that is bounceable and it bounced, send info to the client
 	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( mo->ulNetworkFlags & NETFL_BOUNCED_OFF_ACTOR ) )
 	{
-		SERVERCOMMANDS_MoveThingExact( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ|CM_ANGLE );
+		SERVERCOMMANDS_MoveThing( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ|CM_ANGLE );
 		// [BB] Remove the mark, the syncing is done now.
 		mo->ulNetworkFlags &= ~NETFL_BOUNCED_OFF_ACTOR;
 	}
@@ -7593,7 +7593,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	// [WS] If we know the missile is going to explode,
 	// we need to spawn the missile for the clients.
 	if ( ( bSpawnOnClient || !bValidSpawn ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
-		SERVERCOMMANDS_SpawnMissileExact( MissileActor );
+		SERVERCOMMANDS_SpawnMissile( MissileActor );
 	
 	if (bValidSpawn)
 	{

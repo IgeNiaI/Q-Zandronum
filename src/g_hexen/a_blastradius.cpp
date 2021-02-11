@@ -80,7 +80,7 @@ void BlastActor (AActor *victim, fixed_t strength, fixed_t speed, AActor * Owner
 	// [BB] If we're the server, tell clients about all they need to know here.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_MoveThingExact( victim, CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( victim, CM_VELX|CM_VELY|CM_VELZ );
 		// [BB] Non-players got the blasted flag above.
 		if ( victim->player == NULL )
 			SERVERCOMMANDS_SetThingFlags( victim, FLAGSET_FLAGS2 );

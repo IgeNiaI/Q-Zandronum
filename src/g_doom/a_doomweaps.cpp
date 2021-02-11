@@ -93,7 +93,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Punch)
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
 			SERVERCOMMANDS_SoundActor( self, CHAN_WEAPON, "*fist", 1, ATTN_NORM );
-			SERVERCOMMANDS_SetThingAngleExact( self );
+			SERVERCOMMANDS_SetThingAngle( self );
 		}
 	}
 }
@@ -342,7 +342,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Saw)
 
 	// [BC] If we're the server, tell clients to adjust the player's angle.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_SetThingAngleExact( self );
+		SERVERCOMMANDS_SetThingAngle( self );
 
 	// [BC] Tell all the bots that a weapon was fired.
 	BOTS_PostWeaponFiredEvent( ULONG( self->player - players ), BOTEVENT_USEDCHAINSAW, BOTEVENT_ENEMY_USEDCHAINSAW, BOTEVENT_PLAYER_USEDCHAINSAW );

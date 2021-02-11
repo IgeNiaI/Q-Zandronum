@@ -48,7 +48,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_SentinelBob)
 
 	// [CW] Moving the actor is server side.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThingExact( self, CM_VELZ );
+		SERVERCOMMANDS_MoveThing( self, CM_VELZ );
 }
 
 DEFINE_ACTION_FUNCTION(AActor, A_SentinelAttack)

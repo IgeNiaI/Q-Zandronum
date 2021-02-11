@@ -1165,44 +1165,6 @@ void SERVERCOMMANDS_SpawnThingNoNetID( AActor *pActor, ULONG ulPlayerExtra, Serv
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_SpawnThingExact( AActor *pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	if ( pActor == NULL )
-		return;
-
-	// If the actor doesn't have a network ID, it's better to send it ID-less.
-	if ( pActor->lNetID == -1 )
-	{
-		SERVERCOMMANDS_SpawnThingExactNoNetID( pActor, ulPlayerExtra, flags );
-		return;
-	}
-
-	ServerCommands::SpawnThingExact command;
-	command.SetType( pActor->GetClass() );
-	command.SetX( pActor->x );
-	command.SetY( pActor->y );
-	command.SetZ( pActor->z );
-	command.SetId( pActor->lNetID );
-	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SpawnThingExactNoNetID( AActor *pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	if ( pActor == NULL )
-		return;
-
-	ServerCommands::SpawnThingExactNoNetID command;
-	command.SetType( pActor->GetClass() );
-	command.SetX( pActor->x );
-	command.SetY( pActor->y );
-	command.SetZ( pActor->z );
-	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
 void SERVERCOMMANDS_LevelSpawnThing( AActor *pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( pActor == NULL )
@@ -1327,48 +1289,6 @@ void SERVERCOMMANDS_MoveThing( AActor *actor, ULONG bits, ULONG ulPlayerExtra, S
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_MoveThingExact( AActor *actor, ULONG bits, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	if ( !EnsureActorHasNetID (actor) )
-		return;
-
-	// [BB] Only skip updates, if sent to all players.
-	if ( flags == 0 )
-		RemoveUnnecessaryPositionUpdateFlags ( actor, bits );
-	else // [WS] This will inform clients not to set their lastX/Y/Z with the new position.
-		bits |= CM_NOLAST;
-
-	// [WS] Check to see if the position can be re-used by the client.
-	CheckPositionReuse( actor, bits );
-
-	// Nothing to update.
-	if ( bits == 0 )
-		return;
-
-	ServerCommands::MoveThingExact command;
-	command.SetActor( actor );
-	command.SetBits( bits );
-	command.SetNewX( actor->x );
-	command.SetNewY( actor->y );
-	command.SetNewZ( actor->z );
-	command.SetLastX( actor->lastX );
-	command.SetLastY( actor->lastY );
-	command.SetLastZ( actor->lastZ );
-	command.SetAngle( actor->angle );
-	command.SetVelX( actor->velx );
-	command.SetVelY( actor->vely );
-	command.SetVelZ( actor->velz );
-	command.SetPitch( actor->pitch );
-	command.SetMovedir( actor->movedir );
-	command.sendCommandToClients( ulPlayerExtra, flags );
-
-	// [BB] Only mark something as updated, if it the update was sent to all players.
-	if ( flags == 0 )
-		ActorNetPositionUpdated ( actor, bits );
-}
-
-//*****************************************************************************
-//
 void SERVERCOMMANDS_KillThing( AActor *pActor, AActor *pSource, AActor *pInflictor )
 {
 	if ( !EnsureActorHasNetID (pActor) )
@@ -1429,19 +1349,6 @@ void SERVERCOMMANDS_SetThingAngle( AActor *pActor, ULONG ulPlayerExtra, ServerCo
 		return;
 
 	ServerCommands::SetThingAngle command;
-	command.SetActor( pActor );
-	command.SetAngle( pActor->angle );
-	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SetThingAngleExact( AActor *pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	if ( !EnsureActorHasNetID (pActor) )
-		return;
-
-	ServerCommands::SetThingAngleExact command;
 	command.SetActor( pActor );
 	command.SetAngle( pActor->angle );
 	command.sendCommandToClients( ulPlayerExtra, flags );
@@ -2396,36 +2303,6 @@ void SERVERCOMMANDS_SpawnMissile( AActor *pMissile, ULONG ulPlayerExtra, ServerC
 	// of the missle. In this case the correct angle has to be told to the clients.
  	if( pMissile->angle != R_PointToAngle2( 0, 0, pMissile->velx, pMissile->vely ))
 		SERVERCOMMANDS_SetThingAngle( pMissile, ulPlayerExtra, flags );
-}
-
-//*****************************************************************************
-//
-void SERVERCOMMANDS_SpawnMissileExact( AActor *pMissile, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	if ( pMissile == NULL )
-		return;
-
-	ServerCommands::SpawnMissileExact command;
-	command.SetX( pMissile->x );
-	command.SetY( pMissile->y );
-	command.SetZ( pMissile->z );
-	command.SetVelX( pMissile->velx );
-	command.SetVelY( pMissile->vely );
-	command.SetVelZ( pMissile->velz );
-	command.SetMissileType( pMissile->GetClass() );
-	command.SetNetID( pMissile->lNetID );
-
-	if ( pMissile->target )
-		command.SetTargetNetID( pMissile->target->lNetID );
-	else
-		command.SetTargetNetID( -1 );
-
-	command.sendCommandToClients( ulPlayerExtra, flags );
-
-	// [BB] It's possible that the angle can't be derived from the velocity
-	// of the missle. In this case the correct angle has to be told to the clients.
- 	if( pMissile->angle != R_PointToAngle2( 0, 0, pMissile->velx, pMissile->vely ) )
-		SERVERCOMMANDS_SetThingAngleExact( pMissile, ulPlayerExtra, flags );
 }
 
 //*****************************************************************************

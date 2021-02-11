@@ -1,19 +1,4 @@
 Command SpawnThing
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
-	Class type
-	Short id
-EndCommand
-
-Command SpawnThingNoNetID
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
-	Class type
-EndCommand
-
-Command SpawnThingExact
 	Fixed x
 	Fixed y
 	Fixed z
@@ -21,7 +6,7 @@ Command SpawnThingExact
 	Short id
 EndCommand
 
-Command SpawnThingExactNoNetID
+Command SpawnThingNoNetID
 	Fixed x
 	Fixed y
 	Fixed z
@@ -30,75 +15,22 @@ EndCommand
 
 Command LevelSpawnThing
 	ExtendedCommand
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
+	Fixed x
+	Fixed y
+	Fixed z
 	Class type
 	Short id
 EndCommand
 
 Command LevelSpawnThingNoNetID
 	ExtendedCommand
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
+	Fixed x
+	Fixed y
+	Fixed z
 	Class type
 EndCommand
 
 Command MoveThing
-	Actor actor
-	Short bits
-
-	If (bits & CM_X)
-		AproxFixed newX
-	EndIf
-
-	If (bits & CM_Y)
-		AproxFixed newY
-	EndIf
-
-	If (bits & CM_Z)
-		AproxFixed newZ
-	EndIf
-
-	If (bits & CM_LAST_X)
-		AproxFixed lastX
-	EndIf
-
-	If (bits & CM_LAST_Y)
-		AproxFixed lastY
-	EndIf
-
-	If (bits & CM_LAST_Z)
-		AproxFixed lastZ
-	EndIf
-
-	If (bits & CM_ANGLE)
-		Angle angle
-	EndIf
-
-	If (bits & CM_VELX)
-		AproxFixed velX
-	EndIf
-
-	If (bits & CM_VELY)
-		AproxFixed velY
-	EndIf
-
-	If (bits & CM_VELZ)
-		AproxFixed velZ
-	EndIf
-
-	If (bits & CM_PITCH)
-		Long pitch
-	EndIf
-
-	If (bits & CM_MOVEDIR)
-		Byte movedir
-	EndIf
-EndCommand
-
-Command MoveThingExact
 	Actor actor
 	Short bits
 
@@ -174,11 +106,6 @@ Command DestroyThing
 EndCommand
 
 Command SetThingAngle
-	Actor actor
-	AproxAngle angle
-EndCommand
-
-Command SetThingAngleExact
 	Actor actor
 	Angle angle
 EndCommand
@@ -316,12 +243,12 @@ EndCommand
 
 Command TeleportThing
 	Actor actor
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
-	AproxFixed momx
-	AproxFixed momy
-	AproxFixed momz
+	Fixed x
+	Fixed y
+	Fixed z
+	Fixed momx
+	Fixed momy
+	Fixed momz
 	Short reactiontime
 	Angle angle
 	Bool sourcefog
@@ -349,40 +276,40 @@ Command RespawnRavenThing
 EndCommand
 
 Command SpawnBlood
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
-	AproxAngle dir
+	Fixed x
+	Fixed y
+	Fixed z
+	Angle dir
 	Byte damage
 	Actor originator
 EndCommand
 
 Command SpawnBloodSplatter
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
+	Fixed x
+	Fixed y
+	Fixed z
 	Actor originator
 EndCommand
 
 Command SpawnBloodSplatter2
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
+	Fixed x
+	Fixed y
+	Fixed z
 	Actor originator
 EndCommand
 
 Command SpawnPuff
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
+	Fixed x
+	Fixed y
+	Fixed z
 	Class pufftype
 	Short id
 EndCommand
 
 Command SpawnPuffNoNetID
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
+	Fixed x
+	Fixed y
+	Fixed z
 	Class pufftype
 	Byte stateid
 	Bool receiveTranslation

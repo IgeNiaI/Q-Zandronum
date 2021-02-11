@@ -151,7 +151,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_BishopDoBlur)
 	// [BB] If we're the server, update the thing's velocity.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_MoveThingExact( self, CM_VELX|CM_VELY );
+		SERVERCOMMANDS_MoveThing( self, CM_VELX|CM_VELY );
 	}
 
 	S_Sound (self, CHAN_BODY, "BishopBlur", 1, ATTN_NORM, true);	// [BB] Inform the clients.
@@ -180,7 +180,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_BishopSpawnBlur)
 
 		// [BB] If we're the server, update the thing's velocity.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThingExact( self, CM_VELX|CM_VELY );
+			SERVERCOMMANDS_MoveThing( self, CM_VELX|CM_VELY );
 
 		if (pr_sblur() > 96)
 		{
@@ -234,7 +234,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_BishopChase)
 
 	// [BB] If we're the server, update the thing's z coordinate.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThingExact( self, CM_Z );
+		SERVERCOMMANDS_MoveThing( self, CM_Z );
 }
 
 //============================================================================
