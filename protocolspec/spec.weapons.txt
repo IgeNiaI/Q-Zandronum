@@ -1,16 +1,4 @@
 Command SpawnMissile
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
-	Fixed velX
-	Fixed velY
-	Fixed velZ
-	Class<AActor> missileType
-	Short netID
-	Short targetNetID
-EndCommand
-
-Command SpawnMissileExact
 	Fixed x
 	Fixed y
 	Fixed z
@@ -25,9 +13,9 @@ EndCommand
 Command MissileExplode
 	Actor missile
 	Short lineId
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
+	Fixed x
+	Fixed y
+	Fixed z
 EndCommand
 
 Command WeaponSound

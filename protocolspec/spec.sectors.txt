@@ -1,25 +1,25 @@
 Command SetSectorFloorPlane
 	Sector sector
-	AproxFixed height
+	Fixed height
 EndCommand
 
 Command SetSectorCeilingPlane
 	Sector sector
-	AproxFixed height
+	Fixed height
 EndCommand
 
 Command SetSectorFloorPlaneSlope
 	Sector sector
-	AproxFixed a
-	AproxFixed b
-	AproxFixed c
+	Fixed a
+	Fixed b
+	Fixed c
 EndCommand
 
 Command SetSectorCeilingPlaneSlope
 	Sector sector
-	AproxFixed a
-	AproxFixed b
-	AproxFixed c
+	Fixed a
+	Fixed b
+	Fixed c
 EndCommand
 
 Command SetSectorLightLevel

@@ -5601,7 +5601,7 @@ static void SetActorAngle(AActor *activator, int tid, int angle, bool interpolat
 
 			// [BB] Tell the clients about the changed angle.
 			if( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetThingAngleExact( activator );
+				SERVERCOMMANDS_SetThingAngle( activator );
 		}
 	}
 	else
@@ -5616,7 +5616,7 @@ static void SetActorAngle(AActor *activator, int tid, int angle, bool interpolat
 			// [BB] Tell the clients about the changed angle.
 			// This fixes the "rave room" in SPACEDM5.wad.
 			if( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetThingAngleExact( actor );
+				SERVERCOMMANDS_SetThingAngle( actor );
 		}
 	}
 }
@@ -5631,7 +5631,7 @@ static void SetActorPitch(AActor *activator, int tid, int angle, bool interpolat
 
 			// [BB] Tell the clients about the changed pitch.
 			if( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThingExact( activator, CM_PITCH );
+				SERVERCOMMANDS_MoveThing( activator, CM_PITCH );
 		}
 	}
 	else
@@ -5645,7 +5645,7 @@ static void SetActorPitch(AActor *activator, int tid, int angle, bool interpolat
 
 			// [BB] Tell the clients about the changed pitch.
 			if( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThingExact( actor, CM_PITCH );
+				SERVERCOMMANDS_MoveThing( actor, CM_PITCH );
 		}
 	}
 }

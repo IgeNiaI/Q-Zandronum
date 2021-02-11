@@ -176,7 +176,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 
 			// [BC] Tell clients to spawn the shard.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissileExact( mo );
+				SERVERCOMMANDS_SpawnMissile( mo );
 		}
 	}
 	if (spawndir & SHARDSPAWN_RIGHT)
@@ -192,7 +192,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 
 			// [BC] Tell clients to spawn the shard.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissileExact( mo );
+				SERVERCOMMANDS_SpawnMissile( mo );
 		}
 	}
 	if (spawndir & SHARDSPAWN_UP)
@@ -211,7 +211,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 
 			// [BC] Tell clients to spawn the shard.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissileExact( mo );
+				SERVERCOMMANDS_SpawnMissile( mo );
 		}
 	}
 	if (spawndir & SHARDSPAWN_DOWN)
@@ -231,7 +231,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 
 			// [BC] Tell clients to spawn the shard.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissileExact( mo );
+				SERVERCOMMANDS_SpawnMissile( mo );
 		}
 	}
 }

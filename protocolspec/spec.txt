@@ -45,8 +45,6 @@
 # ║ String             │    FString    │       |x| + 1        │ a null-terminated string                      ║
 # ║ Fixed              │    fixed_t    │          4           │ a 16:16 fixed point number (fixed_t)          ║
 # ║ Angle              │    angle_t    │          4           │ a 32bit binary angle (angle_t)                ║
-# ║ AproxFixed         │    fixed_t    │          2           │ the 16 most significant bits of a fixed_t     ║
-# ║ AproxAngle         │    angle_t    │          2           │ the 16 most significant bits of a angle_t     ║
 # ║ Bool               │     bool      │        1 bit         │ boolean value stored as 1 bit                 ║
 # ║ ShortByte<N>       │      int      │       N bits         │ an integer value of N bits, 1 ≤ N ≤ 8         ║
 # ║ Variable           │      int      │   At least 2 bits,   │ a 32-bit integer sent with as few bytes as    ║

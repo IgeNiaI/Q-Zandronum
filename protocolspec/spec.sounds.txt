@@ -26,9 +26,9 @@ Command SoundSector
 EndCommand
 
 Command SoundPoint
-	AproxFixed x
-	AproxFixed y
-	AproxFixed z
+	Fixed x
+	Fixed y
+	Fixed z
 	Byte channel
 	String sound
 	Byte volume

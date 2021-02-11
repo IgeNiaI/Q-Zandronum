@@ -1679,7 +1679,7 @@ void A_FireCustomMissileHelper ( AActor *self,
 
 		// [BC] If we're the server, tell clients to spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissileExact( misl );
+			SERVERCOMMANDS_SpawnMissile( misl );
 	}
 }
 
@@ -1869,7 +1869,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomPunch)
 		// [BC] Inform the clients about the correct angle and the updated health.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			SERVERCOMMANDS_SetThingAngleExact( self );
+			SERVERCOMMANDS_SetThingAngle( self );
 			if ( self->player && prevhealth != self->health )
 				SERVERCOMMANDS_SetPlayerHealth( self->player - players );
 		}
@@ -2664,7 +2664,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ThrowGrenade)
 
 		// [BC] Tell clients to spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissileExact( bo );
+			SERVERCOMMANDS_SpawnMissile( bo );
 
 		P_CheckMissileSpawn (bo, self->radius);
 	} 
@@ -2697,7 +2697,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Recoil)
 
 	// [BB] Set the thing's velocity, also resync the position.
 	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( self->player == NULL ) )
-		SERVERCOMMANDS_MoveThingExact( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY );
+		SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY );
 }
 
 
@@ -4945,7 +4945,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ScaleVelocity)
 
 	// [TP] Inform the clients about the velocity change.
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( reference ) == false ))
-		SERVERCOMMANDS_MoveThingExact( self, CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( self, CM_VELX|CM_VELY|CM_VELZ );
 }
 
 //===========================================================================
@@ -5005,7 +5005,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 
 	// [TP] Inform the clients about the velocity change.
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( reference ) == false ))
-		SERVERCOMMANDS_MoveThingExact( reference, CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( reference, CM_VELX|CM_VELY|CM_VELZ );
 }
 
 //===========================================================================

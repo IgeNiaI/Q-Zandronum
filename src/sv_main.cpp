@@ -2629,7 +2629,7 @@ void SERVER_SendFullUpdate( ULONG ulClient )
 					ulBits |= CM_MOVEDIR;
 
 				if ( ulBits != 0 )
-					SERVERCOMMANDS_MoveThingExact( pActor, ulBits, ulClient, SVCF_ONLYTHISCLIENT );
+					SERVERCOMMANDS_MoveThing( pActor, ulBits, ulClient, SVCF_ONLYTHISCLIENT );
 			}
 
 			// If it's important to update this thing's arguments, do that now.
@@ -4829,7 +4829,7 @@ void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor )
 		ulBits |= CM_VELZ;
 
 	if ( ulBits )
-		SERVERCOMMANDS_MoveThingExact( pActor, ulBits );
+		SERVERCOMMANDS_MoveThing( pActor, ulBits );
 }
 
 //*****************************************************************************
@@ -4856,7 +4856,7 @@ void SERVER_UpdateThingVelocity( AActor *pActor, bool updateZ, bool updateXY )
 			ulBits |= CM_Z;
 	}
 
-	SERVERCOMMANDS_MoveThingExact( pActor, ulBits );
+	SERVERCOMMANDS_MoveThing( pActor, ulBits );
 }
 
 //*****************************************************************************

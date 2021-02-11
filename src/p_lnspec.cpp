@@ -1027,7 +1027,7 @@ FUNC(LS_ThrustThingZ)	// [BC]
 			// [BB] Unfortunately there are sync issues, if we don't also update the actual position.
 			// Is there a way to fix this without sending the position?
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThingExact( victim, CM_Z|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( victim, CM_Z|CM_VELZ );
 		}
 		return true;
 	}
@@ -1634,7 +1634,7 @@ FUNC(LS_Thing_Stop)
 
 			// [Dusk] tell the clients about this
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThingExact( it, ( ( it->player == NULL ) ? (CM_X|CM_Y|CM_Z) : 0 )|CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( it, ( ( it->player == NULL ) ? (CM_X|CM_Y|CM_Z) : 0 )|CM_VELX|CM_VELY|CM_VELZ );
 
 			ok = true;
 		}
@@ -1650,7 +1650,7 @@ FUNC(LS_Thing_Stop)
 
 			// [Dusk] tell the clients about this
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThingExact( target, ( ( target->player == NULL ) ? (CM_X|CM_Y|CM_Z) : 0 )|CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( target, ( ( target->player == NULL ) ? (CM_X|CM_Y|CM_Z) : 0 )|CM_VELX|CM_VELY|CM_VELZ );
 
 			ok = true;
 		}

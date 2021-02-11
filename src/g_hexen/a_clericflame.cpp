@@ -155,7 +155,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CFlameMissile)
 
 				// [BC] If we're the server, spawn this to clients.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SpawnThingExact( mo );
+					SERVERCOMMANDS_SpawnThing( mo );
 			}
 			mo = Spawn ("CircleFlame", BlockingMobj->x-FixedMul(dist, finecosine[an]),
 				BlockingMobj->y-FixedMul(dist, finesine[an]), 
@@ -170,7 +170,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CFlameMissile)
 
 				// [BC] If we're the server, spawn this to clients.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SpawnThingExact( mo );
+					SERVERCOMMANDS_SpawnThing( mo );
 			}
 		}
 		self->SetState (self->SpawnState);
