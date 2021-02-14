@@ -1206,7 +1206,7 @@ static void ChangeSpy (int changespy)
 void G_SpyPlayer( int pnum )
 {
 	// [BC] Allow view switch to players on our team.
-	if ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS )
+	if ( (GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS) && !players[consoleplayer].bSpectating && !CLIENTDEMO_IsPlaying() )
 	{
 		// Break if the player isn't on a team.
 		if ( players[consoleplayer].bOnTeam == false )
