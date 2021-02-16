@@ -6226,7 +6226,7 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
 
 		case ACSF_PlaySound:
 		case ACSF_PlayActorSound:
-			// PlaySound(tid, "SoundName", channel, volume, looping, attenuation)
+			// PlaySound(tid, "SoundName", channel, volume, looping, attenuation, local)
 			{
 				FSoundID sid;
 
@@ -6247,6 +6247,7 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
 					float vol = argCount > 3 ? FIXED2FLOAT(args[3]) : 1.f;
 					INTBOOL looping = argCount > 4 ? args[4] : false;
 					float atten = argCount > 5 ? FIXED2FLOAT(args[5]) : ATTN_NORM;
+					INTBOOL local = argCount > 6 ? args[6] : false;
 
 					if (args[0] == 0)
 					{
@@ -6261,6 +6262,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 						}
 						if (sid != 0)
 						{
+							if (local) chan |= CHAN_LOCAL;
 							if (!looping)
 							{
 								// [EP] Inform the clients.
