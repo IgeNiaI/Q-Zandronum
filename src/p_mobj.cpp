@@ -6590,6 +6590,7 @@ void P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, angle_t dir, int damage, AAc
 		th = Spawn (bloodcls, x, y, z, NO_REPLACE); // GetBloodType already performed the replacement
 		th->velz = FRACUNIT*2;
 		th->angle = dir;
+		th->target = originator;
 		// [NG] Applying PUFFGETSOWNER to the blood will make it target the owner
 		if (th->flags5 & MF5_PUFFGETSOWNER) th->target = originator;
 		if (gameinfo.gametype & GAME_DoomChex)
@@ -6667,7 +6668,9 @@ statedone:
 			// spawn state. Therefore, there's no need to treat it as a special case.
 			// [BB] This saves bandwidth, but doesn't spawn the blood size based on the damage dealt,
 			// so only use this for players with a slow connection.
-			SERVERCOMMANDS_SpawnThingNoNetID( th, MAXPLAYERS );
+			SERVERCOMMANDS_SpawnThing( th, MAXPLAYERS );
+			if ( th->renderflags & RF_INVISIBLE_TO_TARGET )
+				SERVERCOMMANDS_SetThingTarget( th );
 			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS );
 		}
 		else
