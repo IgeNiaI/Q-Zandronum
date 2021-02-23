@@ -1047,10 +1047,6 @@ void APowerFlight::EndEffect ()
 	}
 	if (!(Owner->player->cheats & CF_FLY))
 	{
-		if (Owner->z != Owner->floorz)
-		{
-			Owner->player->centering = true;
-		}
 		Owner->flags2 &= ~MF2_FLY;
 		Owner->flags &= ~MF_NOGRAVITY;
 	}
