@@ -42,7 +42,16 @@ bool AArtiDarkServant::Use (bool pickup)
 	{
 		mo->target = Owner;
 		mo->tracer = Owner;
-		mo->velz = 5*FRACUNIT;
+
+		if (Owner)
+		{
+			angle_t pitch = ((angle_t)(Owner->pitch)) >> ANGLETOFINESHIFT;
+			mo->velz += FixedMul(5 * FRACUNIT, finecosine[pitch]);
+		}
+		else
+		{
+			mo->velz = 5 * FRACUNIT;
+		}
 
 		// [BC] If we're the server, send clients this missile's updated properties.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
