@@ -3454,7 +3454,9 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
 					if ( CLIENT_PREDICT_IsPredicting() == false )
 					{
-						if (!player->mo->JumpSoundDelay)
+						if (isRampJumper && velz > 0)
+							S_Sound(player->mo, CHAN_BODY, "*rampjump", 1, ATTN_NORM);
+						else if (!player->mo->JumpSoundDelay)
 							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
 
 						player->mo->JumpSoundDelay = 3;
@@ -3479,7 +3481,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				velx += JumpVelx;
 				vely += JumpVely;
 
-				velz = (isRampJumper ? velz : 0) + JumpVelz;
+				velz = (isRampJumper ? MAX(0, velz) : 0) + JumpVelz;
 				player->jumpTics = ulJumpTicks;
 			}
 		}
