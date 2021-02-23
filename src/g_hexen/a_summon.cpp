@@ -47,6 +47,7 @@ bool AArtiDarkServant::Use (bool pickup)
 		{
 			angle_t pitch = ((angle_t)(Owner->pitch)) >> ANGLETOFINESHIFT;
 			mo->velz += FixedMul(5 * FRACUNIT, finecosine[pitch]);
+			mo->SetFriendPlayer(Owner->player);
 		}
 		else
 		{
@@ -108,8 +109,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_Summon)
 			mo->tracer = self->tracer;		// Pointer to master
 			AInventory *power = Spawn<APowerMinotaur> (0, 0, 0, NO_REPLACE);
 			power->CallTryPickup (self->tracer);
-			mo->SetFriendPlayer(self->tracer->player);
 		}
+		mo->FriendPlayer = self->FriendPlayer;
 
 		// Make smoke puff
 		// [BC]
