@@ -3420,7 +3420,6 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 	if ((mvFlags & MV_DOUBLETAPJUMP) && player->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
 	{
 		cmd->ucmd.buttons |= BT_JUMP;
-		player->onground = false;
 		player->secondJumpState = SJ_READY;
 		player->secondJumpTics = 0;
 	}
@@ -3429,7 +3428,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 	if (cmd->ucmd.buttons & BT_JUMP || isClimbingLedge)
 	{
 		// [Leo] Spectators shouldn't be limited by the server settings.
-		if (player->onground && !player->jumpTics)
+		if (player->onground && !player->jumpTics && player->secondJumpState != SJ_READY)
 		{
 			bool isRampJumper = (mvFlags & MV_RAMPJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
@@ -3491,7 +3490,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 			// Wall proximity check
 			bool doSecondJump = false;
 			FTraceResults secondJumpTrace;
-			if ((mvFlags & MV_WALLJUMP) || (mvFlags & MV_WALLJUMPV2))
+			if (((mvFlags & MV_WALLJUMP) || (mvFlags & MV_WALLJUMPV2)) && !player->onground)
 			{
 				// linetrace in 16 directions to see if there is a wall
 				for (int i = 0; i < 16; ++i)
@@ -3540,6 +3539,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
 				}
 
+				player->jumpTics = JumpDelay;
 				player->secondJumpTics = SecondJumpDelay;
 
 				if (player->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
@@ -3871,7 +3871,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				LocalVelocityCap = MAX(FIXED2FLOAT(player->mo->VelocityCap), float(FVector2(vel.X, vel.Y).Length()));
 			}
 
-			if (!player->onground || (player->onground && (cmd->ucmd.buttons & BT_JUMP)))
+			if (!player->onground || ((cmd->ucmd.buttons & BT_JUMP) && player->jumpTics <= 0))
 			{
 				maxGroundSpeed *= moveFactor;
 				velocity = float(FVector2(vel.X, vel.Y).Length());
@@ -4771,10 +4771,10 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		return;
 	}
 
-	if (player->jumpTics)
+	if (player->jumpTics && player->onground)
 	{
 		player->jumpTics--;
-		if (player->onground && player->jumpTics < -18)
+		if (player->jumpTics < -18)
 		{
 			player->jumpTics = 0;
 		}
