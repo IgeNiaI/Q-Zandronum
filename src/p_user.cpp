@@ -3806,7 +3806,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor(cmd);
 		maxGroundSpeed *= moveFactor;
 		player->mo->QAcceleration(vel, acceleration, (maxGroundSpeed * 3.f) / 5.f, 6.f);
-		player->mo->QAcceleration(vel, accelerationZ, maxVerticalSpeed, 8.f);
+		player->mo->QAcceleration(vel, accelerationZ, (maxVerticalSpeed * 3.f) / 5.f, 6.f);
 
 		noJump = true;
 
