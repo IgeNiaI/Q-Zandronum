@@ -64,7 +64,7 @@ Actor PlayerPawn : Actor native
 	Player.SlideMaxTics 70
 	
 	// MvType 2 only
-	Player.CpmAirAcceleration 17
+	Player.CpmAirAcceleration 12
 	Player.CpmMaxForwardAngleRad 0.122173 // 7 degrees
 	
 	Obituary "$OB_MPDEFAULT"
