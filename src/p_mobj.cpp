@@ -1594,7 +1594,7 @@ void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target)
 					{
 						frac = 0;
 					}
-					else if (num >= den)
+					else if (num >= den || den>>30 == 0)
 					{
 						frac = 1<<30;
 					}
