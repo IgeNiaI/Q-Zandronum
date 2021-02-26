@@ -3908,11 +3908,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 							vel.X = forwardVel.X;
 							vel.Y = forwardVel.Y;
 						}
-						else
-						{
-							// Both side and forward acceleration
-							player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
-						}
+
+						player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
 					}
 				}
 				else
