@@ -3458,6 +3458,10 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 		if (!(mo->mvFlags & MV_SILENT) && mo->player->mo->ShouldPlayFootsteps(&(mo->player->cmd), true))
 			S_Sound(mo, CHAN_SIX, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM);
 	}
+
+	if (mo->player->secondJumpState == SJ_READY) {
+		mo->player->secondJumpState = SJ_AVAILABLE;
+	}
 }
 
 
