@@ -602,7 +602,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 			}
 
 			// Play announcer sounds for amount of frags remaining.
-			if ( ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSEARNFRAGS ) && fraglimit )
+			if ( ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSEARNFRAGS ) && fraglimit && ( !duel || ( DUEL_GetState() == DS_INDUEL ) ) )
 			{
 				// [RH] Implement fraglimit
 				// [BC] Betterized!
