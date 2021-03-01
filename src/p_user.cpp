@@ -265,9 +265,14 @@ player_t::player_t()
   viewz(0),
   viewheight(0),
   deltaviewheight(0),
+  prevbob(0),
   bob(0),
   velx(0),
   vely(0),
+  prevswayx(0),
+  prevswayy(0),
+  swayx(0),
+  swayy(0),
   centering(0),
   turnticks(0),
   attackdown(0),
@@ -285,6 +290,7 @@ player_t::player_t()
   cheats2(0), // [BB]
   timefreezer(0),
   refire(0),
+  waiting(false),
   killcount(0),
   itemcount(0),
   secretcount(0),
@@ -295,6 +301,8 @@ player_t::player_t()
   poisoner(0),
   attacker(0),
   extralight(0),
+  fixedcolormap(0),
+  fixedlightlevel(0),
   morphTics(0),
   MorphedPlayerClass(0),
   MorphStyle(0),
@@ -302,23 +310,28 @@ player_t::player_t()
   PremorphWeapon(0),
   chickenPeck(0),
   jumpTics(0),
+  secondJumpTics(0),
+  secondJumpsRemaining(0),
   onground(0),
+  stepInterval(0),
   secondJumpState(0),
   crouchSlideTics(0),
-  isCrouchSliding(0),
+  isCrouchSliding(false),
   wallClimbTics(0),
-  isWallClimbing(0),
+  isWallClimbing(false),
   prepareTapValue(0),
   lastTapValue(0),
-  stepInterval(0),
   respawn_time(0),
   camera(0),
   air_finished(0),
+  settings_controller(false),
   BlendR(0),
   BlendG(0),
   BlendB(0),
   BlendA(0),
   LogText(),
+  MinPitch(0),
+  MaxPitch(0),
   crouching(0),
   crouchdir(0),
   crouchfactor(0),
@@ -364,10 +377,18 @@ player_t::player_t()
   SpawnY( 0 ),
   SpawnAngle( 0 ),
   OldPendingWeapon( 0 ),
+  bClientSelectedWeapon( false ),
   bLagging( 0 ),
   bSpawnTelefragged( 0 ),
   ulTime( 0 ),
-  bUnarmed( false )
+  bUnarmed( false ),
+  ticsToSpyNext( 0 ),
+  pnumToSpyNext( 0 ),
+  restoreX( 0 ),
+  restoreY( 0 ),
+  restoreZ( 0 ),
+  restoreFloorZ( 0 ),
+  restoreCeilingZ( 0 )
 {
 	memset (&cmd, 0, sizeof(cmd));
 	// [BB] Check if this is still necessary.
@@ -378,188 +399,166 @@ player_t::player_t()
 	memset( &ulMedalCount, 0, sizeof( ULONG ) * NUM_MEDALS );
 	memset( &ServerXYZ, 0, sizeof( fixed_t ) * 3 );
 	memset( &ServerXYZVel, 0, sizeof( fixed_t ) * 3 );
+	
+	memset( &unlaggedX, 0, sizeof( fixed_t ) * UNLAGGEDTICS );
+	memset( &unlaggedY, 0, sizeof( fixed_t ) * UNLAGGEDTICS );
+	memset( &unlaggedZ, 0, sizeof( fixed_t ) * UNLAGGEDTICS );
 }
 
-player_t &player_t::operator=(const player_t &p)
-{
-	mo = p.mo;
-	playerstate = p.playerstate;
-	cmd = p.cmd;
-	original_cmd = p.original_cmd;
-	original_oldbuttons = p.original_oldbuttons;
-	// Intentionally not copying userinfo!
-	cls = p.cls;
-	DesiredFOV = p.DesiredFOV;
-	FOV = p.FOV;
-	viewz = p.viewz;
-	viewheight = p.viewheight;
-	deltaviewheight = p.deltaviewheight;
-	bob = p.bob;
-	velx = p.velx;
-	vely = p.vely;
-	centering = p.centering;
-	turnticks = p.turnticks;
-	attackdown = p.attackdown;
-	usedown = p.usedown;
-	oldbuttons = p.oldbuttons;
-	health = p.health;
-	inventorytics = p.inventorytics;
-	CurrentPlayerClass = p.CurrentPlayerClass;
-	backpack = p.backpack;
-	// [BB] Zandronum doesn't have this.
-	//memcpy(frags, &p.frags, sizeof(frags));
-	fragcount = p.fragcount;
-	/* [BB] Zandronum doesn't have these.
-	lastkilltime = p.lastkilltime;
-	multicount = p.multicount;
-	spreecount = p.spreecount;
-	*/
-	WeaponState = p.WeaponState;
-	ReadyWeapon = p.ReadyWeapon;
-	PendingWeapon = p.PendingWeapon;
-	cheats = p.cheats;
-	timefreezer = p.timefreezer;
-	refire = p.refire;
-	// [BB] Zandronum doesn't have this.
-	//inconsistant = p.inconsistant;
-	waiting = p.waiting;
-	killcount = p.killcount;
-	itemcount = p.itemcount;
-	secretcount = p.secretcount;
-	damagecount = p.damagecount;
-	bonuscount = p.bonuscount;
-	hazardcount = p.hazardcount;
-	poisoncount = p.poisoncount;
-	poisontype = p.poisontype;
-	poisonpaintype = p.poisonpaintype;
-	poisoner = p.poisoner;
-	attacker = p.attacker;
-	extralight = p.extralight;
-	fixedcolormap = p.fixedcolormap;
-	fixedlightlevel = p.fixedlightlevel;
-	memcpy(psprites, &p.psprites, sizeof(psprites));
-	morphTics = p.morphTics;
-	MorphedPlayerClass = p.MorphedPlayerClass;
-	MorphStyle = p.MorphStyle;
-	MorphExitFlash = p.MorphExitFlash;
-	PremorphWeapon = p.PremorphWeapon;
-	chickenPeck = p.chickenPeck;
-	jumpTics = p.jumpTics;
-	onground = p.onground;
-	secondJumpState = p.secondJumpState;
-	crouchSlideTics = p.crouchSlideTics;
-	isCrouchSliding = p.isCrouchSliding;
-	wallClimbTics = p.wallClimbTics;
-	isWallClimbing = p.isWallClimbing;
-	prepareTapValue = p.prepareTapValue;
-	lastTapValue = p.lastTapValue;
-	stepInterval = p.stepInterval;
-	respawn_time = p.respawn_time;
-	camera = p.camera;
-	air_finished = p.air_finished;
-	LastDamageType = p.LastDamageType;
-	/* [BB] Zandronum doesn't have these.
-	savedyaw = p.savedyaw;
-	savedpitch = p.savedpitch;
-	angle = p.angle;
-	dest = p.dest;
-	prev = p.prev;
-	enemy = p.enemy;
-	missile = p.missile;
-	mate = p.mate;
-	last_mate = p.last_mate;
-	*/
-	settings_controller = p.settings_controller;
-	/* [BB] Zandronum doesn't have these.
-	skill = p.skill;
-	t_active = p.t_active;
-	t_respawn = p.t_respawn;
-	t_strafe = p.t_strafe;
-	t_react = p.t_react;
-	t_fight = p.t_fight;
-	t_roam = p.t_roam;
-	t_rocket = p.t_rocket;
-	isbot = p.isbot;
-	first_shot = p.first_shot;
-	sleft = p.sleft;
-	allround = p.allround;
-	oldx = p.oldx;
-	oldy = p.oldy;
-	*/
-	BlendR = p.BlendR;
-	BlendG = p.BlendG;
-	BlendB = p.BlendB;
-	BlendA = p.BlendA;
-	LogText = p.LogText;
-	MinPitch = p.MinPitch;
-	MaxPitch = p.MaxPitch;
-	crouching = p.crouching;
-	crouchdir = p.crouchdir;
-	crouchfactor = p.crouchfactor;
-	crouchoffset = p.crouchoffset;
-	crouchviewdelta = p.crouchviewdelta;
-	weapons = p.weapons;
-	ConversationNPC = p.ConversationNPC;
-	ConversationPC = p.ConversationPC;
-	ConversationNPCAngle = p.ConversationNPCAngle;
-	ConversationFaceTalker = p.ConversationFaceTalker;
+  player_t &player_t::operator=(const player_t &p)
+  {
+	  mo = p.mo;
+	  playerstate = p.playerstate;
+	  cmd = p.cmd;
+	  original_cmd = p.original_cmd;
+	  original_oldbuttons = p.original_oldbuttons;
+	  // Intentionally not copying userinfo!
+	  cls = p.cls;
+	  DesiredFOV = p.DesiredFOV;
+	  FOV = p.FOV;
+	  viewz = p.viewz;
+	  viewheight = p.viewheight;
+	  deltaviewheight = p.deltaviewheight;
+	  prevbob = p.prevbob;
+	  bob = p.bob;
+	  velx = p.velx;
+	  vely = p.vely;
+	  prevswayx = p.prevswayx;
+	  prevswayy = p.prevswayy;
+	  swayx = p.swayx;
+	  swayy = p.swayy;
+	  centering = p.centering;
+	  turnticks = p.turnticks;
+	  attackdown = p.attackdown;
+	  usedown = p.usedown;
+	  oldbuttons = p.oldbuttons;
+	  health = p.health;
+	  inventorytics = p.inventorytics;
+	  CurrentPlayerClass = p.CurrentPlayerClass;
+	  backpack = p.backpack;
+	  fragcount = p.fragcount;
+	  WeaponState = p.WeaponState;
+	  ReadyWeapon = p.ReadyWeapon;
+	  PendingWeapon = p.PendingWeapon;
+	  cheats = p.cheats;
+	  cheats2 = p.cheats2;
+	  timefreezer = p.timefreezer;
+	  refire = p.refire;
+	  waiting = p.waiting;
+	  killcount = p.killcount;
+	  itemcount = p.itemcount;
+	  secretcount = p.secretcount;
+	  damagecount = p.damagecount;
+	  bonuscount = p.bonuscount;
+	  hazardcount = p.hazardcount;
+	  poisoncount = p.poisoncount;
+	  poisontype = p.poisontype;
+	  poisonpaintype = p.poisonpaintype;
+	  poisoner = p.poisoner;
+	  attacker = p.attacker;
+	  extralight = p.extralight;
+	  fixedcolormap = p.fixedcolormap;
+	  fixedlightlevel = p.fixedlightlevel;
+	  memcpy(psprites, &p.psprites, sizeof(psprites));
+	  morphTics = p.morphTics;
+	  MorphedPlayerClass = p.MorphedPlayerClass;
+	  MorphStyle = p.MorphStyle;
+	  MorphExitFlash = p.MorphExitFlash;
+	  PremorphWeapon = p.PremorphWeapon;
+	  chickenPeck = p.chickenPeck;
+	  jumpTics = p.jumpTics;
+	  secondJumpTics = p.secondJumpTics;
+	  secondJumpsRemaining = p.secondJumpsRemaining;
+	  onground = p.onground;
+	  stepInterval = p.stepInterval;
+	  secondJumpState = p.secondJumpState;
+	  crouchSlideTics = p.crouchSlideTics;
+	  isCrouchSliding = p.isCrouchSliding;
+	  wallClimbTics = p.wallClimbTics;
+	  isWallClimbing = p.isWallClimbing;
+	  prepareTapValue = p.prepareTapValue;
+	  lastTapValue = p.lastTapValue;
+	  respawn_time = p.respawn_time;
+	  camera = p.camera;
+	  air_finished = p.air_finished;
+	  LastDamageType = p.LastDamageType;
+	  settings_controller = p.settings_controller;
+	  BlendR = p.BlendR;
+	  BlendG = p.BlendG;
+	  BlendB = p.BlendB;
+	  BlendA = p.BlendA;
+	  LogText = p.LogText;
+	  MinPitch = p.MinPitch;
+	  MaxPitch = p.MaxPitch;
+	  crouching = p.crouching;
+	  crouchdir = p.crouchdir;
+	  crouchfactor = p.crouchfactor;
+	  crouchoffset = p.crouchoffset;
+	  crouchviewdelta = p.crouchviewdelta;
+	  weapons = p.weapons;
+	  ConversationNPC = p.ConversationNPC;
+	  ConversationPC = p.ConversationPC;
+	  ConversationNPCAngle = p.ConversationNPCAngle;
+	  ConversationFaceTalker = p.ConversationFaceTalker;
 
-	// [BB] Zandronum additions
-	bOnTeam = p.bOnTeam;
-	ulTeam = p.ulTeam;
-	lPointCount = p.lPointCount;
-	ulDeathCount = p.ulDeathCount;
-	ulLastFragTick = p.ulLastFragTick;
-	ulLastExcellentTick = p.ulLastExcellentTick;
-	ulLastBFGFragTick = p.ulLastBFGFragTick;
-	ulConsecutiveHits = p.ulConsecutiveHits;
-	ulConsecutiveRailgunHits = p.ulConsecutiveRailgunHits;
-	ulFragsWithoutDeath = p.ulFragsWithoutDeath;
-	ulDeathsWithoutFrag = p.ulDeathsWithoutFrag;
-	ulUnrewardedDamageDealt = p.ulUnrewardedDamageDealt;
-	bChatting = p.bChatting;
-	bInConsole = p.bInConsole;
-	bInMenu = p.bInMenu;
-	bSpectating = p.bSpectating;
-	bDeadSpectator = p.bDeadSpectator;
-	ulLivesLeft = p.ulLivesLeft;
-	bStruckPlayer = p.bStruckPlayer;
-	ulRailgunShots = p.ulRailgunShots;
-	memcpy(ulMedalCount, &p.ulMedalCount, sizeof( ULONG ) * NUM_MEDALS);
-	pIcon = p.pIcon;
-	lMaxHealthBonus = p.lMaxHealthBonus;
-	ulWins = p.ulWins;
-	pSkullBot = p.pSkullBot;
-	bIsBot = p.bIsBot;
-	bIgnoreChat = p.bIgnoreChat;
-	lIgnoreChatTicks = p.lIgnoreChatTicks;
-	memcpy(ServerXYZ, &p.ServerXYZ, sizeof( ServerXYZ ));
-	memcpy(ServerXYZVel, &p.ServerXYZVel, sizeof( ServerXYZVel ));
-	ulPing = p.ulPing;
-	ulPingAverages = p.ulPingAverages;
-	bReadyToGoOn = p.bReadyToGoOn;
-	bSpawnOkay = p.bSpawnOkay;
-	SpawnX = p.SpawnX;
-	SpawnY = p.SpawnY;
-	SpawnAngle = p.SpawnAngle;
-	OldPendingWeapon = p.OldPendingWeapon;
-	StartingWeaponName = p.StartingWeaponName;
-	bClientSelectedWeapon = p.bClientSelectedWeapon;
-	bLagging = p.bLagging;
-	bSpawnTelefragged = p.bSpawnTelefragged;
-	ulTime = p.ulTime;
-	bUnarmed = p.bUnarmed;
-	memcpy(unlaggedX, &p.unlaggedX, sizeof( unlaggedX ));
-	memcpy(unlaggedY, &p.unlaggedY, sizeof( unlaggedY ));
-	memcpy(unlaggedZ, &p.unlaggedZ, sizeof( unlaggedZ ));
-	restoreX = p.restoreX;
-	restoreY = p.restoreY;
-	restoreZ = p.restoreZ;
-	restoreFloorZ = p.restoreFloorZ;
-	restoreCeilingZ = p.restoreCeilingZ;
+	  // [BB] Zandronum additions
+	  bOnTeam = p.bOnTeam;
+	  ulTeam = p.ulTeam;
+	  lPointCount = p.lPointCount;
+	  ulDeathCount = p.ulDeathCount;
+	  ulLastFragTick = p.ulLastFragTick;
+	  ulLastExcellentTick = p.ulLastExcellentTick;
+	  ulLastBFGFragTick = p.ulLastBFGFragTick;
+	  ulConsecutiveHits = p.ulConsecutiveHits;
+	  ulConsecutiveRailgunHits = p.ulConsecutiveRailgunHits;
+	  ulFragsWithoutDeath = p.ulFragsWithoutDeath;
+	  ulDeathsWithoutFrag = p.ulDeathsWithoutFrag;
+	  ulUnrewardedDamageDealt = p.ulUnrewardedDamageDealt;
+	  bChatting = p.bChatting;
+	  bInConsole = p.bInConsole;
+	  bInMenu = p.bInMenu;
+	  bSpectating = p.bSpectating;
+	  bDeadSpectator = p.bDeadSpectator;
+	  ulLivesLeft = p.ulLivesLeft;
+	  bStruckPlayer = p.bStruckPlayer;
+	  ulRailgunShots = p.ulRailgunShots;
+	  memcpy(ulMedalCount, &p.ulMedalCount, sizeof(ULONG) * NUM_MEDALS);
+	  pIcon = p.pIcon;
+	  lMaxHealthBonus = p.lMaxHealthBonus;
+	  ulWins = p.ulWins;
+	  pSkullBot = p.pSkullBot;
+	  bIsBot = p.bIsBot;
+	  bIgnoreChat = p.bIgnoreChat;
+	  lIgnoreChatTicks = p.lIgnoreChatTicks;
+	  memcpy(ServerXYZ, &p.ServerXYZ, sizeof(ServerXYZ));
+	  memcpy(ServerXYZVel, &p.ServerXYZVel, sizeof(ServerXYZVel));
+	  ulPing = p.ulPing;
+	  ulPingAverages = p.ulPingAverages;
+	  bReadyToGoOn = p.bReadyToGoOn;
+	  bSpawnOkay = p.bSpawnOkay;
+	  SpawnX = p.SpawnX;
+	  SpawnY = p.SpawnY;
+	  SpawnAngle = p.SpawnAngle;
+	  OldPendingWeapon = p.OldPendingWeapon;
+	  StartingWeaponName = p.StartingWeaponName;
+	  bClientSelectedWeapon = p.bClientSelectedWeapon;
+	  bLagging = p.bLagging;
+	  bSpawnTelefragged = p.bSpawnTelefragged;
+	  ulTime = p.ulTime;
+	  bUnarmed = p.bUnarmed;
+	  ticsToSpyNext = p.ticsToSpyNext;
+	  pnumToSpyNext = p.pnumToSpyNext;
+	  memcpy(unlaggedX, &p.unlaggedX, sizeof(unlaggedX));
+	  memcpy(unlaggedY, &p.unlaggedY, sizeof(unlaggedY));
+	  memcpy(unlaggedZ, &p.unlaggedZ, sizeof(unlaggedZ));
+	  restoreX = p.restoreX;
+	  restoreY = p.restoreY;
+	  restoreZ = p.restoreZ;
+	  restoreFloorZ = p.restoreFloorZ;
+	  restoreCeilingZ = p.restoreCeilingZ;
 
-	return *this;
-}
+	  return *this;
+  }
 
 // This function supplements the pointer cleanup in dobject.cpp, because
 // player_t is not derived from DObject. (I tried it, and DestroyScan was
@@ -729,16 +728,26 @@ void APlayerPawn::Serialize (FArchive &arc)
 {
 	Super::Serialize (arc);
 
-	arc << JumpXY
+	arc << crouchsprite
+		<< MaxHealth
+		<< MugShotMaxHealth
+		<< RunHealth
+		<< PlayerFlags
+		<< InvFirst
+		<< InvSel
+		<< JumpXY
 		<< JumpZ
+		<< JumpSoundDelay
 		<< JumpDelay
 		<< SecondJumpXY
 		<< SecondJumpZ
 		<< SecondJumpDelay
 		<< SecondJumpAmount
-		<< MaxHealth
-		<< RunHealth
-		<< SpawnMask
+		<< wasJustThrustedZ
+		<< GruntSpeed
+		<< FallingScreamMinSpeed
+		<< FallingScreamMaxSpeed
+		<< ViewHeight
 		<< ForwardMove1
 		<< ForwardMove2
 		<< ForwardMove3
@@ -747,20 +756,28 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< SideMove2
 		<< SideMove3
 		<< SideMove4
+		<< FootstepsEnabled1
+		<< FootstepsEnabled2
+		<< FootstepsEnabled3
+		<< FootstepsEnabled4
 		<< ScoreIcon
-		<< InvFirst
-		<< InvSel
+		<< SpawnMask
 		<< MorphWeapon
-		<< DamageFade
-		<< PlayerFlags
+		<< AttackZOffset
+		<< UseRange
+		<< AirCapacity
 		<< FlechetteType
-		<< CrouchScale
 		<< CrouchChangeSpeed
+		<< CrouchScale
+		<< CrouchScaleHalfWay
 		<< MvType
-		<< WallClimbSpeed
+		<< FootstepInterval
+		<< FootstepVolume
 		<< WallClimbMaxTics
 		<< WallClimbRegen
+		<< WallClimbSpeed
 		<< AirAcceleration
+		<< VelocityCap
 		<< GroundAcceleration
 		<< GroundFriction
 		<< SlideAcceleration
@@ -768,26 +785,44 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< SlideMaxTics
 		<< SlideRegen
 		<< CpmAirAcceleration
-		<< CpmMaxForwardAngleRad;
-
-	if (SaveVersion < 3829)
-	{
-		GruntSpeed = 12*FRACUNIT;
-		FallingScreamMinSpeed = 35*FRACUNIT;
-		FallingScreamMaxSpeed = 40*FRACUNIT;
-	}
-	else
-	{
-		arc << GruntSpeed << FallingScreamMinSpeed << FallingScreamMaxSpeed;
-	}
-	if (SaveVersion >= 4502)
-	{
-		arc << UseRange;
-	}
-	if (SaveVersion >= 4503)
-	{
-		arc << AirCapacity;
-	}
+		<< CpmMaxForwardAngleRad
+		<< BT_ATTACK_Script
+		<< BT_USE_Script
+		<< BT_JUMP_Script
+		<< BT_CROUCH_Script
+		<< BT_TURN180_Script
+		<< BT_ALTATTACK_Script
+		<< BT_RELOAD_Script
+		<< BT_ZOOM_Script
+		<< BT_SPEED_Script
+		<< BT_STRAFE_Script
+		<< BT_MOVERIGHT_Script
+		<< BT_MOVELEFT_Script
+		<< BT_BACK_Script
+		<< BT_FORWARD_Script
+		<< BT_RIGHT_Script
+		<< BT_LEFT_Script
+		<< BT_LOOKUP_Script
+		<< BT_LOOKDOWN_Script
+		<< BT_MOVEUP_Script
+		<< BT_MOVEDOWN_Script
+		<< BT_SHOWSCORES_Script
+		<< BT_USER1_Script
+		<< BT_USER2_Script
+		<< BT_USER3_Script
+		<< BT_USER4_Script
+		<< ClientX
+		<< ClientY
+		<< ClientZ
+		<< ClientVelX
+		<< ClientVelY
+		<< ClientVelZ
+		<< ClientAngle
+		<< ClientPitch
+		<< Predictable1
+		<< Predictable2
+		<< Predictable3
+		<< DamageFade;
 }
 
 //===========================================================================

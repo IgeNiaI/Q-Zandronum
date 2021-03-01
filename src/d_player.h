@@ -618,24 +618,6 @@ public:
 
 	FName		LastDamageType;			// [RH] For damage-specific pain and death sounds
 
-	/* [BB] ST doesn't use this.
-	//Added by MC:
-	angle_t		savedyaw;
-	int			savedpitch;
-
-	angle_t		angle;		// The wanted angle that the bot try to get every tic.
-							//  (used to get a smoth view movement)
-	TObjPtr<AActor>		dest;		// Move Destination.
-	TObjPtr<AActor>		prev;		// Previous move destination.
-
-
-	TObjPtr<AActor>		enemy;		// The dead meat.
-	TObjPtr<AActor>		missile;	// A threatening missile that needs to be avoided.
-	TObjPtr<AActor>		mate;		// Friend (used for grouping in teamplay or coop).
-	TObjPtr<AActor>		last_mate;	// If bots mate disappeared (not if died) that mate is
-							// pointed to by this. Allows bot to roam to it if
-							// necessary.
-	*/
 	bool		settings_controller;	// Player can control game settings.
 
 	float		BlendR;		// [RH] Final blending values
@@ -761,9 +743,6 @@ public:
 
 	// [BB] Over how many measurements has ulPing been averaged?
 	ULONG		ulPingAverages;
-
-	// Last tick this player received a packet.
-//	ULONG		ulLastTick;
 
 	// Is this player ready for the next map? (intermission)
 	bool		bReadyToGoOn;
