@@ -524,8 +524,7 @@ void GLSprite::Process(AActor* thing,sector_t * sector)
 			return; 
 	}
 
-	if ((thing->renderflags & RF_INVISIBLE_TO_TARGET) && thing->target && thing->target->player
-		&& thing->target->player - players == consoleplayer)
+	if ((thing->renderflags & RF_INVISIBLE_TO_TARGET) && players[consoleplayer].camera == thing->target)
 	{
 		return;
 	}
