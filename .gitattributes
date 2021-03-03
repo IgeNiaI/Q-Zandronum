@@ -1,0 +1,13 @@
+wadsrc*/static/**/**.txt eol=crlf
+wadsrc*/static/**/*.fp eol=crlf
+wadsrc*/static/**/*.vp eol=crlf
+wadsrc*/static/**/*.z eol=crlf
+wadsrc*/static/**/*.enu eol=crlf
+wadsrc*/static/**/*.fr eol=crlf
+wadsrc*/static/**/*.ita eol=crlf
+wadsrc*/static/**/*.ptb eol=crlf
+wadsrc*/static/**/*.z eol=crlf
+wadsrc*/static/**/*.za eol=crlf
+wadsrc*/static/**/*.bat eol=crlf
+wadsrc*/static/**/*.ps eol=crlf
+wadsrc*/static/**/*.i eol=crlf
