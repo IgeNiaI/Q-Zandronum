@@ -138,7 +138,7 @@ CVAR (Bool, m_noprescale,			true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool,	m_filter,				false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool, m_hidepointer,			true, 0)
 
-CUSTOM_CVAR (Int, in_mouse, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
+CUSTOM_CVAR (Int, in_mouse, 3, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
 {
 	if (self < 0)
 	{
