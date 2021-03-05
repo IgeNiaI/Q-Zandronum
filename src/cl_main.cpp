@@ -8472,7 +8472,7 @@ CVAR( Flag, cl_hidecountry, cl_connect_flags, CCF_HIDECOUNTRY )
 CVAR( String, cl_password, "password", 0 )
 CVAR( String, cl_joinpassword, "password", 0 )
 CVAR( Bool, cl_hitscandecalhack, true, CVAR_ARCHIVE )
-CUSTOM_CVAR( Int, fov, 90, CVAR_ARCHIVE | CVAR_USERINFO )
+CUSTOM_CVAR( Int, fov, 90, CVAR_ARCHIVE )
 {
 	if (self < 5)
 		fov = 5;
