@@ -567,15 +567,27 @@ OptionString "Cursors"
 	"-", "System cursor"
 }
 
+OptionString "Auto"
+{
+	0, "System"
+	1, "System"
+	2, "Direct"
+	3, "Raw"
+}
+
 OptionMenu "MouseOptions"
 {
 	Title "MOUSE OPTIONS"
 	Option "Enable mouse",				"use_mouse", "YesNo"
-	Option "Enable mouse in menus",	"m_use_mouse", "MenuMouse", "use_mouse"
-	Option "Show back button",		"m_show_backbutton", "Corners", "use_mouse"
-	Option "Cursor",				"vid_cursor", "Cursors"
+	Option "Enable mouse in menus",		"m_use_mouse", "MenuMouse", "use_mouse"
+	Option "Show back button",			"m_show_backbutton", "Corners", "use_mouse"
+	Option "Cursor",					"vid_cursor", "Cursors"
 	StaticText 	""
 	Slider "Overall sensitivity",		"mouse_sensitivity", 0.1, 2.5, 0.1, 4
+	IfOption(Windows)
+	{
+		Option "Mouse input",				"in_mouse", "InMouse"
+	}
 	Option "Prescale mouse movement",	"m_noprescale", "NoYes"
 	// [BB] smooth_mouse doesn't do anything in Skulltag (Carn deactivated it long ago), so link this to m_filter.
 	Option "Smooth mouse movement",		"m_filter", "YesNo"
