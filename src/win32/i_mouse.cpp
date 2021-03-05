@@ -148,10 +148,8 @@ CUSTOM_CVAR (Int, in_mouse, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
 	{
 		self = 3;
 	}
-	else
-	{
-		I_StartupMouse();
-	}
+
+	I_StartupMouse();
 }
 
 CUSTOM_CVAR(Int, mouse_capturemode, 1, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
@@ -1150,15 +1148,15 @@ void I_StartupMouse ()
 	{
 	case 0:
 	default:
-		if (OSPlatform == os_WinNT4)
-		{
-			new_mousemode = MM_Win32;
-		}
-		else if (MyRegisterRawInputDevices != NULL)
+		if (MyRegisterRawInputDevices != NULL)
 		{
 			new_mousemode = MM_RawInput;
 		}
-		else
+		else if (OSPlatform == os_WinNT4)
+		{
+			new_mousemode = MM_Win32;
+		}
+		else 
 		{
 			new_mousemode = MM_DInput;
 		}
