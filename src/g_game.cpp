@@ -4151,7 +4151,7 @@ void GAME_ResetMap( bool bRunEnterScripts )
 
 				// [EP] AActor::HandleSpawnFlags might have changed the actor's alpha and the RenderStyle, too. If so, inform the clients.
 				if ( pNewActor->RenderStyle.AsDWORD != pNewActor->GetDefault()->RenderStyle.AsDWORD )
-					SERVERCOMMANDS_SetActorProperty( pNewActor, APROP_RenderStyle, pNewActor->GetDefault()->RenderStyle.AsDWORD );
+					SERVERCOMMANDS_SetActorProperty( pNewActor, APROP_RenderStyle, pNewActor->RenderStyle.AsDWORD );
 				if ( pNewActor->alpha != pNewActor->GetDefault()->alpha )
 					SERVERCOMMANDS_SetActorProperty( pNewActor, APROP_Alpha, pNewActor->alpha );
 			}

@@ -3389,20 +3389,20 @@ void SERVER_UpdateActorProperties( AActor *pActor, ULONG ulClient )
 
 	// Update the actor's speed if it's changed.
 	if ( pActor->Speed != pActor->GetDefault( )->Speed )
-		SERVERCOMMANDS_SetActorProperty( pActor, APROP_Speed, ulClient, SVCF_ONLYTHISCLIENT  );
+		SERVERCOMMANDS_SetActorProperty( pActor, APROP_Speed, pActor->Speed, ulClient, SVCF_ONLYTHISCLIENT  );
 
 	// [BB] Update the actor's RenderStyle if it's changed.
 	if ( pActor->RenderStyle.AsDWORD != pActor->GetDefault( )->RenderStyle.AsDWORD )
-		SERVERCOMMANDS_SetActorProperty( pActor, APROP_RenderStyle, ulClient, SVCF_ONLYTHISCLIENT  );
+		SERVERCOMMANDS_SetActorProperty( pActor, APROP_RenderStyle, pActor->RenderStyle.AsDWORD, ulClient, SVCF_ONLYTHISCLIENT  );
 
 	// [BB] Update the actor's alpha if it's changed.
 	if ( pActor->alpha != pActor->GetDefault( )->alpha )
-		SERVERCOMMANDS_SetActorProperty( pActor, APROP_Alpha, ulClient, SVCF_ONLYTHISCLIENT  );
+		SERVERCOMMANDS_SetActorProperty( pActor, APROP_Alpha, pActor->alpha, ulClient, SVCF_ONLYTHISCLIENT  );
 
 	// [WS] Update the player's jumpz if it's changed.
 	if ( pActor->IsKindOf( RUNTIME_CLASS( APlayerPawn ) )
 		&& static_cast<APlayerPawn *>( pActor )->JumpZ != static_cast<APlayerPawn *>( pActor->GetDefault( ) )->JumpZ )
-		SERVERCOMMANDS_SetActorProperty( pActor, APROP_JumpZ, ulClient, SVCF_ONLYTHISCLIENT );
+		SERVERCOMMANDS_SetActorProperty( pActor, APROP_JumpZ, static_cast<APlayerPawn *>(pActor)->JumpZ, ulClient, SVCF_ONLYTHISCLIENT );
 
 	// [BB] Update the actor's gravity if it's changed.
 	if ( pActor->gravity != pActor->GetDefault( )->gravity )
