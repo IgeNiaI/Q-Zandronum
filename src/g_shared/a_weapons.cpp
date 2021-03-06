@@ -58,6 +58,10 @@ void AWeapon::Serialize (FArchive &arc)
 	arc << WeaponFlags
 		<< AmmoType1 << AmmoType2
 		<< AmmoGive1 << AmmoGive2
+		<< AmmoSpRefill1 << AmmoSpRefill2
+		<< AmmoDmRefill1 << AmmoDmRefill2
+		<< WeaponStayRefillTics
+		<< AmmoDmScale
 		<< MinAmmo1 << MinAmmo2
 		<< AmmoUse1 << AmmoUse2
 		<< Kickback
@@ -66,19 +70,19 @@ void AWeapon::Serialize (FArchive &arc)
 		<< SisterWeaponType
 		<< ProjectileType << AltProjectileType
 		<< SelectionOrder
+		<< MinSelAmmo1 << MinSelAmmo2
 		<< MoveCombatDist
-		<< Ammo1 << Ammo2 << SisterWeapon << GivenAsMorphWeapon
-		<< bAltFire
-		<< ReloadCounter;		
-		if (SaveVersion >= 3615) {
-			arc << BobStyle << BobSpeed << BobRangeX << BobRangeY;
-		}
-	arc << FOVScale
-		<< Crosshair;
-	if (SaveVersion >= 4203)
-	{
-		arc << MinSelAmmo1 << MinSelAmmo2;
-	}
+		<< ReloadCounter
+		<< BobStyle
+		<< BobSpeed
+		<< BobRangeX << BobRangeY
+		<< SwaySpeed
+		<< Ammo1 << Ammo2
+		<< SisterWeapon
+		<< FOVScale
+		<< Crosshair
+		<< GivenAsMorphWeapon
+		<< bAltFire;
 }
 
 //===========================================================================
