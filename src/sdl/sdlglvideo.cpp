@@ -14,6 +14,7 @@
 #include "stats.h"
 #include "version.h"
 #include "c_console.h"
+#include "hardware.h"
 
 #include "sdlglvideo.h"
 #include "gl/system/gl_system.h"
@@ -51,6 +52,8 @@ extern IVideo *Video;
 EXTERN_CVAR (Float, Gamma)
 EXTERN_CVAR (Int, vid_displaybits)
 EXTERN_CVAR (Int, vid_renderer)
+EXTERN_CVAR (Int, vid_maxfps)
+EXTERN_CVAR (Bool, cl_capfps)
 
 
 // PUBLIC DATA DEFINITIONS -------------------------------------------------
@@ -445,6 +448,13 @@ void SDLGLFB::NewRefreshRate ()
 
 void SDLGLFB::SwapBuffers()
 {
+#ifndef __APPLE__
+	if (vid_maxfps && !cl_capfps)
+	{
+		SEMAPHORE_WAIT(FPSLimitSemaphore)
+	}
+#endif
+
 	SDL_GL_SwapBuffers ();
 }
 
