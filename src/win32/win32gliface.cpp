@@ -1060,6 +1060,11 @@ void Win32GLFrameBuffer::SetVSync (bool vsync)
 
 void Win32GLFrameBuffer::SwapBuffers()
 {
+	// Limiting the frame rate is as simple as waiting for the timer to signal this event.
+	if (FPSLimitEvent != NULL)
+	{
+		WaitForSingleObject(FPSLimitEvent, 1000);
+	}
 	::SwapBuffers(static_cast<Win32GLVideo *>(Video)->m_hDC);
 }
 
