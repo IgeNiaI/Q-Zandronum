@@ -618,7 +618,7 @@ bool FRawMouse::ProcessRawInput(RAWINPUT *raw, int code)
 		WheelMoved(1, (SHORT)raw->data.mouse.usButtonData);
 	}
 	int x = m_noprescale ? raw->data.mouse.lLastX : raw->data.mouse.lLastX << 2;
-	int y = -raw->data.mouse.lLastY;
+	int y = m_noprescale ? -raw->data.mouse.lLastY : -(raw->data.mouse.lLastY << 2);
 	PostMouseMove(x, y);
 	if (x | y)
 	{
@@ -844,7 +844,10 @@ void FDInputMouse::ProcessInput()
 			}
 		}
 	}
-	PostMouseMove(m_noprescale ? dx : dx<<2, -dy);
+	if (m_noprescale)
+		PostMouseMove(dx, -dy);
+	else
+		PostMouseMove(dx<<2, -(dy<<2));
 }
 
 //==========================================================================
@@ -953,7 +956,7 @@ void FWin32Mouse::ProcessInput()
 
 	if (!m_noprescale)
 	{
-		x *= 3;
+		x *= 2;
 		y *= 2;
 	}
 	if (x | y)
