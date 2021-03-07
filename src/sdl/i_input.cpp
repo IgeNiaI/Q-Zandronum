@@ -210,7 +210,7 @@ static void MouseRead ()
 	SDL_GetRelativeMouseState (&x, &y);
 	if (!m_noprescale)
 	{
-		x *= 3;
+		x *= 2;
 		y *= 2;
 	}
 	if (x | y)
