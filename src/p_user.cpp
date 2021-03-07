@@ -3327,6 +3327,8 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 	FVector3 velDelta = wishdir * accelerationspeed;
 
 	vel += velDelta;
+	player->velx += FLOAT2FIXED(velDelta.X);
+	player->vely += FLOAT2FIXED(velDelta.Y);
 }
 
 //==========================================================================
