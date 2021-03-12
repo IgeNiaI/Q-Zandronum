@@ -6268,13 +6268,13 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 							{
 								// [EP] Inform the clients.
 								S_Sound(spot, chan, sid, vol, atten, true,
-									(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) || playclientside ? -1 : ULONG(activator->player - players));
+									(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) || playclientside || !activator ? -1 : ULONG(activator->player - players));
 							}
 							else if (!S_IsActorPlayingSomething(spot, chan & 7, sid))
 							{
 								// [EP] Inform the clients.
 								S_Sound(spot, chan | CHAN_LOOP, sid, vol, atten, true,
-									(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) || playclientside ? -1 : ULONG(activator->player - players));
+									(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) || playclientside || !activator ? -1 : ULONG(activator->player - players));
 							}
 						}
 					}
