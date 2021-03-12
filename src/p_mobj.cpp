@@ -3263,7 +3263,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				mo->FloorBounceMissile (mo->ceilingsector->ceilingplane);
 				/*if (!(mo->flags6 & MF6_CANJUMP))*/ return;
 			}
-			else if (mo->flags7 & MF8_NOEXPLODECEILING)
+			else if (mo->flags8 & MF8_NOEXPLODECEILING)
 			{
 				P_HitFloor (mo);
 				mo->velz = 0;
