@@ -404,7 +404,7 @@ public:
 
 	int ST_X, ST_Y;
 	int RelTop;
-	int HorizontalResolution, VirticalResolution;
+	int HorizontalResolution, VerticalResolution;
 	bool Scaled;
 	bool Centering;
 	bool FixedOrigin;
