@@ -77,6 +77,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "gl/api/glext.h"
+#include "gl/api/glcorearb.h"
 #endif
 #include "gl/api/gl_api.h"
 
