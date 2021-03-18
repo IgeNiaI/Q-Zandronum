@@ -589,7 +589,7 @@ void SERVER_Tick( void )
 	{
 		//DObject::BeginFrame ();
 
-		// Recieve packets.
+		// Receive packets.
 		SERVER_GetPackets( );
 
 		// Record player positions before emptying their move buffer
@@ -751,6 +751,12 @@ void SERVER_Tick( void )
 
 		if ( g_aClients[ulIdx].lOverMovementLevel >= MAX_OVERMOVEMENT_LEVEL )
 			SERVER_KickPlayer( ulIdx, "Abnormal level of movement commands detected!" );
+	}
+
+	// Sleep for 1/35th of a second if no players connected
+	// This affects server ping responses though
+	if ( SERVER_CalcNumConnectedClients() <= 0 ) {
+		I_Sleep( 1000 / TICRATE );
 	}
 }
 
