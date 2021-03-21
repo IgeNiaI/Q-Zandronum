@@ -2174,7 +2174,7 @@ void DoTakeInventory(AActor * receiver, DECLARE_PARAMINFO)
 	{
 		bNeedClientUpdate = true;
 		
-		if ( NETWORK_InClientMode() )
+		if ( NETWORK_InClientModeAndActorNotClientHandled ( self ) )
 		{
 			return;
 		}
