@@ -78,6 +78,16 @@ CUSTOM_CVAR(Int, gl_fuzztype, 0, CVAR_ARCHIVE)
 	if (self < 0 || self > 7) self = 0;
 }
 
+EXTERN_CVAR(Bool, sv_cheats)
+CVAR(Float, gl_hitbox_line_width, 3.0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+CUSTOM_CVAR(Bool, gl_show_hitbox, false, CVAR_GLOBALCONFIG)
+{
+	if (self && sv_cheats == false) {
+		Printf("You can't use gl_show_hitbox when sv_cheats is false!\n");
+		self = false;
+	}
+}
+
 extern bool r_showviewer;
 EXTERN_CVAR (Float, transsouls)
 
@@ -337,6 +347,57 @@ void GLSprite::Draw(int pass)
 	else
 	{
 		gl_RenderModel(this, Colormap.colormap);
+	}
+
+	if (gl_show_hitbox && actor) {
+		glLineWidth(gl_hitbox_line_width);
+		gl_RenderState.EnableTexture(false);
+		gl_RenderState.Apply(true);
+		PalEntry p = actor->hitboxColor;
+		glColor3f(p.r, p.g, p.b);
+
+		int scales[14][6] = {
+			// bottom
+			{-1, 0, -1, -1, 0, 1}, {-1, 0, 1, 1, 0, 1}, {1, 0, 1, 1, 0, -1}, {1, 0, -1, -1, 0, -1},
+			// top
+			{-1, 1, -1, -1, 1, 1}, {-1, 1, 1, 1, 1, 1}, {1, 1, 1, 1, 1, -1}, {1, 1, -1, -1, 1, -1},
+			// vertical
+			{-1, 0, -1, -1, 1, -1}, {-1, 0, 1, -1, 1, 1}, {1, 0, 1, 1, 1, 1}, {1, 0, -1, 1, 1, -1},
+			// projectilepassheight
+			{-1, 0, -1, 1, 0, 1}, {-1, 0, 1, 1, 0, -1}
+		};
+
+		// General hitbox
+		for (int i = 0; i < 12; i++) {
+			glBegin(GL_LINES);
+			glVertex3f(
+				FIXED2FLOAT(actor->x + actor->radius * scales[i][0], actor->scaleX),
+				FIXED2FLOAT(actor->z + actor->height * scales[i][1], actor->scaleY),
+				FIXED2FLOAT(actor->y + actor->radius * scales[i][2], actor->scaleX)
+			);
+			glVertex3f(
+				FIXED2FLOAT(actor->x + actor->radius * scales[i][3], actor->scaleX),
+				FIXED2FLOAT(actor->z + actor->height * scales[i][4], actor->scaleY),
+				FIXED2FLOAT(actor->y + actor->radius * scales[i][5], actor->scaleX)
+			);
+			glEnd();
+		}
+
+		// projectilepassheight
+		for (int i = 12; i < 14; i++) {
+			glBegin(GL_LINES);
+			glVertex3f(
+				FIXED2FLOAT(actor->x + actor->radius * scales[i][0], actor->scaleX),
+				FIXED2FLOAT(actor->z + actor->projectilepassheight, actor->scaleY),
+				FIXED2FLOAT(actor->y + actor->radius * scales[i][2], actor->scaleX)
+			);
+			glVertex3f(
+				FIXED2FLOAT(actor->x + actor->radius * scales[i][3], actor->scaleX),
+				FIXED2FLOAT(actor->z + actor->projectilepassheight, actor->scaleY),
+				FIXED2FLOAT(actor->y + actor->radius * scales[i][5], actor->scaleX)
+			);
+			glEnd();
+		}
 	}
 
 	if (pass==GLPASS_TRANSLUCENT)
