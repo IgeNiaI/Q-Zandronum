@@ -1018,6 +1018,16 @@ DEFINE_PROPERTY(stencilcolor, C, Actor)
 //==========================================================================
 //
 //==========================================================================
+DEFINE_PROPERTY(hitboxcolor, C, Actor)
+{
+	PROP_COLOR_PARM(color, 0);
+
+	defaults->hitboxColor = color | (ColorMatcher.Pick(RPART(color), GPART(color), BPART(color)) << 24);
+}
+
+//==========================================================================
+//
+//==========================================================================
 DEFINE_PROPERTY(bloodcolor, C, Actor)
 {
 	PROP_COLOR_PARM(color, 0);
