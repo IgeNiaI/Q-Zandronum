@@ -25,6 +25,7 @@ ACTOR Actor native //: Thinker
 	DesignatedTeam 255
 	PainType Normal
 	DeathType Normal
+	HitboxColor "FF 00 00"
 
 
 	// Variables for the expression evaluator

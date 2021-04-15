@@ -973,6 +973,7 @@ public:
 	DWORD			effects;			// [RH] see p_effect.h
 	fixed_t			alpha;
 	DWORD			fillcolor;			// Color to draw when STYLE_Shaded
+	DWORD			hitboxColor;
 
 // interaction info
 	fixed_t			pitch;
