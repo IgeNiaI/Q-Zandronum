@@ -2493,7 +2493,11 @@ static void AddAutoloadFiles(const char *gamesection)
 		// the announcer and bots directories.
 		// Under Unix looks into SHARE_DIR, progdir and HOME/.zdoom dir.
 		// Under Windows looks into progdir and HOME/.zdoom dir.
-		D_AddSubdirectory ( "skins" );
+		if (sv_allowskinsfolder)
+		{
+			D_AddSubdirectory("skins");
+		}
+
 		D_AddSubdirectory ( "announcer" );
 		D_AddSubdirectory ( "bots" );
 
