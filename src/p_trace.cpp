@@ -538,12 +538,24 @@ cont:
 		hity = StartY + FixedMul (Vy, dist);
 		hitz = StartZ + FixedMul (Vz, dist);
 
-		if (hitz > in->d.thing->z + in->d.thing->height)
+		fixed_t topHeightOffset, bottomHeightOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((in->d.thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			topHeightOffset = in->d.thing->height / 2;
+			bottomHeightOffset = in->d.thing->height / 2;
+		}
+		else
+		{
+			topHeightOffset = in->d.thing->height;
+			bottomHeightOffset = 0;
+		}
+
+		if (hitz > in->d.thing->z + topHeightOffset)
 		{ // trace enters above actor
 			if (Vz >= 0) continue;      // Going up: can't hit
 			
 			// Does it hit the top of the actor?
-			dist = FixedDiv(in->d.thing->z + in->d.thing->height - StartZ, Vz);
+			dist = FixedDiv(in->d.thing->z + topHeightOffset - StartZ, Vz);
 
 			if (dist > MaxDist) continue;
 			in->frac = FixedDiv(dist, MaxDist);
@@ -556,12 +568,12 @@ cont:
 			if (abs(hitx - in->d.thing->x) > in->d.thing->radius ||
 				abs(hity - in->d.thing->y) > in->d.thing->radius) continue;
 		}
-		else if (hitz < in->d.thing->z)
+		else if (hitz < in->d.thing->z - bottomHeightOffset)
 		{ // trace enters below actor
 			if (Vz <= 0) continue;      // Going down: can't hit
 			
 			// Does it hit the bottom of the actor?
-			dist = FixedDiv(in->d.thing->z - StartZ, Vz);
+			dist = FixedDiv(in->d.thing->z - bottomHeightOffset - StartZ, Vz);
 			if (dist > MaxDist) continue;
 			in->frac = FixedDiv(dist, MaxDist);
 

@@ -418,9 +418,29 @@ bool P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z, bool telefra
 		{
 			if (!(th->flags3 & thing->flags3 & MF3_DONTOVERLAP))
 			{
-				if (z > th->z + th->height ||	// overhead
-					z + thing->height < th->z)	// underneath
+				fixed_t thingTopOffset;
+				// For missiles, offset it's height down by half to match the sprite
+				if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+					thingTopOffset = thing->height / 2;
+				}
+				else
+				{
+					thingTopOffset = thing->height;
+				}
+				fixed_t thTopOffset;
+				// For missiles, offset it's height down by half to match the sprite
+				if ((th->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+					thTopOffset = th->height / 2;
+				}
+				else
+				{
+					thTopOffset = th->height;
+				}
+
+				if (z > th->z + thTopOffset ||	// overhead
+					z + thingTopOffset < th->z)	// underneath
 					continue;
+
 			}
 		}
 
@@ -505,10 +525,33 @@ void P_PlayerStartStomp(AActor *actor)
 		// only kill monsters and other players
 		if (th->player == NULL && !(th->flags3 & MF3_ISMONSTER))
 			continue;
+		
+		fixed_t actorTopOffset, actorBottomOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((actor->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			actorTopOffset = actor->height / 2;
+			actorBottomOffset = actor->height / 2;
+		}
+		else
+		{
+			actorTopOffset = actor->height;
+			actorBottomOffset = 0;
+		}
+		fixed_t thTopOffset, thBottomOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((th->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			thTopOffset = th->height / 2;
+			thBottomOffset = th->height / 2;
+		}
+		else
+		{
+			thTopOffset = th->height;
+			thBottomOffset = 0;
+		}
 
-		if (actor->z > th->z + th->height)
+		if (actor->z - actorBottomOffset > th->z + thTopOffset)
 			continue;        // overhead
-		if (actor->z + actor->height < th->z)
+		if (actor->z + actorTopOffset < th->z - thBottomOffset)
 			continue;        // underneath
 
 		// [BB] ST distinguishes between NAME_SpawnTelefrag and NAME_Telefrag.
@@ -921,15 +964,38 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 	// [BB] Adapted this for ZADF_UNBLOCK_PLAYERS.
 	if (P_CheckUnblock(tm.thing, thing) || ((tm.thing->flags6 & MF6_THRUSPECIES) && (tm.thing->GetSpecies() == thing->GetSpecies())))
 		return true;
+	
+	fixed_t thingTopOffset, thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingTopOffset = thing->height / 2;
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingTopOffset = thing->height;
+		thingBottomOffset = 0;
+	}
+	fixed_t tmThingTopOffset, tmThingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((tm.thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		tmThingTopOffset = tm.thing->height / 2;
+		tmThingBottomOffset = tm.thing->height / 2;
+	}
+	else
+	{
+		tmThingTopOffset = tm.thing->height;
+		tmThingBottomOffset = 0;
+	}
 
 	tm.thing->BlockingMobj = thing;
-	topz = thing->z + thing->height;
+	topz = thing->z + thingTopOffset;
 	if (!(i_compatflags & COMPATF_NO_PASSMOBJ) && !(tm.thing->flags & (MF_FLOAT | MF_MISSILE | MF_SKULLFLY | MF_NOGRAVITY)) &&
 		(thing->flags & MF_SOLID) && (thing->flags4 & MF4_ACTLIKEBRIDGE))
 	{
 		// [RH] Let monsters walk on actors as well as floors
 		if ((tm.thing->flags3 & MF3_ISMONSTER) &&
-			topz >= tm.floorz && topz <= tm.thing->z + tm.thing->MaxStepHeight)
+			topz >= tm.floorz && topz <= tm.thing->z - tmThingBottomOffset + tm.thing->MaxStepHeight)
 		{
 			// The commented-out if is an attempt to prevent monsters from walking off a
 			// thing further than they would walk off a ledge. I can't think of an easy
@@ -964,8 +1030,8 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 			if (newdist > olddist)
 			{
 				// ... but not if they did not overlap in z-direction before but would after the move.
-				unblocking = !((tm.thing->z >= thing->z + thing->height && tm.z < thing->z + thing->height) ||
-					(tm.thing->z + tm.thing->height <= thing->z && tm.z + tm.thing->height > thing->z));
+				unblocking = !((tm.thing->z - tmThingBottomOffset >= thing->z + thingTopOffset && tm.z < thing->z + thingTopOffset) ||
+					(tm.thing->z + tmThingTopOffset <= thing->z - tmThingBottomOffset && tm.z + tmThingTopOffset > thing->z - thingBottomOffset));
 			}
 		}
 	}
@@ -983,7 +1049,7 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 			{ // Some things prefer not to overlap each other, if possible
 				return unblocking;
 			}
-			if ((tm.thing->z >= topz) || (tm.thing->z + tm.thing->height <= thing->z))
+			if ((tm.thing->z - tmThingBottomOffset >= topz) || (tm.thing->z + tmThingTopOffset <= thing->z))
 				return true;
 		}
 	}
@@ -999,7 +1065,7 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 			// or different species if DONTHARMSPECIES
 			(!(thing->flags6 & MF6_DONTHARMSPECIES) || thing->GetSpecies() != tm.thing->GetSpecies()) &&
 			// touches vertically
-			thing->z + thing->height >= tm.thing->z && tm.thing->z + tm.thing->height >= thing->z &&
+			thing->z + thingTopOffset >= tm.thing->z - tmThingBottomOffset && tm.thing->z + tmThingTopOffset >= thing->z - thingBottomOffset &&
 			// prevents lost souls from exploding when fired by pain elementals
 			(thing->master != tm.thing && tm.thing->master != thing))
 			// Difference with MBF: MBF hardcodes the LS/PE check and lets actors of the same species
@@ -1094,23 +1160,23 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 
 		if (thing->projectilepassheight > 0)
 		{
-			clipheight = thing->projectilepassheight;
+			clipheight = thing->projectilepassheight - thingTopOffset;
 		}
 		else if (thing->projectilepassheight < 0 && (i_compatflags & COMPATF_MISSILECLIP))
 		{
-			clipheight = -thing->projectilepassheight;
+			clipheight = -thing->projectilepassheight - thingTopOffset;
 		}
 		else
 		{
-			clipheight = thing->height;
+			clipheight = thingTopOffset;
 		}
 
 		// Check if it went over / under
-		if (tm.thing->z > thing->z + clipheight)
+		if (tm.thing->z - tmThingBottomOffset > thing->z + clipheight)
 		{ // Over thing
 			return true;
 		}
-		if (tm.thing->z + tm.thing->height < thing->z)
+		if (tm.thing->z + tmThingTopOffset < thing->z - thingBottomOffset)
 		{ // Under thing
 			return true;
 		}
@@ -1336,7 +1402,7 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 		// [RH] The next condition is to compensate for the extra height
 		// that gets added by P_CheckPosition() so that you cannot pick
 		// up things that are above your true height.
-		&& thing->z < tm.thing->z + tm.thing->height - tm.thing->MaxStepHeight)
+		&& thing->z - thingBottomOffset < tm.thing->z + tmThingTopOffset - tm.thing->MaxStepHeight)
 	{ // Can be picked up by tmthing
 		// Server decides what items are touched.
 		if ( NETWORK_InClientMode() == false )
@@ -1448,6 +1514,18 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y, FCheckPosition &tm, bo
 	//Added by MC: Fill the tmsector.
 	tm.sector = newsec;
 
+	fixed_t thingTopOffset, thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingTopOffset = thing->height / 2;
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingTopOffset = thing->height;
+		thingBottomOffset = 0;
+	}
+
 #ifdef _3DFLOORS
 	//Check 3D floors
 	if (!thing->IsNoClip2() && newsec->e->XFloor.ffloors.Size())
@@ -1455,7 +1533,8 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y, FCheckPosition &tm, bo
 		F3DFloor*  rover;
 		fixed_t    delta1;
 		fixed_t    delta2;
-		int        thingtop = thing->z + (thing->height == 0 ? 1 : thing->height);
+		int        thingtop = thing->z + (thingTopOffset == 0 ? 1 : thingTopOffset);
+		int		   thingbot = thing->z - thingBottomOffset;
 
 		for (unsigned i = 0; i<newsec->e->XFloor.ffloors.Size(); i++)
 		{
@@ -1468,7 +1547,7 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y, FCheckPosition &tm, bo
 			fixed_t ff_bottom = rover->bottom.plane->ZatPoint(x, y);
 			fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
 
-			delta1 = thing->z - (ff_bottom + ((ff_top - ff_bottom) / 2));
+			delta1 = thingbot - (ff_bottom + ((ff_top - ff_bottom) / 2));
 			delta2 = thingtop - (ff_bottom + ((ff_top - ff_bottom) / 2));
 
 			if (ff_top > tm.floorz && abs(delta1) < abs(delta2))
@@ -1514,13 +1593,27 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y, FCheckPosition &tm, bo
 				// could end up stuck inside a wall.
 				AActor *BlockingMobj = thing->BlockingMobj;
 
+				fixed_t blocMobjTopOffset, blocMobjBottomOffset;
+				if (BlockingMobj != NULL) {
+					// For missiles, offset it's height down by half to match the sprite
+					if ((BlockingMobj->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+						blocMobjTopOffset = BlockingMobj->height / 2;
+						blocMobjBottomOffset = BlockingMobj->height / 2;
+					}
+					else
+					{
+						blocMobjTopOffset = BlockingMobj->height;
+						blocMobjBottomOffset = 0;
+					}
+				}
+
 				if (BlockingMobj == NULL || (i_compatflags & COMPATF_NO_PASSMOBJ))
 				{ // Thing slammed into something; don't let it move now.
 					thing->height = realheight;
 					return false;
 				}
 				else if (!BlockingMobj->player && !(thing->flags & (MF_FLOAT | MF_MISSILE | MF_SKULLFLY)) &&
-					BlockingMobj->z + BlockingMobj->height - thing->z <= thing->MaxStepHeight)
+					BlockingMobj->z + blocMobjTopOffset - thing->z - thingBottomOffset <= thing->MaxStepHeight)
 				{
 					if (thingblocker == NULL ||
 						BlockingMobj->z > thingblocker->z)
@@ -1530,7 +1623,7 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y, FCheckPosition &tm, bo
 					thing->BlockingMobj = NULL;
 				}
 				else if (thing->player &&
-					thing->z + thing->height - BlockingMobj->z <= thing->MaxStepHeight)
+					thing->z + thingTopOffset - BlockingMobj->z - blocMobjBottomOffset <= thing->MaxStepHeight)
 				{
 					if (thingblocker)
 					{ // There is something to step up on. Return this thing as
@@ -1626,7 +1719,20 @@ bool P_TestMobjLocation(AActor *mobj)
 	if (P_CheckPosition(mobj, mobj->x, mobj->y))
 	{ // XY is ok, now check Z
 		mobj->flags = flags;
-		if ((mobj->z < mobj->floorz) || (mobj->z + mobj->height > mobj->ceilingz))
+
+		fixed_t mobjTopOffset, mobjBottomOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((mobj->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			mobjTopOffset = mobj->height / 2;
+			mobjBottomOffset = mobj->height / 2;
+		}
+		else
+		{
+			mobjTopOffset = mobj->height;
+			mobjBottomOffset = 0;
+		}
+
+		if ((mobj->z - mobjBottomOffset < mobj->floorz) || (mobj->z + mobjTopOffset > mobj->ceilingz))
 		{ // Bad Z
 			return false;
 		}
@@ -1680,6 +1786,18 @@ bool P_TestMobjZ(AActor *actor, bool quick, AActor **pOnmobj)
 		return true;
 	}
 
+	fixed_t actorTopOffset, actorBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((actor->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		actorTopOffset = actor->height / 2;
+		actorBottomOffset = actor->height / 2;
+	}
+	else
+	{
+		actorTopOffset = actor->height;
+		actorBottomOffset = 0;
+	}
+
 	FBlockThingsIterator it(FBoundingBox(actor->x, actor->y, actor->radius));
 	AActor *thing;
 
@@ -1723,15 +1841,39 @@ bool P_TestMobjZ(AActor *actor, bool quick, AActor **pOnmobj)
 		{ // Don't clip against whoever shot the missile.
 			continue;
 		}
-		if (actor->z > thing->z + thing->height)
+
+		fixed_t thingTopOffset, thingBottomOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			thingTopOffset = thing->height / 2;
+			thingBottomOffset = thing->height / 2;
+		}
+		else
+		{
+			thingTopOffset = thing->height;
+			thingBottomOffset = 0;
+		}
+		fixed_t onMobjTopOffset;
+		if (onmobj != NULL) {
+			// For missiles, offset it's height down by half to match the sprite
+			if ((onmobj->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+				onMobjTopOffset = onmobj->height / 2;
+			}
+			else
+			{
+				onMobjTopOffset = onmobj->height;
+			}
+		}
+
+		if (actor->z - actorBottomOffset > thing->z + thingTopOffset)
 		{ // over thing
 			continue;
 		}
-		else if (actor->z + actor->height <= thing->z)
+		else if (actor->z + actorTopOffset <= thing->z - thingBottomOffset)
 		{ // under thing
 			continue;
 		}
-		else if (!quick && onmobj != NULL && thing->z + thing->height < onmobj->z + onmobj->height)
+		else if (!quick && onmobj != NULL && thing->z + thingTopOffset < onmobj->z + onMobjTopOffset)
 		{ // something higher is in the way
 			continue;
 		}
@@ -1756,12 +1898,25 @@ void P_FakeZMovement(AActor *mo)
 	// adjust height
 	//
 	mo->z += mo->velz;
+
+	fixed_t moTopOffset, moBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((mo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		moTopOffset = mo->height / 2;
+		moBottomOffset = mo->height / 2;
+	}
+	else
+	{
+		moTopOffset = mo->height;
+		moBottomOffset = 0;
+	}
+
 	if ((mo->flags&MF_FLOAT) && mo->target)
 	{ // float down towards target if too close
 		if (!(mo->flags & MF_SKULLFLY) && !(mo->flags & MF_INFLOAT))
 		{
 			fixed_t dist = P_AproxDistance(mo->x - mo->target->x, mo->y - mo->target->y);
-			fixed_t delta = (mo->target->z + (mo->height >> 1)) - mo->z;
+			fixed_t delta = (mo->target->z + (moTopOffset >> 1)) - mo->z;
 			if (delta < 0 && dist < -(delta * 3))
 				mo->z -= mo->FloatSpeed;
 			else if (delta > 0 && dist < (delta * 3))
@@ -1776,14 +1931,14 @@ void P_FakeZMovement(AActor *mo)
 	//
 	// clip movement
 	//
-	if (mo->z <= mo->floorz)
+	if (mo->z - moBottomOffset <= mo->floorz)
 	{ // hit the floor
 		mo->z = mo->floorz;
 	}
 
-	if (mo->z + mo->height > mo->ceilingz)
+	if (mo->z + moTopOffset > mo->ceilingz)
 	{ // hit the ceiling
-		mo->z = mo->ceilingz - mo->height;
+		mo->z = mo->ceilingz - moTopOffset;
 	}
 }
 
@@ -1798,20 +1953,33 @@ static void CheckForPushSpecial(line_t *line, int side, AActor *mobj, bool windo
 	if (line->special && !(mobj->flags6 & MF6_NOTRIGGER))
 	{
 		if (windowcheck && !(i_compatflags2 & COMPATF2_PUSHWINDOW) && line->backsector != NULL)
-		{ // Make sure this line actually blocks us and is not a window
+		{
+			fixed_t mobjTopOffset, mobjBottomOffset;
+			// For missiles, offset it's height down by half to match the sprite
+			if ((mobj->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+				mobjTopOffset = mobj->height / 2;
+				mobjBottomOffset = mobj->height / 2;
+			}
+			else
+			{
+				mobjTopOffset = mobj->height;
+				mobjBottomOffset = 0;
+			}
+			
+			// Make sure this line actually blocks us and is not a window
 			// or similar construct we are standing inside of.
 			fixed_t fzt = line->frontsector->ceilingplane.ZatPoint(mobj->x, mobj->y);
 			fixed_t fzb = line->frontsector->floorplane.ZatPoint(mobj->x, mobj->y);
 			fixed_t bzt = line->backsector->ceilingplane.ZatPoint(mobj->x, mobj->y);
 			fixed_t bzb = line->backsector->floorplane.ZatPoint(mobj->x, mobj->y);
-			if (fzt >= mobj->z + mobj->height && bzt >= mobj->z + mobj->height &&
-				fzb <= mobj->z && bzb <= mobj->z)
+			if (fzt >= mobj->z + mobjTopOffset && bzt >= mobj->z + mobjTopOffset &&
+				fzb <= mobj->z - mobjBottomOffset && bzb <= mobj->z - mobjBottomOffset)
 			{
 				if (line->flags & ML_3DMIDTEX)
 				{
 					fixed_t top, bot;
 					P_GetMidTexturePosition(line, side, &top, &bot);
-					if (bot < mobj->z + mobj->height && top > mobj->z)
+					if (bot < mobj->z + mobjTopOffset && top > mobj->z - mobjBottomOffset)
 					{
 						goto isblocking;
 					}
@@ -1827,7 +1995,7 @@ static void CheckForPushSpecial(line_t *line, int side, AActor *mobj, bool windo
 					fixed_t ff_bottom = rover->bottom.plane->ZatPoint(mobj->x, mobj->y);
 					fixed_t ff_top = rover->top.plane->ZatPoint(mobj->x, mobj->y);
 
-					if (ff_bottom < mobj->z + mobj->height && ff_top > mobj->z)
+					if (ff_bottom < mobj->z + mobjTopOffset && ff_top > mobj->z - mobjBottomOffset)
 					{
 						goto isblocking;
 					}
@@ -1881,6 +2049,18 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 	sector_t*	oldsec = thing->Sector;	// [RH] for sector actions
 	sector_t*	newsec;
 
+	fixed_t thingTopOffset, thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingTopOffset = thing->height / 2;
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingTopOffset = thing->height;
+		thingBottomOffset = 0;
+	}
+
 	tm.floatok = false;
 	oldz = thing->z;
 	if (onfloor)
@@ -1903,14 +2083,28 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 			{
 				goto pushline;
 			}
-			else if (BlockingMobj->z + BlockingMobj->height - thing->z
+			else {
+				fixed_t blocMobjTopOffset, blocMobjBottomOffset;
+				// For missiles, offset it's height down by half to match the sprite
+				if ((BlockingMobj->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+					blocMobjTopOffset = BlockingMobj->height / 2;
+					blocMobjBottomOffset = BlockingMobj->height / 2;
+				}
+				else
+				{
+					blocMobjTopOffset = BlockingMobj->height;
+					blocMobjBottomOffset = 0;
+				}
+
+				if (BlockingMobj->z + blocMobjTopOffset - thing->z - thingBottomOffset
 				> thing->MaxStepHeight
-				|| (BlockingMobj->Sector->ceilingplane.ZatPoint(x, y)
-				- (BlockingMobj->z + BlockingMobj->height) < thing->height)
-				|| (tm.ceilingz - (BlockingMobj->z + BlockingMobj->height)
-				< thing->height))
-			{
-				goto pushline;
+					|| (BlockingMobj->Sector->ceilingplane.ZatPoint(x, y)
+						- (BlockingMobj->z + blocMobjTopOffset) < thingTopOffset)
+					|| (tm.ceilingz - (BlockingMobj->z + blocMobjTopOffset)
+						< thingTopOffset))
+				{
+					goto pushline;
+				}
 			}
 		}
 		if (!(tm.thing->flags2 & MF2_PASSMOBJ) || (i_compatflags & COMPATF_NO_PASSMOBJ))
@@ -1923,21 +2117,21 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 
 	if (thing->flags3 & MF3_FLOORHUGGER)
 	{
-		thing->z = tm.floorz;
+		thing->z = tm.floorz + thingBottomOffset;
 	}
 	else if (thing->flags3 & MF3_CEILINGHUGGER)
 	{
-		thing->z = tm.ceilingz - thing->height;
+		thing->z = tm.ceilingz - thingTopOffset;
 	}
 
 	if (onfloor && tm.floorsector == thing->floorsector)
 	{
-		thing->z = tm.floorz;
+		thing->z = tm.floorz + thingBottomOffset;
 	}
 	// [WS] For clients, check to see if we are allowed to clip our actor's movement.
 	if (!(thing->flags & MF_NOCLIP) && CLIENT_CanClipMovement(thing))
 	{
-		if (tm.ceilingz - tm.floorz < thing->height)
+		if (tm.ceilingz - tm.floorz < thingTopOffset)
 		{
 			goto pushline;		// doesn't fit
 		}
@@ -1945,7 +2139,7 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 		tm.floatok = true;
 
 		if (!(thing->flags & MF_TELEPORT)
-			&& tm.ceilingz - thing->z < thing->height
+			&& tm.ceilingz - thing->z < thingTopOffset
 			&& !(thing->flags3 & MF3_CEILINGHUGGER)
 			&& (!(thing->flags2 & MF2_FLY) || !(thing->flags & MF_NOGRAVITY)))
 		{
@@ -1954,17 +2148,17 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 		if (thing->flags2 & MF2_FLY && thing->flags & MF_NOGRAVITY)
 		{
 #if 1
-			if (thing->z + thing->height > tm.ceilingz)
+			if (thing->z + thingTopOffset > tm.ceilingz)
 				goto pushline;
 #else
 			// When flying, slide up or down blocking lines until the actor
 			// is not blocked.
-			if (thing->z + thing->height > tm.ceilingz)
+			if (thing->z + thingTopOffset > tm.ceilingz)
 			{
 				thing->velz = -8 * FRACUNIT;
 				goto pushline;
 			}
-			else if (thing->z < tm.floorz && tm.floorz - tm.dropoffz > thing->MaxDropOffHeight)
+			else if (thing->z - thingBottomOffset < tm.floorz && tm.floorz - tm.dropoffz > thing->MaxDropOffHeight)
 			{
 				thing->velz = 8 * FRACUNIT;
 				goto pushline;
@@ -1973,19 +2167,19 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 		}
 		if (!(thing->flags & MF_TELEPORT) && !(thing->flags3 & MF3_FLOORHUGGER))
 		{
-			if ((thing->flags & MF_MISSILE) && !(thing->flags6 & MF6_STEPMISSILE) && tm.floorz > thing->z)
+			if ((thing->flags & MF_MISSILE) && !(thing->flags6 & MF6_STEPMISSILE) && tm.floorz > thing->z - thingBottomOffset)
 			{ // [RH] Don't let normal missiles climb steps
 				goto pushline;
 			}
-			if (tm.floorz - thing->z > thing->MaxStepHeight)
+			if (tm.floorz - thing->z - thingBottomOffset > thing->MaxStepHeight)
 			{ // too big a step up
 				goto pushline;
 			}
-			else if (thing->z < tm.floorz)
+			else if (thing->z - thingBottomOffset < tm.floorz)
 			{ // [RH] Check to make sure there's nothing in the way for the step up
 				fixed_t savedz = thing->z;
 				bool good;
-				thing->z = tm.floorz;
+				thing->z = tm.floorz + thingBottomOffset;
 				good = P_TestMobjZ(thing);
 				thing->z = savedz;
 				if (!good)
@@ -1994,7 +2188,7 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 				}
 				if (thing->flags6 & MF6_STEPMISSILE)
 				{
-					thing->z = tm.floorz;
+					thing->z = tm.floorz + thingBottomOffset;
 					// If moving down, cancel vertical component of the velocity
 					if (thing->velz < 0)
 					{
@@ -2036,7 +2230,7 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 				// This is so that it does not walk off of things onto a drop off.
 				if (thing->flags2 & MF2_ONMOBJ)
 				{
-					floorz = MAX(thing->z, tm.floorz);
+					floorz = MAX(thing->z - thingBottomOffset, tm.floorz);
 				}
 
 				if (floorz - tm.dropoffz > thing->MaxDropOffHeight &&
@@ -2062,7 +2256,7 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 		}
 		if (thing->flags2 & MF2_CANTLEAVEFLOORPIC
 			&& (tm.floorpic != thing->floorpic
-			|| tm.floorz - thing->z != 0))
+			|| tm.floorz - thing->z - thingBottomOffset != 0))
 		{ // must stay within a sector of a certain floor type
 			// [BB] For some reason the client slightly mispredicts the actor position,
 			// i.e. if an actor with MF2_CANTLEAVEFLOORPIC touches the boundary of the floorpic
@@ -2102,7 +2296,7 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 	bool oldAboveFakeFloor, oldAboveFakeCeiling;
 	fixed_t viewheight;
 
-	viewheight = thing->player ? thing->player->viewheight : thing->height / 2;
+	viewheight = thing->player ? thing->player->viewheight : thingTopOffset / 2;
 	oldAboveFakeFloor = oldAboveFakeCeiling = false;	// pacify GCC
 
 	if (oldsec->heightsec)
@@ -2113,10 +2307,10 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 		oldAboveFakeCeiling = eyez > oldsec->heightsec->ceilingplane.ZatPoint(thing->x, thing->y);
 	}
 
-	// Borrowed from MBF: 
+	// Borrowed from MBF:
 	if (thing->BounceFlags & BOUNCE_MBF &&  // killough 8/13/98
 		!(thing->flags & (MF_MISSILE | MF_NOGRAVITY)) &&
-		!thing->IsSentient() && tm.floorz - thing->z > 16 * FRACUNIT)
+		!thing->IsSentient() && tm.floorz - thing->z - thingBottomOffset > 16 * FRACUNIT)
 	{ // too big a step up for MBF bouncers under gravity
 		thing->flags6 &= ~MF6_INTRYMOVE;
 		return false;
@@ -2279,6 +2473,18 @@ bool P_OldTryMove (AActor *thing, fixed_t x, fixed_t y,
 
 //  felldown = 
 	tm.floatok = false;               // killough 11/98
+	
+	fixed_t thingTopOffset, thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingTopOffset = thing->height / 2;
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingTopOffset = thing->height;
+		thingBottomOffset = 0;
+	}
 
 //	if (!P_OldCheckPosition (thing, x, y))
 	if (!P_CheckPosition (thing, x, y, tm))
@@ -2289,13 +2495,13 @@ bool P_OldTryMove (AActor *thing, fixed_t x, fixed_t y,
 		// killough 7/26/98: reformatted slightly
 		// killough 8/1/98: Possibly allow escape if otherwise stuck
 
-		if (tm.ceilingz - tm.floorz < thing->height ||     // doesn't fit
+		if (tm.ceilingz - tm.floorz < thingTopOffset ||     // doesn't fit
 			// mobj must lower to fit
 			(tm.floatok = true, !(thing->flags & MF_TELEPORT) &&
-			tm.ceilingz - thing->z < thing->height) ||
+			tm.ceilingz - thing->z < thingTopOffset) ||
 			// too big a step up
 			(!(thing->flags & MF_TELEPORT) && 
-			tm.floorz - thing->z > 24*FRACUNIT))
+			tm.floorz - thing->z - thingBottomOffset > 24*FRACUNIT))
 		{	
 			return tmunstuck 
 				&& !(tm.ceilingline && untouched(tm.ceilingline, tm));
@@ -2341,7 +2547,7 @@ bool P_OldTryMove (AActor *thing, fixed_t x, fixed_t y,
 
 			if (thing->BounceFlags &&    // killough 8/13/98
 			!(thing->flags & (MF_MISSILE|MF_NOGRAVITY)) &&
-			/*!sentient(thing) &&*/ tm.floorz - thing->z > 16*FRACUNIT)
+			/*!sentient(thing) &&*/ tm.floorz - thing->z - thingTopOffset > 16*FRACUNIT)
 				return false; // too big a step up for bouncers under gravity
 /*
 			// killough 11/98: prevent falling objects from going up too many steps
@@ -2430,25 +2636,37 @@ bool P_CheckMove(AActor *thing, fixed_t x, fixed_t y)
 	{
 		return false;
 	}
+	
+	fixed_t thingTopOffset, thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingTopOffset = thing->height / 2;
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingTopOffset = thing->height;
+		thingBottomOffset = 0;
+	}
 
 	if (thing->flags3 & MF3_FLOORHUGGER)
 	{
-		newz = tm.floorz;
+		newz = tm.floorz + thingBottomOffset;
 	}
 	else if (thing->flags3 & MF3_CEILINGHUGGER)
 	{
-		newz = tm.ceilingz - thing->height;
+		newz = tm.ceilingz - thingTopOffset;
 	}
 
 	if (!(thing->flags & MF_NOCLIP))
 	{
-		if (tm.ceilingz - tm.floorz < thing->height)
+		if (tm.ceilingz - tm.floorz < thingTopOffset)
 		{
 			return false;
 		}
 
 		if (!(thing->flags & MF_TELEPORT)
-			&& tm.ceilingz - newz < thing->height
+			&& tm.ceilingz - newz < thingTopOffset
 			&& !(thing->flags3 & MF3_CEILINGHUGGER)
 			&& (!(thing->flags2 & MF2_FLY) || !(thing->flags & MF_NOGRAVITY)))
 		{
@@ -2456,7 +2674,7 @@ bool P_CheckMove(AActor *thing, fixed_t x, fixed_t y)
 		}
 		if (thing->flags2 & MF2_FLY && thing->flags & MF_NOGRAVITY)
 		{
-			if (thing->z + thing->height > tm.ceilingz)
+			if (thing->z + thingTopOffset > tm.ceilingz)
 				return false;
 		}
 		if (!(thing->flags & MF_TELEPORT) && !(thing->flags3 & MF3_FLOORHUGGER))
@@ -2472,7 +2690,7 @@ bool P_CheckMove(AActor *thing, fixed_t x, fixed_t y)
 			else if (newz < tm.floorz)
 			{ // [RH] Check to make sure there's nothing in the way for the step up
 				fixed_t savedz = thing->z;
-				thing->z = newz = tm.floorz;
+				thing->z = newz = tm.floorz + thingBottomOffset;
 				bool good = P_TestMobjZ(thing);
 				thing->z = savedz;
 				if (!good)
@@ -2548,6 +2766,17 @@ void FSlide::HitSlideLine(line_t* ld)
 
 	fixed_t movelen;
 	bool	icyfloor;	// is floor icy?							// phares
+
+	fixed_t slidemoBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((slidemo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		slidemoBottomOffset = slidemo->height / 2;
+	}
+	else
+	{
+		slidemoBottomOffset = 0;
+	}
+
 	//   |
 	// Under icy conditions, if the angle of approach to the wall	//   V
 	// is more than 45 degrees, then you'll bounce and lose half
@@ -2560,7 +2789,7 @@ void FSlide::HitSlideLine(line_t* ld)
 	icyfloor =
 		(P_AproxDistance(tmxmove, tmymove) > 4 * FRACUNIT) &&
 		var_friction &&  // killough 8/28/98: calc friction on demand
-		slidemo->z <= slidemo->floorz &&
+		slidemo->z - slidemoBottomOffset <= slidemo->floorz &&
 		P_GetFriction(slidemo, NULL) > ORIG_FRICTION;
 
 	if (ld->slopetype == ST_HORIZONTAL)
@@ -2845,17 +3074,29 @@ void FSlide::SlideTraverse(fixed_t startx, fixed_t starty, fixed_t endx, fixed_t
 		if (open.range < slidemo->height)
 			goto isblocking;				// doesn't fit
 
-		if (open.top - slidemo->z < slidemo->height)
+		fixed_t slidemoTopOffset, slidemoBottomOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((slidemo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			slidemoTopOffset = slidemo->height / 2;
+			slidemoBottomOffset = slidemo->height / 2;
+		}
+		else
+		{
+			slidemoTopOffset = slidemo->height;
+			slidemoBottomOffset = 0;
+		}
+
+		if (open.top - slidemo->z - slidemoBottomOffset < slidemoTopOffset)
 			goto isblocking;				// mobj is too high
 
-		if (open.bottom - slidemo->z > slidemo->MaxStepHeight)
+		if (open.bottom - slidemo->z - slidemoBottomOffset > slidemo->MaxStepHeight)
 		{
 			goto isblocking;				// too big a step up
 		}
-		else if (slidemo->z < open.bottom)
+		else if (slidemo->z - slidemoBottomOffset < open.bottom)
 		{ // [RH] Check to make sure there's nothing in the way for the step up
 			fixed_t savedz = slidemo->z;
-			slidemo->z = open.bottom;
+			slidemo->z = open.bottom + slidemoBottomOffset;
 			bool good = P_TestMobjZ(slidemo);
 			slidemo->z = savedz;
 			if (!good)
@@ -2915,11 +3156,21 @@ void FSlide::OldSlideTraverse (fixed_t startx, fixed_t starty, fixed_t endx, fix
 
 		if (open.range < slidemo->height)
 			goto isblocking;  // doesn't fit
+		
+		fixed_t slidemoBottomOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((slidemo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			slidemoBottomOffset = slidemo->height / 2;
+		}
+		else
+		{
+			slidemoBottomOffset = 0;
+		}
 
-		if (open.top - slidemo->z < slidemo->height)
+		if (open.top - slidemo->z - slidemoBottomOffset < slidemo->height)
 			goto isblocking;  // mobj is too high
 
-		if (open.bottom - slidemo->z > 24*FRACUNIT )
+		if (open.bottom - slidemo->z - slidemoBottomOffset > 24*FRACUNIT )
 			goto isblocking;  // too big a step up
 
 		// this line doesn't block movement
@@ -3231,6 +3482,16 @@ const secplane_t * P_CheckSlopeWalk(AActor *actor, fixed_t &xmove, fixed_t &ymov
 
 	const secplane_t *plane = &actor->floorsector->floorplane;
 	fixed_t planezhere = plane->ZatPoint(actor->x, actor->y);
+	
+	fixed_t actorBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((actor->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		actorBottomOffset = actor->height / 2;
+	}
+	else
+	{
+		actorBottomOffset = 0;
+	}
 
 #ifdef _3DFLOORS
 	for (unsigned int i = 0; i<actor->floorsector->e->XFloor.ffloors.Size(); i++)
@@ -3240,7 +3501,7 @@ const secplane_t * P_CheckSlopeWalk(AActor *actor, fixed_t &xmove, fixed_t &ymov
 
 		fixed_t thisplanez = rover->top.plane->ZatPoint(actor->x, actor->y);
 
-		if (thisplanez>planezhere && thisplanez <= actor->z + actor->MaxStepHeight)
+		if (thisplanez>planezhere && thisplanez <= actor->z - actorBottomOffset + actor->MaxStepHeight)
 		{
 			copyplane = *rover->top.plane;
 			if (copyplane.c<0) copyplane.FlipVert();
@@ -3258,7 +3519,7 @@ const secplane_t * P_CheckSlopeWalk(AActor *actor, fixed_t &xmove, fixed_t &ymov
 
 			fixed_t thisplanez = rover->top.plane->ZatPoint(actor->x, actor->y);
 
-			if (thisplanez>planezhere && thisplanez <= actor->z + actor->MaxStepHeight)
+			if (thisplanez>planezhere && thisplanez <= actor->z - actorBottomOffset + actor->MaxStepHeight)
 			{
 				copyplane = *rover->top.plane;
 				if (copyplane.c<0) copyplane.FlipVert();
@@ -3276,7 +3537,7 @@ const secplane_t * P_CheckSlopeWalk(AActor *actor, fixed_t &xmove, fixed_t &ymov
 			return NULL;
 	}
 
-	if (actor->z - planezhere > FRACUNIT)
+	if (actor->z - actorBottomOffset - planezhere > FRACUNIT)
 	{ // not on floor
 		return NULL;
 	}
@@ -3288,7 +3549,7 @@ const secplane_t * P_CheckSlopeWalk(AActor *actor, fixed_t &xmove, fixed_t &ymov
 
 		destx = actor->x + xmove;
 		desty = actor->y + ymove;
-		t = TMulScale16(plane->a, destx, plane->b, desty, plane->c, actor->z) + plane->d;
+		t = TMulScale16(plane->a, destx, plane->b, desty, plane->c, actor->z - actorBottomOffset) + plane->d;
 		if (t < 0)
 		{ // Desired location is behind (below) the plane
 			// (i.e. Walking up the plane)
@@ -3310,7 +3571,7 @@ const secplane_t * P_CheckSlopeWalk(AActor *actor, fixed_t &xmove, fixed_t &ymov
 							const sector_t *sec = node->m_sector;
 							if (sec->floorplane.c >= STEEPSLOPE)
 							{
-								if (sec->floorplane.ZatPoint(destx, desty) >= actor->z - actor->MaxStepHeight)
+								if (sec->floorplane.ZatPoint(destx, desty) >= actor->z - actorBottomOffset - actor->MaxStepHeight)
 								{
 									dopush = false;
 									break;
@@ -3336,7 +3597,7 @@ const secplane_t * P_CheckSlopeWalk(AActor *actor, fixed_t &xmove, fixed_t &ymov
 		}
 		else if (t > 0)
 		{ // Desired location is in front of (above) the plane
-			if (planezhere == actor->z)
+			if (planezhere == actor->z - actorBottomOffset)
 			{ // Actor's current spot is on/in the plane, so walk down it
 				// Same principle as walking up, except reversed
 				destx += FixedMul(plane->a, t);
@@ -3455,10 +3716,23 @@ bool FSlide::BounceWall(AActor *mo)
 	}
 	bestslidefrac = FRACUNIT + 1;
 	bestslideline = mo->BlockingLine;
+
+	fixed_t moTopOffset, moBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((mo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		moTopOffset = mo->height / 2;
+		moBottomOffset = mo->height / 2;
+	}
+	else
+	{
+		moTopOffset = mo->height;
+		moBottomOffset = 0;
+	}
+
 	if (BounceTraverse(leadx, leady, leadx + mo->velx, leady + mo->vely) && mo->BlockingLine == NULL)
 	{ // Could not find a wall, so bounce off the floor/ceiling instead.
-		fixed_t floordist = mo->z - mo->floorz;
-		fixed_t ceildist = mo->ceilingz - mo->z;
+		fixed_t floordist = mo->z - moBottomOffset - mo->floorz;
+		fixed_t ceildist = mo->ceilingz - mo->z + moTopOffset;
 		if (floordist <= ceildist)
 		{
 			mo->FloorBounceMissile(mo->Sector->floorplane);
@@ -3896,12 +4170,20 @@ void aim_t::AimTraverse(fixed_t startx, fixed_t starty, fixed_t endx, fixed_t en
 
 		// check angles to see if the thing can be aimed at
 
-		thingtoppitch = -(int)R_PointToAngle2(0, shootz, dist, th->z + th->height);
+		// For missiles, offset it's height down by half to match the sprite
+		if ((th->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+			thingtoppitch = -(int)R_PointToAngle2(0, shootz, dist, th->z + th->height / 2);
+		else
+			thingtoppitch = -(int)R_PointToAngle2(0, shootz, dist, th->z + th->height);
+
 
 		if (thingtoppitch > bottompitch)
 			continue;					// shot over the thing
 
-		thingbottompitch = -(int)R_PointToAngle2(0, shootz, dist, th->z);
+		if ((th->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+			thingbottompitch = -(int)R_PointToAngle2(0, shootz, dist, th->z - th->height / 2);
+		else
+			thingbottompitch = -(int)R_PointToAngle2(0, shootz, dist, th->z);
 
 		if (thingbottompitch < toppitch)
 			continue;					// shot under the thing
@@ -4020,9 +4302,21 @@ fixed_t P_AimLineAttack(AActor *t1, angle_t angle, fixed_t distance, AActor **pL
 	aim.shootthing = t1;
 	aim.friender = (friender == NULL) ? t1 : friender;
 
+	fixed_t t1TopOffset, t1BottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((t1->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		t1TopOffset = t1->height / 2;
+		t1BottomOffset = t1->height / 2;
+	}
+	else
+	{
+		t1TopOffset = t1->height;
+		t1BottomOffset = 0;
+	}
+
 	x2 = t1->x + (distance >> FRACBITS)*finecosine[angle];
 	y2 = t1->y + (distance >> FRACBITS)*finesine[angle];
-	aim.shootz = t1->z + (t1->height >> 1) - t1->floorclip;
+	aim.shootz = t1->z + (t1TopOffset >> 1) - t1->floorclip;
 	// [BB] In ST, right after a map change, mo apparently can be zero.
 	if ( ( t1->player != NULL ) && ( t1->player->mo != NULL ) )
 	{
@@ -4081,10 +4375,10 @@ fixed_t P_AimLineAttack(AActor *t1, angle_t angle, fixed_t distance, AActor **pL
 		F3DFloor * rover = t1->Sector->e->XFloor.ffloors[i];
 		fixed_t bottomz = rover->bottom.plane->ZatPoint(t1->x, t1->y);
 
-		if (bottomz >= t1->z + t1->height) aim.lastceilingplane = rover->bottom.plane;
+		if (bottomz >= t1->z + t1TopOffset) aim.lastceilingplane = rover->bottom.plane;
 
 		bottomz = rover->top.plane->ZatPoint(t1->x, t1->y);
-		if (bottomz <= t1->z) aim.lastfloorplane = rover->top.plane;
+		if (bottomz <= t1->z - t1BottomOffset) aim.lastfloorplane = rover->top.plane;
 	}
 #endif
 
@@ -4205,17 +4499,29 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 
 	// [Spleen]
 	UNLAGGED_Reconcile( t1 );
-	
+
+	fixed_t t1TopOffset, t1BottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((t1->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		t1TopOffset = t1->height / 2;
+		t1BottomOffset = t1->height / 2;
+	}
+	else
+	{
+		t1TopOffset = t1->height;
+		t1BottomOffset = 0;
+	}
+
 	if (t1->player != NULL)
 	{
 		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
 		{
-			shootz = t1->z - t1->floorclip + (t1->height >> 1) + 
+			shootz = t1->z - t1BottomOffset - t1->floorclip + (t1TopOffset >> 1) + 
 					 FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
 		}
 		else
 		{
-			shootz = t1->z - t1->floorclip + t1->player->viewheight;
+			shootz = t1->z - t1BottomOffset - t1->floorclip + t1->player->viewheight;
 		}
 		
 		if (damageType == NAME_Melee || damageType == NAME_Hitscan)
@@ -4227,7 +4533,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 	}
 	else
 	{
-		shootz = t1->z - t1->floorclip + (t1->height >> 1) + 8 * FRACUNIT;
+		shootz = t1->z - t1BottomOffset - t1->floorclip + (t1TopOffset >> 1) + 8 * FRACUNIT;
 	}
 
 	// We need to check the defaults of the replacement here
@@ -4577,6 +4883,12 @@ AActor *P_LinePickActor(AActor *t1, angle_t angle, fixed_t distance, int pitch,
 	vy = FixedMul(finecosine[pitch], finesine[angle]);
 	vz = -finesine[pitch];
 
+	// For missiles, offset it's height down by half to match the sprite
+	if ((t1->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+		shootz = t1->z - (t1->height >> 1) - t1->floorclip + (t1->height >> 2);
+	else
+		shootz = t1->z - t1->floorclip + (t1->height >> 1);
+
 	shootz = t1->z - t1->floorclip + (t1->height >> 1);
 	if (t1->player != NULL && t1->player->mo) // [BB] Added mo check.
 	{
@@ -4701,7 +5013,14 @@ void P_TraceBleed(int damage, fixed_t x, fixed_t y, fixed_t z, AActor *actor, an
 
 void P_TraceBleed(int damage, AActor *target, angle_t angle, int pitch)
 {
-	P_TraceBleed(damage, target->x, target->y, target->z + target->height / 2,
+	fixed_t targetTopOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((target->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+		targetTopOffset = target->height / 2;
+	else
+		targetTopOffset = target->height;
+
+	P_TraceBleed(damage, target->x, target->y, target->z + targetTopOffset / 2,
 		target, angle, pitch);
 }
 
@@ -4731,7 +5050,15 @@ void P_TraceBleed(int damage, AActor *target, AActor *missile)
 	{
 		pitch = 0;
 	}
-	P_TraceBleed(damage, target->x, target->y, target->z + target->height / 2,
+
+	fixed_t targetTopOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((target->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+		targetTopOffset = target->height / 2;
+	else
+		targetTopOffset = target->height;
+
+	P_TraceBleed(damage, target->x, target->y, target->z + targetTopOffset / 2,
 		target, R_PointToAngle2(missile->x, missile->y, target->x, target->y),
 		pitch);
 }
@@ -4749,7 +5076,14 @@ void P_TraceBleed(int damage, AActor *target)
 		fixed_t one = pr_tracebleed() << 24;
 		fixed_t two = (pr_tracebleed() - 128) << 16;
 
-		P_TraceBleed(damage, target->x, target->y, target->z + target->height / 2,
+		fixed_t targetTopOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((target->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+			targetTopOffset = target->height / 2;
+		else
+			targetTopOffset = target->height;
+
+		P_TraceBleed(damage, target->x, target->y, target->z + targetTopOffset / 2,
 			target, one, two);
 	}
 }
@@ -5983,6 +6317,18 @@ void P_FindAboveIntersectors(AActor *actor)
 	if (!(actor->flags & MF_SOLID))
 		return;
 
+	fixed_t actorTopOffset, actorBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((actor->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		actorTopOffset = actor->height / 2;
+		actorBottomOffset = actor->height / 2;
+	}
+	else
+	{
+		actorTopOffset = actor->height;
+		actorBottomOffset = 0;
+	}
+
 	AActor *thing;
 	FBlockThingsIterator it(FBoundingBox(actor->x, actor->y, actor->radius));
 	while ((thing = it.Next()))
@@ -6015,8 +6361,19 @@ void P_FindAboveIntersectors(AActor *actor)
 			// not what is wanted here.
 			continue;
 		}
-		if (thing->z >= actor->z &&
-			thing->z <= actor->z + actor->height)
+
+		fixed_t thingBottomOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			thingBottomOffset = thing->height / 2;
+		}
+		else
+		{
+			thingBottomOffset = 0;
+		}
+
+		if (thing->z - thingBottomOffset >= actor->z - actorBottomOffset &&
+			thing->z - thingBottomOffset <= actor->z + actorTopOffset)
 		{ // Thing intersects above the base
 			intersectors.Push(thing);
 		}
@@ -6037,6 +6394,18 @@ void P_FindBelowIntersectors(AActor *actor)
 	if (!(actor->flags & MF_SOLID))
 		return;
 
+	fixed_t actorTopOffset, actorBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((actor->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		actorTopOffset = actor->height / 2;
+		actorBottomOffset = actor->height / 2;
+	}
+	else
+	{
+		actorTopOffset = actor->height;
+		actorBottomOffset = 0;
+	}
+
 	AActor *thing;
 	FBlockThingsIterator it(FBoundingBox(actor->x, actor->y, actor->radius));
 	while ((thing = it.Next()))
@@ -6069,8 +6438,19 @@ void P_FindBelowIntersectors(AActor *actor)
 			// not what is wanted here.
 			continue;
 		}
-		if (thing->z + thing->height <= actor->z + actor->height &&
-			thing->z + thing->height > actor->z)
+
+		fixed_t thingTopOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+			thingTopOffset = thing->height / 2;
+		}
+		else
+		{
+			thingTopOffset = thing->height;
+		}
+
+		if (thing->z + thingTopOffset <= actor->z + actorTopOffset &&
+			thing->z + thingTopOffset > actor->z - actorBottomOffset)
 		{ // Thing intersects below the base
 			intersectors.Push(thing);
 		}
@@ -6146,12 +6526,22 @@ void P_DoCrunch(AActor *thing, FChangePosition *cpos)
 
 				P_TraceBleed(newdam > 0 ? newdam : cpos->crushchange, thing);
 
+				fixed_t thingTopOffset;
+				// For missiles, offset it's height down by half to match the sprite
+				if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+					thingTopOffset = thing->height / 2;
+				}
+				else
+				{
+					thingTopOffset = thing->height;
+				}
+
 				if (bloodcls != NULL || ( NETWORK_GetState( ) == NETSTATE_SERVER )) // [BB]
 				{
 					AActor *mo;
 
 					mo = Spawn(bloodcls, thing->x, thing->y,
-						thing->z + thing->height / 2, ALLOW_REPLACE);
+						thing->z + thingTopOffset / 2, ALLOW_REPLACE);
 
 					mo->velx = pr_crunch.Random2() << 12;
 					mo->vely = pr_crunch.Random2() << 12;
@@ -6167,7 +6557,7 @@ void P_DoCrunch(AActor *thing, FChangePosition *cpos)
 				an = (M_Random() - 128) << 24;
 				if (cl_bloodtype >= 1)
 				{
-					P_DrawSplash2(32, thing->x, thing->y, thing->z + thing->height / 2, an, 2, bloodcolor);
+					P_DrawSplash2(32, thing->x, thing->y, thing->z + thingTopOffset / 2, an, 2, bloodcolor);
 				}
 			}
 			if (thing->CrushPainSound != 0 && !S_GetSoundPlayingInfo(thing, thing->CrushPainSound))
@@ -6195,7 +6585,17 @@ int P_PushUp(AActor *thing, FChangePosition *cpos)
 	unsigned int lastintersect;
 	int mymass = thing->Mass;
 
-	if (thing->z + thing->height > thing->ceilingz)
+	fixed_t thingTopOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingTopOffset = thing->height / 2;
+	}
+	else
+	{
+		thingTopOffset = thing->height;
+	}
+
+	if (thing->z + thingTopOffset > thing->ceilingz)
 	{
 		return 1;
 	}
@@ -6224,7 +6624,7 @@ int P_PushUp(AActor *thing, FChangePosition *cpos)
 		}
 		fixed_t oldz = intersect->z;
 		P_AdjustFloorCeil(intersect, cpos);
-		intersect->z = thing->z + thing->height + 1;
+		intersect->z = thing->z + thingTopOffset + 1;
 		if (P_PushUp(intersect, cpos))
 		{ // Move blocked
 			P_DoCrunch(intersect, cpos);
@@ -6249,7 +6649,17 @@ int P_PushDown(AActor *thing, FChangePosition *cpos)
 	unsigned int lastintersect;
 	int mymass = thing->Mass;
 
-	if (thing->z <= thing->floorz)
+	fixed_t thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingBottomOffset = 0;
+	}
+
+	if (thing->z - thingBottomOffset <= thing->floorz)
 	{
 		return 1;
 	}
@@ -6268,9 +6678,9 @@ int P_PushDown(AActor *thing, FChangePosition *cpos)
 		}
 		fixed_t oldz = intersect->z;
 		P_AdjustFloorCeil(intersect, cpos);
-		if (oldz > thing->z - intersect->height)
+		if (oldz > thing->z - thingBottomOffset - intersect->height)
 		{ // Only push things down, not up.
-			intersect->z = thing->z - intersect->height;
+			intersect->z = thing->z - thingBottomOffset - intersect->height;
 			if (P_PushDown(intersect, cpos))
 			{ // Move blocked
 				P_DoCrunch(intersect, cpos);
@@ -6297,29 +6707,39 @@ void PIT_FloorDrop(AActor *thing, FChangePosition *cpos)
 	if (oldfloorz == thing->floorz) return;
 	if (thing->flags4 & MF4_ACTLIKEBRIDGE) return; // do not move bridge things
 
+	fixed_t thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingBottomOffset = 0;
+	}
+
 	if (thing->velz == 0 &&
 		(!(thing->flags & MF_NOGRAVITY) ||
-		(thing->z == oldfloorz && !(thing->flags & MF_NOLIFTDROP))))
+		(thing->z - thingBottomOffset == oldfloorz && !(thing->flags & MF_NOLIFTDROP))))
 	{
 		fixed_t oldz = thing->z;
 
 		if ((thing->flags & MF_NOGRAVITY) || (thing->flags5 & MF5_MOVEWITHSECTOR) ||
 			(((cpos->sector->Flags & SECF_FLOORDROP) || cpos->moveamt < 9 * FRACUNIT)
-			&& thing->z - thing->floorz <= cpos->moveamt))
+			&& thing->z - thingBottomOffset - thing->floorz <= cpos->moveamt))
 		{
-			thing->z = thing->floorz;
+			thing->z = thing->floorz + thingBottomOffset;
 			P_CheckFakeFloorTriggers(thing, oldz);
 		}
 
 		// [BC] Mark this thing as having moved.
 		thing->ulSTFlags |= STFL_POSITIONCHANGED;
 	}
-	else if ((thing->z != oldfloorz && !(thing->flags & MF_NOLIFTDROP)))
+	else if ((thing->z - thingBottomOffset != oldfloorz && !(thing->flags & MF_NOLIFTDROP)))
 	{
 		fixed_t oldz = thing->z;
 		if ((thing->flags & MF_NOGRAVITY) && (thing->flags6 & MF6_RELATIVETOFLOOR))
 		{
-			thing->z = thing->z - oldfloorz + thing->floorz;
+			thing->z = thing->z + thingBottomOffset - oldfloorz + thing->floorz;
 			P_CheckFakeFloorTriggers(thing, oldz);
 		}
 	}
@@ -6340,8 +6760,18 @@ void PIT_FloorRaise(AActor *thing, FChangePosition *cpos)
 
 	if (oldfloorz == thing->floorz) return;
 
+	fixed_t thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingBottomOffset = 0;
+	}
+
 	// Move things intersecting the floor up
-	if (thing->z <= thing->floorz)
+	if (thing->z - thingBottomOffset <= thing->floorz)
 	{
 		if (thing->flags4 & MF4_ACTLIKEBRIDGE)
 		{
@@ -6349,7 +6779,7 @@ void PIT_FloorRaise(AActor *thing, FChangePosition *cpos)
 			return; // do not move bridge things
 		}
 		intersectors.Clear();
-		thing->z = thing->floorz;
+		thing->z = thing->floorz + thingBottomOffset;
 
 		// [BC] Mark this thing as having moved.
 		thing->ulSTFlags |= STFL_POSITIONCHANGED;
@@ -6359,7 +6789,7 @@ void PIT_FloorRaise(AActor *thing, FChangePosition *cpos)
 		if ((thing->flags & MF_NOGRAVITY) && (thing->flags6 & MF6_RELATIVETOFLOOR))
 		{
 			intersectors.Clear();
-			thing->z = thing->z - oldfloorz + thing->floorz;
+			thing->z = thing->z + thingBottomOffset - oldfloorz + thing->floorz;
 
 			// [BC/BB] Mark this thing as having moved.
 			thing->ulSTFlags |= STFL_POSITIONCHANGED;
@@ -6392,10 +6822,22 @@ void PIT_CeilingLower(AActor *thing, FChangePosition *cpos)
 {
 	bool onfloor;
 
-	onfloor = thing->z <= thing->floorz;
+	fixed_t thingTopOffset, thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingTopOffset = thing->height / 2;
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingTopOffset = thing->height;
+		thingBottomOffset = 0;
+	}
+
+	onfloor = thing->z - thingBottomOffset <= thing->floorz;
 	P_AdjustFloorCeil(thing, cpos);
 
-	if (thing->z + thing->height > thing->ceilingz)
+	if (thing->z + thingTopOffset > thing->ceilingz)
 	{
 		if (thing->flags4 & MF4_ACTLIKEBRIDGE)
 		{
@@ -6404,13 +6846,13 @@ void PIT_CeilingLower(AActor *thing, FChangePosition *cpos)
 		}
 		intersectors.Clear();
 		fixed_t oldz = thing->z;
-		if (thing->ceilingz - thing->height >= thing->floorz)
+		if (thing->ceilingz - thingTopOffset >= thing->floorz)
 		{
-			thing->z = thing->ceilingz - thing->height;
+			thing->z = thing->ceilingz - thingTopOffset;
 		}
 		else
 		{
-			thing->z = thing->floorz;
+			thing->z = thing->floorz + thingBottomOffset;
 		}
 
 		// [BC] Mark this thing as having moved.
@@ -6422,7 +6864,7 @@ void PIT_CeilingLower(AActor *thing, FChangePosition *cpos)
 			// intentional fall-through
 		case 1:
 			if (onfloor)
-				thing->z = thing->floorz;
+				thing->z = thing->floorz + thingBottomOffset;
 			P_DoCrunch(thing, cpos);
 			P_CheckFakeFloorTriggers(thing, oldz);
 			break;
@@ -6445,31 +6887,43 @@ void PIT_CeilingRaise(AActor *thing, FChangePosition *cpos)
 
 	if (thing->flags4 & MF4_ACTLIKEBRIDGE) return; // do not move bridge things
 
+	fixed_t thingTopOffset, thingBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		thingTopOffset = thing->height / 2;
+		thingBottomOffset = thing->height / 2;
+	}
+	else
+	{
+		thingTopOffset = thing->height;
+		thingBottomOffset = 0;
+	}
+
 	// For DOOM compatibility, only move things that are inside the floor.
 	// (or something else?) Things marked as hanging from the ceiling will
 	// stay where they are.
-	if (thing->z < thing->floorz &&
-		thing->z + thing->height >= thing->ceilingz - cpos->moveamt &&
+	if (thing->z - thingBottomOffset < thing->floorz &&
+		thing->z + thingTopOffset >= thing->ceilingz - cpos->moveamt &&
 		!(thing->flags & MF_NOLIFTDROP))
 	{
 		fixed_t oldz = thing->z;
-		thing->z = thing->floorz;
-		if (thing->z + thing->height > thing->ceilingz)
+		thing->z = thing->floorz + thingBottomOffset;
+		if (thing->z + thingTopOffset > thing->ceilingz)
 		{
-			thing->z = thing->ceilingz - thing->height;
+			thing->z = thing->ceilingz - thing->height - thingTopOffset;
 		}
 		P_CheckFakeFloorTriggers(thing, oldz);
 
 		// [BC] Mark this thing as having moved.
 		thing->ulSTFlags |= STFL_POSITIONCHANGED;
 	}
-	else if ((thing->flags2 & MF2_PASSMOBJ) && !isgood && thing->z + thing->height < thing->ceilingz)
+	else if ((thing->flags2 & MF2_PASSMOBJ) && !isgood && thing->z + thingTopOffset < thing->ceilingz)
 	{
 		AActor *onmobj;
-		if (!P_TestMobjZ(thing, true, &onmobj) && onmobj->z <= thing->z)
+		if (!P_TestMobjZ(thing, true, &onmobj) && onmobj->z <= thing->z - thingBottomOffset)
 		{
 			thing->z = MIN(thing->ceilingz - thing->height,
-				onmobj->z + onmobj->height);
+				onmobj->z + onmobj->height) + thingBottomOffset;
 
 			// [BC] Mark this thing as having moved.
 			thing->ulSTFlags |= STFL_POSITIONCHANGED;

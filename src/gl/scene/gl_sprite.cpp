@@ -367,18 +367,25 @@ void GLSprite::Draw(int pass)
 			{-1, 0, -1, 1, 0, 1}, {-1, 0, 1, 1, 0, -1}
 		};
 
+		fixed_t verticalOffset;
+		// For missiles, offset it's height down by half to match the sprite
+		if ((actor->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+			verticalOffset = actor->height / 2;
+		else
+			verticalOffset = 0;
+
 		// General hitbox
 		for (int i = 0; i < 12; i++) {
 			glBegin(GL_LINES);
 			glVertex3f(
-				FIXED2FLOAT(actor->x + actor->radius * scales[i][0], actor->scaleX),
-				FIXED2FLOAT(actor->z + actor->height * scales[i][1], actor->scaleY),
-				FIXED2FLOAT(actor->y + actor->radius * scales[i][2], actor->scaleX)
+				FIXED2FLOAT(actor->x + actor->radius * scales[i][0]),
+				FIXED2FLOAT(actor->z + actor->height * scales[i][1] - verticalOffset),
+				FIXED2FLOAT(actor->y + actor->radius * scales[i][2])
 			);
 			glVertex3f(
-				FIXED2FLOAT(actor->x + actor->radius * scales[i][3], actor->scaleX),
-				FIXED2FLOAT(actor->z + actor->height * scales[i][4], actor->scaleY),
-				FIXED2FLOAT(actor->y + actor->radius * scales[i][5], actor->scaleX)
+				FIXED2FLOAT(actor->x + actor->radius * scales[i][3]),
+				FIXED2FLOAT(actor->z + actor->height * scales[i][4] - verticalOffset),
+				FIXED2FLOAT(actor->y + actor->radius * scales[i][5])
 			);
 			glEnd();
 		}
@@ -387,14 +394,14 @@ void GLSprite::Draw(int pass)
 		for (int i = 12; i < 14; i++) {
 			glBegin(GL_LINES);
 			glVertex3f(
-				FIXED2FLOAT(actor->x + actor->radius * scales[i][0], actor->scaleX),
-				FIXED2FLOAT(actor->z + actor->projectilepassheight, actor->scaleY),
-				FIXED2FLOAT(actor->y + actor->radius * scales[i][2], actor->scaleX)
+				FIXED2FLOAT(actor->x + actor->radius * scales[i][0]),
+				FIXED2FLOAT(actor->z + actor->projectilepassheight - verticalOffset),
+				FIXED2FLOAT(actor->y + actor->radius * scales[i][2])
 			);
 			glVertex3f(
-				FIXED2FLOAT(actor->x + actor->radius * scales[i][3], actor->scaleX),
-				FIXED2FLOAT(actor->z + actor->projectilepassheight, actor->scaleY),
-				FIXED2FLOAT(actor->y + actor->radius * scales[i][5], actor->scaleX)
+				FIXED2FLOAT(actor->x + actor->radius * scales[i][3]),
+				FIXED2FLOAT(actor->z + actor->projectilepassheight - verticalOffset),
+				FIXED2FLOAT(actor->y + actor->radius * scales[i][5])
 			);
 			glEnd();
 		}
