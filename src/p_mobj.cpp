@@ -1993,8 +1993,31 @@ bool P_SeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax, bool preci
 
 		if (!(actor->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)) && !(actor->flags8 & MF8_SEEKERMISSILENOZ))
 		{
-			if (actor->z + actor->height < target->z ||
-				target->z + target->height < actor->z)
+			fixed_t actorTopOffset, actorBottomOffset;
+			// For missiles, offset it's height down by half to match the sprite
+			if ((actor->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+				actorTopOffset = actor->height / 2;
+				actorBottomOffset = actor->height / 2;
+			}
+			else
+			{
+				actorTopOffset = actor->height;
+				actorBottomOffset = 0;
+			}
+			fixed_t targetTopOffset, targetBottomOffset;
+			// For missiles, offset it's height down by half to match the sprite
+			if ((target->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+				targetTopOffset = target->height / 2;
+				targetBottomOffset = target->height / 2;
+			}
+			else
+			{
+				targetTopOffset = target->height;
+				targetBottomOffset = 0;
+			}
+
+			if (actor->z + actorTopOffset < target->z - targetBottomOffset ||
+				target->z + targetTopOffset < actor->z - actorBottomOffset)
 			{ // Need to seek vertically
 				dist = P_AproxDistance (target->x - actor->x, target->y - actor->y);
 				dist = dist / speed;
@@ -2002,7 +2025,11 @@ bool P_SeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax, bool preci
 				{
 					dist = 1;
 				}
-				actor->velz = ((target->z+target->height/2) - (actor->z+actor->height/2)) / dist;
+				// For missiles, offset it's height down by half to match the sprite
+				if ((target->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+					actor->velz = (target->z - actor->z) / dist;
+				else
+					actor->velz = ((target->z + target->height / 2) - (actor->z + actor->height / 2)) / dist;
 			}
 		}
 	}
@@ -2013,12 +2040,21 @@ bool P_SeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax, bool preci
 		{ // Need to seek vertically
 			double dist = MAX(1.0, FVector2(target->x - actor->x, target->y - actor->y).Length());
 			// Aim at a player's eyes and at the middle of the actor for everything else.
-			fixed_t aimheight = target->height/2;
+			fixed_t aimheight;
+			// For missiles, offset it's height down by half to match the sprite
+			if ((target->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+				aimheight = 0;
+			else
+				aimheight = target->height / 2;
 			if (target->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 			{
 				aimheight = static_cast<APlayerPawn *>(target)->ViewHeight;
 			}
-			pitch = R_PointToAngle2(0, actor->z + actor->height/2, xs_CRoundToInt(dist), target->z + aimheight);
+			// For missiles, offset it's height down by half to match the sprite
+			if ((target->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+				pitch = R_PointToAngle2(0, actor->z, xs_CRoundToInt(dist), target->z + aimheight);
+			else
+				pitch = R_PointToAngle2(0, actor->z + actor->height / 2, xs_CRoundToInt(dist), target->z + aimheight);
 			pitch >>= ANGLETOFINESHIFT;
 		}
 
@@ -2903,15 +2939,26 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 	fixed_t oldz = mo->z;
 	fixed_t grav = mo->GetGravity();
 
+	fixed_t topHeightOffset, bottomHeightOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((mo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		topHeightOffset = mo->height / 2;
+		bottomHeightOffset = mo->height / 2;
+	}
+	else
+	{
+		topHeightOffset = mo->height;
+		bottomHeightOffset = 0;
+	}
 //
 // check for smooth step up
 //
 	// [BC] Don't adjust viewheight while predicting.
 	if ( CLIENT_PREDICT_IsPredicting( ) == false )
 	{
-		if (mo->player && mo->player->mo == mo && mo->z < mo->floorz)
+		if (mo->player && mo->player->mo == mo && mo->z - bottomHeightOffset < mo->floorz)
 		{
-			mo->player->viewheight -= mo->floorz - mo->z;
+			mo->player->viewheight -= mo->floorz - mo->z - bottomHeightOffset;
 			mo->player->deltaviewheight = mo->player->GetDeltaViewHeight();
 		}
 	}
@@ -2925,7 +2972,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 //
 	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType && !mo->player->bSpectating;
 
-	if (mo->z > mo->floorz && !(mo->flags & MF_NOGRAVITY))
+	if (mo->z - bottomHeightOffset > mo->floorz && !(mo->flags & MF_NOGRAVITY))
 	{
 		// [Ivory] Quake gravity but only for players.
 		// I want nothing to do with that thing below
@@ -2954,7 +3001,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				// [RH] Double gravity only if running off a ledge. Coming down from
 				// an upward thrust (e.g. a jump) should not double it.
 				// [AM] Old versions of ZDoom didn't have double gravity.
-				if (!mo->velz && oldfloorz > mo->floorz && mo->z == oldfloorz &&
+				if (!mo->velz && oldfloorz > mo->floorz && mo->z - bottomHeightOffset == oldfloorz &&
 					!(zacompatflags & ZACOMPATF_OLD_ZDOOM_ZMOVEMENT))
 				{
 					mo->velz -= grav + grav;
@@ -3041,7 +3088,10 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		if (!(mo->flags & (MF_SKULLFLY | MF_INFLOAT)))
 		{
 			dist = P_AproxDistance (mo->x - mo->target->x, mo->y - mo->target->y);
-			delta = (mo->target->z + (mo->height>>1)) - mo->z;
+			if ((mo->target->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+				delta = (mo->target->z - mo->target->z / 2 + (topHeightOffset >>1)) - mo->z - bottomHeightOffset;
+			else
+				delta = (mo->target->z + (topHeightOffset >> 1)) - mo->z - bottomHeightOffset;
 			if (delta < 0 && dist < -(delta*3))
 			{
 				mo->z -= mo->FloatSpeed;
@@ -3066,7 +3116,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 	// [Ivory] This is bad for quake movement as well
 	if (!quakeMovement)
 	{
-		if (mo->player && (mo->flags & MF_NOGRAVITY) && mo->z > mo->floorz)
+		if (mo->player && (mo->flags & MF_NOGRAVITY) && mo->z - bottomHeightOffset > mo->floorz)
 		{
 			if (!mo->IsNoClip2())
 				mo->z += finesine[(FINEANGLES / 80 * level.maptime)&FINEMASK] / 8;
@@ -3081,7 +3131,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 // clip movement
 //
 	// [WS] For clients, check to see if we are allowed to clip our actor's movement.
-	if (mo->z <= mo->floorz && CLIENT_CanClipMovement(mo))
+	if (mo->z - bottomHeightOffset <= mo->floorz && CLIENT_CanClipMovement(mo))
 	{	// Hit the floor
 		// [BC] Why "!mo->player"? This makes jump pads and stuff not work. They only work
 		// if you walk onto the pad while on the ground (ex. you can't jump onto it), but
@@ -3098,7 +3148,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		P_CheckFor3DFloorHit(mo);
 		// [RH] Need to recheck this because the sector action might have
 		// teleported the actor so it is no longer below the floor.
-		if (mo->z <= mo->floorz)
+		if (mo->z - bottomHeightOffset <= mo->floorz)
 		{
 			// [BC] We need to do the sky check first, otherwise bouncy things
 			// can potentially bounce off the sky (such as grenades).
@@ -3119,7 +3169,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 
 			if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
 			{
-				mo->z = mo->floorz;
+				mo->z = mo->floorz + bottomHeightOffset;
 				if (mo->BounceFlags & BOUNCE_Floors)
 				{
 					mo->FloorBounceMissile (mo->floorsector->floorplane);
@@ -3177,7 +3227,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 			if ( mo->floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD )
 			{
 				mo->velz = -mo->velz;
-				mo->z = mo->floorz;
+				mo->z = mo->floorz + bottomHeightOffset;
 				return;
 			}
 
@@ -3188,7 +3238,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 					P_MonsterFallingDamage (mo);
 				}
 			}
-			mo->z = mo->floorz;
+			mo->z = mo->floorz + bottomHeightOffset;
 			if (mo->velz < 0)
 			{
 				const fixed_t minvel = -8*FRACUNIT;	// landing speed from a jump with normal gravity
@@ -3227,7 +3277,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		mo->AdjustFloorClip ();
 	}
 	// [WS] For clients, check to see if we are allowed to clip our actor's movement.
-	if (mo->z + mo->height > mo->ceilingz && CLIENT_CanClipMovement(mo))
+	if (mo->z + topHeightOffset > mo->ceilingz && CLIENT_CanClipMovement(mo))
 	{ // hit the ceiling
 		if (/*(!mo->player || !(mo->player->cheats & CF_PREDICTING)) &&*/
 			mo->Sector->SecActTarget != NULL &&
@@ -3238,7 +3288,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		P_CheckFor3DCeilingHit(mo);
 		// [RH] Need to recheck this because the sector action might have
 		// teleported the actor so it is no longer above the ceiling.
-		if (mo->z + mo->height > mo->ceilingz)
+		if (mo->z + topHeightOffset > mo->ceilingz)
 		{
 			// [BC] We need to do the sky check first, otherwise bouncy things
 			// can potentially bounce off the sky (such as grenades).
@@ -3257,7 +3307,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				return;
 			}
 
-			mo->z = mo->ceilingz - mo->height;
+			mo->z = mo->ceilingz - topHeightOffset;
 			if (mo->BounceFlags & BOUNCE_Ceilings)
 			{	// ceiling bounce
 				mo->FloorBounceMissile (mo->ceilingsector->ceilingplane);
@@ -3329,6 +3379,18 @@ void P_CheckFakeFloorTriggers (AActor *mo, fixed_t oldz, bool oldz_has_viewheigh
 		return;
 	}
 */
+	fixed_t topHeightOffset, bottomHeightOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((mo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		topHeightOffset = mo->height / 2;
+		bottomHeightOffset = mo->height / 2;
+	}
+	else
+	{
+		topHeightOffset = mo->height;
+		bottomHeightOffset = 0;
+	}
+
 	sector_t *sec = mo->Sector;
 	assert (sec != NULL);
 	if (sec == NULL)
@@ -3351,12 +3413,12 @@ void P_CheckFakeFloorTriggers (AActor *mo, fixed_t oldz, bool oldz_has_viewheigh
 			viewheight = mo->height / 2;
 		}
 
-		if (oldz > waterz && mo->z <= waterz)
+		if (oldz > waterz && mo->z - bottomHeightOffset <= waterz)
 		{ // Feet hit fake floor
 			sec->SecActTarget->TriggerAction (mo, SECSPAC_HitFakeFloor);
 		}
 
-		newz = mo->z + viewheight;
+		newz = mo->z + bottomHeightOffset + viewheight;
 		if (!oldz_has_viewheight)
 		{
 			oldz += viewheight;
@@ -3492,24 +3554,36 @@ void P_NightmareRespawn (AActor *mobj)
 	y = mobj->SpawnPoint[1];
 	mo = AActor::StaticSpawn(RUNTIME_TYPE(mobj), x, y, z, NO_REPLACE, true);
 
+	fixed_t topHeightOffset, bottomHeightOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((mo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		topHeightOffset = mo->height / 2;
+		bottomHeightOffset = mo->height / 2;
+	}
+	else
+	{
+		topHeightOffset = mo->height;
+		bottomHeightOffset = 0;
+	}
+
 	if (z == ONFLOORZ)
 	{
-		mo->z += mobj->SpawnPoint[2];
-		if (mo->z < mo->floorz)
+		mo->z += mobj->SpawnPoint[2] + bottomHeightOffset;
+		if (mo->z - bottomHeightOffset < mo->floorz)
 		{ // Do not respawn monsters in the floor, even if that's where they
 		  // started. The initial P_ZMovement() call would have put them on
 		  // the floor right away, but we need them on the floor now so we
 		  // can use P_CheckPosition() properly.
-			mo->z = mo->floorz;
+			mo->z = mo->floorz + bottomHeightOffset;
 		}
-		if (mo->z + mo->height > mo->ceilingz)
+		if (mo->z + topHeightOffset > mo->ceilingz)
 		{
-			mo->z = mo->ceilingz - mo->height;
+			mo->z = mo->ceilingz - topHeightOffset;
 		}
 	}
 	else if (z == ONCEILINGZ)
 	{
-		mo->z -= mobj->SpawnPoint[2];
+		mo->z -= mobj->SpawnPoint[2] - topHeightOffset;
 	}
 
 	// If there are 3D floors, we need to find floor/ceiling again.
@@ -3517,16 +3591,16 @@ void P_NightmareRespawn (AActor *mobj)
 
 	if (z == ONFLOORZ)
 	{
-		if (mo->z < mo->floorz)
+		if (mo->z - bottomHeightOffset < mo->floorz)
 		{ // Do not respawn monsters in the floor, even if that's where they
 		  // started. The initial P_ZMovement() call would have put them on
 		  // the floor right away, but we need them on the floor now so we
 		  // can use P_CheckPosition() properly.
-			mo->z = mo->floorz;
+			mo->z = mo->floorz + bottomHeightOffset;
 		}
-		if (mo->z + mo->height > mo->ceilingz)
+		if (mo->z + topHeightOffset > mo->ceilingz)
 		{ // Do the same for the ceiling.
-			mo->z = mo->ceilingz - mo->height;
+			mo->z = mo->ceilingz - topHeightOffset;
 		}
 	}
 
@@ -4494,14 +4568,23 @@ void AActor::Tick ()
 							PlayerLandedOnThing (this, onmo);
 						}
 					}
-					if (onmo->z + onmo->height - z <= MaxStepHeight)
+					fixed_t onmoTopHeightOffset;
+					// For missiles, offset it's height down by half to match the sprite
+					if ((onmo->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+						onmoTopHeightOffset = onmo->height / 2;
+					}
+					else
+					{
+						onmoTopHeightOffset = onmo->height;
+					}
+					if (onmo->z + onmoTopHeightOffset - z <= MaxStepHeight)
 					{
 						if (player && player->mo == this)
 						{
 							// [BC] Don't alter viewheight if we're just predicting.
 							if ( CLIENT_PREDICT_IsPredicting( ) == false )
 							{
-								player->viewheight -= onmo->z + onmo->height - z;
+								player->viewheight -= onmo->z + onmoTopHeightOffset - z;
 								fixed_t deltaview = player->GetDeltaViewHeight();
 								if (deltaview > player->deltaviewheight)
 								{
@@ -4509,7 +4592,7 @@ void AActor::Tick ()
 								}
 							} 
 						}
-						z = onmo->z + onmo->height;
+						z = onmo->z + onmoTopHeightOffset;
 					}
 					// Check for MF6_BUMPSPECIAL
 					// By default, only players can activate things by bumping into them
@@ -5017,15 +5100,27 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 	actor->floorz = actor->Sector->floorplane.ZatPoint (ix, iy);
 	actor->ceilingz = actor->Sector->ceilingplane.ZatPoint (ix, iy);
 
+	fixed_t actorTopOffset, actorBottomOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((actor->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		actorTopOffset = actor->height / 2;
+		actorBottomOffset = actor->height / 2;
+	}
+	else
+	{
+		actorTopOffset = actor->height;
+		actorBottomOffset = 0;
+	}
+
 	// The z-coordinate needs to be set once before calling P_FindFloorCeiling
 	// For FLOATRANDZ just use the floor here.
 	if (iz == ONFLOORZ || iz == FLOATRANDZ)
 	{
-		actor->z = actor->floorz;
+		actor->z = actor->floorz + actorBottomOffset;
 	}
 	else if (iz == ONCEILINGZ)
 	{
-		actor->z = actor->ceilingz - actor->height;
+		actor->z = actor->ceilingz - actorTopOffset;
 	}
 
 	if (SpawningMapThing || !type->IsDescendantOf (RUNTIME_CLASS(APlayerPawn)))
@@ -5062,11 +5157,11 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 
 	if (iz == ONFLOORZ)
 	{
-		actor->z = actor->floorz;
+		actor->z = actor->floorz + actorBottomOffset;
 	}
 	else if (iz == ONCEILINGZ)
 	{
-		actor->z = actor->ceilingz - actor->height;
+		actor->z = actor->ceilingz - actorTopOffset;
 	}
 	else if (iz == FLOATRANDZ)
 	{
@@ -6887,7 +6982,12 @@ bool P_HitWater (AActor * thing, sector_t * sec, fixed_t x, fixed_t y, fixed_t z
 	// don't splash above the object
 	if (checkabove)
 	{
-		fixed_t compare_z = thing->z + (thing->height >> 1);
+		fixed_t compare_z;
+		if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
+			compare_z = thing->z;
+		else
+			compare_z = thing->z + (thing->height >> 1);
+
 		// Missiles are typically small and fast, so they might
 		// end up submerged by the move that calls P_HitWater.
 		if (thing->flags & MF_MISSILE)
@@ -7056,9 +7156,19 @@ bool P_HitFloor (AActor *thing)
 	// don't splash if landing on the edge above water/lava/etc....
 	for (m = thing->touching_sectorlist; m; m = m->m_tnext)
 	{
-		if (thing->z == m->m_sector->floorplane.ZatPoint (thing->x, thing->y))
+		if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
 		{
-			break;
+			if (thing->z - thing->height / 2 == m->m_sector->floorplane.ZatPoint(thing->x, thing->y))
+			{
+				break;
+			}
+		}
+		else
+		{
+			if (thing->z == m->m_sector->floorplane.ZatPoint(thing->x, thing->y))
+			{
+				break;
+			}
 		}
 
 #ifdef _3DFLOORS
@@ -7069,9 +7179,19 @@ bool P_HitFloor (AActor *thing)
 			if (!(rover->flags & FF_EXISTS)) continue;
 			if (rover->flags & (FF_SOLID|FF_SWIMMABLE))
 			{
-				if (rover->top.plane->ZatPoint(thing->x, thing->y) == thing->z)
+				if ((thing->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX)
 				{
-					return P_HitWater (thing, m->m_sector);
+					if (rover->top.plane->ZatPoint(thing->x, thing->y) == thing->z - thing->height / 2)
+					{
+						return P_HitWater(thing, m->m_sector);
+					}
+				}
+				else
+				{
+					if (rover->top.plane->ZatPoint(thing->x, thing->y) == thing->z)
+					{
+						return P_HitWater(thing, m->m_sector);
+					}
 				}
 			}
 		}
@@ -7293,15 +7413,24 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 	// Answer: No, because this way, you can set up sets of parallel missiles.
 
 	FVector3 velocity(dest->x - source->x, dest->y - source->y, dest->z - source->z);
+	fixed_t destTopOffset;
+	// For missiles, offset it's height down by half to match the sprite
+	if ((dest->flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+		destTopOffset = dest->height / 2;
+	}
+	else
+	{
+		destTopOffset = dest->height;
+	}
 	// Floor and ceiling huggers should never have a vertical component to their velocity
 	if ((th->flags3 & (MF3_FLOORHUGGER|MF3_CEILINGHUGGER)) || (th->flags8 & MF8_SEEKERMISSILENOZ))
 	{
 		velocity.Z = 0;
 	}
 	// [RH] Adjust the trajectory if the missile will go over the target's head.
-	else if (z - source->z >= dest->height)
+	else if (z - source->z >= destTopOffset)
 	{
-		velocity.Z += dest->height - z + source->z;
+		velocity.Z += destTopOffset - z + source->z;
 	}
 	velocity.Resize (speed);
 	th->velx = (fixed_t)(velocity.X);

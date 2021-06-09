@@ -104,7 +104,20 @@ void AFastProjectile::Tick ()
 			z += zfrac;
 			UpdateWaterLevel (oldz);
 			oldz = z;
-			if (z <= floorz)
+
+			fixed_t topOffset, bottomOffset;
+			// For missiles, offset it's height down by half to match the sprite
+			if ((flags & MF_MISSILE) && ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX) {
+				topOffset = height / 2;
+				bottomOffset = height / 2;
+			}
+			else
+			{
+				topOffset = height;
+				bottomOffset = 0;
+			}
+
+			if (z - bottomOffset <= floorz)
 			{ // Hit the floor
 
 				if (floorpic == skyflatnum && !(flags3 & MF3_SKYEXPLODE))
@@ -120,7 +133,7 @@ void AFastProjectile::Tick ()
 				P_ExplodeMissile (this, NULL, NULL);
 				return;
 			}
-			if (z + height > ceilingz)
+			if (z + topOffset > ceilingz)
 			{ // Hit the ceiling
 
 				if (ceilingpic == skyflatnum &&  !(flags3 & MF3_SKYEXPLODE))

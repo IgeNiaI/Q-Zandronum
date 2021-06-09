@@ -206,6 +206,7 @@ FONT 8, "Tahoma", 0, 0, 1
     AUTOCHECKBOX    "Monsters can't be pushed off cliffs",				IDC_COMPATF_CROSSDROPOFF,						169, 150, 126, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Old damage radius (infinite height)",				IDC_COMPATF_OLDRADIUSDMG,						169, 160, 126, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Use original missile clipping height",				IDC_COMPATF_MISSILECLIP,						169, 170, 122, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Enable projectile hitbox fix",						IDC_ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX,		169, 180, 122, 10, 0, WS_EX_LEFT
     GROUPBOX        "Oldschool",										IDC_STATIC,										14, 6, 140, 109, 0, WS_EX_LEFT
 }
 
