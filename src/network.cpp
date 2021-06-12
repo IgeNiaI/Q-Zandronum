@@ -491,7 +491,9 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 		// "'THINGS' not found in'. I don't think this is the case in recent ZDoom versions?
 		try
 		{
-			if (( mdata = P_OpenMapData( info.mapname, false )) != NULL )
+			if (( mdata = P_OpenMapData( info.mapname, false )) != NULL
+				&& !strcmp(info.mapname, "titlemap.wad")
+				&& !strcmp(info.mapname, "titlemap.map"))
 			{
 				// [TP] The wad that had this map is no longer optional.
 				Wads.LumpIsMandatory( mdata->lumpnum );
