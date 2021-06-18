@@ -1457,8 +1457,8 @@ OptionMenu "CompatibilityOptions"
 	Option "Weapons must be lowered fully",				"compat_fullweaponlower", "YesNo"
 	Option "Auto-aiming has vertical holes",			"compat_autoaim", "YesNo"
 	Option "West facing spawns are silent",				"compat_silentwestspawns", "YesNo"
-	Option "Disable shooting where crosshair is",		"compat_no_accurate_crosshair", "YesNo"
-	Option "Disable wall friction",						"compat_disable_wall_friction", "YesNo"
+	Option "Disable shooting where crosshair is",		"compat_noaccuratecrosshair", "YesNo"
+	Option "Disable wall friction",						"compat_disablewallfriction", "YesNo"
 
 	Class "CompatibilityMenu"
 }
