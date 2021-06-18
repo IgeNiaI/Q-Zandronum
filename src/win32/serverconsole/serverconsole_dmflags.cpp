@@ -117,7 +117,7 @@ static	ULONG			g_ulLMSSpectatorSettings;
 //==================================================================================
 // [RC] This big map of fun ties all of the DMFlags to their respective checkboxes.
 //==================================================================================
-#define NUMBER_OF_FLAGS 100
+#define NUMBER_OF_FLAGS 101
 
 static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] = 
 {
@@ -156,7 +156,6 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ DF2_NO_RESPAWN_INVUL,								IDC_NO_RESPAWN_INVUL,							&g_ulDMFlags2, },
 	{ DF2_COOP_SHOTGUNSTART,							IDC_SHOTGUN_START,								&g_ulDMFlags2, },
 	{ DF2_SAME_SPAWN_SPOT,								IDC_SAME_SPAWN_SPOT,							&g_ulDMFlags2, },
-	{ ZADF_YES_KEEP_TEAMS,								IDC_ZADF_YES_KEEP_TEAMS,						&g_ulZADMFlags, },
 	{ DF2_YES_KEEPFRAGS,								IDC_DF2_YES_KEEP_FRAGS,							&g_ulDMFlags2, },
 	{ DF2_NO_RESPAWN,									IDC_DF2_NO_RESPAWN,								&g_ulDMFlags2, },
 	{ DF2_YES_LOSEFRAG,									IDC_DF2_YES_LOSEFRAG,							&g_ulDMFlags2, },
@@ -173,6 +172,9 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ ZADF_AWARD_DAMAGE_INSTEAD_KILLS,					IDC_ZADF_AWARD_DAMAGE_INSTEAD_KILLS,			&g_ulZADMFlags, },
 	{ ZADF_FORCE_ALPHA,									IDC_ZADF_FORCE_ALPHA,							&g_ulZADMFlags, },
 	{ ZADF_COOP_SP_ACTOR_SPAWN,							NULL,											&g_ulZADMFlags, },
+	{ ZADF_YES_KEEP_TEAMS,								IDC_ZADF_YES_KEEP_TEAMS,						&g_ulZADMFlags, },
+	{ ZADF_DISABLE_CROSSHAIR_ACCURATE,					IDC_ZADF_DISABLE_CROSSHAIR_ACCURATE,			&g_ulZADMFlags, },
+	{ ZADF_DISABLE_WALL_FRICTION,						IDC_ZADF_DISABLE_WALL_FRICTION,					&g_ulZADMFlags, },
 	{ COMPATF_SHORTTEX,									IDC_SHORTTEX,									&g_ulCompatFlags, },
 	{ COMPATF_STAIRINDEX,								IDC_STAIRINDEX,									&g_ulCompatFlags, },
 	{ COMPATF_LIMITPAIN,								IDC_LIMITPAIN,									&g_ulCompatFlags, },
@@ -194,7 +196,6 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ COMPATF_SECTORSOUNDS,								IDC_COMPATF_SECTORSOUNDS,						&g_ulCompatFlags, },
 	{ COMPATF_MISSILECLIP,								IDC_COMPATF_MISSILECLIP,						&g_ulCompatFlags, },
 	{ COMPATF_CROSSDROPOFF,								IDC_COMPATF_CROSSDROPOFF,						&g_ulCompatFlags, },
-	{ ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,				IDC_ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE,		&g_ulZacompatFlags, },
 	{ ZACOMPATF_LIMITED_AIRMOVEMENT,					IDC_LIMITED_AIRMOVEMENT,						&g_ulZacompatFlags, },
 	{ ZACOMPATF_PLASMA_BUMP_BUG,						IDC_PLASMA_BUMP_BUG,							&g_ulZacompatFlags, },
 	{ ZACOMPATF_INSTANTRESPAWN,							IDC_INSTANTRESPAWN,								&g_ulZacompatFlags, },

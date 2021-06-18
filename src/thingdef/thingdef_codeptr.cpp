@@ -1714,7 +1714,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 		fixed_t SavedPlayerPitch = self->pitch;
 		self->pitch -= pitch;
 
-		if (!(zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE))
+		if (!(zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE))
 		{
 			//*************************************************************************************************************************
 			// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values

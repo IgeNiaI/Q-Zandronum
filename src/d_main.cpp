@@ -591,21 +591,23 @@ CUSTOM_CVAR (Int, zadmflags, 0, CVAR_SERVERINFO)
 
 CVAR (Flag, sv_noidentifytarget,			zadmflags, ZADF_NO_IDENTIFY_TARGET);
 CVAR (Flag, sv_applylmsspectatorsettings,	zadmflags, ZADF_ALWAYS_APPLY_LMS_SPECTATORSETTINGS);
-CVAR (Flag, sv_nocoopinfo,			zadmflags, ZADF_NO_COOP_INFO);
-CVAR (Flag, sv_unblockplayers,			zadmflags, ZADF_UNBLOCK_PLAYERS);
-CVAR (Flag, sv_nomedals,			zadmflags, ZADF_NO_MEDALS);
-CVAR (Flag, sv_sharekeys,			zadmflags, ZADF_SHARE_KEYS);
-CVAR (Flag, sv_keepteams,			zadmflags, ZADF_YES_KEEP_TEAMS);
-CVAR (Flag, sv_forcegldefaults,		zadmflags, ZADF_FORCE_GL_DEFAULTS);
-CVAR (Flag, sv_norocketjumping,		zadmflags, ZADF_NO_ROCKET_JUMPING);
+CVAR (Flag, sv_nocoopinfo,					zadmflags, ZADF_NO_COOP_INFO);
+CVAR (Flag, sv_unblockplayers,				zadmflags, ZADF_UNBLOCK_PLAYERS);
+CVAR (Flag, sv_nomedals,					zadmflags, ZADF_NO_MEDALS);
+CVAR (Flag, sv_sharekeys,					zadmflags, ZADF_SHARE_KEYS);
+CVAR (Flag, sv_keepteams,					zadmflags, ZADF_YES_KEEP_TEAMS);
+CVAR (Flag, sv_forcegldefaults,				zadmflags, ZADF_FORCE_GL_DEFAULTS);
+CVAR (Flag, sv_norocketjumping,				zadmflags, ZADF_NO_ROCKET_JUMPING);
 CVAR (Flag, sv_awarddamageinsteadkills,		zadmflags, ZADF_AWARD_DAMAGE_INSTEAD_KILLS);
-CVAR (Flag, sv_forcealpha,		zadmflags, ZADF_FORCE_ALPHA);
-CVAR (Flag, sv_coop_spactorspawn,	zadmflags, ZADF_COOP_SP_ACTOR_SPAWN);
-CVAR (Flag, sv_maxbloodscalar,		zadmflags, ZADF_MAX_BLOOD_SCALAR);
-CVAR (Flag, sv_unblockallies,		zadmflags, ZADF_UNBLOCK_ALLIES);
-CVAR (Flag, sv_nodrop,				zadmflags, ZADF_NODROP);
-CVAR (Flag, sv_survival_nomapresetondeath, zadmflags, ZADF_SURVIVAL_NO_MAP_RESET_ON_DEATH);
-CVAR (Flag, sv_deadplayerscankeepinventory, zadmflags, ZADF_DEAD_PLAYERS_CAN_KEEP_INVENTORY);
+CVAR (Flag, sv_forcealpha,					zadmflags, ZADF_FORCE_ALPHA);
+CVAR (Flag, sv_coop_spactorspawn,			zadmflags, ZADF_COOP_SP_ACTOR_SPAWN);
+CVAR (Flag, sv_maxbloodscalar,				zadmflags, ZADF_MAX_BLOOD_SCALAR);
+CVAR (Flag, sv_unblockallies,				zadmflags, ZADF_UNBLOCK_ALLIES);
+CVAR (Flag, sv_nodrop,						zadmflags, ZADF_NODROP);
+CVAR (Flag, sv_survival_nomapresetondeath,	zadmflags, ZADF_SURVIVAL_NO_MAP_RESET_ON_DEATH);
+CVAR (Flag, sv_deadplayerscankeepinventory,	zadmflags, ZADF_DEAD_PLAYERS_CAN_KEEP_INVENTORY);
+CVAR (Flag, sv_noaccuratecrosshair,			zadmflags, ZADF_DISABLE_CROSSHAIR_ACCURATE);
+CVAR (Flag, sv_disablewallfriction,			zadmflags, ZADF_DISABLE_WALL_FRICTION);
 
 //==========================================================================
 //
@@ -788,8 +790,6 @@ CVAR (Flag, compat_fullweaponlower,								zacompatflags, ZACOMPATF_FULL_WEAPON_
 CVAR (Flag, compat_autoaim,										zacompatflags, ZACOMPATF_AUTOAIM);
 CVAR (Flag, compat_silentwestspawns,							zacompatflags, ZACOMPATF_SILENT_WEST_SPAWNS);
 CVAR (Flag, compat_skulltagjumping,								zacompatflags, ZACOMPATF_SKULLTAG_JUMPING);
-CVAR (Flag, compat_no_accurate_crosshair,						zacompatflags, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
-CVAR (Flag, compat_disable_wall_friction,						zacompatflags, ZACOMPATF_DISABLE_WALL_FRICTION);
 
 #ifdef _WIN32
 extern int AppActive;
