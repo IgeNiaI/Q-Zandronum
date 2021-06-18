@@ -2974,7 +2974,7 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	{
 		if (mo->reactiontime > 0) // player coming right out of a teleporter.
 			return;
-		else if(zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION)
+		else if(zadmflags & ZADF_DISABLE_WALL_FRICTION)
 			preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };
 	}
 
@@ -3066,7 +3066,7 @@ retry:
 	if (playerNotVoodoo)
 	{
 		// [Ivory]: Quake like wall friction
-		if ((zacompatflags & ZACOMPATF_DISABLE_WALL_FRICTION) && (mo->velx || mo->vely))
+		if ((zadmflags & ZADF_DISABLE_WALL_FRICTION) && (mo->velx || mo->vely))
 		{
 			FVector2 slideVel = FVector2(FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely)).Unit();
 			FVector2 velUnit = preSlideVel.Unit();
@@ -4208,7 +4208,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 	
 	if (t1->player != NULL)
 	{
-		if (zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE)
+		if (zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE)
 		{
 			shootz = t1->z - t1->floorclip + (t1->height >> 1) + 
 					 FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
@@ -4840,7 +4840,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	vy = FixedMul(finecosine[pitch], finesine[angle]);
 	vz = finesine[pitch];
 
-	if (!(zacompatflags & ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE) && source->player)
+	if (!(zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE) && source->player)
 	{
 		//*************************************************************************************************************************
 		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values

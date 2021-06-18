@@ -1311,6 +1311,8 @@ OptionMenu GameplayOptions
 	Option "Force OpenGL defaults",	"sv_forcegldefaults", "YesNo"
 	Option "Force translucency",	"sv_forcealpha", "YesNo"
 	Option "Full blood brightness",	"sv_maxbloodscalar", "YesNo"
+	Option "Disable shooting where crosshair is",	"sv_noaccuratecrosshair", "YesNo"
+	Option "Disable wall friction",					"sv_disablewallfriction", "YesNo"
 	// [TP] --
 
 	StaticText " "
@@ -1457,8 +1459,6 @@ OptionMenu "CompatibilityOptions"
 	Option "Weapons must be lowered fully",				"compat_fullweaponlower", "YesNo"
 	Option "Auto-aiming has vertical holes",			"compat_autoaim", "YesNo"
 	Option "West facing spawns are silent",				"compat_silentwestspawns", "YesNo"
-	Option "Disable shooting where crosshair is",		"compat_no_accurate_crosshair", "YesNo"
-	Option "Disable wall friction",						"compat_disable_wall_friction", "YesNo"
 
 	Class "CompatibilityMenu"
 }
