@@ -94,6 +94,7 @@ static FRandom pr_poison ("PoisonDamage");
 static FRandom pr_switcher ("SwitchTarget");
 static FRandom pr_kickbackdir ("KickbackDir");
 
+CVAR( Int, sv_terminatorfragaward, 10, CVAR_SERVERINFO | CVAR_LATCH );
 EXTERN_CVAR (Bool, show_obituaries)
 EXTERN_CVAR (Int, sv_endleveldelay)
 // [BB] FIXME
@@ -571,7 +572,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 			{
 				// [BC] Frags are server side.
 				if ( NETWORK_InClientMode() == false )
-					PLAYER_SetFragcount( player, player->fragcount - (( bPossessedTerminatorArtifact ) ? 10 : 1 ), true, true );
+					PLAYER_SetFragcount( player, player->fragcount - (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );
 			}
 			else
 			{
@@ -586,9 +587,9 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 						PLAYER_SetFragcount( player, player->fragcount - 1, true, true );
 
 					if ( source->IsTeammate( this ))
-						PLAYER_SetFragcount( source->player, source->player->fragcount - (( bPossessedTerminatorArtifact ) ? 10 : 1 ), true, true );
+						PLAYER_SetFragcount( source->player, source->player->fragcount - (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );
 					else
-						PLAYER_SetFragcount( source->player, source->player->fragcount + (( bPossessedTerminatorArtifact ) ? 10 : 1 ), true, true );
+						PLAYER_SetFragcount( source->player, source->player->fragcount + (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );
 				}
 
 				// [BC] Add this frag to the server's statistic module.
@@ -782,7 +783,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 		// count environment kills against you
 		if (!source)
 		{
-			PLAYER_SetFragcount( player, player->fragcount - (( bPossessedTerminatorArtifact ) ? 10 : 1 ), true, true );	// [RH] Cumulative frag count
+			PLAYER_SetFragcount( player, player->fragcount - (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );	// [RH] Cumulative frag count
 
 			// Spawning in nukage or getting crushed is NOT
 			// somewhere where you would want to be at when you respawn again
