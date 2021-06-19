@@ -5129,7 +5129,7 @@ void AActor::FreeNetID ()
 //
 //==========================================================================
 
-AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t iz, replace_t allowreplacement, bool SpawningMapThing, player_t *ownerPlayer)
+AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t iz, replace_t allowreplacement, bool SpawningMapThing, player_t *ownerPlayer, bool skipOwner)
 {
 	g_lSpawnCount++;
 	g_SpawnCycles.Clock();
@@ -5165,7 +5165,7 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 
 	// [geNia] If the projectile hitbox fix is enabled, shift spawn z by half height
 	if ( actor->isMissile() && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX )
-		&& ( NETWORK_GetState( ) != NETSTATE_CLIENT ) )
+		&& ( NETWORK_GetState( ) != NETSTATE_CLIENT || ownerPlayer - players == consoleplayer ) )
 		iz -= actor->height / 2;
 
 	actor->x = actor->PrevX = ix;
@@ -5335,13 +5335,18 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 			SERVERCOMMANDS_SetMapNumTotalSecrets();
 	}
 
+	actor->ownerPlayer = ownerPlayer;
+
+	if ( skipOwner && !( actor->ulNetworkFlags & NETFL_SERVERNETID ) )
+		actor->ulNetworkFlags |= NETFL_SKIPOWNER;
+
 	// Forget ownerPlayer to properly assign lNetID
 	if ( actor->ulNetworkFlags & NETFL_SERVERNETID )
 		ownerPlayer = NULL;
 
 	if ( ( ( actor->ulNetworkFlags & NETFL_NONETID ) == false ) && ( ( actor->ulNetworkFlags & NETFL_SERVERSIDEONLY ) == false )
 		&& ( ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			|| ( NETWORK_InClientMode( ) && ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS ) && ( ownerPlayer - players == consoleplayer ) ) ) )
+			|| ( NETWORK_InClientMode( ) && NETWORK_ClientsideFunctionsAllowed( ownerPlayer ) && ( ownerPlayer - players == consoleplayer ) ) ) )
 	{
 		actor->lNetID = g_NetIDList.getNewID( ownerPlayer );
 		g_NetIDList.useID ( actor->lNetID, actor );
@@ -5375,24 +5380,24 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 	return actor;
 }
 
-AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer)
+AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer, bool skipOwner)
 {
 	FName classname(type, true);
 	if (classname == NAME_None)
 	{
 		I_Error("Attempt to spawn actor of unknown type '%s'\n", type);
 	}
-	return Spawn(classname, x, y, z, allowreplacement, ownerPlayer);
+	return Spawn(classname, x, y, z, allowreplacement, ownerPlayer, skipOwner);
 }
 
-AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer)
+AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer, bool skipOwner)
 {
 	const PClass *cls = PClass::FindClass(classname);
 	if (cls == NULL) 
 	{
 		I_Error("Attempt to spawn actor of unknown type '%s'\n", classname.GetChars());
 	}
-	return AActor::StaticSpawn (cls, x, y, z, allowreplacement, false, ownerPlayer);
+	return AActor::StaticSpawn (cls, x, y, z, allowreplacement, false, ownerPlayer, skipOwner);
 }
 
 void AActor::LevelSpawned ()

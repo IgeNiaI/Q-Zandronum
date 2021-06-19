@@ -124,6 +124,18 @@ player_t* GetInstigator(AActor *it, bool isFromAcs)
 	return it ? it->player : NULL;
 }
 
+int GetPlayerNumToSkip(AActor *it, bool isFromAcs, bool isFromDecorate)
+{
+	if (
+		( isFromAcs && ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
+		||
+		( isFromDecorate && ( zacompatflags & ZACOMPATF_ALLOW_MORE_CLIENTSIDE_FUNCTIONS ) && ( it->ulNetworkFlags & NETFL_SKIPOWNER ) )
+	)
+		return NETWORK_GetActorsOwnerPlayer( it ) - players;
+
+	return -1;
+}
+
 FUNC(LS_NOP)
 {
 	return false;

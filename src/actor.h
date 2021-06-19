@@ -485,6 +485,9 @@ enum
 	// [geNia] This actor receives NetID from server pool instead of player one.
 	NETFL_SERVERNETID			= 0x00000100,
 
+	// [geNia] Don't tell this actor's owner about location and velocity updates.
+	NETFL_SKIPOWNER				= 0x00000200,
+
 	// [BC] End of new ST flags.
 
 // --- mobj.renderflags ---
@@ -732,7 +735,7 @@ public:
 
 	void Serialize (FArchive &arc);
 
-	static AActor *StaticSpawn (const PClass *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, bool SpawningMapThing = false, player_t *ownerPlayer = NULL);
+	static AActor *StaticSpawn (const PClass *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, bool SpawningMapThing = false, player_t *ownerPlayer = NULL, bool skipOwner = false);
 
 	inline AActor *GetDefault () const
 	{
@@ -1057,6 +1060,7 @@ public:
 	SDWORD			threshold;		// if > 0, the target will be chased
 									// no matter what (even if shot)
 	player_t		*player;		// only valid if type of APlayerPawn
+	player_t		*ownerPlayer;	// player who spawned this actor directly or via another actor
 	TObjPtr<AActor>	LastLookActor;	// Actor last looked for (if TIDtoHate != 0)
 	fixed_t			SpawnPoint[3]; 	// For nightmare respawn
 	WORD			SpawnAngle;
@@ -1360,18 +1364,18 @@ public:
 bool P_IsTIDUsed(int tid);
 int P_FindUniqueTID(int start_tid, int limit);
 
-inline AActor *Spawn (const PClass *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL)
+inline AActor *Spawn (const PClass *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL, bool skipOwner = false)
 {
-	return AActor::StaticSpawn (type, x, y, z, allowreplacement, false, ownerPlayer);
+	return AActor::StaticSpawn (type, x, y, z, allowreplacement, false, ownerPlayer, skipOwner);
 }
 
-AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL);
-AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL);
+AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL, bool skipOwner = false);
+AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL, bool skipOwner = false);
 
 template<class T>
-inline T *Spawn (fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL)
+inline T *Spawn (fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL, bool skipOwner = false)
 {
-	return static_cast<T *>(AActor::StaticSpawn (RUNTIME_CLASS(T), x, y, z, allowreplacement, false, ownerPlayer));
+	return static_cast<T *>(AActor::StaticSpawn (RUNTIME_CLASS(T), x, y, z, allowreplacement, false, ownerPlayer, skipOwner));
 }
 
 

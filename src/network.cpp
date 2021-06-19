@@ -1261,6 +1261,54 @@ bool NETWORK_InClientMode( )
 
 //*****************************************************************************
 //
+bool NETWORK_IsUnlaggedEnabled( const player_t *player )
+{
+	return player && ( !( zadmflags & ZADF_NOUNLAGGED ) || ( player->userinfo.GetClientFlags() & CLIENTFLAGS_UNLAGGED ) );
+}
+
+//*****************************************************************************
+//
+bool NETWORK_ClientsideFunctionsAllowed( const player_t* player )
+{
+	// Check if the actor is the player and clientside functions are allowed
+	return (player
+		&& ( ( NETWORK_GetState() == NETSTATE_SERVER ) || ( player - players == consoleplayer ) )
+		&& NETWORK_IsUnlaggedEnabled( player ) )
+		&& ( zacompatflags & ZACOMPATF_ALLOW_MORE_CLIENTSIDE_FUNCTIONS );
+}
+
+//*****************************************************************************
+//
+bool NETWORK_ClientsideFunctionsAllowed( const AActor* actor )
+{
+	// Allow functions that don't affect actors
+	if (!actor)
+		return true;
+
+	// Allow all functions for clientside actors
+	if ((actor->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) || ( actor->lNetID == -1 ))
+		return true;
+	
+	return NETWORK_ClientsideFunctionsAllowed( actor->player ) && ( actor->player->mo == actor );
+}
+
+//*****************************************************************************
+//
+bool NETWORK_ClientsideFunctionsAllowedOrIsServer( const AActor* actor )
+{
+	// Only check in client mode
+	if (NETWORK_InClientMode( ))
+	{
+		return NETWORK_ClientsideFunctionsAllowed( actor );
+	}
+	else
+	{
+		return true;
+	}
+}
+
+//*****************************************************************************
+//
 bool NETWORK_IsConsolePlayerOrNotInClientMode( const player_t *pPlayer )
 {
 	// [BB] Not in client mode, so just return true.
@@ -1355,6 +1403,18 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 
 		// Thrust
 		|| ( Special == ThrustThing ) || ( Special == ThrustThingZ );
+}
+
+//*****************************************************************************
+//
+player_t* NETWORK_GetActorsOwnerPlayer( const AActor *pActor )
+{
+	if ( !pActor )
+		return NULL;
+	if ( pActor->player )
+		return pActor->player;
+
+	return pActor->ownerPlayer;
 }
 
 //*****************************************************************************

@@ -262,6 +262,14 @@ const PClass	*NETWORK_GetClassFromIdentification( USHORT usActorNetworkIndex );
 
 // [BB] Returns true if either "NETSTATE_CLIENT" or a client side demo is played.
 bool			NETWORK_InClientMode( );
+// [geNia] Check if this client's unlagged is enabled.
+bool			NETWORK_IsUnlaggedEnabled( const player_t *player );
+// [geNia] Check if in client mode and clientside functions are allowed
+bool			NETWORK_ClientsideFunctionsAllowed( const player_t* player );
+// [geNia] Check if in client mode and clientside functions are allowed
+bool			NETWORK_ClientsideFunctionsAllowed( const AActor* actor );
+// [geNia] Check if in client mode and clientside functions are allowed
+bool			NETWORK_ClientsideFunctionsAllowedOrIsServer( const AActor* actor );
 bool			NETWORK_IsConsolePlayerOrNotInClientMode( const player_t *pPlayer );
 bool			NETWORK_IsConsolePlayer( const AActor *pActor );
 bool			NETWORK_IsConsolePlayerOrSpiedByConsolePlayerOrNotInClientMode( const player_t *pPlayer );
@@ -269,6 +277,7 @@ bool			NETWORK_IsActorClientHandled( const AActor *pActor );
 bool			NETWORK_InClientModeAndActorNotClientHandled( const AActor *pActor );
 bool			NETWORK_IsClientPredictedSpecial( const int Special );
 bool			NETWORK_ShouldActorNotBeSpawned ( const AActor *pSpawner, const PClass *pSpawnType, const bool bForceClientSide = false );
+player_t*		NETWORK_GetActorsOwnerPlayer ( const AActor *pActor );
 
 // [BB] Generate a checksum from a ticcmd_t.
 SDWORD			NETWORK_Check ( ticcmd_t *pCmd );
