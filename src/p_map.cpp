@@ -1186,7 +1186,7 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 		// MBF bouncer might have a non-0 damage value, but they must not deal damage on impact either.
 		if ((tm.thing->BounceFlags & BOUNCE_Actors) && (tm.thing->Damage == 0 || !(tm.thing->flags & MF_MISSILE)))
 		{
-			return (tm.thing->target == thing || !(thing->flags & MF_SOLID));
+			return ((tm.thing->target == thing && !(tm.thing->flags8 & MF8_HITOWNER)) || !(thing->flags & MF_SOLID));
 		}
 
 		switch (tm.thing->SpecialMissileHit(thing))
@@ -1205,7 +1205,7 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 
 		if (tm.thing->target != NULL)
 		{
-			if (thing == tm.thing->target)
+			if (thing == tm.thing->target && !(tm.thing->flags8 & MF8_HITOWNER))
 			{ // Don't missile self
 				return true;
 			}
