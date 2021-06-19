@@ -254,6 +254,7 @@ static FFlagDef ActorFlags[]=
 	DEFINE_FLAG(MF7, NOKILLSCRIPTS, AActor, flags7),
 		
 	// [geNia] New flags
+	DEFINE_FLAG(MF8, HITOWNER, AActor, flags8),
 	DEFINE_FLAG(MF8, NOEXPLODECEILING, AActor, flags8),
 	DEFINE_FLAG(MF8, SEEKERMISSILENOZ, AActor, flags8),
 
