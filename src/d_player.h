@@ -111,6 +111,7 @@ public:
 	virtual void DropImportantItems( bool bLeavingGame, AActor *pSource = NULL );
 
 	virtual int WalkCrouchState (ticcmd_t *cmd);
+	virtual bool ShouldPlaySound();
 	virtual bool ShouldPlayFootsteps(ticcmd_t *cmd, bool landing);
 	virtual void PlayFootsteps (ticcmd_t *cmd);
 	virtual void TweakSpeeds (ticcmd_t *cmd, int &forwardmove, int &sidemove);
