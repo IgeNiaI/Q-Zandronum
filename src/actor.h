@@ -352,6 +352,7 @@ enum
 	MF7_NOKILLSCRIPTS	= 0x01000000,	// [JM] No "KILL" Script on death whatsoever, even if forced by GameInfo.
 
 	// [geNia] New Q-Zandronum flags
+	MF8_HITOWNER		= 0x00000010,	// projectile can hit the actor that fired it
 	MF8_NOEXPLODECEILING= 0x00010000,	// Missile stops at ceiling instead of exploding
 	MF8_SEEKERMISSILENOZ= 0x00020000,	// [geNia] Same as MF2_SEEKERMISSILE, but doesn't trace along Z axis
 
