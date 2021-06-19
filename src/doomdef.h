@@ -488,9 +488,8 @@ enum
 	// [geNia] Disable crosshair accurate weapons
 	ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE = 1 << 27,
 
-	// [geNia] Disable executing ACS_ExecuteWithResult on client
-	// TODO add new prediction ACS type for this
-	ZACOMPATF_NO_PREDICTION_ACS = 1 << 28,
+	// [geNia] Enable predicting Decorate and ACS functions on clients
+	ZACOMPATF_PREDICT_CLIENTSIDE_FUNCTIONS = 1 << 28,
 
 	// [geNia] Disable wallfriction
 	ZACOMPATF_DISABLE_WALL_FRICTION = 1 << 29,
