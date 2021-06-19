@@ -1261,6 +1261,54 @@ bool NETWORK_InClientMode( )
 
 //*****************************************************************************
 //
+bool NETWORK_IsUnlaggedEnabled( const player_t *player )
+{
+	return player && ( !( zadmflags & ZADF_NOUNLAGGED ) || ( player->userinfo.GetClientFlags() & CLIENTFLAGS_UNLAGGED ) );
+}
+
+//*****************************************************************************
+//
+bool NETWORK_ClientsideFunctionsAllowed( const player_t* player )
+{
+	// Check if the actor is the player and clientside functions are allowed
+	return (player
+		&& ( ( NETWORK_GetState() == NETSTATE_SERVER ) || ( player - players == consoleplayer ) )
+		&& NETWORK_IsUnlaggedEnabled( player ) )
+		&& ( zacompatflags & ZACOMPATF_PREDICT_CLIENTSIDE_FUNCTIONS );
+}
+
+//*****************************************************************************
+//
+bool NETWORK_ClientsideFunctionsAllowed( const AActor* actor )
+{
+	// Allow functions that don't affect actors
+	if (!actor)
+		return true;
+
+	// Allow all functions for clientside actors
+	if (actor->ulNetworkFlags & NETFL_CLIENTSIDEONLY)
+		return true;
+	
+	return NETWORK_ClientsideFunctionsAllowed( actor->player ) && actor->player->mo == actor;
+}
+
+//*****************************************************************************
+//
+bool NETWORK_ClientsideFunctionsAllowedOrIsServer( const AActor* actor )
+{
+	// Only check in client mode
+	if (NETWORK_GetState() == NETSTATE_CLIENT)
+	{
+		return NETWORK_ClientsideFunctionsAllowed( actor );
+	}
+	else
+	{
+		return true;
+	}
+}
+
+//*****************************************************************************
+//
 bool NETWORK_IsConsolePlayerOrNotInClientMode( const player_t *pPlayer )
 {
 	// [BB] Not in client mode, so just return true.

@@ -4987,7 +4987,7 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 
 	// [geNia] If the projectile hitbox fix is enabled, shift spawn z by half height
 	if ( actor->isMissile() && ( zacompatflags & ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX )
-		&& ( NETWORK_GetState( ) != NETSTATE_CLIENT ) )
+		&& ( NETWORK_GetState( ) != NETSTATE_CLIENT || ownerPlayer - players == consoleplayer ) )
 		iz -= actor->height / 2;
 
 	actor->x = actor->PrevX = ix;
@@ -5159,7 +5159,7 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 
 	if ( ( ( actor->ulNetworkFlags & NETFL_NONETID ) == false ) && ( ( actor->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) && ( ( actor->ulNetworkFlags & NETFL_SERVERSIDEONLY ) == false )
 		&& ( ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			|| ( NETWORK_InClientMode( ) && ( zacompatflags & ZACOMPATF_PREDICT_CLIENTSIDE_FUNCTIONS ) && ( ownerPlayer - players == consoleplayer ) ) ) )
+			|| ( NETWORK_InClientMode( ) && NETWORK_ClientsideFunctionsAllowed( ownerPlayer ) && ( ownerPlayer - players == consoleplayer ) ) ) )
 	{
 		actor->lNetID = g_NetIDList.getNewID( ownerPlayer );
 		g_NetIDList.useID ( actor->lNetID, actor );
