@@ -2464,6 +2464,19 @@ int APlayerPawn::WalkCrouchState (ticcmd_t *cmd)
 
 //===========================================================================
 //
+// APlayerPawn :: ShouldPlaySound
+//
+// Tells if should play player sounds like *jump or *grunt
+//
+//===========================================================================
+
+bool APlayerPawn::ShouldPlaySound()
+{
+	return (NETWORK_GetState() == NETSTATE_SERVER) || ((CLIENT_PREDICT_IsPredicting() == false) && (player - players == consoleplayer));
+}
+
+//===========================================================================
+//
 // APlayerPawn :: ShouldPlayFootstep
 //
 // Tells if should play footsteps based on walk/crouch state
@@ -2473,6 +2486,9 @@ int APlayerPawn::WalkCrouchState (ticcmd_t *cmd)
 bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd, bool landing)
 {
 	if ( CLIENT_PREDICT_IsPredicting() )
+		return false;
+	
+	if ( NETWORK_InClientMode() && (player - players != consoleplayer) )
 		return false;
 
 	if ((!player->onground && !landing) || player->mo->waterlevel >= 2 ||
@@ -3390,8 +3406,8 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 	// crouch slide sound start/stop
 	if (isSliding && !player->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
 	{
-		if (!CLIENT_PREDICT_IsPredicting())
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM);
+		if ( player->mo->ShouldPlaySound() )
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, true, player - players);
 	}
 	else if (!isSliding && player->isCrouchSliding)
 	{
@@ -3418,8 +3434,8 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	// Wall climb parameters and sound start/stop
 	if (isClimbing && !player->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
 	{
-		if (!CLIENT_PREDICT_IsPredicting())
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM);
+		if ( player->mo->ShouldPlaySound() )
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, true, player - players);
 	}
 	else if (!isClimbing && player->isWallClimbing)
 	{
@@ -3488,12 +3504,12 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				if (!(mvFlags & MV_SILENT) && !isClimbingLedge)
 				{
 					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-					if ( CLIENT_PREDICT_IsPredicting() == false )
+					if ( ShouldPlaySound() )
 					{
 						if (isRampJumper && velz > 0)
-							S_Sound(player->mo, CHAN_BODY, "*rampjump", 1, ATTN_NORM);
+							S_Sound(player->mo, CHAN_BODY, "*rampjump", 1, ATTN_NORM, true, player - players);
 						else if (!player->mo->JumpSoundDelay)
-							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM);
+							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, true, player - players);
 
 						player->mo->JumpSoundDelay = 3;
 					}
@@ -3572,8 +3588,8 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 
 				if (!(mvFlags & MV_SILENT))
 				{
-					if (!CLIENT_PREDICT_IsPredicting())
-						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM);
+					if ( ShouldPlaySound() )
+						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, player - players);
 				}
 
 				player->jumpTics = JumpDelay;
