@@ -1225,7 +1225,7 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 	}
 	// [BB] The clients may not do this.
 	if ( (target->flags & MF_SKULLFLY)
-	     && ( NETWORK_InClientMode() == false ) )
+	     && ( NETWORK_ClientsideFunctionsAllowedOrIsServer( target ) ) )
 	{
 		target->velx = target->vely = target->velz = 0;
 
@@ -1341,7 +1341,7 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 		( target->player->cheats & CF_REFLECTION ) &&
 		( source ) &&
 		( mod != NAME_Reflection ) &&
-		( NETWORK_InClientMode() == false ))
+		( NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) ))
 	{
 		if ( target != source )
 		{
@@ -1360,7 +1360,7 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 		&& !(inflictor->flags2 & MF2_NODMGTHRUST)
 		&& !(flags & DMG_THRUSTLESS)
 		&& (source == NULL || source->player == NULL || !(source->flags2 & MF2_NODMGTHRUST))
-		&& ( NETWORK_InClientMode() == false ) )
+		&& ( NETWORK_ClientsideFunctionsAllowedOrIsServer( target ) ) )
 	{
 		int kickback;
 
@@ -1492,6 +1492,10 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 			}
 		}
 	}
+	
+	// [geNia] If client, then only do damage calculations for clientside actors
+	if ( NETWORK_InClientMode() && !( target->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+		return -1;
 
 	// [RH] Avoid friendly fire if enabled
 	if (!(flags & DMG_FORCED) && source != NULL &&
@@ -1729,7 +1733,7 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 		// kgKILL end
 
 		// Deaths are server side.
-		if ( NETWORK_InClientMode() == false )
+		if ( ( NETWORK_InClientMode() == false ) || ( target->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
 		{
 			target->Die (source, inflictor, flags);
 		}
@@ -1821,7 +1825,8 @@ dopain:
 	}
 
 	// Nothing more to do!
-	if ( NETWORK_InClientMode() )
+	// [geNia] If client, then only do state calculations for clientside actors
+	if ( NETWORK_InClientMode() && !( target->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
 		return -1;
 
 	target->reactiontime = 0;			// we're awake now...	
