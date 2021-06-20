@@ -3106,7 +3106,7 @@ void A_Chase(AActor *self)
 void A_Face (AActor *self, AActor *other, angle_t max_turn, angle_t max_pitch)
 {
 	// [BC] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// [RH] Andy Baker's stealth monsters
 		if (self->flags & MF_STEALTH)
