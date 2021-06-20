@@ -3602,7 +3602,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Die)
 	ACTION_PARAM_START(1);
 	ACTION_PARAM_NAME(damagetype, 0);
 	// [BC] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
