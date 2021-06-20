@@ -622,7 +622,7 @@ void AActor::HideOrDestroyIfSafe ()
 	// state.
 	if (( GAMEMODE_GetCurrentFlags() & GMF_MAPRESETS ) &&
 		( ulSTFlags & STFL_LEVELSPAWNED ) &&
-		( NETWORK_InClientMode() == false ))
+		( NETWORK_ClientsideFunctionsAllowedOrIsServer( this ) ))
 	{
 		// [BB] Do any actor specific things that are necessary to properly hide this thing.
 		PrepareForHiding();
