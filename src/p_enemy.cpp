@@ -2468,7 +2468,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 	}
 
 	// [BC] Clients do not know what the target is.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ) )
 	{
 		actor->target = NULL;
 		actor->goal = NULL;
@@ -2574,7 +2574,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 			return;
 		}
 		// [BC/BB] In client mode, just keep moving along.
-		if ( (actor->target == NULL) && ( NETWORK_InClientMode() == false ) )
+		if ( (actor->target == NULL) && NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ) )
 		{
 			if (actor->flags & MF_FRIENDLY)
 			{
@@ -2605,7 +2605,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 		actor->flags &= ~MF_JUSTATTACKED;
 		if ((!actor->isFast()) && !dontmove &&
 			// [BC] Don't decide a new chase dir in client mode.
-			( NETWORK_InClientMode() == false ))
+			NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ))
 		{
 			P_NewChaseDir (actor);
 		}
@@ -2680,7 +2680,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 
 	if (fastchase && !dontmove &&
 		// [BC] Don't fast chase in client mode.
-		( NETWORK_InClientMode() == false ))
+		NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ))
 	{
 		if (actor->FastChaseStrafeCount > 0)
 		{
@@ -2779,7 +2779,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 	// possibly choose another target
 	if ((( NETWORK_GetState( ) != NETSTATE_SINGLE ) || actor->TIDtoHate)
 		&& !actor->threshold
-		&& ( NETWORK_InClientMode() == false )
+		&& NETWORK_ClientsideFunctionsAllowedOrIsServer( actor )
 		// [BB] In invasion mode, player doesn't have to be visible to be chased by monsters.
 		// [BB] The flags argument of P_CheckSight has to be the same here as it is in P_LookForPlayers.
 		&& !P_CheckSight (actor, actor->target, SF_SEEPASTBLOCKEVERYTHING) && ( invasion == false ) )
@@ -2821,7 +2821,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 
 		// [BC] In client mode, just keep walking until the server tells us to
 		// change directions.
-		if ( NETWORK_InClientMode() )
+		if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ) )
 		{
 			P_Move( actor );
 		}
@@ -2837,7 +2837,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 		{
 			// [BC] In client mode, just keep walking until the server tells us to
 			// change directions.
-			if ( NETWORK_InClientMode() )
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ) )
 			{
 				P_TryMove( actor, oldX, oldY, false );
 			}
