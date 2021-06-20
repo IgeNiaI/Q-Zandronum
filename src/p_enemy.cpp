@@ -2329,7 +2329,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Wander)
 
 	// [BC] In client mode, just keep walking until the server tells us to
 	// change directions.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		P_Move( self );
 		return;
