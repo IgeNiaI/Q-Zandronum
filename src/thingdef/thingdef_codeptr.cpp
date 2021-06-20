@@ -5167,7 +5167,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Teleport)
 	}
 
 	// [BB] This is handled by the server.
-	if ( NETWORK_InClientMode() && ( ( reference->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	// Randomly choose not to teleport like A_Srcr2Decide.
