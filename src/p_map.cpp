@@ -4168,7 +4168,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 {
 	// [BB] The only reason the client should try to execute P_LineAttack, is the online hitscan decal fix. 
 	// [CK] And also predicted puffs and blood decals.
-	if ( NETWORK_InClientMode()
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 )
 		&& cl_hitscandecalhack == false
 		&& CLIENT_ShouldPredictPuffs( ) == false )
 	{
@@ -4261,7 +4261,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 	{ // hit nothing
 		// [BB] No decal will be spawned, so the client stops here.
 		// [CK] But continue on if we want clientside puffs since it may occur.
-		if ( NETWORK_InClientMode() && CLIENT_ShouldPredictPuffs( ) == false )
+		if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) && CLIENT_ShouldPredictPuffs( ) == false )
 			return NULL;
 
 		if (puffDefaults == NULL)
@@ -4269,11 +4269,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		}
 		else if (puffDefaults->ActiveSound)
 		{ // Play miss sound
-			S_Sound(t1, CHAN_WEAPON, puffDefaults->ActiveSound, 1, ATTN_NORM);
-
-			// [BC] Play the hit sound to clients.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( t1, CHAN_WEAPON, S_GetName( puffDefaults->ActiveSound ), 1, ATTN_NORM );
+			S_Sound(t1, CHAN_WEAPON, puffDefaults->ActiveSound, 1, ATTN_NORM, true);
 		}
 		if (puffDefaults != NULL && puffDefaults->flags3 & MF3_ALWAYSPUFF)
 		{ // Spawn the puff anyway
@@ -4281,7 +4277,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 
 			// [CK] We don't want this function returning an actor if it's a
 			// client predicting. The client would be done regardless.
-			if ( NETWORK_InClientMode() )
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) )
 				return NULL;
 		}
 		else
@@ -4297,7 +4293,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		{
 			// [BB] The client only spawns decals, no puffs.
 			// [CK] Now there is an option for clientside puffs.
-			if ( ( NETWORK_InClientMode() == false ) || CLIENT_ShouldPredictPuffs( ) )
+			if ( NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) || CLIENT_ShouldPredictPuffs( ) )
 			{
 				// position a bit closer for puffs
 				if (trace.HitType != TRACE_HitWall || trace.Line->special != Line_Horizon)
@@ -4310,7 +4306,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			}
 
 			// [CK] If we don't want decals, stop before entering.
-			if ( NETWORK_InClientMode() && cl_hitscandecalhack == false ) 
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) && cl_hitscandecalhack == false )
 				return NULL;
 
 			// [RH] Spawn a decal
@@ -4334,7 +4330,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 				}
 
 				// [BB] Clients dont' spawn the puff, so we have to look if the default puff has a decal defined.
-				else if( NETWORK_InClientMode()
+				else if( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 )
 							&& pufftype && (GetDefaultByType (pufftype) != NULL) && GetDefaultByType (pufftype)->DecalGenerator)
 				{
 					SpawnShootDecal (GetDefaultByType (pufftype), trace);
@@ -4351,7 +4347,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 				trace.HitType == TRACE_HitFloor)
 			{
 				// [CK] We are not predicting water splashes.
-				if ( NETWORK_InClientMode() )
+				if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) )
 					return NULL;
 
 				// Using the puff's position is not accurate enough.
@@ -4362,7 +4358,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 				P_HitWater(puff, P_PointInSector(hitx, hity), hitx, hity, hitz);
 			}
 			// [BB] Decal has been spawned, so the client stops here. 
-			if ( NETWORK_InClientMode() )
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) )
 			{
 				return NULL;
 			}
@@ -4371,7 +4367,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		{
 			// [BB] No decal will be spawned, so the client stops here.
 			// [CK] Also exit if we don't want puffs, or blood decals.
-			if ( NETWORK_InClientMode()
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 )
 					&& CLIENT_ShouldPredictPuffs( ) == false
 					&& cl_hitscandecalhack == false )
 				return NULL;
@@ -4404,7 +4400,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			if (((puffDefaults != NULL && puffDefaults->flags3 & MF3_PUFFONACTORS) ||
 				(trace.Actor->flags & MF_NOBLOOD) ||
 				(trace.Actor->flags2 & (MF2_INVULNERABLE | MF2_DORMANT)))
-				&& ( NETWORK_InClientMode() == false || CLIENT_ShouldPredictPuffs( ) ) )
+				&& (NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) || CLIENT_ShouldPredictPuffs( ) ) )
 			{
 				if (!(trace.Actor->flags & MF_NOBLOOD))
 					puffFlags |= PF_HITTHINGBLEED;
@@ -4416,12 +4412,12 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			// [CK] The client by this point has predicted their desired
 			// puff and should only be here if they want puff prediction,
 			// so we can exit. We will only continue on if we want blood decals.
-			if ( NETWORK_InClientMode() && cl_hitscandecalhack == false )
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) && cl_hitscandecalhack == false )
 				return NULL;
 
 			// Allow puffs to inflict poison damage, so that hitscans can poison, too.
 			// [EP] Skip this for clients.
-			if ( ( NETWORK_InClientMode( ) == false ) && puffDefaults != NULL && puffDefaults->PoisonDamage > 0 && puffDefaults->PoisonDuration != INT_MIN)
+			if ( ( NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) ) && puffDefaults != NULL && puffDefaults->PoisonDamage > 0 && puffDefaults->PoisonDuration != INT_MIN)
 			{
 				P_PoisonMobj(trace.Actor, puff ? puff : t1, t1, puffDefaults->PoisonDamage, puffDefaults->PoisonDuration, puffDefaults->PoisonPeriod, puffDefaults->PoisonDamageType);
 			}
@@ -4430,7 +4426,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			// Note: The puff may not yet be spawned here so we must check the class defaults, not the actor.
 			int newdam = damage;
 			// [EP] Skip this for clients.
-			if ( ( NETWORK_InClientMode( ) == false ) && (damage || (puffDefaults != NULL && puffDefaults->flags6 & MF6_FORCEPAIN)))
+			if ( ( NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) ) && (damage || (puffDefaults != NULL && puffDefaults->flags6 & MF6_FORCEPAIN)))
 			{
 				int dmgflags = DMG_INFLICTOR_IS_PUFF | pflag;
 				// Allow MF5_PIERCEARMOR on a weapon as well.
@@ -4464,7 +4460,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 				if (!bloodsplatter && !axeBlood &&
 					!(trace.Actor->flags & MF_NOBLOOD) &&
 					!(trace.Actor->flags2 & (MF2_INVULNERABLE | MF2_DORMANT)) &&
-					NETWORK_InClientMode() == false )
+					NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) )
 				{
 					P_SpawnBlood(hitx, hity, hitz, angle - ANG180, newdam > 0 ? newdam : damage, trace.Actor);
 				}
@@ -4473,7 +4469,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 				{
 					// [CK] Do not do any blood splatters, that is not the function
 					// we intend to predict with blood decals.
-					if ((bloodsplatter || axeBlood) && NETWORK_InClientMode() == false )
+					if ((bloodsplatter || axeBlood) && NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) )
 					{
 						if (!(trace.Actor->flags&MF_NOBLOOD) &&
 							!(trace.Actor->flags2&(MF2_INVULNERABLE | MF2_DORMANT)))
@@ -4508,7 +4504,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			// [CK] We do not want to predict splashes right now. This puff is
 			// destroyed further down, so we can assume it would be bad to do
 			// any prediction here.
-			if ( NETWORK_InClientMode() )
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) )
 				return NULL;
 
 			if (puff == NULL)
@@ -4525,7 +4521,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 	UNLAGGED_Restore( t1 );
 
 	// [CK] In case the client ever gets this far, it should end now.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) )
 		return NULL;
 
 	if (killPuff && puff != NULL)
