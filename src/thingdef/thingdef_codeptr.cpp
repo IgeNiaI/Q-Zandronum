@@ -356,10 +356,10 @@ static void DoAttack (AActor *self, bool domelee, bool domissile,
 					  int MeleeDamage, FSoundID MeleeSound, const PClass *MissileType,fixed_t MissileHeight)
 {
 	// [BC] Let the server play these sounds.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
+		return;
 	}
 
 	if (self->target == NULL) return;
@@ -390,7 +390,7 @@ static void DoAttack (AActor *self, bool domelee, bool domissile,
 
 			// [BC] If we're the server, tell clients to spawn the missile.
 			if ( bSucces && ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
-				SERVERCOMMANDS_SpawnMissile( missile );
+				UNLAGGED_UnlagAndReplicateMissile( self, missile, false, false, false );
 		}
 	}
 }
