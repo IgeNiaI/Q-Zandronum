@@ -89,7 +89,6 @@ static FRandom pr_cwbullet ("CustomWpBullet");
 static FRandom pr_cwjump ("CustomWpJump");
 static FRandom pr_cwpunch ("CustomWpPunch");
 static FRandom pr_grenade ("ThrowGrenade");
-static FRandom pr_crailgun ("CustomRailgun");
 static FRandom pr_spawndebris ("SpawnDebris");
 static FRandom pr_spawnitemex ("SpawnItemEx");
 static FRandom pr_burst ("Burst");
@@ -1910,8 +1909,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RailAttack)
 		return;
 
 	// [BC] Don't actually do the attack in client mode.
+	// [geNia] Unless clientside functions are allowed
 	// [Spleen] Railgun is handled by the server unless unlagged
-	if ( NETWORK_InClientMode() && !UNLAGGED_DrawRailClientside( self )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) && !UNLAGGED_DrawRailClientside( self )
 		&& !( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
 		return;
 
@@ -1925,8 +1925,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RailAttack)
 	}
 	else
 	{
-		angle = pr_crailgun.Random2() * (Spread_XY / 255);
-		slope = pr_crailgun.Random2() * (Spread_Z / 255);
+		angle = self->actorRandom.Random2() * (Spread_XY / 255);
+		slope = self->actorRandom.Random2() * (Spread_Z / 255);
 	}
 
 	P_RailAttackWithPossibleSpread (self, Damage, Spawnofs_XY, Spawnofs_Z, Color1, Color2, MaxDiff, Flags, PuffType, angle, slope, Range, Duration, Sparsity, DriftSpeed, SpawnClass);
@@ -1988,7 +1988,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 	self->flags &= ~MF_AMBUSH;
 
 	// [BB] Don't actually do the attack in client mode, unless necessary for unlagged.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self )
 		&& !UNLAGGED_DrawRailClientside( self ) )
 	{
 		return;
@@ -2031,7 +2032,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 
 		if (self->target->flags & MF_SHADOW)
 		{
-			angle_t rnd = pr_crailgun.Random2() << 21;
+			angle_t rnd = self->actorRandom.Random2() << 21;
 			self->angle += rnd;
 			saved_angle = rnd;
 		}
@@ -2049,8 +2050,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 	}
 	else
 	{
-		angleoffset = pr_crailgun.Random2() * (Spread_XY / 255);
-		slopeoffset = pr_crailgun.Random2() * (Spread_Z / 255);
+		angleoffset = self->actorRandom.Random2() * (Spread_XY / 255);
+		slopeoffset = self->actorRandom.Random2() * (Spread_Z / 255);
 	}
 
 	P_RailAttackWithPossibleSpread (self, Damage, Spawnofs_XY, Spawnofs_Z, Color1, Color2, MaxDiff, Flags, PuffType, angleoffset, slopeoffset, Range, Duration, Sparsity, DriftSpeed, SpawnClass);
