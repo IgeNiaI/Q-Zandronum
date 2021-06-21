@@ -2880,7 +2880,7 @@ static bool P_CheckForResurrection(AActor *self, bool usevilestates)
 	AActor *temp;
 		
 	// [BC] Movement is server-side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// Return to normal attack.
 		//A_Chase (self);
