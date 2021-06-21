@@ -86,7 +86,6 @@ static FRandom pr_camelee ("CustomMelee");
 static FRandom pr_cabullet ("CustomBullet");
 static FRandom pr_cajump ("CustomJump");
 static FRandom pr_cwbullet ("CustomWpBullet");
-static FRandom pr_cwjump ("CustomWpJump");
 static FRandom pr_cwpunch ("CustomWpPunch");
 static FRandom pr_grenade ("ThrowGrenade");
 static FRandom pr_spawndebris ("SpawnDebris");
@@ -2604,14 +2603,23 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 // Throws a grenade (like Hexen's fighter flechette)
 //
 //===========================================================================
+enum
+{
+	TGR_NOUNLAGGED = 1,
+	TGR_UNLAGDEATH = 2,
+	TGR_SKIPOWNER = 4,
+	TGR_FORCESERVERSIDE = 8,
+};
+
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ThrowGrenade)
 {
-	ACTION_PARAM_START(5);
+	ACTION_PARAM_START(6);
 	ACTION_PARAM_CLASS(missile, 0);
 	ACTION_PARAM_FIXED(zheight, 1);
 	ACTION_PARAM_FIXED(xyvel, 2);
 	ACTION_PARAM_FIXED(zvel, 3);
 	ACTION_PARAM_BOOL(useammo, 4);
+	ACTION_PARAM_INT(flags, 5);
 
 	if (missile == NULL) return;
 
@@ -2625,23 +2633,23 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ThrowGrenade)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( NETWORK_InClientMode() && ( ( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) || !NETWORK_ClientsideFunctionsAllowed( self ) || ( flags & TGR_FORCESERVERSIDE ) ) )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
+		return;
 	}
 
 	AActor * bo;
 
 	bo = Spawn(missile, self->x, self->y, 
 			self->z - self->floorclip + self->GetBobOffset() + zheight + 35*FRACUNIT + (self->player? self->player->crouchoffset : 0),
-			ALLOW_REPLACE);
+			ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( self ), !!( flags & TGR_SKIPOWNER ));
 	if (bo)
 	{
 		P_PlaySpawnSound(bo, self);
 		if (xyvel != 0)
 			bo->Speed = xyvel;
-		bo->angle = self->angle + (((pr_grenade()&7) - 4) << 24);
+		bo->angle = self->angle + (((self->actorRandom()&7) - 4) << 24);
 
 		angle_t pitch = angle_t(-self->pitch) >> ANGLETOFINESHIFT;
 		angle_t angle = bo->angle >> ANGLETOFINESHIFT;
@@ -2667,11 +2675,11 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ThrowGrenade)
 
 		bo->target = self;
 
+		P_CheckMissileSpawn (bo, self->radius);
+
 		// [BC] Tell clients to spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissile( bo );
-
-		P_CheckMissileSpawn (bo, self->radius);
+			UNLAGGED_UnlagAndReplicateMissile( self, bo, !!( flags & TGR_SKIPOWNER ), !!( flags & TGR_NOUNLAGGED ), !!( flags & TGR_UNLAGDEATH ) );
 	} 
 	else ACTION_SET_RESULT(false);
 }
