@@ -986,7 +986,7 @@ DEFINE_ACTION_FUNCTION(AInventory, A_Raise)
 	// [BC] If this player has respawn invulnerability, disable it if they're done raising
 	// a weapon that isn't the pistol or their fist.
 	if (( player->mo ) &&
-		( NETWORK_InClientMode() == false ))
+		( NETWORK_ClientsideFunctionsAllowedOrIsServer ( self ) ))
 	{
 		APowerInvulnerable	*pInvulnerability;
 
