@@ -3619,7 +3619,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Die)
 DEFINE_ACTION_FUNCTION(AActor, A_Detonate)
 {
 	// [BC] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
