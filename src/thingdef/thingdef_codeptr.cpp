@@ -1966,8 +1966,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RailAttack)
 		return;
 
 	// [BC] Don't actually do the attack in client mode.
+	// [geNia] Unless clientside functions are allowed
 	// [Spleen] Railgun is handled by the server unless unlagged
-	if ( NETWORK_InClientMode() && !UNLAGGED_DrawRailClientside( self )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) && !UNLAGGED_DrawRailClientside( self )
 		&& !( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
 		return;
 
@@ -2044,7 +2045,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 	self->flags &= ~MF_AMBUSH;
 
 	// [BB] Don't actually do the attack in client mode, unless necessary for unlagged.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self )
 		&& !UNLAGGED_DrawRailClientside( self ) )
 	{
 		return;

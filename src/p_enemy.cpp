@@ -3266,7 +3266,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FaceTracer)
 DEFINE_ACTION_FUNCTION(AActor, A_MonsterRail)
 {
 	// [BC] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// [RH] Andy Baker's stealth monsters
 		if (self->flags & MF_STEALTH)
