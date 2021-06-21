@@ -6428,12 +6428,12 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 	// [CK] If we're a client in this function and we're supposed to be a server
 	// telling clients to spawn it, then we will get information later from the
 	// server.
-	if ( NETWORK_InClientMode() && CLIENT_ShouldPredictPuffs( ) == false )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) && CLIENT_ShouldPredictPuffs( ) == false )
 		return NULL;
 
 	// [CK] The client also should not be doing this puff prediction if it's not
 	// for themselves.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) )
 	{
 		// If these aren't valid or the player is not the console player, don't 
 		// predict anything.
@@ -6462,7 +6462,7 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 
 	// [CK] The puff has been made if we're a client, so any client prediction 
 	// of puffs is done, meaning we can exit now.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) )
 		return NULL;
 
 	//Moved puff creation and target/master/tracer setting to here. 
@@ -6520,11 +6520,18 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 		( bTellClientToSpawn ))
 	{
+		ULONG activatorPlayerNumber = -1;
+		if ( source && source->player )
+			 activatorPlayerNumber = ULONG( source->player - players );
+
 		// If it's translated, or spawning in a state other than its spawn state,
 		// treat it as a special case.
 		if ( ulState != STATE_SPAWN )
 		{
-			SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false );
+			if ( ( activatorPlayerNumber < MAXPLAYERS) && NETWORK_ClientsideFunctionsAllowed( source->player ) )
+				SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false, activatorPlayerNumber, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false );
 		}
 		// In certain other conditions, we need to spawn the puff with a network
 		// ID so that things like sounds work.
@@ -6536,38 +6543,21 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 				puff->lNetID = g_NetIDList.getNewID( NULL );
 				g_NetIDList.useID ( puff->lNetID , puff );
 			}
-
-			SERVERCOMMANDS_SpawnPuff( puff );
+			
+			if ( ( activatorPlayerNumber < MAXPLAYERS) && NETWORK_ClientsideFunctionsAllowed( source->player ) )
+				SERVERCOMMANDS_SpawnPuff( puff, activatorPlayerNumber, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnPuff( puff );
 		}
 		else
 		{
-			// [CK] If a player is the source that is firing this, check and see
-			// if the attacker is predicting and exclude them (and only them)
-			// from getting the predicted puff if the bullet puff has +NONETID.
-			if ( source && source->player )
+			if ( ( activatorPlayerNumber < MAXPLAYERS )
+				&& ( ( source->player->userinfo.GetClientFlags() & CLIENTFLAGS_CLIENTSIDEPUFFS ) || NETWORK_ClientsideFunctionsAllowed( source->player ) ) )
 			{
-				// [CK] Only spawn for players who are not predicting puffs.
-				ULONG activatorPlayerNumber = source->player - players;
-				for ( ULONG ulPlayer = 0; ulPlayer < MAXPLAYERS; ulPlayer++ )
-				{
-					// [CK] Don't send to invalid clients
-					if ( SERVER_IsValidClient( ulPlayer ) == false )
-						continue;
-
-					// [CK] If the player is the source, and the player fired a
-					// puff with +NONETID, and the player wants to predict puffs
-					// then we won't send them this command.
-					if ( ( activatorPlayerNumber == ulPlayer ) && ( puff->ulNetworkFlags & NETFL_NONETID ) && ( source->player->userinfo.GetClientFlags() & CLIENTFLAGS_CLIENTSIDEPUFFS ) )
-						continue;
-
-					// [BB] If the puff has a net ID, it must be spawned with one.
-					SERVERCOMMANDS_SpawnPuff( puff, ulPlayer, SVCF_ONLYTHISCLIENT );
-				}
+				SERVERCOMMANDS_SpawnPuff( puff, activatorPlayerNumber, SVCF_SKIPTHISCLIENT );
 			}
 			else
 			{
-				// [CK] It is always sent when fired from a non-player.
-				// [BB] If the puff has a net ID, it must be spawned with one.
 				SERVERCOMMANDS_SpawnPuff( puff );
 			}
 		}
