@@ -2699,10 +2699,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Recoil)
 
 	// [BB] For non-player non-clientsideonly actors, this is server side.
 	// Note: I'm not sure whether this should be server side also for players.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
-		if ( (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) && ( self->player == NULL ) )
-			return;
+		return;
 	}
 
 	angle_t angle = self->angle + ANG180;
