@@ -124,7 +124,6 @@ static FRandom pr_reflect ("Reflect");
 static FRandom pr_nightmarerespawn ("NightmareRespawn");
 static FRandom pr_botspawnmobj ("BotSpawnActor");
 static FRandom pr_spawnmapthing ("SpawnMapThing");
-static FRandom pr_spawnpuff ("SpawnPuff");
 static FRandom pr_spawnblood ("SpawnBlood");
 static FRandom pr_splatter ("BloodSplatter");
 static FRandom pr_takedamage ("TakeDamage");
@@ -6624,12 +6623,12 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 	// [CK] If we're a client in this function and we're supposed to be a server
 	// telling clients to spawn it, then we will get information later from the
 	// server.
-	if ( NETWORK_InClientMode() && CLIENT_ShouldPredictPuffs( ) == false )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) && CLIENT_ShouldPredictPuffs( ) == false )
 		return NULL;
 
 	// [CK] The client also should not be doing this puff prediction if it's not
 	// for themselves.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) )
 	{
 		// If these aren't valid or the player is not the console player, don't 
 		// predict anything.
@@ -6651,10 +6650,13 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 	ULONG	ulState = STATE_SPAWN;
 	
 	if (!(flags & PF_NORANDOMZ))
-		z += pr_spawnpuff.Random2 () << 10;
+		z += source->actorRandom.Random2 () << 10;
 
-	puff = Spawn (pufftype, x, y, z, ALLOW_REPLACE);
+	puff = Spawn (pufftype, x, y, z, ALLOW_REPLACE, ( GetDefaultByType( pufftype )->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) ? NULL : NETWORK_GetActorsOwnerPlayer( source ));
 	if (puff == NULL) return NULL;
+	
+	if ( !( puff->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+		puff->SetRandomSeed( source->actorRandom() );
 
 	//Moved puff creation and target/master/tracer setting to here.
 	if (puff && vict)
@@ -6669,7 +6671,8 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 
 	// [CK] The puff has been made if we're a client, so any client prediction
 	// of puffs is done, meaning we can exit now.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) )
 		return NULL;
 
 	if (source != NULL) puff->angle = R_PointToAngle2(x, y, source->x, source->y);
@@ -6677,6 +6680,9 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 	// [BB] If the clients don't spawn it, make sure it doesn't have a netID.
 	if ( bTellClientToSpawn == false )
 		puff->FreeNetID();
+	
+	if ( NETWORK_InClientMode( ) )
+		puff->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 	// If a puff has a crash state and an actor was not hit,
 	// it will enter the crash state. This is used by the StrifeSpark
@@ -6715,11 +6721,16 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 		( bTellClientToSpawn ))
 	{
+		ULONG activatorPlayerNumber = NETWORK_GetActorsOwnerPlayer( source ) - players;
+
 		// If it's translated, or spawning in a state other than its spawn state,
 		// treat it as a special case.
 		if ( ulState != STATE_SPAWN )
 		{
-			SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false );
+			if ( ( activatorPlayerNumber < MAXPLAYERS) && NETWORK_ClientsideFunctionsAllowed( source->player ) )
+				SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false, activatorPlayerNumber, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnPuffNoNetID( puff, ulState, false );
 		}
 		// In certain other conditions, we need to spawn the puff with a network
 		// ID so that things like sounds work.
@@ -6732,37 +6743,20 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 				g_NetIDList.useID ( puff->lNetID , puff );
 			}
 
-			SERVERCOMMANDS_SpawnPuff( puff );
+			if ( ( activatorPlayerNumber < MAXPLAYERS) && NETWORK_ClientsideFunctionsAllowed( source->player ) )
+				SERVERCOMMANDS_SpawnPuff( puff, activatorPlayerNumber, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnPuff( puff );
 		}
 		else
 		{
-			// [CK] If a player is the source that is firing this, check and see
-			// if the attacker is predicting and exclude them (and only them)
-			// from getting the predicted puff if the bullet puff has +NONETID.
-			if ( source && source->player )
+			if ( ( activatorPlayerNumber < MAXPLAYERS ) && source->player
+				&& ( ( source->player->userinfo.GetClientFlags() & CLIENTFLAGS_CLIENTSIDEPUFFS ) || NETWORK_ClientsideFunctionsAllowed( source->player ) ) )
 			{
-				// [CK] Only spawn for players who are not predicting puffs.
-				ULONG activatorPlayerNumber = source->player - players;
-				for ( ULONG ulPlayer = 0; ulPlayer < MAXPLAYERS; ulPlayer++ )
-				{
-					// [CK] Don't send to invalid clients
-					if ( SERVER_IsValidClient( ulPlayer ) == false )
-						continue;
-
-					// [CK] If the player is the source, and the player fired a
-					// puff with +NONETID, and the player wants to predict puffs
-					// then we won't send them this command.
-					if ( ( activatorPlayerNumber == ulPlayer ) && ( puff->ulNetworkFlags & NETFL_NONETID ) && ( source->player->userinfo.GetClientFlags() & CLIENTFLAGS_CLIENTSIDEPUFFS ) )
-						continue;
-
-					// [BB] If the puff has a net ID, it must be spawned with one.
-					SERVERCOMMANDS_SpawnPuff( puff, ulPlayer, SVCF_ONLYTHISCLIENT );
-				}
+				SERVERCOMMANDS_SpawnPuff( puff, activatorPlayerNumber, SVCF_SKIPTHISCLIENT );
 			}
 			else
 			{
-				// [CK] It is always sent when fired from a non-player.
-				// [BB] If the puff has a net ID, it must be spawned with one.
 				SERVERCOMMANDS_SpawnPuff( puff );
 			}
 		}
