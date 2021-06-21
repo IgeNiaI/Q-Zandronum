@@ -110,14 +110,15 @@ bool NETWORK_ShouldActorNotBeSpawned ( const AActor *pSpawner, const PClass *pSp
 
 	bool bSpawnOnClient = ( bForceClientSide
 	                        || ( pSpawner && ( pSpawner->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
-	                        || ( GetDefaultByType(pSpawnType)->ulNetworkFlags & NETFL_CLIENTSIDEONLY )
+	                        || ( GetDefaultByType( pSpawnType )->ulNetworkFlags & NETFL_CLIENTSIDEONLY )
 	                      );
 
-	// [BB] Clients don't spawn non-client side only things.
-	if ( NETWORK_InClientMode() && !bSpawnOnClient )
-		return true;
 	// [BB] The server doesn't spawn client side only things.
-	else if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && bSpawnOnClient )
+	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && bSpawnOnClient )
+		return true;
+	// [BB] Clients don't spawn non-client side only things.
+	// [geNia] Unless clientside functions are allowed
+	else if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( pSpawner ) && !bSpawnOnClient )
 		return true;
 	else
 		return false;
