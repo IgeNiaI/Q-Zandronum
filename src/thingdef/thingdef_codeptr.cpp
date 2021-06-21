@@ -4842,7 +4842,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_MonsterRefire)
 	ACTION_PARAM_STATE(jump, 1);
 
 	// [BB] This is handled by the server.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	ACTION_SET_RESULT(false);	// Jumps should never set the result for inventory state chains!
