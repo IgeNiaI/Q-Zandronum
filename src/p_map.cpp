@@ -4929,7 +4929,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	// [Spleen] Don't do damage, don't award medals, don't spawn puffs,
 	// and don't spawn blood in clients on a network.
 	// [BB] Actually client spawn the puffs to draw decals / splashes.
-	if ( NETWORK_InClientMode() == false )
+	if ( NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) )
 	{
 		for (i = 0; i < rail_data.RailHits.Size(); i++)
 		{
@@ -4964,7 +4964,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 				P_SpawnPuff(source, puffclass, x, y, z, (source->angle + angleoffset) - ANG90, 1, puffflags, hitactor);
 			}
 			// [BC] Damage is server side.
-			if ( NETWORK_InClientMode() == false )
+			if ( NETWORK_ClientsideFunctionsAllowedOrIsServer( hitactor ) )
 			{
 				if (puffDefaults && puffDefaults->PoisonDamage > 0 && puffDefaults->PoisonDuration != INT_MIN)
 				{
