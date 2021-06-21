@@ -1318,7 +1318,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMeleeAttack)
 	ACTION_PARAM_BOOL(bleed, 4);
 
 	// [BB] This is handled by the server.
-	if ( NETWORK_InClientMode() && ( ( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	if (DamageType==NAME_None) DamageType = NAME_Melee;	// Melee is the default type
@@ -1360,7 +1361,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomComboAttack)
 	A_FaceTarget (self);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
