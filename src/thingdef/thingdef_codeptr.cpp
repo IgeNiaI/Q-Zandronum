@@ -940,7 +940,8 @@ enum
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Explode)
 {
 	// [BB] This is server side.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -1006,7 +1007,8 @@ enum
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusThrust)
 {
 	// [BB] This is server side.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
