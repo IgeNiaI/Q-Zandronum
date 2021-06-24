@@ -209,6 +209,7 @@ ACTOR RocketSmokeTrail
 	+NOGRAVITY 
 	+DONTSPLASH
 	+NOTELEPORT
+	+NONETID
 	States
 	{
 	Spawn:
@@ -225,6 +226,7 @@ ACTOR GrenadeSmokeTrail
 	+NOCLIP 
 	+DONTSPLASH
 	+NOTELEPORT
+	+NONETID
 	Gravity 0.1
 	VSpeed 0.5
 	Scale 0.6

@@ -43,6 +43,7 @@ ACTOR BulletPuff
 	+NOGRAVITY
 	+ALLOWPARTICLES
 	+RANDOMIZE
+	+PUFFGETSOWNER
 	// [BC] No need to tag it with a network ID.
 	+NONETID
 	RenderStyle Translucent

@@ -21,7 +21,6 @@ static FRandom pr_fireshotgun2 ("FireSG2");
 static FRandom pr_fireplasma ("FirePlasma");
 static FRandom pr_firerail ("FireRail");
 static FRandom pr_bfgspray ("BFGSpray");
-static FRandom pr_oldbfg ("OldBFG");
 
 //
 // A_Punch
@@ -34,7 +33,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_Punch)
 	AActor		*linetarget;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -56,7 +56,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Punch)
 
 	angle = self->angle;
 
-	angle += pr_punch.Random2() << 18;
+	angle += self->actorRandom.Random2() << 18;
 	pitch = P_AimLineAttack (self, angle, MELEERANGE, &linetarget);
 
 	P_LineAttack (self, angle, MELEERANGE, pitch, damage, NAME_Melee, NAME_BulletPuff, LAF_ISMELEEATTACK, &linetarget);
@@ -83,17 +83,18 @@ DEFINE_ACTION_FUNCTION(AActor, A_Punch)
 	// turn to face target
 	if (linetarget)
 	{
-		S_Sound (self, CHAN_WEAPON, "*fist", 1, ATTN_NORM);
+		S_Sound (self, CHAN_WEAPON, "*fist", 1, ATTN_NORM, true);
 		self->angle = R_PointToAngle2 (self->x,
 										self->y,
 										linetarget->x,
 										linetarget->y);
 
-		// [BC] Play the hit sound to clients.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			SERVERCOMMANDS_SoundActor( self, CHAN_WEAPON, "*fist", 1, ATTN_NORM );
-			SERVERCOMMANDS_SetThingAngle( self );
+			if ( NETWORK_ClientsideFunctionsAllowed( self ) )
+				SERVERCOMMANDS_SetThingAngle( self, ULONG( self->player - players ), SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SetThingAngle( self );
 		}
 	}
 }
@@ -208,7 +209,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Saw)
 	int actualdamage;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -240,8 +242,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Saw)
 	// use meleerange + 1 so the puff doesn't skip the flash (i.e. plays all states)
 	if (Range == 0) Range = MELEERANGE+1;
 
-	angle = self->angle + (pr_saw.Random2() * (Spread_XY / 255));
-	slope = P_AimLineAttack (self, angle, Range, &linetarget) + (pr_saw.Random2() * (Spread_Z / 255));
+	angle = self->angle + (self->actorRandom.Random2() * (Spread_XY / 255));
+	slope = P_AimLineAttack (self, angle, Range, &linetarget) + (self->actorRandom.Random2() * (Spread_Z / 255));
 
 
 	AWeapon *weapon = self->player->ReadyWeapon;
@@ -281,11 +283,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Saw)
 		{
 			player->extralight = !player->extralight;
 		}
-		S_Sound (self, CHAN_WEAPON, fullsound, 1, ATTN_NORM);
-
-		// [BC] If we're the server, tell clients to play the saw sound.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SoundActor( self, CHAN_WEAPON, S_GetName( fullsound ), 1, ATTN_NORM );
+		S_Sound (self, CHAN_WEAPON, fullsound, 1, ATTN_NORM, true);
 		return;
 	}
 
@@ -316,10 +314,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Saw)
 	if ( ( NETWORK_GetState() == NETSTATE_SERVER ) && self->player && prevhealth != self->health )
 		SERVERCOMMANDS_SetPlayerHealth( self->player - players );
 
-	S_Sound (self, CHAN_WEAPON, hitsound, 1, ATTN_NORM);
-	// [BC] If we're the server, tell clients to play the saw sound.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_SoundActor( self, CHAN_WEAPON, S_GetName( hitsound ), 1, ATTN_NORM );
+	S_Sound (self, CHAN_WEAPON, hitsound, 1, ATTN_NORM, true);
 		
 	// turn to face target
 	angle = R_PointToAngle2 (self->x, self->y,
@@ -342,7 +337,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Saw)
 
 	// [BC] If we're the server, tell clients to adjust the player's angle.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_SetThingAngle( self );
+	{
+		if ( NETWORK_ClientsideFunctionsAllowed( self ) )
+			SERVERCOMMANDS_SetThingAngle( self, ULONG( self->player - players ), SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_SetThingAngle( self );
+	}
 
 	// [BC] Tell all the bots that a weapon was fired.
 	BOTS_PostWeaponFiredEvent( ULONG( self->player - players ), BOTEVENT_USEDCHAINSAW, BOTEVENT_ENEMY_USEDCHAINSAW, BOTEVENT_PLAYER_USEDCHAINSAW );
@@ -734,7 +734,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMissile)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -802,7 +803,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireSTGrenade)
 	}
 		
 	// Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -842,7 +844,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePlasma)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -881,8 +884,9 @@ static void FireRailgun(AActor *self, int offset_xy, const PClass* puffType = NU
 	}
 
 	// Weapons are handled by the server.
+	// [geNia] Unless clientside functions are allowed.
 	// [Spleen] But railgun is an exception if it's unlagged, to make it look nicer
-	if ( NETWORK_InClientMode()
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self )
 		&& !UNLAGGED_DrawRailClientside( self ) )
 	{
 		return;
@@ -967,7 +971,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireBFG)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -998,7 +1003,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_BFGSpray)
 	AActor				*linetarget;
 
 	// [BC] This is not done on the client end.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -1109,8 +1114,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireOldBFG)
 	self->player->ReadyWeapon->WeaponFlags |= WIF_NOAUTOAIM; // No autoaiming that gun
 	for (int i = 0; i < 2; i++) // Spawn two plasma balls in sequence
     {
-		self->angle += ((pr_oldbfg()&127) - 64) * (ANG90/768);
-		self->pitch += ((pr_oldbfg()&127) - 64) * (ANG90/640);
+		self->angle += ((self->actorRandom()&127) - 64) * (ANG90/768);
+		self->pitch += ((self->actorRandom()&127) - 64) * (ANG90/640);
 		mo = P_SpawnPlayerMissile (self, plasma[i]);
 		// Restore saved values
 		self->angle = SavedPlayerAngle;
