@@ -6898,7 +6898,7 @@ bool P_HitWater (AActor * thing, sector_t * sec, fixed_t x, fixed_t y, fixed_t z
 	}
 
 	// [BC] Let the server handle splashes.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( thing ) )
 	{
 		return ( false );
 	}
