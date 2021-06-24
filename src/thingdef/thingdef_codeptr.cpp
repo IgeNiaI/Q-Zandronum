@@ -4589,11 +4589,17 @@ DEFINE_ACTION_FUNCTION(AActor, A_ResetReloadCounter)
 // A_ChangeFlag
 //
 //===========================================================================
+enum
+{
+	CF_SKIPOWNER = 1,
+};
+
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeFlag)
 {
-	ACTION_PARAM_START(2);
+	ACTION_PARAM_START(3);
 	ACTION_PARAM_STRING(flagname, 0);
 	ACTION_PARAM_BOOL(expression, 1);
+	ACTION_PARAM_INT(flags, 2)
 
 	const char *dot = strchr (flagname, '.');
 	FFlagDef *fd;
@@ -4626,7 +4632,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeFlag)
 		else
 		{
 			// [BB] The server handles the flag change.
-			if ( NETWORK_InClientMode() )
+			// [geNia] Unless clientside functions are allowed
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 				return;
 
 			DWORD *flagp = (DWORD*) (((char*)self) + fd->structoffset);
@@ -4664,8 +4671,15 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeFlag)
 					flagset = FLAGSET_FLAGSST;
 				else if ( flagp == &self->mvFlags)
 					flagset = FLAGSET_MVFLAGS;
-
-				SERVERCOMMANDS_SetThingFlags( self, flagset );
+				
+				if ( flags & CF_SKIPOWNER )
+				{
+					SERVERCOMMANDS_SetThingFlags( self, flagset, NETWORK_GetActorsOwnerPlayer( self ) - players, SVCF_SKIPTHISCLIENT );
+				}
+				else
+				{
+					SERVERCOMMANDS_SetThingFlags( self, flagset );
+				}
 			}
 		}
 		kill_after = self->CountsAsKill();

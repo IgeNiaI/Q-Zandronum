@@ -342,6 +342,8 @@ Const Int WARPF_TESTONLY = 0x200;
 const int SPF_FORCECLAMP = 1;
 const int SPF_INTERPOLATE = 2;
 
+// flags for A_ChangeFlag
+const int CF_SKIPOWNER = 1;
 
 // flags for A_CheckLOF
 

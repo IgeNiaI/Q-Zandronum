@@ -233,7 +233,7 @@ ACTOR Actor native //: Thinker
 	action native A_ExtChase(bool usemelee, bool usemissile, bool playactive = true, bool nightmarefast = false);
 	action native A_DropInventory(class<Inventory> itemtype);
 	action native A_SetBlend(color color1, float alpha, int tics, color color2 = "");
-	action native A_ChangeFlag(string flagname, bool value);
+	action native A_ChangeFlag(string flagname, bool value, int flags = 0);
 	action native A_CheckFlag(string flagname, state label, int check_pointer = AAPTR_DEFAULT);
 	action native A_JumpIf(bool expression, state label);
 	action native A_RemoveMaster();
