@@ -1990,7 +1990,7 @@ bool P_SeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax, bool preci
 	fixed_t speed;
 
 	// [BC] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ) )
 	{
 		return ( false );
 	}
