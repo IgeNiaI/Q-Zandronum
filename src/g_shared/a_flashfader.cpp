@@ -24,7 +24,20 @@ DFlashFader::DFlashFader (float r1, float g1, float b1, float a1,
 	// [CW] If we're the server, tell this client to do the fade.
 	// [BB] Only possible if who is not a NULL pointer.
 	if ( who && (NETWORK_GetState( ) == NETSTATE_SERVER) )
-		SERVERCOMMANDS_DoFlashFader( Blends[0][0], Blends[0][1], Blends[0][2], Blends[0][3], Blends[1][0], Blends[1][1], Blends[1][2], Blends[1][3], time, ULONG( who->player - players));
+	{
+		// [BB] This is handled by the server.
+		// [geNia] Unless clientside functions are allowed
+		if ( NETWORK_ClientsideFunctionsAllowed( who ) )
+		{
+			player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( who );
+			SERVERCOMMANDS_DoFlashFader( Blends[0][0], Blends[0][1], Blends[0][2], Blends[0][3], Blends[1][0], Blends[1][1], Blends[1][2], Blends[1][3], time, ULONG( who->player - players ),
+				ULONG( ownerPlayer - players ), SVCF_SKIPTHISCLIENT );
+		}
+		else
+		{
+			SERVERCOMMANDS_DoFlashFader( Blends[0][0], Blends[0][1], Blends[0][2], Blends[0][3], Blends[1][0], Blends[1][1], Blends[1][2], Blends[1][3], time, ULONG( who->player - players));
+		}
+	}
 }
 
 void DFlashFader::Destroy ()

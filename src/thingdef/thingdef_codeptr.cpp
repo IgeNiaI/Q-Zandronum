@@ -2952,7 +2952,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeIn)
 	ACTION_PARAM_FIXED(reduce, 0);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	if (reduce == 0)
@@ -2991,7 +2992,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeOut)
 	ACTION_PARAM_BOOL(remove, 1);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	if (reduce == 0)
@@ -3046,7 +3048,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FadeTo)
 	ACTION_PARAM_BOOL(remove, 2);
 
 	// [EP] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	// [EP] Store the old values of alpha and renderstyle for bandwidth.
