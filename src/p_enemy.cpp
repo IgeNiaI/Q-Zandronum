@@ -3452,7 +3452,7 @@ CVAR(Int, sv_dropstyle, 0, CVAR_SERVERINFO | CVAR_ARCHIVE);
 AInventory *P_DropItem (AActor *source, const PClass *type, int dropamount, int chance)
 {
 	// [BC] This is handled server side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( source ) )
 	{
 		return ( NULL );
 	}
