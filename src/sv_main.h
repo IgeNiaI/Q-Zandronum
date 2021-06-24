@@ -470,7 +470,7 @@ bool		SERVER_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream );
 ULONG		SERVER_GetPlayerIndexFromName( const char *pszName, bool bIgnoreColors, bool bReturnBots );
 LONG		SERVER_GetCurrentClient( void );
 void		SERVER_GiveInventoryToPlayer( const player_t *player, AInventory *pInventory );
-void		SERVER_HandleWeaponStateJump( ULONG ulPlayer, FState *pState, LONG lPosition );
+void		SERVER_HandleWeaponStateJump( ULONG ulPlayer, FState *pState, LONG lPosition, bool bSkipPlayer );
 void		SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor );
 void		SERVER_IgnoreIP( NETADDRESS_s Address );
 IPList		*SERVER_GetAdminList( void );

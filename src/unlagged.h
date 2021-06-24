@@ -70,6 +70,7 @@ void	UNLAGGED_RecordPolyobj( int unlaggedIndex );
 bool	UNLAGGED_DrawRailClientside ( AActor *attacker );
 void	UNLAGGED_GetHitOffset ( const AActor *attacker, const FTraceResults &trace, TVector3<fixed_t> &hitOffset );
 bool	UNLAGGED_IsReconciled ( );
+player_t *UNLAGGED_GetReconciledPlayer ( );
 void	UNLAGGED_AddReconciliationBlocker ( );
 void	UNLAGGED_RemoveReconciliationBlocker ( );
 void	UNLAGGED_SpawnDebugActors ( player_t *player, bool server );

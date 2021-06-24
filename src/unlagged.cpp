@@ -135,6 +135,7 @@ CUSTOM_CVAR( Bool, sv_unlagged_debugactors, false, CVAR_SERVERINFO )
 bool reconciledGame = false;
 bool unlagInProgress = false;
 int reconciliationBlockers = 0;
+player_t* reconciledPlayer = NULL;
 int delayTics = 0;
 
 void UNLAGGED_Tick( void )
@@ -264,6 +265,7 @@ void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
 		return;
 
 	reconciledGame = true;
+	reconciledPlayer = actor->player;
 
 	//find the index
 	const int unlaggedIndex = Tic % UNLAGGEDTICS;
@@ -449,6 +451,7 @@ void UNLAGGED_Restore( AActor *actor )
 
 	// we need to set this to false earlier, otherwise SERVERCOMMANDS below won't be sent
 	reconciledGame = false;
+	reconciledPlayer = NULL;
 
 	// [geNia] Restore unlagged actor
 	AUnlaggedActor* unlaggedActor = firstUnlaggedActor;
@@ -668,6 +671,11 @@ void UNLAGGED_GetHitOffset ( const AActor *attacker, const FTraceResults &trace,
 bool UNLAGGED_IsReconciled ( )
 {
   return reconciledGame;
+}
+
+player_t *UNLAGGED_GetReconciledPlayer ( )
+{
+  return reconciledPlayer;
 }
 
 void UNLAGGED_AddReconciliationBlocker ( )
