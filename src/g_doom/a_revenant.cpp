@@ -82,7 +82,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Tracer)
 		smoke->tics = 1;
 	
 	// [BC] Server takes care of movement.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
