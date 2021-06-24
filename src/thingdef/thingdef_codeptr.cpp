@@ -4626,7 +4626,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeFlag)
 		else
 		{
 			// [BB] The server handles the flag change.
-			if ( NETWORK_InClientMode() )
+			// [geNia] Unless clientside functions are allowed
+			if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 				return;
 
 			DWORD *flagp = (DWORD*) (((char*)self) + fd->structoffset);
