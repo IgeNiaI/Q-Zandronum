@@ -2156,7 +2156,8 @@ static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 		bNeedClientUpdate = true;
 		
 		// [BB] The server will let the client know about the outcome.
-		if ( NETWORK_InClientModeAndActorNotClientHandled ( self ) )
+	// [geNia] Unless clientside functions are allowed
+		if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 			return;
 	}
 
@@ -2236,7 +2237,7 @@ void DoTakeInventory(AActor * receiver, DECLARE_PARAMINFO)
 	{
 		bNeedClientUpdate = true;
 		
-		if ( NETWORK_InClientModeAndActorNotClientHandled ( self ) )
+		if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		{
 			return;
 		}
@@ -3447,10 +3448,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_DropInventory)
 	ACTION_PARAM_CLASS(drop, 0);
 
 	// [BC] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
+		return;
 	}
 
 	if (drop)
@@ -5909,7 +5910,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 	ACTION_PARAM_INT(amount, 3);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	// We need a valid item, valid targets, and a valid range
