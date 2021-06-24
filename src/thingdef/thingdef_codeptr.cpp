@@ -5607,7 +5607,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Warp)
 		oldz;
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	AActor *reference = COPY_AAPTR(self, destination_selector);
