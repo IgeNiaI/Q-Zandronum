@@ -5632,7 +5632,9 @@ enum WARPF
 
 	WARPF_STOP = 0x80,
 	WARPF_TOFLOOR = 0x100,
-	WARPF_TESTONLY = 0x200
+	WARPF_TESTONLY = 0x200,
+
+	WARPF_SKIPOWNER = 0x400
 };
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Warp)
@@ -5654,7 +5656,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Warp)
 		oldz;
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	AActor *reference = COPY_AAPTR(self, destination_selector);
@@ -5772,7 +5775,16 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Warp)
 
 		// [BB] Inform the clients.
 		if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
-			SERVERCOMMANDS_MoveThingIfChanged( self, oldPositionData, noInterpolation );
+		{
+			if ( flags & WARPF_SKIPOWNER )
+			{
+				SERVERCOMMANDS_MoveThingIfChanged( self, oldPositionData, noInterpolation, NETWORK_GetActorsOwnerPlayer( self ) - players, SVCF_SKIPTHISCLIENT );
+			}
+			else
+			{
+				SERVERCOMMANDS_MoveThingIfChanged( self, oldPositionData, noInterpolation );
+			}
+		}
 
 		if (success_state)
 		{
