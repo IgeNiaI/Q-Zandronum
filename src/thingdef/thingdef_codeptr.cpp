@@ -446,26 +446,21 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_PlaySound)
 	ACTION_PARAM_FLOAT(attenuation, 4);
 
 	// [BC] Let the server play these sounds.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
+		return;
 	}
 
 	if (!looping)
 	{
-		S_Sound (self, channel, soundid, volume, attenuation, true );	// [BC] Inform the clients.
+		S_Sound ( self, channel, soundid, volume, attenuation, true, self->target );	// [BC] Inform the clients.
 	}
 	else
 	{
 		if (!S_IsActorPlayingSomething (self, channel&7, soundid))
 		{
-			S_Sound (self, channel | CHAN_LOOP, soundid, volume, attenuation);
-
-			// [BC] If we're the server, tell clients to play the sound.
-			// [Dusk] We need to respect existing sound play since this is a looped sound.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( self, channel | CHAN_LOOP, S_GetName( soundid ), volume, attenuation, MAXPLAYERS, 0, true );
+			S_Sound ( self, channel | CHAN_LOOP, soundid, volume, attenuation, true, self->target );
 		}
 	}
 }
@@ -504,10 +499,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_PlaySoundEx)
 	ACTION_PARAM_INT(attenuation_raw, 3);
 
 	// [BB] Let the server play these sounds.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
+		return;
 	}
 
 	float attenuation;
@@ -527,17 +522,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_PlaySoundEx)
 
 	if (!looping)
 	{
-		S_Sound (self, int(channel) - NAME_Auto, soundid, 1, attenuation, true );	// [BB] Inform the clients.
+		S_Sound ( self, int(channel) - NAME_Auto, soundid, 1, attenuation, true, self->target );	// [BB] Inform the clients.
 	}
 	else
 	{
 		if (!S_IsActorPlayingSomething (self, int(channel) - NAME_Auto, soundid))
 		{
-			S_Sound (self, (int(channel) - NAME_Auto) | CHAN_LOOP, soundid, 1, attenuation);
-
-			// [BB] If we're the server, tell clients to play the sound, but only if they are not already playing something for this actor.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( self, (int(channel) - NAME_Auto) | CHAN_LOOP, S_GetName( soundid ), 1, attenuation, MAXPLAYERS, 0, true );
+			S_Sound ( self, (int(channel) - NAME_Auto) | CHAN_LOOP, soundid, 1, attenuation, true, self->target );
 		}
 	}
 }
