@@ -215,6 +215,8 @@ enum
 	RGF_NOTRACER	= 128,
 	RGF_NOMASTER	= 256,
 	RGF_CUBE		= 512,
+	RGF_SKIPOWNER = 1024,
+	RGF_FORCESERVERSIDE = 2048,
 };
 
 // Activation flags
@@ -241,8 +243,14 @@ const int AF_ClearSpecial = 32;
 const int AF_NoDeathSpecial = 64;
 const int AF_TriggerActs = 128;
 
+// Flags for A_GiveInventory and A_GiveToTarget
+const int GIF_SKIPOWNER = 1;
+const int GIF_FORCESERVERSIDE = 2;
+
 // Flags for A_TakeInventory and A_TakeFromTarget
 const int TIF_NOTAKEINFINITE = 1;
+const int TIF_SKIPOWNER = 2;
+const int TIF_FORCESERVERSIDE = 4;
 
 // constants for A_PlaySound
 enum

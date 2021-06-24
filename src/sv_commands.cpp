@@ -3328,7 +3328,7 @@ void SERVERCOMMANDS_GiveInventory( ULONG ulPlayer, AInventory *pInventory, ULONG
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_GiveInventoryNotOverwritingAmount( AActor *pReceiver, AInventory *pItem )
+void SERVERCOMMANDS_GiveInventoryNotOverwritingAmount( AActor *pReceiver, AInventory *pItem, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if( (pItem == NULL) || (pReceiver == NULL) || (pReceiver->player == NULL) )
 		return;
@@ -3342,10 +3342,10 @@ void SERVERCOMMANDS_GiveInventoryNotOverwritingAmount( AActor *pReceiver, AInven
 	if ( pInventory != NULL )
 		pItem->Amount = pInventory->Amount;
 
-	SERVERCOMMANDS_GiveInventory( ULONG( pReceiver->player - players ), pItem );
+	SERVERCOMMANDS_GiveInventory( ULONG( pReceiver->player - players ), pItem, ulPlayerExtra, flags );
 	// [BB] The armor display amount has to be updated separately.
 	if( pItem->GetClass()->IsDescendantOf (RUNTIME_CLASS(AArmor)))
-		SERVERCOMMANDS_SetPlayerArmor( ULONG( pReceiver->player - players ));
+		SERVERCOMMANDS_SetPlayerArmor( ULONG( pReceiver->player - players ), ulPlayerExtra, flags );
 }
 //*****************************************************************************
 //

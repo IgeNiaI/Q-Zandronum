@@ -2087,12 +2087,19 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 //
 //===========================================================================
 
+enum
+{
+	GIF_SKIPOWNER = 1,
+	GIF_FORCESERVERSIDE = 2,
+};
+
 static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 {
-	ACTION_PARAM_START(3);
+	ACTION_PARAM_START(4);
 	ACTION_PARAM_CLASS(mi, 0);
 	ACTION_PARAM_INT(amount, 1);
 	ACTION_PARAM_INT(setreceiver, 2);
+	ACTION_PARAM_INT(flags, 3);
 
 	bool bNeedClientUpdate;
 
@@ -2110,15 +2117,21 @@ static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 		bNeedClientUpdate = true;
 		
 		// [BB] The server will let the client know about the outcome.
-		if ( NETWORK_InClientModeAndActorNotClientHandled ( self ) )
+		// [geNia] Unless clientside functions are allowed
+		if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 			return;
 	}
 
-
+// [geNia] Don't give serverside items
+	if ( NETWORK_InClientMode() && ( flags & GIF_FORCESERVERSIDE ) )
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 	if (amount==0) amount=1;
 	if (mi) 
 	{
-		AInventory *item = static_cast<AInventory *>(Spawn (mi, 0, 0, 0, NO_REPLACE));
+		AInventory *item = static_cast<AInventory *>(Spawn (mi, 0, 0, 0, NO_REPLACE, self->player));
 		if (item->IsKindOf(RUNTIME_CLASS(AHealth)))
 		{
 			item->Amount *= amount;
@@ -2141,7 +2154,10 @@ static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 			if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 				( bNeedClientUpdate ))
 			{
-				SERVERCOMMANDS_GiveInventoryNotOverwritingAmount( receiver, item );
+				if ( flags & GIF_SKIPOWNER )
+					SERVERCOMMANDS_GiveInventoryNotOverwritingAmount( receiver, item, NETWORK_GetActorsOwnerPlayer( self ) - players, SVCF_SKIPTHISCLIENT );
+				else
+					SERVERCOMMANDS_GiveInventoryNotOverwritingAmount( receiver, item );
 			}
 		}
 	}
@@ -2169,6 +2185,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GiveToTarget)
 enum
 {
 	TIF_NOTAKEINFINITE = 1,
+	TIF_SKIPOWNER = 2,
+	TIF_FORCESERVERSIDE = 4,
 };
 
 void DoTakeInventory(AActor * receiver, DECLARE_PARAMINFO)
@@ -2190,7 +2208,7 @@ void DoTakeInventory(AActor * receiver, DECLARE_PARAMINFO)
 	{
 		bNeedClientUpdate = true;
 		
-		if ( NETWORK_InClientModeAndActorNotClientHandled ( self ) )
+		if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		{
 			return;
 		}
@@ -2199,6 +2217,13 @@ void DoTakeInventory(AActor * receiver, DECLARE_PARAMINFO)
 	
 	if (!item) return;
 	COPY_AAPTR_NOT_NULL(receiver, receiver, setreceiver);
+
+	// [geNia] Don't take serverside items
+	if ( NETWORK_InClientMode() && ( flags & TIF_FORCESERVERSIDE ) )
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
 	bool res = false;
 
@@ -2226,7 +2251,10 @@ void DoTakeInventory(AActor * receiver, DECLARE_PARAMINFO)
 				( inv->Owner ) &&
 				( inv->Owner->player ))
 			{
-				SERVERCOMMANDS_TakeInventory( inv->Owner->player - players, inv->GetClass(), 0 );
+				if ( flags & GIF_SKIPOWNER )
+					SERVERCOMMANDS_TakeInventory( inv->Owner->player - players, inv->GetClass(), 0, NETWORK_GetActorsOwnerPlayer( self ) - players, SVCF_SKIPTHISCLIENT );
+				else
+					SERVERCOMMANDS_TakeInventory( inv->Owner->player - players, inv->GetClass(), 0 );
 			}
 			if (inv->ItemFlags&IF_KEEPDEPLETED) inv->Amount=0;
 			else inv->Destroy();
@@ -2241,7 +2269,10 @@ void DoTakeInventory(AActor * receiver, DECLARE_PARAMINFO)
 				( inv->Owner ) &&
 				( inv->Owner->player ))
 			{
-				SERVERCOMMANDS_TakeInventory( inv->Owner->player - players, inv->GetClass(), inv->Amount );
+				if ( flags & GIF_SKIPOWNER )
+					SERVERCOMMANDS_TakeInventory( inv->Owner->player - players, inv->GetClass(), inv->Amount, NETWORK_GetActorsOwnerPlayer( self ) - players, SVCF_SKIPTHISCLIENT );
+				else
+					SERVERCOMMANDS_TakeInventory( inv->Owner->player - players, inv->GetClass(), inv->Amount );
 			}
 		}
 	}
@@ -3431,10 +3462,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_DropInventory)
 	ACTION_PARAM_CLASS(drop, 0);
 
 	// [BC] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
-			return;
+		return;
 	}
 
 	if (drop)
@@ -5968,6 +5999,8 @@ enum RadiusGiveFlags
 	RGF_NOTRACER	= 128,
 	RGF_NOMASTER	= 256,
 	RGF_CUBE		= 512,
+	RGF_SKIPOWNER = 1024,
+	RGF_FORCESERVERSIDE = 2048,
 };
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
@@ -5979,8 +6012,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 	ACTION_PARAM_INT(amount, 3);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( NETWORK_InClientMode() && ( !NETWORK_ClientsideFunctionsAllowed( self ) || ( flags & RGF_FORCESERVERSIDE ) ) )
+	{
+		ACTION_SET_RESULT(false);
 		return;
+	}
 
 	// We need a valid item, valid targets, and a valid range
 	if (item == NULL || (flags & RGF_MASK) == 0 || distance <= 0)
@@ -6079,7 +6116,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 
 		if (P_CheckSight (thing, self, SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY))
 		{ // OK to give; target is in direct path
-			AInventory *gift = static_cast<AInventory *>(Spawn (item, 0, 0, 0, NO_REPLACE));
+			AInventory *gift = static_cast<AInventory *>(Spawn (item, 0, 0, 0, NO_REPLACE, thing->player));
 			if (gift->IsKindOf(RUNTIME_CLASS(AHealth)))
 			{
 				gift->Amount *= amount;
@@ -6095,7 +6132,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 				gift->Destroy ();
 			}
 			// [BB] If a player got something, inform the clients.
-			else if ( ( thing->player ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
+			else if ( ( thing->player ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && !( flags & RGF_SKIPOWNER ) )
 				SERVERCOMMANDS_GiveInventoryNotOverwritingAmount( thing, gift );
 		}
 	}
