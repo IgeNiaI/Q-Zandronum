@@ -5038,7 +5038,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ScaleVelocity)
 	}
 
 	// [TP] This is handled by the server.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( reference ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( reference ) )
 		return;
 
 	INTBOOL was_moving = reference->velx | reference->vely | reference->velz;
@@ -5082,7 +5083,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 	}
 
 	// [TP] This is handled by the server.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( reference ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( reference ) )
 		return;
 
 	INTBOOL was_moving = reference->velx | reference->vely | reference->velz;
