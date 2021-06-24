@@ -55,7 +55,7 @@ void A_Fire(AActor *self, int height)
 	angle_t an;
 				
 	// [BC] Fire movement is server-side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
