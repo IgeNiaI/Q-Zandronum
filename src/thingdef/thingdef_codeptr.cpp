@@ -3127,7 +3127,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetScale)
 	}
 
 	// [EP] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( reference ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( reference ) )
 		return;
 
 	// [EP] Save the previous scale values.
