@@ -3680,7 +3680,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_BossDeath)
 	FName mytype = self->GetClass()->TypeName;
 
 	// [BC] This is handled server-side.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
