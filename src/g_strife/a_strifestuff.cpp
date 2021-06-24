@@ -620,7 +620,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FLoopActiveSound)
 DEFINE_ACTION_FUNCTION(AActor, A_Countdown)
 {
 	// [BB] The server handles this.
-	if ( NETWORK_InClientMode() && ( ( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false ) )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	if (--self->reactiontime <= 0)
