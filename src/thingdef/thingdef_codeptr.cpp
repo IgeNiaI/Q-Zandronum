@@ -3754,7 +3754,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Respawn)
 	ACTION_PARAM_INT(flags, 0);
 
 	// [EP] Don't let the clients execute it.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	bool oktorespawn = false;
