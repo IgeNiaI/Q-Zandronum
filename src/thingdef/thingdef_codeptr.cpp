@@ -5051,7 +5051,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ScaleVelocity)
 	}
 
 	// [TP] This is handled by the server.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( reference ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( reference ) )
 		return;
 
 	INTBOOL was_moving = reference->velx | reference->vely | reference->velz;
@@ -5101,7 +5102,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 	}
 
 	// [TP] This is handled by the server.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( reference ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( reference ) )
 		return;
 
 	INTBOOL was_moving = reference->velx | reference->vely | reference->velz;
@@ -5121,6 +5123,11 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 		reference->vely = vy;
 		reference->velz = vz;
 
+		if (reference->player && reference->player->mo == reference && reference->velz > 0)
+		{
+			reference->player->mo->wasJustThrustedZ = true;
+		}
+
 		if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
 		{
 			CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( vx, vy, true );
@@ -5132,6 +5139,11 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 		reference->velx += vx;
 		reference->vely += vy;
 		reference->velz += vz;
+		
+		if (reference->player && reference->player->mo == reference && reference->velz > 0)
+		{
+			reference->player->mo->wasJustThrustedZ = true;
+		}
 
 		if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
 		{
