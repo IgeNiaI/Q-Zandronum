@@ -72,7 +72,7 @@ IMPLEMENT_CLASS (ASwitchingDecoration)
 void A_Unblock(AActor *self, bool drop, bool okforclients) // [EP] Added 'okforclients'.
 {
 	// [EP] Don't let the clients execute it, except when necessary.
-	if ( NETWORK_InClientMode() && ( okforclients == false ))
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) && ( okforclients == false ))
 		return;
 
 	// [RH] Andy Baker's stealth monsters
