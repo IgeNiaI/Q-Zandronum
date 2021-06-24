@@ -1484,8 +1484,8 @@ void A_FireBulletsHelper ( AActor *self,
 			}
 			else
 			{
-				angle += pr_cwbullet.Random2() * (Spread_XY / 255);
-				slope += pr_cwbullet.Random2() * (Spread_Z / 255);
+				angle += self->actorRandom.Random2() * (Spread_XY / 255);
+				slope += self->actorRandom.Random2() * (Spread_Z / 255);
 			}
 			int damage = DamagePerBullet;
 
@@ -1566,9 +1566,10 @@ void A_CustomFireBullets( AActor *self,
 	}
 
 	// [BC] Weapons are handled by the server.
+	// [geNia] Unless clientside functions are allowed
 	// [BB] To make hitscan decals kinda work online, we may not stop here yet.
 	// [CK] This also includes predicted puffs and blood decals.
-	if ( NETWORK_InClientMode()
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self )
 		&& cl_hitscandecalhack == false
 		&& CLIENT_ShouldPredictPuffs( ) == false )
 	{
@@ -1584,7 +1585,8 @@ void A_CustomFireBullets( AActor *self,
 	}
 
 	// [BB] Even with the online hitscan decal hack (and clientside puffs), a client has to stop here.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
