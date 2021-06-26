@@ -34,7 +34,6 @@
 #include "m_random.h"
 #include "p_pspr.h"
 #include "p_enemy.h"
-#include "s_sound.h"
 #include "a_sharedglobal.h"
 #include "a_keys.h"
 #include "statnums.h"
@@ -2720,7 +2719,7 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 			if (!(player->mo->mvFlags & MV_SILENT))
 			{
 				if ( ShouldPlaySound() )
-					S_Sound(player->mo, CHAN_AUTO, "*footstep", player->mo->FootstepVolume, ATTN_NORM, true, player - players);
+					S_Sound(player->mo, CHAN_AUTO, "*footstep", player->mo->FootstepVolume, ATTN_NORM, true, NULL, true);
 			}
 
 			CreateEffectActor( EA_FOOTSTEP );
@@ -3670,11 +3669,11 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 	if (isSliding && !player->mo->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*crouchslide", 1, ATTN_NORM, true, player - players);
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*crouchslide", 1, ATTN_NORM, true, NULL, true);
 	}
 	else if (!isSliding && player->mo->isCrouchSliding)
 	{
-		S_StopSound(player->mo, CHAN_SEVEN, player - players);
+		S_StopSound(player->mo, CHAN_SEVEN, NULL, true);
 	}
 
 	if ( isSliding )
@@ -3711,11 +3710,11 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	if (isClimbing && !player->mo->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, true, player - players);
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, true, NULL, true);
 	}
 	else if (!isClimbing && player->mo->isWallClimbing)
 	{
-		S_StopSound(player->mo, CHAN_SEVEN, player - players);
+		S_StopSound(player->mo, CHAN_SEVEN, NULL, true);
 	}
 
 	if (isClimbing)
@@ -3797,9 +3796,9 @@ void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 					if ( ShouldPlaySound() )
 					{
 						if (isEdgeJumper && velz > 0)
-							S_Sound(this, CHAN_BODY, "*edgejump", 1, ATTN_NORM, true, player - players);
+							S_Sound(this, CHAN_BODY, "*edgejump", 1, ATTN_NORM, true, NULL, true);
 						else if (!JumpSoundDelay)
-							S_Sound(this, CHAN_BODY, "*jump", 1, ATTN_NORM, true, player - players);
+							S_Sound(this, CHAN_BODY, "*jump", 1, ATTN_NORM, true, NULL, true);
 
 						JumpSoundDelay = 3;
 					}
@@ -3991,7 +3990,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 				if (!(mvFlags & MV_SILENT))
 				{
 					if ( ShouldPlaySound() )
-						S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, player - players);
+						S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, NULL, true);
 				}
 
 				CreateEffectActor( EA_SECOND_JUMP );

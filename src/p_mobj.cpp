@@ -3541,7 +3541,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 			if (mo->player->mo && mo->health > 0 && mo->velz < -mo->player->mo->GruntSpeed)
 			{
 				if (!(mo->mvFlags & MV_SILENT))
-					S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, true, mo->player - players);
+					S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, true, NULL, true);
 				grunted = true;
 
 				if (mo->player->mo)
@@ -3553,7 +3553,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 				if (!grunted || !S_AreSoundsEquivalent (mo, "*grunt", "*land"))
 				{
 					if (!(mo->mvFlags & MV_SILENT))
-						S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM, true, mo->player - players);
+						S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM, true, NULL, true);
 
 					if (mo->player->mo)
 						mo->player->mo->CreateEffectActor( EA_LAND );
@@ -3565,7 +3565,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 	else if (mo->waterlevel < 2 && mo->player->mo && !mo->player->mo->isCrouchSliding)
 	{
 		if (!(mo->mvFlags & MV_SILENT) && mo->player->mo->ShouldPlayFootsteps(&(mo->player->cmd), true))
-			S_Sound(mo, CHAN_AUTO, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM, true, mo->player - players);
+			S_Sound(mo, CHAN_AUTO, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM, true);
 
 		mo->player->mo->CreateEffectActor( EA_FOOTSTEP );
 	}

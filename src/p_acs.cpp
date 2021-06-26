@@ -6337,7 +6337,7 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
 
 		case ACSF_PlaySound:
 		case ACSF_PlayActorSound:
-			// PlaySound(tid, "SoundName", channel, volume, looping, attenuation, local, playclientside)
+			// PlaySound(tid, "SoundName", channel, volume, looping, attenuation, local)
 			{
 				FSoundID sid;
 
@@ -6359,7 +6359,6 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
 					INTBOOL looping = argCount > 4 ? args[4] : false;
 					float atten = argCount > 5 ? FIXED2FLOAT(args[5]) : ATTN_NORM;
 					INTBOOL local = argCount > 6 ? args[6] : false;
-					INTBOOL playclientside = argCount > 7 ? args[7] : false;
 
 					if (args[0] == 0)
 					{
@@ -6378,14 +6377,12 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 							if (!looping)
 							{
 								// [EP] Inform the clients.
-								S_Sound(spot, chan, sid, vol, atten, true,
-									!(zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS) || playclientside || !activator ? -1 : ULONG(activator->player - players));
+								S_Sound(spot, chan, sid, vol, atten, true, activator);
 							}
 							else if (!S_IsActorPlayingSomething(spot, chan & 7, sid))
 							{
 								// [EP] Inform the clients.
-								S_Sound(spot, chan | CHAN_LOOP, sid, vol, atten, true,
-									!(zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS) || playclientside || !activator ? -1 : ULONG(activator->player - players));
+								S_Sound(spot, chan | CHAN_LOOP, sid, vol, atten, true, activator);
 							}
 						}
 					}
