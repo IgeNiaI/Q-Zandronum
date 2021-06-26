@@ -3433,7 +3433,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 			if (mo->player->mo && mo->health > 0 && mo->velz < -mo->player->mo->GruntSpeed)
 			{
 				if (!(mo->mvFlags & MV_SILENT))
-					S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, true, mo->player - players);
+					S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, true);
 				grunted = true;
 			}
 
@@ -3442,7 +3442,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 				if (!grunted || !S_AreSoundsEquivalent (mo, "*grunt", "*land"))
 				{
 					if (!(mo->mvFlags & MV_SILENT))
-						S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM, true, mo->player - players);
+						S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM, true);
 				}
 			}
 		}
@@ -3451,7 +3451,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 	else if (mo->waterlevel < 2 && !mo->player->isCrouchSliding)
 	{
 		if (!(mo->mvFlags & MV_SILENT) && mo->player->mo->ShouldPlayFootsteps(&(mo->player->cmd), true))
-			S_Sound(mo, CHAN_SIX, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM, true, mo->player - players);
+			S_Sound(mo, CHAN_SIX, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM, true);
 	}
 
 	if (mo->player->secondJumpState == SJ_READY) {

@@ -1282,10 +1282,13 @@ void S_Sound (int channel, FSoundID sound_id, float volume, float attenuation, b
 //
 //==========================================================================
 
-void S_Sound (AActor *ent, int channel, FSoundID sound_id, float volume, float attenuation, bool bSoundOnClient, int playerNumToSkip) // [EP] Added bSoundOnClient.
+void S_Sound (AActor *ent, int channel, FSoundID sound_id, float volume, float attenuation, bool bSoundOnClient, AActor *activator, bool bSkipActivatorClient) // [EP] Added bSoundOnClient.
 {
 	if (ent == NULL || ent->Sector->Flags & SECF_SILENT)
 		return;
+
+	if (activator == NULL)
+		activator = ent;
 
 	if ((channel & CHAN_LOCAL) && ( NETWORK_GetState( ) != NETSTATE_SERVER ) && !ent->CheckLocalView( consoleplayer ))
 		return;
@@ -1294,8 +1297,8 @@ void S_Sound (AActor *ent, int channel, FSoundID sound_id, float volume, float a
 
 	// [EP] If we're the server, tell the clients to make a sound.
 	if (bSoundOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ))
-		if (playerNumToSkip >= 0)
-			SERVERCOMMANDS_SoundActor(ent, channel, S_GetName( sound_id ), volume, attenuation, playerNumToSkip, SVCF_SKIPTHISCLIENT);
+		if ( NETWORK_ClientsideFunctionsAllowed( activator ) || bSkipActivatorClient )
+			SERVERCOMMANDS_SoundActor(ent, channel, S_GetName( sound_id ), volume, attenuation, ULONG( activator->player - players ), SVCF_SKIPTHISCLIENT);
 		else
 			SERVERCOMMANDS_SoundActor(ent, channel, S_GetName( sound_id ), volume, attenuation);
 }
@@ -1582,7 +1585,7 @@ void S_StopSound (int channel)
 //
 //==========================================================================
 
-void S_StopSound (AActor *actor, int channel, int playerNumToSkip)
+void S_StopSound (AActor *actor, int channel, AActor* activator, bool bSkipActivatorClient)
 {
 	FSoundChan *chan = Channels;
 	while (chan != NULL)
@@ -1597,9 +1600,12 @@ void S_StopSound (AActor *actor, int channel, int playerNumToSkip)
 		chan = next;
 	}
 			
+	if (activator == NULL)
+		activator = actor;
+
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		if (playerNumToSkip >= 0)
-			SERVERCOMMANDS_StopSoundActor(actor, channel, playerNumToSkip, SVCF_SKIPTHISCLIENT);
+		if ( NETWORK_ClientsideFunctionsAllowed( activator ) || bSkipActivatorClient )
+			SERVERCOMMANDS_StopSoundActor(actor, channel, ULONG(activator->player - players), SVCF_SKIPTHISCLIENT);
 		else
 			SERVERCOMMANDS_StopSoundActor(actor, channel);
 }

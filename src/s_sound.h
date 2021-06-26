@@ -226,7 +226,7 @@ void S_CacheSound (sfxinfo_t *sfx);
 
 // Start sound for thing at <ent>
 void S_Sound (int channel, FSoundID sfxid, float volume, float attenuation, bool bSoundOnClient = false); // [EP] Added bSoundOnClient.
-void S_Sound (AActor *ent, int channel, FSoundID sfxid, float volume, float attenuation, bool bSoundOnClient = false, int playerNumToSkip = -1); // [EP] Added bSoundOnClient.
+void S_Sound (AActor *ent, int channel, FSoundID sfxid, float volume, float attenuation, bool bSoundOnClient = false, AActor *activator = NULL, bool bSkipActivatorClient = false); // [EP] Added bSoundOnClient.
 void S_SoundMinMaxDist (AActor *ent, int channel, FSoundID sfxid, float volume, float mindist, float maxdist);
 void S_Sound (const FPolyObj *poly, int channel, FSoundID sfxid, float volume, float attenuation);
 void S_Sound (const sector_t *sec, int channel, FSoundID sfxid, float volume, float attenuation);
@@ -294,7 +294,7 @@ bool S_IsMusicPaused ( void );
 void S_StopSoundID (int sound_id, int channel);
 
 // Stops a sound emanating from one of an emitter's channels.
-void S_StopSound (AActor *ent, int channel, int playerNumToSkip = -1);
+void S_StopSound (AActor *ent, int channel, AActor *activator = NULL, bool bSkipActivatorClient = false);
 void S_StopSound (const sector_t *sec, int channel);
 void S_StopSound (const FPolyObj *poly, int channel);
 

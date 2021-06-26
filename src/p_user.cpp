@@ -34,7 +34,6 @@
 #include "m_random.h"
 #include "p_pspr.h"
 #include "p_enemy.h"
-#include "s_sound.h"
 #include "a_sharedglobal.h"
 #include "a_keys.h"
 #include "statnums.h"
@@ -2546,7 +2545,7 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 			if (!(player->mo->mvFlags & MV_SILENT))
 			{
 				if ( ShouldPlaySound() )
-					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM, true, player - players);
+					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM, true, NULL, true);
 			}
 
 			player->stepInterval = player->mo->FootstepInterval;
@@ -3410,7 +3409,7 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 	if (isSliding && !player->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, true, player - players);
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, true, NULL, true);
 	}
 	else if (!isSliding && player->isCrouchSliding)
 	{
@@ -3438,7 +3437,7 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	if (isClimbing && !player->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, true, player - players);
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, true, NULL, true);
 	}
 	else if (!isClimbing && player->isWallClimbing)
 	{
@@ -3510,9 +3509,9 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 					if ( ShouldPlaySound() )
 					{
 						if (isRampJumper && velz > 0)
-							S_Sound(player->mo, CHAN_BODY, "*rampjump", 1, ATTN_NORM, true, player - players);
+							S_Sound(player->mo, CHAN_BODY, "*rampjump", 1, ATTN_NORM, true, NULL, true);
 						else if (!player->mo->JumpSoundDelay)
-							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, true, player - players);
+							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, true, NULL, true);
 
 						player->mo->JumpSoundDelay = 3;
 					}
@@ -3592,7 +3591,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				if (!(mvFlags & MV_SILENT))
 				{
 					if ( ShouldPlaySound() )
-						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, player - players);
+						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, NULL, true);
 				}
 
 				player->jumpTics = JumpDelay;
