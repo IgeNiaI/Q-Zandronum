@@ -7281,7 +7281,7 @@ AActor *P_SpawnMissile (AActor *source, AActor *dest, const PClass *type, AActor
 		source, dest, type, true, owner, bSpawnOnClient); // [BB] Added bSpawnOnClient.
 }
 
-AActor *P_SpawnMissileZ (AActor *source, fixed_t z, AActor *dest, const PClass *type, const bool bSpawnOnClient) // [BB] Added bSpawnOnClient.
+AActor *P_SpawnMissileZ (AActor *source, fixed_t z, AActor *dest, const PClass *type, const bool bSpawnOnClient ) // [BB] Added bSpawnOnClient.
 {
 	return P_SpawnMissileXYZ (source->x, source->y, z, source, dest, type,
 		true, NULL, bSpawnOnClient ); // [BB] Added bSpawnOnClient.
@@ -7356,6 +7356,10 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 
 	// [BB]
 	AActor *pMissile = (!checkspawn || P_CheckMissileSpawn (th, source->radius)) ? th : NULL;
+	
+	// Mark actor as clientside if spawned on client
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( source ) )
+		pMissile->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 	// [BB] If we're the server, tell clients to spawn the missile.
 	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
@@ -7457,7 +7461,7 @@ AActor *P_SpawnMissileAngle (AActor *source, const PClass *type,
 {
 	return P_SpawnMissileAngleZSpeed (source, source->z + 32*FRACUNIT + source->GetBobOffset(),
 		type, angle, velz, GetDefaultSpeed (type),
-		NULL, true, bSpawnOnClient ); // [BB] Added bSpawnOnClient.
+		NULL, true, bSpawnOnClient); // [BB] Added bSpawnOnClient.
 }
 
 AActor *P_SpawnMissileAngleZ (AActor *source, fixed_t z,
@@ -7532,6 +7536,10 @@ AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
 
 	// [BB]
 	AActor *pMissile = (!checkspawn || P_CheckMissileSpawn(mo, source->radius)) ? mo : NULL;
+	
+	// Mark actor as clientside if spawned on client
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( source ) )
+		pMissile->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && pMissile )
 	{
@@ -7683,6 +7691,10 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	}
 	AActor *MissileActor = Spawn (type, source->x + x, source->y + y, z, ALLOW_REPLACE, source->player);
 	if (pMissileActor) *pMissileActor = MissileActor;
+
+	// Mark actor as clientside if spawned on client
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( source ) )
+		MissileActor->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 	if ( bSpawnSound )
 	{
