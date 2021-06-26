@@ -4488,7 +4488,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 					!(trace.Actor->flags2 & (MF2_INVULNERABLE | MF2_DORMANT)) &&
 					NETWORK_ClientsideFunctionsAllowedOrIsServer( t1 ) )
 				{
-					P_SpawnBlood(hitx, hity, hitz, angle - ANG180, newdam > 0 ? newdam : damage, trace.Actor);
+					P_SpawnBlood(hitx, hity, hitz, angle - ANG180, newdam > 0 ? newdam : damage, trace.Actor, t1);
 				}
 
 				if (damage)
@@ -4979,7 +4979,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 
 				if (bleed)
 				{
-					P_SpawnBlood(x, y, z, (source->angle + angleoffset) - ANG180, newdam > 0 ? newdam : damage, hitactor);
+					P_SpawnBlood(x, y, z, (source->angle + angleoffset) - ANG180, newdam > 0 ? newdam : damage, hitactor, source);
 					P_TraceBleed(newdam > 0 ? newdam : damage, x, y, z, hitactor, source->angle, pitch);
 				}
 			}

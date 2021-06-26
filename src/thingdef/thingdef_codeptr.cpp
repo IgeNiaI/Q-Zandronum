@@ -5460,7 +5460,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_WolfAttack)
 			int newdam = P_DamageMobj(self->target, self, self, damage, mod, DMG_THRUSTLESS);
 			if (spawnblood)
 			{
-				P_SpawnBlood(dx, dy, dz, angle, newdam > 0 ? newdam : damage, self->target);
+				P_SpawnBlood(dx, dy, dz, angle, newdam > 0 ? newdam : damage, self->target, self);
 				P_TraceBleed(newdam > 0 ? newdam : damage, self->target, R_PointToAngle2(self->x, self->y, dx, dy), 0);
 			}
 		}
