@@ -79,6 +79,8 @@ ACTOR StaffPuff
 	+NOBLOCKMAP
 	+NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
+	+NONETID
 	AttackSound "weapons/staffhit"
 	States
 	{
@@ -97,6 +99,8 @@ ACTOR StaffPuff2
 	+NOBLOCKMAP
 	+NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
+	+NONETID
 	AttackSound "weapons/staffpowerhit"
 	States
 	{
@@ -217,6 +221,8 @@ ACTOR GoldWandPuff1
 	+NOBLOCKMAP
 	+NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
+	+NONETID
 	RenderStyle Add
 	States
 	{
@@ -234,6 +240,8 @@ ACTOR GoldWandPuff2 : GoldWandFX1
 	+NOBLOCKMAP
 	+NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
+	+NONETID
 	States
 	{
 	Spawn:
@@ -348,7 +356,7 @@ ACTOR CrossbowFX2 : CrossbowFX1
 	States
 	{
 	Spawn:
-		FX03 B 1 BRIGHT A_SpawnItemEx("CrossbowFX4", random2[BoltSpark]()*0.015625, random2[BoltSpark]()*0.015625, 0, 0,0,0,0,SXF_ABSOLUTEPOSITION, 50)
+		FX03 B 1 BRIGHT A_SpawnItemEx("CrossbowFX4", random2[BoltSpark]()*0.015625, random2[BoltSpark]()*0.015625, 0, 0,0,0,0,SXF_ABSOLUTEPOSITION|SXF_SKIPOWNER, 50)
 		Loop
 	}
 }
@@ -381,6 +389,7 @@ ACTOR CrossbowFX3 : CrossbowFX1
 ACTOR CrossbowFX4
 {
 	+NOBLOCKMAP
+	+NONETID
 	Gravity 0.125
 	RenderStyle Add
 	States
@@ -477,6 +486,8 @@ ACTOR GauntletPuff1
 	+NOBLOCKMAP
 	+NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
+	+NONETID
 	RenderStyle Translucent
 	Alpha 0.4
 	VSpeed 0.8
@@ -791,6 +802,7 @@ ACTOR BlasterSmoke
 	+NOGRAVITY
 	+NOTELEPORT
 	+CANNOTPUSH
+	+NONETID
 	RenderStyle Translucent
 	Alpha 0.4
 	States
@@ -834,6 +846,8 @@ ACTOR BlasterPuff
 	+NOBLOCKMAP
 	+NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
+	+NONETID
 	RenderStyle Add
 	States
 	{
@@ -992,6 +1006,7 @@ ACTOR RainPillar native
 	Damage 5
 	Mass 5
 	Projectile
+	+NONETID
 	-ACTIVATEPCROSS
 	-ACTIVATEIMPACT
 	RenderStyle Add
@@ -1131,6 +1146,8 @@ ACTOR PhoenixPuff
 	+NOGRAVITY
 	+NOTELEPORT
 	+CANNOTPUSH
+	+PUFFGETSOWNER
+	+NONETID
 	RenderStyle Translucent
 	Alpha 0.4
 	States

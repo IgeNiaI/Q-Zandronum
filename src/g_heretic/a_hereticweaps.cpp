@@ -14,27 +14,23 @@
 #include "thingdef/thingdef.h"
 #include "doomstat.h"
 */
+#include "cl_main.h"
+#include "unlagged.h"
 
-static FRandom pr_sap ("StaffAtkPL1");
-static FRandom pr_sap2 ("StaffAtkPL2");
-static FRandom pr_fgw ("FireWandPL1");
-static FRandom pr_fgw2 ("FireWandPL2");
-static FRandom pr_boltspark ("BoltSpark");
-static FRandom pr_macerespawn ("MaceRespawn");
-static FRandom pr_maceatk ("FireMacePL1");
-static FRandom pr_gatk ("GauntletAttack");
-static FRandom pr_bfx1 ("BlasterFX1");
-static FRandom pr_ripd ("RipperD");
-static FRandom pr_fb1 ("FireBlasterPL1");
-static FRandom pr_bfx1t ("BlasterFX1Tick");
-static FRandom pr_hrfx2 ("HornRodFX2");
-static FRandom pr_rp ("RainPillar");
-static FRandom pr_fsr1 ("FireSkullRodPL1");
-static FRandom pr_storm ("SkullRodStorm");
-static FRandom pr_impact ("RainImpact");
-static FRandom pr_pfx1 ("PhoenixFX1");
-static FRandom pr_pfx2 ("PhoenixFX2");
-static FRandom pr_fp2 ("FirePhoenixPL2");
+static FRandom pr_fgw("FireWandPL1");
+static FRandom pr_fgw2("FireWandPL2");
+static FRandom pr_maceatk("FireMacePL1");
+static FRandom pr_gatk("GauntletAttack");
+static FRandom pr_bfx1("BlasterFX1");
+static FRandom pr_ripd("RipperD");
+static FRandom pr_fb1("FireBlasterPL1");
+static FRandom pr_bfx1t("BlasterFX1Tick");
+static FRandom pr_hrfx2("HornRodFX2");
+static FRandom pr_rp("RainPillar");
+static FRandom pr_fsr1("FireSkullRodPL1");
+static FRandom pr_storm("SkullRodStorm");
+static FRandom pr_impact("RainImpact");
+static FRandom pr_pfx2("PhoenixFX2");
 
 #define FLAME_THROWER_TICS (10*TICRATE)
 
@@ -83,14 +79,15 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_StaffAttack)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
 
 	if (puff == NULL) puff = PClass::FindClass(NAME_BulletPuff);	// just to be sure
 	angle = self->angle;
-	angle += pr_sap.Random2() << 18;
+	angle += self->actorRandom.Random2() << 18;
 	slope = P_AimLineAttack (self, angle, MELEERANGE, &linetarget);
 	P_LineAttack (self, angle, MELEERANGE, slope, damage, NAME_Melee, puff, true, &linetarget);
 
@@ -110,7 +107,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_StaffAttack)
 
 		// [BC] If we're the server, tell clients to adjust the player's angle.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingAngle( player->mo );
+		{
+			if ( NETWORK_ClientsideFunctionsAllowed( self ) )
+				SERVERCOMMANDS_SetThingAngle( player->mo, ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SetThingAngle( player->mo );
+		}
 	}
 }
 
@@ -140,7 +142,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL1)
 	}
 
 	// [BC] If we're the client, just play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( player->mo, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM );
 		return;
@@ -151,7 +154,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL1)
 	angle = self->angle;
 	if (player->refire)
 	{
-		angle += pr_fgw.Random2() << 18;
+		angle += self->actorRandom.Random2() << 18;
 	}
 	P_LineAttack (self, angle, PLAYERMISSILERANGE, pitch, damage, NAME_Hitscan, "GoldWandPuff1");
 
@@ -161,14 +164,14 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL1)
 		angle = self->angle;
 		if (player->refire)
 		{
-			angle += pr_fgw.Random2() << 18;
+			angle += self->actorRandom.Random2() << 18;
 		}
 		P_LineAttack(self, angle + ( ANGLE_45 / 3 ), PLAYERMISSILERANGE, pitch, damage, NAME_Hitscan, "GoldWandPuff1");
 
 		angle = self->angle;
 		if (player->refire)
 		{
-			angle += pr_fgw.Random2() << 18;
+			angle += self->actorRandom.Random2() << 18;
 		}
 		P_LineAttack(self, angle - ( ANGLE_45 / 3 ), PLAYERMISSILERANGE, pitch, damage, NAME_Hitscan, "GoldWandPuff1");
 	}
@@ -177,11 +180,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL1)
 	if (  PLAYER_AwardMedalFromThisActor( weapon ) )
 		PLAYER_CheckStruckPlayer ( self );
 
-	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM);
-
-	// [BC] If we're the server, tell clients that a weapon is being fired.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/wandhit", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM, true);
 }
 
 //----------------------------------------------------------------------------
@@ -211,7 +210,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL2)
 	}
 
 	// [BC] If we're the client, just play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( player->mo, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM );
 		return;
@@ -253,12 +253,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL2)
 			angle += ((ANG45/8)*2)/4;
 		}
 	}
-	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM);
-
-
-	// [BC] If we're the server, tell clients that a weapon is being fired.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/wandhit", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM, true);
 }
 
 //----------------------------------------------------------------------------
@@ -283,7 +278,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireCrossbowPL1)
 			return;
 	}
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -317,7 +313,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireCrossbowPL2)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{		
 		return;
 	}
@@ -369,14 +366,14 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GauntletAttack)
 	{
 		damage = pr_gatk.HitDice (2);
 		dist = 4*MELEERANGE;
-		angle += pr_gatk.Random2() << 17;
+		angle += self->actorRandom.Random2() << 17;
 		pufftype = PClass::FindClass("GauntletPuff2");
 	}
 	else
 	{
 		damage = pr_gatk.HitDice (2);
 		dist = MELEERANGE+1;
-		angle += pr_gatk.Random2() << 18;
+		angle += self->actorRandom.Random2() << 18;
 		pufftype = PClass::FindClass("GauntletPuff1");
 	}
 	slope = P_AimLineAttack (self, angle, dist, &linetarget);
@@ -405,7 +402,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GauntletAttack)
 	}
 
 	// [EP] Clients should not execute this, let the server know what's needed.
-	if ( NETWORK_InClientMode() == false )
+	// [geNia] Unless clientside functions are allowed.
+	if ( NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		if (power)
 		{
@@ -413,23 +411,18 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GauntletAttack)
 			const int prevhealth = self->health;
 
 			if (!(linetarget->flags5 & MF5_DONTDRAIN)) P_GiveBody (self, actualdamage>>1);
-			S_Sound (self, CHAN_AUTO, "weapons/gauntletspowhit", 1, ATTN_NORM);
+			S_Sound (self, CHAN_AUTO, "weapons/gauntletspowhit", 1, ATTN_NORM, true);
 
-			// [EP] Inform the clients about the sound and the possible health change.
+			// [EP] Inform the clients about the possible health change.
 			if ( NETWORK_GetState() == NETSTATE_SERVER )
 			{
-				SERVERCOMMANDS_SoundActor( self, CHAN_AUTO, "weapons/gauntletspowhit", 1, ATTN_NORM );
 				if ( prevhealth != self->health )
 					 SERVERCOMMANDS_SetPlayerHealth( player - players );
 			}
 		}
 		else
 		{
-			S_Sound (self, CHAN_AUTO, "weapons/gauntletshit", 1, ATTN_NORM);
-
-			// [EP] Inform the clients about the sound.
-			if ( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( self, CHAN_AUTO, "weapons/gauntletshit", 1, ATTN_NORM );
+			S_Sound (self, CHAN_AUTO, "weapons/gauntletshit", 1, ATTN_NORM, true);
 		}
 	}
 	// turn to face target
@@ -511,14 +504,13 @@ void FireMacePL1B (AActor *actor)
 			return;
 	}
 
-	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ) )
 	{
 		return;
 	}
 
 	ball = Spawn("MaceFX2", actor->x, actor->y, actor->z + 28*FRACUNIT 
-		- actor->floorclip, ALLOW_REPLACE);
+		- actor->floorclip, ALLOW_REPLACE, actor->player);
 	ball->velz = 2*FRACUNIT+/*((player->lookdir)<<(FRACBITS-5))*/
 		finetangent[FINEANGLES/4-(actor->pitch>>ANGLETOFINESHIFT)];
 	angle = actor->angle;
@@ -528,20 +520,20 @@ void FireMacePL1B (AActor *actor)
 	angle >>= ANGLETOFINESHIFT;
 	ball->velx = (actor->velx>>1) + FixedMul(ball->Speed, finecosine[angle]);
 	ball->vely = (actor->vely>>1) + FixedMul(ball->Speed, finesine[angle]);
-	S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM);
+	S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM, true, actor);
+	
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( actor ) )
+		ball->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 	// [BC] If we're the server, spawn the ball and play the sound.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-	{
-		SERVERCOMMANDS_SpawnMissile( ball );
-		SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
-	}
+		UNLAGGED_UnlagAndReplicateMissile( actor, ball, false, false, false );
 
 	// [BC] Apply spread.
 	if ( player->cheats2 & CF2_SPREAD )
 	{
 		ball = Spawn("MaceFX2", actor->x, actor->y, actor->z + 28*FRACUNIT 
-			- actor->floorclip, ALLOW_REPLACE);
+			- actor->floorclip, ALLOW_REPLACE, actor->player);
 		ball->velz = 2*FRACUNIT+/*((player->lookdir)<<(FRACBITS-5))*/
 			finetangent[FINEANGLES/4-(actor->pitch>>ANGLETOFINESHIFT)];
 		angle = actor->angle + ( ANGLE_45 / 3 );
@@ -551,17 +543,17 @@ void FireMacePL1B (AActor *actor)
 		angle >>= ANGLETOFINESHIFT;
 		ball->velx = (actor->velx>>1)+FixedMul(ball->Speed, finecosine[angle]);
 		ball->vely = (actor->vely>>1)+FixedMul(ball->Speed, finesine[angle]);
-		S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM);
+		S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM, true, actor);
+		
+		if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( actor ) )
+			ball->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 		// [BC] If we're the server, spawn the ball and play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			SERVERCOMMANDS_SpawnMissile( ball );
-			SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
-		}
+			UNLAGGED_UnlagAndReplicateMissile( actor, ball, false, false, false );
 
 		ball = Spawn("MaceFX2", actor->x, actor->y, actor->z + 28*FRACUNIT 
-			- actor->floorclip, ALLOW_REPLACE);
+			- actor->floorclip, ALLOW_REPLACE, actor->player);
 		ball->velz = 2*FRACUNIT+/*((player->lookdir)<<(FRACBITS-5))*/
 			finetangent[FINEANGLES/4-(actor->pitch>>ANGLETOFINESHIFT)];
 		angle = actor->angle - ( ANGLE_45 / 3 );
@@ -571,14 +563,14 @@ void FireMacePL1B (AActor *actor)
 		angle >>= ANGLETOFINESHIFT;
 		ball->velx = (actor->velx>>1)+FixedMul(ball->Speed, finecosine[angle]);
 		ball->vely = (actor->vely>>1)+FixedMul(ball->Speed, finesine[angle]);
-		S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM);
+		S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM, true, actor);
+		
+		if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( actor ) )
+			ball->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 		// [BC] If we're the server, spawn the ball and play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
-			SERVERCOMMANDS_SpawnMissile( ball );
-			SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
-		}
+			UNLAGGED_UnlagAndReplicateMissile( actor, ball, false, false, false );
 	}
 
 	P_CheckMissileSpawn (ball, actor->radius);
@@ -599,8 +591,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL1)
 	{
 		return;
 	}
-
-	if (pr_maceatk() < 28)
+	
+	if (self->actorRandom() < 28)
 	{
 		FireMacePL1B (self);
 		return;
@@ -615,33 +607,64 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL1)
 	player->psprites[ps_weapon].sy = WEAPONTOP+(pr_maceatk()&3)*FRACUNIT;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
 
-	ball = P_SpawnPlayerMissile (self, PClass::FindClass("MaceFX1"),
-		self->angle+(((pr_maceatk()&7)-4)<<24));
+	ball = P_SpawnPlayerMissile (self, 0, 0, 0, PClass::FindClass("MaceFX1"),
+		self->angle+(((self->actorRandom()&7)-4)<<24),
+		NULL, NULL, 0U, false, true, false, true);
 	if (ball)
 	{
 		ball->special1 = 16; // tics till dropoff
+
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER ) {
+			UNLAGGED_UnlagAndReplicateMissile( self, ball, false, false, false );
+			SERVERCOMMANDS_SetThingSpecial1( ball );
+			if ( ball->special1 == 0 ) {
+				SERVERCOMMANDS_SetThingFlags( ball, FLAGSET_FLAGS );
+				SERVERCOMMANDS_SetThingGravity( ball );
+			}
+		}
 	}
 
 	// [BC] Apply spread.
 	if ( player->cheats2 & CF2_SPREAD )
 	{
-		ball = P_SpawnPlayerMissile (self, PClass::FindClass("MaceFX1"),
-			self->angle+(((pr_maceatk()&7)-4)<<24) + ( ANGLE_45 / 3 ));
+		ball = P_SpawnPlayerMissile (self, 0, 0, 0, PClass::FindClass("MaceFX1"),
+			self->angle+(((self->actorRandom()&7)-4)<<24) + ( ANGLE_45 / 3 ),
+			NULL, NULL, 0U, false, true, false, true);
 		if (ball)
 		{
 			ball->special1 = 16; // tics till dropoff
+
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER ) {
+				UNLAGGED_UnlagAndReplicateMissile( self, ball, false, false, false );
+				SERVERCOMMANDS_SetThingSpecial1( ball );
+				if ( ball->special1 == 0 ) {
+					SERVERCOMMANDS_SetThingFlags( ball, FLAGSET_FLAGS );
+					SERVERCOMMANDS_SetThingGravity( ball );
+				}
+			}
 		}
 
-		ball = P_SpawnPlayerMissile (self, PClass::FindClass("MaceFX1"),
-			self->angle+(((pr_maceatk()&7)-4)<<24) - ( ANGLE_45 / 3 ));
+		ball = P_SpawnPlayerMissile (self, 0, 0, 0, PClass::FindClass("MaceFX1"),
+			self->angle+(((self->actorRandom()&7)-4)<<24) - ( ANGLE_45 / 3 ),
+			NULL, NULL, 0U, false, true, false, true);
 		if (ball)
 		{
 			ball->special1 = 16; // tics till dropoff
+
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER ) {
+				UNLAGGED_UnlagAndReplicateMissile( self, ball, false, false, false );
+				SERVERCOMMANDS_SetThingSpecial1( ball );
+				if ( ball->special1 == 0 ) {
+					SERVERCOMMANDS_SetThingFlags( ball, FLAGSET_FLAGS );
+					SERVERCOMMANDS_SetThingGravity( ball );
+				}
+			}
 		}
 	}
 }
@@ -655,7 +678,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL1)
 DEFINE_ACTION_FUNCTION(AActor, A_MacePL1Check)
 {
 	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -664,6 +688,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MacePL1Check)
 	{
 		return;
 	}
+
 	self->special1 -= 4;
 	if (self->special1 > 0)
 	{
@@ -706,7 +731,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_MacePL1Check)
 DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact)
 {
 	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// We need to make sure the ball doesn't temporary go into it's death frame.
 		if ( self->flags & MF_INBOUNCE )
@@ -727,18 +753,17 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact)
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
 			SERVERCOMMANDS_SetThingState( self, STATE_SPAWN );
 			SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
-			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM );
 		}
 
 		self->SetState (self->SpawnState);
-		S_Sound (self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM, true);
 	}
 	else
 	{ // Explode
 		self->velx = self->vely = self->velz = 0;
 		self->flags |= MF_NOGRAVITY;
 		self->gravity = FRACUNIT;
-		S_Sound (self, CHAN_BODY, "weapons/macehit", 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY, "weapons/macehit", 1, ATTN_NORM, true);
 
 		// [BC] If we're the server, tell clients to move the object.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -747,7 +772,6 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact)
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
 			SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
 			SERVERCOMMANDS_SetThingGravity( self );
-			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM );
 		}
 	}
 }
@@ -763,8 +787,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 	AActor *tiny;
 	angle_t angle;
 
-	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// We need to make sure the ball doesn't temporary go into it's death frame.
 		if ( self->flags & MF_INBOUNCE )
@@ -815,7 +838,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
 
-		tiny = Spawn("MaceFX3", self->x, self->y, self->z, ALLOW_REPLACE);
+		tiny = Spawn("MaceFX3", self->x, self->y, self->z, ALLOW_REPLACE, self->target->player);
 		angle = self->angle+ANG90;
 		tiny->target = self->target;
 		tiny->angle = angle;
@@ -825,12 +848,13 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 		tiny->velz = self->velz;
 
 		// [BC] If we're the server, spawn this missile.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER ) {
 			SERVERCOMMANDS_SpawnMissile( tiny );
+		}
 
 		P_CheckMissileSpawn (tiny, self->radius);
 
-		tiny = Spawn("MaceFX3", self->x, self->y, self->z, ALLOW_REPLACE);
+		tiny = Spawn("MaceFX3", self->x, self->y, self->z, ALLOW_REPLACE, self->target->player);
 		angle = self->angle-ANG90;
 		tiny->target = self->target;
 		tiny->angle = angle;
@@ -840,8 +864,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 		tiny->velz = self->velz;
 
 		// [BC] If we're the server, spawn this missile.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER ) {
 			SERVERCOMMANDS_SpawnMissile( tiny );
+		}
 
 		P_CheckMissileSpawn (tiny, self->radius);
 	}
@@ -890,13 +915,15 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 	}
 
 	// [BC] If we're the client, play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( player->mo, CHAN_WEAPON, "weapons/maceshoot", 1, ATTN_NORM );
 		return;
 	}
 
-	mo = P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AMaceFX4), self->angle, &linetarget);
+	mo = P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AMaceFX4), self->angle, &linetarget,
+		NULL, 0U, false, true, false, true);
 	if (mo)
 	{
 		mo->velx += self->velx;
@@ -908,18 +935,18 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 			mo->tracer = linetarget;
 		}
 	}
-	S_Sound (self, CHAN_WEAPON, "weapons/maceshoot", 1, ATTN_NORM);
+	S_Sound (self, CHAN_WEAPON, "weapons/maceshoot", 1, ATTN_NORM, true);
 
 	// [BC] If we're the server, play the sound.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_MoveThing( mo, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/maceshoot", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+		UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 	}
 
 	if ( player->cheats2 & CF2_SPREAD )
 	{
-		mo = P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AMaceFX4), self->angle + ( ANGLE_45 / 3 ), &linetarget);
+		mo = P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AMaceFX4), self->angle + ( ANGLE_45 / 3 ), &linetarget,
+			NULL, 0U, false, true, false, true);
 		if (mo)
 		{
 			mo->velx += self->velx;
@@ -933,10 +960,11 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 
 			// [BC] If we're the server, play the sound.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( mo, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
+				UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 		}
 
-		mo = P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AMaceFX4), self->angle - ( ANGLE_45 / 3 ), &linetarget);
+		mo = P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AMaceFX4), self->angle - ( ANGLE_45 / 3 ), &linetarget,
+			NULL, 0U, false, true, false, true);
 		if (mo)
 		{
 			mo->velx += self->velx;
@@ -950,7 +978,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 
 			// [BC] If we're the server, play the sound.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( mo, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
+				UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 		}
 	}
 }
@@ -970,7 +998,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_DeathBallImpact)
 	AActor *linetarget;
 
 	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// We need to make sure the self doesn't temporary go into it's death frame.
 		if ( self->flags & MF_INBOUNCE )
@@ -1059,14 +1088,11 @@ DEFINE_ACTION_FUNCTION(AActor, A_DeathBallImpact)
 			self->vely = FixedMul (self->Speed, finesine[angle]);
 		}
 		self->SetState (self->SpawnState);
-		S_Sound (self, CHAN_BODY, "weapons/macestop", 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY, "weapons/macestop", 1, ATTN_NORM, true);
 
 		// [BC] If we're the server, send the state change and move it.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
 			SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
-			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macestop", 1, ATTN_NORM );
-		}
 	}
 	else
 	{ // Explode
@@ -1074,7 +1100,7 @@ boom:
 		self->velx = self->vely = self->velz = 0;
 		self->flags |= MF_NOGRAVITY;
 		self->gravity = FRACUNIT;
-		S_Sound (self, CHAN_BODY, "weapons/maceexplode", 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY, "weapons/maceexplode", 1, ATTN_NORM, true);
 
 		// [BC] If we're the server, do some stuff.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -1084,7 +1110,6 @@ boom:
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS );
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
 			SERVERCOMMANDS_SetThingGravity( self );
-			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/maceexplode", 1, ATTN_NORM );
 		}
 	}
 }
@@ -1178,7 +1203,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireBlasterPL1)
 			return;
 	}
 	// [BC] If we're the client, just play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( player->mo, CHAN_WEAPON, "weapons/blastershoot", 1, ATTN_NORM );
 		return;
@@ -1189,7 +1215,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireBlasterPL1)
 	angle = self->angle;
 	if (player->refire)
 	{
-		angle += pr_fb1.Random2() << 18;
+		angle += self->actorRandom.Random2() << 18;
 	}
 	P_LineAttack (self, angle, PLAYERMISSILERANGE, pitch, damage, NAME_Hitscan, "BlasterPuff");
 
@@ -1204,11 +1230,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireBlasterPL1)
 	if ( PLAYER_AwardMedalFromThisActor( weapon ) )
 		PLAYER_CheckStruckPlayer ( self );
 
-	S_Sound (self, CHAN_WEAPON, "weapons/blastershoot", 1, ATTN_NORM);
-
-	// [BC] If we're the server, tell clients that a weapon is being fired.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/blastershoot", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "weapons/blastershoot", 1, ATTN_NORM, true);
 }
 
 //----------------------------------------------------------------------------
@@ -1222,16 +1244,29 @@ DEFINE_ACTION_FUNCTION(AActor, A_SpawnRippers)
 	unsigned int i;
 	angle_t angle;
 	AActor *ripper;
+	player_t* ownerPlayer;
+
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
+		return;
+
+	ownerPlayer = NETWORK_GetActorsOwnerPlayer( self );
 
 	for(i = 0; i < 8; i++)
 	{
-		ripper = Spawn<ARipper> (self->x, self->y, self->z, ALLOW_REPLACE);
+		ripper = Spawn<ARipper> (self->x, self->y, self->z, ALLOW_REPLACE, ownerPlayer);
 		angle = i*ANG45;
 		ripper->target = self->target;
 		ripper->angle = angle;
 		angle >>= ANGLETOFINESHIFT;
 		ripper->velx = FixedMul (ripper->Speed, finecosine[angle]);
 		ripper->vely = FixedMul (ripper->Speed, finesine[angle]);
+		
+		if ( NETWORK_InClientMode() )
+			ripper->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
+		
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			UNLAGGED_UnlagAndReplicateMissile( self, ripper, false, false, false );
+
 		P_CheckMissileSpawn (ripper, self->radius);
 	}
 }
@@ -1322,7 +1357,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL1)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -1382,7 +1418,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL2)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -1403,11 +1440,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL2)
 		{
 			MissileActor->tracer = linetarget;
 		}
-		S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM);
-
-		// [BC] If we're the server, play this sound.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SoundActor( MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM );
+		S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM, true);
 	}
 
 	// [BC] Apply spread.
@@ -1429,11 +1462,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL2)
 			{
 				MissileActor->tracer = linetarget;
 			}
-			S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM);
-
-			// [BC] If we're the server, play this sound.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM );
+			S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM, true);
 		}
 
 		P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AHornRodFX2), self->angle - ( ANGLE_45 / 3 ), &linetarget, &MissileActor);
@@ -1452,11 +1481,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL2)
 			{
 				MissileActor->tracer = linetarget;
 			}
-			S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM);
-
-			// [BC] If we're the server, play this sound.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM );
+			S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM, true);
 		}
 	}
 }
@@ -1472,7 +1497,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_AddPlayerRain)
 	ARainTracker *tracker;
 
 	// [BC] Let the server spawn rain.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	if (self->target == NULL || self->target->health <= 0)
@@ -1572,7 +1598,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_SkullRodStorm)
 	}
 	x = self->x + ((pr_storm()&127) - 64) * FRACUNIT;
 	y = self->y + ((pr_storm()&127) - 64) * FRACUNIT;
-	mo = Spawn<ARainPillar> (x, y, ONCEILINGZ, ALLOW_REPLACE);
+	mo = Spawn<ARainPillar> (x, y, ONCEILINGZ, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( self ));
 #ifdef _3DFLOORS
 	// We used bouncecount to store the 3D floor index in A_HideInCeiling
 	if (!mo) return;
@@ -1595,7 +1621,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_SkullRodStorm)
 	P_CheckMissileSpawn (mo, self->radius);
 	if (self->special1 != -1 && !S_IsActorPlayingSomething (self, CHAN_BODY, -1))
 	{
-		S_Sound (self, CHAN_BODY|CHAN_LOOP, self->special1, 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY|CHAN_LOOP, self->special1, 1, ATTN_NORM, true);
 	}
 }
 
@@ -1742,7 +1768,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePhoenixPL1)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -1750,14 +1777,23 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePhoenixPL1)
 	P_SpawnPlayerMissileWithPossibleSpread (self, RUNTIME_CLASS(APhoenixFX1)); // [BB] Spread
 	angle = self->angle + ANG180;
 	angle >>= ANGLETOFINESHIFT;
-	self->velx += FixedMul (4*FRACUNIT, finecosine[angle]);
-	self->vely += FixedMul (4*FRACUNIT, finesine[angle]);
+
+	fixed_t bonusVelX = FixedMul (4*FRACUNIT, finecosine[angle]);
+	fixed_t bonusVelY = FixedMul (4*FRACUNIT, finesine[angle]);
+	self->velx += bonusVelX;
+	self->vely += bonusVelY;
+
+	if ( NETWORK_InClientMode() && self->player == &players[consoleplayer] && self->player->mo == self )
+		CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( bonusVelX, bonusVelY, false );
 
 	// [BC] Push the player back even more if they are using spread.
 	if ( player->cheats2 & CF2_SPREAD )
 	{
-		self->velx += FixedMul( 4*FRACUNIT, finecosine[angle] ) * 2;
-		self->vely += FixedMul( 4*FRACUNIT, finesine[angle] ) * 2;
+		self->velx += bonusVelX * 2;
+		self->vely += bonusVelY * 2;
+
+		if ( NETWORK_InClientMode() && self->player == &players[consoleplayer] && self->player->mo == self )
+			CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( bonusVelX * 2, bonusVelY * 2, false );
 	}
 }
 
@@ -1841,7 +1877,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePhoenixPL2)
 		return;
 	}
 	// [BC] If we're the client, just play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		if (!player->refire || !S_IsActorPlayingSomething (player->mo, CHAN_WEAPON, -1))
 		{
@@ -1851,17 +1888,23 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePhoenixPL2)
 	}
 
 	angle = self->angle;
-	x = self->x + (pr_fp2.Random2() << 9);
-	y = self->y + (pr_fp2.Random2() << 9);
+	x = self->x + (self->actorRandom.Random2() << 9);
+	y = self->y + (self->actorRandom.Random2() << 9);
 	z = self->z + 26*FRACUNIT + finetangent[FINEANGLES/4-(self->pitch>>ANGLETOFINESHIFT)];
 	z -= self->floorclip;
 	slope = finetangent[FINEANGLES/4-(self->pitch>>ANGLETOFINESHIFT)] + (FRACUNIT/10);
-	mo = Spawn("PhoenixFX2", x, y, z, ALLOW_REPLACE);
+	mo = Spawn("PhoenixFX2", x, y, z, ALLOW_REPLACE, self->player);
 	mo->target = self;
 	mo->angle = angle;
 	mo->velx = self->velx + FixedMul (mo->Speed, finecosine[angle>>ANGLETOFINESHIFT]);
 	mo->vely = self->vely + FixedMul (mo->Speed, finesine[angle>>ANGLETOFINESHIFT]);
 	mo->velz = FixedMul (mo->Speed, slope);
+	
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( self ) )
+		mo->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
+	else if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
+
 	if (!player->refire || !S_IsActorPlayingSomething (self, CHAN_WEAPON, -1))
 	{
 		S_Sound (self, CHAN_WEAPON|CHAN_LOOP, soundid, 1, ATTN_NORM);
@@ -1871,33 +1914,41 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePhoenixPL2)
 	if ( player->cheats2 & CF2_SPREAD )
 	{
 		angle = self->angle + ( ANGLE_45 / 3 );
-		mo = Spawn<APhoenixFX2> (x, y, z, ALLOW_REPLACE);
+		mo = Spawn<APhoenixFX2> (x, y, z, ALLOW_REPLACE, self->player);
 		mo->target = self;
 		mo->angle = angle;
 		mo->velx = self->velx + FixedMul (mo->Speed, finecosine[angle>>ANGLETOFINESHIFT]);
 		mo->vely = self->vely + FixedMul (mo->Speed, finesine[angle>>ANGLETOFINESHIFT]);
 		mo->velz = FixedMul (mo->Speed, slope);
+		
+		if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( self ) )
+			mo->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
+		else if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
+
 		if (!player->refire || !S_IsActorPlayingSomething (self, CHAN_WEAPON, -1))
 		{
 			S_Sound (self, CHAN_WEAPON|CHAN_LOOP, soundid, 1, ATTN_NORM);
 		}
 
 		angle = self->angle - ( ANGLE_45 / 3 );
-		mo = Spawn<APhoenixFX2> (x, y, z, ALLOW_REPLACE);
+		mo = Spawn<APhoenixFX2> (x, y, z, ALLOW_REPLACE, self->player);
 		mo->target = self;
 		mo->angle = angle;
 		mo->velx = self->velx + FixedMul (mo->Speed, finecosine[angle>>ANGLETOFINESHIFT]);
 		mo->vely = self->vely + FixedMul (mo->Speed, finesine[angle>>ANGLETOFINESHIFT]);
 		mo->velz = FixedMul (mo->Speed, slope);
+		
+		if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( self ) )
+			mo->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
+		else if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
+
 		if (!player->refire || !S_IsActorPlayingSomething (self, CHAN_WEAPON, -1))
 		{
 			S_Sound (self, CHAN_WEAPON|CHAN_LOOP, soundid, 1, ATTN_NORM);
 		}
 	}
-
-	// [BC] If we're the server, spawn this missile.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_SpawnMissile( mo );
 
 	P_CheckMissileSpawn (mo, self->radius);
 }

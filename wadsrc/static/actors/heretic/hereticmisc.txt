@@ -92,6 +92,7 @@ ACTOR TeleGlitterGenerator1 74
 	+NOGRAVITY
 	+DONTSPLASH
 	+MOVEWITHSECTOR
+	+CLIENTSIDEONLY
 	States
 	{
 	Spawn:
@@ -110,6 +111,7 @@ ACTOR TeleGlitterGenerator2 52
 	+NOGRAVITY
 	+DONTSPLASH
 	+MOVEWITHSECTOR
+	+CLIENTSIDEONLY
 	States
 	{
 	Spawn:

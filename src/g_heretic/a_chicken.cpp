@@ -41,11 +41,11 @@ void AChickenPlayer::MorphPlayerThink ()
 	{
 		return;
 	}
-	if (!(velx | vely) && pr_chickenplayerthink () < 160)
+	if (!(velx | vely) && this->actorRandom () < 160)
 	{ // Twitch view angle
-		angle += pr_chickenplayerthink.Random2 () << 19;
+		angle += this->actorRandom.Random2 () << 19;
 	}
-	if ((z <= floorz) && (pr_chickenplayerthink() < 32))
+	if ((z <= floorz) && (this->actorRandom() < 32))
 	{ // Jump and noise
 		velz += JumpZ;
 
