@@ -6592,7 +6592,7 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 // 
 //---------------------------------------------------------------------------
 
-void P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, angle_t dir, int damage, AActor *originator)
+void P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, angle_t dir, int damage, AActor *originator, AActor *instigator)
 {
 	// [BB] Initialize with NULL.
 	AActor *th = NULL;
@@ -6680,6 +6680,10 @@ statedone:
 	// [BC] If we're the server, tell clients to spawn the blood.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
+		player_t* player = NULL;
+		if (instigator)
+			player = instigator->player;
+
 		// [BB] If the bloodcolor is not the standard one, we have to inform the client 
 		// about the correct color.
 		if ( ( bloodcolor == 0 ) && ( th != NULL ) )
@@ -6688,13 +6692,23 @@ statedone:
 			// spawn state. Therefore, there's no need to treat it as a special case.
 			// [BB] This saves bandwidth, but doesn't spawn the blood size based on the damage dealt,
 			// so only use this for players with a slow connection.
-			SERVERCOMMANDS_SpawnThing( th, MAXPLAYERS );
-			if ( th->renderflags & RF_INVISIBLE_TO_TARGET )
-				SERVERCOMMANDS_SetThingTarget( th );
-			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS );
+			if ( NETWORK_ClientsideFunctionsAllowed( player ) )
+			{
+				SERVERCOMMANDS_SpawnThing( th, player - players, SVCF_SKIPTHISCLIENT );
+				SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, player - players, SVCF_SKIPTHISCLIENT );
+			}
+			else
+			{
+				SERVERCOMMANDS_SpawnThing( th, MAXPLAYERS );
+				SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS );
+			}
+			SERVERCOMMANDS_SetThingTarget( th );
 		}
 		else
-			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator );
+			if ( NETWORK_ClientsideFunctionsAllowed( player ) )
+				SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, player - players, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator );
 	}
 
 	if (!(bloodtype <= 1)) th->renderflags |= RF_INVISIBLE;
