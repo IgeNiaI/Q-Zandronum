@@ -15,26 +15,26 @@
 #include "doomstat.h"
 */
 
-static FRandom pr_sap ("StaffAtkPL1");
-static FRandom pr_sap2 ("StaffAtkPL2");
-static FRandom pr_fgw ("FireWandPL1");
-static FRandom pr_fgw2 ("FireWandPL2");
-static FRandom pr_boltspark ("BoltSpark");
-static FRandom pr_macerespawn ("MaceRespawn");
-static FRandom pr_maceatk ("FireMacePL1");
-static FRandom pr_gatk ("GauntletAttack");
-static FRandom pr_bfx1 ("BlasterFX1");
-static FRandom pr_ripd ("RipperD");
-static FRandom pr_fb1 ("FireBlasterPL1");
-static FRandom pr_bfx1t ("BlasterFX1Tick");
-static FRandom pr_hrfx2 ("HornRodFX2");
-static FRandom pr_rp ("RainPillar");
-static FRandom pr_fsr1 ("FireSkullRodPL1");
-static FRandom pr_storm ("SkullRodStorm");
-static FRandom pr_impact ("RainImpact");
-static FRandom pr_pfx1 ("PhoenixFX1");
-static FRandom pr_pfx2 ("PhoenixFX2");
-static FRandom pr_fp2 ("FirePhoenixPL2");
+static FRandom pr_sap("StaffAtkPL1");
+static FRandom pr_sap2("StaffAtkPL2");
+static FRandom pr_fgw("FireWandPL1");
+static FRandom pr_fgw2("FireWandPL2");
+static FRandom pr_boltspark("BoltSpark");
+static FRandom pr_macerespawn("MaceRespawn");
+static FRandom pr_maceatk("FireMacePL1");
+static FRandom pr_gatk("GauntletAttack");
+static FRandom pr_bfx1("BlasterFX1");
+static FRandom pr_ripd("RipperD");
+static FRandom pr_fb1("FireBlasterPL1");
+static FRandom pr_bfx1t("BlasterFX1Tick");
+static FRandom pr_hrfx2("HornRodFX2");
+static FRandom pr_rp("RainPillar");
+static FRandom pr_fsr1("FireSkullRodPL1");
+static FRandom pr_storm("SkullRodStorm");
+static FRandom pr_impact("RainImpact");
+static FRandom pr_pfx1("PhoenixFX1");
+static FRandom pr_pfx2("PhoenixFX2");
+static FRandom pr_fp2("FirePhoenixPL2");
 
 #define FLAME_THROWER_TICS (10*TICRATE)
 
@@ -83,7 +83,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_StaffAttack)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -110,7 +111,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_StaffAttack)
 
 		// [BC] If we're the server, tell clients to adjust the player's angle.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingAngle( player->mo );
+			if ( NETWORK_ClientsideFunctionsAllowed( self ) )
+				SERVERCOMMANDS_SetThingAngle( player->mo, ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SetThingAngle( player->mo );
 	}
 }
 
@@ -140,7 +144,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL1)
 	}
 
 	// [BC] If we're the client, just play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( player->mo, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM );
 		return;
@@ -176,11 +181,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL1)
 	// [BB] If the player hit a player with his attack, potentially give him a medal.
 	PLAYER_CheckStruckPlayer ( self );
 
-	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM);
-
-	// [BC] If we're the server, tell clients that a weapon is being fired.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/wandhit", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM, true);
 }
 
 //----------------------------------------------------------------------------
@@ -210,7 +211,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL2)
 	}
 
 	// [BC] If we're the client, just play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( player->mo, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM );
 		return;
@@ -252,12 +254,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL2)
 			angle += ((ANG45/8)*2)/4;
 		}
 	}
-	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM);
-
-
-	// [BC] If we're the server, tell clients that a weapon is being fired.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/wandhit", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM, true);
 }
 
 //----------------------------------------------------------------------------
@@ -282,7 +279,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireCrossbowPL1)
 			return;
 	}
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -316,7 +314,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireCrossbowPL2)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{		
 		return;
 	}
@@ -404,7 +403,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GauntletAttack)
 	}
 
 	// [EP] Clients should not execute this, let the server know what's needed.
-	if ( NETWORK_InClientMode() == false )
+	// [geNia] Unless clientside functions are allowed.
+	if ( NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		if (power)
 		{
@@ -412,23 +412,18 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GauntletAttack)
 			const int prevhealth = self->health;
 
 			if (!(linetarget->flags5 & MF5_DONTDRAIN)) P_GiveBody (self, actualdamage>>1);
-			S_Sound (self, CHAN_AUTO, "weapons/gauntletspowhit", 1, ATTN_NORM);
+			S_Sound (self, CHAN_AUTO, "weapons/gauntletspowhit", 1, ATTN_NORM, true);
 
-			// [EP] Inform the clients about the sound and the possible health change.
+			// [EP] Inform the clients about the possible health change.
 			if ( NETWORK_GetState() == NETSTATE_SERVER )
 			{
-				SERVERCOMMANDS_SoundActor( self, CHAN_AUTO, "weapons/gauntletspowhit", 1, ATTN_NORM );
 				if ( prevhealth != self->health )
 					 SERVERCOMMANDS_SetPlayerHealth( player - players );
 			}
 		}
 		else
 		{
-			S_Sound (self, CHAN_AUTO, "weapons/gauntletshit", 1, ATTN_NORM);
-
-			// [EP] Inform the clients about the sound.
-			if ( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( self, CHAN_AUTO, "weapons/gauntletshit", 1, ATTN_NORM );
+			S_Sound (self, CHAN_AUTO, "weapons/gauntletshit", 1, ATTN_NORM, true);
 		}
 	}
 	// turn to face target
@@ -510,8 +505,7 @@ void FireMacePL1B (AActor *actor)
 			return;
 	}
 
-	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( actor ) )
 	{
 		return;
 	}
@@ -527,13 +521,12 @@ void FireMacePL1B (AActor *actor)
 	angle >>= ANGLETOFINESHIFT;
 	ball->velx = (actor->velx>>1) + FixedMul(ball->Speed, finecosine[angle]);
 	ball->vely = (actor->vely>>1) + FixedMul(ball->Speed, finesine[angle]);
-	S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM);
+	S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM, true);
 
 	// [BC] If we're the server, spawn the ball and play the sound.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
 		SERVERCOMMANDS_SpawnMissile( ball );
-		SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
 	}
 
 	// [BC] Apply spread.
@@ -550,13 +543,12 @@ void FireMacePL1B (AActor *actor)
 		angle >>= ANGLETOFINESHIFT;
 		ball->velx = (actor->velx>>1)+FixedMul(ball->Speed, finecosine[angle]);
 		ball->vely = (actor->vely>>1)+FixedMul(ball->Speed, finesine[angle]);
-		S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM);
+		S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM, true);
 
 		// [BC] If we're the server, spawn the ball and play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
 			SERVERCOMMANDS_SpawnMissile( ball );
-			SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
 		}
 
 		ball = Spawn("MaceFX2", actor->x, actor->y, actor->z + 28*FRACUNIT 
@@ -570,13 +562,12 @@ void FireMacePL1B (AActor *actor)
 		angle >>= ANGLETOFINESHIFT;
 		ball->velx = (actor->velx>>1)+FixedMul(ball->Speed, finecosine[angle]);
 		ball->vely = (actor->vely>>1)+FixedMul(ball->Speed, finesine[angle]);
-		S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM);
+		S_Sound (ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM, true);
 
 		// [BC] If we're the server, spawn the ball and play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
 			SERVERCOMMANDS_SpawnMissile( ball );
-			SERVERCOMMANDS_SoundActor( ball, CHAN_BODY, "weapons/maceshoot", 1, ATTN_NORM );
 		}
 	}
 
@@ -598,7 +589,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL1)
 	{
 		return;
 	}
-
+	
 	if (pr_maceatk() < 28)
 	{
 		FireMacePL1B (self);
@@ -614,7 +605,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL1)
 	player->psprites[ps_weapon].sy = WEAPONTOP+(pr_maceatk()&3)*FRACUNIT;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -654,7 +646,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL1)
 DEFINE_ACTION_FUNCTION(AActor, A_MacePL1Check)
 {
 	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -705,7 +698,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_MacePL1Check)
 DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact)
 {
 	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// We need to make sure the ball doesn't temporary go into it's death frame.
 		if ( self->flags & MF_INBOUNCE )
@@ -726,18 +720,17 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact)
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
 			SERVERCOMMANDS_SetThingState( self, STATE_SPAWN );
 			SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
-			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM );
 		}
 
 		self->SetState (self->SpawnState);
-		S_Sound (self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM, true);
 	}
 	else
 	{ // Explode
 		self->velx = self->vely = self->velz = 0;
 		self->flags |= MF_NOGRAVITY;
 		self->gravity = FRACUNIT;
-		S_Sound (self, CHAN_BODY, "weapons/macehit", 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY, "weapons/macehit", 1, ATTN_NORM, true);
 
 		// [BC] If we're the server, tell clients to move the object.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -746,7 +739,6 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact)
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
 			SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
 			SERVERCOMMANDS_SetThingGravity( self );
-			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macebounce", 1, ATTN_NORM );
 		}
 	}
 }
@@ -762,8 +754,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 	AActor *tiny;
 	angle_t angle;
 
-	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// We need to make sure the ball doesn't temporary go into it's death frame.
 		if ( self->flags & MF_INBOUNCE )
@@ -824,8 +815,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 		tiny->velz = self->velz;
 
 		// [BC] If we're the server, spawn this missile.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER ) {
 			SERVERCOMMANDS_SpawnMissile( tiny );
+		}
 
 		P_CheckMissileSpawn (tiny, self->radius);
 
@@ -839,8 +831,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaceBallImpact2)
 		tiny->velz = self->velz;
 
 		// [BC] If we're the server, spawn this missile.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER ) {
 			SERVERCOMMANDS_SpawnMissile( tiny );
+		}
 
 		P_CheckMissileSpawn (tiny, self->radius);
 	}
@@ -889,7 +882,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 	}
 
 	// [BC] If we're the client, play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( player->mo, CHAN_WEAPON, "weapons/maceshoot", 1, ATTN_NORM );
 		return;
@@ -907,13 +901,12 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMacePL2)
 			mo->tracer = linetarget;
 		}
 	}
-	S_Sound (self, CHAN_WEAPON, "weapons/maceshoot", 1, ATTN_NORM);
+	S_Sound (self, CHAN_WEAPON, "weapons/maceshoot", 1, ATTN_NORM, true);
 
 	// [BC] If we're the server, play the sound.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
 		SERVERCOMMANDS_MoveThing( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/maceshoot", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
 	}
 
 	if ( player->cheats2 & CF2_SPREAD )
@@ -969,7 +962,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_DeathBallImpact)
 	AActor *linetarget;
 
 	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		// We need to make sure the self doesn't temporary go into it's death frame.
 		if ( self->flags & MF_INBOUNCE )
@@ -1058,14 +1052,11 @@ DEFINE_ACTION_FUNCTION(AActor, A_DeathBallImpact)
 			self->vely = FixedMul (self->Speed, finesine[angle]);
 		}
 		self->SetState (self->SpawnState);
-		S_Sound (self, CHAN_BODY, "weapons/macestop", 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY, "weapons/macestop", 1, ATTN_NORM, true);
 
 		// [BC] If we're the server, send the state change and move it.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		{
 			SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
-			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/macestop", 1, ATTN_NORM );
-		}
 	}
 	else
 	{ // Explode
@@ -1073,7 +1064,7 @@ boom:
 		self->velx = self->vely = self->velz = 0;
 		self->flags |= MF_NOGRAVITY;
 		self->gravity = FRACUNIT;
-		S_Sound (self, CHAN_BODY, "weapons/maceexplode", 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY, "weapons/maceexplode", 1, ATTN_NORM, true);
 
 		// [BC] If we're the server, do some stuff.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -1083,7 +1074,6 @@ boom:
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS );
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS2 );
 			SERVERCOMMANDS_SetThingGravity( self );
-			SERVERCOMMANDS_SoundActor( self, CHAN_BODY, "weapons/maceexplode", 1, ATTN_NORM );
 		}
 	}
 }
@@ -1177,7 +1167,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireBlasterPL1)
 			return;
 	}
 	// [BC] If we're the client, just play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( player->mo, CHAN_WEAPON, "weapons/blastershoot", 1, ATTN_NORM );
 		return;
@@ -1202,11 +1193,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireBlasterPL1)
 	// [BB] If the player hit a player with his attack, potentially give him a medal.
 	PLAYER_CheckStruckPlayer ( self );
 
-	S_Sound (self, CHAN_WEAPON, "weapons/blastershoot", 1, ATTN_NORM);
-
-	// [BC] If we're the server, tell clients that a weapon is being fired.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "weapons/blastershoot", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "weapons/blastershoot", 1, ATTN_NORM, true);
 }
 
 //----------------------------------------------------------------------------
@@ -1320,7 +1307,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL1)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -1380,12 +1368,13 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL2)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
 
-	P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AHornRodFX2), self->angle, &linetarget, &MissileActor);
+	P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AHornRodFX2), self->angle, &linetarget, &MissileActor, false, true, true);
 	// Use MissileActor instead of the return value from
 	// P_SpawnPlayerMissile because we need to give info to the mobj
 	// even if it exploded immediately.
@@ -1401,11 +1390,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL2)
 		{
 			MissileActor->tracer = linetarget;
 		}
-		S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM);
-
-		// [BC] If we're the server, play this sound.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SoundActor( MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM );
+		S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM, true);
 	}
 
 	// [BC] Apply spread.
@@ -1427,11 +1412,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL2)
 			{
 				MissileActor->tracer = linetarget;
 			}
-			S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM);
-
-			// [BC] If we're the server, play this sound.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM );
+			S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM, true);
 		}
 
 		P_SpawnPlayerMissile (self, 0,0,0, RUNTIME_CLASS(AHornRodFX2), self->angle - ( ANGLE_45 / 3 ), &linetarget, &MissileActor);
@@ -1450,11 +1431,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSkullRodPL2)
 			{
 				MissileActor->tracer = linetarget;
 			}
-			S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM);
-
-			// [BC] If we're the server, play this sound.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SoundActor( MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM );
+			S_Sound (MissileActor, CHAN_WEAPON, "weapons/hornrodpowshoot", 1, ATTN_NORM, true);
 		}
 	}
 }
@@ -1470,7 +1447,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_AddPlayerRain)
 	ARainTracker *tracker;
 
 	// [BC] Let the server spawn rain.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	if (self->target == NULL || self->target->health <= 0)
@@ -1593,7 +1571,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_SkullRodStorm)
 	P_CheckMissileSpawn (mo, self->radius);
 	if (self->special1 != -1 && !S_IsActorPlayingSomething (self, CHAN_BODY, -1))
 	{
-		S_Sound (self, CHAN_BODY|CHAN_LOOP, self->special1, 1, ATTN_NORM);
+		S_Sound (self, CHAN_BODY|CHAN_LOOP, self->special1, 1, ATTN_NORM, true);
 	}
 }
 
@@ -1740,7 +1718,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePhoenixPL1)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -1839,7 +1818,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePhoenixPL2)
 		return;
 	}
 	// [BC] If we're the client, just play the sound and get out.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		if (!player->refire || !S_IsActorPlayingSomething (player->mo, CHAN_WEAPON, -1))
 		{
