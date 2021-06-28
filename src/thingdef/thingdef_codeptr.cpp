@@ -2499,11 +2499,20 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItem)
 	// [geNia] If the projectile hitbox fix is enabled and item is spawned by a missile, shift spawn z by half height
 	if ( ( self->isMissile() ) && ( zacompatflags & ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX ) )
 		zheight += self->height / 2;
+	
+	// [geNia] If the actor is spawned by a nonetid actor, then mark it as clientside
+	//  so that the client doesn't generate net id for it either
+	if ( self->lNetID == -1 )
+		((AActor*) missile->Defaults)->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
+
+	player_t* player = NULL;
+	if (self->target)
+		player = self->target->player;
 
 	AActor * mo = Spawn( missile, 
 					self->x + FixedMul(distance, finecosine[self->angle>>ANGLETOFINESHIFT]), 
 					self->y + FixedMul(distance, finesine[self->angle>>ANGLETOFINESHIFT]), 
-					self->z - self->floorclip + self->GetBobOffset() + zheight, ALLOW_REPLACE);
+					self->z - self->floorclip + self->GetBobOffset() + zheight, ALLOW_REPLACE, player);
 
 	int flags = (transfer_translation ? SXF_TRANSFERTRANSLATION : 0) + (useammo ? SXF_SETMASTER : 0);
 	bool res = InitSpawnedItem(self, mo, flags);
@@ -2597,8 +2606,17 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 	// [geNia] If the projectile hitbox fix is enabled and item is spawned by a missile, shift spawn z by half height
 	if ( ( self->isMissile() ) && ( zacompatflags & ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX ) )
 		zofs += self->height / 2;
+	
+	// [geNia] If the actor is spawned by a nonetid actor, then mark it as clientside
+	//  so that the client doesn't generate net id for it either
+	if ( self->lNetID == -1 )
+		((AActor*) missile->Defaults)->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
-	AActor *mo = Spawn(missile, x, y, self->z - self->floorclip + self->GetBobOffset() + zofs, ALLOW_REPLACE);
+	player_t* player = NULL;
+	if (self->target)
+		player = self->target->player;
+
+	AActor *mo = Spawn(missile, x, y, self->z - self->floorclip + self->GetBobOffset() + zofs, ALLOW_REPLACE, player);
 	bool res = InitSpawnedItem(self, mo, flags);
 	ACTION_SET_RESULT(res);	// for an inventory item's use state
 	if (res)
