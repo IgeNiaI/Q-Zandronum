@@ -4813,7 +4813,7 @@ void SERVER_HandleWeaponStateJump( ULONG ulPlayer, FState *pState, LONG lPositio
 
 //*****************************************************************************
 // [BB]
-void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor )
+void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor, int playerNumToSkip )
 {
 	ULONG ulBits = 0;
 
@@ -4829,7 +4829,10 @@ void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor )
 		ulBits |= CM_VELZ;
 
 	if ( ulBits )
-		SERVERCOMMANDS_MoveThing( pActor, ulBits );
+		if ( playerNumToSkip >= 0 )
+			SERVERCOMMANDS_MoveThing( pActor, ulBits, playerNumToSkip, SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_MoveThing( pActor, ulBits );
 }
 
 //*****************************************************************************
