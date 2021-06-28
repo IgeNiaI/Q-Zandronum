@@ -1605,7 +1605,11 @@ void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target)
 
 					x = line->v1->x + MulScale30 (line->dx, frac);
 					y = line->v1->y + MulScale30 (line->dy, frac);
-					z = mo->z;
+					// [geNia] If the projectile hitbox fix is enabled, offset the decal half height up
+					if ( ( mo->isMissile() ) && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX ) )
+						z = mo->z + mo->height / 2;
+					else
+						z = mo->z;
 
 					F3DFloor * ffloor=NULL;
 #ifdef _3DFLOORS
@@ -4965,6 +4969,11 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 		actor->Conversation = NULL;
 	}
 
+	// [geNia] If the projectile hitbox fix is enabled, shift spawn z by half height
+	if ( actor->isMissile() && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX )
+		&& ( NETWORK_GetState( ) != NETSTATE_CLIENT ) )
+		iz -= actor->height / 2;
+
 	actor->x = actor->PrevX = ix;
 	actor->y = actor->PrevY = iy;
 	actor->z = actor->PrevZ = iz;
@@ -6664,7 +6673,7 @@ statedone:
 	// [BC] If we're the server, tell clients to spawn the blood.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		// [BB] If the bloodcolor is not the standard one, we have to inform the client 
+		// [BB] If the bloodcolor is not the standard one, we have to inform the client
 		// about the correct color.
 		if ( ( bloodcolor == 0 ) && ( th != NULL ) )
 		{
@@ -7277,7 +7286,7 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 	}
 
 	AActor *th = Spawn (type, x, y, z, ALLOW_REPLACE);
-	
+
 	P_PlaySpawnSound(th, source);
 
 	// record missile's originator
@@ -7560,6 +7569,11 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 			z = source->floorz;
 		}
 	}
+
+	// [geNia] If the projectile hitbox fix is enabled and missile is spawned by a missile, shift spawn z by half height
+	if ( ( source->isMissile() ) && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX ) )
+		z += source->height / 2;
+
 	AActor *MissileActor = Spawn (type, source->x + x, source->y + y, z, ALLOW_REPLACE);
 	if (pMissileActor) *pMissileActor = MissileActor;
 
@@ -7601,7 +7615,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	// we need to spawn the missile for the clients.
 	if ( ( bSpawnOnClient || !bValidSpawn ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
 		SERVERCOMMANDS_SpawnMissile( MissileActor );
-	
+
 	if (bValidSpawn)
 	{
 		return MissileActor;

@@ -1313,6 +1313,7 @@ OptionMenu GameplayOptions
 	Option "Full blood brightness",	"sv_maxbloodscalar", "YesNo"
 	Option "Disable shooting where crosshair is",	"sv_noaccuratecrosshair", "YesNo"
 	Option "Disable wall friction",					"sv_disablewallfriction", "YesNo"
+	Option "Enable projectile hitbox fix",			"sv_enableprojectilehitboxfix", "YesNo"
 	// [TP] --
 
 	StaticText " "

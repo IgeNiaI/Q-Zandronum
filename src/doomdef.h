@@ -379,6 +379,9 @@ enum
 
 	// [geNia] Disable wall friction
 	ZADF_DISABLE_WALL_FRICTION = 1 << 19,
+
+	// [geNia] Enable projectile hitbox lowering to match it's sprite
+	ZADF_ENABLE_PROJECTILE_HITBOX_FIX = 1 << 20,
 };
 
 // [RH] Compatibility flags.
