@@ -278,6 +278,7 @@ FONT 8, "Tahoma", 0, 0, 1
     AUTOCHECKBOX    "Don't let players spy on allies", IDC_DF2_DISALLOW_SPYING, 215, 70, 109, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Instant flag/skull return", IDC_INSTANT_RETURN, 200, 88, 91, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Disable wall friction", IDC_ZADF_DISABLE_WALL_FRICTION, 20, 120, 127, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Enable projectile hitbox fix", IDC_ZADF_ENABLE_PROJECTILE_HITBOX_FIX, 20, 130, 122, 10, 0, WS_EX_LEFT
     GROUPBOX        "Environment", IDC_STATIC, 10, 10, 164, 105, 0, WS_EX_LEFT
     RTEXT           "Falling damage:", IDC_STATIC, 21, 26, 51, 8, SS_RIGHT, WS_EX_LEFT
     GROUPBOX        "Teams", IDC_STATIC, 185, 10, 150, 105, 0, WS_EX_LEFT

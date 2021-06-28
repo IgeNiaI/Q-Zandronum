@@ -641,7 +641,11 @@ void GLSprite::Process(AActor* thing,sector_t * sector)
 	
 
 	x = FIXED2FLOAT(thingx);
-	z = FIXED2FLOAT(thingz-thing->floorclip);
+	// [geNia] If the projectile hitbox fix is enabled, draw projectile sprite half height higher
+	if ( ( thing->isMissile() ) && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX ) )
+		z = FIXED2FLOAT(thingz - thing->floorclip + thing->height / 2);
+	else
+		z = FIXED2FLOAT(thingz - thing->floorclip);
 	y = FIXED2FLOAT(thingy);
 
 	// [RH] Make floatbobbing a renderer-only effect.
