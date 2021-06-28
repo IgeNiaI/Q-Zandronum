@@ -1459,6 +1459,7 @@ OptionMenu "CompatibilityOptions"
 	Option "West facing spawns are silent",				"compat_silentwestspawns", "YesNo"
 	Option "Disable shooting where crosshair is",		"compat_noaccuratecrosshair", "YesNo"
 	Option "Disable wall friction",						"compat_disablewallfriction", "YesNo"
+	Option "Enable projectile hitbox fix",				"compat_enableprojectilehitboxfix", "YesNo"
 
 	Class "CompatibilityMenu"
 }

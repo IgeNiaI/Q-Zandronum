@@ -117,7 +117,7 @@ static	ULONG			g_ulLMSSpectatorSettings;
 //==================================================================================
 // [RC] This big map of fun ties all of the DMFlags to their respective checkboxes.
 //==================================================================================
-#define NUMBER_OF_FLAGS 101
+#define NUMBER_OF_FLAGS 102
 
 static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] = 
 {
@@ -208,6 +208,7 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE,				IDC_ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE,		&g_ulZacompatFlags, },
 	{ ZACOMPATF_NO_PREDICTION_ACS,						IDC_ZACOMPATF_NO_PREDICTION_ACS,				&g_ulZacompatFlags, },
 	{ ZACOMPATF_DISABLE_WALL_FRICTION,					IDC_ZACOMPATF_DISABLE_WALL_FRICTION,			&g_ulZacompatFlags, },
+	{ ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX,			IDC_ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX,		&g_ulZacompatFlags, },
 	{ ZACOMPATF_NO_LAND,								NULL,											&g_ulZacompatFlags, },
 	{ ZACOMPATF_OLD_RANDOM_GENERATOR,					NULL,											&g_ulZacompatFlags, },
 	{ ZACOMPATF_NOGRAVITY_SPHERES,						NULL,											&g_ulZacompatFlags, },
