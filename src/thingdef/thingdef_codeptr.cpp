@@ -2267,6 +2267,10 @@ enum SIX_Flags
 	SXF_CLEARCALLERSPECIAL		= 1 << 16,
 	SXF_TRANSFERSTENCILCOL		= 1 << 17,
 	SXF_TRANSFERSPRITEFRAME		= 1 << 24,    // [BIN]
+	SXF_NOUNLAGGED				= 1 << 25,    // [geNia]
+	SXF_UNLAGDEATH				= 1 << 26,	  // [geNia]
+	SXF_SKIPOWNER				= 1 << 27,	  // [geNia]
+	SXF_FORCESERVERSIDE			= 1 << 28,    // [geNia]
 };
 
 // [BB] Changed return value to bool (returns false if the actor already was destroyed).
@@ -2442,10 +2446,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItem)
 	if ( ( self->isMissile() ) && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX ) )
 		zheight += self->height / 2;
 
+	player_t* player = NETWORK_GetActorsOwnerPlayer( self );
+
 	AActor * mo = Spawn( missile, 
 					self->x + FixedMul(distance, finecosine[self->angle>>ANGLETOFINESHIFT]), 
 					self->y + FixedMul(distance, finesine[self->angle>>ANGLETOFINESHIFT]), 
-					self->z - self->floorclip + self->GetBobOffset() + zheight, ALLOW_REPLACE);
+					self->z - self->floorclip + self->GetBobOffset() + zheight, ALLOW_REPLACE, player);
 
 	int flags = (transfer_translation ? SXF_TRANSFERTRANSLATION : 0) + (useammo ? SXF_SETMASTER : 0);
 	bool res = InitSpawnedItem(self, mo, flags);
@@ -2497,7 +2503,25 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 		return;
 	}
 
-	if (chance > 0 && pr_spawnitemex()<chance) return;
+	if ( NETWORK_InClientMode( ) && ( flags & SXF_FORCESERVERSIDE ) )
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
+
+	if ( chance > 0 )
+	{
+		if ( flags & SXF_FORCESERVERSIDE )
+		{
+			if ( pr_spawnitemex() < chance )
+				return;
+		}
+		else
+		{
+			if ( self->actorRandom() < chance )
+				return;
+		}
+	}
 
 	// Don't spawn monsters if this actor has been massacred
 	if (self->DamageType == NAME_Massacre && GetDefaultByType(missile)->flags3&MF3_ISMONSTER) return;
@@ -2540,7 +2564,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 	if ( ( self->isMissile() ) && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX ) )
 		zofs += self->height / 2;
 
-	AActor *mo = Spawn(missile, x, y, self->z - self->floorclip + self->GetBobOffset() + zofs, ALLOW_REPLACE);
+	player_t* player = NETWORK_GetActorsOwnerPlayer( self );
+
+	AActor *mo = Spawn(missile, x, y, self->z - self->floorclip + self->GetBobOffset() + zofs, ALLOW_REPLACE, player, !!(flags & SXF_SKIPOWNER));
 	bool res = InitSpawnedItem(self, mo, flags);
 	ACTION_SET_RESULT(res);	// for an inventory item's use state
 	if (res)
@@ -2565,13 +2591,29 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 		}
 		mo->angle = Angle;
 
+		if ( !( flags & SXF_FORCESERVERSIDE ) && !( mo->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+			mo->SetRandomSeed( self->actorRandom() );
+
+		// [BC] Flag this actor as being client-spawned.
+		if ( NETWORK_InClientMode() )
+		{
+			mo->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
+		}
+
 		// [BB] If we're the server and the spawn was not blocked, tell clients to spawn the item
 		if ( res && (NETWORK_GetState( ) == NETSTATE_SERVER) )
 		{
-			SERVERCOMMANDS_SpawnThing( mo );
+			if ( player )
+			{
+				UNLAGGED_UnlagAndReplicateThing( self, mo, !!(flags & SXF_SKIPOWNER), !!(flags & SXF_NOUNLAGGED), !!(flags & SXF_UNLAGDEATH) );
+			}
+			else
+			{
+				SERVERCOMMANDS_SpawnThing( mo );
 
-			// [BB] Set the angle and velocity if necessary.
-			SERVER_SetThingNonZeroAngleAndVelocity( mo );
+				// [BB] Set the angle and velocity if necessary.
+				SERVER_SetThingNonZeroAngleAndVelocity( mo );
+			}
 
 			if ( mo->Translation )
 				SERVERCOMMANDS_SetThingTranslation( mo );
@@ -2588,12 +2630,6 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 
 			if (flags & SXF_TRANSFERSPRITEFRAME)
 				SERVERCOMMANDS_SetThingSprite( mo );
-		}
-
-		// [BC] Flag this actor as being client-spawned.
-		if ( NETWORK_InClientMode() )
-		{
-			mo->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 		}
 	}
 }
