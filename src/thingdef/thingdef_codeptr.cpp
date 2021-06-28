@@ -2439,6 +2439,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItem)
 	// [BB] Should the actor not be spawned, taking in account client side only actors?
 	if ( NETWORK_ShouldActorNotBeSpawned ( self, missile ) )
 		return;
+	
+	// [geNia] If the projectile hitbox fix is enabled and item is spawned by a missile, shift spawn z by half height
+	if ( ( self->isMissile() ) && ( zacompatflags & ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX ) )
+		zheight += self->height / 2;
 
 	AActor * mo = Spawn( missile, 
 					self->x + FixedMul(distance, finecosine[self->angle>>ANGLETOFINESHIFT]), 
@@ -2533,6 +2537,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 	// [BB] Should the actor not be spawned, taking in account client side only actors?
 	if ( NETWORK_ShouldActorNotBeSpawned ( self, missile, !!( flags & SXF_CLIENTSIDE ) ) )
 		return;
+	
+	// [geNia] If the projectile hitbox fix is enabled and item is spawned by a missile, shift spawn z by half height
+	if ( ( self->isMissile() ) && ( zacompatflags & ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX ) )
+		zofs += self->height / 2;
 
 	AActor *mo = Spawn(missile, x, y, self->z - self->floorclip + self->GetBobOffset() + zofs, ALLOW_REPLACE);
 	bool res = InitSpawnedItem(self, mo, flags);

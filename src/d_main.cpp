@@ -790,6 +790,7 @@ CVAR (Flag, compat_silentwestspawns,							zacompatflags, ZACOMPATF_SILENT_WEST_
 CVAR (Flag, compat_skulltagjumping,								zacompatflags, ZACOMPATF_SKULLTAG_JUMPING);
 CVAR (Flag, compat_noaccuratecrosshair,							zacompatflags, ZACOMPATF_DISABLE_CROSSHAIR_ACCURATE);
 CVAR (Flag, compat_disablewallfriction,							zacompatflags, ZACOMPATF_DISABLE_WALL_FRICTION);
+CVAR (Flag, compat_enableprojectilehitboxfix,					zacompatflags, ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX);
 
 #ifdef _WIN32
 extern int AppActive;

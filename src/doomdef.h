@@ -494,6 +494,9 @@ enum
 
 	// [geNia] Disable wallfriction
 	ZACOMPATF_DISABLE_WALL_FRICTION = 1 << 29,
+
+	// [geNia] Enable projectile hitbox lowering to match it's sprite
+	ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX = 1 << 30,
 };
 
 // Emulate old bugs for select maps. These are not exposed by a cvar
