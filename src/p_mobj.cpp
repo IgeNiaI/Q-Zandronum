@@ -1605,7 +1605,11 @@ void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target)
 
 					x = line->v1->x + MulScale30 (line->dx, frac);
 					y = line->v1->y + MulScale30 (line->dy, frac);
-					z = mo->z;
+					// [geNia] If the projectile hitbox fix is enabled, offset the decal half height up
+					if ( ( mo->isMissile() ) && ( zacompatflags & ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX ) )
+						z = mo->z + mo->height / 2;
+					else
+						z = mo->z;
 
 					F3DFloor * ffloor=NULL;
 #ifdef _3DFLOORS
@@ -4964,6 +4968,11 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 	{
 		actor->Conversation = NULL;
 	}
+
+	// [geNia] If the projectile hitbox fix is enabled, shift spawn z by half height
+	if ( actor->isMissile() && ( zacompatflags & ZACOMPATF_ENABLE_PROJECTILE_HITBOX_FIX )
+		&& ( NETWORK_GetState( ) != NETSTATE_CLIENT || ownerPlayer - players == consoleplayer ) )
+		iz -= actor->height / 2;
 
 	actor->x = actor->PrevX = ix;
 	actor->y = actor->PrevY = iy;
