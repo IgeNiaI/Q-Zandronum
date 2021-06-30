@@ -83,18 +83,15 @@ DEFINE_ACTION_FUNCTION(AActor, A_CFlameAttack)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound (self, CHAN_WEAPON, "ClericFlameFire", 1, ATTN_NORM);
 		return;
 	}
 
 	P_SpawnPlayerMissileWithPossibleSpread (self, RUNTIME_CLASS(ACFlameMissile)); // [BB] Spread
-	S_Sound (self, CHAN_WEAPON, "ClericFlameFire", 1, ATTN_NORM);
-
-	// [BC] If we're the server, tell other clients to make the sound.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "ClericFlameFire", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "ClericFlameFire", 1, ATTN_NORM, true);
 }
 
 //============================================================================
@@ -129,7 +126,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_CFlameMissile)
 	S_Sound (self, CHAN_BODY, "ClericFlameExplode", 1, ATTN_NORM);
 
 	// [BC] Let the server handle this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}

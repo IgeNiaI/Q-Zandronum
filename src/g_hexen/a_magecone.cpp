@@ -71,17 +71,14 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireConePL1)
 		if (!weapon->DepleteAmmo (weapon->bAltFire))
 			return;
 	}
-	S_Sound (self, CHAN_WEAPON, "MageShardsFire", 1, ATTN_NORM);
+	S_Sound (self, CHAN_WEAPON, "MageShardsFire", 1, ATTN_NORM, true);
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
-
-	// [BC] If we're the server, play the sound.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "MageShardsFire", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
 
 	damage = 90+(pr_cone()&15);
 	for (i = 0; i < 16; i++)
@@ -153,7 +150,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 	int spermcount = self->special2;
 
 	// [BC] Let the server do this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}

@@ -137,9 +137,13 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack2)
 	int i;
 	AActor *mo;
 
+	// [geNia] Weapons are handled by the server.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
+		return;
+
 	for (j = 0; j < 4; j++)
 	{
-		mo = Spawn<AHolySpirit> (self->x, self->y, self->z, ALLOW_REPLACE);
+		mo = Spawn<AHolySpirit> (self->x, self->y, self->z, ALLOW_REPLACE, self->target->player);
 		if (!mo)
 		{
 			continue;
@@ -176,6 +180,10 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack2)
 			mo->flags |= MF_NOCLIP|MF_SKULLFLY;
 			mo->flags &= ~MF_MISSILE;
 		}
+
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			SERVERCOMMANDS_SpawnMissile( mo );
+		
 		SpawnSpiritTail (mo);
 	}
 }
@@ -225,7 +233,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		weapon->CHolyCount = 3;
 		S_Sound (self, CHAN_WEAPON, "HolySymbolFire", 1, ATTN_NORM);
@@ -248,11 +257,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack)
 	}
 
 	weapon->CHolyCount = 3;
-	S_Sound (self, CHAN_WEAPON, "HolySymbolFire", 1, ATTN_NORM);
-
-	// [BC] If we're the server, play this sound to clients.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "HolySymbolFire", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "HolySymbolFire", 1, ATTN_NORM, true);
 }
 
 //============================================================================
@@ -550,7 +555,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyCheckScream)
 DEFINE_ACTION_FUNCTION(AActor, A_ClericAttack)
 {
 	// [BB] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}

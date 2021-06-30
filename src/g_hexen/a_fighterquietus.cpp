@@ -94,7 +94,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FSwordAttack)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound (self, CHAN_WEAPON, "FighterSwordFire", 1, ATTN_NORM);
 		return;
@@ -122,11 +123,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FSwordAttack)
 		P_SpawnPlayerMissile (self, 0, 0,  10*FRACUNIT, RUNTIME_CLASS(AFSwordMissile), self->angle-ANGLE_45/4 - ( ANGLE_45 / 3 ));
 	}
 
-	S_Sound (self, CHAN_WEAPON, "FighterSwordFire", 1, ATTN_NORM);
-
-	// [BB] If we're the server, tell the clients to play the sound.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "FighterSwordFire", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "FighterSwordFire", 1, ATTN_NORM, true);
 }
 
 //============================================================================
@@ -157,7 +154,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_FSwordFlames)
 DEFINE_ACTION_FUNCTION(AActor, A_FighterAttack)
 {
 	// [Dusk] Zedek's attack is handled by the server
-	if ( NETWORK_InClientMode() ) return;
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
+		return;
 
 	if (!self->target) return;
 

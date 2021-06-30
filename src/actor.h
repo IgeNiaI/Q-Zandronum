@@ -1338,9 +1338,9 @@ AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allo
 AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement);
 
 template<class T>
-inline T *Spawn (fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement)
+inline T *Spawn (fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL)
 {
-	return static_cast<T *>(AActor::StaticSpawn (RUNTIME_CLASS(T), x, y, z, allowreplacement));
+	return static_cast<T *>(AActor::StaticSpawn (RUNTIME_CLASS(T), x, y, z, allowreplacement, false, ownerPlayer));
 }
 
 
