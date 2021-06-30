@@ -160,7 +160,7 @@ ACTOR FSwordMissile native
 
 ACTOR FSwordFlame
 {
-	+NOBLOCKMAP +NOGRAVITY
+	+NOBLOCKMAP +NOGRAVITY +NONETID
 	RenderStyle Translucent
 	Alpha 0.6
 	States

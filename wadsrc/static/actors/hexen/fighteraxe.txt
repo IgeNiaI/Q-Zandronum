@@ -86,6 +86,8 @@ ACTOR AxePuff
 {
 	+NOBLOCKMAP +NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
+	+NONETID
 	RenderStyle Translucent
 	Alpha 0.6
 	SeeSound "FighterAxeHitThing"
@@ -104,6 +106,7 @@ ACTOR AxePuff
 ACTOR AxePuffGlow : AxePuff
 {
 	+PUFFONACTORS
+	+NONETID
 	RenderStyle Add
 	Alpha 1
 	States

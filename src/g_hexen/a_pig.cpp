@@ -15,7 +15,6 @@
 */
 
 static FRandom pr_snoutattack ("SnoutAttack");
-static FRandom pr_pigattack ("PigAttack");
 static FRandom pr_pigplayerthink ("PigPlayerThink");
 
 extern void AdjustPlayerAngle (AActor *, AActor *);
@@ -79,7 +78,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_SnoutAttack)
 	S_Sound(player->mo, CHAN_VOICE, "PigActive", 1, ATTN_NORM);
 
 	// [Dusk] clients aren't properly aware of linetarget, thus they stop here.
-	if ( NETWORK_InClientMode() ) return;
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) ) return;
 
 	if(linetarget)
 	{

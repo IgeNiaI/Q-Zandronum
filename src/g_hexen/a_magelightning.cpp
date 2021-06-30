@@ -129,11 +129,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_LightningReady)
 	DoReadyWeapon(self);
 	if (pr_lightningready() < 160)
 	{
-		S_Sound (self, CHAN_WEAPON, "MageLightningReady", 1, ATTN_NORM);
-
-		// [BC] If we're the server, play sound for clients.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_WeaponSound( ULONG( self->player - players ), "MageLightningReady", ULONG( self->player - players ), SVCF_SKIPTHISCLIENT );
+		S_Sound (self, CHAN_WEAPON, "MageLightningReady", 1, ATTN_NORM, true);
 	}
 }
 
@@ -271,7 +267,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_MLightningAttack)
 	AActor *fmo, *cmo;
 
 	// [BC/BB] The projectile spawning is handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		goto spawningdone;
 	}
@@ -328,11 +325,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_MLightningAttack)
 
 	// [BB] Added label so that the clients can skip the stuff above.
 spawningdone:
-	S_Sound (self, CHAN_BODY, "MageLightningFire", 1, ATTN_NORM);
-
-	// [BC] If we're the server, play sound for clients.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( self->player - players ), "MageLightningFire", ULONG( self->player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_BODY, "MageLightningFire", 1, ATTN_NORM, true);
 
 	if (self->player != NULL)
 	{

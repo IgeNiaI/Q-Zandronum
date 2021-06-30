@@ -6,6 +6,7 @@ ACTOR SnoutPuff
 {
 	+NOBLOCKMAP
 	+NOGRAVITY
+	+PUFFGETSOWNER
 	Renderstyle Translucent
 	Alpha 0.6
 	States

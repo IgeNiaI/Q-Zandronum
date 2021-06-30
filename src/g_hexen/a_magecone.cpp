@@ -13,6 +13,8 @@
 #include "thingdef/thingdef.h"
 */
 
+#include "unlagged.h"
+
 const int SHARDSPAWN_LEFT	= 1;
 const int SHARDSPAWN_RIGHT	= 2;
 const int SHARDSPAWN_UP		= 4;
@@ -71,17 +73,14 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireConePL1)
 		if (!weapon->DepleteAmmo (weapon->bAltFire))
 			return;
 	}
-	S_Sound (self, CHAN_WEAPON, "MageShardsFire", 1, ATTN_NORM);
+	S_Sound (self, CHAN_WEAPON, "MageShardsFire", 1, ATTN_NORM, true);
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
-
-	// [BC] If we're the server, play the sound.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "MageShardsFire", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
 
 	damage = 90+(pr_cone()&15);
 	for (i = 0; i < 16; i++)
@@ -104,7 +103,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireConePL1)
 	// didn't find any creatures, so fire projectiles
 	if (!conedone)
 	{
-		mo = P_SpawnPlayerMissile (self, RUNTIME_CLASS(AFrostMissile));
+		mo = P_SpawnPlayerMissile (self, 0, 0, 0, RUNTIME_CLASS(AFrostMissile), self->angle, NULL, NULL, 0, false, true, true, true);
 		if (mo)
 		{
 			mo->special1 = SHARDSPAWN_LEFT|SHARDSPAWN_DOWN|SHARDSPAWN_UP
@@ -112,12 +111,15 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireConePL1)
 			mo->special2 = 3; // Set sperm count (levels of reproductivity)
 			mo->target = self;
 			mo->args[0] = 3;		// Mark Initial shard as super damage
+			
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 		}
 
 		// [BC] Apply spread.
 		if ( player->cheats2 & CF2_SPREAD )
 		{
-			mo = P_SpawnPlayerMissile (self, RUNTIME_CLASS(AFrostMissile), self->angle + ( ANGLE_45 / 3 ));
+			mo = P_SpawnPlayerMissile (self, 0, 0, 0, RUNTIME_CLASS(AFrostMissile), self->angle + ( ANGLE_45 / 3 ), NULL, NULL, 0, false, true, true, true);
 			if (mo)
 			{
 				mo->special1 = SHARDSPAWN_LEFT|SHARDSPAWN_DOWN|SHARDSPAWN_UP
@@ -125,9 +127,12 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireConePL1)
 				mo->special2 = 3; // Set sperm count (levels of reproductivity)
 				mo->target = self;
 				mo->args[0] = 3;		// Mark Initial shard as super damage
+			
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 			}
-
-			mo = P_SpawnPlayerMissile (self, RUNTIME_CLASS(AFrostMissile), self->angle - ( ANGLE_45 / 3 ));
+			
+			mo = P_SpawnPlayerMissile (self, 0, 0, 0, RUNTIME_CLASS(AFrostMissile), self->angle - ( ANGLE_45 / 3 ), NULL, NULL, 0, false, true, true, true);
 			if (mo)
 			{
 				mo->special1 = SHARDSPAWN_LEFT|SHARDSPAWN_DOWN|SHARDSPAWN_UP
@@ -135,6 +140,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireConePL1)
 				mo->special2 = 3; // Set sperm count (levels of reproductivity)
 				mo->target = self;
 				mo->args[0] = 3;		// Mark Initial shard as super damage
+			
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 			}
 		}
 	}
@@ -153,7 +161,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 	int spermcount = self->special2;
 
 	// [BC] Let the server do this.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -176,7 +185,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 
 			// [BC] Tell clients to spawn the shard.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissile( mo );
+				UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 		}
 	}
 	if (spawndir & SHARDSPAWN_RIGHT)
@@ -192,7 +201,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 
 			// [BC] Tell clients to spawn the shard.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissile( mo );
+				UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 		}
 	}
 	if (spawndir & SHARDSPAWN_UP)
@@ -211,7 +220,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 
 			// [BC] Tell clients to spawn the shard.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissile( mo );
+				UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 		}
 	}
 	if (spawndir & SHARDSPAWN_DOWN)
@@ -231,7 +240,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ShedShard)
 
 			// [BC] Tell clients to spawn the shard.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SpawnMissile( mo );
+				UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
 		}
 	}
 }

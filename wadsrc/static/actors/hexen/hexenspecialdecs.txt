@@ -286,6 +286,7 @@ ACTOR LeafSpawner 113
 	Game Hexen
 	+NOBLOCKMAP +NOSECTOR
 	+INVISIBLE
+	+CLIENTSIDEONLY
 
 	action native A_LeafSpawn();
 

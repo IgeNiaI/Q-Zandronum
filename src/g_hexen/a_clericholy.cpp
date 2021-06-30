@@ -12,15 +12,12 @@
 #include "doomstat.h"
 */
 
+#include "unlagged.h"
+
 #define BLAST_FULLSTRENGTH	255
 
-static FRandom pr_holyatk2 ("CHolyAtk2");
-static FRandom pr_holyseeker ("CHolySeeker");
-static FRandom pr_holyweave ("CHolyWeave");
-static FRandom pr_holyseek ("CHolySeek");
 static FRandom pr_checkscream ("CCheckScream");
 static FRandom pr_spiritslam ("CHolySlam");
-static FRandom pr_wraithvergedrop ("WraithvergeDrop");
 
 void SpawnSpiritTail (AActor *spirit);
 
@@ -137,9 +134,13 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack2)
 	int i;
 	AActor *mo;
 
+	// [geNia] Weapons are handled by the server.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
+		return;
+
 	for (j = 0; j < 4; j++)
 	{
-		mo = Spawn<AHolySpirit> (self->x, self->y, self->z, ALLOW_REPLACE);
+		mo = Spawn<AHolySpirit> (self->x, self->y, self->z, ALLOW_REPLACE, self->target->player);
 		if (!mo)
 		{
 			continue;
@@ -147,17 +148,17 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack2)
 		switch (j)
 		{ // float bob index
 			case 0:
-				mo->special2 = pr_holyatk2(8 << BOBTOFINESHIFT); // upper-left
+				mo->special2 = self->actorRandom(8 << BOBTOFINESHIFT); // upper-left
 				break;
 			case 1:
-				mo->special2 = FINEANGLES/2 + pr_holyatk2(8 << BOBTOFINESHIFT); // upper-right
+				mo->special2 = FINEANGLES/2 + self->actorRandom(8 << BOBTOFINESHIFT); // upper-right
 				break;
 			case 2:
-				mo->special2 = (FINEANGLES/2 + pr_holyatk2(8 << BOBTOFINESHIFT)) << 16; // lower-left
+				mo->special2 = (FINEANGLES/2 + self->actorRandom(8 << BOBTOFINESHIFT)) << 16; // lower-left
 				break;
 			case 3:
-				i = pr_holyatk2(8 << BOBTOFINESHIFT);
-				mo->special2 = ((FINEANGLES/2 + i) << 16) + FINEANGLES/2 + pr_holyatk2(8 << BOBTOFINESHIFT);
+				i = self->actorRandom(8 << BOBTOFINESHIFT);
+				mo->special2 = ((FINEANGLES/2 + i) << 16) + FINEANGLES/2 + self->actorRandom(8 << BOBTOFINESHIFT);
 				break;
 		}
 		mo->z = self->z;
@@ -176,6 +177,10 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack2)
 			mo->flags |= MF_NOCLIP|MF_SKULLFLY;
 			mo->flags &= ~MF_MISSILE;
 		}
+
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			UNLAGGED_UnlagAndReplicateMissile( self, mo, false, false, false );
+		
 		SpawnSpiritTail (mo);
 	}
 }
@@ -225,7 +230,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		weapon->CHolyCount = 3;
 		S_Sound (self, CHAN_WEAPON, "HolySymbolFire", 1, ATTN_NORM);
@@ -248,11 +254,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyAttack)
 	}
 
 	weapon->CHolyCount = 3;
-	S_Sound (self, CHAN_WEAPON, "HolySymbolFire", 1, ATTN_NORM);
-
-	// [BC] If we're the server, play this sound to clients.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "HolySymbolFire", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "HolySymbolFire", 1, ATTN_NORM, true);
 }
 
 //============================================================================
@@ -440,7 +442,7 @@ static void CHolySeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax)
 		|| actor->z > target->z+(target->height)
 		|| actor->z+actor->height < target->z)
 	{
-		newZ = target->z+((pr_holyseeker()*target->height)>>8);
+		newZ = target->z+((actor->actorRandom()*target->height)>>8);
 		deltaZ = newZ-actor->z;
 		if (abs(deltaZ) > 15*FRACUNIT)
 		{
@@ -470,7 +472,7 @@ static void CHolySeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax)
 //
 //============================================================================
 
-void CHolyWeave (AActor *actor, FRandom &pr_random)
+void CHolyWeave(AActor *actor, FRandom &pr_random)
 {
 	fixed_t newX, newY;
 	int weaveXY, weaveZ;
@@ -506,7 +508,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolySeek)
 		self->vely >>= 2;
 		self->velz = 0;
 		self->SetState (self->FindState(NAME_Death));
-		self->tics -= pr_holyseek()&3;
+		self->tics -= self->actorRandom()&3;
 		return;
 	}
 	if (self->tracer)
@@ -515,10 +517,10 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolySeek)
 			self->args[0]*ANGLE_1*2);
 		if (!((level.time+7)&15))
 		{
-			self->args[0] = 5+(pr_holyseek()/20);
+			self->args[0] = 5+(self->actorRandom()/20);
 		}
 	}
-	CHolyWeave (self, pr_holyweave);
+	CHolyWeave (self, self->actorRandom);
 }
 
 //============================================================================
@@ -550,7 +552,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_CHolyCheckScream)
 DEFINE_ACTION_FUNCTION(AActor, A_ClericAttack)
 {
 	// [BB] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}

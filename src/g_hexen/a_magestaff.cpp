@@ -103,7 +103,8 @@ void MStaffSpawn (AActor *pmo, angle_t angle)
 	AActor *linetarget;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( pmo ) )
 	{
 		return;
 	}
@@ -263,7 +264,8 @@ void MStaffSpawn2 (AActor *actor, angle_t angle)
 DEFINE_ACTION_FUNCTION(AActor, A_MageAttack)
 {
 	// [BB] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}

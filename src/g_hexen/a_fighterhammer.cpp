@@ -2,7 +2,6 @@
 #include "actor.h"
 #include "gi.h"
 #include "m_random.h"
-#include "s_sound.h"
 #include "d_player.h"
 #include "a_action.h"
 #include "p_local.h"
@@ -181,7 +180,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FHammerThrow)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}

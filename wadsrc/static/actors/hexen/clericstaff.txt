@@ -86,6 +86,7 @@ ACTOR CStaffPuff
 {
 	+NOBLOCKMAP +NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
 	RenderStyle Translucent
 	Alpha 0.6
 	SeeSound "ClericCStaffHitThing"

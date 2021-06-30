@@ -151,7 +151,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_CStaffAttack)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound (self, CHAN_WEAPON, "ClericCStaffFire", 1, ATTN_NORM);
 		return;
@@ -206,11 +207,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CStaffAttack)
 		}
 	}
 
-	S_Sound (self, CHAN_WEAPON, "ClericCStaffFire", 1, ATTN_NORM);
-
-	// [BC] If we're the server, play the sound for clients.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_WeaponSound( ULONG( player - players ), "ClericCStaffFire", ULONG( player - players ), SVCF_SKIPTHISCLIENT );
+	S_Sound (self, CHAN_WEAPON, "ClericCStaffFire", 1, ATTN_NORM, true);
 }
 
 //============================================================================

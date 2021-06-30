@@ -134,7 +134,7 @@ ACTOR HolyMissile
 	States
 	{
 	Spawn:
-		SPIR PPPP 3 Bright A_SpawnItemEx("HolyMissilePuff")
+		SPIR PPPP 3 Bright A_SpawnItemEx("HolyMissilePuff", 0, 0, 0, 0, 0, 0, 0, SXF_NOUNLAGGED|SXF_SKIPOWNER)
 	Death:
 		SPIR P 1 Bright A_CHolyAttack2
 		Stop
@@ -149,6 +149,8 @@ ACTOR HolyMissilePuff
 	Height 8
 	+NOBLOCKMAP +NOGRAVITY +DROPOFF
 	+NOTELEPORT
+	+PUFFGETSOWNER
+	+NONETID
 	RenderStyle "Translucent"
 	Alpha 0.4
 	States
@@ -164,6 +166,7 @@ ACTOR HolyMissilePuff
 ACTOR HolyPuff
 {
 	+NOBLOCKMAP +NOGRAVITY
+	+PUFFGETSOWNER +NONETID
 	RenderStyle Translucent
 	Alpha 0.6
 	States
@@ -217,6 +220,7 @@ ACTOR HolyTail
 	Height 1
 	+NOBLOCKMAP +NOGRAVITY +DROPOFF +NOCLIP
 	+NOTELEPORT
+	+NONETID
 	RenderStyle Translucent
 	Alpha 0.6
 
