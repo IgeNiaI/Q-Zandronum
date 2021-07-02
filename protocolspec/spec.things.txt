@@ -3,7 +3,7 @@ Command SpawnThing
 	Fixed y
 	Fixed z
 	Class type
-	Short id
+	Long id
 EndCommand
 
 Command SpawnThingNoNetID
@@ -19,7 +19,7 @@ Command LevelSpawnThing
 	Fixed y
 	Fixed z
 	Class type
-	Short id
+	Long id
 EndCommand
 
 Command LevelSpawnThingNoNetID
@@ -326,7 +326,7 @@ Command SpawnPuff
 	Fixed y
 	Fixed z
 	Class pufftype
-	Short id
+	Long id
 EndCommand
 
 Command SpawnPuffNoNetID

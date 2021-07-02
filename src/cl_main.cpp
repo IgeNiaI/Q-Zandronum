@@ -1726,6 +1726,13 @@ AActor *CLIENT_SpawnThing( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z,
 
 		pActor->lNetID = lNetID;
 		g_NetIDList.useID ( lNetID, pActor );
+		
+		if ( ( lNetID > 0 ) && ( lNetID / g_NetIDList.MAX_NETID_FOR_PLAYER == consoleplayer ) && ( ( (ULONG) lNetID ) >= players[consoleplayer].firstFreeNetId || lNetID == 1 ) ) {
+			players[consoleplayer].firstFreeNetId = lNetID + 1;
+			if (players[consoleplayer].firstFreeNetId >= g_NetIDList.MAX_NETID_FOR_PLAYER * (consoleplayer + 1)) {
+				players[consoleplayer].firstFreeNetId = 1;
+			}
+		}
 
 		pActor->SpawnPoint[0] = X;
 		pActor->SpawnPoint[1] = Y;
@@ -1801,6 +1808,13 @@ void CLIENT_SpawnMissile( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, 
 
 	pActor->lNetID = lNetID;
 	g_NetIDList.useID ( lNetID, pActor );
+	
+	if ( ( lNetID > 0 ) && ( lNetID / g_NetIDList.MAX_NETID_FOR_PLAYER == consoleplayer ) && ( ( (ULONG) lNetID ) >= players[consoleplayer].firstFreeNetId || lNetID == 1 ) ) {
+		players[consoleplayer].firstFreeNetId = lNetID + 1;
+		if (players[consoleplayer].firstFreeNetId >= g_NetIDList.MAX_NETID_FOR_PLAYER * (consoleplayer + 1)) {
+			players[consoleplayer].firstFreeNetId = 1;
+		}
+	}
 
 	// Play the seesound if this missile has one.
 	if ( pActor->SeeSound )
@@ -2625,6 +2639,13 @@ void ServerCommands::SpawnPlayer::Execute()
 	// Set the network ID.
 	pPlayer->mo->lNetID = netid;
 	g_NetIDList.useID ( netid, pPlayer->mo );
+	
+	if ( ( netid > 0 ) && ( netid / g_NetIDList.MAX_NETID_FOR_PLAYER == consoleplayer ) && ( ( (ULONG) netid ) >= players[consoleplayer].firstFreeNetId || netid == 1 ) ) {
+		players[consoleplayer].firstFreeNetId = netid + 1;
+		if (players[consoleplayer].firstFreeNetId >= g_NetIDList.MAX_NETID_FOR_PLAYER * (consoleplayer + 1)) {
+			players[consoleplayer].firstFreeNetId = 1;
+		}
+	}
 
 	// Set the spectator variables [after G_PlayerReborn so our data doesn't get lost] [BB] Why?.
 	// [BB] To properly handle that true spectators don't get default inventory, we need to set this

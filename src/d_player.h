@@ -532,6 +532,10 @@ public:
 	usercmd_t	original_cmd;
 	DWORD		original_oldbuttons;
 
+	// [geNia] Used to spawn actors on client side and then replace them with server spawned
+	// This is needed for unlagged projectiles when compat_predictclientsidefunctions is true
+	ULONG		firstFreeNetId;
+
 	userinfo_t	userinfo;				// [RH] who is this?
 	
 	const PClass *cls;					// class of associated PlayerPawn
