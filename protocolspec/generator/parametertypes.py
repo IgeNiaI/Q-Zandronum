@@ -234,7 +234,7 @@ class ActorParameter(SpecParameter):
 
 		# Write the code to read in the netid
 		writer.declare('int', netid)
-		writer.writeline('{netid} = NETWORK_ReadShort( bytestream );'.format(**locals()))
+		writer.writeline('{netid} = NETWORK_ReadLong( bytestream );'.format(**locals()))
 
 	def writereadchecks(self, writer, command, reference, **args):
 		netid = self.readnetid
@@ -250,7 +250,7 @@ class ActorParameter(SpecParameter):
 					   allownull=('nullallowed' in self.attributes) and 'true' or 'false', **locals()))
 
 	def writesend(self, writer, command, reference, **args):
-		writer.writeline('command.addShort( this->{reference} ? this->{reference}->lNetID : -1 );'.format(**locals()))
+		writer.writeline('command.addLong( this->{reference} ? this->{reference}->lNetID : -1 );'.format(**locals()))
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -265,7 +265,7 @@ class ClassParameter(SpecParameter):
 		netid = next(writer.tempvar)
 		self.readnetid = netid
 		writer.declare('int', netid)
-		writer.writeline('{netid} = NETWORK_ReadShort( bytestream );'.format(**locals()))
+		writer.writeline('{netid} = NETWORK_ReadLong( bytestream );'.format(**locals()))
 		writer.writeline('command.{reference} = NETWORK_GetClassFromIdentification( {netid} );'.format(**locals()))
 
 		# If the class parameter is specialized, ensure that it is a descendant of the specified class.
@@ -294,7 +294,7 @@ class ClassParameter(SpecParameter):
 				'''.format(commandname = command.name, **locals()))
 
 	def writesend(self, writer, command, reference, **args):
-		writer.writeline('command.addShort( this->{reference} ? this->{reference}->getActorNetworkIndex() : -1 );'.format(**locals()))
+		writer.writeline('command.addLong( this->{reference} ? this->{reference}->getActorNetworkIndex() : -1 );'.format(**locals()))
 
 # ----------------------------------------------------------------------------------------------------------------------
 

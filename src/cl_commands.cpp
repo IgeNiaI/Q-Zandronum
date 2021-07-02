@@ -731,7 +731,7 @@ void CLIENTCOMMANDS_InfoCheat( AActor* mobj, bool extended )
 		return;
 
 	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_INFOCHEAT );
-	NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, mobj->lNetID );
+	NETWORK_WriteLong( &CLIENT_GetLocalBuffer( )->ByteStream, mobj->lNetID );
 	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, extended );
 }
 

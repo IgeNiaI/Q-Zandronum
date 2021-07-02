@@ -248,6 +248,8 @@ void SERVERCOMMANDS_SpawnPlayer( ULONG ulPlayer, LONG lPlayerState, ULONG ulPlay
 	// We don't have to tell about CF_NOTARGET, since it's only used on the server.
 	if( players[ulPlayer].cheats && players[ulPlayer].cheats != CF_NOTARGET )
 		SERVERCOMMANDS_SetPlayerCheats( ulPlayer, ulPlayer, SVCF_ONLYTHISCLIENT );
+
+	SERVERCOMMANDS_UpdateClientNetID( ulPlayer, true );
 }
 
 //*****************************************************************************
@@ -1272,7 +1274,7 @@ void SERVERCOMMANDS_SetThingState( AActor *pActor, NetworkActorState state, ULON
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_SetThingTarget( AActor *pActor )
+void SERVERCOMMANDS_SetThingTarget( AActor *pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( !EnsureActorHasNetID (pActor) || !EnsureActorHasNetID(pActor->target) )
 		return;
@@ -1280,19 +1282,19 @@ void SERVERCOMMANDS_SetThingTarget( AActor *pActor )
 	ServerCommands::SetThingTarget command;
 	command.SetActor( pActor );
 	command.SetTarget( pActor->target );
-	command.sendCommandToClients();
+	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_DestroyThing( AActor *pActor )
+void SERVERCOMMANDS_DestroyThing( AActor *pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( !EnsureActorHasNetID (pActor) )
 		return;
 
 	ServerCommands::DestroyThing command;
 	command.SetActor( pActor );
-	command.sendCommandToClients();
+	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -4144,6 +4146,19 @@ void SERVERCOMMANDS_SetCameraToTexture( AActor *pCamera, char *pszTexture, LONG 
 	command.SetTexture ( pszTexture );
 	command.SetFov ( lFOV );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
+void SERVERCOMMANDS_UpdateClientNetID( const ULONG ulPlayer, const bool force )
+{
+	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
+		return;
+
+	ServerCommands::UpdateClientNetID command;
+	command.SetNetId ( players[ulPlayer].firstFreeNetId );
+	command.SetForce ( force );
+	command.sendCommandToClients ( ulPlayer, SVCF_ONLYTHISCLIENT );
 }
 
 //*****************************************************************************

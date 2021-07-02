@@ -169,8 +169,8 @@ void	SERVERCOMMANDS_MoveThing( AActor *pActor, ULONG ulBits, ULONG ulPlayerExtra
 void	SERVERCOMMANDS_MoveThingIfChanged( AActor *pActor, const MoveThingData &oldData, bool noSmooth = false, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_KillThing( AActor *pActor, AActor *pSource, AActor *pInflictor );
 void	SERVERCOMMANDS_SetThingState( AActor *pActor, NetworkActorState state, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_SetThingTarget( AActor *pActor );
-void	SERVERCOMMANDS_DestroyThing( AActor *pActor );
+void	SERVERCOMMANDS_SetThingTarget( AActor *pActor, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_DestroyThing( AActor *pActor, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetThingAngle( AActor *pActor, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetThingWaterLevel( AActor *pActor, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetThingFlags( AActor *pActor, FlagSet flagset, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
@@ -388,6 +388,7 @@ void	SERVERCOMMANDS_SetWallScroller( LONG lId, LONG lSidechoice, LONG lXSpeed, L
 void	SERVERCOMMANDS_DoFlashFader( float fR1, float fG1, float fB1, float fA1, float fR2, float fG2, float fB2, float fA2, float fTime, ULONG ulPlayer, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_GenericCheat( ULONG ulPlayer, ULONG ulCheat, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetCameraToTexture( AActor *pCamera, char *pszTexture, LONG lFOV, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_UpdateClientNetID( const ULONG ulPlayer, const bool force = false );
 void	SERVERCOMMANDS_CreateTranslation( ULONG ulTranslation, ULONG ulStart, ULONG ulEnd, ULONG ulPal1, ULONG ulPal2, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_CreateTranslation( ULONG ulTranslation, ULONG ulStart, ULONG ulEnd, ULONG ulR1, ULONG ulG1, ULONG ulB1, ULONG ulR2, ULONG ulG2, ULONG ulB2, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_ReplaceTextures( const char *Fromname, const char *Toname, int iTexFlags, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );

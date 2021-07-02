@@ -139,7 +139,6 @@ static FRandom pr_rockettrail("RocketTrail");
 static FRandom pr_uniquetid("UniqueTID");
 
 /*static*/	IDList<AActor> g_NetIDList;
-static	ULONG		g_ulFirstFreeNetID = 1;
 
 static	LONG	g_lSpawnCount = 0;
 static	cycle_t	g_SpawnCycles;
@@ -170,7 +169,7 @@ CVAR (Int, cl_pufftype, 0, CVAR_ARCHIVE);
 CVAR (Int, cl_bloodtype, 0, CVAR_ARCHIVE);
 
 // [BB]
-CVAR (Bool, sv_showspawnnames, false, CVAR_DEBUGONLY)
+CVAR (Int, sv_showspawnnames, 0, 0)
 
 // CODE --------------------------------------------------------------------
 
@@ -395,9 +394,9 @@ void AActor::Serialize (FArchive &arc)
 	if (arc.IsLoading ())
 	{
 		// [BB] If the the actor needs one, generate a new netID.
-		if ( !( ulNetworkFlags & NETFL_NONETID ) && !( ulNetworkFlags & NETFL_SERVERSIDEONLY ) )
+		if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && !( ulNetworkFlags & NETFL_NONETID ) && !( ulNetworkFlags & NETFL_SERVERSIDEONLY ) )
 		{
-			lNetID = g_NetIDList.getNewID( );
+			lNetID = g_NetIDList.getNewID( NULL );
 			g_NetIDList.useID ( lNetID, this );
 		}
 
@@ -5013,7 +5012,7 @@ void IDList<T>::clear( void )
 	for ( ULONG ulIdx = 0; ulIdx < MAX_NETID; ulIdx++ )
 		freeID ( ulIdx );
 
-	_firstFreeID = 1;
+	_firstFreeID = MIN_NETID;
 }
 
 //*****************************************************************************
@@ -5054,34 +5053,59 @@ void IDList<T>::useID ( const LONG lNetID, T *pActor )
 void CountActors ( ); // [BB]
 
 template <typename T>
-ULONG IDList<T>::getNewID( void )
+LONG IDList<T>::getNewID( player_t* ownerPlayer )
 {
 	// Actor's network ID is the first availible net ID.
-	ULONG ulID = _firstFreeID;
+	LONG lID;
 
-	do
+	if ( ownerPlayer )
 	{
-		_firstFreeID++;
-		if ( _firstFreeID >= MAX_NETID )
-			_firstFreeID = 1;
+		lID = ownerPlayer->firstFreeNetId;
 
-		if ( _firstFreeID == ulID )
+		do
 		{
-			// [BB] In case there is no free netID, the server has to abort the current game.
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			ownerPlayer->firstFreeNetId++;
+			if ( ownerPlayer->firstFreeNetId >= MAX_NETID_FOR_PLAYER )
+				ownerPlayer->firstFreeNetId = 1; // IDs from 1 to 64999 are reserved for player spawned actors
+
+			if ( ownerPlayer->firstFreeNetId == lID )
 			{
 				// [BB] We can only spawn (MAX_NETID-2) actors with netID, because ID zero is reserved and
 				// we already check that a new ID for the next actor is available when assign a net ID.
-				Printf( "ACTOR_GetNewNetID: Network ID limit reached (>=%d actors)\n", MAX_NETID - 1 );
+				Printf( "ACTOR_GetNewNetID: Network ID for player limit reached (>=%ld actors)\n", MAX_NETID_FOR_PLAYER - 1 );
 				CountActors ( );
-				I_Error ("Network ID limit reached (>=%d actors)!\n", MAX_NETID - 1 );
+				I_Error ("Network ID for player limit reached (>=%ld actors)!\n", MAX_NETID_FOR_PLAYER - 1 );
+
+				return ( 0 );
 			}
+		} while ( _entries[ownerPlayer->firstFreeNetId].bFree == false );
 
-			return ( 0 );
-		}
-	} while ( _entries[_firstFreeID].bFree == false );
+		lID += (ownerPlayer - players) * MAX_NETID_FOR_PLAYER;
+	}
+	else
+	{
+		lID = _firstFreeID;
 
-	return ( ulID );
+		do
+		{
+			_firstFreeID++;
+			if ( _firstFreeID >= MAX_NETID )
+				_firstFreeID = MIN_NETID; // IDs from 1 to 64999 are reserved for player spawned actors
+
+			if ( _firstFreeID == lID )
+			{
+				// [BB] We can only spawn (MAX_NETID-2) actors with netID, because ID zero is reserved and
+				// we already check that a new ID for the next actor is available when assign a net ID.
+				Printf( "ACTOR_GetNewNetID: Network ID limit reached (>=%ld actors)\n", MAX_NETID - 1 );
+				CountActors ( );
+				I_Error ("Network ID limit reached (>=%ld actors)!\n", MAX_NETID - 1 );
+
+				return ( 0 );
+			}
+		} while ( _entries[_firstFreeID].bFree == false );
+	}
+
+	return ( lID );
 }
 
 template class IDList<AActor>;
@@ -5102,7 +5126,7 @@ void AActor::FreeNetID ()
 //
 //==========================================================================
 
-AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t iz, replace_t allowreplacement, bool SpawningMapThing)
+AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t iz, replace_t allowreplacement, bool SpawningMapThing, player_t *ownerPlayer)
 {
 	g_lSpawnCount++;
 	g_SpawnCycles.Clock();
@@ -5308,12 +5332,17 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 			SERVERCOMMANDS_SetMapNumTotalSecrets();
 	}
 
-	if ((( actor->ulNetworkFlags & NETFL_NONETID ) == false ) && ( ( actor->ulNetworkFlags & NETFL_SERVERSIDEONLY ) == false ) &&
-		( NETWORK_InClientMode() == false ))
+	// Forget ownerPlayer to properly assign lNetID
+	if ( actor->ulNetworkFlags & NETFL_SERVERNETID )
+		ownerPlayer = NULL;
+
+	if ( ( ( actor->ulNetworkFlags & NETFL_NONETID ) == false ) && ( ( actor->ulNetworkFlags & NETFL_SERVERSIDEONLY ) == false )
+		&& ( ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			|| ( NETWORK_InClientMode( ) && !( zacompatflags & ZACOMPATF_NO_PREDICTION_ACS ) && ( ownerPlayer - players == consoleplayer ) ) ) )
 	{
-		actor->lNetID = g_NetIDList.getNewID( );
+		actor->lNetID = g_NetIDList.getNewID( ownerPlayer );
 		g_NetIDList.useID ( actor->lNetID, actor );
-		if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && sv_showspawnnames )
+		if ( ( ( sv_showspawnnames == 1 && actor->lNetID < g_NetIDList.MIN_NETID ) || ( sv_showspawnnames == 2 ) ) && ( ownerPlayer == NULL || !ownerPlayer->bIsBot ) )
 			Printf ( "%s %d\n", actor->GetClass()->TypeName.GetChars(), actor->lNetID );
 	}
 	else
@@ -5341,24 +5370,24 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 	return actor;
 }
 
-AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement)
+AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer)
 {
 	FName classname(type, true);
 	if (classname == NAME_None)
 	{
 		I_Error("Attempt to spawn actor of unknown type '%s'\n", type);
 	}
-	return Spawn(classname, x, y, z, allowreplacement);
+	return Spawn(classname, x, y, z, allowreplacement, ownerPlayer);
 }
 
-AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement)
+AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer)
 {
 	const PClass *cls = PClass::FindClass(classname);
 	if (cls == NULL) 
 	{
 		I_Error("Attempt to spawn actor of unknown type '%s'\n", classname.GetChars());
 	}
-	return AActor::StaticSpawn (cls, x, y, z, allowreplacement);
+	return AActor::StaticSpawn (cls, x, y, z, allowreplacement, false, ownerPlayer);
 }
 
 void AActor::LevelSpawned ()
@@ -6684,7 +6713,7 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 		{
 			if ( puff->lNetID == -1 )
 			{
-				puff->lNetID = g_NetIDList.getNewID( );
+				puff->lNetID = g_NetIDList.getNewID( NULL );
 				g_NetIDList.useID ( puff->lNetID , puff );
 			}
 
@@ -7778,7 +7807,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	if ( ( source->isMissile() ) && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX ) )
 		z += source->height / 2;
 
-	AActor *MissileActor = Spawn (type, source->x + x, source->y + y, z, ALLOW_REPLACE);
+	AActor *MissileActor = Spawn (type, source->x + x, source->y + y, z, ALLOW_REPLACE, source->player);
 	if (pMissileActor) *pMissileActor = MissileActor;
 
 	if ( bSpawnSound )

@@ -482,6 +482,9 @@ enum
 	// (used for respawning barrels).
 	NETFL_DESTROYED_ON_CLIENT		= 0x00000080,
 
+	// [geNia] This actor receives NetID from server pool instead of player one.
+	NETFL_SERVERNETID			= 0x00000100,
+
 	// [BC] End of new ST flags.
 
 // --- mobj.renderflags ---
@@ -729,7 +732,7 @@ public:
 
 	void Serialize (FArchive &arc);
 
-	static AActor *StaticSpawn (const PClass *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, bool SpawningMapThing = false);
+	static AActor *StaticSpawn (const PClass *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, bool SpawningMapThing = false, player_t *ownerPlayer = NULL);
 
 	inline AActor *GetDefault () const
 	{
@@ -1180,7 +1183,6 @@ public:
 	int			lFixedColormap;
 
 	// ID used to identify this actor over network games.
-	// [EP] TODO: remove the 'l' prefix from this variable, it isn't LONG anymore
 	int			lNetID;
 
 	// Pointer to the pickup spot this item was spawned from.
@@ -1352,18 +1354,18 @@ public:
 bool P_IsTIDUsed(int tid);
 int P_FindUniqueTID(int start_tid, int limit);
 
-inline AActor *Spawn (const PClass *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement)
+inline AActor *Spawn (const PClass *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL)
 {
-	return AActor::StaticSpawn (type, x, y, z, allowreplacement);
+	return AActor::StaticSpawn (type, x, y, z, allowreplacement, false, ownerPlayer);
 }
 
-AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement);
-AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement);
+AActor *Spawn (const char *type, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL);
+AActor *Spawn (FName classname, fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL);
 
 template<class T>
-inline T *Spawn (fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement)
+inline T *Spawn (fixed_t x, fixed_t y, fixed_t z, replace_t allowreplacement, player_t *ownerPlayer = NULL)
 {
-	return static_cast<T *>(AActor::StaticSpawn (RUNTIME_CLASS(T), x, y, z, allowreplacement));
+	return static_cast<T *>(AActor::StaticSpawn (RUNTIME_CLASS(T), x, y, z, allowreplacement, false, ownerPlayer));
 }
 
 
@@ -1387,7 +1389,9 @@ template <typename T>
 class IDList
 {
 public:
-	const static int MAX_NETID = 32768;
+	const static LONG MIN_NETID = 65000l;
+	const static LONG MAX_NETID = 100000l;
+	const static LONG MAX_NETID_FOR_PLAYER = 1000l;
 
 private:
 	// List of all possible network ID's for an actor. Slot is true if it available for use.
@@ -1402,7 +1406,7 @@ private:
 	} IDNODE_t;
 
 	IDNODE_t _entries[MAX_NETID];
-	ULONG _firstFreeID;
+	LONG _firstFreeID;
 
 	inline bool isIndexValid ( const LONG lNetID ) const
 	{
@@ -1430,7 +1434,7 @@ public:
 		}
 	}
 
-	ULONG getNewID ( );
+	LONG getNewID ( player_t* ownerPlayer );
 
 	T* findPointerByID ( const LONG lNetID ) const
 	{

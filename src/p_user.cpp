@@ -278,6 +278,7 @@ FArchive &operator<< (FArchive &arc, player_t *&p)
 player_t::player_t()
 : mo(0),
   playerstate(0),
+  firstFreeNetId(1),
   cls(0),
   DesiredFOV(0),
   FOV(0),
@@ -415,6 +416,7 @@ player_t::player_t()
   {
 	  mo = p.mo;
 	  playerstate = p.playerstate;
+	  firstFreeNetId = p.firstFreeNetId;
 	  cmd = p.cmd;
 	  original_cmd = p.original_cmd;
 	  original_oldbuttons = p.original_oldbuttons;

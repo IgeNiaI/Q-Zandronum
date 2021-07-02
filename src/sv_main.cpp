@@ -6735,7 +6735,7 @@ static bool server_CheckLogin ( const ULONG ulClient )
 //
 static bool server_InfoCheat( BYTESTREAM_s *pByteStream )
 {
-	LONG lID = NETWORK_ReadShort( pByteStream );
+	LONG lID = NETWORK_ReadLong( pByteStream );
 	AActor* linetarget = CLIENT_FindThingByNetID( lID );
 	bool extended = !!NETWORK_ReadByte( pByteStream );
 

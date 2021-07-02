@@ -408,3 +408,8 @@ Command SetPlayerSkin
 	Name skinName
 	bool overrideWeaponSkin
 EndCommand
+
+Command UpdateClientNetID
+	Long netId
+	Bool force
+EndCommand

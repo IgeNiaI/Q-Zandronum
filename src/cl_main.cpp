@@ -1760,6 +1760,14 @@ AActor *CLIENT_SpawnThing( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z,
 
 		pActor->lNetID = lNetID;
 		g_NetIDList.useID ( lNetID, pActor );
+		
+		if ( ( lNetID > 0 ) && ( (int) ( lNetID / g_NetIDList.MAX_NETID_FOR_PLAYER ) == consoleplayer ) && ( lNetID >= players[consoleplayer].firstFreeNetId || lNetID == 1 ) ) {
+			int oldfreenetid = players[consoleplayer].firstFreeNetId;
+			players[consoleplayer].firstFreeNetId = lNetID % g_NetIDList.MAX_NETID_FOR_PLAYER + 1;
+			if (players[consoleplayer].firstFreeNetId >= g_NetIDList.MAX_NETID_FOR_PLAYER * (consoleplayer + 1)) {
+				players[consoleplayer].firstFreeNetId = 1;
+			}
+		}
 
 		pActor->SpawnPoint[0] = X;
 		pActor->SpawnPoint[1] = Y;
@@ -1835,6 +1843,14 @@ void CLIENT_SpawnMissile( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, 
 
 	pActor->lNetID = lNetID;
 	g_NetIDList.useID ( lNetID, pActor );
+	
+	if ( ( lNetID > 0 ) && ( (int) ( lNetID / g_NetIDList.MAX_NETID_FOR_PLAYER ) == consoleplayer ) && ( lNetID >= players[consoleplayer].firstFreeNetId || lNetID == 1 ) ) {
+		int oldfreenetid = players[consoleplayer].firstFreeNetId;
+		players[consoleplayer].firstFreeNetId = lNetID % g_NetIDList.MAX_NETID_FOR_PLAYER + 1;
+		if (players[consoleplayer].firstFreeNetId >= g_NetIDList.MAX_NETID_FOR_PLAYER * (consoleplayer + 1)) {
+			players[consoleplayer].firstFreeNetId = 1;
+		}
+	}
 
 	// Play the seesound if this missile has one.
 	if ( pActor->SeeSound )
@@ -2626,6 +2642,14 @@ void ServerCommands::SpawnPlayer::Execute()
 	// Set the network ID.
 	pPlayer->mo->lNetID = netid;
 	g_NetIDList.useID ( netid, pPlayer->mo );
+	
+	if ( ( netid > 0 ) && ( (int) ( netid / g_NetIDList.MAX_NETID_FOR_PLAYER ) == consoleplayer ) && ( netid >= players[consoleplayer].firstFreeNetId || netid == 1 ) ) {
+		int oldfreenetid = players[consoleplayer].firstFreeNetId;
+		players[consoleplayer].firstFreeNetId = netid % g_NetIDList.MAX_NETID_FOR_PLAYER + 1;
+		if (players[consoleplayer].firstFreeNetId >= g_NetIDList.MAX_NETID_FOR_PLAYER * (consoleplayer + 1)) {
+			players[consoleplayer].firstFreeNetId = 1;
+		}
+	}
 
 	// Set the spectator variables [after G_PlayerReborn so our data doesn't get lost] [BB] Why?.
 	// [BB] To properly handle that true spectators don't get default inventory, we need to set this
@@ -7323,6 +7347,19 @@ void ServerCommands::SetCameraToTexture::Execute()
 	}
 
 	FCanvasTextureInfo::Add( camera, picNum, fov );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::UpdateClientNetID::Execute()
+{
+	if ( ( netId > 0 ) && ( (int) ( netId / g_NetIDList.MAX_NETID_FOR_PLAYER ) == consoleplayer ) && ( netId >= players[consoleplayer].firstFreeNetId || netId == 1 || force ) ) {
+		int oldfreenetid = players[consoleplayer].firstFreeNetId;
+		players[consoleplayer].firstFreeNetId = netId % g_NetIDList.MAX_NETID_FOR_PLAYER;
+		if (players[consoleplayer].firstFreeNetId >= g_NetIDList.MAX_NETID_FOR_PLAYER * (consoleplayer + 1)) {
+			players[consoleplayer].firstFreeNetId = 1;
+		}
+	}
 }
 
 //*****************************************************************************
