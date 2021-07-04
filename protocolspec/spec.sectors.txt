@@ -222,3 +222,214 @@ Command SetSideFlags
 	Side side
 	Byte flags
 EndCommand
+
+Command DoDoor
+	Short sectorID
+	Fixed position
+	Byte instigator
+	Byte type
+	Byte direction
+	Fixed speed
+	Long topWait
+	Long countdown
+	Short lightTag
+EndCommand
+
+Command DestroyDoor
+	Short sectorID
+	Fixed position
+EndCommand
+
+Command DoFloor
+	Short sectorID
+	Fixed position
+	Byte instigator
+	Byte type
+	Byte direction
+	Fixed speed
+	Fixed orgDist
+	Fixed destDist
+	Byte crush
+	Bool hexenCrush
+	Long newSpecial
+EndCommand
+
+Command DestroyFloor
+	Short sectorID
+	Fixed position
+EndCommand
+
+Command BuildStair
+	ExtendedCommand
+	Short sectorID
+	Fixed position
+	Byte instigator
+	Byte type
+	Byte direction
+	Fixed speed
+	Fixed orgDist
+	Fixed destDist
+	Byte crush
+	Bool hexenCrush
+	Long newSpecial
+	Long resetCount
+	Long delay
+	Long pauseTime
+	Long stepTime
+	Long perStepTime
+EndCommand
+
+Command DestroyStair
+	ExtendedCommand
+	Short sectorID
+	Fixed position
+EndCommand
+
+Command DoCeiling
+	Short sectorID
+	Fixed position
+	Byte instigator
+	Short tag
+	Byte type
+	Byte direction
+	Byte oldDirection
+	Fixed bottomHeight
+	Fixed topHeight
+	Fixed speed
+	Fixed speed1
+	Fixed speed2
+	Byte crush
+	Bool hexenCrush
+	Byte silent
+EndCommand
+
+Command DestroyCeiling
+	Short sectorID
+	Fixed position
+EndCommand
+
+Command DoPlat
+	Short sectorID
+	Fixed position
+	Byte instigator
+	Short tag
+	Byte type
+	Byte status
+	Byte oldStatus
+	Fixed speed
+	Fixed high
+	Fixed low
+	Long wait
+	Long count
+	Byte crush
+EndCommand
+
+Command DestroyPlat
+	Short sectorID
+	Fixed position
+EndCommand
+
+Command DoElevator
+	Short sectorID
+	Fixed floorPosition
+	Fixed ceilingPosition
+	Byte instigator
+	Byte type
+	Fixed speed
+	Byte direction
+	Fixed floorDestDist
+	Fixed ceilingDestDist
+EndCommand
+
+Command DestroyElevator
+	Short sectorID
+	Fixed floorPosition
+	Fixed ceilingPosition
+EndCommand
+
+Command DoPillar
+	Short sectorID
+	Fixed floorPosition
+	Fixed ceilingPosition
+	Byte instigator
+	Byte type
+	Fixed floorSpeed
+	Fixed ceilingSpeed
+	Fixed floorTarget
+	Fixed ceilingTarget
+	Byte crush
+	Bool hexenCrush
+EndCommand
+
+Command DestroyPillar
+	Short sectorID
+	Fixed floorPosition
+	Fixed ceilingPosition
+EndCommand
+
+Command DoWaggle
+	Short sectorID
+	Fixed position
+	Bool isCeilingWaggle
+	Byte instigator
+	Fixed originalDistance
+	Fixed accumulator
+	Fixed accelerationDelta
+	Fixed targetScale
+	Fixed scale
+	Fixed scaleDelta
+	Long ticker
+	Byte state
+EndCommand
+
+Command DestroyWaggle
+	Short sectorID
+	Fixed position
+	Bool isCeilingWaggle
+EndCommand
+
+Command DoRotatePoly
+	Short polyObj
+	Byte instigator
+	Long speed
+	Long dist
+EndCommand
+
+Command DoMovePoly
+	Short polyObj
+	Byte instigator
+	Fixed xSpeed
+	Fixed ySpeed
+	Long speed
+	Angle angle
+	Long dist
+EndCommand
+
+Command DoMovePolyTo
+	Short polyObj
+	Byte instigator
+	Fixed xTarget
+	Fixed yTarget
+	Fixed xSpeed
+	Fixed ySpeed
+	Long speed
+	Long dist
+EndCommand
+
+Command DoPolyDoor
+	Short polyObj
+	Byte type
+	Byte instigator
+	Fixed x
+	Fixed y
+	Fixed xSpeed
+	Fixed ySpeed
+	Long speed
+	Angle angle
+	Long dist
+	Long totalDist
+	Bool close
+	Short direction
+	Short tics
+	Short waitTics
+EndCommand

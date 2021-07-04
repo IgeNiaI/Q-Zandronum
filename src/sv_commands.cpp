@@ -205,9 +205,7 @@ void SERVERCOMMANDS_Nothing( ULONG ulPlayer, bool bReliable )
 	if ( SERVER_IsValidClient( ulPlayer ) == false )
 		return;
 
-	NetCommand command( SVC_NOTHING );
-	command.setUnreliable( bReliable == false );
-	command.sendCommandToOneClient( ulPlayer );
+	ServerCommands::Nothing().sendCommandToClients( ulPlayer, SVCF_ONLYTHISCLIENT );
 }
 
 //*****************************************************************************
@@ -611,9 +609,9 @@ void SERVERCOMMANDS_SetPlayerDeaths( ULONG ulPlayer, ULONG ulPlayerExtra, Server
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command( SVC2_SETPLAYERDEATHS );
-	command.addByte( ulPlayer );
-	command.addVariable( players[ulPlayer].ulDeathCount );
+	ServerCommands::SetPlayerDeaths command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetDeathCount( players[ulPlayer].ulDeathCount );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -718,9 +716,9 @@ void SERVERCOMMANDS_SetPlayerPoisonCount( ULONG ulPlayer, ULONG ulPlayerExtra, S
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command( SVC_SETPLAYERPOISONCOUNT );
-	command.addByte( ulPlayer );
-	command.addShort( players[ulPlayer].poisoncount );
+	ServerCommands::SetPlayerPoisonCount command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetPoisonCount( players[ulPlayer].poisoncount );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -735,10 +733,10 @@ void SERVERCOMMANDS_SetPlayerAmmoCapacity( ULONG ulPlayer, AInventory *pAmmo, UL
 		return;
 	}
 
-	NetCommand command( SVC_SETPLAYERAMMOCAPACITY );
-	command.addByte( ulPlayer );
-	command.addShort( pAmmo->GetClass( )->getActorNetworkIndex() );
-	command.addLong( pAmmo->MaxAmount );
+	ServerCommands::SetPlayerAmmoCapacity command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetAmmoType( pAmmo->GetClass( ) );
+	command.SetMaxAmount( pAmmo->MaxAmount );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -749,9 +747,9 @@ void SERVERCOMMANDS_SetPlayerCheats( ULONG ulPlayer, ULONG ulPlayerExtra, Server
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command( SVC_SETPLAYERCHEATS );
-	command.addByte( ulPlayer );
-	command.addLong( players[ulPlayer].cheats );
+	ServerCommands::SetPlayerCheats command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetCheats( players[ulPlayer].cheats );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -776,21 +774,6 @@ void SERVERCOMMANDS_SetPlayerPendingWeapon( ULONG ulPlayer, ULONG ulPlayerExtra,
 	command.SetWeaponType( players[ulPlayer].PendingWeapon->GetClass() );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
-
-//*****************************************************************************
-//
-/* [BB] Does not work with the latest ZDoom changes. Check if it's still necessary.
-void SERVERCOMMANDS_SetPlayerPieces( ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
-{
-	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
-		return;
-
-	NetCommand command( SVC_SETPLAYERPIECES );
-	command.addByte( ulPlayer );
-	command.addByte( players[ulPlayer].pieces );
-	command.sendCommandToClients( ulPlayerExtra, flags );
-}
-*/
 
 //*****************************************************************************
 //
@@ -864,9 +847,9 @@ void SERVERCOMMANDS_SetPlayerViewHeight( ULONG ulPlayer, ULONG ulPlayerExtra, Se
 	if ( PLAYER_IsValidPlayerWithMo( ulPlayer ) == false )
 		return;
 
-	NetCommand command( SVC2_SETPLAYERVIEWHEIGHT );
-	command.addByte( ulPlayer );
-	command.addLong( players[ulPlayer].mo->ViewHeight );
+	ServerCommands::SetPlayerViewHeight command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetViewHeight( players[ulPlayer].mo->ViewHeight );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -1110,10 +1093,10 @@ void SERVERCOMMANDS_PotentiallyIgnorePlayer( ULONG ulPlayer )
 		if ( lTicks == 0 )
 			continue;
 
-		NetCommand command( SVC_IGNOREPLAYER );
-		command.addByte( ulPlayer );
-		command.addLong( lTicks );
-		command.sendCommandToOneClient( *it );
+		ServerCommands::IgnorePlayer command;
+		command.SetPlayer( &players[ulPlayer] );
+		command.SetIgnoreChatTicks( lTicks );
+		command.sendCommandToClients( ulPlayer, SVCF_ONLYTHISCLIENT );
 	}
 }
 
@@ -1499,9 +1482,9 @@ void SERVERCOMMANDS_SetThingSpecial( AActor *pActor, ULONG ulPlayerExtra, Server
 	if ( !EnsureActorHasNetID (pActor) )
 		return;
 
-	NetCommand command( SVC2_SETTHINGSPECIAL );
-	command.addShort( pActor->lNetID );
-	command.addShort( pActor->special );
+	ServerCommands::SetThingSpecial command;
+	command.SetActor( pActor );
+	command.SetSpecial( pActor->special );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -1994,10 +1977,10 @@ void SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( const char *pszString, float f
 //
 void SERVERCOMMANDS_SetGameMode( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETGAMEMODE );
-	command.addByte( GAMEMODE_GetCurrentMode( ));
-	command.addByte( instagib );
-	command.addByte( buckshot );
+	ServerCommands::SetGameMode command;
+	command.SetTheCurrentMode( GAMEMODE_GetCurrentMode( ));
+	command.SetTheInstaGib( instagib );
+	command.SetTheBuckShot( buckshot );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2005,9 +1988,9 @@ void SERVERCOMMANDS_SetGameMode( ULONG ulPlayerExtra, ServerCommandFlags flags )
 //
 void SERVERCOMMANDS_SetGameSkill( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETGAMESKILL );
-	command.addByte( gameskill );
-	command.addByte( botskill );
+	ServerCommands::SetGameSkill command;
+	command.SetTheGameSkill( gameskill );
+	command.SetTheBotSkill( botskill );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2015,13 +1998,13 @@ void SERVERCOMMANDS_SetGameSkill( ULONG ulPlayerExtra, ServerCommandFlags flags 
 //
 void SERVERCOMMANDS_SetGameDMFlags( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_SETGAMEDMFLAGS );
-	command.addLong ( dmflags );
-	command.addLong ( dmflags2 );
-	command.addLong ( compatflags );
-	command.addLong ( compatflags2 );
-	command.addLong ( zacompatflags );
-	command.addLong ( zadmflags );
+	ServerCommands::SetGameDmFlags command;
+	command.SetTheDmFlags ( dmflags );
+	command.SetTheDmFlags2 ( dmflags2 );
+	command.SetTheCompatFlags ( compatflags );
+	command.SetTheCompatFlags2 ( compatflags2 );
+	command.SetTheZacompatFlags ( zacompatflags );
+	command.SetTheZadmFlags ( zadmflags );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2029,31 +2012,31 @@ void SERVERCOMMANDS_SetGameDMFlags( ULONG ulPlayerExtra, ServerCommandFlags flag
 //
 void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_SETGAMEMODELIMITS );
-	command.addShort( fraglimit );
-	command.addFloat( timelimit );
-	command.addShort( pointlimit );
-	command.addByte( duellimit );
-	command.addByte( winlimit );
-	command.addByte( wavelimit );
-	command.addByte( sv_cheats );
-	command.addByte( sv_fastweapons );
-	command.addByte( sv_maxlives );
-	command.addByte( sv_maxteams );
+	ServerCommands::SetGameModeLimits command;
+	command.SetTheFragLimit( fraglimit );
+	command.SetTheTimeLimit( timelimit );
+	command.SetThePointLimit( pointlimit );
+	command.SetTheDuelLimit( duellimit );
+	command.SetTheWinLimit( winlimit );
+	command.SetTheWaveLimit( wavelimit );
+	command.SetTheCheats( sv_cheats );
+	command.SetTheFastWeapons( sv_fastweapons );
+	command.SetTheMaxLives( sv_maxlives );
+	command.SetTheMaxTeams( sv_maxteams );
 	// [BB] The value of sv_gravity is irrelevant when sv_gravity hasn't been changed since the map start
 	// and the map has a custom gravity value in MAPINFO. level.gravity always contains the used gravity value,
 	// so we just send this one instead of sv_gravity.
-	command.addFloat( level.gravity );
+	command.SetTheLevelGravity( level.gravity );
 	// [BB] sv_aircontrol needs to be handled similarly to sv_gravity.
-	command.addFloat( static_cast<float>(level.aircontrol) / 65536.f );
+	command.SetTheLevelAirControl( static_cast<float>(level.aircontrol) / 65536.f );
 	// [WS] Send in sv_coop_damagefactor.
-	command.addFloat( sv_coop_damagefactor );
+	command.SetTheCoopDamageFactor( sv_coop_damagefactor );
 	// [WS] Send in alwaysapplydmflags.
-	command.addBit( alwaysapplydmflags );
+	command.SetTheAlwaysApplyDmFlags( alwaysapplydmflags );
 	// [AM] Send lobby map.
-	command.addString( lobby );
+	command.SetTheLobby( static_cast<FString>(lobby) );
 	// [TP] Send sv_limitcommands
-	command.addBit( sv_limitcommands );
+	command.SetTheLimitCommands( sv_limitcommands );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2061,8 +2044,8 @@ void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags f
 //
 void SERVERCOMMANDS_SetGameEndLevelDelay( ULONG ulEndLevelDelay, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETGAMEENDLEVELDELAY );
-	command.addShort( ulEndLevelDelay );
+	ServerCommands::SetGameEndLevelDelay command;
+	command.SetTheEndLevelDelay( ulEndLevelDelay );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2070,9 +2053,9 @@ void SERVERCOMMANDS_SetGameEndLevelDelay( ULONG ulEndLevelDelay, ULONG ulPlayerE
 //
 void SERVERCOMMANDS_SetGameModeState( ULONG ulState, ULONG ulCountdownTicks, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETGAMEMODESTATE );
-	command.addByte( ulState );
-	command.addShort( ulCountdownTicks );
+	ServerCommands::SetGameModeState command;
+	command.SetTheState( ulState );
+	command.SetTheCountdownTicks( ulCountdownTicks );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2080,8 +2063,8 @@ void SERVERCOMMANDS_SetGameModeState( ULONG ulState, ULONG ulCountdownTicks, ULO
 //
 void SERVERCOMMANDS_SetDuelNumDuels( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETDUELNUMDUELS );
-	command.addByte( DUEL_GetNumDuels( ));
+	ServerCommands::SetDuelNumDuels command;
+	command.SetTheNumDuels( DUEL_GetNumDuels( ));
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2089,8 +2072,8 @@ void SERVERCOMMANDS_SetDuelNumDuels( ULONG ulPlayerExtra, ServerCommandFlags fla
 //
 void SERVERCOMMANDS_SetLMSSpectatorSettings( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETLMSSPECTATORSETTINGS );
-	command.addLong( lmsspectatorsettings );
+	ServerCommands::SetLMSSpectatorSettings command;
+	command.SetTheLMSSpectatorSettings( lmsspectatorsettings );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2098,8 +2081,8 @@ void SERVERCOMMANDS_SetLMSSpectatorSettings( ULONG ulPlayerExtra, ServerCommandF
 //
 void SERVERCOMMANDS_SetLMSAllowedWeapons( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETLMSALLOWEDWEAPONS );
-	command.addLong( lmsallowedweapons );
+	ServerCommands::SetLMSAllowedWeapons command;
+	command.SetTheLMSAllowedWeapons( lmsallowedweapons );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2107,9 +2090,9 @@ void SERVERCOMMANDS_SetLMSAllowedWeapons( ULONG ulPlayerExtra, ServerCommandFlag
 //
 void SERVERCOMMANDS_SetInvasionNumMonstersLeft( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETINVASIONNUMMONSTERSLEFT );
-	command.addShort( INVASION_GetNumMonstersLeft( ));
-	command.addShort( INVASION_GetNumArchVilesLeft( ));
+	ServerCommands::SetInvasionNumMonstersLeft command;
+	command.SetTheNumMonstersLeft( INVASION_GetNumMonstersLeft( ));
+	command.SetTheNumArchVilesLeft( INVASION_GetNumArchVilesLeft( ));
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2117,8 +2100,8 @@ void SERVERCOMMANDS_SetInvasionNumMonstersLeft( ULONG ulPlayerExtra, ServerComma
 //
 void SERVERCOMMANDS_SetInvasionWave( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETINVASIONWAVE );
-	command.addByte( INVASION_GetCurrentWave( ));
+	ServerCommands::SetInvasionWave command;
+	command.SetTheInvasionWave( INVASION_GetCurrentWave( ));
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2126,8 +2109,8 @@ void SERVERCOMMANDS_SetInvasionWave( ULONG ulPlayerExtra, ServerCommandFlags fla
 //
 void SERVERCOMMANDS_SetSimpleCTFSTMode( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETSIMPLECTFSTMODE );
-	command.addByte( !!TEAM_GetSimpleCTFSTMode( ));
+	ServerCommands::SetSimpleCTFSTMode command;
+	command.SetTheSimpleCTFSTMode( !!TEAM_GetSimpleCTFSTMode( ));
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2138,9 +2121,9 @@ void SERVERCOMMANDS_DoPossessionArtifactPickedUp( ULONG ulPlayer, ULONG ulTicks,
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command( SVC_DOPOSSESSIONARTIFACTPICKEDUP );
-	command.addByte( ulPlayer );
-	command.addShort( ulTicks );
+	ServerCommands::DoPossessionArtifactPickedUp command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetTicks( ulTicks );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2148,7 +2131,7 @@ void SERVERCOMMANDS_DoPossessionArtifactPickedUp( ULONG ulPlayer, ULONG ulTicks,
 //
 void SERVERCOMMANDS_DoPossessionArtifactDropped( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_DOPOSSESSIONARTIFACTDROPPED );
+	ServerCommands::DoPossessionArtifactDropped command;
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2156,8 +2139,8 @@ void SERVERCOMMANDS_DoPossessionArtifactDropped( ULONG ulPlayerExtra, ServerComm
 //
 void SERVERCOMMANDS_DoGameModeFight( ULONG ulCurrentWave, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_DOGAMEMODEFIGHT );
-	command.addByte( ulCurrentWave );
+	ServerCommands::DoGameModeFight command;
+	command.SetCurrentWave( ulCurrentWave );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2165,8 +2148,8 @@ void SERVERCOMMANDS_DoGameModeFight( ULONG ulCurrentWave, ULONG ulPlayerExtra, S
 //
 void SERVERCOMMANDS_DoGameModeCountdown( ULONG ulTicks, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_DOGAMEMODECOUNTDOWN );
-	command.addShort( ulTicks );
+	ServerCommands::DoGameModeCountdown command;
+	command.SetTicks( ulTicks );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2174,8 +2157,8 @@ void SERVERCOMMANDS_DoGameModeCountdown( ULONG ulTicks, ULONG ulPlayerExtra, Ser
 //
 void SERVERCOMMANDS_DoGameModeWinSequence( ULONG ulWinner, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_DOGAMEMODEWINSEQUENCE );
-	command.addByte( ulWinner );
+	ServerCommands::DoGameModeWinSequence command;
+	command.SetWinner( &players[ulWinner] );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2183,16 +2166,16 @@ void SERVERCOMMANDS_DoGameModeWinSequence( ULONG ulWinner, ULONG ulPlayerExtra, 
 //
 void SERVERCOMMANDS_SetDominationState( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	unsigned int NumPoints = DOMINATION_NumPoints();
 	unsigned int *PointOwners = DOMINATION_PointOwners();
-	NetCommand command( SVC_SETDOMINATIONSTATE );
-	command.addLong( NumPoints );
 
-	for( unsigned int i = 0u; i < NumPoints; i++ )
+	ServerCommands::SetDominationState command;
+
+	TArray<int> pointOwners;
+	for ( unsigned int i = 0; i < DOMINATION_NumPoints(); ++i )
 	{
-		//one byte should be enough to hold the value of the team.
-		command.addByte( PointOwners[i] );
+		pointOwners[i] = PointOwners[i];
 	}
+	command.SetPointOwners( pointOwners );
 
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
@@ -2201,9 +2184,9 @@ void SERVERCOMMANDS_SetDominationState( ULONG ulPlayerExtra, ServerCommandFlags 
 //
 void SERVERCOMMANDS_SetDominationPointOwnership( ULONG ulPoint, ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC_SETDOMINATIONPOINTOWNER );
-	command.addByte( ulPoint );
-	command.addByte( ulPlayer );
+	ServerCommands::SetDominationPointOwner command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetPoint( ulPoint );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2214,10 +2197,10 @@ void SERVERCOMMANDS_SetTeamFrags( ULONG ulTeam, LONG lFrags, bool bAnnounce, ULO
 	if ( TEAM_CheckIfValid( ulTeam ) == false )
 		return;
 
-	NetCommand command( SVC_SETTEAMFRAGS );
-	command.addByte( ulTeam );
-	command.addShort( lFrags );
-	command.addByte( bAnnounce );
+	ServerCommands::SetTeamFrags command;
+	command.SetTeam( ulTeam );
+	command.SetFrags( lFrags );
+	command.SetAnnounce( bAnnounce );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2228,10 +2211,10 @@ void SERVERCOMMANDS_SetTeamScore( ULONG ulTeam, LONG lScore, bool bAnnounce, ULO
 	if ( TEAM_CheckIfValid( ulTeam ) == false )
 		return;
 
-	NetCommand command( SVC_SETTEAMSCORE );
-	command.addByte( ulTeam );
-	command.addShort( lScore );
-	command.addByte( bAnnounce );
+	ServerCommands::SetTeamScore command;
+	command.SetTeam( ulTeam );
+	command.SetScore( lScore );
+	command.SetAnnounce( bAnnounce );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2242,10 +2225,10 @@ void SERVERCOMMANDS_SetTeamWins( ULONG ulTeam, LONG lWins, bool bAnnounce, ULONG
 	if ( TEAM_CheckIfValid( ulTeam ) == false )
 		return;
 
-	NetCommand command( SVC_SETTEAMWINS );
-	command.addByte( ulTeam );
-	command.addShort( lWins );
-	command.addByte( bAnnounce );
+	ServerCommands::SetTeamWins command;
+	command.SetTeam( ulTeam );
+	command.SetWins( lWins );
+	command.SetAnnounce( bAnnounce );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2257,9 +2240,9 @@ void SERVERCOMMANDS_SetTeamReturnTicks( ULONG ulTeam, ULONG ulReturnTicks, ULONG
 	if (( TEAM_CheckIfValid ( ulTeam ) == false ) && ( ulTeam != teams.Size() ))
 		return;
 
-	NetCommand command( SVC_SETTEAMRETURNTICKS );
-	command.addByte( ulTeam );
-	command.addShort( ulReturnTicks );
+	ServerCommands::SetTeamReturnTicks command;
+	command.SetTeam( ulTeam );
+	command.SetReturnTicks( ulReturnTicks );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2271,8 +2254,8 @@ void SERVERCOMMANDS_TeamFlagReturned( ULONG ulTeam, ULONG ulPlayerExtra, ServerC
 	if (( TEAM_CheckIfValid ( ulTeam ) == false ) && ( ulTeam != teams.Size() ))
 		return;
 
-	NetCommand command( SVC_TEAMFLAGRETURNED );
-	command.addByte( ulTeam );
+	ServerCommands::TeamFlagReturned command;
+	command.SetTeam( ulTeam );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -2283,9 +2266,9 @@ void SERVERCOMMANDS_TeamFlagDropped( ULONG ulPlayer, ULONG ulTeam, ULONG ulPlaye
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command( SVC_TEAMFLAGDROPPED );
-	command.addByte( ulPlayer );
-	command.addByte( ulTeam );
+	ServerCommands::TeamFlagDropped command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetTeam( ulTeam );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3105,11 +3088,11 @@ void SERVERCOMMANDS_CallVote( ULONG ulPlayer, FString Command, FString Parameter
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command ( SVC_CALLVOTE );
-	command.addByte ( ulPlayer );
-	command.addString ( Command.GetChars() );
-	command.addString ( Parameters.GetChars() );
-	command.addString ( Reason.GetChars() );
+	ServerCommands::CallVote command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetCommand ( Command );
+	command.SetParameters ( Parameters );
+	command.SetReason ( Reason );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3120,9 +3103,9 @@ void SERVERCOMMANDS_PlayerVote( ULONG ulPlayer, bool bVoteYes, ULONG ulPlayerExt
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command ( SVC_PLAYERVOTE );
-	command.addByte ( ulPlayer );
-	command.addByte ( bVoteYes );
+	ServerCommands::PlayerVote command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetVoteYes ( bVoteYes );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3130,8 +3113,8 @@ void SERVERCOMMANDS_PlayerVote( ULONG ulPlayer, bool bVoteYes, ULONG ulPlayerExt
 //
 void SERVERCOMMANDS_VoteEnded( bool bVotePassed, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_VOTEENDED );
-	command.addByte ( bVotePassed );
+	ServerCommands::VoteEnded command;
+	command.SetVotePassed ( bVotePassed );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3300,10 +3283,10 @@ void SERVERCOMMANDS_GiveInventory( ULONG ulPlayer, AInventory *pInventory, ULONG
 	if ( pInventory->ulNetworkFlags & NETFL_SERVERSIDEONLY )
 		return;
 
-	NetCommand command ( SVC_GIVEINVENTORY );
-	command.addByte ( ulPlayer );
-	command.addShort (  pInventory->GetClass()->getActorNetworkIndex() );
-	command.addLong ( pInventory->Amount );
+	ServerCommands::GiveInventory command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetActorNetworkIndex (  pInventory->GetClass()->getActorNetworkIndex() );
+	command.SetAmount ( pInventory->Amount );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 
 	// [BB] Clients don't know that a BackpackItem may be depleted. In this case we have to resync the ammo count.
@@ -3342,10 +3325,10 @@ void SERVERCOMMANDS_TakeInventory( ULONG ulPlayer, const PClass *inventoryClass,
 	if ( inventoryClass == NULL || ( GetDefaultByType ( inventoryClass )->ulNetworkFlags & NETFL_SERVERSIDEONLY ) )
 		return;
 
-	NetCommand command ( SVC_TAKEINVENTORY );
-	command.addByte ( ulPlayer );
-	command.addShort ( inventoryClass->getActorNetworkIndex() );
-	command.addLong ( ulAmount );
+	ServerCommands::TakeInventory command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetActorNetworkIndex ( inventoryClass->getActorNetworkIndex() );
+	command.SetAmount ( ulAmount );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3359,15 +3342,15 @@ void SERVERCOMMANDS_GivePowerup( ULONG ulPlayer, APowerup *pPowerup, ULONG ulPla
 	if ( pPowerup == NULL )
 		return;
 
-	NetCommand command ( SVC_GIVEPOWERUP );
-	command.addByte( ulPlayer );
-	command.addShort( pPowerup->GetClass( )->getActorNetworkIndex() );
+	ServerCommands::GivePowerup command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetActorNetworkIndex( pPowerup->GetClass( )->getActorNetworkIndex() );
 	// Can we have multiple amounts of a powerup? Probably not, but I'll be safe for now.
-	command.addShort( pPowerup->Amount );
-	command.addByte( pPowerup->IsActiveRune() );
+	command.SetAmount( pPowerup->Amount );
+	command.SetIsActiveRune( pPowerup->IsActiveRune() );
 
 	if ( pPowerup->IsActiveRune() == false )
-		command.addShort( pPowerup->EffectTics );
+		command.SetEffectTicks( pPowerup->EffectTics );
 
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
@@ -3382,10 +3365,10 @@ void SERVERCOMMANDS_SetPowerupBlendColor( ULONG ulPlayer, APowerup *pPowerup, UL
 	if ( pPowerup == NULL )
 		return;
 
-	NetCommand command( SVC2_SETPOWERUPBLENDCOLOR );
-	command.addByte( ulPlayer );
-	command.addShort( pPowerup->GetClass( )->getActorNetworkIndex() );
-	command.addLong( pPowerup->BlendColor );
+	ServerCommands::SetPowerupBlendColor command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetActorNetworkIndex( pPowerup->GetClass( )->getActorNetworkIndex() );
+	command.SetBlendColor( pPowerup->BlendColor );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3416,10 +3399,10 @@ void SERVERCOMMANDS_DoInventoryPickup( ULONG ulPlayer, const char *pszClassName,
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command ( SVC_DOINVENTORYPICKUP );
-	command.addByte ( ulPlayer );
-	command.addString ( pszClassName );
-	command.addString ( pszPickupMessage );
+	ServerCommands::DoInventoryPickup command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetClassName ( pszClassName );
+	command.SetPickupMessage ( pszPickupMessage );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3427,8 +3410,8 @@ void SERVERCOMMANDS_DoInventoryPickup( ULONG ulPlayer, const char *pszClassName,
 //
 void SERVERCOMMANDS_DestroyAllInventory( ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DESTROYALLINVENTORY );
-	command.addByte ( ulPlayer );
+	ServerCommands::DestroyAllInventory command;
+	command.SetPlayer ( &players[ulPlayer] );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3441,10 +3424,10 @@ void SERVERCOMMANDS_SetInventoryIcon( ULONG ulPlayer, AInventory *pInventory, UL
 
 	FString iconTexName = TexMan( pInventory->Icon )->Name;
 
-	NetCommand command ( SVC2_SETINVENTORYICON );
-	command.addByte ( ulPlayer );
-	command.addShort ( pInventory->GetClass()->getActorNetworkIndex() );
-	command.addString ( iconTexName.GetChars() );
+	ServerCommands::SetInventoryIcon command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetActorNetworkIndex ( pInventory->GetClass()->getActorNetworkIndex() );
+	command.SetIconTexName ( iconTexName.GetChars() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3485,9 +3468,9 @@ void SERVERCOMMANDS_SetFastChaseStrafeCount( AActor *mobj, ULONG ulPlayerExtra, 
 	if ( !EnsureActorHasNetID (mobj) )
 		return;
 
-	NetCommand command( SVC2_SETFASTCHASESTRAFECOUNT );
-	command.addShort( mobj->lNetID );
-	command.addByte( mobj->FastChaseStrafeCount );
+	ServerCommands::SetFastChaseStrafeCount command;
+	command.SetActor( mobj );
+	command.SetStrafeCount( mobj->FastChaseStrafeCount );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3503,9 +3486,9 @@ void SERVERCOMMANDS_SetThingHealth( AActor* mobj, ULONG ulPlayerExtra, ServerCom
 	if ( !EnsureActorHasNetID (mobj) )
 		return;
 
-	NetCommand command( SVC2_SETTHINGHEALTH );
-	command.addShort( mobj->lNetID );
-	command.addByte( mobj->health );
+	ServerCommands::SetThingHealth command;
+	command.SetActor( mobj );
+	command.SetHealth( mobj->health );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3519,13 +3502,11 @@ void SERVERCOMMANDS_SetThingScale( AActor* mobj, unsigned int scaleFlags, ULONG 
 	if ( scaleFlags == 0 )
 		return;
 
-	NetCommand command( SVC2_SETTHINGSCALE );
-	command.addShort( mobj->lNetID );
-	command.addByte( scaleFlags );
-	if ( scaleFlags & ACTORSCALE_X )
-		command.addLong( mobj->scaleX );
-	if ( scaleFlags & ACTORSCALE_Y )
-		command.addLong( mobj->scaleY );
+	ServerCommands::SetThingScale command;
+	command.SetActor( mobj );
+	command.SetScaleflags( scaleFlags );
+	command.SetScaleX( mobj->scaleX );
+	command.SetScaleY( mobj->scaleY );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3554,10 +3535,10 @@ void SERVERCOMMANDS_SetThingFillColor( AActor* pActor, ULONG ulPlayerExtra, Serv
 	// [BB] Sanity check.
 	if ( pActor == NULL )
 		return;
-	
-	NetCommand command( SVC2_SETTHINGFILLCOLOR );
-	command.addShort( pActor->lNetID );
-	command.addLong( pActor->fillcolor );
+
+	ServerCommands::SetThingFillColor command;
+	command.SetActor( pActor );
+	command.SetFillcolor( pActor->fillcolor );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3568,11 +3549,11 @@ void SERVERCOMMANDS_SetThingSprite( AActor* pActor, ULONG ulPlayerExtra, ServerC
 	// [BB] Sanity check.
 	if ( pActor == NULL )
 		return;
-	
-	NetCommand command( SVC2_SETTHINGSPRITE );
-	command.addShort( pActor->lNetID );
-	command.addLong( pActor->sprite );
-	command.addByte( pActor->frame );
+
+	ServerCommands::SetThingSprite command;
+	command.SetActor( pActor );
+	command.SetSprite( pActor->sprite );
+	command.SetFrame( pActor->frame );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3583,8 +3564,8 @@ void SERVERCOMMANDS_FlashStealthMonster( AActor* pActor, ULONG ulPlayerExtra, Se
 	if ( EnsureActorHasNetID( pActor ) == false )
 		return;
 
-	NetCommand command ( SVC2_FLASHSTEALTHMONSTER );
-	command.addShort( pActor->lNetID );
+	ServerCommands::FlashStealthMonster command;
+	command.SetActor( pActor );
 	command.sendCommandToClients();
 }
 
@@ -3599,7 +3580,7 @@ void SERVERCOMMANDS_FullUpdateCompleted( ULONG ulClient )
 //
 void SERVERCOMMANDS_ResetMap( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC2_RESETMAP );
+	ServerCommands::ResetMap command;
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3607,24 +3588,24 @@ void SERVERCOMMANDS_ResetMap( ULONG ulPlayerExtra, ServerCommandFlags flags )
 //
 void SERVERCOMMANDS_SetIgnoreWeaponSelect( ULONG ulClient, const bool bIgnoreWeaponSelect )
 {
-	NetCommand command ( SVC2_SETIGNOREWEAPONSELECT );
-	command.addByte ( bIgnoreWeaponSelect );
-	command.sendCommandToOneClient( ulClient );
+	ServerCommands::SetIgnoreWeaponSelect command;
+	command.SetIgnore ( bIgnoreWeaponSelect );
+	command.sendCommandToClients( ulClient, SVCF_ONLYTHISCLIENT );
 }
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_ClearConsoleplayerWeapon( ULONG ulClient )
+void SERVERCOMMANDS_ClearConsolePlayerWeapon( ULONG ulClient )
 {
-	NetCommand command ( SVC2_CLEARCONSOLEPLAYERWEAPON );
-	command.sendCommandToOneClient( ulClient );
+	ServerCommands::ClearConsolePlayerWeapon command;
+	command.sendCommandToClients( ulClient, SVCF_ONLYTHISCLIENT );
 }
 
 //*****************************************************************************
 //
 void SERVERCOMMANDS_Lightning( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC2_LIGHTNING );
+	ServerCommands::Lightning command;
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -3632,21 +3613,24 @@ void SERVERCOMMANDS_Lightning( ULONG ulPlayerExtra, ServerCommandFlags flags )
 //
 void SERVERCOMMANDS_CancelFade( const ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC2_CANCELFADE );
-	command.addByte ( ulPlayer );
+	ServerCommands::CancelFade command;
+	if (ulPlayer == MAXPLAYERS)
+		command.SetPlayer ( NULL );
+	else
+		command.SetPlayer ( &players[ulPlayer] );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_PlayBounceSound( const AActor *pActor, const bool bOnfloor, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_PlayBounceSound( AActor *pActor, bool bOnfloor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( !EnsureActorHasNetID (pActor) )
 		return;
 
-	NetCommand command ( SVC2_PLAYBOUNCESOUND );
-	command.addShort ( pActor->lNetID );
-	command.addByte ( bOnfloor );
+	ServerCommands::PlayBounceSound command;
+	command.SetActor ( pActor );
+	command.SetOnFloor ( bOnfloor );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3661,27 +3645,27 @@ void SERVERCOMMANDS_DoDoor( DDoor *Door, ULONG ulPlayerExtra, ServerCommandFlags
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	NetCommand command ( SVC_DODOOR );
-	command.addShort ( lSectorID );
-	command.addLong ( Door->GetPosition() );
-
 	if (Door->ObjectFlags & OF_EuthanizeMe)
 	{
-		command.addBit( true ); // thinker is destroyed
+		ServerCommands::DestroyDoor command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Door->GetPosition() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 	else
 	{
-		command.addBit( false ); // thinker is alive
-		command.addByte ( Door->GetLastInstigator() - players );
-		command.addByte ( (BYTE)Door->GetType() );
-		command.addByte ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
-		command.addLong ( Door->GetSpeed() );
-		command.addLong ( Door->GetTopWait() );
-		command.addLong ( Door->GetCountdown() );
-		command.addShort ( Door->GetLightTag() );
+		ServerCommands::DoDoor command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Door->GetPosition() );
+		command.SetInstigator ( (BYTE) ( Door->GetLastInstigator() - players ) );
+		command.SetType ( (BYTE)Door->GetType() );
+		command.SetDirection ( SERVER_AdjustDoorDirection( Door->GetDirection() ) );
+		command.SetSpeed ( Door->GetSpeed() );
+		command.SetTopWait ( Door->GetTopWait() );
+		command.SetCountdown ( Door->GetCountdown() );
+		command.SetLightTag ( Door->GetLightTag() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
-
-	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -3693,29 +3677,29 @@ void SERVERCOMMANDS_DoFloor( DFloor *Floor, ULONG ulPlayerExtra, ServerCommandFl
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	NetCommand command ( SVC_DOFLOOR );
-	command.addShort ( lSectorID );
-	command.addLong ( Floor->GetPosition() );
-
 	if (Floor->ObjectFlags & OF_EuthanizeMe)
 	{
-		command.addBit( true ); // thinker is destroyed
+		ServerCommands::DestroyFloor command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Floor->GetPosition() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 	else
 	{
-		command.addBit( false ); // thinker is alive
-		command.addByte ( Floor->GetLastInstigator() - players );
-		command.addByte ( (ULONG) Floor->GetType() );
-		command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
-		command.addLong ( Floor->GetSpeed() );
-		command.addLong ( Floor->GetOrgDist() );
-		command.addLong ( Floor->GetFloorDestDist() );
-		command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
-		command.addBit ( Floor->GetHexencrush() );
-		command.addLong ( Floor->GetNewSpecial() );
+		ServerCommands::DoFloor command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Floor->GetPosition() );
+		command.SetInstigator ( Floor->GetLastInstigator() - players );
+		command.SetType ( (ULONG) Floor->GetType() );
+		command.SetDirection ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
+		command.SetSpeed ( Floor->GetSpeed() );
+		command.SetOrgDist ( Floor->GetOrgDist() );
+		command.SetDestDist ( Floor->GetFloorDestDist() );
+		command.SetCrush ( clamp<LONG>(Floor->GetCrush(),-128,127) );
+		command.SetHexenCrush ( Floor->GetHexencrush() );
+		command.SetNewSpecial ( Floor->GetNewSpecial() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
-
-	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -3726,34 +3710,34 @@ void SERVERCOMMANDS_BuildStair( DFloor *Floor, ULONG ulPlayerExtra, ServerComman
 	if (( SectorID < 0 ) || ( SectorID >= numsectors ))
 		return;
 
-	NetCommand command ( SVC2_BUILDSTAIR );
-	command.addShort ( SectorID );
-	command.addLong ( Floor->GetPosition() );
-
 	if (Floor->ObjectFlags & OF_EuthanizeMe)
 	{
-		command.addBit( true ); // thinker is destroyed
+		ServerCommands::DestroyStair command;
+		command.SetSectorID ( SectorID );
+		command.SetPosition ( Floor->GetPosition() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 	else
 	{
-		command.addBit( false ); // thinker is alive
-		command.addByte ( Floor->GetLastInstigator() - players );
-		command.addByte ( (ULONG) Floor->GetType() );
-		command.addByte ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
-		command.addLong ( Floor->GetSpeed() );
-		command.addLong ( Floor->GetOrgDist() );
-		command.addLong ( Floor->GetFloorDestDist() );
-		command.addByte ( clamp<LONG>(Floor->GetCrush(),-128,127) );
-		command.addBit ( Floor->GetHexencrush() );
-		command.addLong ( Floor->GetNewSpecial() );
-		command.addLong ( Floor->GetResetCount() );
-		command.addLong ( Floor->GetDelay() );
-		command.addLong ( Floor->GetPauseTime() );
-		command.addLong ( Floor->GetStepTime() );
-		command.addLong ( Floor->GetPerStepTime() );
+		ServerCommands::BuildStair command;
+		command.SetSectorID ( SectorID );
+		command.SetPosition ( Floor->GetPosition() );
+		command.SetInstigator ( Floor->GetLastInstigator() - players );
+		command.SetType ( (ULONG) Floor->GetType() );
+		command.SetDirection ( SERVER_AdjustFloorDirection( Floor->GetDirection() ) );
+		command.SetSpeed ( Floor->GetSpeed() );
+		command.SetOrgDist ( Floor->GetOrgDist() );
+		command.SetDestDist ( Floor->GetFloorDestDist() );
+		command.SetCrush ( clamp<LONG>(Floor->GetCrush(),-128,127) );
+		command.SetHexenCrush ( Floor->GetHexencrush() );
+		command.SetNewSpecial ( Floor->GetNewSpecial() );
+		command.SetResetCount ( Floor->GetResetCount() );
+		command.SetDelay ( Floor->GetDelay() );
+		command.SetPauseTime ( Floor->GetPauseTime() );
+		command.SetStepTime ( Floor->GetStepTime() );
+		command.SetPerStepTime ( Floor->GetPerStepTime() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
-
-	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -3765,33 +3749,33 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	NetCommand command ( SVC_DOCEILING );
-	command.addShort ( lSectorID );
-	command.addLong ( Ceiling->GetPosition() );
-
 	if (Ceiling->ObjectFlags & OF_EuthanizeMe)
 	{
-		command.addBit( true ); // thinker is destroyed
+		ServerCommands::DestroyCeiling command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Ceiling->GetPosition() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 	else
 	{
-		command.addBit( false ); // thinker is alive
-		command.addByte ( Ceiling->GetLastInstigator() - players );
-		command.addByte ( Ceiling->GetTag() );
-		command.addByte ( (ULONG)Ceiling->GetType() );
-		command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetDirection() ) );
-		command.addByte ( SERVER_AdjustCeilingDirection( Ceiling->GetOldDirection() ) );
-		command.addLong ( Ceiling->GetBottomHeight() );
-		command.addLong ( Ceiling->GetTopHeight() );
-		command.addLong ( Ceiling->GetSpeed() );
-		command.addLong ( Ceiling->GetSpeed1() );
-		command.addLong ( Ceiling->GetSpeed2() );
-		command.addByte ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
-		command.addBit ( Ceiling->GetHexencrush() );
-		command.addShort ( Ceiling->GetSilent() );
+		ServerCommands::DoCeiling command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Ceiling->GetPosition() );
+		command.SetInstigator ( Ceiling->GetLastInstigator() - players );
+		command.SetTag ( Ceiling->GetTag() );
+		command.SetType ( (ULONG)Ceiling->GetType() );
+		command.SetDirection ( SERVER_AdjustCeilingDirection( Ceiling->GetDirection() ) );
+		command.SetOldDirection ( SERVER_AdjustCeilingDirection( Ceiling->GetOldDirection() ) );
+		command.SetBottomHeight ( Ceiling->GetBottomHeight() );
+		command.SetTopHeight ( Ceiling->GetTopHeight() );
+		command.SetSpeed ( Ceiling->GetSpeed() );
+		command.SetSpeed1 ( Ceiling->GetSpeed1() );
+		command.SetSpeed2 ( Ceiling->GetSpeed2() );
+		command.SetCrush ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
+		command.SetHexenCrush ( Ceiling->GetHexencrush() );
+		command.SetSilent ( Ceiling->GetSilent() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
-
-	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -3803,31 +3787,31 @@ void SERVERCOMMANDS_DoPlat( DPlat *Plat, ULONG ulPlayerExtra, ServerCommandFlags
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	NetCommand command ( SVC_DOPLAT );
-	command.addShort ( lSectorID );
-	command.addLong ( Plat->GetPosition() );
-
 	if (Plat->ObjectFlags & OF_EuthanizeMe)
 	{
-		command.addBit( true ); // thinker is destroyed
+		ServerCommands::DestroyPlat command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Plat->GetPosition() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 	else
 	{
-		command.addBit( false ); // thinker is alive
-		command.addByte ( Plat->GetLastInstigator() - players );
-		command.addByte ( (ULONG)Plat->GetType() );
-		command.addByte ( (ULONG)Plat->GetStatus() );
-		command.addByte ( (ULONG)Plat->GetOldStatus() );
-		command.addLong ( Plat->GetSpeed() );
-		command.addLong ( Plat->GetHigh() );
-		command.addLong ( Plat->GetLow() );
-		command.addLong ( Plat->GetWait() );
-		command.addLong ( Plat->GetCount() );
-		command.addLong ( Plat->GetCrush() );
-		command.addLong ( Plat->GetTag() );
+		ServerCommands::DoPlat command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Plat->GetPosition() );
+		command.SetInstigator ( Plat->GetLastInstigator() - players );
+		command.SetTag ( Plat->GetTag() );
+		command.SetType ( (ULONG)Plat->GetType() );
+		command.SetStatus ( (ULONG)Plat->GetStatus() );
+		command.SetOldStatus ( (ULONG)Plat->GetOldStatus() );
+		command.SetSpeed ( Plat->GetSpeed() );
+		command.SetHigh ( Plat->GetHigh() );
+		command.SetLow ( Plat->GetLow() );
+		command.SetWait ( Plat->GetWait() );
+		command.SetCount ( Plat->GetCount() );
+		command.SetCrush ( Plat->GetCrush() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
-
-	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -3839,27 +3823,28 @@ void SERVERCOMMANDS_DoElevator( DElevator *Elevator, ULONG ulPlayerExtra, Server
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	NetCommand command ( SVC_DOELEVATOR );
-	command.addShort ( lSectorID );
-	command.addLong ( Elevator->GetFloorPosition() );
-	command.addLong ( Elevator->GetCeilingPosition() );
-
 	if (Elevator->ObjectFlags & OF_EuthanizeMe)
 	{
-		command.addBit( true ); // thinker is destroyed
+		ServerCommands::DestroyElevator command;
+		command.SetSectorID ( lSectorID );
+		command.SetFloorPosition ( Elevator->GetFloorPosition() );
+		command.SetCeilingPosition ( Elevator->GetCeilingPosition() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 	else
 	{
-		command.addBit( false ); // thinker is alive
-		command.addByte ( Elevator->GetLastInstigator() - players );
-		command.addByte ( Elevator->GetType() );
-		command.addLong ( Elevator->GetSpeed() );
-		command.addByte ( SERVER_AdjustElevatorDirection( Elevator->GetDirection() ) );
-		command.addLong ( Elevator->GetFloorDestDist() );
-		command.addLong ( Elevator->GetCeilingDestDist() );
+		ServerCommands::DoElevator command;
+		command.SetSectorID ( lSectorID );
+		command.SetFloorPosition ( Elevator->GetFloorPosition() );
+		command.SetCeilingPosition ( Elevator->GetCeilingPosition() );
+		command.SetInstigator ( Elevator->GetLastInstigator() - players );
+		command.SetType ( Elevator->GetType() );
+		command.SetSpeed ( Elevator->GetSpeed() );
+		command.SetDirection ( SERVER_AdjustElevatorDirection( Elevator->GetDirection() ) );
+		command.SetFloorDestDist ( Elevator->GetFloorDestDist() );
+		command.SetCeilingDestDist ( Elevator->GetCeilingDestDist() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
-
-	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -3871,29 +3856,30 @@ void SERVERCOMMANDS_DoPillar( DPillar *Pillar, ULONG ulPlayerExtra, ServerComman
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	NetCommand command ( SVC_DOPILLAR );
-	command.addShort ( lSectorID );
-	command.addLong ( Pillar->GetFloorPosition() );
-	command.addLong ( Pillar->GetCeilingPosition() );
-
 	if (Pillar->ObjectFlags & OF_EuthanizeMe)
 	{
-		command.addBit( true ); // thinker is destroyed
+		ServerCommands::DestroyPillar command;
+		command.SetSectorID ( lSectorID );
+		command.SetFloorPosition ( Pillar->GetFloorPosition() );
+		command.SetCeilingPosition ( Pillar->GetCeilingPosition() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 	else
 	{
-		command.addBit( false ); // thinker is alive
-		command.addByte ( Pillar->GetLastInstigator() - players );
-		command.addByte ( Pillar->GetType() );
-		command.addLong ( Pillar->GetFloorSpeed() );
-		command.addLong ( Pillar->GetCeilingSpeed() );
-		command.addLong ( Pillar->GetFloorTarget() );
-		command.addLong ( Pillar->GetCeilingTarget() );
-		command.addLong ( Pillar->GetCrush() );
-		command.addBit ( Pillar->GetHexencrush() );
+		ServerCommands::DoPillar command;
+		command.SetSectorID ( lSectorID );
+		command.SetFloorPosition ( Pillar->GetFloorPosition() );
+		command.SetCeilingPosition ( Pillar->GetCeilingPosition() );
+		command.SetInstigator ( Pillar->GetLastInstigator() - players );
+		command.SetType ( Pillar->GetType() );
+		command.SetFloorSpeed ( Pillar->GetFloorSpeed() );
+		command.SetCeilingSpeed ( Pillar->GetCeilingSpeed() );
+		command.SetFloorTarget ( Pillar->GetFloorTarget() );
+		command.SetCeilingTarget ( Pillar->GetCeilingTarget() );
+		command.SetCrush ( Pillar->GetCrush() );
+		command.SetHexenCrush ( Pillar->GetHexencrush() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
-
-	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -3905,29 +3891,31 @@ void SERVERCOMMANDS_DoWaggle( DWaggleBase *Waggle, ULONG ulPlayerExtra, ServerCo
 	if (( lSectorID < 0 ) || ( lSectorID >= numsectors ))
 		return;
 
-	NetCommand command ( SVC_DOWAGGLE );
-	command.addShort ( lSectorID );
-	command.addLong ( Waggle->GetPosition() );
-	command.addBit ( Waggle->GetClass( ) == RUNTIME_CLASS( DCeilingWaggle ) );
-
 	if (Waggle->ObjectFlags & OF_EuthanizeMe)
 	{
-		command.addBit( true ); // thinker is destroyed
+		ServerCommands::DestroyWaggle command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Waggle->GetPosition() );
+		command.SetIsCeilingWaggle ( Waggle->GetClass( ) == RUNTIME_CLASS( DCeilingWaggle ) );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 	else
 	{
-		command.addBit( false ); // thinker is alive
-		command.addByte ( Waggle->GetLastInstigator() - players );
-		command.addLong ( Waggle->GetOriginalDistance() );
-		command.addLong ( Waggle->GetAccumulator() );
-		command.addLong ( Waggle->GetAccelerationDelta() );
-		command.addLong ( Waggle->GetTargetScale() );
-		command.addLong ( Waggle->GetScale() );
-		command.addLong ( Waggle->GetScaleDelta() );
-		command.addLong ( Waggle->GetTicker() );
-		command.addByte ( Waggle->GetState() );
+		ServerCommands::DoWaggle command;
+		command.SetSectorID ( lSectorID );
+		command.SetPosition ( Waggle->GetPosition() );
+		command.SetIsCeilingWaggle ( Waggle->GetClass( ) == RUNTIME_CLASS( DCeilingWaggle ) );
+		command.SetInstigator ( Waggle->GetLastInstigator() - players );
+		command.SetOriginalDistance ( Waggle->GetOriginalDistance() );
+		command.SetAccumulator ( Waggle->GetAccumulator() );
+		command.SetAccelerationDelta ( Waggle->GetAccelerationDelta() );
+		command.SetTargetScale ( Waggle->GetTargetScale() );
+		command.SetScale ( Waggle->GetScale() );
+		command.SetScaleDelta ( Waggle->GetScaleDelta() );
+		command.SetTicker ( Waggle->GetTicker() );
+		command.SetState ( Waggle->GetState() );
+		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
-	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
@@ -3935,11 +3923,11 @@ void SERVERCOMMANDS_DoWaggle( DWaggleBase *Waggle, ULONG ulPlayerExtra, ServerCo
 //
 void SERVERCOMMANDS_DoRotatePoly( DRotatePoly *RotatePoly, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DOROTATEPOLY );
-	command.addShort ( RotatePoly->GetPolyObj() );
-	command.addByte( RotatePoly->GetLastInstigator() - players );
-	command.addLong ( RotatePoly->GetSpeed() );
-	command.addLong ( RotatePoly->GetDist() );
+	ServerCommands::DoRotatePoly command;
+	command.SetPolyObj ( RotatePoly->GetPolyObj() );
+	command.SetInstigator ( RotatePoly->GetLastInstigator() - players );
+	command.SetSpeed ( RotatePoly->GetSpeed() );
+	command.SetDist ( RotatePoly->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3948,14 +3936,14 @@ void SERVERCOMMANDS_DoRotatePoly( DRotatePoly *RotatePoly, ULONG ulPlayerExtra, 
 //
 void SERVERCOMMANDS_DoMovePoly( DMovePoly *MovePoly, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DOMOVEPOLY );
-	command.addShort ( MovePoly->GetPolyObj() );
-	command.addByte( MovePoly->GetLastInstigator() - players );
-	command.addLong ( MovePoly->GetXSpeed() );
-	command.addLong ( MovePoly->GetYSpeed() );
-	command.addLong ( MovePoly->GetSpeed() );
-	command.addLong ( MovePoly->GetAngle() );
-	command.addLong ( MovePoly->GetDist() );
+	ServerCommands::DoMovePoly command;
+	command.SetPolyObj ( MovePoly->GetPolyObj() );
+	command.SetInstigator ( MovePoly->GetLastInstigator() - players );
+	command.SetXSpeed ( MovePoly->GetXSpeed() );
+	command.SetYSpeed ( MovePoly->GetYSpeed() );
+	command.SetSpeed ( MovePoly->GetSpeed() );
+	command.SetAngle ( MovePoly->GetAngle() );
+	command.SetDist ( MovePoly->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3964,15 +3952,15 @@ void SERVERCOMMANDS_DoMovePoly( DMovePoly *MovePoly, ULONG ulPlayerExtra, Server
 //
 void SERVERCOMMANDS_DoMovePolyTo( DMovePolyTo *MovePolyTo, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DOMOVEPOLYTO );
-	command.addShort ( MovePolyTo->GetPolyObj() );
-	command.addByte( MovePolyTo->GetLastInstigator() - players );
-	command.addLong ( MovePolyTo->GetXTarget() );
-	command.addLong ( MovePolyTo->GetYTarget() );
-	command.addLong ( MovePolyTo->GetXSpeed() );
-	command.addLong ( MovePolyTo->GetYSpeed() );
-	command.addLong ( MovePolyTo->GetSpeed() );
-	command.addLong ( MovePolyTo->GetDist() );
+	ServerCommands::DoMovePolyTo command;
+	command.SetPolyObj ( MovePolyTo->GetPolyObj() );
+	command.SetInstigator ( MovePolyTo->GetLastInstigator() - players );
+	command.SetXTarget ( MovePolyTo->GetXTarget() );
+	command.SetYTarget ( MovePolyTo->GetYTarget() );
+	command.SetXSpeed ( MovePolyTo->GetXSpeed() );
+	command.SetYSpeed ( MovePolyTo->GetYSpeed() );
+	command.SetSpeed ( MovePolyTo->GetSpeed() );
+	command.SetDist ( MovePolyTo->GetDist() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -3981,22 +3969,22 @@ void SERVERCOMMANDS_DoMovePolyTo( DMovePolyTo *MovePolyTo, ULONG ulPlayerExtra, 
 //
 void SERVERCOMMANDS_DoPolyDoor( DPolyDoor *PolyDoor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DOPOLYDOOR );
-	command.addShort ( PolyDoor->GetPolyObj() );
-	command.addByte ( PolyDoor->GetType() );
-	command.addByte( PolyDoor->GetLastInstigator() - players );
-	command.addLong ( PolyDoor->GetX() );
-	command.addLong ( PolyDoor->GetY() );
-	command.addLong ( PolyDoor->GetXSpeed() );
-	command.addLong ( PolyDoor->GetYSpeed() );
-	command.addLong ( PolyDoor->GetSpeed() );
-	command.addLong ( PolyDoor->GetAngle() );
-	command.addLong ( PolyDoor->GetDist() );
-	command.addLong ( PolyDoor->GetTotalDist() );
-	command.addBit ( PolyDoor->GetClose() ? 1 : 0 );
-	command.addShort ( PolyDoor->GetDirection() );
-	command.addShort ( PolyDoor->GetTics() );
-	command.addShort ( PolyDoor->GetWaitTics() );
+	ServerCommands::DoPolyDoor command;
+	command.SetPolyObj ( PolyDoor->GetPolyObj() );
+	command.SetType ( PolyDoor->GetType() );
+	command.SetInstigator ( PolyDoor->GetLastInstigator() - players );
+	command.SetX ( PolyDoor->GetX() );
+	command.SetY ( PolyDoor->GetY() );
+	command.SetXSpeed ( PolyDoor->GetXSpeed() );
+	command.SetYSpeed ( PolyDoor->GetYSpeed() );
+	command.SetSpeed ( PolyDoor->GetSpeed() );
+	command.SetAngle ( PolyDoor->GetAngle() );
+	command.SetDist ( PolyDoor->GetDist() );
+	command.SetTotalDist ( PolyDoor->GetTotalDist() );
+	command.SetClose ( PolyDoor->GetClose() );
+	command.SetDirection ( PolyDoor->GetDirection() );
+	command.SetTics ( PolyDoor->GetTics() );
+	command.SetWaitTics ( PolyDoor->GetWaitTics() );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4009,13 +3997,13 @@ void SERVERCOMMANDS_Earthquake( AActor *pCenter, LONG lIntensity, LONG lDuration
 		return;
 
 	const char *pszQuakeSound = S_GetName( Quakesound );
-
-	NetCommand command ( SVC_EARTHQUAKE );
-	command.addShort ( pCenter->lNetID );
-	command.addByte ( lIntensity );
-	command.addShort ( lDuration );
-	command.addShort ( lTemorRadius );
-	command.addString ( pszQuakeSound );
+	
+	ServerCommands::EarthQuake command;
+	command.SetCenter ( pCenter );
+	command.SetIntensity ( lIntensity );
+	command.SetDuration ( lDuration );
+	command.SetTremorRadius ( lTemorRadius );
+	command.SetQuakeSound ( pszQuakeSound );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4044,9 +4032,9 @@ void SERVERCOMMANDS_PushToJoinQueue( ULONG ulPlayerExtra, ServerCommandFlags fla
 	if ( JOINQUEUE_GetSize() > 0 )
 	{
 		const JoinSlot& slot = JOINQUEUE_GetSlotAt( JOINQUEUE_GetSize() - 1 );
-		NetCommand command ( SVC2_PUSHTOJOINQUEUE );
-		command.addByte( slot.player );
-		command.addByte( slot.team );
+		ServerCommands::PushToJoinQueue command;
+		command.SetPlayerNum( slot.player );
+		command.SetTeam( slot.team );
 		command.sendCommandToClients( ulPlayerExtra, flags );
 	}
 }
@@ -4055,8 +4043,8 @@ void SERVERCOMMANDS_PushToJoinQueue( ULONG ulPlayerExtra, ServerCommandFlags fla
 //
 void SERVERCOMMANDS_RemoveFromJoinQueue( unsigned int index, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC2_REMOVEFROMJOINQUEUE );
-	command.addByte( index );
+	ServerCommands::RemoveFromJoinQueue command;
+	command.SetIndex( index );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -4064,11 +4052,11 @@ void SERVERCOMMANDS_RemoveFromJoinQueue( unsigned int index, ULONG ulPlayerExtra
 //
 void SERVERCOMMANDS_DoScroller( LONG lType, LONG lXSpeed, LONG lYSpeed, LONG lAffectee, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DOSCROLLER );
-	command.addByte ( lType );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addLong ( lAffectee );
+	ServerCommands::DoScroller command;
+	command.SetType ( lType );
+	command.SetXSpeed ( lXSpeed );
+	command.SetYSpeed ( lYSpeed );
+	command.SetAffectee ( lAffectee );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4076,11 +4064,11 @@ void SERVERCOMMANDS_DoScroller( LONG lType, LONG lXSpeed, LONG lYSpeed, LONG lAf
 //
 void SERVERCOMMANDS_SetScroller( LONG lType, LONG lXSpeed, LONG lYSpeed, LONG lTag, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_SETSCROLLER );
-	command.addByte ( lType );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addShort ( lTag );
+	ServerCommands::SetScroller command;
+	command.SetType ( lType );
+	command.SetXSpeed ( lXSpeed );
+	command.SetYSpeed ( lYSpeed );
+	command.SetTag ( lTag );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4088,12 +4076,12 @@ void SERVERCOMMANDS_SetScroller( LONG lType, LONG lXSpeed, LONG lYSpeed, LONG lT
 //
 void SERVERCOMMANDS_SetWallScroller( LONG lId, LONG lSidechoice, LONG lXSpeed, LONG lYSpeed, LONG lWhere, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_SETWALLSCROLLER );
-	command.addLong ( lId );
-	command.addByte ( lSidechoice );
-	command.addLong ( lXSpeed );
-	command.addLong ( lYSpeed );
-	command.addLong ( lWhere );
+	ServerCommands::SetWallScroller command;
+	command.SetId ( lId );
+	command.SetSideChoice ( lSidechoice );
+	command.SetXSpeed ( lXSpeed );
+	command.SetYSpeed ( lYSpeed );
+	command.SetLWhere ( lWhere );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4101,17 +4089,17 @@ void SERVERCOMMANDS_SetWallScroller( LONG lId, LONG lSidechoice, LONG lXSpeed, L
 //
 void SERVERCOMMANDS_DoFlashFader( float fR1, float fG1, float fB1, float fA1, float fR2, float fG2, float fB2, float fA2, float fTime, ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_DOFLASHFADER );
-	command.addFloat ( fR1 );
-	command.addFloat ( fG1 );
-	command.addFloat ( fB1 );
-	command.addFloat ( fA1 );
-	command.addFloat ( fR2 );
-	command.addFloat ( fG2 );
-	command.addFloat ( fB2 );
-	command.addFloat ( fA2 );
-	command.addFloat ( fTime );
-	command.addByte ( ulPlayer );
+	ServerCommands::DoFlashFader command;
+	command.SetR1 ( fR1 );
+	command.SetG1 ( fG1 );
+	command.SetB1 ( fB1 );
+	command.SetA1 ( fA1 );
+	command.SetR2 ( fR2 );
+	command.SetG2 ( fG2 );
+	command.SetB2 ( fB2 );
+	command.SetA2 ( fA2 );
+	command.SetTime ( fTime );
+	command.SetPlayer ( &players[ulPlayer] );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4122,9 +4110,9 @@ void SERVERCOMMANDS_GenericCheat( ULONG ulPlayer, ULONG ulCheat, ULONG ulPlayerE
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command ( SVC_GENERICCHEAT );
-	command.addByte ( ulPlayer );
-	command.addByte ( ulCheat );
+	ServerCommands::GenericCheat command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetCheat ( ulCheat );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4138,10 +4126,10 @@ void SERVERCOMMANDS_SetCameraToTexture( AActor *pCamera, char *pszTexture, LONG 
 		return;
 	}
 
-	NetCommand command ( SVC_SETCAMERATOTEXTURE );
-	command.addShort ( pCamera->lNetID );
-	command.addString ( pszTexture );
-	command.addByte ( lFOV );
+	ServerCommands::SetCameraToTexture command;
+	command.SetCamera ( pCamera );
+	command.SetTexture ( pszTexture );
+	command.SetFov ( lFOV );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4151,13 +4139,13 @@ void SERVERCOMMANDS_CreateTranslation( ULONG ulTranslation, ULONG ulStart, ULONG
 {
 	const bool bIsEdited = SERVER_IsTranslationEdited ( ulTranslation );
 
-	NetCommand command ( SVC_CREATETRANSLATION );
-	command.addShort ( ulTranslation );
-	command.addByte ( bIsEdited );
-	command.addByte ( ulStart );
-	command.addByte ( ulEnd );
-	command.addByte ( ulPal1 );
-	command.addByte ( ulPal2 );
+	ServerCommands::CreateTranslation command;
+	command.SetTranslation ( ulTranslation );
+	command.SetIsEdited ( bIsEdited );
+	command.SetStart ( ulStart );
+	command.SetEnd ( ulEnd );
+	command.SetPal1 ( ulPal1 );
+	command.SetPal2 ( ulPal2 );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 
 }
@@ -4167,17 +4155,17 @@ void SERVERCOMMANDS_CreateTranslation( ULONG ulTranslation, ULONG ulStart, ULONG
 {
 	const bool bIsEdited = SERVER_IsTranslationEdited ( ulTranslation );
 
-	NetCommand command ( SVC_CREATETRANSLATION2 );
-	command.addShort ( ulTranslation );
-	command.addByte ( bIsEdited );
-	command.addByte ( ulStart );
-	command.addByte ( ulEnd );
-	command.addByte ( ulR1 );
-	command.addByte ( ulG1 );
-	command.addByte ( ulB1 );
-	command.addByte ( ulR2 );
-	command.addByte ( ulG2 );
-	command.addByte ( ulB2 );
+	ServerCommands::CreateTranslation2 command;
+	command.SetTranslation ( ulTranslation );
+	command.SetIsEdited ( bIsEdited );
+	command.SetStart ( ulStart );
+	command.SetEnd ( ulEnd );
+	command.SetR1 ( ulR1 );
+	command.SetG1 ( ulG1 );
+	command.SetB1 ( ulB1 );
+	command.SetR2 ( ulR2 );
+	command.SetG2 ( ulG2 );
+	command.SetB2 ( ulB2 );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4209,15 +4197,14 @@ void SERVERCOMMANDS_SetSectorLink( ULONG ulSector, int iArg1, int iArg2, int iAr
 void SERVERCOMMANDS_DoPusher( ULONG ulType, line_t *pLine, int iMagnitude, int iAngle, AActor *pSource, int iAffectee, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	const int iLineNum = pLine ? static_cast<ULONG>( pLine - lines ) : -1;
-	const LONG lSourceNetID = pSource ? pSource->lNetID : -1;
 
-	NetCommand command ( SVC_DOPUSHER );
-	command.addByte ( ulType );
-	command.addShort ( iLineNum );
-	command.addLong ( iMagnitude );
-	command.addLong ( iAngle );
-	command.addShort ( lSourceNetID );
-	command.addShort ( iAffectee );
+	ServerCommands::DoPusher command;
+	command.SetType ( ulType );
+	command.SetLineNum ( iLineNum );
+	command.SetMagnitude ( iMagnitude );
+	command.SetAngle ( iAngle );
+	command.SetSourceActor ( pSource );
+	command.SetAffectee ( iAffectee );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4225,11 +4212,11 @@ void SERVERCOMMANDS_DoPusher( ULONG ulType, line_t *pLine, int iMagnitude, int i
 //
 void SERVERCOMMANDS_AdjustPusher( int iTag, int iMagnitude, int iAngle, ULONG ulType, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC_ADJUSTPUSHER );
-	command.addShort ( iTag );
-	command.addLong ( iMagnitude );
-	command.addLong ( iAngle );
-	command.addByte ( ulType );
+	ServerCommands::AdjustPusher command;
+	command.SetTag ( iTag );
+	command.SetMagnitude ( iMagnitude );
+	command.SetAngle ( iAngle );
+	command.SetType ( ulType );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4241,9 +4228,9 @@ void SERVERCOMMANDS_SetPlayerHazardCount ( ULONG ulPlayer, ULONG ulPlayerExtra, 
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command ( SVC2_SETPLAYERHAZARDCOUNT );
-	command.addByte ( ulPlayer );
-	command.addShort ( players[ulPlayer].hazardcount );
+	ServerCommands::SetPlayerHazardCount command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetHazardCount ( players[ulPlayer].hazardcount );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4251,8 +4238,8 @@ void SERVERCOMMANDS_SetPlayerHazardCount ( ULONG ulPlayer, ULONG ulPlayerExtra, 
 // [EP] All the clients must change their own mugshot state.
 void SERVERCOMMANDS_SetMugShotState ( const char *statename )
 {
-	NetCommand command( SVC2_SETMUGSHOTSTATE );
-	command.addString( statename );
+	ServerCommands::SetMugShotState command;
+	command.SetStateName( statename );
 	command.sendCommandToClients();
 }
 
@@ -4260,10 +4247,10 @@ void SERVERCOMMANDS_SetMugShotState ( const char *statename )
 // [Dusk] Used in map resets to move a 3d midtexture moves without sector it's attached to.
 void SERVERCOMMANDS_Scroll3dMidtexture ( sector_t* sector, fixed_t move, bool ceiling, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command ( SVC2_SCROLL3DMIDTEX );
-	command.addByte ( sector - sectors );
-	command.addLong ( move );
-	command.addByte ( ceiling );
+	ServerCommands::Scroll3dMidTex command;
+	command.SetSectorNum ( sector - sectors );
+	command.SetMove ( move );
+	command.SetIsCeiling ( ceiling );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4273,9 +4260,9 @@ void SERVERCOMMANDS_SetPlayerLogNumber ( const ULONG ulPlayer, const int Arg0, U
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
 
-	NetCommand command ( SVC2_SETPLAYERLOGNUMBER );
-	command.addByte ( ulPlayer );
-	command.addShort ( Arg0 );
+	ServerCommands::SetPlayerLogNumber command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetArg0 ( Arg0 );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }
 
@@ -4283,9 +4270,9 @@ void SERVERCOMMANDS_SetPlayerLogNumber ( const ULONG ulPlayer, const int Arg0, U
 //
 void SERVERCOMMANDS_SetCVar( const FBaseCVar &CVar, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC2_SETCVAR );
-	command.addString( CVar.GetName() );
-	command.addString( CVar.GetGenericRep (CVAR_String).String );
+	ServerCommands::SetCVar command;
+	command.SetName( CVar.GetName() );
+	command.SetValue( CVar.GetGenericRep (CVAR_String).String );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
@@ -4293,11 +4280,13 @@ void SERVERCOMMANDS_SetCVar( const FBaseCVar &CVar, ULONG ulPlayerExtra, ServerC
 //
 void SERVERCOMMANDS_SetDefaultSkybox( ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
-	NetCommand command( SVC2_SETDEFAULTSKYBOX );
-	command.addShort( ( level.DefaultSkybox != NULL ) ? level.DefaultSkybox->lNetID : -1 );
+	ServerCommands::SetDefaultSkybox command;
+	command.SetSkyboxActor( level.DefaultSkybox );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
+
 //*****************************************************************************
+//
 void SERVERCOMMANDS_SRPUserStartAuthentication ( const ULONG ulClient )
 {
 	if ( SERVER_IsValidClient( ulClient ) == false )
@@ -4310,6 +4299,7 @@ void SERVERCOMMANDS_SRPUserStartAuthentication ( const ULONG ulClient )
 }
 
 //*****************************************************************************
+//
 void SERVERCOMMANDS_SRPUserProcessChallenge ( const ULONG ulClient )
 {
 	if ( SERVER_IsValidClient( ulClient ) == false )
@@ -4327,6 +4317,7 @@ void SERVERCOMMANDS_SRPUserProcessChallenge ( const ULONG ulClient )
 }
 
 //*****************************************************************************
+//
 void SERVERCOMMANDS_SRPUserVerifySession ( const ULONG ulClient )
 {
 	if ( SERVER_IsValidClient( ulClient ) == false )
@@ -4340,7 +4331,8 @@ void SERVERCOMMANDS_SRPUserVerifySession ( const ULONG ulClient )
 	command.sendCommandToClients ( ulClient, SVCF_ONLYTHISCLIENT );
 }
 
- //*****************************************************************************
+//*****************************************************************************
+//
 void SERVERCOMMANDS_ShootDecal ( const FDecalTemplate* tpl, AActor* actor, fixed_t z, angle_t angle, fixed_t tracedist,
 	bool permanent, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
@@ -4358,6 +4350,7 @@ void SERVERCOMMANDS_ShootDecal ( const FDecalTemplate* tpl, AActor* actor, fixed
 }
 
 //*****************************************************************************
+//
 void APathFollower::SyncWithClient ( const ULONG ulClient )
 {
 	if ( !EnsureActorHasNetID (this) )

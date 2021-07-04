@@ -148,6 +148,12 @@ Command SetThingSpawnPoint
 	Fixed spawnPointZ
 EndCommand
 
+Command SetThingSpecial
+	ExtendedCommand
+	Actor actor
+	Short special
+EndCommand
+
 Command SetThingSpecial1
 	Actor actor
 	Short special1
@@ -169,15 +175,15 @@ Command SetThingTics
 	Short tics
 EndCommand
 
-Command SetThingTID
-	Actor actor
-	Long tid
-EndCommand
-
 Command SetThingReactionTime
 	ExtendedCommand
 	Actor actor
 	Short reactiontime
+EndCommand
+
+Command SetThingTID
+	Actor actor
+	Long tid
 EndCommand
 
 Command SetThingGravity
@@ -209,6 +215,12 @@ Command SetWeaponAmmoGive
 	Short ammoGive2
 EndCommand
 
+Command SetThingHealth
+	ExtendedCommand
+	Actor actor
+	Byte health
+EndCommand
+
 Command SetThingScale
 	ExtendedCommand
 	Actor actor
@@ -234,6 +246,11 @@ Command SetThingSprite
 	Actor actor
 	Long sprite
 	Byte frame
+EndCommand
+
+Command FlashStealthMonster
+	ExtendedCommand
+	Actor actor
 EndCommand
 
 Command ThingIsCorpse
@@ -323,4 +340,22 @@ Command SpawnPuffNoNetID
 	If (receiveTranslation)
 		Long translation
 	EndIf
+EndCommand
+
+Command SetFastChaseStrafeCount
+	ExtendedCommand
+	Actor actor
+	Byte strafeCount
+EndCommand
+
+Command PlayBounceSound
+	ExtendedCommand
+	Actor actor
+	Bool onFloor
+EndCommand
+
+Command SetCameraToTexture
+	Actor camera
+	String texture
+	Byte fov
 EndCommand

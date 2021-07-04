@@ -150,7 +150,9 @@
 Protocol GameServerToClient
 	Include "spec.protocol.txt"
 	Include "spec.map.txt"
+	Include "spec.game.txt"
 	Include "spec.players.txt"
+	Include "spec.team.txt"
 	Include "spec.print.txt"
 	Include "spec.things.txt"
 	Include "spec.sectors.txt"

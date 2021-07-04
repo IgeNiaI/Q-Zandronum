@@ -1,0 +1,32 @@
+
+Command SetTeamFrags
+	Byte team
+	Short frags
+	Bool announce
+EndCommand
+
+Command SetTeamScore
+	Byte team
+	Short score
+	Bool announce
+EndCommand
+
+Command SetTeamWins
+	Byte team
+	Short wins
+	Bool announce
+EndCommand
+
+Command SetTeamReturnTicks
+	Byte team
+	Short returnTicks
+EndCommand
+
+Command TeamFlagReturned
+	Byte team
+EndCommand
+
+Command TeamFlagDropped
+	Player player with IndexTestOnly
+	Byte team
+EndCommand

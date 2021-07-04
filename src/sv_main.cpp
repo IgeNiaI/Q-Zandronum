@@ -6276,7 +6276,7 @@ static bool server_AuthenticateLevel( BYTESTREAM_s *pByteStream )
 	SERVER_ResetInventory( g_lCurrentClient, false );
 	// [BB] Make sure that the client doesn't bring up a weapon on from the inventory we just
 	// gave him before we tell him which weapon to select after the full update.
-	SERVERCOMMANDS_ClearConsoleplayerWeapon( g_lCurrentClient );
+	SERVERCOMMANDS_ClearConsolePlayerWeapon( g_lCurrentClient );
 	// [BB] The client is now spawned and has its inventory back, so he may send us
 	// weapon changes again.
 	SERVERCOMMANDS_SetIgnoreWeaponSelect( g_lCurrentClient, false );
