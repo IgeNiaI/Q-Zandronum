@@ -7,7 +7,7 @@ Command SpawnPlayer
 	Bool isSpectating
 	Bool isDeadSpectator
 	Bool isMorphed
-	Short netid
+	Long netid
 	Angle angle
 	Fixed x
 	Fixed y
@@ -115,6 +115,12 @@ Command SetPlayerWins
 	Byte wins
 EndCommand
 
+Command SetPlayerDeaths
+	ExtendedCommand
+	Player player
+	Short deathCount
+EndCommand
+
 Command SetPlayerKillCount
 	Player player
 	Short killCount
@@ -201,6 +207,12 @@ Command SetPlayerLivesLeft
 	Byte livesLeft
 EndCommand
 
+Command SetPlayerViewHeight
+	ExtendedCommand
+	Player player
+	Long viewHeight
+EndCommand
+
 Command UpdatePlayerPing
 	UnreliableCommand
 	Player player
@@ -274,11 +286,60 @@ Command PlayerDropInventory
 	Class<AInventory> itemType
 EndCommand
 
+Command IgnorePlayer
+	Player player
+	Long ignoreChatTicks
+EndCommand
+
+Command GiveInventory
+	Player player with IndexTestOnly
+	Short actorNetworkIndex
+	Long amount
+EndCommand
+
+Command TakeInventory
+	Player player with IndexTestOnly
+	Short actorNetworkIndex
+	Long amount
+EndCommand
+
+Command GivePowerup
+	Player player with IndexTestOnly
+	Short actorNetworkIndex
+	Short amount
+	Bool isActiveRune
+	Short effectTicks
+EndCommand
+
+Command SetPowerupBlendColor
+	ExtendedCommand
+	Player player with MoTest
+	Short actorNetworkIndex
+	Long blendColor
+EndCommand
+
 Command GiveWeaponHolder
 	ExtendedCommand
 	Player player with MoTest
 	Short pieceMask
 	Class pieceWeapon
+EndCommand
+
+Command DoInventoryPickup
+	Player player with IndexTestOnly
+	String className
+	String pickupMessage
+EndCommand
+
+Command DestroyAllInventory
+	Player player with IndexTestOnly
+EndCommand
+
+Command SetInventoryIcon
+	ExtendedCommand
+	Player player with IndexTestOnly
+	Short actorNetworkIndex
+	String iconTexName
 EndCommand
 
 Command SetHexenArmorSlots
@@ -289,4 +350,53 @@ Command SetHexenArmorSlots
 	Long slot2
 	Long slot3
 	Long slot4
+EndCommand
+
+Command SetIgnoreWeaponSelect
+	ExtendedCommand
+	Bool ignore
+EndCommand
+
+Command ClearConsolePlayerWeapon
+	ExtendedCommand
+EndCommand
+
+Command CancelFade
+	ExtendedCommand
+	Player player with NullAllowed
+EndCommand
+
+Command DoFlashFader
+	Float r1
+	Float g1
+	Float b1
+	Float a1
+	Float r2
+	Float g2
+	Float b2
+	Float a2
+	Float time
+	Player player
+EndCommand
+
+Command GenericCheat
+	Player player
+	Byte cheat
+EndCommand
+
+Command SetPlayerHazardCount
+	ExtendedCommand
+	Player player
+	Short hazardCount
+EndCommand
+
+Command SetMugShotState
+	ExtendedCommand
+	String stateName
+EndCommand
+
+Command SetPlayerLogNumber
+	ExtendedCommand
+	Player player
+	Short arg0
 EndCommand
