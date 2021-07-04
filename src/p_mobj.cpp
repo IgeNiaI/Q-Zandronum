@@ -3608,7 +3608,7 @@ void P_NightmareRespawn (AActor *mobj)
 			SERVERCOMMANDS_SetThingAngle( mo );
 
 		// [EP] Since AActor::HandleSpawnFlags has been called, we need to inform the clients about its effects.
-		SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( mo, MAXPLAYERS, 0 );
+		SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( mo );
 		if ( mo->RenderStyle.AsDWORD != mo->GetDefault()->RenderStyle.AsDWORD )
 			SERVERCOMMANDS_SetActorProperty( mo, APROP_RenderStyle, mo->RenderStyle.AsDWORD );
 		if ( mo->alpha != mo->GetDefault()->alpha )
