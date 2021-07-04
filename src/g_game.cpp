@@ -4163,7 +4163,7 @@ void GAME_ResetMap( bool bRunEnterScripts )
 					SERVERCOMMANDS_SetThingTID( pNewActor );
 
 				// [BB] Since we called AActor::HandleSpawnFlags and GAMEMODE_AdjustActorSpawnFlags, we possibly need to let the clients know about its effects.
-				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( pNewActor, MAXPLAYERS, 0 );
+				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( pNewActor );
 
 				// [EP] AActor::HandleSpawnFlags might have changed the actor's alpha and the RenderStyle, too. If so, inform the clients.
 				if ( pNewActor->RenderStyle.AsDWORD != pNewActor->GetDefault()->RenderStyle.AsDWORD )
