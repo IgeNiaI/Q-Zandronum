@@ -1,5 +1,9 @@
+Command Nothing
+	UnreliableCommand
+EndCommand
+
 Command ACSScriptExecute
-	Short netid
+	Long netid
 	Actor activator with NullAllowed
 	Short lineid
 	Byte levelnum
@@ -13,7 +17,7 @@ EndCommand
 
 Command ACSSendString
 	ExtendedCommand
-	Short netid
+	Long netid
 	Actor activator with NullAllowed
 	String string
 EndCommand
@@ -28,8 +32,63 @@ Command SyncJoinQueue
 	Struct<JoinSlot>[] slots
 EndCommand
 
+Command PushToJoinQueue
+	ExtendedCommand
+	Byte playerNum
+	Byte team
+EndCommand
+
+Command RemoveFromJoinQueue
+	ExtendedCommand
+	Byte index
+EndCommand
+
 Command ReplaceTextures
 	String fromTexture
 	String toTexture
 	Byte textureFlags
+EndCommand
+
+Command CreateTranslation
+	Short translation
+	Bool isEdited
+	Byte start
+	Byte end
+	Byte pal1
+	Byte pal2
+EndCommand
+
+Command CreateTranslation2
+	Short translation
+	Bool isEdited
+	Byte start
+	Byte end
+	Byte r1
+	Byte g1
+	Byte b1
+	Byte r2
+	Byte g2
+	Byte b2
+EndCommand
+
+Command CallVote
+	Player player with IndexTestOnly
+	String command
+	String parameters
+	String reason
+EndCommand
+
+Command PlayerVote
+	Player player with IndexTestOnly
+	Bool voteYes
+EndCommand
+
+Command VoteEnded
+	Bool votePassed
+EndCommand
+
+Command SetCVar
+	ExtendedCommand
+	String name
+	String value
 EndCommand
