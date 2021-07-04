@@ -158,96 +158,6 @@ CVAR( Bool, cl_connectsound, true, CVAR_ARCHIVE )
 CVAR( Bool, cl_showwarnings, false, CVAR_ARCHIVE )
 
 //*****************************************************************************
-//	PROTOTYPES
-
-// Player functions.
-// [BB] Does not work with the latest ZDoom changes. Check if it's still necessary.
-//static	void	client_SetPlayerPieces( BYTESTREAM_s *pByteStream );
-static	void	client_IgnorePlayer( BYTESTREAM_s *pByteStream );
-
-// Game commands.
-static	void	client_SetGameMode( BYTESTREAM_s *pByteStream );
-static	void	client_SetGameSkill( BYTESTREAM_s *pByteStream );
-static	void	client_SetGameDMFlags( BYTESTREAM_s *pByteStream );
-static	void	client_SetGameModeLimits( BYTESTREAM_s *pByteStream );
-static	void	client_SetGameEndLevelDelay( BYTESTREAM_s *pByteStream );
-static	void	client_SetGameModeState( BYTESTREAM_s *pByteStream );
-static	void	client_SetDuelNumDuels( BYTESTREAM_s *pByteStream );
-static	void	client_SetLMSSpectatorSettings( BYTESTREAM_s *pByteStream );
-static	void	client_SetLMSAllowedWeapons( BYTESTREAM_s *pByteStream );
-static	void	client_SetInvasionNumMonstersLeft( BYTESTREAM_s *pByteStream );
-static	void	client_SetInvasionWave( BYTESTREAM_s *pByteStream );
-static	void	client_SetSimpleCTFSTMode( BYTESTREAM_s *pByteStream );
-static	void	client_DoPossessionArtifactPickedUp( BYTESTREAM_s *pByteStream );
-static	void	client_DoPossessionArtifactDropped( BYTESTREAM_s *pByteStream );
-static	void	client_DoGameModeFight( BYTESTREAM_s *pByteStream );
-static	void	client_DoGameModeCountdown( BYTESTREAM_s *pByteStream );
-static	void	client_DoGameModeWinSequence( BYTESTREAM_s *pByteStream );
-static	void	client_SetDominationState( BYTESTREAM_s *pByteStream );
-static	void	client_SetDominationPointOwnership( BYTESTREAM_s *pByteStream );
-
-// Team commands.
-static	void	client_SetTeamFrags( BYTESTREAM_s *pByteStream );
-static	void	client_SetTeamScore( BYTESTREAM_s *pByteStream );
-static	void	client_SetTeamWins( BYTESTREAM_s *pByteStream );
-static	void	client_SetTeamReturnTicks( BYTESTREAM_s *pByteStream );
-static	void	client_TeamFlagReturned( BYTESTREAM_s *pByteStream );
-static	void	client_TeamFlagDropped( BYTESTREAM_s *pByteStream );
-
-// Vote commands.
-static	void	client_CallVote( BYTESTREAM_s *pByteStream );
-static	void	client_PlayerVote( BYTESTREAM_s *pByteStream );
-static	void	client_VoteEnded( BYTESTREAM_s *pByteStream );
-
-// Inventory commands.
-static	void	client_GiveInventory( BYTESTREAM_s *pByteStream );
-static	void	client_TakeInventory( BYTESTREAM_s *pByteStream );
-static	void	client_GivePowerup( BYTESTREAM_s *pByteStream );
-static	void	client_DoInventoryPickup( BYTESTREAM_s *pByteStream );
-static	void	client_DestroyAllInventory( BYTESTREAM_s *pByteStream );
-static	void	client_SetInventoryIcon( BYTESTREAM_s *pByteStream );
-
-// Door commands.
-static	void	client_DoDoor( BYTESTREAM_s *pByteStream );
-
-// Floor commands.
-static	void	client_DoFloor( BYTESTREAM_s *pByteStream );
-static	void	client_BuildStair( BYTESTREAM_s *pByteStream );
-
-// Ceiling commands.
-static	void	client_DoCeiling( BYTESTREAM_s *pByteStream );
-
-// Plat commands.
-static	void	client_DoPlat( BYTESTREAM_s *pByteStream );
-
-// Elevator commands.
-static	void	client_DoElevator( BYTESTREAM_s *pByteStream );
-
-// Pillar commands.
-static	void	client_DoPillar( BYTESTREAM_s *pByteStream );
-
-// Waggle commands.
-static	void	client_DoWaggle( BYTESTREAM_s *pByteStream );
-
-// Poly commands.
-static	void	client_DoRotatePoly( BYTESTREAM_s *pByteStream );
-static	void	client_DoMovePoly( BYTESTREAM_s *pByteStream );
-static	void	client_DoMovePolyTo( BYTESTREAM_s *pByteStream );
-static	void	client_DoPolyDoor( BYTESTREAM_s *pByteStream );
-
-// Miscellaneous commands.
-static	void	client_EarthQuake( BYTESTREAM_s *pByteStream );
-static	void	client_DoScroller( BYTESTREAM_s *pByteStream );
-static	void	client_SetScroller( BYTESTREAM_s *pByteStream );
-static	void	client_SetWallScroller( BYTESTREAM_s *pByteStream );
-static	void	client_DoFlashFader( BYTESTREAM_s *pByteStream );
-static	void	client_GenericCheat( BYTESTREAM_s *pByteStream );
-static	void	client_SetCameraToTexture( BYTESTREAM_s *pByteStream );
-static	void	client_CreateTranslation( BYTESTREAM_s *pByteStream, bool bIsTypeTwo );
-static	void	client_DoPusher( BYTESTREAM_s *pByteStream );
-static	void	client_AdjustPusher( BYTESTREAM_s *pByteStream );
-
-//*****************************************************************************
 //	VARIABLES
 
 // Local network buffer for the client.
@@ -1451,242 +1361,6 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 			CLIENT_QuitNetworkGame( szErrorString );
 		}
 		return;
-	case SVC_NOTHING:
-
-		break;
-	/* [BB] Does not work with the latest ZDoom changes. Check if it's still necessary.
-	case SVC_SETPLAYERPIECES:
-
-		client_SetPlayerPieces( pByteStream );
-		break;
-	*/
-	case SVC_SETGAMEMODE:
-
-		client_SetGameMode( pByteStream );
-		break;
-	case SVC_SETGAMESKILL:
-
-		client_SetGameSkill( pByteStream );
-		break;
-	case SVC_SETGAMEDMFLAGS:
-
-		client_SetGameDMFlags( pByteStream );
-		break;
-	case SVC_SETGAMEMODELIMITS:
-
-		client_SetGameModeLimits( pByteStream );
-		break;
-	case SVC_SETGAMEENDLEVELDELAY:
-		
-		client_SetGameEndLevelDelay( pByteStream );
-		break;
-	case SVC_SETGAMEMODESTATE:
-
-		client_SetGameModeState( pByteStream );
-		break;
-	case SVC_SETDUELNUMDUELS:
-
-		client_SetDuelNumDuels( pByteStream );
-		break;
-	case SVC_SETLMSSPECTATORSETTINGS:
-
-		client_SetLMSSpectatorSettings( pByteStream );
-		break;
-	case SVC_SETLMSALLOWEDWEAPONS:
-
-		client_SetLMSAllowedWeapons( pByteStream );
-		break;
-	case SVC_SETINVASIONNUMMONSTERSLEFT:
-
-		client_SetInvasionNumMonstersLeft( pByteStream );
-		break;
-	case SVC_SETINVASIONWAVE:
-
-		client_SetInvasionWave( pByteStream );
-		break;
-	case SVC_SETSIMPLECTFSTMODE:
-
-		client_SetSimpleCTFSTMode( pByteStream );
-		break;
-	case SVC_DOPOSSESSIONARTIFACTPICKEDUP:
-
-		client_DoPossessionArtifactPickedUp( pByteStream );
-		break;
-	case SVC_DOPOSSESSIONARTIFACTDROPPED:
-
-		client_DoPossessionArtifactDropped( pByteStream );
-		break;
-	case SVC_DOGAMEMODEFIGHT:
-
-		client_DoGameModeFight( pByteStream );
-		break;
-	case SVC_DOGAMEMODECOUNTDOWN:
-
-		client_DoGameModeCountdown( pByteStream );
-		break;
-	case SVC_DOGAMEMODEWINSEQUENCE:
-
-		client_DoGameModeWinSequence( pByteStream );
-		break;
-	case SVC_SETDOMINATIONSTATE:
-
-		client_SetDominationState( pByteStream );
-		break;
-	case SVC_SETDOMINATIONPOINTOWNER:
-
-		client_SetDominationPointOwnership( pByteStream );
-		break;
-	case SVC_SETTEAMFRAGS:
-
-		client_SetTeamFrags( pByteStream );
-		break;
-	case SVC_SETTEAMSCORE:
-
-		client_SetTeamScore( pByteStream );
-		break;
-	case SVC_SETTEAMWINS:
-
-		client_SetTeamWins( pByteStream );
-		break;
-	case SVC_SETTEAMRETURNTICKS:
-
-		client_SetTeamReturnTicks( pByteStream );
-		break;
-	case SVC_TEAMFLAGRETURNED:
-
-		client_TeamFlagReturned( pByteStream );
-		break;
-	case SVC_TEAMFLAGDROPPED:
-
-		client_TeamFlagDropped( pByteStream );
-		break;
-	case SVC_CALLVOTE:
-
-		client_CallVote( pByteStream );
-		break;
-	case SVC_PLAYERVOTE:
-
-		client_PlayerVote( pByteStream );
-		break;
-	case SVC_VOTEENDED:
-
-		client_VoteEnded( pByteStream );
-		break;
-	case SVC_GIVEINVENTORY:
-
-		client_GiveInventory( pByteStream );
-		break;
-	case SVC_TAKEINVENTORY:
-
-		client_TakeInventory( pByteStream );
-		break;
-	case SVC_GIVEPOWERUP:
-
-		client_GivePowerup( pByteStream );
-		break;
-	case SVC_DOINVENTORYPICKUP:
-
-		client_DoInventoryPickup( pByteStream );
-		break;
-	case SVC_DESTROYALLINVENTORY:
-
-		client_DestroyAllInventory( pByteStream );
-		break;
-	case SVC_DODOOR:
-
-		client_DoDoor( pByteStream );
-		break;
-	case SVC_DOFLOOR:
-
-		client_DoFloor( pByteStream );
-		break;
-	case SVC_DOCEILING:
-
-		client_DoCeiling( pByteStream );
-		break;
-	case SVC_DOPLAT:
-
-		client_DoPlat( pByteStream );
-		break;
-	case SVC_DOELEVATOR:
-
-		client_DoElevator( pByteStream );
-		break;
-	case SVC_DOPILLAR:
-
-		client_DoPillar( pByteStream );
-		break;
-	case SVC_DOWAGGLE:
-
-		client_DoWaggle( pByteStream );
-		break;
-	case SVC_DOROTATEPOLY:
-
-		client_DoRotatePoly( pByteStream );
-		break;
-	case SVC_DOMOVEPOLY:
-
-		client_DoMovePoly( pByteStream );
-		break;
-	case SVC_DOMOVEPOLYTO:
-
-		client_DoMovePolyTo( pByteStream );
-		break;
-	case SVC_DOPOLYDOOR:
-
-		client_DoPolyDoor( pByteStream );
-		break;
-	case SVC_EARTHQUAKE:
-
-		client_EarthQuake( pByteStream );
-		break;
-	case SVC_DOSCROLLER:
-
-		client_DoScroller( pByteStream );
-		break;
-	case SVC_SETSCROLLER:
-
-		client_SetScroller( pByteStream );
-		break;
-	case SVC_SETWALLSCROLLER:
-
-		client_SetWallScroller( pByteStream );
-		break;
-	case SVC_DOFLASHFADER:
-
-		client_DoFlashFader( pByteStream );
-		break;
-	case SVC_GENERICCHEAT:
-
-		client_GenericCheat( pByteStream );
-		break;
-	case SVC_SETCAMERATOTEXTURE:
-
-		client_SetCameraToTexture( pByteStream );
-		break;
-	case SVC_CREATETRANSLATION:
-
-		client_CreateTranslation( pByteStream, false );
-		break;
-	case SVC_CREATETRANSLATION2:
-
-		client_CreateTranslation( pByteStream, true );
-		break;
-
-	case SVC_DOPUSHER:
-
-		client_DoPusher( pByteStream );
-		break;
-
-	case SVC_ADJUSTPUSHER:
-
-		client_AdjustPusher( pByteStream );
-		break;
-
-	case SVC_IGNOREPLAYER:
-
-		client_IgnorePlayer( pByteStream );
-		break;
 
 	case SVC_EXTENDEDCOMMAND:
 		{
@@ -1700,221 +1374,12 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 
 			switch ( lExtCommand )
 			{
-			case SVC2_SETINVENTORYICON:
-
-				client_SetInventoryIcon( pByteStream );
-				break;
-
-			case SVC2_SETIGNOREWEAPONSELECT:
-				{
-					const bool bIgnoreWeaponSelect = !!NETWORK_ReadByte( pByteStream );
-					CLIENT_IgnoreWeaponSelect ( bIgnoreWeaponSelect );
-				}
-
-				break;
-
-			case SVC2_CLEARCONSOLEPLAYERWEAPON:
-				{
-					PLAYER_ClearWeapon ( &players[consoleplayer] );
-				}
-
-				break;
-
-			case SVC2_LIGHTNING:
-				{
-					// [Dusk] The client doesn't care about the mode given to P_ForceLightning since
-					// it doesn't do the next lightning calculations anyway.
-					P_ForceLightning( 0 );
-				}
-
-				break;
-
-			case SVC2_CANCELFADE:
-				{
-					const ULONG ulPlayer = NETWORK_ReadByte( pByteStream );
-					AActor *activator = NULL;
-					// [BB] ( ulPlayer == MAXPLAYERS ) means that CancelFade was called with NULL as activator.
-					if ( PLAYER_IsValidPlayer ( ulPlayer ) )
-						activator = players[ulPlayer].mo;
-
-					// [BB] Needed to copy the code below from the implementation of PCD_CANCELFADE.
-					TThinkerIterator<DFlashFader> iterator;
-					DFlashFader *fader;
-
-					while ( (fader = iterator.Next()) )
-					{
-						if (activator == NULL || fader->WhoFor() == activator)
-						{
-							fader->Cancel ();
-						}
-					}
-				}
-
-				break;
-
-			case SVC2_PLAYBOUNCESOUND:
-				{
-					AActor *pActor = CLIENT_FindThingByNetID( NETWORK_ReadShort( pByteStream ) );
-					const bool bOnfloor = !!NETWORK_ReadByte( pByteStream );
-					if ( pActor )
-						pActor->PlayBounceSound ( bOnfloor );
-				}
-				break;
-
-			case SVC2_SETTHINGREACTIONTIME:
-				{
-					const LONG lID = NETWORK_ReadShort( pByteStream ); 
-					const LONG lReactionTime = NETWORK_ReadShort( pByteStream );
-					AActor *pActor = CLIENT_FindThingByNetID( lID );
-
-					if ( pActor == NULL )
-					{
-						CLIENT_PrintWarning( "SETTHINGREACTIONTIME: Couldn't find thing: %ld\n", lID );
-						break;
-					}
-					pActor->reactiontime = lReactionTime;
-				}
-				break;
 
 			// [Dusk]
-			case SVC2_SETFASTCHASESTRAFECOUNT:
-				{
-					const LONG lID = NETWORK_ReadShort( pByteStream );
-					const LONG lStrafeCount = NETWORK_ReadByte( pByteStream ); 
-					AActor *pActor = CLIENT_FindThingByNetID( lID );
-
-					if ( pActor == NULL )
-					{
-						CLIENT_PrintWarning( "SETFASTCHASESTRAFECOUNT: Couldn't find thing: %ld\n", lID );
-						break;
-					}
-					pActor->FastChaseStrafeCount = lStrafeCount;
-				}
-				break;
-
-			case SVC2_RESETMAP:
-				{
-					// [EP] Clear all the HUD messages.
-					if ( StatusBar )
-						StatusBar->DetachAllMessages();
-
-					GAME_ResetMap();
-				}
-				break;
-
-			case SVC2_SETPOWERUPBLENDCOLOR:
-				{
-					// Read in the player ID.
-					const ULONG ulPlayer = NETWORK_ReadByte( pByteStream );
-
-					// Read in the identification of the type of item to give.
-					const USHORT usActorNetworkIndex = NETWORK_ReadShort( pByteStream );
-
-					// Read in the blend color of the powerup.
-					const ULONG ulBlendColor = NETWORK_ReadLong( pByteStream );
-
-					// Check to make sure everything is valid. If not, break out.
-					if ( PLAYER_IsValidPlayerWithMo( ulPlayer ) == false ) 
-						break;
-
-					const PClass *pType = NETWORK_GetClassFromIdentification( usActorNetworkIndex );
-					if ( pType == NULL )
-						break;
-
-					// If this isn't a powerup, just quit.
-					if ( pType->IsDescendantOf( RUNTIME_CLASS( APowerup )) == false )
-						break;
-
-					// Try to find this object within the player's personal inventory.
-					AInventory *pInventory = players[ulPlayer].mo->FindInventory( pType );
-
-					// [WS] If the player has this powerup, set its blendcolor appropriately.
-					if ( pInventory )
-						static_cast<APowerup*>(pInventory)->BlendColor = ulBlendColor;
-					break;
-				}
-
-			// [Dusk]
-			case SVC2_SETPLAYERHAZARDCOUNT:
-				{
-					const ULONG ulPlayer = NETWORK_ReadByte( pByteStream );
-					const int hz = NETWORK_ReadShort( pByteStream );
-
-					if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
-						break;
-
-					players[ulPlayer].hazardcount = hz;
-				}
-				break;
-
-			case SVC2_SCROLL3DMIDTEX:
-				{
-					const int i = NETWORK_ReadByte ( pByteStream );
-					const int move = NETWORK_ReadLong ( pByteStream );
-					const bool ceiling = !!NETWORK_ReadByte ( pByteStream );
-
-					if ( i < 0 || i >= numsectors || !move )
-						break;
-
-					P_Scroll3dMidtex( &sectors[i], 0, move, ceiling );
-					break;
-				}
-			case SVC2_SETPLAYERLOGNUMBER:
-				{
-					const ULONG ulPlayer = NETWORK_ReadByte( pByteStream );
-					const int arg0 = NETWORK_ReadShort( pByteStream );
-
-					if ( PLAYER_IsValidPlayerWithMo( ulPlayer ) == false ) 
-						break;
-
-					if ( players[ulPlayer].mo->FindInventory(NAME_Communicator) )
-						players[ulPlayer].SetLogNumber ( arg0 );
-				}
-				break;
-
-			case SVC2_SETTHINGSPECIAL:
-				{
-					const LONG lID = NETWORK_ReadShort( pByteStream ); 
-					const LONG lSpecial = NETWORK_ReadShort( pByteStream );
-					AActor *pActor = CLIENT_FindThingByNetID( lID );
-
-					if ( pActor == NULL )
-					{
-						CLIENT_PrintWarning( "SVC2_SETTHINGSPECIAL: Couldn't find thing: %ld\n", lID );
-						break;
-					}
-					pActor->special = lSpecial;
-				}
-				break;
 
 			case SVC2_SYNCPATHFOLLOWER:
 				{
 					APathFollower::InitFromStream ( pByteStream );
-				}
-				break;
-
-			case SVC2_SETPLAYERVIEWHEIGHT:
-				{
-					const ULONG ulPlayer = NETWORK_ReadByte( pByteStream );
-					const int viewHeight = NETWORK_ReadLong( pByteStream );
-
-					if ( PLAYER_IsValidPlayerWithMo( ulPlayer ) == false ) 
-						break;
-
-					players[ulPlayer].mo->ViewHeight = viewHeight;
-					players[ulPlayer].viewheight = viewHeight;
-				}
-				break;
-
-			case SVC2_SETPLAYERDEATHS:
-				{
-					const ULONG ulPlayer = NETWORK_ReadByte( pByteStream );
-					const int deaths = NETWORK_ReadVariable( pByteStream );
-
-					if ( PLAYER_IsValidPlayer( ulPlayer ) == false ) 
-						break;
-
-					players[ulPlayer].ulDeathCount = deaths;
 				}
 				break;
 
@@ -1924,96 +1389,7 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 				CLIENT_ProcessSRPServerCommand ( lExtCommand, pByteStream );
 				break;
 
-			case SVC2_SETTHINGHEALTH:
-				{
-					const LONG lID = NETWORK_ReadShort( pByteStream );
-					const int health = NETWORK_ReadByte( pByteStream );
-					AActor* mo = CLIENT_FindThingByNetID( lID );
-
-					if ( mo == NULL )
-					{
-						CLIENT_PrintWarning( "SVC2_SETTHINGSPECIAL: Couldn't find thing: %ld\n", lID );
-						break;
-					}
-
-					mo->health = health;
-				}
-				break;
-
-			case SVC2_SETCVAR:
-				{
-					const FString cvarName = NETWORK_ReadString( pByteStream );
-					const FString cvarValue = NETWORK_ReadString( pByteStream );
-
-					// [TP] Only allow the server to set mod CVARs.
-					FBaseCVar* cvar = FindCVar( cvarName, NULL );
-
-					if ( cvar == NULL )
-					{
-						CLIENT_PrintWarning( "SVC2_SETCVAR: The server attempted to set the value of "
-							"%s to \"%s\"\n", cvarName.GetChars(), cvarValue.GetChars() );
-						break;
-					}
-
-					UCVarValue vval;
-					vval.String = cvarValue;
-					cvar->ForceSet( vval, CVAR_String );
-				}
-				break;
-
 			// [EP]
-			case SVC2_BUILDSTAIR:
-				client_BuildStair( pByteStream );
-				break;
-
-			// [EP]
-			case SVC2_SETMUGSHOTSTATE:
-				{
-					const char *statename = NETWORK_ReadString( pByteStream );
-					if ( StatusBar != NULL)
-					{
-						StatusBar->SetMugShotState( statename );
-					}
-				}
-				break;
-
-			case SVC2_PUSHTOJOINQUEUE:
-				{
-					int player = NETWORK_ReadByte( pByteStream );
-					int team = NETWORK_ReadByte( pByteStream );
-					JOINQUEUE_AddPlayer( player, team );
-				}
-				break;
-
-			case SVC2_REMOVEFROMJOINQUEUE:
-				JOINQUEUE_RemovePlayerAtPosition( NETWORK_ReadByte( pByteStream ) );
-				break;
-
-			case SVC2_SETDEFAULTSKYBOX:
-				{
-					int mobjNetID = NETWORK_ReadShort( pByteStream );
-					if ( mobjNetID == -1  )
-						level.DefaultSkybox = NULL;
-					else
-					{
-						AActor *mo = CLIENT_FindThingByNetID( mobjNetID );
-						if ( mo && mo->GetClass()->IsDescendantOf( RUNTIME_CLASS( ASkyViewpoint ) ) )
-							level.DefaultSkybox = static_cast<ASkyViewpoint *>( mo );
-					}
-				}
-				break;
-
-			case SVC2_FLASHSTEALTHMONSTER:
-				{
-					AActor* mobj = CLIENT_FindThingByNetID( NETWORK_ReadShort( pByteStream ));
-
-					if ( mobj && ( mobj->flags & MF_STEALTH ))
-					{
-						mobj->alpha = OPAQUE;
-						mobj->visdir = -1;
-					}
-				}
-				break;
 
 			case SVC2_SHOOTDECAL:
 				{
@@ -3100,6 +2476,23 @@ void ServerCommands::FullUpdateCompleted::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::Nothing::Execute()
+{
+}
+
+//*****************************************************************************
+//
+void ServerCommands::ResetMap::Execute()
+{
+	// [EP] Clear all the HUD messages.
+	if ( StatusBar )
+		StatusBar->DetachAllMessages();
+
+	GAME_ResetMap();
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SpawnPlayer::Execute()
 {
 	ULONG					ulPlayer = player - players;
@@ -3888,6 +3281,14 @@ void ServerCommands::SetPlayerWins::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetPlayerDeaths::Execute()
+{
+	player->ulDeathCount = deathCount;
+	SCOREBOARD_RefreshHUD();
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetPlayerKillCount::Execute()
 {
 	player->killcount = killCount;
@@ -4106,6 +3507,14 @@ void ServerCommands::SetPlayerLivesLeft::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetPlayerViewHeight::Execute()
+{
+	player->mo->ViewHeight = viewHeight;
+	player->viewheight = viewHeight;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::UpdatePlayerPing::Execute()
 {
 	player->ulPing = ping;
@@ -4225,6 +3634,15 @@ void ServerCommands::SecretFound::Execute()
 void ServerCommands::SecretMarkSectorFound::Execute()
 {
 	sector->special &= ~SECRET_MASK;
+}
+
+//*****************************************************************************
+//
+void ServerCommands::Lightning::Execute()
+{
+	// [Dusk] The client doesn't care about the mode given to P_ForceLightning since
+	// it doesn't do the next lightning calculations anyway.
+	P_ForceLightning( 0 );
 }
 
 //*****************************************************************************
@@ -4433,6 +3851,16 @@ void ServerCommands::PlayerDropInventory::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::IgnorePlayer::Execute()
+{
+	player->bIgnoreChat = true;
+	player->lIgnoreChatTicks = ignoreChatTicks;
+
+	Printf( "%s\\c- will be ignored, because you're ignoring %s IP.\n", player->userinfo.GetName(), player->userinfo.GetGender() == GENDER_MALE ? "his" : player->userinfo.GetGender() == GENDER_FEMALE ? "her" : "its" );
+}
+
+//*****************************************************************************
+//
 void ServerCommands::GiveWeaponHolder::Execute()
 {
 	AWeaponHolder *holder = player->mo->FindInventory<AWeaponHolder>();
@@ -4469,6 +3897,51 @@ void ServerCommands::SetHexenArmorSlots::Execute()
 	{
 		CLIENT_PrintWarning( "SetHexenArmorSlots: Player %td does not have HexenArmor!\n", player - players );
 	}
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetIgnoreWeaponSelect::Execute()
+{
+	CLIENT_IgnoreWeaponSelect ( ignore );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::ClearConsolePlayerWeapon::Execute()
+{
+	PLAYER_ClearWeapon ( &players[consoleplayer] );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::CancelFade::Execute()
+{
+	// [BB] Needed to copy the code below from the implementation of PCD_CANCELFADE.
+	TThinkerIterator<DFlashFader> iterator;
+	DFlashFader *fader;
+
+	while ( (fader = iterator.Next()) )
+	{
+		if (player == NULL || fader->WhoFor() == player->mo)
+		{
+			fader->Cancel ();
+		}
+	}
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetFastChaseStrafeCount::Execute()
+{
+	actor->FastChaseStrafeCount = strafeCount;
+}
+
+//*****************************************************************************
+//
+void ServerCommands::PlayBounceSound::Execute()
+{
+	actor->PlayBounceSound ( onFloor );
 }
 
 //*****************************************************************************
@@ -4845,6 +4318,13 @@ void ServerCommands::SetThingSpawnPoint::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetThingSpecial::Execute()
+{
+	actor->special = special;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetThingSpecial1::Execute()
 {
 	actor->special1 = special1;
@@ -4967,6 +4447,13 @@ void ServerCommands::SetActorProperty::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetThingHealth::Execute()
+{
+	actor->health = health;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetThingScale::Execute()
 {
 	if ( ContainsScaleX() )
@@ -4989,6 +4476,17 @@ void ServerCommands::SetThingSprite::Execute()
 {
 	actor->sprite = sprite;
 	actor->frame = frame;
+}
+
+//*****************************************************************************
+//
+void ServerCommands::FlashStealthMonster::Execute()
+{
+	if ( actor && (actor->flags & MF_STEALTH ))
+	{
+		actor->alpha = OPAQUE;
+		actor->visdir = -1;
+	}
 }
 
 //*****************************************************************************
@@ -5338,101 +4836,101 @@ void ServerCommands::PrintHUDMessageTypeOnFadeOut::Execute()
 
 //*****************************************************************************
 //
-static void client_SetGameMode( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetGameMode::Execute()
 {
 	UCVarValue	Value;
 
-	GAMEMODE_SetCurrentMode ( static_cast<GAMEMODE_e> ( NETWORK_ReadByte( pByteStream ) ) );
+	GAMEMODE_SetCurrentMode ( static_cast<GAMEMODE_e> ( theCurrentMode ) );
 
 	// [BB] The client doesn't necessarily know the game mode in P_SetupLevel, so we have to call this here.
 	if ( domination )
 		DOMINATION_Init();
 
-	Value.Bool = !!NETWORK_ReadByte( pByteStream );
+	Value.Bool = theInstaGib;
 	instagib.ForceSet( Value, CVAR_Bool );
 
-	Value.Bool = !!NETWORK_ReadByte( pByteStream );
+	Value.Bool = theBuckShot;
 	buckshot.ForceSet( Value, CVAR_Bool );
 }
 
 //*****************************************************************************
 //
-static void client_SetGameSkill( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetGameSkill::Execute()
 {
 	UCVarValue	Value;
 
 	// Read in the gameskill setting, and set gameskill to this setting.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theGameSkill;
 	gameskill.ForceSet( Value, CVAR_Int );
 
 	// Do the same for botskill.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theBotSkill;
 	botskill.ForceSet( Value, CVAR_Int );
 }
 
 //*****************************************************************************
 //
-static void client_SetGameDMFlags( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetGameDmFlags::Execute()
 {
 	UCVarValue	Value;
 
 	// Read in the dmflags value, and set it to this value.
-	Value.Int = NETWORK_ReadLong( pByteStream );
+	Value.Int = theDmFlags;
 	dmflags.ForceSet( Value, CVAR_Int );
 
 	// Do the same for dmflags2.
-	Value.Int = NETWORK_ReadLong( pByteStream );
+	Value.Int = theDmFlags2;
 	dmflags2.ForceSet( Value, CVAR_Int );
 
 	// ... and compatflags.
-	Value.Int = NETWORK_ReadLong( pByteStream );
+	Value.Int = theCompatFlags;
 	compatflags.ForceSet( Value, CVAR_Int );
 
-	// ... and compatflags.
-	Value.Int = NETWORK_ReadLong( pByteStream );
+	// ... and compatflags2.
+	Value.Int = theCompatFlags2;
 	compatflags2.ForceSet( Value, CVAR_Int );
 
 	// [BB] ... and zacompatflags.
-	Value.Int = NETWORK_ReadLong( pByteStream );
+	Value.Int = theZacompatFlags;
 	zacompatflags.ForceSet( Value, CVAR_Int );
 
 	// [BB] ... and zadmflags.
-	Value.Int = NETWORK_ReadLong( pByteStream );
+	Value.Int = theZadmFlags;
 	zadmflags.ForceSet( Value, CVAR_Int );
 }
 
 //*****************************************************************************
 //
-static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetGameModeLimits::Execute()
 {
 	UCVarValue	Value;
 
 	// Read in, and set the value for fraglimit.
-	Value.Int = NETWORK_ReadShort( pByteStream );
+	Value.Int = theFragLimit;
 	fraglimit.ForceSet( Value, CVAR_Int );
 
 	// Read in, and set the value for timelimit.
-	Value.Float = NETWORK_ReadFloat( pByteStream );
+	Value.Float = theTimeLimit;
 	timelimit.ForceSet( Value, CVAR_Float );
 
 	// Read in, and set the value for pointlimit.
-	Value.Int = NETWORK_ReadShort( pByteStream );
+	Value.Int = thePointLimit;
 	pointlimit.ForceSet( Value, CVAR_Int );
 
 	// Read in, and set the value for duellimit.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theDuelLimit;
 	duellimit.ForceSet( Value, CVAR_Int );
 
 	// Read in, and set the value for winlimit.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theWinLimit;
 	winlimit.ForceSet( Value, CVAR_Int );
 
 	// Read in, and set the value for wavelimit.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theWaveLimit;
 	wavelimit.ForceSet( Value, CVAR_Int );
 
 	// Read in, and set the value for sv_cheats.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theCheats;
 	sv_cheats.ForceSet( Value, CVAR_Int );
 	// [BB] This ensures that am_cheat respects the sv_cheats value we just set.
 	am_cheat.Callback();
@@ -5440,197 +4938,145 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	turbo.Callback();
 
 	// Read in, and set the value for sv_fastweapons.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theFastWeapons;
 	sv_fastweapons.ForceSet( Value, CVAR_Int );
 
 	// Read in, and set the value for sv_maxlives.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theMaxLives;
 	sv_maxlives.ForceSet( Value, CVAR_Int );
 
 	// Read in, and set the value for sv_maxteams.
-	Value.Int = NETWORK_ReadByte( pByteStream );
+	Value.Int = theMaxTeams;
 	sv_maxteams.ForceSet( Value, CVAR_Int );
 
 	// [BB] Read in, and set the value for sv_gravity.
-	Value.Float = NETWORK_ReadFloat( pByteStream );
+	Value.Float = theLevelGravity;
 	sv_gravity.ForceSet( Value, CVAR_Float );
 
 	// [BB] Read in, and set the value for sv_aircontrol.
-	Value.Float = NETWORK_ReadFloat( pByteStream );
+	Value.Float = theLevelAirControl;
 	sv_aircontrol.ForceSet( Value, CVAR_Float );
 
 	// [WS] Read in, and set the value for sv_coop_damagefactor.
-	Value.Float = NETWORK_ReadFloat( pByteStream );
+	Value.Float = theCoopDamageFactor;
 	sv_coop_damagefactor.ForceSet( Value, CVAR_Float );
 
 	// [WS] Read in, and set the value for alwaysapplydmflags.
-	Value.Bool = NETWORK_ReadBit( pByteStream );
+	Value.Bool = theAlwaysApplyDmFlags;
 	alwaysapplydmflags.ForceSet( Value, CVAR_Bool );
 
 	// [AM] Read in, and set the value for lobby.
-	Value.String = const_cast<char*>(NETWORK_ReadString( pByteStream ));
+	Value.String = theLobby;
 	lobby.ForceSet( Value, CVAR_String );
 
 	// [TP] Yea.
-	Value.Bool = NETWORK_ReadBit( pByteStream );
+	Value.Bool = theLimitCommands;
 	sv_limitcommands.ForceSet( Value, CVAR_Bool );
 }
 
 //*****************************************************************************
 //
-static void client_SetGameEndLevelDelay( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetGameEndLevelDelay::Execute()
 {
-	ULONG	ulDelay;
-
-	ulDelay = NETWORK_ReadShort( pByteStream );
-
-	GAME_SetEndLevelDelay( ulDelay );
+	GAME_SetEndLevelDelay( theEndLevelDelay );
 }
 
 //*****************************************************************************
 //
-static void client_SetGameModeState( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetGameModeState::Execute()
 {
-	ULONG	ulModeState;
-	ULONG	ulCountdownTicks;
-
-	ulModeState = NETWORK_ReadByte( pByteStream );
-	ulCountdownTicks = NETWORK_ReadShort( pByteStream );
-
 	if ( duel )
 	{
-		DUEL_SetState( (DUELSTATE_e)ulModeState );
-		DUEL_SetCountdownTicks( ulCountdownTicks );
+		DUEL_SetState( (DUELSTATE_e)theState);
+		DUEL_SetCountdownTicks( theCountdownTicks );
 	}
 	else if ( lastmanstanding || teamlms )
 	{
-		LASTMANSTANDING_SetState( (LMSSTATE_e)ulModeState );
-		LASTMANSTANDING_SetCountdownTicks( ulCountdownTicks );
+		LASTMANSTANDING_SetState( (LMSSTATE_e)theState);
+		LASTMANSTANDING_SetCountdownTicks( theCountdownTicks );
 	}
 	else if ( possession || teampossession )
 	{
-		POSSESSION_SetState( (PSNSTATE_e)ulModeState );
-		if ( (PSNSTATE_e)ulModeState == PSNS_ARTIFACTHELD )
-			POSSESSION_SetArtifactHoldTicks( ulCountdownTicks );
+		POSSESSION_SetState( (PSNSTATE_e)theState);
+		if ( (PSNSTATE_e)theState == PSNS_ARTIFACTHELD )
+			POSSESSION_SetArtifactHoldTicks( theCountdownTicks );
 		else
-			POSSESSION_SetCountdownTicks( ulCountdownTicks );
+			POSSESSION_SetCountdownTicks( theCountdownTicks );
 	}
 	else if ( survival )
 	{
-		SURVIVAL_SetState( (SURVIVALSTATE_e)ulModeState );
-		SURVIVAL_SetCountdownTicks( ulCountdownTicks );
+		SURVIVAL_SetState( (SURVIVALSTATE_e)theState);
+		SURVIVAL_SetCountdownTicks( theCountdownTicks );
 	}
 	else if ( invasion )
 	{
-		INVASION_SetState( (INVASIONSTATE_e)ulModeState );
-		INVASION_SetCountdownTicks( ulCountdownTicks );
+		INVASION_SetState( (INVASIONSTATE_e)theState);
+		INVASION_SetCountdownTicks( theCountdownTicks );
 	}
 }
 
 //*****************************************************************************
 //
-static void client_SetDuelNumDuels( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetDuelNumDuels::Execute()
 {
-	ULONG	ulNumDuels;
-
-	// Read in the number of duels that have occured.
-	ulNumDuels = NETWORK_ReadByte( pByteStream );
-
-	DUEL_SetNumDuels( ulNumDuels );
+	DUEL_SetNumDuels( theNumDuels );
 }
 
 //*****************************************************************************
 //
-static void client_SetLMSSpectatorSettings( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetLMSSpectatorSettings::Execute()
 {
 	UCVarValue	Value;
 
-	Value.Int = NETWORK_ReadLong( pByteStream );
+	Value.Int = theLMSSpectatorSettings;
 	lmsspectatorsettings.ForceSet( Value, CVAR_Int );
 }
 
 //*****************************************************************************
 //
-static void client_SetLMSAllowedWeapons( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetLMSAllowedWeapons::Execute()
 {
 	UCVarValue	Value;
 
-	Value.Int = NETWORK_ReadLong( pByteStream );
+	Value.Int = theLMSAllowedWeapons;
 	lmsallowedweapons.ForceSet( Value, CVAR_Int );
 }
 
 //*****************************************************************************
 //
-static void client_SetInvasionNumMonstersLeft( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetInvasionNumMonstersLeft::Execute()
 {
-	ULONG	ulNumMonstersLeft;
-	ULONG	ulNumArchVilesLeft;
-
-	// Read in the number of monsters left.
-	ulNumMonstersLeft = NETWORK_ReadShort( pByteStream );
-
-	// Read in the number of arch-viles left.
-	ulNumArchVilesLeft = NETWORK_ReadShort( pByteStream );
-
 	// Set the number of monsters/archies left.
-	INVASION_SetNumMonstersLeft( ulNumMonstersLeft );
-	INVASION_SetNumArchVilesLeft( ulNumArchVilesLeft );
+	INVASION_SetNumMonstersLeft( theNumMonstersLeft );
+	INVASION_SetNumArchVilesLeft( theNumArchVilesLeft );
 }
 
 //*****************************************************************************
 //
-static void client_SetInvasionWave( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetInvasionWave::Execute()
 {
-	ULONG	ulWave;
-
-	// Read in the current wave we're on.
-	ulWave = NETWORK_ReadByte( pByteStream );
-
 	// Set the current wave in the invasion module.
-	INVASION_SetCurrentWave( ulWave );
+	INVASION_SetCurrentWave( theInvasionWave );
 }
 
 //*****************************************************************************
 //
-static void client_SetSimpleCTFSTMode( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetSimpleCTFSTMode::Execute()
 {
-	bool	bSimpleCTFST;
-
-	// Read in whether or not we're in the simple version of these game modes.
-	bSimpleCTFST = !!NETWORK_ReadByte( pByteStream );
-
 	// Set the simple CTF/ST mode.
-	TEAM_SetSimpleCTFSTMode( bSimpleCTFST );
+	TEAM_SetSimpleCTFSTMode( theSimpleCTFSTMode );
 }
 
 //*****************************************************************************
 //
-static void client_DoPossessionArtifactPickedUp( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoPossessionArtifactPickedUp::Execute()
 {
-	ULONG	ulPlayer;
-	ULONG	ulTicks;
-
-	// Read in the player who picked up the possession artifact.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// Read in how many ticks remain until the player potentially scores a point.
-	ulTicks = NETWORK_ReadShort( pByteStream );
-
-	// If this is an invalid player, break out.
-	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
-		return;
-
-	// If we're not playing possession, there's no need to do this.
-	if (( possession == false ) && ( teampossession == false ))
-		return;
-
-	// Finally, call the function that handles the picking up of the artifact.
-	POSSESSION_ArtifactPickedUp( &players[ulPlayer], ulTicks );
+	POSSESSION_ArtifactPickedUp( player, ticks );
 }
 
 //*****************************************************************************
 //
-static void client_DoPossessionArtifactDropped( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoPossessionArtifactDropped::Execute()
 {
 	// If we're not playing possession, there's no need to do this.
 	if (( possession == false ) && ( teampossession == false ))
@@ -5642,13 +5088,8 @@ static void client_DoPossessionArtifactDropped( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_DoGameModeFight( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoGameModeFight::Execute()
 {
-	ULONG	ulWave;
-
-	// What wave are we starting? (invasion only).
-	ulWave = NETWORK_ReadByte( pByteStream );
-
 	// Play fight sound, and draw gfx.
 	if ( duel )
 		DUEL_DoFight( );
@@ -5659,37 +5100,33 @@ static void client_DoGameModeFight( BYTESTREAM_s *pByteStream )
 	else if ( survival )
 		SURVIVAL_DoFight( );
 	else if ( invasion )
-		INVASION_BeginWave( ulWave );
+		INVASION_BeginWave( currentWave );
 }
 
 //*****************************************************************************
 //
-static void client_DoGameModeCountdown( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoGameModeCountdown::Execute()
 {
-	ULONG	ulTicks;
-
-	ulTicks = NETWORK_ReadShort( pByteStream );
-
 	// Begin the countdown.
 	if ( duel )
-		DUEL_StartCountdown( ulTicks );
+		DUEL_StartCountdown( ticks );
 	else if ( lastmanstanding || teamlms )
-		LASTMANSTANDING_StartCountdown( ulTicks );
+		LASTMANSTANDING_StartCountdown( ticks );
 	else if ( possession || teampossession )
-		POSSESSION_StartCountdown( ulTicks );
+		POSSESSION_StartCountdown( ticks );
 	else if ( survival )
-		SURVIVAL_StartCountdown( ulTicks );
+		SURVIVAL_StartCountdown( ticks );
 	else if ( invasion )
-		INVASION_StartCountdown( ulTicks );
+		INVASION_StartCountdown( ticks );
 }
 
 //*****************************************************************************
 //
-static void client_DoGameModeWinSequence( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoGameModeWinSequence::Execute()
 {
 	ULONG	ulWinner;
 
-	ulWinner = NETWORK_ReadByte( pByteStream );
+	ulWinner = winner - players;
 
 	// Begin the win sequence.
 	if ( duel )
@@ -5711,160 +5148,75 @@ static void client_DoGameModeWinSequence( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_SetDominationState( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetDominationState::Execute()
 {
-	unsigned int NumPoints = NETWORK_ReadLong( pByteStream );
-
-	// [BB] It's impossible that the server sends us this many points
-	// in a single packet, so something must be wrong. Just parse
-	// what the server has claimed to have send, but don't try to store
-	// it or allocate memory for it.
-	if ( NumPoints > MAX_UDP_PACKET )
-	{
-		for ( unsigned int i = 0; i < NumPoints; ++i )
-			NETWORK_ReadByte( pByteStream );
-		return;
-	}
-
-	unsigned int *PointOwners = new unsigned int[NumPoints];
-	for(unsigned int i = 0;i < NumPoints;i++)
-	{
-		PointOwners[i] = NETWORK_ReadByte( pByteStream );
-	}
-	DOMINATION_LoadInit(NumPoints, PointOwners);
+	unsigned int *PointOwners = new unsigned int[pointOwners.Size()];
+	for ( unsigned int i = 0; i < pointOwners.Size(); ++i )
+		PointOwners[i] = pointOwners[i];
+	DOMINATION_LoadInit( pointOwners.Size(), PointOwners );
 }
 
 //*****************************************************************************
 //
-static void client_SetDominationPointOwnership( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetDominationPointOwner::Execute()
 {
-	unsigned int ulPoint = NETWORK_ReadByte( pByteStream );
-	unsigned int ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// If this is an invalid player, break out.
-	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
-		return;
-
-	DOMINATION_SetOwnership(ulPoint, &players[ulPlayer]);
+	DOMINATION_SetOwnership( point, player );
 }
 
 //*****************************************************************************
 //
-static void client_SetTeamFrags( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetTeamFrags::Execute()
 {
-	ULONG	ulTeam;
-	LONG	lFragCount;
-	bool	bAnnounce;
-
-	// Read in the team.
-	ulTeam = NETWORK_ReadByte( pByteStream );
-
-	// Read in the fragcount.
-	lFragCount = NETWORK_ReadShort( pByteStream );
-
 	// Announce a lead change... but don't do it if we're receiving a snapshot of the level!
-	bAnnounce = !!NETWORK_ReadByte( pByteStream );
 	if ( g_ConnectionState != CTS_ACTIVE )
-		bAnnounce = false;
+		announce = false;
 
-	// Finally, set the team's fragcount.
-	TEAM_SetFragCount( ulTeam, lFragCount, bAnnounce );
+	TEAM_SetFragCount( team, frags, announce );
 }
 
 //*****************************************************************************
 //
-static void client_SetTeamScore( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetTeamScore::Execute()
 {
-	ULONG	ulTeam;
-	LONG	lScore;
-	bool	bAnnounce;
-
-	// Read in the team having its score updated.
-	ulTeam = NETWORK_ReadByte( pByteStream );
-
-	// Read in the team's new score.
-	lScore = NETWORK_ReadShort( pByteStream );
-
-	// Should it be announced?
-	bAnnounce = !!NETWORK_ReadByte( pByteStream );
-	
 	// Don't announce the score change if we're receiving a snapshot of the level!
 	if ( g_ConnectionState != CTS_ACTIVE )
-		bAnnounce = false;
+		announce = false;
 
-	TEAM_SetScore( ulTeam, lScore, bAnnounce );
+	TEAM_SetScore( team, score, announce );
 
 	SCOREBOARD_RefreshHUD( );
 }
 
 //*****************************************************************************
 //
-static void client_SetTeamWins( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetTeamWins::Execute()
 {
-	ULONG	ulTeamIdx;
-	LONG	lWinCount;
-	bool	bAnnounce;
-
-	// Read in the team.
-	ulTeamIdx = NETWORK_ReadByte( pByteStream );
-
-	// Read in the wins.
-	lWinCount = NETWORK_ReadShort( pByteStream );
-
-	// Read in whether or not it should be announced.	
-	bAnnounce = !!NETWORK_ReadByte( pByteStream );
-
 	// Don't announce if we're receiving a snapshot of the level!
 	if ( g_ConnectionState != CTS_ACTIVE )
-		bAnnounce = false;
+		announce = false;
 
-	// Finally, set the team's win count.
-	TEAM_SetWinCount( ulTeamIdx, lWinCount, bAnnounce );
+	TEAM_SetWinCount( team, wins, announce );
 }
 
 //*****************************************************************************
 //
-static void client_SetTeamReturnTicks( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetTeamReturnTicks::Execute()
 {
-	ULONG	ulTeam;
-	ULONG	ulTicks;
-
-	// Read in the team having its return ticks altered.
-	ulTeam = NETWORK_ReadByte( pByteStream );
-
-	// Read in the return ticks value.
-	ulTicks = NETWORK_ReadShort( pByteStream );
-
-	// Finally, set the return ticks for the given team.
-	TEAM_SetReturnTicks( ulTeam, ulTicks );
+	TEAM_SetReturnTicks( team, returnTicks );
 }
 
 //*****************************************************************************
 //
-static void client_TeamFlagReturned( BYTESTREAM_s *pByteStream )
+void ServerCommands::TeamFlagReturned::Execute()
 {
-	ULONG	ulTeam;
-
-	// Read in the team that the flag has been returned for.
-	ulTeam = NETWORK_ReadByte( pByteStream );
-
-	// Finally, just call this function that does all the dirty work.
-	TEAM_ExecuteReturnRoutine( ulTeam, NULL );
+	TEAM_ExecuteReturnRoutine( team, NULL );
 }
 
 //*****************************************************************************
 //
-static void client_TeamFlagDropped( BYTESTREAM_s *pByteStream )
+void ServerCommands::TeamFlagDropped::Execute()
 {
-	ULONG	ulPlayer;
-	ULONG	ulTeamIdx;
-
-	// Read in the player that dropped a flag.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-	ulTeamIdx = NETWORK_ReadByte( pByteStream );
-
-	// Finally, just call this function that does all the dirty work.
-	TEAM_FlagDropped( &players[ulPlayer], ulTeamIdx );
+	TEAM_FlagDropped( player, team );
 }
 
 //*****************************************************************************
@@ -6443,58 +5795,26 @@ void ServerCommands::StopSectorSequence::Execute()
 
 //*****************************************************************************
 //
-static void client_CallVote( BYTESTREAM_s *pByteStream )
+void ServerCommands::CallVote::Execute()
 {
-	FString		command;
-	FString		parameters;
-	FString		reason;
-	ULONG		ulVoteCaller;
-
-	// Read in the vote starter.
-	ulVoteCaller = NETWORK_ReadByte( pByteStream );
-
-	// Read in the command.
-	command = NETWORK_ReadString( pByteStream );
-
-	// Read in the parameters.
-	parameters = NETWORK_ReadString( pByteStream );
-	
-	// Read in the reason.
-	reason = NETWORK_ReadString( pByteStream );
-
-	// Begin the vote!
-	CALLVOTE_BeginVote( command, parameters, reason, ulVoteCaller );
+	CALLVOTE_BeginVote( command, parameters, reason, player - players );
 }
 
 //*****************************************************************************
 //
-static void client_PlayerVote( BYTESTREAM_s *pByteStream )
+void ServerCommands::PlayerVote::Execute()
 {
-	ULONG	ulPlayer;
-	bool	bYes;
-
-	// Read in the player making the vote.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// Did the player vote yes?
-	bYes = !!NETWORK_ReadByte( pByteStream );
-
-	if ( bYes )
-		CALLVOTE_VoteYes( ulPlayer );
+	if ( voteYes )
+		CALLVOTE_VoteYes( player - players );
 	else
-		CALLVOTE_VoteNo( ulPlayer );
+		CALLVOTE_VoteNo( player - players );
 }
 
 //*****************************************************************************
 //
-static void client_VoteEnded( BYTESTREAM_s *pByteStream )
+void ServerCommands::VoteEnded::Execute()
 {
-	bool	bPassed;
-
-	// Did the vote pass?
-	bPassed = !!NETWORK_ReadByte( pByteStream );
-
-	CALLVOTE_EndVote( bPassed );
+	CALLVOTE_EndVote( votePassed );
 }
 
 //*****************************************************************************
@@ -6668,28 +5988,16 @@ void ServerCommands::SetMapSky::Execute()
 
 //*****************************************************************************
 //
-static void client_GiveInventory( BYTESTREAM_s *pByteStream )
+void ServerCommands::GiveInventory::Execute()
 {
 	const PClass	*pType;
-	ULONG			ulPlayer;
-	USHORT			usActorNetworkIndex;
-	LONG			lAmount;
 	AInventory		*pInventory;
 
-	// Read in the player ID.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// Read in the identification of the type of item to give.
-	usActorNetworkIndex = NETWORK_ReadShort( pByteStream );
-
-	// Read in the amount of this inventory type the player has.
-	lAmount = NETWORK_ReadLong( pByteStream );
-
 	// Check to make sure everything is valid. If not, break out.
-	if (( PLAYER_IsValidPlayer( ulPlayer ) == false ) || ( players[ulPlayer].mo == NULL ))
+	if ( player->mo == NULL )
 		return;
 
-	pType = NETWORK_GetClassFromIdentification( usActorNetworkIndex );
+	pType = NETWORK_GetClassFromIdentification( actorNetworkIndex );
 	if ( pType == NULL )
 		return;
 
@@ -6698,37 +6006,37 @@ static void client_GiveInventory( BYTESTREAM_s *pByteStream )
 		return;
 
 	// [BB] Keep track of whether the player had a weapon.
-	const bool playerHadNoWeapon = ( ( players[ulPlayer].ReadyWeapon == NULL ) &&  ( players[ulPlayer].PendingWeapon == WP_NOCHANGE ) );
+	const bool playerHadNoWeapon = ( ( player->ReadyWeapon == NULL ) &&  ( player->PendingWeapon == WP_NOCHANGE ) );
 
 	// Try to give the player the item.
 	pInventory = static_cast<AInventory *>( Spawn( pType, 0, 0, 0, NO_REPLACE ));
 	if ( pInventory != NULL )
 	{
-		if ( lAmount > 0 )
+		if ( amount > 0 )
 		{
 			if ( pType->IsDescendantOf( RUNTIME_CLASS( ABasicArmorPickup )))
 			{
 				if ( static_cast<ABasicArmorPickup*>( pInventory )->SaveAmount != 0 )
-					static_cast<ABasicArmorPickup*>( pInventory )->SaveAmount *= lAmount;
+					static_cast<ABasicArmorPickup*>( pInventory )->SaveAmount *= amount;
 				else
-					static_cast<ABasicArmorPickup*>( pInventory )->SaveAmount *= lAmount;
+					static_cast<ABasicArmorPickup*>( pInventory )->SaveAmount *= amount;
 			}
 			else if ( pType->IsDescendantOf( RUNTIME_CLASS( ABasicArmorBonus )))
 			{
-				static_cast<ABasicArmorBonus*>( pInventory )->SaveAmount *= lAmount;
-				static_cast<ABasicArmorBonus*>( pInventory )->BonusCount *= lAmount;
+				static_cast<ABasicArmorBonus*>( pInventory )->SaveAmount *= amount;
+				static_cast<ABasicArmorBonus*>( pInventory )->BonusCount *= amount;
 			}
 			else if ( pType->IsDescendantOf( RUNTIME_CLASS( AHealth ) ) )
 			{
 				if ( pInventory->MaxAmount > 0 )
-					pInventory->Amount = MIN( lAmount, (LONG)pInventory->MaxAmount );
+					pInventory->Amount = MIN( amount, pInventory->MaxAmount );
 				else
-					pInventory->Amount = lAmount;
+					pInventory->Amount = amount;
 			}
 			else
-				pInventory->Amount = lAmount;
+				pInventory->Amount = amount;
 		}
-		if ( pInventory->CallTryPickup( players[ulPlayer].mo ) == false )
+		if ( pInventory->CallTryPickup( player->mo ) == false )
 		{
 			pInventory->Destroy( );
 			pInventory = NULL;
@@ -6741,8 +6049,8 @@ static void client_GiveInventory( BYTESTREAM_s *pByteStream )
 		if ( ( pType->IsDescendantOf( RUNTIME_CLASS( ABasicArmorPickup ) ) == false ) 
 			 && ( pType->IsDescendantOf( RUNTIME_CLASS( ABasicArmorBonus ) ) == false )
 			 && ( pType->IsDescendantOf( RUNTIME_CLASS( AHealth ) ) == false )
-			 && ( players[ulPlayer].mo->FindInventory( pType ) == NULL ) )
-			CLIENT_PrintWarning( "client_GiveInventory: Failed to give inventory type, %s!\n", NETWORK_GetClassNameFromIdentification( usActorNetworkIndex ));
+			 && ( player->mo->FindInventory( pType ) == NULL ) )
+			CLIENT_PrintWarning( "ServerCommands::GiveInventory: Failed to give inventory type, %s!\n", NETWORK_GetClassNameFromIdentification( actorNetworkIndex ));
 		return;
 	}
 
@@ -6754,9 +6062,9 @@ static void client_GiveInventory( BYTESTREAM_s *pByteStream )
 	}
 
 	// Set the new amount of the inventory object.
-	pInventory = players[ulPlayer].mo->FindInventory( pType );
+	pInventory = player->mo->FindInventory( pType );
 	if ( pInventory )
-		pInventory->Amount = lAmount;
+		pInventory->Amount = amount;
 
 	// [BC] For some weird reason, the KDIZD new pistol has the amount of 0 when
 	// picked up, so we can't actually destroy items when the amount is 0 or less.
@@ -6773,8 +6081,8 @@ static void client_GiveInventory( BYTESTREAM_s *pByteStream )
 	}
 */
 	// [BB] Prevent the client from trying to switch to a different weapon while morphed.
-	if ( players[ulPlayer].morphTics )
-		players[ulPlayer].PendingWeapon = WP_NOCHANGE;
+	if ( player->morphTics )
+		player->PendingWeapon = WP_NOCHANGE;
 
 	// Since an item displayed on the HUD may have been given, refresh the HUD.
 	SCOREBOARD_RefreshHUD( );
@@ -6783,31 +6091,19 @@ static void client_GiveInventory( BYTESTREAM_s *pByteStream )
 	// that he was just spawned and didn't tell the server yet which weapon he selected. In this
 	// case make sure that this pickup doesn't cause him to bring up a weapon and wait for the
 	// server to tell us which weapon the player uses.
-	if ( playerHadNoWeapon  && ( players[ulPlayer].bIsBot == false )&& ( ulPlayer != (ULONG)consoleplayer ) )
-		PLAYER_ClearWeapon ( &players[ulPlayer] );
+	if ( playerHadNoWeapon  && ( player->bIsBot == false )&& ( player - players != (ULONG)consoleplayer ) )
+		PLAYER_ClearWeapon ( player );
 }
 
 //*****************************************************************************
 //
-static void client_TakeInventory( BYTESTREAM_s *pByteStream )
+void ServerCommands::TakeInventory::Execute()
 {
 	const PClass	*pType;
-	ULONG			ulPlayer;
-	USHORT			actorNetworkIndex;
-	LONG			lAmount;
 	AInventory		*pInventory;
 
-	// Read in the player ID.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// Read in the identification of the type of item to take away.
-	actorNetworkIndex = NETWORK_ReadShort( pByteStream );
-
-	// Read in the new amount of this inventory type the player has.
-	lAmount = NETWORK_ReadLong( pByteStream );
-
 	// Check to make sure everything is valid. If not, break out.
-	if (( PLAYER_IsValidPlayer( ulPlayer ) == false ) || ( players[ulPlayer].mo == NULL ))
+	if ( player->mo == NULL )
 		return;
 
 	pType = NETWORK_GetClassFromIdentification( actorNetworkIndex );
@@ -6818,10 +6114,10 @@ static void client_TakeInventory( BYTESTREAM_s *pByteStream )
 		return;
 
 	// Try to find this object within the player's personal inventory.
-	pInventory = players[ulPlayer].mo->FindInventory( pType );
+	pInventory = player->mo->FindInventory( pType );
 
 	// [TP] If we're trying to set the item amount to 0, then destroy the item if the player has it.
-	if ( lAmount <= 0 )
+	if ( amount <= 0 )
 	{
 		if ( pInventory )
 		{
@@ -6831,21 +6127,21 @@ static void client_TakeInventory( BYTESTREAM_s *pByteStream )
 				pInventory->Destroy( );
 		}
 	}
-	else if ( lAmount > 0 )
+	else if ( amount > 0 )
 	{
 		// If the player doesn't have this type, give it to him.
 		if ( pInventory == NULL )
-			pInventory = players[ulPlayer].mo->GiveInventoryType( pType );
+			pInventory = player->mo->GiveInventoryType( pType );
 
 		// If he still doesn't have the object after trying to give it to him... then YIKES!
 		if ( pInventory == NULL )
 		{
-			CLIENT_PrintWarning( "client_TakeInventory: Failed to give inventory type, %s!\n", pType->TypeName.GetChars());
+			CLIENT_PrintWarning( "ServerCommands::TakeInventory: Failed to take inventory type, %s!\n", pType->TypeName.GetChars());
 			return;
 		}
 
 		// Set the new amount of the inventory object.
-		pInventory->Amount = lAmount;
+		pInventory->Amount = amount;
 	}
 
 	// Since an item displayed on the HUD may have been taken away, refresh the HUD.
@@ -6854,35 +6150,16 @@ static void client_TakeInventory( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_GivePowerup( BYTESTREAM_s *pByteStream )
+void ServerCommands::GivePowerup::Execute()
 {
 	const PClass	*pType;
-	ULONG			ulPlayer;
-	USHORT			usActorNetworkIndex;
-	LONG			lAmount;
-	LONG			lEffectTics;
 	AInventory		*pInventory;
 
-	// Read in the player ID.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// Read in the identification of the type of item to give.
-	usActorNetworkIndex = NETWORK_ReadShort( pByteStream );
-
-	// Read in the amount of this inventory type the player has.
-	lAmount = NETWORK_ReadShort( pByteStream );
-
-	// [TP]
-	bool isRune = !!NETWORK_ReadByte( pByteStream );
-
-	// Read in the amount of time left on this powerup.
-	lEffectTics = ( isRune == false ) ? NETWORK_ReadShort( pByteStream ) : 0;
-
 	// Check to make sure everything is valid. If not, break out.
-	if (( PLAYER_IsValidPlayer( ulPlayer ) == false ) || ( players[ulPlayer].mo == NULL ))
+	if ( player->mo == NULL )
 		return;
 
-	pType = NETWORK_GetClassFromIdentification( usActorNetworkIndex );
+	pType = NETWORK_GetClassFromIdentification( actorNetworkIndex );
 	if ( pType == NULL )
 		return;
 
@@ -6891,21 +6168,21 @@ static void client_GivePowerup( BYTESTREAM_s *pByteStream )
 		return;
 
 	// Try to find this object within the player's personal inventory.
-	pInventory = players[ulPlayer].mo->FindInventory( pType );
+	pInventory = player->mo->FindInventory( pType );
 
 	// If the player doesn't have this type, give it to him.
 	if ( pInventory == NULL )
-		pInventory = players[ulPlayer].mo->GiveInventoryType( pType );
+		pInventory = player->mo->GiveInventoryType( pType );
 
 	// If he still doesn't have the object after trying to give it to him... then YIKES!
 	if ( pInventory == NULL )
 	{
-		CLIENT_PrintWarning( "client_TakeInventory: Failed to give inventory type, %s!\n", NETWORK_GetClassNameFromIdentification( usActorNetworkIndex ));
+		CLIENT_PrintWarning( "ServerCommands::GivePowerup: Failed to give powerup, %s!\n", NETWORK_GetClassNameFromIdentification( actorNetworkIndex ));
 		return;
 	}
 
 	// Set the new amount of the inventory object.
-	pInventory->Amount = lAmount;
+	pInventory->Amount = amount;
 	if ( pInventory->Amount <= 0 )
 	{
 		pInventory->Destroy( );
@@ -6914,10 +6191,10 @@ static void client_GivePowerup( BYTESTREAM_s *pByteStream )
 
 	if ( pInventory )
 	{
-		static_cast<APowerup *>( pInventory )->EffectTics = lEffectTics;
+		static_cast<APowerup *>( pInventory )->EffectTics = effectTicks;
 
 		// [TP]
-		if ( isRune )
+		if ( isActiveRune )
 			pInventory->Owner->Rune = static_cast<APowerup *>( pInventory );
 	}
 
@@ -6925,33 +6202,42 @@ static void client_GivePowerup( BYTESTREAM_s *pByteStream )
 	SCOREBOARD_RefreshHUD( );
 }
 
+
 //*****************************************************************************
 //
-static void client_DoInventoryPickup( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetPowerupBlendColor::Execute()
 {
-	ULONG			ulPlayer;
-	FString			szClassName;
-	FString			pszPickupMessage;
+	const PClass *pType = NETWORK_GetClassFromIdentification(actorNetworkIndex);
+	if (pType == NULL)
+		return;
+
+	// If this isn't a powerup, just quit.
+	if (pType->IsDescendantOf(RUNTIME_CLASS(APowerup)) == false)
+		return;
+
+	// Try to find this object within the player's personal inventory.
+	AInventory *pInventory = player->mo->FindInventory(pType);
+
+	// [WS] If the player has this powerup, set its blendcolor appropriately.
+	if (pInventory)
+		static_cast<APowerup*>(pInventory)->BlendColor = blendColor;
+}
+
+//*****************************************************************************
+//
+void ServerCommands::DoInventoryPickup::Execute()
+{
 	AInventory		*pInventory;
 
 	static LONG			s_lLastMessageTic = 0;
 	static FString		s_szLastMessage;
 
-	// Read in the player ID.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// Read in the class name of the item.
-	szClassName = NETWORK_ReadString( pByteStream );
-
-	// Read in the pickup message.
-	pszPickupMessage = NETWORK_ReadString( pByteStream );
-
 	// Check to make sure everything is valid. If not, break out.
-	if (( PLAYER_IsValidPlayer( ulPlayer ) == false ) || ( players[ulPlayer].mo == NULL ))
+	if ( player->mo == NULL )
 		return;
 
 	// If the player doesn't have this inventory item, break out.
-	pInventory = static_cast<AInventory *>( Spawn( PClass::FindClass( szClassName ), 0, 0, 0, NO_REPLACE ));
+	pInventory = static_cast<AInventory *>( Spawn( PClass::FindClass( className ), 0, 0, 0, NO_REPLACE ));
 	if ( pInventory == NULL )
 		return;
 
@@ -6960,37 +6246,37 @@ static void client_DoInventoryPickup( BYTESTREAM_s *pByteStream )
 	{
 		// [BB] The server doesn't tell us about itemcount updates,
 		// so try to keep track of this locally.
-		players[ulPlayer].itemcount++;
+		player->itemcount++;
 
 		pInventory->flags &= ~MF_COUNTITEM;
 		level.total_items--;
 	}
 
 	// Print out the pickup message.
-	if (( players[ulPlayer].mo->CheckLocalView( consoleplayer )) &&
-		(( s_lLastMessageTic != gametic ) || ( s_szLastMessage.CompareNoCase( pszPickupMessage ) != 0 )))
+	if (( player->mo->CheckLocalView( consoleplayer )) &&
+		(( s_lLastMessageTic != gametic ) || ( s_szLastMessage.CompareNoCase( pickupMessage ) != 0 )))
 	{
 		s_lLastMessageTic = gametic;
-		s_szLastMessage = pszPickupMessage;
+		s_szLastMessage = pickupMessage;
 
 		// This code is from PrintPickupMessage().
-		if ( pszPickupMessage.IsNotEmpty( ) )
+		if ( pickupMessage.IsNotEmpty( ) )
 		{
-			if ( pszPickupMessage[0] == '$' )
-				pszPickupMessage = GStrings( pszPickupMessage.GetChars( ) + 1 );
+			if ( pickupMessage[0] == '$' )
+				pickupMessage = GStrings( pickupMessage.GetChars( ) + 1 );
 
-			Printf( PRINT_LOW, "%s\n", pszPickupMessage.GetChars( ) );
+			Printf( PRINT_LOW, "%s\n", pickupMessage.GetChars( ) );
 		}
 
 		StatusBar->FlashCrosshair( );
 	}
 
 	// Play the inventory pickup sound and blend the screen.
-	pInventory->PlayPickupSound( players[ulPlayer].mo );
-	players[ulPlayer].bonuscount = BONUSADD;
+	pInventory->PlayPickupSound( player->mo );
+	player->bonuscount = BONUSADD;
 
 	// Play the announcer pickup entry as well.
-	if ( players[ulPlayer].mo->CheckLocalView( consoleplayer ) && cl_announcepickups )
+	if ( player->mo->CheckLocalView( consoleplayer ) && cl_announcepickups )
 		ANNOUNCER_PlayEntry( cl_announcer, pInventory->PickupAnnouncerEntry( ));
 
 	// Finally, destroy the temporarily spawned inventory item.
@@ -6999,40 +6285,31 @@ static void client_DoInventoryPickup( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_DestroyAllInventory( BYTESTREAM_s *pByteStream )
+void ServerCommands::DestroyAllInventory::Execute()
 {
-	ULONG			ulPlayer;
-
-	// Read in the player ID.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
 	// Check to make sure everything is valid. If not, break out.
-	if (( PLAYER_IsValidPlayer( ulPlayer ) == false ) || ( players[ulPlayer].mo == NULL ))
+	if ( player->mo == NULL )
 		return;
 
 	// Finally, destroy the player's inventory.
 	// [BB] Be careful here, we may not use mo->DestroyAllInventory( ), otherwise
 	// AHexenArmor messes up.
-	players[ulPlayer].mo->ClearInventory();
+	player->mo->ClearInventory();
 }
 
 //*****************************************************************************
 //
-static void client_SetInventoryIcon( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetInventoryIcon::Execute()
 {
-	const ULONG ulPlayer = NETWORK_ReadByte( pByteStream );
-	const USHORT usActorNetworkIndex = NETWORK_ReadShort( pByteStream );
-	const FString iconTexName = NETWORK_ReadString( pByteStream );
-
 	// Check to make sure everything is valid. If not, break out.
-	if (( PLAYER_IsValidPlayer( ulPlayer ) == false ) || ( players[ulPlayer].mo == NULL ))
+	if ( player->mo == NULL )
 		return;
 
-	const PClass *pType = NETWORK_GetClassFromIdentification( usActorNetworkIndex );
+	const PClass *pType = NETWORK_GetClassFromIdentification( actorNetworkIndex );
 	if ( pType == NULL )
 		return;
 
-	AInventory *pInventory = players[ulPlayer].mo->FindInventory( pType );
+	AInventory *pInventory = player->mo->FindInventory( pType );
 
 	if ( pInventory )
 		pInventory->Icon = TexMan.GetTexture( iconTexName, 0 );
@@ -7040,586 +6317,574 @@ static void client_SetInventoryIcon( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_DoDoor( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoDoor::Execute()
 {
-	int SectorID = NETWORK_ReadShort( pByteStream );
-	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	DDoor *pDoor = P_GetDoorBySectorNum( SectorID );
+	DDoor *pDoor = P_GetDoorBySectorNum( sectorID );
 	
 	sector_t *pSector = NULL;
 
-	if (( SectorID >= 0 ) && ( SectorID < numsectors ))
-		pSector = &sectors[SectorID];
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 	
-	if ( NETWORK_ReadBit( pByteStream ) )
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// If the sector already has activity, don't override it.
+	if ( !pDoor && pSector->ceilingdata )
+		return;
+	
+	if (pDoor == NULL)
 	{
-		if ( pDoor )
-		{
-			// Door is destroyed on server side
-			P_SetCeilingPlane( pSector, Position );
-			pDoor->SetDirection( 0 );
-			pDoor->Destroy();
-		}
+		// Create the new door.
+		pDoor = new DDoor( pSector, (DDoor::EVlDoor)type, speed, topWait, lightTag, g_ConnectionState != CTS_ACTIVE );
 	}
 	else
 	{
-		int Instigator = NETWORK_ReadByte( pByteStream );
-		int Type = NETWORK_ReadByte( pByteStream );
-		fixed_t Direction = CLIENT_AdjustDoorDirection( NETWORK_ReadByte( pByteStream ) );
-		fixed_t Speed = NETWORK_ReadLong( pByteStream );
-		int TopWait = NETWORK_ReadLong( pByteStream );
-		int Countdown = NETWORK_ReadLong( pByteStream );
-		int LightTag = NETWORK_ReadShort( pByteStream );
-		
-		// Invalid sector.
-		if ( !pSector )
-			return;
+		pDoor->SetType( (DDoor::EVlDoor)type );
+		pDoor->SetSpeed( speed );
+		pDoor->SetTopWait( topWait );
+		pDoor->SetLightTag( lightTag );
+	}
 
-		// If the sector already has activity, don't override it.
-		if ( !pDoor && pSector->ceilingdata )
-			return;
-	
-		if (pDoor == NULL)
-		{
-			// Create the new door.
-			pDoor = new DDoor( pSector, (DDoor::EVlDoor)Type, Speed, TopWait, LightTag, g_ConnectionState != CTS_ACTIVE );
-		}
-		else
-		{
-			pDoor->SetType( (DDoor::EVlDoor)Type );
-			pDoor->SetSpeed( Speed );
-			pDoor->SetTopWait( TopWait );
-			pDoor->SetLightTag( LightTag );
-		}
+	pDoor->SetLastInstigator( &players[instigator] );
+	P_SetCeilingPlane( pSector, position );
+	pDoor->SetDirection( CLIENT_AdjustDoorDirection ( direction ) );
+	pDoor->SetCountdown( countdown );
 
-		pDoor->SetLastInstigator( &players[Instigator] );
-		P_SetCeilingPlane( pSector, Position );
-		pDoor->SetDirection( Direction );
-		pDoor->SetCountdown( Countdown );
-
-		if ( Instigator == consoleplayer )
-		{
-			pDoor->Predict();
-		}
+	if ( instigator == consoleplayer )
+	{
+		pDoor->Predict();
 	}
 }
 
 //*****************************************************************************
 //
-static void client_DoFloor( BYTESTREAM_s *pByteStream )
+void ServerCommands::DestroyDoor::Execute()
 {
-	int SectorID = NETWORK_ReadShort( pByteStream );
-	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	DFloor *pFloor = P_GetFloorBySectorNum( SectorID );
+	DDoor *pDoor = P_GetDoorBySectorNum( sectorID );
+
+	sector_t *pSector = NULL;
+
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
+
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// Door doesn't exist
+	if ( !pDoor )
+		return;
+
+	// Door is destroyed on server side
+	P_SetCeilingPlane( pSector, position );
+	pDoor->SetDirection( 0 );
+	pDoor->Destroy();
+}
+
+//*****************************************************************************
+//
+void ServerCommands::DoFloor::Execute()
+{
+	DFloor *pFloor = P_GetFloorBySectorNum( sectorID );
 	
 	sector_t *pSector = NULL;
 	DWaggleBase	*pWaggle = NULL;
 
-	if (( SectorID >= 0 ) && ( SectorID < numsectors ))
-		pSector = &sectors[SectorID];
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 	
-	if ( NETWORK_ReadBit( pByteStream ) )
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// If the sector already has activity, don't override it.
+	if ( !pFloor && pSector->floordata )
+		return;
+	
+	if (pFloor == NULL )
 	{
-		if ( pFloor )
-		{
-			// Floor is destroyed on server side
-			P_SetFloorPlane( pSector, Position );
-			pFloor->SetDirection( 0 );
-			pFloor->Destroy();
-		}
+		// Create the new floor.
+		pFloor = new DFloor( pSector );
 	}
-	else
+
+	pFloor->SetLastInstigator( &players[instigator] );
+	pFloor->SetType( (DFloor::EFloor)type );
+	pFloor->SetCrush( static_cast<SBYTE>( crush ) );
+	pFloor->SetHexencrush( hexenCrush );
+	pFloor->SetOrgDist( orgDist );
+	pFloor->SetFloorDestDist( destDist );
+	P_SetFloorPlane( pSector, position );
+	pFloor->SetDirection( CLIENT_AdjustFloorDirection( direction ) );
+	pFloor->SetSpeed( speed );
+	pFloor->SetNewSpecial( newSpecial );
+
+	if ( instigator == consoleplayer )
 	{
-		int Instigator = NETWORK_ReadByte( pByteStream );
-		int Type = NETWORK_ReadByte( pByteStream );
-		int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
-		fixed_t Speed = NETWORK_ReadLong( pByteStream );
-		fixed_t OrgDist = NETWORK_ReadLong( pByteStream );
-		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
-		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-		bool Hexencrush = NETWORK_ReadBit( pByteStream );
-		int NewSpecial = NETWORK_ReadLong( pByteStream );
-		
-		// Invalid sector.
-		if ( !pSector )
-			return;
-
-		// If the sector already has activity, don't override it.
-		if ( !pFloor && pSector->floordata )
-			return;
-	
-		if (pFloor == NULL )
-		{
-			// Create the new floor.
-			pFloor = new DFloor( pSector );
-		}
-
-		pFloor->SetLastInstigator( &players[Instigator] );
-		pFloor->SetType( (DFloor::EFloor)Type );
-		pFloor->SetCrush( Crush );
-		pFloor->SetHexencrush( Hexencrush );
-		pFloor->SetOrgDist( OrgDist );
-		pFloor->SetFloorDestDist( FloorDestDist );
-		P_SetFloorPlane( pSector, Position );
-		pFloor->SetDirection( Direction );
-		pFloor->SetSpeed( Speed );
-		pFloor->SetNewSpecial( NewSpecial );
-
-		if ( Instigator == consoleplayer )
-		{
-			pFloor->Predict();
-		}
+		pFloor->Predict();
 	}
 }
 
 //*****************************************************************************
 //
-static void client_BuildStair( BYTESTREAM_s *pByteStream )
+void ServerCommands::DestroyFloor::Execute()
 {
-	int SectorID = NETWORK_ReadShort( pByteStream );
-	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	DFloor *pFloor = P_GetFloorBySectorNum( SectorID );
+	DFloor *pFloor = P_GetFloorBySectorNum( sectorID );
 	
 	sector_t *pSector = NULL;
+	DWaggleBase	*pWaggle = NULL;
 
-	if (( SectorID >= 0 ) && ( SectorID < numsectors ))
-		pSector = &sectors[SectorID];
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 	
-	if ( NETWORK_ReadBit( pByteStream ) )
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// Floor doesn't exist
+	if ( !pFloor )
+		return;
+
+	// Floor is destroyed on server side
+	P_SetFloorPlane( pSector, position );
+	pFloor->SetDirection( 0 );
+	pFloor->Destroy();
+}
+
+//*****************************************************************************
+//
+void ServerCommands::BuildStair::Execute()
+{
+	DFloor *pFloor = P_GetFloorBySectorNum( sectorID );
+
+	sector_t *pSector = NULL;
+
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
+
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// If the sector already has activity, don't override it.
+	if ( !pFloor && pSector->floordata )
+		return;
+	
+	if ( pFloor == NULL )
 	{
-		if ( pFloor )
-		{
-			// Floor is destroyed on server side
-			P_SetFloorPlane( pSector, Position );
-			pFloor->SetDirection( 0 );
-			pFloor->Destroy();
-		}
+		// Create the new floor.
+		pFloor = new DFloor( pSector );
 	}
-	else
+
+	pFloor->SetLastInstigator( &players[instigator] );
+	pFloor->SetType( (DFloor::EFloor)type );
+	pFloor->SetCrush( static_cast<SBYTE>( crush ) );
+	pFloor->SetHexencrush( hexenCrush );
+	pFloor->SetOrgDist( orgDist );
+	pFloor->SetFloorDestDist( destDist );
+	P_SetFloorPlane( pSector, position );
+	pFloor->SetDirection( CLIENT_AdjustFloorDirection( direction ) );
+	pFloor->SetSpeed( speed );
+	pFloor->SetNewSpecial( newSpecial );
+	pFloor->SetResetCount( resetCount );
+	pFloor->SetDelay( delay );
+	pFloor->SetPauseTime( pauseTime );
+	pFloor->SetStepTime( stepTime );
+	pFloor->SetPerStepTime( perStepTime );
+
+	if ( instigator == consoleplayer )
 	{
-		int Instigator = NETWORK_ReadByte( pByteStream );
-		int Type = NETWORK_ReadByte( pByteStream );
-		int Direction = CLIENT_AdjustFloorDirection( NETWORK_ReadByte( pByteStream ) );
-		fixed_t Speed = NETWORK_ReadLong( pByteStream );
-		fixed_t OrgDist = NETWORK_ReadLong( pByteStream );
-		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
-		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-		bool Hexencrush = NETWORK_ReadBit( pByteStream );
-		LONG lNewSpecial = NETWORK_ReadLong( pByteStream );
-		int ResetCount = NETWORK_ReadLong( pByteStream );
-		int Delay = NETWORK_ReadLong( pByteStream );
-		int PauseTime = NETWORK_ReadLong( pByteStream );
-		int StepTime = NETWORK_ReadLong( pByteStream );
-		int PerStepTime = NETWORK_ReadLong( pByteStream );
-
-		// Invalid sector.
-		if ( !pSector )
-			return;
-
-		// If the sector already has activity, don't override it.
-		if ( !pFloor && pSector->floordata )
-			return;
-	
-		if ( pFloor == NULL )
-		{
-			// Create the new floor.
-			pFloor = new DFloor( pSector );
-		}
-
-		pFloor->SetLastInstigator( &players[Instigator] );
-		pFloor->SetType( (DFloor::EFloor)Type );
-		pFloor->SetCrush( Crush );
-		pFloor->SetHexencrush( Hexencrush );
-		pFloor->SetOrgDist( OrgDist );
-		pFloor->SetFloorDestDist( FloorDestDist );
-		P_SetFloorPlane( pSector, Position );
-		pFloor->SetDirection( Direction );
-		pFloor->SetSpeed( Speed );
-		pFloor->SetNewSpecial( lNewSpecial );
-		pFloor->SetResetCount( ResetCount );
-		pFloor->SetDelay( Delay );
-		pFloor->SetPauseTime( PauseTime );
-		pFloor->SetStepTime( StepTime );
-		pFloor->SetPerStepTime( PerStepTime );
-
-		if ( Instigator == consoleplayer )
-		{
-			pFloor->Predict();
-		}
+		pFloor->Predict();
 	}
 }
 
 //*****************************************************************************
 //
-static void client_DoCeiling( BYTESTREAM_s *pByteStream )
+void ServerCommands::DestroyStair::Execute()
 {
-	int SectorID = NETWORK_ReadShort( pByteStream );
-	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	DCeiling *pCeiling = P_GetCeilingBySectorNum( SectorID );
+	DFloor *pFloor = P_GetFloorBySectorNum( sectorID );
 	
 	sector_t *pSector = NULL;
 
-	if (( SectorID >= 0 ) && ( SectorID < numsectors ))
-		pSector = &sectors[SectorID];
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 	
-	if ( NETWORK_ReadBit( pByteStream ) )
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// Floor doesn't exist
+	if ( !pFloor )
+		return;
+
+	// Floor is destroyed on server side
+	P_SetFloorPlane( pSector, position );
+	pFloor->SetDirection( 0 );
+	pFloor->Destroy();
+}
+
+//*****************************************************************************
+//
+void ServerCommands::DoCeiling::Execute()
+{
+	DCeiling *pCeiling = P_GetCeilingBySectorNum( sectorID );
+
+	sector_t *pSector = NULL;
+
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
+
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// If the sector already has activity, don't override it.
+	if ( !pCeiling && pSector->ceilingdata )
+		return;
+	
+	if ( pCeiling == NULL )
 	{
-		if ( pCeiling )
-		{
-			// Ceiling is destroyed on server side
-			P_SetCeilingPlane( pSector, Position );
-			pCeiling->SetDirection( 0 );
-			pCeiling->Destroy();
-		}
+		// Create the new ceiling.
+		pCeiling = new DCeiling( pSector );
 	}
-	else
+
+	pCeiling->SetLastInstigator( &players[instigator] );
+	pCeiling->SetTag( tag );
+	pCeiling->SetType( (DCeiling::ECeiling)type );
+	pCeiling->SetBottomHeight( bottomHeight );
+	pCeiling->SetTopHeight( topHeight );
+	P_SetCeilingPlane( pSector, position );
+	pCeiling->SetDirection( CLIENT_AdjustCeilingDirection( direction ) );
+	pCeiling->SetOldDirection( CLIENT_AdjustCeilingDirection( oldDirection ) );
+	pCeiling->SetSpeed( speed );
+	pCeiling->SetSpeed1( speed1 );
+	pCeiling->SetSpeed2( speed2 );
+	pCeiling->SetCrush( static_cast<SBYTE>( crush ) );
+	pCeiling->SetHexencrush( hexenCrush );
+	pCeiling->SetSilent( silent );
+
+	if ( instigator == consoleplayer )
 	{
-		int Instigator = NETWORK_ReadByte( pByteStream );
-		int Tag = NETWORK_ReadByte( pByteStream );
-		int Type = NETWORK_ReadByte( pByteStream );
-		int Direction = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
-		int OldDirection = CLIENT_AdjustCeilingDirection( NETWORK_ReadByte( pByteStream ) );
-		fixed_t BottomHeight = NETWORK_ReadLong( pByteStream );
-		fixed_t TopHeight = NETWORK_ReadLong( pByteStream );
-		fixed_t Speed = NETWORK_ReadLong( pByteStream );
-		fixed_t Speed1 = NETWORK_ReadLong( pByteStream );
-		fixed_t Speed2 = NETWORK_ReadLong( pByteStream );
-		int Crush = static_cast<SBYTE>( NETWORK_ReadByte( pByteStream ) );
-		bool Hexencrush = NETWORK_ReadBit( pByteStream );
-		int Silent = NETWORK_ReadShort( pByteStream );
-		
-		// Invalid sector.
-		if ( !pSector )
-			return;
-
-		// If the sector already has activity, don't override it.
-		if ( !pCeiling && pSector->ceilingdata )
-			return;
-	
-		if ( pCeiling == NULL )
-		{
-			// Create the new ceiling.
-			pCeiling = new DCeiling( pSector );
-		}
-
-		pCeiling->SetLastInstigator( &players[Instigator] );
-		pCeiling->SetTag( Tag );
-		pCeiling->SetType( (DCeiling::ECeiling)Type );
-		pCeiling->SetBottomHeight( BottomHeight );
-		pCeiling->SetTopHeight( TopHeight );
-		P_SetCeilingPlane( pSector, Position );
-		pCeiling->SetDirection( Direction );
-		pCeiling->SetOldDirection( OldDirection );
-		pCeiling->SetSpeed( Speed );
-		pCeiling->SetSpeed1( Speed1 );
-		pCeiling->SetSpeed2( Speed2 );
-		pCeiling->SetCrush( Crush );
-		pCeiling->SetHexencrush( Hexencrush );
-		pCeiling->SetSilent( Silent );
-
-		if ( Instigator == consoleplayer )
-		{
-			pCeiling->Predict();
-		}
+		pCeiling->Predict();
 	}
 }
 
 //*****************************************************************************
 //
-static void client_DoPlat( BYTESTREAM_s *pByteStream )
+void ServerCommands::DestroyCeiling::Execute()
 {
-	int SectorID = NETWORK_ReadShort( pByteStream );
-	fixed_t Position = NETWORK_ReadLong( pByteStream );
-	DPlat *pPlat = P_GetPlatBySectorNum( SectorID );
+	DCeiling *pCeiling = P_GetCeilingBySectorNum( sectorID );
 	
 	sector_t *pSector = NULL;
 
-	if (( SectorID >= 0 ) && ( SectorID < numsectors ))
-		pSector = &sectors[SectorID];
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 	
-	if ( NETWORK_ReadBit( pByteStream ) )
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// Ceiling doesn't exist
+	if ( !pCeiling )
+		return;
+
+	// Ceiling is destroyed on server side
+	P_SetCeilingPlane( pSector, position );
+	pCeiling->SetDirection( 0 );
+	pCeiling->Destroy();
+}
+
+//*****************************************************************************
+//
+void ServerCommands::DoPlat::Execute()
+{
+	DPlat *pPlat = P_GetPlatBySectorNum( sectorID );
+
+	sector_t *pSector = NULL;
+
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
+	
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// If the sector already has activity, don't override it.
+	if ( !pPlat && pSector->ceilingdata )
+		return;
+	
+	if (pPlat == NULL)
 	{
-		if ( pPlat )
-		{
-			// Plat is destroyed on server side
-			P_SetFloorPlane( pSector, Position );
-			pPlat->Destroy();
-		}
+		// Create the new door.
+		pPlat = new DPlat( pSector );
 	}
-	else
+
+	pPlat->SetLastInstigator( &players[instigator] );
+	pPlat->SetType( (DPlat::EPlatType)type );
+	pPlat->SetStatus( status );
+	pPlat->SetOldStatus( oldStatus );
+	pPlat->SetSpeed( speed );
+	pPlat->SetHigh( high );
+	pPlat->SetLow( low );
+	P_SetFloorPlane( pSector, position );
+	pPlat->SetWait( wait );
+	pPlat->SetCount( count );
+	pPlat->SetCrush( crush );
+	pPlat->SetTag( tag );
+
+	if ( instigator == consoleplayer )
 	{
-		int Instigator = NETWORK_ReadByte( pByteStream );
-		int Type = NETWORK_ReadByte( pByteStream );
-		int Status = NETWORK_ReadByte( pByteStream );
-		int OldStatus = NETWORK_ReadByte( pByteStream );
-		fixed_t lSpeed = NETWORK_ReadLong( pByteStream );
-		fixed_t High = NETWORK_ReadLong( pByteStream );
-		fixed_t Low = NETWORK_ReadLong( pByteStream );
-		LONG Wait = NETWORK_ReadLong( pByteStream );
-		LONG Count = NETWORK_ReadLong( pByteStream );
-		LONG Crush = NETWORK_ReadLong( pByteStream );
-		LONG Tag = NETWORK_ReadLong( pByteStream );
-	
-		// Invalid sector.
-		if ( !pSector )
-			return;
-
-		// If the sector already has activity, don't override it.
-		if ( !pPlat && pSector->ceilingdata )
-			return;
-	
-		if (pPlat == NULL)
-		{
-			// Create the new door.
-			pPlat = new DPlat( pSector );
-		}
-
-		pPlat->SetLastInstigator( &players[Instigator] );
-		pPlat->SetType( (DPlat::EPlatType)Type );
-		pPlat->SetStatus( Status );
-		pPlat->SetOldStatus( OldStatus );
-		pPlat->SetSpeed( lSpeed );
-		pPlat->SetHigh( High );
-		pPlat->SetLow( Low );
-		P_SetFloorPlane( pSector, Position );
-		pPlat->SetWait( Wait );
-		pPlat->SetCount( Count );
-		pPlat->SetCrush( Crush );
-		pPlat->SetTag( Tag );
-
-		if ( Instigator == consoleplayer )
-		{
-			pPlat->Predict();
-		}
+		pPlat->Predict();
 	}
 }
 
 //*****************************************************************************
 //
-static void client_DoElevator( BYTESTREAM_s *pByteStream )
+void ServerCommands::DestroyPlat::Execute()
 {
-	int SectorID = NETWORK_ReadShort( pByteStream );
-	fixed_t FloorPosition = NETWORK_ReadLong( pByteStream );
-	fixed_t CeilingPosition = NETWORK_ReadLong( pByteStream );
-	DElevator *pElevator = P_GetElevatorBySectorNum( SectorID );
+	DPlat *pPlat = P_GetPlatBySectorNum( sectorID );
+
+	sector_t *pSector = NULL;
+
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
+
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// Plat doesn't exist
+	if ( !pPlat )
+		return;
+
+	// Plat is destroyed on server side
+	P_SetFloorPlane( pSector, position );
+	pPlat->Destroy();
+}
+
+//*****************************************************************************
+//
+void ServerCommands::DoElevator::Execute()
+{
+	DElevator *pElevator = P_GetElevatorBySectorNum( sectorID );
 	
 	sector_t *pSector = NULL;
 
-	if (( SectorID >= 0 ) && ( SectorID < numsectors ))
-		pSector = &sectors[SectorID];
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 	
-	if ( NETWORK_ReadBit( pByteStream ) )
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// If the sector already has activity, don't override it.
+	if ( !pElevator && (pSector->floordata || pSector->ceilingdata) )
+		return;
+	
+	if (pElevator == NULL)
 	{
-		if ( pElevator )
-		{
-			// Elevator is destroyed on server side
-			pElevator->SetDirection( 0 );
-			P_SetFloorPlane( pSector, FloorPosition );
-			P_SetCeilingPlane( pSector, CeilingPosition );
-			pElevator->Destroy();
-		}
+		// Create the new elevator.
+		pElevator = new DElevator( pSector );
 	}
-	else
+
+	pElevator->SetLastInstigator( &players[instigator] );
+	pElevator->SetType( (DElevator::EElevator)type );
+	pElevator->SetSpeed( speed );
+	pElevator->SetDirection( CLIENT_AdjustElevatorDirection( direction ) );
+	P_SetFloorPlane( pSector, floorPosition );
+	P_SetCeilingPlane( pSector, ceilingPosition );
+	pElevator->SetFloorDestDist( floorDestDist );
+	pElevator->SetCeilingDestDist( ceilingDestDist );
+
+	if ( instigator == consoleplayer )
 	{
-		int Instigator = NETWORK_ReadByte( pByteStream );
-		int Type = NETWORK_ReadByte( pByteStream );
-		fixed_t Speed = NETWORK_ReadLong( pByteStream );
-		int Direction = CLIENT_AdjustElevatorDirection( NETWORK_ReadByte( pByteStream ) );
-		fixed_t FloorDestDist = NETWORK_ReadLong( pByteStream );
-		fixed_t CeilingDestDist = NETWORK_ReadLong( pByteStream );
-		
-		// Invalid sector.
-		if ( !pSector )
-			return;
-
-		// If the sector already has activity, don't override it.
-		if ( !pElevator && (pSector->floordata || pSector->ceilingdata) )
-			return;
-	
-		if (pElevator == NULL)
-		{
-			// Create the new elevator.
-			pElevator = new DElevator( pSector );
-		}
-
-		pElevator->SetLastInstigator( &players[Instigator] );
-		pElevator->SetType( (DElevator::EElevator)Type );
-		pElevator->SetSpeed( Speed );
-		pElevator->SetDirection( Direction );
-		P_SetFloorPlane( pSector, FloorPosition );
-		P_SetCeilingPlane( pSector, CeilingPosition );
-		pElevator->SetFloorDestDist( FloorDestDist );
-		pElevator->SetCeilingDestDist( CeilingDestDist );
-
-		if ( Instigator == consoleplayer )
-		{
-			pElevator->Predict();
-		}
+		pElevator->Predict();
 	}
 }
 
 //*****************************************************************************
 //
-static void client_DoPillar( BYTESTREAM_s *pByteStream )
+void ServerCommands::DestroyElevator::Execute()
 {
-	int SectorID = NETWORK_ReadShort ( pByteStream );
-	fixed_t FloorPosition = NETWORK_ReadLong ( pByteStream );
-	fixed_t CeilingPosition = NETWORK_ReadLong ( pByteStream );
-	DPillar	*pPillar = P_GetPillarBySectorNum( SectorID );
+	DElevator *pElevator = P_GetElevatorBySectorNum( sectorID );
 	
 	sector_t *pSector = NULL;
 
-	if (( SectorID >= 0 ) && ( SectorID < numsectors ))
-		pSector = &sectors[SectorID];
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 	
-	if ( NETWORK_ReadBit( pByteStream ) )
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// Elevator doesn't exist
+	if ( !pElevator )
+		return;
+
+	// Elevator is destroyed on server side
+	pElevator->SetDirection( 0 );
+	P_SetFloorPlane( pSector, floorPosition );
+	P_SetCeilingPlane( pSector, ceilingPosition );
+	pElevator->Destroy();
+}
+
+//*****************************************************************************
+//
+void ServerCommands::DoPillar::Execute()
+{
+	DPillar	*pPillar = P_GetPillarBySectorNum( sectorID );
+
+	sector_t *pSector = NULL;
+
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
+
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// If the sector already has activity, don't override it.
+	if ( !pPillar && (pSector->floordata || pSector->ceilingdata) )
+		return;
+
+	if (pPillar == NULL)
 	{
-		if ( pPillar )
-		{
-			// Pillar is destroyed on server side
-			P_SetFloorPlane( pSector, FloorPosition );
-			P_SetCeilingPlane( pSector, CeilingPosition );
-			pPillar->Destroy();
-		}
+		// Create the new pillar.
+		pPillar = new DPillar( pSector );
 	}
+
+	pPillar->SetLastInstigator( &players[instigator] );
+	pPillar->SetType( (DPillar::EPillar)type );
+	P_SetFloorPlane( pSector, floorPosition );
+	P_SetCeilingPlane( pSector, ceilingPosition );
+	pPillar->SetFloorSpeed( floorSpeed );
+	pPillar->SetCeilingSpeed( ceilingSpeed );
+	pPillar->SetFloorTarget( floorTarget );
+	pPillar->SetCeilingTarget( ceilingTarget );
+	pPillar->SetHexencrush( hexenCrush );
+
+	// Begin playing the sound sequence for the pillar.
+	if ( pSector->seqType >= 0 )
+		SN_StartSequence( pSector, CHAN_FLOOR, pSector->seqType, SEQ_PLATFORM, 0 );
 	else
+		SN_StartSequence( pSector, CHAN_FLOOR, "Floor", 0 );
+
+	if ( instigator == consoleplayer )
 	{
-		int Instigator = NETWORK_ReadByte( pByteStream );
-		int Type = NETWORK_ReadByte( pByteStream );
-		fixed_t FloorSpeed = NETWORK_ReadLong( pByteStream );
-		fixed_t CeilingSpeed = NETWORK_ReadLong( pByteStream );
-		fixed_t FloorTarget = NETWORK_ReadLong ( pByteStream );
-		fixed_t CeilingTarget = NETWORK_ReadLong ( pByteStream );
-		LONG Crush = NETWORK_ReadLong ( pByteStream );
-		bool Hexencrush = NETWORK_ReadBit ( pByteStream );
-		
-		// Invalid sector.
-		if ( !pSector )
-			return;
+		pPillar->Predict();
+	}
+}
 
-		// If the sector already has activity, don't override it.
-		if ( !pPillar && (pSector->floordata || pSector->ceilingdata) )
-			return;
+//*****************************************************************************
+//
+void ServerCommands::DestroyPillar::Execute()
+{
+	DPillar	*pPillar = P_GetPillarBySectorNum( sectorID );
+	
+	sector_t *pSector = NULL;
 
-		if (pPillar == NULL)
-		{
-			// Create the new pillar.
-			pPillar = new DPillar( pSector );
-		}
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 
-		pPillar->SetLastInstigator( &players[Instigator] );
-		pPillar->SetType( (DPillar::EPillar)Type );
-		P_SetFloorPlane( pSector, FloorPosition );
-		P_SetCeilingPlane( pSector, CeilingPosition );
-		pPillar->SetFloorSpeed( FloorSpeed );
-		pPillar->SetCeilingSpeed( CeilingSpeed );
-		pPillar->SetFloorTarget( FloorTarget );
-		pPillar->SetCeilingTarget( CeilingTarget );
-		pPillar->SetHexencrush( Hexencrush );
+	// Invalid sector.
+	if ( !pSector )
+		return;
 
-		// Begin playing the sound sequence for the pillar.
-		if ( pSector->seqType >= 0 )
-			SN_StartSequence( pSector, CHAN_FLOOR, pSector->seqType, SEQ_PLATFORM, 0 );
+	// Pillar doesn't exist
+	if ( !pPillar )
+		return;
+
+	// Pillar is destroyed on server side
+	P_SetFloorPlane( pSector, floorPosition );
+	P_SetCeilingPlane( pSector, ceilingPosition );
+	pPillar->Destroy();
+}
+
+//*****************************************************************************
+//
+void ServerCommands::DoWaggle::Execute()
+{
+	DWaggleBase	*pWaggle = P_GetWaggleBySectorNum( sectorID, isCeilingWaggle );
+
+	sector_t *pSector = NULL;
+
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
+
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// If the sector already has activity, don't override it.
+	if ( !pWaggle && ( isCeilingWaggle ? pSector->ceilingdata : pSector->floordata ))
+		return;
+
+	if (pWaggle == NULL)
+	{
+		// Create the waggle
+		if ( isCeilingWaggle )
+			pWaggle = static_cast<DWaggleBase *>( new DCeilingWaggle( pSector ));
 		else
-			SN_StartSequence( pSector, CHAN_FLOOR, "Floor", 0 );
+			pWaggle = static_cast<DWaggleBase *>( new DFloorWaggle( pSector ));
+	}
 
-		if ( Instigator == consoleplayer )
-		{
-			pPillar->Predict();
-		}
+	pWaggle->SetLastInstigator( &players[instigator] );
+	if ( isCeilingWaggle )
+		P_SetCeilingPlane( pSector, position );
+	else
+		P_SetFloorPlane( pSector, position );
+	pWaggle->SetOriginalDistance( originalDistance );
+	pWaggle->SetAccumulator( accumulator );
+	pWaggle->SetAccelerationDelta( accelerationDelta );
+	pWaggle->SetTargetScale( targetScale );
+	pWaggle->SetScale( scale );
+	pWaggle->SetScaleDelta( scaleDelta );
+	pWaggle->SetTicker( ticker );
+	pWaggle->SetState( state );
+
+	if ( instigator == consoleplayer )
+	{
+		pWaggle->Predict();
 	}
 }
 
 //*****************************************************************************
 //
-static void client_DoWaggle( BYTESTREAM_s *pByteStream )
+void ServerCommands::DestroyWaggle::Execute()
 {
-	int SectorID = NETWORK_ReadShort( pByteStream );
-	fixed_t Position = NETWORK_ReadLong ( pByteStream );
-	bool bCeiling = NETWORK_ReadBit( pByteStream );
-	DWaggleBase	*pWaggle = P_GetWaggleBySectorNum( SectorID, bCeiling );
-	
+	DWaggleBase	*pWaggle = P_GetWaggleBySectorNum( sectorID, isCeilingWaggle );
+
 	sector_t *pSector = NULL;
 
-	if (( SectorID >= 0 ) && ( SectorID < numsectors ))
-		pSector = &sectors[SectorID];
+	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
+		pSector = &sectors[sectorID];
 
-	if ( NETWORK_ReadBit( pByteStream ) )
-	{
-		if ( pWaggle )
-		{
-			// Waggle is destroyed on server side
-			if ( bCeiling )
-				P_SetCeilingPlane( pSector, Position );
-			else
-				P_SetFloorPlane( pSector, Position );
-			pWaggle->Destroy();
-		}
-	}
+	// Invalid sector.
+	if ( !pSector )
+		return;
+
+	// Waggle doesn't exist
+	if ( !pWaggle )
+		return;
+
+	// Waggle is destroyed on server side
+	if ( isCeilingWaggle )
+		P_SetCeilingPlane( pSector, position );
 	else
-	{
-		int Instigator = NETWORK_ReadByte( pByteStream );
-		fixed_t OriginalDistance = NETWORK_ReadLong( pByteStream );
-		fixed_t Accumulator = NETWORK_ReadLong( pByteStream );
-		fixed_t AccelerationDelta = NETWORK_ReadLong( pByteStream );
-		fixed_t TargetScale = NETWORK_ReadLong( pByteStream );
-		fixed_t Scale = NETWORK_ReadLong( pByteStream );
-		fixed_t ScaleDelta = NETWORK_ReadLong( pByteStream );
-		int Ticker = NETWORK_ReadLong( pByteStream );
-		int State = NETWORK_ReadByte( pByteStream );
-
-		// Invalid sector.
-		if ( !pSector )
-			return;
-
-		// If the sector already has activity, don't override it.
-		if ( !pWaggle && ( bCeiling ? pSector->ceilingdata : pSector->floordata ))
-			return;
-
-		if (pWaggle == NULL)
-		{
-			// Create the waggle
-			if ( bCeiling )
-				pWaggle = static_cast<DWaggleBase *>( new DCeilingWaggle( pSector ));
-			else
-				pWaggle = static_cast<DWaggleBase *>( new DFloorWaggle( pSector ));
-		}
-		
-		pWaggle->SetLastInstigator( &players[Instigator] );
-		if ( bCeiling )
-			P_SetCeilingPlane( pSector, Position );
-		else
-			P_SetFloorPlane( pSector, Position );
-		pWaggle->SetOriginalDistance( OriginalDistance );
-		pWaggle->SetAccumulator( Accumulator );
-		pWaggle->SetAccelerationDelta( AccelerationDelta );
-		pWaggle->SetTargetScale( TargetScale );
-		pWaggle->SetScale( Scale );
-		pWaggle->SetScaleDelta( ScaleDelta );
-		pWaggle->SetTicker( Ticker );
-		pWaggle->SetState( State );
-
-		if ( Instigator == consoleplayer )
-		{
-			pWaggle->Predict();
-		}
-	}
+		P_SetFloorPlane( pSector, position );
+	pWaggle->Destroy();
 }
 
 //*****************************************************************************
 //
-static void client_DoRotatePoly( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoRotatePoly::Execute()
 {
-	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
-	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	LONG lDist = NETWORK_ReadLong( pByteStream );
-
 	// Make sure the polyobj exists before we try to work with it.
-	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( polyObj );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", lPolyNum );
+		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", polyObj );
 		return;
 	}
 
@@ -7638,21 +6903,21 @@ static void client_DoRotatePoly( BYTESTREAM_s *pByteStream )
 	if (pRotatePoly == NULL )
 	{
 		// Create the polyobject.
-		pRotatePoly = new DRotatePoly(lPolyNum);
+		pRotatePoly = new DRotatePoly( polyObj );
 		pPoly->specialdata = pRotatePoly;
 		
-		if ( Instigator != consoleplayer )
+		if ( instigator != consoleplayer )
 		{
 			// Start the sound sequence associated with this polyobject.
 			SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
 		}
 	}
 	
-	pRotatePoly->SetLastInstigator( &players[Instigator] );
-	pRotatePoly->SetSpeed( Speed );
-	pRotatePoly->SetDist( lDist );
+	pRotatePoly->SetLastInstigator( &players[instigator] );
+	pRotatePoly->SetSpeed( speed );
+	pRotatePoly->SetDist( dist );
 
-	if ( Instigator == consoleplayer )
+	if ( instigator == consoleplayer )
 	{
 		pRotatePoly->Predict();
 	}
@@ -7660,21 +6925,13 @@ static void client_DoRotatePoly( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_DoMovePoly( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoMovePoly::Execute()
 {
-	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
-	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
-	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
-	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	angle_t Angle = NETWORK_ReadLong( pByteStream );
-	LONG lDist = NETWORK_ReadLong( pByteStream );
-
 	// Make sure the polyobj exists before we try to work with it.
-	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( polyObj );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", lPolyNum );
+		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", polyObj );
 		return;
 	}
 
@@ -7693,24 +6950,24 @@ static void client_DoMovePoly( BYTESTREAM_s *pByteStream )
 	if ( pMovePoly == NULL )
 	{
 		// Create the polyobject.
-		pMovePoly = new DMovePoly(lPolyNum);
+		pMovePoly = new DMovePoly( polyObj );
 		pPoly->specialdata = pMovePoly;
 		
-		if ( Instigator != consoleplayer )
+		if ( instigator != consoleplayer )
 		{
 			// Start the sound sequence associated with this polyobject.
 			SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
 		}
 	}
 	
-	pMovePoly->SetLastInstigator( &players[Instigator] );
-	pMovePoly->SetXSpeed( XSpeed );
-	pMovePoly->SetYSpeed( YSpeed );
-	pMovePoly->SetSpeed( Speed );
-	pMovePoly->SetAngle( Angle );
-	pMovePoly->SetDist( lDist );
+	pMovePoly->SetLastInstigator( &players[instigator] );
+	pMovePoly->SetXSpeed( xSpeed );
+	pMovePoly->SetYSpeed( ySpeed );
+	pMovePoly->SetSpeed( speed );
+	pMovePoly->SetAngle( angle );
+	pMovePoly->SetDist( dist );
 
-	if ( Instigator == consoleplayer )
+	if ( instigator == consoleplayer )
 	{
 		pMovePoly->Predict();
 	}
@@ -7718,22 +6975,13 @@ static void client_DoMovePoly( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_DoMovePolyTo( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoMovePolyTo::Execute()
 {
-	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
-	fixed_t XTarget = NETWORK_ReadLong( pByteStream );
-	fixed_t YTarget = NETWORK_ReadLong( pByteStream );
-	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
-	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
-	int Speed = NETWORK_ReadLong( pByteStream );
-	LONG lDist = NETWORK_ReadLong( pByteStream );
-
 	// Make sure the polyobj exists before we try to work with it.
-	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( polyObj );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoMovePolyTo: Invalid polyobj number: %ld\n", lPolyNum );
+		CLIENT_PrintWarning( "client_DoMovePolyTo: Invalid polyobj number: %ld\n", polyObj );
 		return;
 	}
 
@@ -7752,25 +7000,25 @@ static void client_DoMovePolyTo( BYTESTREAM_s *pByteStream )
 	if (pMovePolyTo == NULL )
 	{
 		// Create the polyobject.
-		pMovePolyTo = new DMovePolyTo(lPolyNum);
+		pMovePolyTo = new DMovePolyTo( polyObj );
 		pPoly->specialdata = pMovePolyTo;
 		
-		if ( Instigator != consoleplayer )
+		if ( instigator != consoleplayer )
 		{
 			// Start the sound sequence associated with this polyobject.
 			SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
 		}
 	}
 	
-	pMovePolyTo->SetLastInstigator( &players[Instigator] );
-	pMovePolyTo->SetXTarget( XTarget );
-	pMovePolyTo->SetYTarget( YTarget );
-	pMovePolyTo->SetXSpeed( XSpeed );
-	pMovePolyTo->SetYSpeed( YSpeed );
-	pMovePolyTo->SetSpeed( Speed );
-	pMovePolyTo->SetDist( lDist );
+	pMovePolyTo->SetLastInstigator( &players[instigator] );
+	pMovePolyTo->SetXTarget( xTarget );
+	pMovePolyTo->SetYTarget( yTarget );
+	pMovePolyTo->SetXSpeed( xSpeed );
+	pMovePolyTo->SetYSpeed( ySpeed );
+	pMovePolyTo->SetSpeed( speed );
+	pMovePolyTo->SetDist( dist );
 
-	if ( Instigator == consoleplayer )
+	if ( instigator == consoleplayer )
 	{
 		pMovePolyTo->Predict();
 	}
@@ -7778,29 +7026,13 @@ static void client_DoMovePolyTo( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_DoPolyDoor( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoPolyDoor::Execute()
 {
-	LONG lPolyNum = NETWORK_ReadShort( pByteStream );
-	LONG lType = NETWORK_ReadByte( pByteStream );
-	int Instigator = NETWORK_ReadByte( pByteStream );
-	fixed_t X = NETWORK_ReadLong( pByteStream );
-	fixed_t Y = NETWORK_ReadLong( pByteStream );
-	fixed_t XSpeed = NETWORK_ReadLong( pByteStream );
-	fixed_t YSpeed = NETWORK_ReadLong( pByteStream );
-	fixed_t Speed = NETWORK_ReadLong( pByteStream );
-	angle_t Angle = NETWORK_ReadLong( pByteStream );
-	LONG lDist = NETWORK_ReadLong( pByteStream );
-	LONG lTotalDist = NETWORK_ReadLong( pByteStream );
-	bool bClose = NETWORK_ReadBit( pByteStream ) ? true : false;
-	LONG lDirection = NETWORK_ReadShort( pByteStream );
-	LONG lTics = NETWORK_ReadShort( pByteStream );
-	LONG lWaitTics = NETWORK_ReadShort( pByteStream );
-
 	// Make sure the polyobj exists before we try to work with it.
-	FPolyObj *pPoly = PO_GetPolyobj( lPolyNum );
+	FPolyObj *pPoly = PO_GetPolyobj( polyObj );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoPolyDoor: Invalid polyobj number: %ld\n", lPolyNum );
+		CLIENT_PrintWarning( "client_DoPolyDoor: Invalid polyobj number: %ld\n", polyObj );
 		return;
 	}
 
@@ -7819,40 +7051,40 @@ static void client_DoPolyDoor( BYTESTREAM_s *pByteStream )
 	if ( pPolyDoor == NULL )
 	{
 		// Create the polyobject.
-		pPolyDoor = new DPolyDoor(lPolyNum, (podoortype_t)lType);
+		pPolyDoor = new DPolyDoor( polyObj, (podoortype_t)type );
 		pPoly->specialdata = pPolyDoor;
 	}
 	
-	pPolyDoor->SetLastInstigator( &players[Instigator] );
+	pPolyDoor->SetLastInstigator( &players[instigator] );
 
-	fixed_t DeltaX = X - pPoly->StartSpot.x;
-	fixed_t DeltaY = Y - pPoly->StartSpot.y;
+	fixed_t DeltaX = x - pPoly->StartSpot.x;
+	fixed_t DeltaY = y - pPoly->StartSpot.y;
 	pPoly->MovePolyobj( DeltaX, DeltaY );
 
-	pPolyDoor->SetXSpeed( XSpeed );
-	pPolyDoor->SetYSpeed( YSpeed );
-	pPolyDoor->SetSpeed( Speed );
+	pPolyDoor->SetXSpeed( xSpeed );
+	pPolyDoor->SetYSpeed( ySpeed );
+	pPolyDoor->SetSpeed( speed );
 
-	angle_t DeltaAngle = Angle - pPoly->angle;
+	angle_t DeltaAngle = angle - pPoly->angle;
 	pPoly->RotatePolyobj(DeltaAngle);
 
-	pPolyDoor->SetDist( lDist );
-	pPolyDoor->SetTotalDist( lTotalDist );
+	pPolyDoor->SetDist( dist );
+	pPolyDoor->SetTotalDist( totalDist );
 
-	pPolyDoor->SetTics( lTics );
-	pPolyDoor->SetWaitTics( lWaitTics );
+	pPolyDoor->SetTics( tics );
+	pPolyDoor->SetWaitTics( waitTics );
 	
-	pPolyDoor->SetClose( bClose );
-	pPolyDoor->SetDirection( lDirection );
+	pPolyDoor->SetClose( close );
+	pPolyDoor->SetDirection( direction );
 
-	if ( Instigator == consoleplayer )
+	if ( instigator == consoleplayer )
 	{
 		pPolyDoor->Predict();
 	}
 	else
 	{
 		// Start the sound sequence associated with this polyobject.
-		if ( lTics == 0 )
+		if ( tics == 0 )
 		{
 			SN_StartSequence( pPoly, pPoly->seqType, SEQ_DOOR, 0 );
 		}
@@ -7865,281 +7097,120 @@ static void client_DoPolyDoor( BYTESTREAM_s *pByteStream )
 
 //*****************************************************************************
 //
-static void client_EarthQuake( BYTESTREAM_s *pByteStream )
+void ServerCommands::EarthQuake::Execute()
 {
-	AActor	*pCenter;
-	LONG	lID;
-	LONG	lIntensity;
-	LONG	lDuration;
-	LONG	lTremorRadius;
-
-	// Read in the center's network ID.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the intensity of the quake.
-	lIntensity = NETWORK_ReadByte( pByteStream );
-
-	// Read in the duration of the quake.
-	lDuration = NETWORK_ReadShort( pByteStream );
-
-	// Read in the tremor radius of the quake.
-	lTremorRadius = NETWORK_ReadShort( pByteStream );
-
-	// [BB] Read in the quake sound.
-	FSoundID quakesound = NETWORK_ReadString( pByteStream );
-
-	// Find the actor that represents the center of the quake based on the network
-	// ID sent. If we can't find the actor, then the quake has no center.
-	pCenter = CLIENT_FindThingByNetID( lID );
-	if ( pCenter == NULL )
-		return;
-
 	// Create the earthquake. Since this is client-side, damage is always 0.
-	new DEarthquake( pCenter, lIntensity, lDuration, 0, lTremorRadius, quakesound );
+	new DEarthquake( center, intensity, duration, 0, tremorRadius, quakeSound );
 }
 
 //*****************************************************************************
 //
-static void client_DoScroller( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoScroller::Execute()
 {
-	DScroller::EScrollType	Type;
-	fixed_t					dX;
-	fixed_t					dY;
-	LONG					lAffectee;
-
-	// Read in the type of scroller.
-	Type = (DScroller::EScrollType)NETWORK_ReadByte( pByteStream );
-
-	// Read in the X speed.
-	dX = NETWORK_ReadLong( pByteStream );
-
-	// Read in the Y speed.
-	dY = NETWORK_ReadLong( pByteStream );
-
-	// Read in the sector/side being scrolled.
-	lAffectee = NETWORK_ReadLong( pByteStream );
-
 	// Check to make sure what we've read in is valid.
 	// [BB] sc_side is allowed, too, but we need to make a different check for it.
-	if (( Type != DScroller::sc_floor ) && ( Type != DScroller::sc_ceiling ) &&
-		( Type != DScroller::sc_carry ) && ( Type != DScroller::sc_carry_ceiling ) && ( Type != DScroller::sc_side ) )
+	if (( type != DScroller::sc_floor ) && ( type != DScroller::sc_ceiling ) &&
+		( type != DScroller::sc_carry ) && ( type != DScroller::sc_carry_ceiling ) && ( type != DScroller::sc_side ) )
 	{
-		CLIENT_PrintWarning( "client_DoScroller: Unknown type: %d!\n", static_cast<int> (Type) );
+		CLIENT_PrintWarning( "client_DoScroller: Unknown type: %d!\n", static_cast<int> (type) );
 		return;
 	}
 
-	if( Type == DScroller::sc_side )
+	if( type == DScroller::sc_side )
 	{
-		if (( lAffectee < 0 ) || ( lAffectee >= numsides ))
+		if (( affectee < 0 ) || ( affectee >= numsides ))
 		{
-			CLIENT_PrintWarning( "client_DoScroller: Invalid side ID: %ld!\n", lAffectee );
+			CLIENT_PrintWarning( "client_DoScroller: Invalid side ID: %ld!\n", affectee );
 			return;
 		}
 	}
-	else if (( lAffectee < 0 ) || ( lAffectee >= numsectors ))
+	else if (( affectee < 0 ) || ( affectee >= numsectors ))
 	{
-		CLIENT_PrintWarning( "client_DoScroller: Invalid sector ID: %ld!\n", lAffectee );
+		CLIENT_PrintWarning( "client_DoScroller: Invalid sector ID: %ld!\n", affectee );
 		return;
 	}
 
 	// Finally, create the scroller.
-	new DScroller( Type, dX, dY, -1, lAffectee, 0 );
+	new DScroller( (DScroller::EScrollType)type, xSpeed, ySpeed, -1, affectee, 0 );
 }
 
 //*****************************************************************************
 //
 // [BB] SetScroller is defined in p_lnspec.cpp.
-void SetScroller (int tag, DScroller::EScrollType type, fixed_t dx, fixed_t dy);
+void DoSetScroller (int tag, DScroller::EScrollType type, fixed_t dx, fixed_t dy);
 
-static void client_SetScroller( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetScroller::Execute()
 {
-	DScroller::EScrollType	Type;
-	fixed_t					dX;
-	fixed_t					dY;
-	LONG					lTag;
-
-	// Read in the type of scroller.
-	Type = (DScroller::EScrollType)NETWORK_ReadByte( pByteStream );
-
-	// Read in the X speed.
-	dX = NETWORK_ReadLong( pByteStream );
-
-	// Read in the Y speed.
-	dY = NETWORK_ReadLong( pByteStream );
-
-	// Read in the sector being scrolled.
-	lTag = NETWORK_ReadShort( pByteStream );
-
 	// Check to make sure what we've read in is valid.
-	if (( Type != DScroller::sc_floor ) && ( Type != DScroller::sc_ceiling ) &&
-		( Type != DScroller::sc_carry ) && ( Type != DScroller::sc_carry_ceiling ))
+	if (( type != DScroller::sc_floor ) && ( type != DScroller::sc_ceiling ) &&
+		( type != DScroller::sc_carry ) && ( type != DScroller::sc_carry_ceiling ))
 	{
-		CLIENT_PrintWarning( "client_SetScroller: Unknown type: %d!\n", static_cast<int> (Type) );
+		CLIENT_PrintWarning( "client_SetScroller: Unknown type: %d!\n", static_cast<int> (type) );
 		return;
 	}
 
 	// Finally, create or update the scroller.
-	SetScroller (lTag, Type, dX, dY );
+	DoSetScroller (tag, (DScroller::EScrollType)type, xSpeed, ySpeed );
 }
 
 //*****************************************************************************
 //
 // [BB] SetWallScroller is defined in p_lnspec.cpp.
-void SetWallScroller(int id, int sidechoice, fixed_t dx, fixed_t dy, int Where);
+void DoSetWallScroller(int id, int sidechoice, fixed_t dx, fixed_t dy, int Where);
 
-static void client_SetWallScroller( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetWallScroller::Execute()
 {
-	LONG					lId;
-	LONG					lSidechoice;
-	fixed_t					dX;
-	fixed_t					dY;
-	LONG					lWhere;
-
-	// Read in the id.
-	lId = NETWORK_ReadLong( pByteStream );
-
-	// Read in the side choice.
-	lSidechoice = NETWORK_ReadByte( pByteStream );
-
-	// Read in the X speed.
-	dX = NETWORK_ReadLong( pByteStream );
-
-	// Read in the Y speed.
-	dY = NETWORK_ReadLong( pByteStream );
-
-	// Read in where.
-	lWhere = NETWORK_ReadLong( pByteStream );
-
-	// Finally, create or update the scroller.
-	SetWallScroller (lId, lSidechoice, dX, dY, lWhere );
+	DoSetWallScroller (id, sideChoice, xSpeed, ySpeed, lWhere );
 }
 
 //*****************************************************************************
 //
-static void client_DoFlashFader( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoFlashFader::Execute()
 {
-	float	fR1;
-	float	fG1;
-	float	fB1;
-	float	fA1;
-	float	fR2;
-	float	fG2;
-	float	fB2;
-	float	fA2;
-	float	fTime;
-	ULONG	ulPlayer;
-
-	// Read in the colors, time for the flash fader and which player to apply the effect to.
-	fR1 = NETWORK_ReadFloat( pByteStream );
-	fG1 = NETWORK_ReadFloat( pByteStream );
-	fB1 = NETWORK_ReadFloat( pByteStream );
-	fA1 = NETWORK_ReadFloat( pByteStream );
-
-	fR2 = NETWORK_ReadFloat( pByteStream );
-	fG2 = NETWORK_ReadFloat( pByteStream );
-	fB2 = NETWORK_ReadFloat( pByteStream );
-	fA2 = NETWORK_ReadFloat( pByteStream );
-
-	fTime = NETWORK_ReadFloat( pByteStream );
-
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// [BB] Sanity check.
-	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
-		return;
-
-	// Create the flash fader.
-	if ( players[ulPlayer].mo )
-		new DFlashFader( fR1, fG1, fB1, fA1, fR2, fG2, fB2, fA2, fTime, players[ulPlayer].mo );
+	if ( player->mo )
+		new DFlashFader( r1, g1, b1, a1, r2, g2, b2, a2, time, player->mo );
 }
 
 //*****************************************************************************
 //
-static void client_GenericCheat( BYTESTREAM_s *pByteStream )
+void ServerCommands::GenericCheat::Execute()
 {
-	ULONG	ulPlayer;
-	ULONG	ulCheat;
-
-	// Read in the player who's doing the cheat.
-	ulPlayer = NETWORK_ReadByte( pByteStream );
-
-	// Read in the cheat.
-	ulCheat = NETWORK_ReadByte( pByteStream );
-
-	if ( playeringame[ulPlayer] == false )
-		return;
-
-	// Finally, do the cheat.
-	cht_DoCheat( &players[ulPlayer], ulCheat );
+	cht_DoCheat( player, cheat );
 }
 
 //*****************************************************************************
 //
-static void client_SetCameraToTexture( BYTESTREAM_s *pByteStream )
+void ServerCommands::SetCameraToTexture::Execute()
 {
-	LONG		lID;
-	const char	*pszTexture;
-	LONG		lFOV;
-	AActor		*pCamera;
-	FTextureID	picNum;
-
-	// Read in the ID of the camera.
-	lID = NETWORK_ReadShort( pByteStream );
-
-	// Read in the name of the texture.
-	pszTexture = NETWORK_ReadString( pByteStream );
-
-	// Read in the FOV of the camera.
-	lFOV = NETWORK_ReadByte( pByteStream );
-
-	// Find the actor that represents the camera. If we can't find the actor, then
-	// break out.
-	pCamera = CLIENT_FindThingByNetID( lID );
-	if ( pCamera == NULL )
-		return;
-
-	picNum = TexMan.CheckForTexture( pszTexture, FTexture::TEX_Wall, FTextureManager::TEXMAN_Overridable );
+	FTextureID picNum = TexMan.CheckForTexture( texture, FTexture::TEX_Wall, FTextureManager::TEXMAN_Overridable );
 	if ( !picNum.Exists() )
 	{
-		CLIENT_PrintWarning( "client_SetCameraToTexture: %s is not a texture\n", pszTexture );
+		CLIENT_PrintWarning( "ServerCommands::SetCameraToTexture: %s is not a texture\n", texture );
 		return;
 	}
 
-	FCanvasTextureInfo::Add( pCamera, picNum, lFOV );
+	FCanvasTextureInfo::Add( camera, picNum, fov );
 }
 
 //*****************************************************************************
 //
-static void client_CreateTranslation( BYTESTREAM_s *pByteStream, bool bIsTypeTwo )
+void ServerCommands::CreateTranslation::Execute()
 {
-	EDITEDTRANSLATION_s	Translation;
+	EDITEDTRANSLATION_s	Translation = EDITEDTRANSLATION_s();
 	FRemapTable	*pTranslation;
 
 	// Read in which translation is being created.
-	Translation.ulIdx = NETWORK_ReadShort( pByteStream );
+	Translation.ulIdx = translation;
 
-	const bool bIsEdited = !!NETWORK_ReadByte( pByteStream );
+	const bool bIsEdited = isEdited;
 
 	// Read in the range that's being translated.
-	Translation.ulStart = NETWORK_ReadByte( pByteStream );
-	Translation.ulEnd = NETWORK_ReadByte( pByteStream );
+	Translation.ulStart = start;
+	Translation.ulEnd = end;
 
-	if ( bIsTypeTwo == false )
-	{
-		Translation.ulPal1 = NETWORK_ReadByte( pByteStream );
-		Translation.ulPal2 = NETWORK_ReadByte( pByteStream );
-		Translation.ulType = DLevelScript::PCD_TRANSLATIONRANGE1;
-	}
-	else
-	{
-		Translation.ulR1 = NETWORK_ReadByte( pByteStream );
-		Translation.ulG1 = NETWORK_ReadByte( pByteStream );
-		Translation.ulB1 = NETWORK_ReadByte( pByteStream );
-		Translation.ulR2 = NETWORK_ReadByte( pByteStream );
-		Translation.ulG2 = NETWORK_ReadByte( pByteStream );
-		Translation.ulB2 = NETWORK_ReadByte( pByteStream );
-		Translation.ulType = DLevelScript::PCD_TRANSLATIONRANGE2;
-	}
+	Translation.ulPal1 = pal1;
+	Translation.ulPal2 = pal2;
+	Translation.ulType = DLevelScript::PCD_TRANSLATIONRANGE1;
 
 	// [BB] We need to do this check here, otherwise the client could be crashed
 	// by sending a SVC_CREATETRANSLATION packet with an illegal tranlation number.
@@ -8171,45 +7242,95 @@ static void client_CreateTranslation( BYTESTREAM_s *pByteStream, bool bIsTypeTwo
 
 //*****************************************************************************
 //
-static void client_IgnorePlayer( BYTESTREAM_s *pByteStream )
+void ServerCommands::CreateTranslation2::Execute()
 {
-	ULONG	ulPlayer = NETWORK_ReadByte( pByteStream );
-	LONG	lTicks = NETWORK_ReadLong( pByteStream );
+	EDITEDTRANSLATION_s	Translation = EDITEDTRANSLATION_s();
+	FRemapTable	*pTranslation;
 
-	if ( ulPlayer < MAXPLAYERS )
+	// Read in which translation is being created.
+	Translation.ulIdx = translation;
+
+	const bool bIsEdited = isEdited;
+
+	// Read in the range that's being translated.
+	Translation.ulStart = start;
+	Translation.ulEnd = end;
+
+	Translation.ulR1 = r1;
+	Translation.ulG1 = g1;
+	Translation.ulB1 = b1;
+	Translation.ulR2 = r2;
+	Translation.ulG2 = g2;
+	Translation.ulB2 = b2;
+	Translation.ulType = DLevelScript::PCD_TRANSLATIONRANGE2;
+
+	// [BB] We need to do this check here, otherwise the client could be crashed
+	// by sending a SVC_CREATETRANSLATION packet with an illegal tranlation number.
+	if ( Translation.ulIdx < 1 || Translation.ulIdx > MAX_ACS_TRANSLATIONS )
 	{
-		players[ulPlayer].bIgnoreChat = true;
-		players[ulPlayer].lIgnoreChatTicks = lTicks;
-
-		Printf( "%s\\c- will be ignored, because you're ignoring %s IP.\n", players[ulPlayer].userinfo.GetName(), players[ulPlayer].userinfo.GetGender() == GENDER_MALE ? "his" : players[ulPlayer].userinfo.GetGender() == GENDER_FEMALE ? "her" : "its" );
+		return;
 	}
+
+	pTranslation = translationtables[TRANSLATION_LevelScripted].GetVal(Translation.ulIdx - 1);
+
+	if (pTranslation == NULL)
+	{
+		pTranslation = new FRemapTable;
+		translationtables[TRANSLATION_LevelScripted].SetVal(Translation.ulIdx - 1, pTranslation);
+		// [BB] It's mandatory to initialize the translation with the identity, because the server can only send
+		// "bIsEdited == false" if the client is already in the game when the translation is created.
+		pTranslation->MakeIdentity();
+	}
+
+	if ( bIsEdited == false )
+		pTranslation->MakeIdentity();
+
+	if ( Translation.ulType == DLevelScript::PCD_TRANSLATIONRANGE1 )
+		pTranslation->AddIndexRange( Translation.ulStart, Translation.ulEnd, Translation.ulPal1, Translation.ulPal2 );
+	else
+		pTranslation->AddColorRange( Translation.ulStart, Translation.ulEnd, Translation.ulR1, Translation.ulG1, Translation.ulB1, Translation.ulR2, Translation.ulG2, Translation.ulB2 );
+	pTranslation->UpdateNative();
 }
 
 //*****************************************************************************
 //
-static void client_DoPusher( BYTESTREAM_s *pByteStream )
+void ServerCommands::DoPusher::Execute()
 {
-	const ULONG ulType = NETWORK_ReadByte( pByteStream );
-	const int iLineNum = NETWORK_ReadShort( pByteStream );
-	const int iMagnitude = NETWORK_ReadLong( pByteStream );
-	const int iAngle = NETWORK_ReadLong( pByteStream );
-	const LONG lSourceNetID = NETWORK_ReadShort( pByteStream );
-	const int iAffectee = NETWORK_ReadShort( pByteStream );
-
-	line_t *pLine = ( iLineNum >= 0 && iLineNum < numlines ) ? &lines[iLineNum] : NULL;
-	new DPusher ( static_cast<DPusher::EPusher> ( ulType ), pLine, iMagnitude, iAngle, CLIENT_FindThingByNetID( lSourceNetID ), iAffectee );
+	line_t *pLine = ( lineNum >= 0 && lineNum < numlines ) ? &lines[lineNum] : NULL;
+	new DPusher ( static_cast<DPusher::EPusher> ( type ), pLine, magnitude, angle, sourceActor, affectee );
 }
 
 //*****************************************************************************
 //
-void AdjustPusher (int tag, int magnitude, int angle, DPusher::EPusher type);
-static void client_AdjustPusher( BYTESTREAM_s *pByteStream )
+void DoAdjustPusher (int tag, int magnitude, int angle, DPusher::EPusher type);
+void ServerCommands::AdjustPusher::Execute()
 {
-	const int iTag = NETWORK_ReadShort( pByteStream );
-	const int iMagnitude = NETWORK_ReadLong( pByteStream );
-	const int iAngle = NETWORK_ReadLong( pByteStream );
-	const ULONG ulType = NETWORK_ReadByte( pByteStream );
-	AdjustPusher (iTag, iMagnitude, iAngle, static_cast<DPusher::EPusher> ( ulType ));
+	DoAdjustPusher (tag, magnitude, angle, static_cast<DPusher::EPusher> ( type ));
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetPlayerHazardCount::Execute()
+{
+	player->hazardcount = hazardCount;
+}
+
+//*****************************************************************************
+//
+void ServerCommands::Scroll3dMidTex::Execute()
+{
+	if ( sectorNum < 0 || sectorNum >= numsectors || !move )
+		return;
+
+	P_Scroll3dMidtex( &sectors[sectorNum], 0, move, isCeiling );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetPlayerLogNumber::Execute()
+{
+	if ( player->mo->FindInventory(NAME_Communicator) )
+		player->SetLogNumber ( arg0 );
 }
 
 //*****************************************************************************
@@ -8217,6 +7338,45 @@ static void client_AdjustPusher( BYTESTREAM_s *pByteStream )
 void ServerCommands::ReplaceTextures::Execute()
 {
 	DLevelScript::ReplaceTextures( fromTexture, toTexture, textureFlags );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetCVar::Execute()
+{
+	// [TP] Only allow the server to set mod CVARs.
+	FBaseCVar* cvar = FindCVar( name, NULL );
+
+	if ( cvar == NULL )
+	{
+		CLIENT_PrintWarning( "SVC2_SETCVAR: The server attempted to set the value of "
+			"%s to \"%s\"\n", name, value );
+		return;
+	}
+
+	UCVarValue vval;
+	vval.String = value;
+	cvar->ForceSet( vval, CVAR_String );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetMugShotState::Execute()
+{
+	if ( StatusBar != NULL)
+	{
+		StatusBar->SetMugShotState( stateName );
+	}
+}
+
+//*****************************************************************************
+//
+void ServerCommands::SetDefaultSkybox::Execute()
+{
+	if ( skyboxActor == NULL )
+		level.DefaultSkybox = NULL;
+	else
+		level.DefaultSkybox = static_cast<ASkyViewpoint *>( skyboxActor );
 }
 
 //*****************************************************************************
@@ -8249,6 +7409,20 @@ void ServerCommands::SyncJoinQueue::Execute()
 
 	for ( unsigned int i = 0; i < slots.Size(); ++i )
 		JOINQUEUE_AddPlayer( slots[i].player, slots[i].team );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::PushToJoinQueue::Execute()
+{
+	JOINQUEUE_AddPlayer( playerNum, team );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::RemoveFromJoinQueue::Execute()
+{
+	JOINQUEUE_RemovePlayerAtPosition( index );
 }
 
 //*****************************************************************************
