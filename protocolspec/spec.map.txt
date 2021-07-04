@@ -19,6 +19,10 @@ Command SetMapTime
 	Long time
 EndCommand
 
+Command ResetMap
+	ExtendedCommand
+EndCommand
+
 Command SetMapNumKilledMonsters
 	Short killedMonsters
 EndCommand
@@ -63,4 +67,66 @@ EndCommand
 Command SecretMarkSectorFound
 	ExtendedCommand
 	Sector sector
+EndCommand
+
+Command Lightning
+	ExtendedCommand
+EndCommand
+
+Command EarthQuake
+	Actor center
+	Byte intensity
+	Short duration
+	Short tremorRadius
+	String quakeSound
+EndCommand
+
+Command DoScroller
+	Byte type
+	Fixed xSpeed
+	Fixed ySpeed
+	Long affectee
+EndCommand
+
+Command SetScroller
+	Byte type
+	Fixed xSpeed
+	Fixed ySpeed
+	Short tag
+EndCommand
+
+Command SetWallScroller
+	Long id
+	Byte sideChoice
+	Fixed xSpeed
+	Fixed ySpeed
+	Long lWhere
+EndCommand
+
+Command Scroll3dMidTex
+	ExtendedCommand
+	Byte sectorNum
+	Long move
+	Bool isCeiling
+EndCommand
+
+Command DoPusher
+	Byte type
+	Short lineNum
+	Long magnitude
+	Long angle
+	Actor sourceActor with NullAllowed
+	Short affectee
+EndCommand
+
+Command AdjustPusher
+	Short tag
+	Long magnitude
+	Long angle
+	Byte type
+EndCommand
+
+Command SetDefaultSkybox
+	ExtendedCommand
+	Actor skyboxActor with NullAllowed
 EndCommand

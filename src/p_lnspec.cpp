@@ -2169,7 +2169,7 @@ struct FThinkerCollection
 
 static TArray<FThinkerCollection> Collection;
 
-void AdjustPusher (int tag, int magnitude, int angle, DPusher::EPusher type)
+void DoAdjustPusher (int tag, int magnitude, int angle, DPusher::EPusher type)
 {
 	// Find pushers already attached to the sector, and change their parameters.
 	{
@@ -2216,7 +2216,7 @@ FUNC(LS_Sector_SetWind)
 	if (arg3)
 		return false;
 
-	AdjustPusher (arg0, arg1, arg2, DPusher::p_wind);
+	DoAdjustPusher (arg0, arg1, arg2, DPusher::p_wind);
 	return true;
 }
 
@@ -2226,7 +2226,7 @@ FUNC(LS_Sector_SetCurrent)
 	if (arg3)
 		return false;
 
-	AdjustPusher (arg0, arg1, arg2, DPusher::p_current);
+	DoAdjustPusher (arg0, arg1, arg2, DPusher::p_current);
 	return true;
 }
 
@@ -2276,7 +2276,7 @@ FUNC(LS_Sector_SetLink)
 }
 
 
-/*static*/ void SetWallScroller (int id, int sidechoice, fixed_t dx, fixed_t dy, int Where)
+/*static*/ void DoSetWallScroller (int id, int sidechoice, fixed_t dx, fixed_t dy, int Where)
 {
 	// [BB] The server has to tell the clients to call SetWallScroller.
 	if( NETWORK_GetState() == NETSTATE_SERVER )
@@ -2369,7 +2369,7 @@ FUNC(LS_Scroll_Texture_Both)
 		sidechoice = 0;
 	}
 
-	SetWallScroller (arg0, sidechoice, dx, dy, 7);
+	DoSetWallScroller (arg0, sidechoice, dx, dy, 7);
 
 	return true;
 }
@@ -2380,11 +2380,11 @@ FUNC(LS_Scroll_Wall)
 	if (arg0 == 0)
 		return false;
 
-	SetWallScroller (arg0, !!arg3, arg1, arg2, arg4);
+	DoSetWallScroller (arg0, !!arg3, arg1, arg2, arg4);
 	return true;
 }
 
-/*static*/ void SetScroller (int tag, DScroller::EScrollType type, fixed_t dx, fixed_t dy)
+/*static*/ void DoSetScroller (int tag, DScroller::EScrollType type, fixed_t dx, fixed_t dy)
 {
 	// [BB] The server has to tell the clients to call SetScroller.
 	if( NETWORK_GetState() == NETSTATE_SERVER )
@@ -2436,19 +2436,19 @@ FUNC(LS_Scroll_Floor)
 
 	if (arg3 == 0 || arg3 == 2)
 	{
-		SetScroller (arg0, DScroller::sc_floor, -dx, dy);
+		DoSetScroller (arg0, DScroller::sc_floor, -dx, dy);
 	}
 	else
 	{
-		SetScroller (arg0, DScroller::sc_floor, 0, 0);
+		DoSetScroller (arg0, DScroller::sc_floor, 0, 0);
 	}
 	if (arg3 > 0)
 	{
-		SetScroller (arg0, DScroller::sc_carry, dx, dy);
+		DoSetScroller (arg0, DScroller::sc_carry, dx, dy);
 	}
 	else
 	{
-		SetScroller (arg0, DScroller::sc_carry, 0, 0);
+		DoSetScroller (arg0, DScroller::sc_carry, 0, 0);
 	}
 	return true;
 }
@@ -2459,7 +2459,7 @@ FUNC(LS_Scroll_Ceiling)
 	fixed_t dx = arg1 * FRACUNIT/32;
 	fixed_t dy = arg2 * FRACUNIT/32;
 
-	SetScroller (arg0, DScroller::sc_ceiling, -dx, dy);
+	DoSetScroller(arg0, DScroller::sc_ceiling, -dx, dy);
 	return true;
 }
 

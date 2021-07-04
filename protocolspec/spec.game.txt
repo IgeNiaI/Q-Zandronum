@@ -1,0 +1,101 @@
+Command SetGameMode
+	Byte theCurrentMode
+	Bool theInstaGib
+	Bool theBuckShot
+EndCommand
+
+Command SetGameSkill
+	Byte theGameSkill
+	Byte theBotSkill
+EndCommand
+
+Command SetGameDmFlags
+	Long theDmFlags
+	Long theDmFlags2
+	Long theCompatFlags
+	Long theCompatFlags2
+	Long theZacompatFlags
+	Long theZadmFlags
+EndCommand
+
+Command SetGameModeLimits
+	Short theFragLimit
+	Float theTimeLimit
+	Short thePointLimit
+	Byte theDuelLimit
+	Byte theWinLimit
+	Byte theWaveLimit
+	Byte theCheats
+	Byte theFastWeapons
+	Byte theMaxLives
+	Byte theMaxTeams
+	Float theLevelGravity
+	Float theLevelAirControl
+	Float theCoopDamageFactor
+	Bool theAlwaysApplyDmFlags
+	String theLobby
+	Bool theLimitCommands
+EndCommand
+
+Command SetGameEndLevelDelay
+	Short theEndLevelDelay
+EndCommand
+
+Command SetGameModeState
+	Byte theState
+	Short theCountdownTicks
+EndCommand
+
+Command SetDuelNumDuels
+	Byte theNumDuels
+EndCommand
+
+Command SetLMSSpectatorSettings
+	Long theLMSSpectatorSettings
+EndCommand
+
+Command SetLMSAllowedWeapons
+	Long theLMSAllowedWeapons
+EndCommand
+
+Command SetInvasionNumMonstersLeft
+	Short theNumMonstersLeft
+	Short theNumArchVilesLeft
+EndCommand
+
+Command SetInvasionWave
+	Byte theInvasionWave
+EndCommand
+
+Command SetSimpleCTFSTMode
+	Bool theSimpleCTFSTMode
+EndCommand
+
+Command DoPossessionArtifactPickedUp
+	Player player with IndexTestOnly
+	Short ticks
+EndCommand
+
+Command DoPossessionArtifactDropped
+EndCommand
+
+Command DoGameModeFight
+	Byte currentWave
+EndCommand
+
+Command DoGameModeCountdown
+	Short ticks
+EndCommand
+
+Command DoGameModeWinSequence
+	Player winner with IndexTestOnly
+EndCommand
+
+Command SetDominationState
+	Byte[] pointOwners
+EndCommand
+
+Command SetDominationPointOwner
+	Player player with IndexTestOnly
+	Byte point
+EndCommand
