@@ -1855,14 +1855,17 @@ void CLIENT_SpawnMissile( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, 
 		}
 	}
 
+	pActor->target = CLIENT_FindThingByNetID( lTargetNetID );
+
 	if ( randomSeed >= 0 )
 		pActor->SetRandomSeed( randomSeed );
 
 	// Play the seesound if this missile has one.
 	if ( pActor->SeeSound )
-		S_Sound( pActor, CHAN_VOICE, pActor->SeeSound, 1, ATTN_NORM );
-
-	pActor->target = CLIENT_FindThingByNetID( lTargetNetID );
+		if ( !( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS )
+			|| !pActor->target
+			|| pActor->target->player - players != consoleplayer )
+			S_Sound( pActor, CHAN_VOICE, pActor->SeeSound, 1, ATTN_NORM );
 }
 
 //*****************************************************************************
