@@ -1533,6 +1533,20 @@ void SERVERCOMMANDS_SetThingSpecial2( AActor *pActor, ULONG ulPlayerExtra, Serve
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetThingWeaveIndex( AActor *pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( !EnsureActorHasNetID (pActor) )
+		return;
+
+	ServerCommands::SetThingWeaveIndex command;
+	command.SetActor( pActor );
+	command.SetIndexXY( pActor->WeaveIndexXY );
+	command.SetIndexZ( pActor->WeaveIndexZ );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_SetThingTics( AActor *pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( !EnsureActorHasNetID (pActor) )
