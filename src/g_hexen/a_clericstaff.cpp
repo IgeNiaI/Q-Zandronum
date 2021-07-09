@@ -164,7 +164,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CStaffAttack)
 
 		// [BC] Clients need to have this information.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SetThingSpecial2( mo );
+			SERVERCOMMANDS_SetThingWeaveIndex( mo );
 	}
 	mo = P_SpawnPlayerMissile (self, RUNTIME_CLASS(ACStaffMissile), self->angle+(ANG45/15));
 	if (mo)
@@ -182,7 +182,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CStaffAttack)
 
 			// [BC] Clients need to have this information.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetThingSpecial2( mo );
+				SERVERCOMMANDS_SetThingWeaveIndex( mo );
 		}
 		mo = P_SpawnPlayerMissile( self, RUNTIME_CLASS( ACStaffMissile ), self->angle+(ANG45/15) + ( ANGLE_45 / 3 ));
 		if (mo)
@@ -197,7 +197,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_CStaffAttack)
 
 			// [BC] Clients need to have this information.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetThingSpecial2( mo );
+				SERVERCOMMANDS_SetThingWeaveIndex( mo );
 		}
 		mo = P_SpawnPlayerMissile( self, RUNTIME_CLASS( ACStaffMissile ), self->angle+(ANG45/15) - ( ANGLE_45 / 3 ));
 		if (mo)

@@ -158,6 +158,12 @@ Command SetThingSpecial2
 	Short special2
 EndCommand
 
+Command SetThingWeaveIndex
+	Actor actor
+	Short indexXY
+	Short indexZ
+EndCommand
+
 Command SetThingTics
 	Actor actor
 	Short tics

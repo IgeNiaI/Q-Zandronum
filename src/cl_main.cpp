@@ -4850,6 +4850,14 @@ void ServerCommands::SetThingSpecial2::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetThingWeaveIndex::Execute()
+{
+	actor->WeaveIndexXY = indexXY;
+	actor->WeaveIndexZ = indexZ;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetThingTics::Execute()
 {
 	actor->tics = tics;
