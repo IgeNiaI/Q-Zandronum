@@ -1816,11 +1816,14 @@ void CLIENT_SpawnMissile( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, 
 		}
 	}
 
+	pActor->target = CLIENT_FindThingByNetID( lTargetNetID );
+
 	// Play the seesound if this missile has one.
 	if ( pActor->SeeSound )
-		S_Sound( pActor, CHAN_VOICE, pActor->SeeSound, 1, ATTN_NORM );
-
-	pActor->target = CLIENT_FindThingByNetID( lTargetNetID );
+		if ( !NETWORK_ClientsideFunctionsAllowed( pActor )
+			|| !pActor->target
+			|| pActor->target->player - players != consoleplayer )
+			S_Sound( pActor, CHAN_VOICE, pActor->SeeSound, 1, ATTN_NORM );
 }
 
 //*****************************************************************************
