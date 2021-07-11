@@ -26,7 +26,9 @@ const int CMF_SAVEPITCH = 64;
 const int CMF_ABSOLUTEANGLE = 128;
 
 // Flags for A_FireCustomMissile
-const int FCM_AIMATANGLE = 1;
+const int FPF_AIMATANGLE = 1;
+const int FPF_TRANSFERTRANSLATION = 2;
+const int FPF_NOAUTOAIM = 4;
 
 // Flags for A_CustomBulletAttack
 const int CBAF_AIMFACING = 1;
