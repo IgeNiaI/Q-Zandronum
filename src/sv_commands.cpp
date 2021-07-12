@@ -3018,6 +3018,19 @@ void SERVERCOMMANDS_SoundActor( AActor *pActor, LONG lChannel, const char *pszSo
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_StopSoundActor( AActor *pActor, LONG lChannel, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( pActor == NULL )
+		return;
+
+	ServerCommands::StopSoundActor command;
+	command.SetActor( pActor );
+	command.SetChannel( lChannel );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_SoundSector( sector_t *sector, int channel, const char *sound, float volume, float attenuation, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( sector == NULL )
