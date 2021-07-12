@@ -4852,41 +4852,38 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 	else
 	{
-		// Servers read in the pitch value. It is not calculated.
-		if (( NETWORK_GetState( ) != NETSTATE_SERVER ) || ( player->pSkullBot != NULL ))
-		{
-			int look = cmd->ucmd.pitch << 16;
+		int look = cmd->ucmd.pitch << 16;
 
-			// The player's view pitch is clamped between -90 and +90 degrees
-			if (look)
+		// The player's view pitch is clamped between -90 and +90 degrees
+
+		if (look)
+		{
+			if (look == -32768 << 16)
+			{ // center view
+				player->mo->pitch = 0;
+			}
+			else
 			{
-				if (look == -32768 << 16)
-				{ // center view
-					player->mo->pitch = 0;
+				fixed_t oldpitch = player->mo->pitch;
+				player->mo->pitch -= look;
+				if (look > 0)
+				{ // look up
+					// [BB] Zandronum handles pitch differently.
+					const fixed_t pitchLimit = - ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) ? Renderer->GetMaxViewPitch(false) : 90 ) * ANGLE_1;
+					player->mo->pitch = MAX(player->mo->pitch, pitchLimit );
+					if (player->mo->pitch > oldpitch)
+					{
+						player->mo->pitch = pitchLimit;
+					}
 				}
 				else
-				{
-					fixed_t oldpitch = player->mo->pitch;
-					player->mo->pitch -= look;
-					if (look > 0)
-					{ // look up
-						// [BB] Zandronum handles pitch differently.
-						const fixed_t pitchLimit = - ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) ? Renderer->GetMaxViewPitch(false) : 90 ) * ANGLE_1;
-						player->mo->pitch = MAX(player->mo->pitch, pitchLimit );
-						if (player->mo->pitch > oldpitch)
-						{
-							player->mo->pitch = pitchLimit;
-						}
-					}
-					else
-					{ // look down
-						// [BB] Zandronum handles pitch differently.
-						const fixed_t pitchLimit = ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) ? Renderer->GetMaxViewPitch(true) : 90 ) * ANGLE_1;
-						player->mo->pitch = MIN(player->mo->pitch, pitchLimit );
-						if (player->mo->pitch < oldpitch)
-						{
-							player->mo->pitch = pitchLimit;
-						}
+				{ // look down
+					// [BB] Zandronum handles pitch differently.
+					const fixed_t pitchLimit = ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) ? Renderer->GetMaxViewPitch(true) : 90 ) * ANGLE_1;
+					player->mo->pitch = MIN(player->mo->pitch, pitchLimit );
+					if (player->mo->pitch < oldpitch)
+					{
+						player->mo->pitch = pitchLimit;
 					}
 				}
 			}
