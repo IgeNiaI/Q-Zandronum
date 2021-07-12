@@ -16,6 +16,11 @@ EndCommand
 Command SoundActorIfNotPlaying : SoundActor
 EndCommand
 
+Command StopSoundActor
+	Actor actor
+	Short channel
+EndCommand
+
 Command SoundSector
 	ExtendedCommand
 	Sector sector

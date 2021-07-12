@@ -294,7 +294,7 @@ bool S_IsMusicPaused ( void );
 void S_StopSoundID (int sound_id, int channel);
 
 // Stops a sound emanating from one of an emitter's channels.
-void S_StopSound (AActor *ent, int channel);
+void S_StopSound (AActor *ent, int channel, int playerNumToSkip = -1);
 void S_StopSound (const sector_t *sec, int channel);
 void S_StopSound (const FPolyObj *poly, int channel);
 

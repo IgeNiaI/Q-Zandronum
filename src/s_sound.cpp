@@ -1582,7 +1582,7 @@ void S_StopSound (int channel)
 //
 //==========================================================================
 
-void S_StopSound (AActor *actor, int channel)
+void S_StopSound (AActor *actor, int channel, int playerNumToSkip)
 {
 	FSoundChan *chan = Channels;
 	while (chan != NULL)
@@ -1596,6 +1596,12 @@ void S_StopSound (AActor *actor, int channel)
 		}
 		chan = next;
 	}
+			
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		if (playerNumToSkip >= 0)
+			SERVERCOMMANDS_StopSoundActor(actor, channel, playerNumToSkip, SVCF_SKIPTHISCLIENT);
+		else
+			SERVERCOMMANDS_StopSoundActor(actor, channel);
 }
 
 //==========================================================================
