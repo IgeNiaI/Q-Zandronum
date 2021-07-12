@@ -6387,6 +6387,13 @@ void ServerCommands::SoundActorIfNotPlaying::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::StopSoundActor::Execute()
+{
+	S_StopSound( actor, channel );
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SoundSector::Execute()
 {
 	if ( volume > 127 )
