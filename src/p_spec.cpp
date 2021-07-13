@@ -322,17 +322,10 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 	repeat = line->flags & ML_REPEAT_SPECIAL;
 	buttonSuccess = false;
 
-	// [BB] Activating the line may trigger a sector movement. For this it's crucial
-	// for the sectors to be in their actual (and not their unlagged) position.
-	UNLAGGED_SwapSectorUnlaggedStatus ( );
-
 	buttonSuccess = P_ExecuteSpecial(line->special,
 					line, mo, side == 1, false,
 					line->args[0], line->args[1], line->args[2],
 					line->args[3], line->args[4]);
-
-	// [BB] If the sectors were reconciled revert their actual to their reconciled positions now.
-	UNLAGGED_SwapSectorUnlaggedStatus ( );
 
 	special = line->special;
 	if (!repeat && buttonSuccess)

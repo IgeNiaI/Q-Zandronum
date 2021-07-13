@@ -155,24 +155,40 @@ void UNLAGGED_Reconcile( AActor *actor )
 
 	const int unlaggedGametic = UNLAGGED_Gametic( actor->player );
 
+	UNLAGGED_ReconcileTick( actor, unlaggedGametic );
+}
+
+void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
+{
+	//Only do anything if the actor to be reconciled is a player,
+	//it's on a server with unlagged on, and reconciliation is not being blocked
+	if ( !actor->player || (NETWORK_GetState() != NETSTATE_SERVER) || ( zadmflags & ZADF_NOUNLAGGED ) || ( reconciliationBlockers > 0 ) )
+		return;
+
 	//Don't reconcile if the unlagged gametic is the same as the current
 	//because unlagged data for this tic may not be completely recorded yet
-	if (unlaggedGametic == gametic)
+	if (Tic >= gametic)
 		return;
 
 	reconciledGame = true;
 
 	//find the index
-	const int unlaggedIndex = unlaggedGametic % UNLAGGEDTICS;
+	const int unlaggedIndex = Tic % UNLAGGEDTICS;
 
 	//reconcile the sectors
 	for (int i = 0; i < numsectors; ++i)
 	{
-		sectors[i].floorplane.restoreD = sectors[i].floorplane.d;
-		sectors[i].ceilingplane.restoreD = sectors[i].ceilingplane.d;
+		if ( sectors[i].floordata && sectors[i].floordata->GetLastInstigator() != actor->player )
+		{
+			sectors[i].floorplane.restoreD = sectors[i].floorplane.d;
+			sectors[i].floorplane.d = sectors[i].floorplane.unlaggedD[unlaggedIndex];
+		}
 
-		sectors[i].floorplane.d = sectors[i].floorplane.unlaggedD[unlaggedIndex];
-		sectors[i].ceilingplane.d = sectors[i].ceilingplane.unlaggedD[unlaggedIndex];
+		if ( sectors[i].ceilingdata && sectors[i].ceilingdata->GetLastInstigator() != actor->player )
+		{
+			sectors[i].ceilingplane.restoreD = sectors[i].ceilingplane.d;
+			sectors[i].ceilingplane.d = sectors[i].ceilingplane.unlaggedD[unlaggedIndex];
+		}
 	}
 
 	//reconcile the PolyActions
@@ -181,7 +197,8 @@ void UNLAGGED_Reconcile( AActor *actor )
 
 	polyActionIt.Reinit();
 	while ((polyAction = polyActionIt.Next()))
-		polyAction->ReconcileUnlagged(unlaggedIndex);
+		if ( polyAction->GetLastInstigator() != actor->player )
+			polyAction->ReconcileUnlagged(unlaggedIndex);
 
 	//reconcile the players
 	for (int i = 0; i < MAXPLAYERS; ++i)
@@ -200,7 +217,7 @@ void UNLAGGED_Reconcile( AActor *actor )
 
 			//Also, don't reconcile the shooter because the client is supposed
 			//to predict him
-			if (players+i != actor->player)
+			if (players + i != actor->player)
 			{
 				players[i].mo->SetOrigin(
 					players[i].unlaggedX[unlaggedIndex],
@@ -245,18 +262,6 @@ void UNLAGGED_Reconcile( AActor *actor )
 				//todo: more correction for client misprediction
 			}
 		}
-	}	
-}
-
-void UNLAGGED_SwapSectorUnlaggedStatus( )
-{
-	if ( reconciledGame == false )
-		return;
-
-	for (int i = 0; i < numsectors; ++i)
-	{
-		swapvalues ( sectors[i].floorplane.d, sectors[i].floorplane.restoreD );
-		swapvalues ( sectors[i].ceilingplane.d, sectors[i].ceilingplane.restoreD );
 	}
 }
 
@@ -274,8 +279,10 @@ void UNLAGGED_Restore( AActor *actor )
 	//restore the sectors
 	for (int i = 0; i < numsectors; ++i)
 	{
-		sectors[i].floorplane.d = sectors[i].floorplane.restoreD;
-		sectors[i].ceilingplane.d = sectors[i].ceilingplane.restoreD;
+		if ( sectors[i].floordata && sectors[i].floordata->GetLastInstigator() != actor->player )
+			sectors[i].floorplane.d = sectors[i].floorplane.restoreD;
+		if ( sectors[i].ceilingdata && sectors[i].ceilingdata->GetLastInstigator() != actor->player )
+			sectors[i].ceilingplane.d = sectors[i].ceilingplane.restoreD;
 	}
 	
 	//reconcile the PolyActions
@@ -284,7 +291,8 @@ void UNLAGGED_Restore( AActor *actor )
 
 	polyActionIt.Reinit();
 	while ((polyAction = polyActionIt.Next()))
-		polyAction->RestoreUnlagged();
+		if ( polyAction->GetLastInstigator() != actor->player )
+			polyAction->RestoreUnlagged();
 
 	//restore the players
 	for (int i = 0; i < MAXPLAYERS; ++i)
