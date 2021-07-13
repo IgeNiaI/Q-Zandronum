@@ -29,6 +29,8 @@ const int CMF_ABSOLUTEANGLE = 128;
 const int FPF_AIMATANGLE = 1;
 const int FPF_TRANSFERTRANSLATION = 2;
 const int FPF_NOAUTOAIM = 4;
+const int FPF_NOUNLAGGED = 8;
+const int FPF_SKIPOWNER = 16;
 
 // Flags for A_CustomBulletAttack
 const int CBAF_AIMFACING = 1;

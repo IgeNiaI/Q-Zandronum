@@ -1651,7 +1651,7 @@ void A_FireCustomMissileHelper ( AActor *self,
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM) ? true : false, true, false);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM) ? true : false, true, false, !!(flags & FPF_NOUNLAGGED), !!(flags & FPF_SKIPOWNER) );
 
 	// automatic handling of seeker missiles
 	if (misl)
@@ -1679,7 +1679,49 @@ void A_FireCustomMissileHelper ( AActor *self,
 
 		// [BC] If we're the server, tell clients to spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissile( misl );
+		{
+			if ( flags & FPF_SKIPOWNER )
+				SERVERCOMMANDS_SpawnMissile( misl, self->player - players, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnMissile( misl );
+
+			// [geNia] Compensate player ping when shooting missiles
+			if ( !( flags & FPF_NOUNLAGGED ) && NETWORK_ClientsideFunctionsAllowed( self->player ) )
+			{
+				int StartingTick = UNLAGGED_Gametic( self->player );
+
+				if (StartingTick < gametic)
+				{
+					for (int Tick = StartingTick; Tick <= gametic; Tick++)
+					{
+						UNLAGGED_ReconcileTick( self, Tick );
+						UNLAGGED_AddReconciliationBlocker();
+						int InitialTics = misl->tics;
+						misl->tics = -1;
+						misl->Tick();
+						misl->tics = InitialTics;
+
+						UNLAGGED_RemoveReconciliationBlocker();
+						UNLAGGED_Restore( self );
+
+						if ( !( misl->flags & MF_MISSILE ) )
+						{
+							// The missile exploded
+							break;
+						}
+					}
+
+					if ( !!( misl->flags & MF_MISSILE ) )
+					{
+						// The missile didn't explode, so tell clients it's location
+						if ( flags & FPF_SKIPOWNER )
+							SERVERCOMMANDS_MoveThing ( misl, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ, self->player - players, SVCF_SKIPTHISCLIENT );
+						else
+							SERVERCOMMANDS_MoveThing ( misl, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+					}
+				}
+			}
+		}
 	}
 }
 

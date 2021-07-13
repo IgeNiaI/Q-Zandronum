@@ -147,17 +147,18 @@ void	P_ExplodeMissile (AActor *missile, line_t *explodeline, AActor *target);
 
 AActor *P_SpawnMissile (AActor* source, AActor* dest, const PClass *type, AActor* owner = NULL, const bool bSpawnOnClient = false ); // [BB] Added bSpawnOnClient.
 AActor *P_SpawnMissileZ (AActor* source, fixed_t z, AActor* dest, const PClass *type, const bool bSpawnOnClient = false); // [BB] Added bSpawnOnClient.
-AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z, AActor *source, AActor *dest, const PClass *type, bool checkspawn = true, AActor *owner = NULL, const bool bSpawnOnClient = false ); // [BB] Added bSpawnOnClient.
+AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z, AActor *source, AActor *dest, const PClass *type, bool checkspawn = true, AActor *owner = NULL, const bool bSpawnOnClient = false, bool bNoUnlagged = false, bool bSkipOwner = false ); // [BB] Added bSpawnOnClient.
 AActor *P_SpawnMissileAngle (AActor *source, const PClass *type, angle_t angle, fixed_t velz, bool bSpawnOnClient = false); // [BB] Added bSpawnOnClient.
 AActor *P_SpawnMissileAngleSpeed (AActor *source, const PClass *type, angle_t angle, fixed_t velz, fixed_t speed);
 AActor *P_SpawnMissileAngleZ (AActor *source, fixed_t z, const PClass *type, angle_t angle, fixed_t velz, bool bSpawnOnClient = false); // [BB] Added bSpawnOnClient.
-AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z, const PClass *type, angle_t angle, fixed_t velz, fixed_t speed, AActor *owner=NULL, bool checkspawn = true, const bool bSpawnOnClient = false ); // [BB] Added bSpawnOnClient.
+AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z, const PClass *type, angle_t angle, fixed_t velz, fixed_t speed, AActor *owner=NULL, bool checkspawn = true, const bool bSpawnOnClient = false, const bool bNoUnlagged = false, bool bSkipOwner = false ); // [BB] Added bSpawnOnClient.
 AActor *P_SpawnMissileZAimed (AActor *source, fixed_t z, AActor *dest, const PClass *type, bool bSpawnOnClient = false); // [BB] Added bSpawnOnClient.
 
 AActor *P_SpawnPlayerMissile (AActor* source, const PClass *type);
 AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle, bool bSpawnSound = true );
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z, const PClass *type, angle_t angle, 
-							  AActor **pLineTarget = NULL, AActor **MissileActor = NULL, bool noautoaim = false, bool bSpawnSound = true, bool bSpawnOnClient = true);
+							  AActor **pLineTarget = NULL, AActor **MissileActor = NULL, bool noautoaim = false,
+							  bool bSpawnSound = true, bool bSpawnOnClient = true, bool bNoUnlagged = false, bool bSkipOwner = false );
 
 // [BB]
 inline void P_SpawnPlayerMissileWithPossibleSpread (AActor* source, const PClass *type)
@@ -191,6 +192,8 @@ enum
 	FPF_AIMATANGLE = 1,
 	FPF_TRANSFERTRANSLATION = 2,
 	FPF_NOAUTOAIM = 4,
+	FPF_NOUNLAGGED = 8,
+	FPF_SKIPOWNER = 16,
 };
 
 void P_CheckFakeFloorTriggers (AActor *mo, fixed_t oldz, bool oldz_has_viewheight=false);

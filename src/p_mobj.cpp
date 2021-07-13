@@ -7288,7 +7288,7 @@ AActor *P_SpawnMissileZ (AActor *source, fixed_t z, AActor *dest, const PClass *
 }
 
 AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
-	AActor *source, AActor *dest, const PClass *type, bool checkspawn, AActor *owner, const bool bSpawnOnClient ) // [BB] Added bSpawnOnClient.
+	AActor *source, AActor *dest, const PClass *type, bool checkspawn, AActor *owner, const bool bSpawnOnClient, const bool bNoUnlagged, bool bSkipOwner ) // [BB] Added bSpawnOnClient.
 {
 	if (dest == NULL)
 	{
@@ -7358,8 +7358,51 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 	AActor *pMissile = (!checkspawn || P_CheckMissileSpawn (th, source->radius)) ? th : NULL;
 
 	// [BB] If we're the server, tell clients to spawn the missile.
-	if ( bSpawnOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
-		SERVERCOMMANDS_SpawnMissile( pMissile );
+	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
+	{
+		if ( bSpawnOnClient )
+			if ( bSkipOwner )
+				SERVERCOMMANDS_SpawnMissile( pMissile, owner->player - players, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnMissile( pMissile );
+
+		// [geNia] Compensate player ping when shooting missiles
+		if ( !bNoUnlagged && NETWORK_ClientsideFunctionsAllowed( owner->player ) )
+		{
+			int StartingTick = UNLAGGED_Gametic( owner->player );
+
+			if (StartingTick < gametic)
+			{
+				for (int Tick = StartingTick; Tick <= gametic; Tick++)
+				{
+					UNLAGGED_ReconcileTick( owner, Tick );
+					UNLAGGED_AddReconciliationBlocker();
+					int InitialTics = pMissile->tics;
+					pMissile->tics = -1;
+					pMissile->Tick();
+					pMissile->tics = InitialTics;
+
+					UNLAGGED_RemoveReconciliationBlocker();
+					UNLAGGED_Restore( owner );
+
+					if ( !( pMissile->flags & MF_MISSILE ) )
+					{
+						// The missile exploded
+						break;
+					}
+				}
+			}
+
+			if ( bSpawnOnClient && !!( pMissile->flags & MF_MISSILE ) )
+			{
+				// The missile didn't explode, so tell clients it's location
+				if ( bSkipOwner )
+					SERVERCOMMANDS_MoveThing ( pMissile, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ, owner->player - players, SVCF_SKIPTHISCLIENT );
+				else
+					SERVERCOMMANDS_MoveThing ( pMissile, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+			}
+		}
+	}
 
 	return pMissile;
 }
@@ -7457,7 +7500,7 @@ AActor *P_SpawnMissileAngleSpeed (AActor *source, const PClass *type,
 }
 
 AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
-	const PClass *type, angle_t angle, fixed_t velz, fixed_t speed, AActor *owner, bool checkspawn, const bool bSpawnOnClient ) // [BB] Added bSpawnOnClient.
+	const PClass *type, angle_t angle, fixed_t velz, fixed_t speed, AActor *owner, bool checkspawn, const bool bSpawnOnClient, const bool bNoUnlagged, bool bSkipOwner ) // [BB] Added bSpawnOnClient.
 {
 	AActor *mo;
 
@@ -7485,9 +7528,51 @@ AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
 	// [BB]
 	AActor *pMissile = (!checkspawn || P_CheckMissileSpawn(mo, source->radius)) ? mo : NULL;
 
-	// [BB] If we're the server, tell clients to spawn the missile.
-	if ( bSpawnOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
-		SERVERCOMMANDS_SpawnMissile( pMissile );
+	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && pMissile )
+	{
+		if ( bSpawnOnClient )
+			if ( bSkipOwner )
+				SERVERCOMMANDS_SpawnMissile( pMissile, source->player - players, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnMissile( pMissile );
+
+		// [geNia] Compensate player ping when shooting missiles
+		if ( !bNoUnlagged && NETWORK_ClientsideFunctionsAllowed( source->player ) )
+		{
+			int StartingTick = UNLAGGED_Gametic( source->player );
+
+			if (StartingTick < gametic)
+			{
+				for (int Tick = StartingTick; Tick <= gametic; Tick++)
+				{
+					UNLAGGED_ReconcileTick( source, Tick );
+					UNLAGGED_AddReconciliationBlocker();
+					int InitialTics = pMissile->tics;
+					pMissile->tics = -1;
+					pMissile->Tick();
+					pMissile->tics = InitialTics;
+
+					UNLAGGED_RemoveReconciliationBlocker();
+					UNLAGGED_Restore( source );
+
+					if ( !( pMissile->flags & MF_MISSILE ) )
+					{
+						// The missile exploded
+						break;
+					}
+				}
+			}
+
+			if ( bSpawnOnClient && !!( pMissile->flags & MF_MISSILE ) )
+			{
+				// The missile didn't explode, so tell clients it's location
+				if ( bSkipOwner )
+					SERVERCOMMANDS_MoveThing ( pMissile, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ, source->player - players, SVCF_SKIPTHISCLIENT );
+				else
+					SERVERCOMMANDS_MoveThing ( pMissile, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+			}
+		}
+	}
 
 	return pMissile;
 }
@@ -7516,7 +7601,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle,
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
-							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient)
+							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient, bool bNoUnlagged, bool bSkipOwner)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
@@ -7625,8 +7710,53 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	// [BC/BB] Possibly tell clients to spawn this missile.
 	// [WS] If we know the missile is going to explode,
 	// we need to spawn the missile for the clients.
-	if ( ( bSpawnOnClient || !bValidSpawn ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
-		SERVERCOMMANDS_SpawnMissile( MissileActor );
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
+		if ( bSpawnOnClient || !bValidSpawn )
+		{
+			if ( bSkipOwner )
+				SERVERCOMMANDS_SpawnMissile( MissileActor, source->player - players, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_SpawnMissile( MissileActor );
+
+			// [geNia] Compensate player ping when shooting missiles
+			if ( bValidSpawn && !bNoUnlagged && NETWORK_ClientsideFunctionsAllowed( source->player ) )
+			{
+				int StartingTick = UNLAGGED_Gametic( source->player );
+
+				if (StartingTick < gametic)
+				{
+					for (int Tick = StartingTick; Tick <= gametic; Tick++)
+					{
+						UNLAGGED_ReconcileTick( source, Tick );
+						UNLAGGED_AddReconciliationBlocker();
+						int InitialTics = MissileActor->tics;
+						MissileActor->tics = -1;
+						MissileActor->Tick();
+						MissileActor->tics = InitialTics;
+
+						UNLAGGED_RemoveReconciliationBlocker();
+						UNLAGGED_Restore( source );
+
+						if ( !( MissileActor->flags & MF_MISSILE ) )
+						{
+							// The missile exploded
+							break;
+						}
+					}
+				}
+
+				if ( !!( MissileActor->flags & MF_MISSILE ) )
+				{
+					// The missile didn't explode, so tell clients it's location
+					if ( bSkipOwner )
+						SERVERCOMMANDS_MoveThing ( MissileActor, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ, source->player - players, SVCF_SKIPTHISCLIENT );
+					else
+						SERVERCOMMANDS_MoveThing ( MissileActor, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+				}
+			}
+		}
+	}
 	
 	if (bValidSpawn)
 	{
