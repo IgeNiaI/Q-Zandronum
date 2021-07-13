@@ -61,11 +61,60 @@
 #include "sv_commands.h"
 #include "templates.h"
 #include "d_netinf.h"
+#include "a_sharedglobal.h"
+
+
+IMPLEMENT_CLASS(AUnlaggedActor)
+
+AUnlaggedActor* firstUnlaggedActor = NULL;
+AUnlaggedActor* lastUnlaggedActor = NULL;
+
+void AUnlaggedActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (NETWORK_GetState() == NETSTATE_SERVER) {
+		if ( firstUnlaggedActor == NULL ) {
+			firstUnlaggedActor = this;
+		}
+
+		previousUnlaggedActor = lastUnlaggedActor;
+		nextUnlaggedActor = NULL;
+		if ( lastUnlaggedActor != NULL ) {
+			lastUnlaggedActor->nextUnlaggedActor = this;
+		}
+
+		lastUnlaggedActor = this;
+
+		UNLAGGED_ResetActor( this );
+		isCurrentlyBeingUnlagged = false;
+		isMissile = !!(flags & MF_MISSILE);
+	}
+}
+
+void AUnlaggedActor::Destroy()
+{
+	if (NETWORK_GetState() == NETSTATE_SERVER) {
+		if ( previousUnlaggedActor != NULL )
+			previousUnlaggedActor->nextUnlaggedActor = nextUnlaggedActor;
+		else
+			firstUnlaggedActor = nextUnlaggedActor;
+
+		if ( nextUnlaggedActor != NULL )
+			nextUnlaggedActor->previousUnlaggedActor = previousUnlaggedActor;
+		else
+			lastUnlaggedActor = previousUnlaggedActor;
+	}
+
+	Super::Destroy();
+}
+
 
 CVAR(Flag, sv_nounlagged, zadmflags, ZADF_NOUNLAGGED);
 CVAR( Bool, sv_unlagged_debugactors, false, 0 )
 
 bool reconciledGame = false;
+bool unlagInProgress = false;
 int reconciliationBlockers = 0;
 
 void UNLAGGED_Tick( void )
@@ -74,17 +123,27 @@ void UNLAGGED_Tick( void )
 	if ( NETWORK_GetState() != NETSTATE_SERVER )
 		return;
 
+	//find the index
+	const int unlaggedIndex = gametic % UNLAGGEDTICS;
+
 	// [Spleen] Record sectors soon before they are reconciled/restored
-	UNLAGGED_RecordSectors( );
+	UNLAGGED_RecordSectors( unlaggedIndex );
 
 	// [geNia] Record polyobjects
-	UNLAGGED_RecordPolyobj( );
+	UNLAGGED_RecordPolyobj( unlaggedIndex );
 
 	// [Spleen] Record players
 	for ( ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ++ulIdx )
 	{
 		if ( PLAYER_IsValidPlayerWithMo( ulIdx ) )
-			UNLAGGED_RecordPlayer( &players[ulIdx] );
+			UNLAGGED_RecordPlayer( &players[ulIdx], unlaggedIndex );
+	}
+
+	// [geNia] Record unlagged actors
+	AUnlaggedActor* unlaggedActor = firstUnlaggedActor;
+	while ( unlaggedActor ) {
+		UNLAGGED_RecordActor( unlaggedActor, unlaggedIndex );
+		unlaggedActor = unlaggedActor->nextUnlaggedActor;
 	}
 
 	// [BB] Spawn debug actors if the server runner wants them.
@@ -140,7 +199,7 @@ void UNLAGGED_Reconcile( AActor *actor )
 {
 	//Only do anything if the actor to be reconciled is a player,
 	//it's on a server with unlagged on, and reconciliation is not being blocked
-	if ( !actor->player || (NETWORK_GetState() != NETSTATE_SERVER) || !NETWORK_IsUnlaggedEnabled( actor->player ) || ( reconciliationBlockers > 0 ) )
+	if ( !actor || !actor->player || (NETWORK_GetState() != NETSTATE_SERVER) || !NETWORK_IsUnlaggedEnabled( actor->player ) || ( reconciliationBlockers > 0 ) || actor->player->bIsBot )
 		return;
 
 	//Something went wrong, reconciliation was attempted when the gamestate
@@ -162,8 +221,18 @@ void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
 {
 	//Only do anything if the actor to be reconciled is a player,
 	//it's on a server with unlagged on, and reconciliation is not being blocked
-	if ( !actor->player || (NETWORK_GetState() != NETSTATE_SERVER) || ( zadmflags & ZADF_NOUNLAGGED ) || ( reconciliationBlockers > 0 ) )
+	if ( !actor || !actor->player || (NETWORK_GetState() != NETSTATE_SERVER) || ( zadmflags & ZADF_NOUNLAGGED ) || ( reconciliationBlockers > 0 ) )
 		return;
+
+	//Something went wrong, reconciliation was attempted when the gamestate
+	//was already reconciled!
+	if (reconciledGame)
+	{
+		// [BB] I_Error terminates the current game, so we need to reset the value of reconciledGame,
+		// otherwise UNLAGGED_Reconcile will always trigger this error from now on.
+		reconciledGame = false;
+		I_Error("UNLAGGED_ReconcileTick called while reconciledGame is true");
+	}
 
 	//Don't reconcile if the unlagged gametic is the same as the current
 	//because unlagged data for this tic may not be completely recorded yet
@@ -263,6 +332,50 @@ void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
 			}
 		}
 	}
+
+	// [geNia] Reconcile unlagged actors
+	AUnlaggedActor* unlaggedActor = firstUnlaggedActor;
+	while ( unlaggedActor ) {
+		if ( !unlaggedActor->isCurrentlyBeingUnlagged ) {
+			unlaggedActor->restoreFlags[0] = unlaggedActor->mvFlags;
+			unlaggedActor->restoreFlags[1] = unlaggedActor->flags;
+			unlaggedActor->restoreFlags[2] = unlaggedActor->flags2;
+			unlaggedActor->restoreFlags[3] = unlaggedActor->flags3;
+			unlaggedActor->restoreFlags[4] = unlaggedActor->flags4;
+			unlaggedActor->restoreFlags[5] = unlaggedActor->flags5;
+			unlaggedActor->restoreFlags[6] = unlaggedActor->flags6;
+			unlaggedActor->restoreFlags[7] = unlaggedActor->flags7;
+			unlaggedActor->restoreFlags[8] = unlaggedActor->flags8;
+			unlaggedActor->restoreX = unlaggedActor->x;
+			unlaggedActor->restoreY = unlaggedActor->y;
+			unlaggedActor->restoreZ = unlaggedActor->z;
+			unlaggedActor->restoreFloorZ = unlaggedActor->floorz;
+			unlaggedActor->restoreCeilingZ = unlaggedActor->ceilingz;
+
+			unlaggedActor->UnlinkFromWorld();
+
+			unlaggedActor->mvFlags = unlaggedActor->unlaggedFlags[unlaggedIndex][0];
+			unlaggedActor->flags = unlaggedActor->unlaggedFlags[unlaggedIndex][1];
+			unlaggedActor->flags2 = unlaggedActor->unlaggedFlags[unlaggedIndex][2];
+			unlaggedActor->flags3 = unlaggedActor->unlaggedFlags[unlaggedIndex][3];
+			unlaggedActor->flags4 = unlaggedActor->unlaggedFlags[unlaggedIndex][4];
+			unlaggedActor->flags5 = unlaggedActor->unlaggedFlags[unlaggedIndex][5];
+			unlaggedActor->flags6 = unlaggedActor->unlaggedFlags[unlaggedIndex][6];
+			unlaggedActor->flags7 = unlaggedActor->unlaggedFlags[unlaggedIndex][7];
+			unlaggedActor->flags8 = unlaggedActor->unlaggedFlags[unlaggedIndex][8];
+			unlaggedActor->x = unlaggedActor->unlaggedX[unlaggedIndex];
+			unlaggedActor->y = unlaggedActor->unlaggedY[unlaggedIndex];
+			unlaggedActor->z = unlaggedActor->unlaggedZ[unlaggedIndex];
+
+			unlaggedActor->LinkToWorld();
+
+			unlaggedActor->floorz = unlaggedActor->Sector->floorplane.ZatPoint(unlaggedActor->restoreX, unlaggedActor->restoreY);
+			unlaggedActor->ceilingz = unlaggedActor->Sector->ceilingplane.ZatPoint(unlaggedActor->restoreX, unlaggedActor->restoreY);
+
+		}
+
+		unlaggedActor = unlaggedActor->nextUnlaggedActor;
+	}
 }
 
 // Restore everything that has been shifted
@@ -284,7 +397,7 @@ void UNLAGGED_Restore( AActor *actor )
 		if ( sectors[i].ceilingdata && sectors[i].ceilingdata->GetLastInstigator() != actor->player )
 			sectors[i].ceilingplane.d = sectors[i].ceilingplane.restoreD;
 	}
-	
+
 	//reconcile the PolyActions
 	TThinkerIterator<DPolyAction> polyActionIt;
 	DPolyAction *polyAction;
@@ -297,7 +410,7 @@ void UNLAGGED_Restore( AActor *actor )
 	//restore the players
 	for (int i = 0; i < MAXPLAYERS; ++i)
 	{
-		if (playeringame[i] && players[i].mo && !players[i].bSpectating)
+		if (playeringame[i] && players[i].mo && !players[i].bSpectating && players + i != actor->player)
 		{
 			players[i].mo->SetOrigin( players[i].restoreX, players[i].restoreY, players[i].restoreZ );
 			players[i].mo->floorz = players[i].restoreFloorZ;
@@ -305,13 +418,57 @@ void UNLAGGED_Restore( AActor *actor )
 		}
 	}
 
+	// we need to set this to false earlier, otherwise SERVERCOMMANDS below won't be sent
 	reconciledGame = false;
+
+	// [geNia] Restore unlagged actor
+	AUnlaggedActor* unlaggedActor = firstUnlaggedActor;
+	while ( unlaggedActor ) {
+		if ( !unlaggedActor->isCurrentlyBeingUnlagged )
+		{
+			// Only restore if the actor wasn't destroyed or killed
+			if ( ( unlaggedActor->health <= 0 ) || ( unlaggedActor->isMissile && !(unlaggedActor->flags & MF_MISSILE) ) )
+			{
+				if ( unlaggedActor->isMissile )
+					SERVERCOMMANDS_MissileExplode( unlaggedActor, unlaggedActor->BlockingLine );
+				else
+					SERVERCOMMANDS_MoveThing( unlaggedActor, CM_XY|CM_Z|CM_VELXY|CM_VELZ|CM_NOSMOOTH );
+				SERVERCOMMANDS_SetThingFrame( unlaggedActor, unlaggedActor->state );
+				SERVERCOMMANDS_SetThingTics( unlaggedActor );
+				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( unlaggedActor );
+			}
+			else
+			{
+				unlaggedActor->UnlinkFromWorld();
+
+				unlaggedActor->mvFlags = unlaggedActor->restoreFlags[0];
+				unlaggedActor->flags = unlaggedActor->restoreFlags[1];
+				unlaggedActor->flags2 = unlaggedActor->restoreFlags[2];
+				unlaggedActor->flags3 = unlaggedActor->restoreFlags[3];
+				unlaggedActor->flags4 = unlaggedActor->restoreFlags[4];
+				unlaggedActor->flags5 = unlaggedActor->restoreFlags[5];
+				unlaggedActor->flags6 = unlaggedActor->restoreFlags[6];
+				unlaggedActor->flags7 = unlaggedActor->restoreFlags[7];
+				unlaggedActor->flags8 = unlaggedActor->restoreFlags[8];
+				unlaggedActor->x = unlaggedActor->restoreX;
+				unlaggedActor->y = unlaggedActor->restoreY;
+				unlaggedActor->z = unlaggedActor->restoreZ;
+
+				unlaggedActor->LinkToWorld();
+
+				unlaggedActor->floorz = unlaggedActor->restoreFloorZ;
+				unlaggedActor->ceilingz = unlaggedActor->restoreCeilingZ;
+			}
+		}
+
+		unlaggedActor = unlaggedActor->nextUnlaggedActor;
+	}
 }
 
 
 // Record the positions of just one player
 // in order to be able to reconcile them later
-void UNLAGGED_RecordPlayer( player_t *player )
+void UNLAGGED_RecordPlayer( player_t *player, int unlaggedIndex )
 {
 	// [BB] Sanity check.
 	if ( player == NULL )
@@ -320,9 +477,6 @@ void UNLAGGED_RecordPlayer( player_t *player )
 	//Only do anything if it's on a server
 	if (NETWORK_GetState() != NETSTATE_SERVER)
 		return;
-
-	//find the index
-	const int unlaggedIndex = gametic % UNLAGGEDTICS;
 
 	//record the player
 	player->unlaggedX[unlaggedIndex] = player->mo->x;
@@ -351,16 +505,70 @@ void UNLAGGED_ResetPlayer( player_t *player )
 	}
 }
 
+// Record the positions of just one actor
+// in order to be able to reconcile it later
+void UNLAGGED_RecordActor( AUnlaggedActor* unlaggedActor, int unlaggedIndex )
+{
+	// [geNia] Sanity check.
+	if ( unlaggedActor == NULL )
+		return;
+
+	// Only do anything if it's on a server
+	if ( NETWORK_GetState() != NETSTATE_SERVER )
+		return;
+
+	// record the projectile
+	unlaggedActor->unlaggedFlags[unlaggedIndex][0] = unlaggedActor->mvFlags;
+	unlaggedActor->unlaggedFlags[unlaggedIndex][1] = unlaggedActor->flags;
+	unlaggedActor->unlaggedFlags[unlaggedIndex][2] = unlaggedActor->flags2;
+	unlaggedActor->unlaggedFlags[unlaggedIndex][3] = unlaggedActor->flags3;
+	unlaggedActor->unlaggedFlags[unlaggedIndex][4] = unlaggedActor->flags4;
+	unlaggedActor->unlaggedFlags[unlaggedIndex][5] = unlaggedActor->flags5;
+	unlaggedActor->unlaggedFlags[unlaggedIndex][6] = unlaggedActor->flags6;
+	unlaggedActor->unlaggedFlags[unlaggedIndex][7] = unlaggedActor->flags7;
+	unlaggedActor->unlaggedFlags[unlaggedIndex][8] = unlaggedActor->flags8;
+	unlaggedActor->unlaggedX[unlaggedIndex] = unlaggedActor->x;
+	unlaggedActor->unlaggedY[unlaggedIndex] = unlaggedActor->y;
+	unlaggedActor->unlaggedZ[unlaggedIndex] = unlaggedActor->z;
+}
+
+
+// Reset the reconciliation buffers of an actor
+// Should be called when an actor is spawned
+void UNLAGGED_ResetActor( AUnlaggedActor* unlaggedActor )
+{
+	// [geNia] Sanity check.
+	if ( unlaggedActor == NULL )
+		return;
+
+	// Only do anything if it's on a server
+	if ( NETWORK_GetState() != NETSTATE_SERVER )
+		return;
+
+	for (int unlaggedIndex = 0; unlaggedIndex < UNLAGGEDTICS; ++unlaggedIndex)
+	{
+		unlaggedActor->unlaggedFlags[unlaggedIndex][0] = unlaggedActor->mvFlags;
+		unlaggedActor->unlaggedFlags[unlaggedIndex][1] = unlaggedActor->flags;
+		unlaggedActor->unlaggedFlags[unlaggedIndex][2] = unlaggedActor->flags2;
+		unlaggedActor->unlaggedFlags[unlaggedIndex][3] = unlaggedActor->flags3;
+		unlaggedActor->unlaggedFlags[unlaggedIndex][4] = unlaggedActor->flags4;
+		unlaggedActor->unlaggedFlags[unlaggedIndex][5] = unlaggedActor->flags5;
+		unlaggedActor->unlaggedFlags[unlaggedIndex][6] = unlaggedActor->flags6;
+		unlaggedActor->unlaggedFlags[unlaggedIndex][7] = unlaggedActor->flags7;
+		unlaggedActor->unlaggedFlags[unlaggedIndex][8] = unlaggedActor->flags8;
+		unlaggedActor->unlaggedX[unlaggedIndex] = unlaggedActor->x;
+		unlaggedActor->unlaggedY[unlaggedIndex] = unlaggedActor->y;
+		unlaggedActor->unlaggedZ[unlaggedIndex] = unlaggedActor->z;
+	}
+}
+
 
 // Record the positions of the sectors
-void UNLAGGED_RecordSectors( )
+void UNLAGGED_RecordSectors( int unlaggedIndex )
 {
 	//Only do anything if it's on a server
 	if (NETWORK_GetState() != NETSTATE_SERVER)
 		return;
-
-	//find the index
-	const int unlaggedIndex = gametic % UNLAGGEDTICS;
 
 	//record the sectors
 	for (int i = 0; i < numsectors; ++i)
@@ -371,14 +579,11 @@ void UNLAGGED_RecordSectors( )
 }
 
 // Record the positions of the polyobjects
-void UNLAGGED_RecordPolyobj( )
+void UNLAGGED_RecordPolyobj( int unlaggedIndex )
 {
 	//Only do anything if it's on a server
 	if (NETWORK_GetState() != NETSTATE_SERVER)
 		return;
-	
-	//find the index
-	const int unlaggedIndex = gametic % UNLAGGEDTICS;
 
 	TThinkerIterator<DPolyAction> polyActionIt;
 	DPolyAction *polyAction;
@@ -489,4 +694,261 @@ void UNLAGGED_SpawnDebugActors ( )
 		// [BB] Get rid ot the dummy actor.
 		pActor->Destroy();
 	}
+}
+
+void UNLAGGED_SendThingUpdate( AActor *source, AActor *thing, int lNetID, bool skipOwner )
+{
+	player_t* player = NETWORK_GetActorsOwnerPlayer( source );
+
+	bool wasReconciled = reconciledGame;
+	reconciledGame = false;
+	if ( thing->state != NULL )
+	{
+		SERVERCOMMANDS_UpdateClientNetID( player - players );
+		// The thing didn't stop during unlagged, so tell clients about it
+		if ( skipOwner )
+		{
+			SERVERCOMMANDS_MoveThing( thing, CM_XY|CM_Z|CM_VELXY|CM_VELZ|CM_NOSMOOTH, player - players, SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_SetThingFrame( thing, thing->state, player - players, SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_SetThingTics( thing, player - players, SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( thing, player - players, SVCF_SKIPTHISCLIENT );
+		}
+		else
+		{
+			SERVERCOMMANDS_SpawnThing( thing, player - players, SVCF_ONLYTHISCLIENT );
+			SERVERCOMMANDS_MoveThing( thing, CM_XY|CM_Z|CM_VELXY|CM_VELZ|CM_NOSMOOTH );
+			SERVERCOMMANDS_SetThingFrame( thing, thing->state );
+			SERVERCOMMANDS_SetThingTics( thing );
+			SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( thing );
+		}
+	}
+	else
+	{
+		// The thing stopped during unlagged, tell clients about it
+		SERVERCOMMANDS_UpdateClientNetID( player - players );
+		thing->lNetID = lNetID; // The thing lost it's NetID so we need to restore it for this command only
+		SERVERCOMMANDS_DestroyThing( thing, source->player - players, SVCF_SKIPTHISCLIENT );
+		thing->lNetID = -1;
+	}
+	reconciledGame = wasReconciled;
+}
+
+void UNLAGGED_SendMissileUpdate( AActor *source, AActor *missile, int lNetID, bool skipOwner )
+{
+	player_t* player = NETWORK_GetActorsOwnerPlayer( source );
+
+	bool wasReconciled = reconciledGame;
+	reconciledGame = false;
+	if ( missile->state != NULL )
+	{
+		SERVERCOMMANDS_UpdateClientNetID( player - players );
+		// The missile didn't stop during unlagged, so tell clients about it
+		if ( skipOwner )
+		{
+			if ( missile->flags & MF_MISSILE )
+				SERVERCOMMANDS_MoveThing( missile, CM_XY|CM_Z|CM_VELXY|CM_VELZ|CM_NOSMOOTH, player - players, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_MissileExplode( missile, missile->BlockingLine, player - players, SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_SetThingFrame( missile, missile->state, player - players, SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_SetThingTics( missile, player - players, SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( missile, player - players, SVCF_SKIPTHISCLIENT );
+		}
+		else
+		{
+			if ( missile->flags & MF_MISSILE )
+			{
+				SERVERCOMMANDS_SpawnMissile( missile, player - players, SVCF_ONLYTHISCLIENT );
+				SERVERCOMMANDS_MoveThing( missile, CM_XY|CM_Z|CM_VELXY|CM_VELZ|CM_NOSMOOTH, player - players, SVCF_SKIPTHISCLIENT );
+				SERVERCOMMANDS_SetThingFrame( missile, missile->state );
+				SERVERCOMMANDS_SetThingTics( missile );
+				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( missile );
+			}
+			else
+			{
+				SERVERCOMMANDS_MissileExplode( missile, missile->BlockingLine, player - players, SVCF_SKIPTHISCLIENT );
+				SERVERCOMMANDS_SetThingFrame( missile, missile->state, player - players, SVCF_SKIPTHISCLIENT );
+				SERVERCOMMANDS_SetThingTics( missile, player - players, SVCF_SKIPTHISCLIENT );
+				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( missile, player - players, SVCF_SKIPTHISCLIENT );
+			}
+		}
+	}
+	else
+	{
+		// The missile stopped during unlagged, tell clients about it
+		SERVERCOMMANDS_UpdateClientNetID( player - players );
+		missile->lNetID = lNetID; // The missile lost it's NetID so we need to restore it for this command only
+		SERVERCOMMANDS_DestroyThing( missile, source->player - players, SVCF_SKIPTHISCLIENT );
+		missile->lNetID = -1;
+	}
+	reconciledGame = wasReconciled;
+}
+
+struct currentlyUnlaggingActor
+{
+	AActor *actor;
+	bool isMissile;
+	int lNetID;
+	bool skipOwner;
+	bool unlagDeath;
+	bool isFirstIteration;
+	bool finishedUnlagging;
+};
+std::vector<currentlyUnlaggingActor*> currentlyUnlaggingActors;
+
+void UNLAGGED_DoUnlagActors( AActor *source, int StartingTick )
+{
+	if (StartingTick < gametic || currentlyUnlaggingActors.size() > 0)
+	{
+		unlagInProgress = true;
+		bool allActorsFinished = false;
+		for (int Tick = StartingTick; Tick <= gametic; Tick++)
+		{
+			if (!reconciledGame) // it is possible that an actor to unlag spawned while the game is reconciled. We can just skip reconciliation.
+				UNLAGGED_ReconcileTick( source, Tick );
+			UNLAGGED_AddReconciliationBlocker();
+
+			allActorsFinished = currentlyUnlaggingActors[0]->finishedUnlagging;
+
+			for (unsigned int i = 0; i < currentlyUnlaggingActors.size(); i++)
+			{
+				currentlyUnlaggingActor *cua = currentlyUnlaggingActors[i];
+				if (cua->finishedUnlagging)
+					continue;
+
+				AActor *actor = cua->actor;
+
+				bool isMissile = !!( actor->flags & MF_MISSILE );
+				AUnlaggedActor* unlaggedActor = NULL;
+				if (actor->IsKindOf(RUNTIME_CLASS(AUnlaggedActor)))
+					unlaggedActor = static_cast<AUnlaggedActor *>(actor);
+
+				if (cua->isFirstIteration)
+				{
+					actor->PostBeginPlay();
+					cua->isFirstIteration = false;
+				}
+				actor->Tick();
+
+				UNLAGGED_RecordActor( unlaggedActor, Tick % UNLAGGEDTICS );
+
+				bool actorDied = isMissile ? !(actor->flags & MF_MISSILE) : !!(actor->flags6 & MF6_KILLED);
+				if ( ( actorDied && !cua->unlagDeath ) || actor->state == NULL )
+				{
+					if (unlaggedActor != NULL)
+					{
+						// We don't want to unlag dead actors so complete remaining unlagged records
+						for (int Tick2 = Tick + 1; Tick2 <= gametic; Tick2++)
+							UNLAGGED_RecordActor( unlaggedActor, Tick2 % UNLAGGEDTICS );
+						unlaggedActor->isCurrentlyBeingUnlagged = false;
+					}
+
+					// Skip this actor in future
+					cua->finishedUnlagging = true;
+					cua->actor->wasJustUnlagged = true;
+
+					if ( cua->isMissile )
+						UNLAGGED_SendMissileUpdate( source, cua->actor, cua->lNetID, cua->skipOwner );
+					else
+						UNLAGGED_SendThingUpdate( source, cua->actor, cua->lNetID, cua->skipOwner );
+				}
+
+				allActorsFinished &= cua->finishedUnlagging;
+			}
+
+			UNLAGGED_RemoveReconciliationBlocker();
+			UNLAGGED_Restore( source );
+
+			if (allActorsFinished)
+				break;
+		}
+		unlagInProgress = false;
+	}
+
+	for (unsigned int i = 0; i < currentlyUnlaggingActors.size(); i++)
+	{
+		currentlyUnlaggingActor *cua = currentlyUnlaggingActors[i];
+
+		cua->actor->wasJustUnlagged = true;
+
+		if ( cua->actor->IsKindOf( RUNTIME_CLASS(AUnlaggedActor) ) )
+			static_cast<AUnlaggedActor *>(cua->actor)->isCurrentlyBeingUnlagged = false;
+
+		if ( !cua->finishedUnlagging )
+			if ( cua->isMissile )
+				UNLAGGED_SendMissileUpdate( source, cua->actor, cua->lNetID, cua->skipOwner );
+			else
+				UNLAGGED_SendThingUpdate( source, cua->actor, cua->lNetID, cua->skipOwner );
+
+		free(cua);
+	}
+	currentlyUnlaggingActors.clear();
+}
+
+void UNLAGGED_UnlagActor( AActor *source, AActor *actor, bool isMissile, bool skipOwner, bool unlagDeath )
+{
+	struct currentlyUnlaggingActor *cua = (struct currentlyUnlaggingActor*) malloc(sizeof(struct currentlyUnlaggingActor));
+	cua->actor = actor;
+	cua->isFirstIteration = true;
+	cua->isMissile = isMissile;
+	cua->skipOwner = skipOwner;
+	cua->lNetID = actor->lNetID;
+	cua->unlagDeath = unlagDeath;
+	cua->finishedUnlagging = false;
+	currentlyUnlaggingActors.emplace_back( cua );
+
+	if (actor->IsKindOf(RUNTIME_CLASS(AUnlaggedActor)))
+		static_cast<AUnlaggedActor *>(actor)->isCurrentlyBeingUnlagged = true;
+
+	// If the game is already being unlagged, just add the actor to the list and leave
+	if ( unlagInProgress )
+		return;
+
+	UNLAGGED_DoUnlagActors( source, UNLAGGED_Gametic( source->player ) );
+}
+
+void UNLAGGED_UnlagAndReplicateThing( AActor *source, AActor *thing, bool bSkipOwner, bool bNoUnlagged, bool bUnlagDeath )
+{
+	if ( ( (!source || !source->player) && !UNLAGGED_IsReconciled() ) || ( zadmflags & ZADF_NOUNLAGGED ) )
+		bNoUnlagged = true;
+	
+	player_t* player = source->player;
+
+	// We have to spawn the thing on clients every time even if it stops during unlagged
+	// Otherwise some Decorate functions will be replicated before the client spawns the thing and not work as intended
+	SERVERCOMMANDS_SpawnThing(thing, player - players, SVCF_SKIPTHISCLIENT);
+
+	if ( !source || !NETWORK_ClientsideFunctionsAllowed( player ) || bNoUnlagged || UNLAGGED_Gametic( source->player ) >= gametic || player->bIsBot ) {
+		// Unlagged is disabled, so exit here
+		if ( bSkipOwner )
+			SERVERCOMMANDS_UpdateClientNetID( player - players );
+		else
+			SERVERCOMMANDS_SpawnThing( thing, player - players, SVCF_ONLYTHISCLIENT );
+		SERVER_SetThingNonZeroAngleAndVelocity( thing );
+		return;
+	}
+
+	UNLAGGED_UnlagActor( source, thing, false, bSkipOwner, bUnlagDeath );
+}
+
+void UNLAGGED_UnlagAndReplicateMissile( AActor *source, AActor *missile, bool bSkipOwner, bool bNoUnlagged, bool bUnlagDeath )
+{
+	if ( ( (!source || !source->player) && !UNLAGGED_IsReconciled() ) || ( zadmflags & ZADF_NOUNLAGGED ) )
+		bNoUnlagged = true;
+
+	player_t* player = source->player;
+
+	// We have to spawn the missile on clients every time even if it stops during unlagged
+	// Otherwise some Decorate functions will be replicated before the client spawns the missile and not work as intended
+	SERVERCOMMANDS_SpawnMissile( missile, player - players, SVCF_SKIPTHISCLIENT );
+
+	if ( !source || !NETWORK_ClientsideFunctionsAllowed( player ) || bNoUnlagged || UNLAGGED_Gametic( source->player ) >= gametic || player->bIsBot ) {
+		// Unlagged is disabled, so exit here
+		if ( bSkipOwner )
+			SERVERCOMMANDS_UpdateClientNetID( player - players );
+		else
+			SERVERCOMMANDS_SpawnMissile( missile, player - players, SVCF_ONLYTHISCLIENT );
+		return;
+	}
+
+	UNLAGGED_UnlagActor( source, missile, true, bSkipOwner, bUnlagDeath );
 }

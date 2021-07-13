@@ -4127,6 +4127,13 @@ void AActor::SetAngle(angle_t ang, bool interpolate)
 EXTERN_CVAR(Bool, cl_spectsource)
 void AActor::Tick ()
 {
+	// [geNia] If this actor was unlagged on this tic, don't Tick() it
+	if (wasJustUnlagged)
+	{
+		wasJustUnlagged = false;
+		return;
+	}
+
 	// [BB] Start to measure how much outbound net traffic this call of AActor::Tick() needs.
 	NETWORK_StartTrafficMeasurement ( );
 

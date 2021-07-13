@@ -82,6 +82,7 @@
 #include "decallib.h"
 #include "network/netcommand.h"
 #include "network/servercommands.h"
+#include "unlagged.h"
 
 CVAR (Bool, sv_showwarnings, false, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
 
@@ -1211,6 +1212,9 @@ void SERVERCOMMANDS_MoveThingIfChanged( AActor *actor, const MoveThingData &oldD
 //
 void SERVERCOMMANDS_MoveThing( AActor *actor, ULONG bits, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
+	if ( UNLAGGED_IsReconciled() && actor->IsKindOf(RUNTIME_CLASS(AUnlaggedActor)) ) // don't send unlagged actor updates when unlagging, they will be sent later
+		return;
+
 	if ( !EnsureActorHasNetID (actor) )
 		return;
 
@@ -1267,6 +1271,9 @@ void SERVERCOMMANDS_KillThing( AActor *pActor, AActor *pSource, AActor *pInflict
 //
 void SERVERCOMMANDS_SetThingState( AActor *pActor, NetworkActorState state, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
+	if ( UNLAGGED_IsReconciled() && pActor->IsKindOf(RUNTIME_CLASS(AUnlaggedActor)) ) // don't send unlagged actor updates when unlagging, they will be sent later
+		return;
+
 	if ( !EnsureActorHasNetID (pActor) )
 		return;
 
@@ -2296,6 +2303,9 @@ void SERVERCOMMANDS_SpawnMissile( AActor *pMissile, ULONG ulPlayerExtra, ServerC
 //
 void SERVERCOMMANDS_MissileExplode( AActor *pMissile, line_t *pLine, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
+	if ( UNLAGGED_IsReconciled() && pMissile->IsKindOf(RUNTIME_CLASS(AUnlaggedActor)) ) // don't send unlagged actor updates when unlagging, they will be sent later
+		return;
+
 	if ( !EnsureActorHasNetID (pMissile) )
 		return;
 

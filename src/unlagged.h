@@ -60,15 +60,19 @@ int		UNLAGGED_Gametic( player_t *player );
 void	UNLAGGED_Reconcile( AActor *actor );
 void	UNLAGGED_ReconcileTick( AActor *actor, int Tick );
 void	UNLAGGED_Restore( AActor *actor );
-void	UNLAGGED_RecordPlayer( player_t *player );
+void	UNLAGGED_RecordPlayer( player_t *player, int unlaggedIndex );
 void	UNLAGGED_ResetPlayer( player_t *player );
-void	UNLAGGED_RecordSectors( );
-void	UNLAGGED_RecordPolyobj( );
+void	UNLAGGED_RecordActor( AUnlaggedActor* unlaggedActor, int unlaggedIndex );
+void	UNLAGGED_ResetActor( AUnlaggedActor* unlaggedActor );
+void	UNLAGGED_RecordSectors( int unlaggedIndex );
+void	UNLAGGED_RecordPolyobj( int unlaggedIndex );
 bool	UNLAGGED_DrawRailClientside ( AActor *attacker );
 void	UNLAGGED_GetHitOffset ( const AActor *attacker, const FTraceResults &trace, TVector3<fixed_t> &hitOffset );
 bool	UNLAGGED_IsReconciled ( );
 void	UNLAGGED_AddReconciliationBlocker ( );
 void	UNLAGGED_RemoveReconciliationBlocker ( );
 void	UNLAGGED_SpawnDebugActors ( );
+void	UNLAGGED_UnlagAndReplicateThing ( AActor *source, AActor *thing, bool bSkipOwner, bool bNoUnlagged, bool bUnlagDeath );
+void	UNLAGGED_UnlagAndReplicateMissile ( AActor *source, AActor *missile, bool bSkipOwner, bool bNoUnlagged, bool bUnlagDeath );
 
 #endif // __UNLAGGED_H__

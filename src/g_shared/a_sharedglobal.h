@@ -262,5 +262,32 @@ public:
 	virtual void Effect();
 };
 
+class AUnlaggedActor : public AActor
+{
+	DECLARE_CLASS(AUnlaggedActor, AActor)
+public:
+	fixed_t		unlaggedX[UNLAGGEDTICS];
+	fixed_t		unlaggedY[UNLAGGEDTICS];
+	fixed_t		unlaggedZ[UNLAGGEDTICS];
+	DWORD		unlaggedFlags[UNLAGGEDTICS][9]; // 0 is mvFlags, 1 to 8 is flags to flags8
+
+	fixed_t		restoreX;
+	fixed_t		restoreY;
+	fixed_t		restoreZ;
+	DWORD		restoreFlags[9]; // 0 is mvFlags, 1 to 8 is flags to flags8
+
+	fixed_t		restoreFloorZ;
+	fixed_t		restoreCeilingZ;
+
+	bool		isCurrentlyBeingUnlagged;
+	bool		isMissile;
+
+	AUnlaggedActor* previousUnlaggedActor;
+	AUnlaggedActor* nextUnlaggedActor;
+
+	void BeginPlay();
+	void Destroy();
+};
+
 
 #endif //__A_SHAREDGLOBAL_H__

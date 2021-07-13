@@ -1218,6 +1218,9 @@ public:
 	// [BB] Last movedir that was sent to the client.
 	BYTE lastMovedir;
 
+	// [geNia] If this actor was unlagged on this tic, don't Tick() it
+	bool wasJustUnlagged;
+
 	// [geNia] Used to generate numbers in sync with the server.
 	FRandom actorRandom;
 	int randomSeed;

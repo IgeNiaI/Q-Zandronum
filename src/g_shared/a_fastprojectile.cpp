@@ -22,6 +22,13 @@ IMPLEMENT_CLASS(AFastProjectile)
 
 void AFastProjectile::Tick ()
 {
+	// [geNia] If this actor was unlagged on this tic, don't Tick() it
+	if (wasJustUnlagged)
+	{
+		wasJustUnlagged = false;
+		return;
+	}
+
 	int i;
 	fixed_t xfrac;
 	fixed_t yfrac;

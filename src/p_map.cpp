@@ -4285,9 +4285,6 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		MF_SHOOTABLE, ML_BLOCKEVERYTHING | ML_BLOCKHITSCAN, t1, trace,
 		tflags, CheckForActor, &TData);
 
-	// [Spleen]
-	UNLAGGED_Restore( t1 );
-
 	if (!hitSomething)
 	{ // hit nothing
 		// [BB] No decal will be spawned, so the client stops here.
@@ -4317,6 +4314,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		}
 		else
 		{
+			UNLAGGED_Restore(t1);
 			return NULL;
 		}
 	}
@@ -4548,6 +4546,9 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 			SpawnDeepSplash(t1, trace, puff, vx, vy, vz, shootz, trace.Crossed3DWater != NULL);
 		}
 	}
+
+	// [Spleen]
+	UNLAGGED_Restore( t1 );
 
 	// [CK] In case the client ever gets this far, it should end now.
 	if ( NETWORK_InClientMode() )
@@ -4920,9 +4921,6 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 		distance, MF_SHOOTABLE, ML_BLOCKEVERYTHING, source, trace,
 		flags, ProcessRailHit, &rail_data);
 
-	// [Spleen]
-	UNLAGGED_Restore( source );
-
 	// Hurt anything the trace hit
 	unsigned int i;
 	FName damagetype = (puffDefaults == NULL || puffDefaults->DamageType == NAME_None) ? FName(NAME_Railgun) : puffDefaults->DamageType;
@@ -5024,6 +5022,9 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			}
 		}
 	}
+
+	// [Spleen]
+	UNLAGGED_Restore( source );
 
 	// Spawn a decal or puff at the point where the trace ended.
 	if (trace.HitType == TRACE_HitWall || trace.HitType == TRACE_HitFloor || trace.HitType == TRACE_HitCeiling)
