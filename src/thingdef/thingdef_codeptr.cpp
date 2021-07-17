@@ -470,7 +470,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_StopSound)
 	ACTION_PARAM_START(1);
 	ACTION_PARAM_INT(slot, 0);
 
-	S_StopSound(self, slot);
+	S_StopSound(self, slot, self->target);
 }
 
 //==========================================================================
@@ -540,7 +540,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_StopSoundEx)
 
 	if (channel > NAME_Auto && channel <= NAME_SoundSlot7)
 	{
-		S_StopSound (self, int(channel) - NAME_Auto);
+		S_StopSound (self, int(channel) - NAME_Auto, self->target);
 	}
 }
 
