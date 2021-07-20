@@ -152,6 +152,12 @@ ACTOR FastProjectile native
 	Projectile
 }
 
+// Unlagged actors --------------------------------------------------------
+
+ACTOR UnlaggedActor native
+{
+}
+
 // Sector flag setter ------------------------------------------------------
 
 ACTOR SectorFlagSetter 9041 native

@@ -355,6 +355,7 @@ enum
 	MF8_HITOWNER		= 0x00000010,	// projectile can hit the actor that fired it
 	MF8_NOEXPLODECEILING= 0x00010000,	// Missile stops at ceiling instead of exploding
 	MF8_SEEKERMISSILENOZ= 0x00020000,	// [geNia] Same as MF2_SEEKERMISSILE, but doesn't trace along Z axis
+	MF8_NORESTOREONWOUND= 0x00040000,	// [geNia] If the actor is an AUnlaggedActor and it's health is below the WoundHealth value, then don't restore it's position in unlagged
 
 	// [Ivory] extra movement flags
 	MV_CROUCHSLIDE		= 0x00000001,

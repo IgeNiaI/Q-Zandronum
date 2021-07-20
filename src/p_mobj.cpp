@@ -7373,17 +7373,22 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 
 			if (StartingTick < gametic)
 			{
+				AUnlaggedActor* unlaggedMissile = NULL;
+				if ( pMissile->IsKindOf( RUNTIME_CLASS(AUnlaggedActor) ) )
+					unlaggedMissile = static_cast<AUnlaggedActor *>(pMissile);
+
 				for (int Tick = StartingTick; Tick <= gametic; Tick++)
 				{
-					UNLAGGED_ReconcileTick( owner, Tick );
+					UNLAGGED_ReconcileTick( owner, Tick, unlaggedMissile );
 					UNLAGGED_AddReconciliationBlocker();
 					int InitialTics = pMissile->tics;
 					pMissile->tics = -1;
 					pMissile->Tick();
 					pMissile->tics = InitialTics;
-
+					
+					UNLAGGED_RecordActor( unlaggedMissile, Tick % UNLAGGEDTICS );
 					UNLAGGED_RemoveReconciliationBlocker();
-					UNLAGGED_Restore( owner );
+					UNLAGGED_Restore( owner, unlaggedMissile );
 
 					if ( !( pMissile->flags & MF_MISSILE ) )
 					{
@@ -7543,17 +7548,22 @@ AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
 
 			if (StartingTick < gametic)
 			{
+				AUnlaggedActor* unlaggedMissile = NULL;
+				if ( pMissile->IsKindOf( RUNTIME_CLASS(AUnlaggedActor) ) )
+					unlaggedMissile = static_cast<AUnlaggedActor *>(pMissile);
+
 				for (int Tick = StartingTick; Tick <= gametic; Tick++)
 				{
-					UNLAGGED_ReconcileTick( source, Tick );
+					UNLAGGED_ReconcileTick( source, Tick, unlaggedMissile );
 					UNLAGGED_AddReconciliationBlocker();
 					int InitialTics = pMissile->tics;
 					pMissile->tics = -1;
 					pMissile->Tick();
 					pMissile->tics = InitialTics;
-
+					
+					UNLAGGED_RecordActor( unlaggedMissile, Tick % UNLAGGEDTICS );
 					UNLAGGED_RemoveReconciliationBlocker();
-					UNLAGGED_Restore( source );
+					UNLAGGED_Restore( source, unlaggedMissile );
 
 					if ( !( pMissile->flags & MF_MISSILE ) )
 					{
@@ -7726,17 +7736,22 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 
 				if (StartingTick < gametic)
 				{
+					AUnlaggedActor* unlaggedMissile = NULL;
+					if ( MissileActor->IsKindOf( RUNTIME_CLASS(AUnlaggedActor) ) )
+						unlaggedMissile = static_cast<AUnlaggedActor *>(MissileActor);
+
 					for (int Tick = StartingTick; Tick <= gametic; Tick++)
 					{
-						UNLAGGED_ReconcileTick( source, Tick );
+						UNLAGGED_ReconcileTick( source, Tick, unlaggedMissile );
 						UNLAGGED_AddReconciliationBlocker();
 						int InitialTics = MissileActor->tics;
 						MissileActor->tics = -1;
 						MissileActor->Tick();
 						MissileActor->tics = InitialTics;
-
+						
+						UNLAGGED_RecordActor( unlaggedMissile, Tick % UNLAGGEDTICS );
 						UNLAGGED_RemoveReconciliationBlocker();
-						UNLAGGED_Restore( source );
+						UNLAGGED_Restore( source, unlaggedMissile );
 
 						if ( !( MissileActor->flags & MF_MISSILE ) )
 						{

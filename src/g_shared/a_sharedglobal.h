@@ -262,5 +262,27 @@ public:
 	virtual void Effect();
 };
 
+class AUnlaggedActor : public AActor
+{
+	DECLARE_CLASS(AUnlaggedActor, AActor)
+public:
+	fixed_t		unlaggedX[UNLAGGEDTICS];
+	fixed_t		unlaggedY[UNLAGGEDTICS];
+	fixed_t		unlaggedZ[UNLAGGEDTICS];
+
+	fixed_t		restoreX;
+	fixed_t		restoreY;
+	fixed_t		restoreZ;
+
+	fixed_t		restoreFloorZ;
+	fixed_t		restoreCeilingZ;
+
+	AUnlaggedActor* previousUnlaggedActor;
+	AUnlaggedActor* nextUnlaggedActor;
+
+	void BeginPlay();
+	void Destroy();
+};
+
 
 #endif //__A_SHAREDGLOBAL_H__

@@ -61,6 +61,47 @@
 #include "sv_commands.h"
 #include "templates.h"
 #include "d_netinf.h"
+#include "a_sharedglobal.h"
+
+
+IMPLEMENT_CLASS(AUnlaggedActor)
+
+AUnlaggedActor* firstUnlaggedActor = NULL;
+AUnlaggedActor* lastUnlaggedActor = NULL;
+
+void AUnlaggedActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if ( firstUnlaggedActor == NULL ) {
+		firstUnlaggedActor = this;
+	}
+
+	previousUnlaggedActor = lastUnlaggedActor;
+	if ( lastUnlaggedActor != NULL) {
+		lastUnlaggedActor->nextUnlaggedActor = this;
+	}
+
+	lastUnlaggedActor = this;
+
+	UNLAGGED_ResetActor( this );
+}
+
+void AUnlaggedActor::Destroy()
+{
+	Super::Destroy();
+
+	if ( previousUnlaggedActor != NULL )
+		previousUnlaggedActor->nextUnlaggedActor = nextUnlaggedActor;
+	else
+		firstUnlaggedActor = nextUnlaggedActor;
+
+	if ( nextUnlaggedActor != NULL )
+		nextUnlaggedActor->previousUnlaggedActor = previousUnlaggedActor;
+	else
+		lastUnlaggedActor = previousUnlaggedActor;
+}
+
 
 CVAR(Flag, sv_nounlagged, zadmflags, ZADF_NOUNLAGGED);
 CVAR( Bool, sv_unlagged_debugactors, false, 0 )
@@ -73,18 +114,28 @@ void UNLAGGED_Tick( void )
 	// [BB] Only the server has to do anything here.
 	if ( NETWORK_GetState() != NETSTATE_SERVER )
 		return;
+	
+	//find the index
+	const int unlaggedIndex = gametic % UNLAGGEDTICS;
 
 	// [Spleen] Record sectors soon before they are reconciled/restored
-	UNLAGGED_RecordSectors( );
+	UNLAGGED_RecordSectors( unlaggedIndex );
 
 	// [geNia] Record polyobjects
-	UNLAGGED_RecordPolyobj( );
+	UNLAGGED_RecordPolyobj( unlaggedIndex );
 
 	// [Spleen] Record players
 	for ( ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ++ulIdx )
 	{
 		if ( PLAYER_IsValidPlayerWithMo( ulIdx ) )
-			UNLAGGED_RecordPlayer( &players[ulIdx] );
+			UNLAGGED_RecordPlayer( &players[ulIdx], unlaggedIndex );
+	}
+
+	// [geNia] Record unlagged actors
+	AUnlaggedActor* unlaggedActor = firstUnlaggedActor;
+	while ( unlaggedActor) {
+		UNLAGGED_RecordActor( unlaggedActor, unlaggedIndex );
+		unlaggedActor = unlaggedActor->nextUnlaggedActor;
 	}
 
 	// [BB] Spawn debug actors if the server runner wants them.
@@ -158,7 +209,7 @@ void UNLAGGED_Reconcile( AActor *actor )
 	UNLAGGED_ReconcileTick( actor, unlaggedGametic );
 }
 
-void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
+void UNLAGGED_ReconcileTick( AActor *actor, int Tic, AUnlaggedActor* actorToSkip )
 {
 	//Only do anything if the actor to be reconciled is a player,
 	//it's on a server with unlagged on, and reconciliation is not being blocked
@@ -263,11 +314,29 @@ void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
 			}
 		}
 	}
+
+	// [geNia] Reconcile unlagged actors
+	AUnlaggedActor* unlaggedActor = firstUnlaggedActor;
+	while ( unlaggedActor ) {
+		if ( unlaggedActor != actorToSkip ) {
+			unlaggedActor->restoreX = unlaggedActor->x;
+			unlaggedActor->restoreY = unlaggedActor->y;
+			unlaggedActor->restoreZ = unlaggedActor->z;
+
+			unlaggedActor->SetOrigin(
+				unlaggedActor->unlaggedX[unlaggedIndex],
+				unlaggedActor->unlaggedY[unlaggedIndex],
+				unlaggedActor->unlaggedZ[unlaggedIndex]
+			);
+		}
+
+		unlaggedActor = unlaggedActor->nextUnlaggedActor;
+	}
 }
 
 // Restore everything that has been shifted
 // back in time by UNLAGGED_Reconcile
-void UNLAGGED_Restore( AActor *actor )
+void UNLAGGED_Restore( AActor *actor, AUnlaggedActor* actorToSkip )
 {
 	//Only do anything if the game is currently reconciled
 	// [BB] Since reconciledGame can only be true if all necessary checks in UNLAGGED_Reconcile were passed,
@@ -304,6 +373,29 @@ void UNLAGGED_Restore( AActor *actor )
 			players[i].mo->ceilingz = players[i].restoreCeilingZ;
 		}
 	}
+	
+	// [geNia] Restore unlagged actor
+	AUnlaggedActor* unlaggedActor = firstUnlaggedActor;
+	while ( unlaggedActor ) {
+		// Only restore if the actor wasn't destroyed or killed
+		if ( ( unlaggedActor != actorToSkip )
+			&& !( unlaggedActor->ObjectFlags & OF_EuthanizeMe )
+			&& ( unlaggedActor->health > 0 )
+			&& ( !( unlaggedActor->flags8 & MF8_NORESTOREONWOUND ) || ( unlaggedActor->health > RUNTIME_TYPE(unlaggedActor)->Meta.GetMetaInt (AMETA_WoundHealth, 6) ) ) )
+		{
+			Printf("Restore %d %d %d %d %d %d\n",
+				(unlaggedActor != actorToSkip),
+				!(unlaggedActor->ObjectFlags & OF_EuthanizeMe),
+				(unlaggedActor->health > 0),
+				!(unlaggedActor->flags8 & MF8_NORESTOREONWOUND),
+				(unlaggedActor->health > RUNTIME_TYPE(unlaggedActor)->Meta.GetMetaInt(AMETA_WoundHealth, 6)),
+				unlaggedActor->health
+			);
+			unlaggedActor->SetOrigin( unlaggedActor->restoreX, unlaggedActor->restoreY, unlaggedActor->restoreZ );
+		}
+
+		unlaggedActor = unlaggedActor->nextUnlaggedActor;
+	}
 
 	reconciledGame = false;
 }
@@ -311,7 +403,7 @@ void UNLAGGED_Restore( AActor *actor )
 
 // Record the positions of just one player
 // in order to be able to reconcile them later
-void UNLAGGED_RecordPlayer( player_t *player )
+void UNLAGGED_RecordPlayer( player_t *player, int unlaggedIndex )
 {
 	// [BB] Sanity check.
 	if ( player == NULL )
@@ -320,9 +412,6 @@ void UNLAGGED_RecordPlayer( player_t *player )
 	//Only do anything if it's on a server
 	if (NETWORK_GetState() != NETSTATE_SERVER)
 		return;
-
-	//find the index
-	const int unlaggedIndex = gametic % UNLAGGEDTICS;
 
 	//record the player
 	player->unlaggedX[unlaggedIndex] = player->mo->x;
@@ -351,16 +440,52 @@ void UNLAGGED_ResetPlayer( player_t *player )
 	}
 }
 
+// Record the positions of just one actor
+// in order to be able to reconcile it later
+void UNLAGGED_RecordActor( AUnlaggedActor* actor, int unlaggedIndex )
+{
+	// [geNia] Sanity check.
+	if ( actor == NULL )
+		return;
+	
+	// Only do anything if it's on a server
+	if ( NETWORK_GetState() != NETSTATE_SERVER )
+		return;
+
+	// record the projectile
+	actor->unlaggedX[unlaggedIndex] = actor->x;
+	actor->unlaggedY[unlaggedIndex] = actor->y;
+	actor->unlaggedZ[unlaggedIndex] = actor->z;
+}
+
+
+// Reset the reconciliation buffers of an actor
+// Should be called when an actor is spawned
+void UNLAGGED_ResetActor( AUnlaggedActor* actor )
+{
+	// [geNia] Sanity check.
+	if ( actor == NULL )
+		return;
+
+	// Only do anything if it's on a server
+	if ( NETWORK_GetState() != NETSTATE_SERVER )
+		return;
+
+	for (int unlaggedIndex = 0; unlaggedIndex < UNLAGGEDTICS; ++unlaggedIndex)
+	{
+		actor->unlaggedX[unlaggedIndex] = actor->x;
+		actor->unlaggedY[unlaggedIndex] = actor->y;
+		actor->unlaggedZ[unlaggedIndex] = actor->z;
+	}
+}
+
 
 // Record the positions of the sectors
-void UNLAGGED_RecordSectors( )
+void UNLAGGED_RecordSectors( int unlaggedIndex )
 {
 	//Only do anything if it's on a server
 	if (NETWORK_GetState() != NETSTATE_SERVER)
 		return;
-
-	//find the index
-	const int unlaggedIndex = gametic % UNLAGGEDTICS;
 
 	//record the sectors
 	for (int i = 0; i < numsectors; ++i)
@@ -371,14 +496,11 @@ void UNLAGGED_RecordSectors( )
 }
 
 // Record the positions of the polyobjects
-void UNLAGGED_RecordPolyobj( )
+void UNLAGGED_RecordPolyobj( int unlaggedIndex )
 {
 	//Only do anything if it's on a server
 	if (NETWORK_GetState() != NETSTATE_SERVER)
 		return;
-	
-	//find the index
-	const int unlaggedIndex = gametic % UNLAGGEDTICS;
 
 	TThinkerIterator<DPolyAction> polyActionIt;
 	DPolyAction *polyAction;

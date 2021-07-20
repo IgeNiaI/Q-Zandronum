@@ -1692,17 +1692,22 @@ void A_FireCustomMissileHelper ( AActor *self,
 
 				if (StartingTick < gametic)
 				{
+					AUnlaggedActor* unlaggedMissile = NULL;
+					if ( misl->IsKindOf( RUNTIME_CLASS(AUnlaggedActor) ) )
+						unlaggedMissile = static_cast<AUnlaggedActor *>(misl);
+
 					for (int Tick = StartingTick; Tick <= gametic; Tick++)
 					{
-						UNLAGGED_ReconcileTick( self, Tick );
+						UNLAGGED_ReconcileTick( self, Tick, unlaggedMissile );
 						UNLAGGED_AddReconciliationBlocker();
 						int InitialTics = misl->tics;
 						misl->tics = -1;
 						misl->Tick();
 						misl->tics = InitialTics;
 
+						UNLAGGED_RecordActor( unlaggedMissile, Tick % UNLAGGEDTICS );
 						UNLAGGED_RemoveReconciliationBlocker();
-						UNLAGGED_Restore( self );
+						UNLAGGED_Restore( self, unlaggedMissile );
 
 						if ( !( misl->flags & MF_MISSILE ) )
 						{
