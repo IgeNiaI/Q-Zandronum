@@ -13,6 +13,7 @@ Command SpawnPlayer
 	Fixed y
 	Fixed z
 	Byte playerClass
+	Byte randomSeed
 
 	If (isMorphed)
 		Short morphStyle
@@ -296,6 +297,7 @@ Command GiveInventory
 	Player player with IndexTestOnly
 	Short actorNetworkIndex
 	Long amount
+	Byte randomSeed
 EndCommand
 
 Command TakeInventory

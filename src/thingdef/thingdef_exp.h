@@ -589,6 +589,59 @@ public:
 
 //==========================================================================
 //
+//
+//
+//==========================================================================
+
+class FxARandom : public FxExpression
+{
+protected:
+	FxExpression *min, *max;
+
+public:
+
+	FxARandom(FxExpression *mi, FxExpression *ma, const FScriptPosition &pos);
+	~FxARandom();
+	FxExpression *Resolve(FCompileContext&);
+
+	ExpVal EvalExpression (AActor *self);
+};
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+class FxAFRandom : public FxARandom
+{
+public:
+	FxAFRandom(FxExpression *mi, FxExpression *ma, const FScriptPosition &pos);
+	ExpVal EvalExpression (AActor *self);
+};
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+class FxARandom2 : public FxExpression
+{
+	FxExpression *mask;
+
+public:
+
+	FxARandom2(FxExpression *m, const FScriptPosition &pos);
+	~FxARandom2();
+	FxExpression *Resolve(FCompileContext&);
+
+	ExpVal EvalExpression (AActor *self);
+};
+
+
+//==========================================================================
+//
 //	FxGlobalVariable
 //
 //==========================================================================

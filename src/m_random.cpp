@@ -288,6 +288,23 @@ void FRandom::Init(DWORD seed)
 
 //==========================================================================
 //
+// FRandom :: WriteRNGState
+//
+// Writes this RNG state
+//
+//==========================================================================
+
+void FRandom::WriteRNGState(FArchive &arc)
+{
+	arc << idx;
+	for (int i = 0; i < SFMT::N32; ++i)
+	{
+		arc << sfmt.u[i];
+	}
+}
+
+//==========================================================================
+//
 // FRandom :: StaticSumSeeds
 //
 // This function produces a DWORD that can be used to check the consistancy

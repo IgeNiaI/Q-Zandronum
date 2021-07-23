@@ -8,6 +8,7 @@ Command SpawnMissile
 	Class<AActor> missileType
 	Long netID
 	Long targetNetID
+	Byte randomSeed
 EndCommand
 
 Command MissileExplode

@@ -157,8 +157,8 @@ void				CLIENT_WaitForServer( void );
 
 // Support functions to make things work more smoothly.
 void				CLIENT_AuthenticateLevel( const char *pszMapName );
-AActor				*CLIENT_SpawnThing( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, LONG lNetID, BYTE spawnFlags = 0 );
-void				CLIENT_SpawnMissile( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, fixed_t VelX, fixed_t VelY, fixed_t VelZ, LONG lNetID, LONG lTargetNetID );
+AActor				*CLIENT_SpawnThing( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, LONG lNetID, BYTE spawnFlags, int randomSeed );
+void				CLIENT_SpawnMissile( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, fixed_t VelX, fixed_t VelY, fixed_t VelZ, LONG lNetID, LONG lTargetNetID, int randomSeed );
 AActor				*CLIENT_FindThingByNetID( LONG lID );
 void				CLIENT_DisplayMOTD( void );
 void				CLIENT_RestoreSpecialPosition( AActor *pActor );

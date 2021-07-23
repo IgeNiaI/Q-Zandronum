@@ -40,6 +40,7 @@
 #include "sfmt/SFMT.h"
 
 struct PNGHandle;
+class FArchive;
 
 class FRandom
 {
@@ -91,6 +92,7 @@ public:
 	void InitByArray(DWORD *init_key, int key_length);
 	int GetMinArraySize32();
 	int GetMinArraySize64();
+	void WriteRNGState(FArchive &arc);
 
 	/* These real versions are due to Isaku Wada */
 	/** generates a random number on [0,1]-real-interval */

@@ -420,6 +420,41 @@ static FxExpression *ParseExpression0 (FScanner &sc, const PClass *cls)
 		}
 		return new FxRandom2(rng, mask, sc);
 	}
+	else if (sc.CheckToken(TK_ARandom))
+	{
+		sc.MustGetToken('(');
+
+		FxExpression *min = ParseExpressionM (sc, cls);
+		sc.MustGetToken(',');
+		FxExpression *max = ParseExpressionM (sc, cls);
+		sc.MustGetToken(')');
+
+		return new FxARandom(min, max, sc);
+	}
+	else if (sc.CheckToken(TK_AFRandom))
+	{
+		sc.MustGetToken('(');
+
+		FxExpression *min = ParseExpressionM (sc, cls);
+		sc.MustGetToken(',');
+		FxExpression *max = ParseExpressionM (sc, cls);
+		sc.MustGetToken(')');
+
+		return new FxAFRandom(min, max, sc);
+	}
+	else if (sc.CheckToken(TK_ARandom2))
+	{
+		sc.MustGetToken('(');
+
+		FxExpression *mask = NULL;
+
+		if (!sc.CheckToken(')'))
+		{
+			mask = ParseExpressionM(sc, cls);
+			sc.MustGetToken(')');
+		}
+		return new FxARandom2(mask, sc);
+	}
 	else if (sc.CheckToken(TK_Abs))
 	{
 		sc.MustGetToken('(');

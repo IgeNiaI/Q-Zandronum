@@ -1214,6 +1214,10 @@ public:
 	// [BB] Last movedir that was sent to the client.
 	BYTE lastMovedir;
 
+	// [geNia] Used to generate numbers in sync with the server.
+	FRandom actorRandom;
+	int randomSeed;
+
 	// ThingIDs
 	static void ClearTIDHashes ();
 	void AddToHash ();
@@ -1286,6 +1290,8 @@ public:
 	// end of GZDoom specific additions
 
 	size_t PropagateMark();
+
+	void SetRandomSeed(int seed);
 };
 
 class FActorIterator

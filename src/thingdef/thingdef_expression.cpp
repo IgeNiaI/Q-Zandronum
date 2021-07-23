@@ -1825,6 +1825,186 @@ ExpVal FxRandom2::EvalExpression (AActor *self)
 //
 //
 //==========================================================================
+FxARandom::FxARandom(FxExpression *mi, FxExpression *ma, const FScriptPosition &pos)
+: FxExpression(pos)
+{
+	if (mi != NULL && ma != NULL)
+	{
+		min = new FxIntCast(mi);
+		max = new FxIntCast(ma);
+	}
+	else min = max = NULL;
+	ValueType = VAL_Int;
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+FxARandom::~FxARandom()
+{
+	SAFE_DELETE(min);
+	SAFE_DELETE(max);
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+FxExpression *FxARandom::Resolve(FCompileContext &ctx)
+{
+	CHECKRESOLVED();
+	if (min && max)
+	{
+		RESOLVE(min, ctx);
+		RESOLVE(max, ctx);
+		ABORT(min && max);
+	}
+	return this;
+};
+
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+ExpVal FxARandom::EvalExpression (AActor *self)
+{
+	ExpVal val;
+	val.Type = VAL_Int;
+
+	if (min != NULL && max != NULL)
+	{
+		int minval = min->EvalExpression (self).GetInt();
+		int maxval = max->EvalExpression (self).GetInt();
+
+		if (maxval < minval)
+		{
+			swapvalues (maxval, minval);
+		}
+
+		val.Int = self->actorRandom(maxval - minval + 1) + minval;
+	}
+	else
+	{
+		val.Int = self->actorRandom();
+	}
+	return val;
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+FxAFRandom::FxAFRandom(FxExpression *mi, FxExpression *ma, const FScriptPosition &pos)
+: FxARandom(NULL, NULL, pos)
+{
+	if (mi != NULL && ma != NULL)
+	{
+		min = mi;
+		max = ma;
+	}
+	ValueType = VAL_Float;
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+ExpVal FxAFRandom::EvalExpression (AActor *self)
+{
+	ExpVal val;
+	val.Type = VAL_Float;
+	int random = self->actorRandom(0x40000000);
+	double frandom = random / double(0x40000000);
+
+	if (min != NULL && max != NULL)
+	{
+		double minval = min->EvalExpression (self).GetFloat();
+		double maxval = max->EvalExpression (self).GetFloat();
+
+		if (maxval < minval)
+		{
+			swapvalues (maxval, minval);
+		}
+
+		val.Float = frandom * (maxval - minval) + minval;
+	}
+	else
+	{
+		val.Float = frandom;
+	}
+	return val;
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+FxARandom2::FxARandom2(FxExpression *m, const FScriptPosition &pos)
+: FxExpression(pos)
+{
+	if (m) mask = new FxIntCast(m);
+	else mask = new FxConstant(-1, pos);
+	ValueType = VAL_Int;
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+FxARandom2::~FxARandom2()
+{
+	SAFE_DELETE(mask);
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+FxExpression *FxARandom2::Resolve(FCompileContext &ctx)
+{
+	CHECKRESOLVED();
+	SAFE_RESOLVE(mask, ctx);
+	return this;
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
+
+ExpVal FxARandom2::EvalExpression (AActor *self)
+{
+	ExpVal maskval = mask->EvalExpression(self);
+	int imaskval = maskval.GetInt();
+
+	maskval.Type = VAL_Int;
+	maskval.Int = self->actorRandom.Random2(imaskval);
+	return maskval;
+}
+
+//==========================================================================
+//
+//
+//
+//==========================================================================
 
 FxIdentifier::FxIdentifier(FName name, const FScriptPosition &pos)
 : FxExpression(pos)
