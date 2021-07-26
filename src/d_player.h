@@ -100,6 +100,20 @@ class player_t;
 class	CSkullBot;
 class	AFloatyIcon;
 
+typedef struct futureradiusattack {
+	int tic;
+	AActor *thing;
+	AActor *bombspot;
+	AActor *bombsource;
+	double bombdamagefloat;
+	double bombdistancefloat;
+	FName bombmod;
+	int attackFlags;
+	int bombFlags2, bombFlags3;
+	int fulldamagedistance;
+	struct futureradiusattack *next = NULL;
+} sFUTURERADIUSATTACK;
+
 #define PREDICTABLES_SIZE 20
 
 class APlayerPawn : public AActor
@@ -570,6 +584,8 @@ public:
 	void SetLogText (const char *text);
 	void SendPitchLimits() const;
 
+	void AddFutureRadiusAttack( sFUTURERADIUSATTACK* NewFutureRadiusAttack );
+
 	APlayerPawn	*mo;
 	BYTE		playerstate;
 	ticcmd_t	cmd;
@@ -832,6 +848,8 @@ public:
 
 	fixed_t		restoreFloorZ;
 	fixed_t		restoreCeilingZ;
+
+	sFUTURERADIUSATTACK *FutureRadiusAttack;
 
 	// [BC] End of ST additions.
 

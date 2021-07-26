@@ -708,6 +708,58 @@ void player_t::SendPitchLimits() const
 
 //===========================================================================
 //
+// player_t :: AddFutureRadiusAttack
+//
+// Adds a struct with explosion details to thrust and damage the unlagged player
+// with an proper delay
+//
+//===========================================================================
+
+void player_t::AddFutureRadiusAttack( sFUTURERADIUSATTACK* NewFutureRadiusAttack )
+{
+	if ( NewFutureRadiusAttack == NULL )
+		return;
+
+	if ( FutureRadiusAttack != NULL )
+	{
+		sFUTURERADIUSATTACK *tempFutureRadiusAttack = FutureRadiusAttack;
+
+		if ( FutureRadiusAttack->tic > NewFutureRadiusAttack->tic )
+		{
+			FutureRadiusAttack = NewFutureRadiusAttack;
+			FutureRadiusAttack->next = tempFutureRadiusAttack;
+		}
+		else
+		{
+			while ( tempFutureRadiusAttack )
+			{
+				if (tempFutureRadiusAttack->next == NULL)
+				{
+					tempFutureRadiusAttack->next = NewFutureRadiusAttack;
+					tempFutureRadiusAttack = NULL;
+				}
+				else if (tempFutureRadiusAttack->next->tic > NewFutureRadiusAttack->tic)
+				{
+					NewFutureRadiusAttack->next = tempFutureRadiusAttack->next;
+					tempFutureRadiusAttack->next = NewFutureRadiusAttack;
+					tempFutureRadiusAttack = NULL;
+				}
+				else
+				{
+					tempFutureRadiusAttack = tempFutureRadiusAttack->next;
+				}
+			}
+
+		}
+	}
+	else
+	{
+		FutureRadiusAttack = NewFutureRadiusAttack;
+	}
+}
+
+//===========================================================================
+//
 // APlayerPawn
 //
 //===========================================================================
@@ -904,6 +956,35 @@ void APlayerPawn::Tick()
 		if (health > 0) height = GetDefault()->height;
 	}
 	Super::Tick();
+
+	if ( player && NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
+		// Apply future thrust structs whose time has come
+		sFUTURERADIUSATTACK *tempFutureRadiusAttack = player->FutureRadiusAttack;
+		while ( tempFutureRadiusAttack != NULL )
+		{
+			tempFutureRadiusAttack->tic--;
+			if ( tempFutureRadiusAttack->tic < 0 )
+			{
+				if ( player->FutureRadiusAttack->thing != NULL && !( player->FutureRadiusAttack->thing->ObjectFlags & OF_EuthanizeMe )
+					&& player->FutureRadiusAttack->bombspot != NULL && !( player->FutureRadiusAttack->bombspot->ObjectFlags & OF_EuthanizeMe ) )
+				{
+					P_DoRadiusAttack( player->FutureRadiusAttack->thing, player->FutureRadiusAttack->bombspot, player->FutureRadiusAttack->bombsource,
+						player->FutureRadiusAttack->bombdamagefloat, player->FutureRadiusAttack->bombdistancefloat, player->FutureRadiusAttack->bombmod,
+						player->FutureRadiusAttack->attackFlags, player->FutureRadiusAttack->fulldamagedistance,
+						player->FutureRadiusAttack->bombFlags2, player->FutureRadiusAttack->bombFlags3 );
+				}
+
+				player->FutureRadiusAttack = tempFutureRadiusAttack->next;
+				free(tempFutureRadiusAttack);
+				tempFutureRadiusAttack = player->FutureRadiusAttack;
+			}
+			else
+			{
+				tempFutureRadiusAttack = tempFutureRadiusAttack->next;
+			}
+		}
+	}
 }
 
 //===========================================================================

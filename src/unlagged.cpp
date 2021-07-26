@@ -135,6 +135,7 @@ CUSTOM_CVAR( Bool, sv_unlagged_debugactors, false, CVAR_SERVERINFO )
 bool reconciledGame = false;
 bool unlagInProgress = false;
 int reconciliationBlockers = 0;
+int delayTics = 0;
 
 void UNLAGGED_Tick( void )
 {
@@ -399,6 +400,11 @@ void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
 
 		unlaggedActor = unlaggedActor->nextUnlaggedActor;
 	}
+}
+
+int	UNLAGGED_GetDelayTics( )
+{
+	return delayTics;
 }
 
 // Restore everything that has been shifted
@@ -825,6 +831,7 @@ void UNLAGGED_DoUnlagActors( AActor *source, int StartingTick )
 					UNLAGGED_SpawnDebugActors( source->player, true );
 			}
 			UNLAGGED_AddReconciliationBlocker();
+			delayTics = Tick - StartingTick;
 
 			allActorsFinished = currentlyUnlaggingActors[0]->finishedUnlagging;
 
