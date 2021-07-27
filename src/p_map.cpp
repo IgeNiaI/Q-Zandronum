@@ -5822,7 +5822,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
 								( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
 							{
-								if (!(flags & RADF_NODAMAGE))
+								if (!(flags & RADF_NODAMAGE) || (flags & RADF_THRUSTZ))
 									thing->velz += (fixed_t)velz;	// this really doesn't work well
 							}
 						}

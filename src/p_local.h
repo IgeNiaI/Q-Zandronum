@@ -541,7 +541,8 @@ enum
 	RADF_HURTSOURCE = 1,
 	RADF_NOIMPACTDAMAGE = 2,
 	RADF_SOURCEISSPOT = 4,
-	RADF_NODAMAGE = 8
+	RADF_NODAMAGE = 8,
+	RADF_THRUSTZ = 16
 };
 void	P_RadiusAttack (AActor *spot, AActor *source, int damage, int distance, 
 						FName damageType, int flags, int fulldamagedistance=0);
