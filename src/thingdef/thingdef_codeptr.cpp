@@ -606,7 +606,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_BulletAttack)
 	S_Sound (self, CHAN_WEAPON, self->AttackSound, 1, ATTN_NORM, true );	// [BC] Inform the clients.
 	for (i = self->GetMissileDamage (0, 1); i > 0; --i)
     {
-		int angle = bangle + (pr_cabullet.Random2() << 20);
+		int angle = bangle + (self->actorRandom.Random2() << 20);
 		int damage = ((pr_cabullet()%5)+1)*3;
 		P_LineAttack(self, angle, MISSILERANGE, slope, damage,
 			NAME_Hitscan, NAME_BulletPuff);
@@ -1333,8 +1333,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomBulletAttack)
 			}
 			else
 			{
-				angle += pr_cwbullet.Random2() * (Spread_XY / 255);
-				slope += pr_cwbullet.Random2() * (Spread_Z / 255);
+				angle += self->actorRandom.Random2() * (Spread_XY / 255);
+				slope += self->actorRandom.Random2() * (Spread_Z / 255);
 			}
 
 			int damage = DamagePerBullet;
