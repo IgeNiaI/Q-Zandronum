@@ -5748,7 +5748,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 				// [BC] Damage is server side.
 				if ( NETWORK_InClientMode() == false )
 				{
-					if (!(flags & RADF_NODAMAGE))
+					if (!(flags & RADF_NODAMAGE) || (flags & RADF_THRUSTZ))
 						newdam = P_DamageMobj(thing, bombspot, bombsource, damage, bombmod);
 					else if (thing->player == NULL && !(flags & RADF_NOIMPACTDAMAGE))
 					{
