@@ -451,11 +451,35 @@ void CLIENT_EndTick( void )
 		AInventory* item = const_cast<AInventory*>( SendItemUse );
 
 		if ( item == (AInventory*)1 )
+		{
+			if ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS )
+			{
+				AInventory *item = players[consoleplayer].mo->Inventory;
+
+				while (item != NULL)
+				{
+					AInventory *next = item->Inventory;
+					if (item->ItemFlags & IF_INVBAR && !(item->IsKindOf(RUNTIME_CLASS(APuzzleItem))))
+					{
+						players[consoleplayer].mo->UseInventory (item);
+					}
+					item = next;
+				}
+			}
 			CLIENTCOMMANDS_RequestInventoryUseAll();
+		}
 		else if ( SendItemUse->IsKindOf( RUNTIME_CLASS( AWeapon ) ) )
+		{
 			players[consoleplayer].mo->UseInventory( item );
+		}
 		else
+		{
+			if ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS )
+			{
+				players[consoleplayer].mo->UseInventory( item );
+			}
 			CLIENTCOMMANDS_RequestInventoryUse( item );
+		}
 
 		SendItemUse = NULL;
 	}

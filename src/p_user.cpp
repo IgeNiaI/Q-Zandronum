@@ -1233,7 +1233,10 @@ bool APlayerPawn::UseInventory (AInventory *item)
 	if( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
 		// [BB] Use the player number we stored above.
-		SERVERCOMMANDS_PlayerUseInventory( ulPlayer, item );
+		if ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS )
+			SERVERCOMMANDS_PlayerUseInventory( ulPlayer, item, ulPlayer, SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_PlayerUseInventory( ulPlayer, item );
 	}
 	else if (player == &players[consoleplayer])
 	{
@@ -5307,7 +5310,7 @@ void P_PlayerThink (player_t *player)
 		}
 
 		// [BB] The server tells the client that it used the fly item.
-		if (NETWORK_GetState() != NETSTATE_CLIENT && cmd->ucmd.upmove > 0 && !(cmd->ucmd.buttons & BT_JUMP))
+		if (NETWORK_ClientsideFunctionsAllowedOrIsServer( player->mo ) && cmd->ucmd.upmove > 0 && !(cmd->ucmd.buttons & BT_JUMP))
 		{
 			AInventory *fly = player->mo->FindInventory(NAME_ArtiFly);
 			if (fly != NULL)
