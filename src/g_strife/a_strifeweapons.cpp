@@ -10,6 +10,8 @@
 #include "doomstat.h"
 */
 
+#include "unlagged.h"
+
 // Note: Strife missiles do 1-4 times their damage amount.
 // Doom missiles do 1-8 times their damage amount, so to
 // make the strife missiles do proper damage without
@@ -17,14 +19,9 @@
 // all Strife missiles the MF4_STRIFEDAMAGE flag.
 
 static FRandom pr_jabdagger ("JabDagger");
-static FRandom pr_electric ("FireElectric");
 static FRandom pr_sgunshot ("StrifeGunShot");
-static FRandom pr_minimissile ("MiniMissile");
-static FRandom pr_flamethrower ("FlameThrower");
-static FRandom pr_flamedie ("FlameDie");
 static FRandom pr_mauler1 ("Mauler1");
 static FRandom pr_mauler2 ("Mauler2");
-static FRandom pr_phburn ("PhBurn");
 
 void A_LoopActiveSound (AActor *);
 void A_Countdown (AActor *);
@@ -114,7 +111,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_JabDagger)
 	AActor *linetarget;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -127,7 +125,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_JabDagger)
 		damage *= 10;
 	}
 
-	angle = self->angle + (pr_jabdagger.Random2() << 18);
+	angle = self->angle + (self->actorRandom.Random2() << 18);
 	pitch = P_AimLineAttack (self, angle, 80*FRACUNIT, &linetarget);
 	P_LineAttack (self, angle, 80*FRACUNIT, pitch, damage, NAME_Melee, "StrifeSpark", true, &linetarget);
 
@@ -179,7 +177,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_AlertMonsters)
 	AActor * emitter = self;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -288,7 +287,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireArrow)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( self, CHAN_WEAPON, "weapons/xbowshoot", 1, ATTN_NORM );
 		return;
@@ -297,7 +297,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireArrow)
 	if (ti) 
 	{
 		savedangle = self->angle;
-		self->angle += pr_electric.Random2 () << (18 - self->player->mo->accuracy * 5 / 100);
+		self->angle += self->actorRandom.Random2 () << (18 - self->player->mo->accuracy * 5 / 100);
 		self->player->mo->PlayAttacking2 ();
 		P_SpawnPlayerMissile (self, ti);
 		self->angle = savedangle;
@@ -323,7 +323,8 @@ void P_StrifeGunShot (AActor *mo, bool accurate, angle_t pitch)
 	int damage;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( mo ) )
 	{
 		return;
 	}
@@ -333,7 +334,7 @@ void P_StrifeGunShot (AActor *mo, bool accurate, angle_t pitch)
 
 	if (mo->player != NULL && !accurate)
 	{
-		angle += pr_sgunshot.Random2() << (20 - mo->player->mo->accuracy * 5 / 100);
+		angle += mo->actorRandom.Random2() << (20 - mo->player->mo->accuracy * 5 / 100);
 	}
 
 	P_LineAttack (mo, angle, PLAYERMISSILERANGE, pitch, damage, NAME_Hitscan, NAME_StrifePuff);
@@ -380,7 +381,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireAssaultGun)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -412,7 +414,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMiniMissile)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -422,7 +425,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMiniMissile)
 		SERVERCOMMANDS_SetPlayerState( ULONG( player - players ), STATE_PLAYER_ATTACK2, ULONG( player - players ), SVCF_SKIPTHISCLIENT );
 
 	savedangle = self->angle;
-	self->angle += pr_minimissile.Random2() << (19 - player->mo->accuracy * 5 / 100);
+	self->angle += self->actorRandom.Random2() << (19 - player->mo->accuracy * 5 / 100);
 	player->mo->PlayAttacking2 ();
 	P_SpawnPlayerMissile (self, PClass::FindClass("MiniMissile"));
 	self->angle = savedangle;
@@ -458,7 +461,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_RocketInFlight)
 DEFINE_ACTION_FUNCTION(AActor, A_FlameDie)
 {
 	self->flags |= MF_NOGRAVITY;
-	self->velz = (pr_flamedie() & 3) << FRACBITS;
+	self->velz = (self->actorRandom() & 3) << FRACBITS;
 }
 
 //============================================================================
@@ -488,16 +491,22 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireFlamer)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
 
-	self->angle += pr_flamethrower.Random2() << 18;
+	self->angle += self->actorRandom.Random2() << 18;
 
 	// [Dusk] Update the player's angle now.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThing( self, CM_ANGLE );
+	{
+		if ( NETWORK_ClientsideFunctionsAllowed( self ) )
+			SERVERCOMMANDS_MoveThing( self, CM_ANGLE, self->player - players, SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_MoveThing( self, CM_ANGLE );
+	}
 
 	self = P_SpawnPlayerMissile (self, PClass::FindClass("FlameMissile"));
 	if (self != NULL)
@@ -506,7 +515,12 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireFlamer)
 
 		// [BC] If we're the server, update the thing's velocity.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThing( self, CM_VELZ );
+		{
+			if ( NETWORK_ClientsideFunctionsAllowed( self ) )
+				SERVERCOMMANDS_MoveThing( self, CM_VELZ, self->player - players, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_MoveThing( self, CM_VELZ);
+		}
 	}
 }
 
@@ -543,7 +557,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMauler1)
 	S_Sound (self, CHAN_WEAPON, "weapons/mauler1", 1, ATTN_NORM);
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -560,8 +575,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMauler1)
 	for (int i = 0; i < 20; ++i)
 	{
 		int damage = 5 * (pr_mauler1() % 3 + 1);
-		angle_t angle = self->angle + (pr_mauler1.Random2() << 19);
-		int pitch = bpitch + (pr_mauler1.Random2() * 332063);
+		angle_t angle = self->angle + (self->actorRandom.Random2() << 19);
+		int pitch = bpitch + (self->actorRandom.Random2() * 332063);
 		
 		// Strife used a range of 2112 units for the mauler to signal that
 		// it should use a different puff. ZDoom's default range is longer
@@ -621,7 +636,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireMauler2)
 	}
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -648,7 +664,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaulerTorpedoWave)
 	self->angle += ANGLE_180;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -663,14 +680,16 @@ DEFINE_ACTION_FUNCTION(AActor, A_MaulerTorpedoWave)
 	for (int i = 0; i < 80; ++i)
 	{
 		self->angle += ANGLE_45/10;
-		P_SpawnSubMissile (self, PClass::FindClass("MaulerTorpedoWave"), self->target);
+		AActor* torpedo = P_SpawnSubMissile (self, PClass::FindClass("MaulerTorpedoWave"), self->target);
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER && torpedo )
+			UNLAGGED_UnlagAndReplicateMissile( self, torpedo, false, false, false );
 	}
 	self->z = savedz;
 }
 
 AActor *P_SpawnSubMissile (AActor *source, const PClass *type, AActor *target)
 {
-	AActor *other = Spawn (type, source->x, source->y, source->z, ALLOW_REPLACE);
+	AActor *other = Spawn (type, source->x, source->y, source->z, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( source ));
 
 	if (other == NULL)
 	{
@@ -694,15 +713,14 @@ AActor *P_SpawnSubMissile (AActor *source, const PClass *type, AActor *target)
 			other->SetFriendPlayer(target->player);
 		}
 	}
+	
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( source ) )
+		other->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 	if (P_CheckMissileSpawn (other, source->radius))
 	{
 		angle_t pitch = P_AimLineAttack (source, source->angle, 1024*FRACUNIT);
 		other->velz = FixedMul (-finesine[pitch>>ANGLETOFINESHIFT], other->Speed);
-
-		// [BC] If we're the server, spawn this to clients.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissile( other );
 
 		return other;
 	}
@@ -738,7 +756,8 @@ int APhosphorousFire::DoSpecialDamage (AActor *target, int damage, FName damaget
 DEFINE_ACTION_FUNCTION(AActor, A_BurnArea)
 {
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -749,11 +768,12 @@ DEFINE_ACTION_FUNCTION(AActor, A_BurnArea)
 DEFINE_ACTION_FUNCTION(AActor, A_Burnination)
 {
 	// [Dusk] The server manages the velocity
-	if ( NETWORK_InClientMode() == false )
+	// [geNia] Unless clientside functions are allowed.
+	if ( NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		self->velz -= 8*FRACUNIT;
-		self->velx += (pr_phburn.Random2 (3)) << FRACBITS;
-		self->vely += (pr_phburn.Random2 (3)) << FRACBITS;
+		self->velx += (self->actorRandom.Random2 (3)) << FRACBITS;
+		self->vely += (self->actorRandom.Random2 (3)) << FRACBITS;
 
 		// [Dusk] Update velocity to clients
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -764,14 +784,15 @@ DEFINE_ACTION_FUNCTION(AActor, A_Burnination)
 
 	// Only the main fire spawns more.
 	// [Dusk] Client doesn't do any spawning either
-	if (!(self->flags & MF_DROPPED) && ( NETWORK_InClientMode() == false ))
+	// [geNia] Unless clientside functions are allowed.
+	if (!(self->flags & MF_DROPPED) && NETWORK_ClientsideFunctionsAllowedOrIsServer( self ))
 	{
 		// Original x and y offsets seemed to be like this:
-		//		x + (((pr_phburn() + 12) & 31) << FRACBITS);
+		//		x + (((self->actorRandom() + 12) & 31) << FRACBITS);
 		//
 		// But that creates a lop-sided burn because it won't use negative offsets.
-		int xofs, xrand = pr_phburn();
-		int yofs, yrand = pr_phburn();
+		int xofs, xrand = self->actorRandom();
+		int yofs, yrand = self->actorRandom();
 
 		// Adding 12 is pointless if you're going to mask it afterward.
 		xofs = xrand & 31;
@@ -799,13 +820,13 @@ DEFINE_ACTION_FUNCTION(AActor, A_Burnination)
 
 		AActor *drop = Spawn<APhosphorousFire> (
 			x, y,
-			self->z + 4*FRACUNIT, ALLOW_REPLACE);
+			self->z + 4*FRACUNIT, ALLOW_REPLACE, self->target->player);
 		if (drop != NULL)
 		{
-			drop->velx = self->velx + ((pr_phburn.Random2 (7)) << FRACBITS);
-			drop->vely = self->vely + ((pr_phburn.Random2 (7)) << FRACBITS);
+			drop->velx = self->velx + ((self->actorRandom.Random2 (7)) << FRACBITS);
+			drop->vely = self->vely + ((self->actorRandom.Random2 (7)) << FRACBITS);
 			drop->velz = self->velz - FRACUNIT;
-			drop->reactiontime = (pr_phburn() & 3) + 2;
+			drop->reactiontime = (self->actorRandom() & 3) + 2;
 			drop->flags |= MF_DROPPED;
 
 			// [Dusk] Send the spawn info to clients
@@ -849,7 +870,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireGrenade)
 		return;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		return;
 	}
@@ -867,7 +889,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireGrenade)
 
 		if (grenade->SeeSound != 0)
 		{
-			S_Sound (grenade, CHAN_VOICE, grenade->SeeSound, 1, ATTN_NORM);
+			S_Sound (grenade, CHAN_VOICE, grenade->SeeSound, 1, ATTN_NORM, true, self);
 		}
 
 		grenade->velz = FixedMul (finetangent[FINEANGLES/4-(self->pitch>>ANGLETOFINESHIFT)], grenade->Speed) + 8*FRACUNIT;
@@ -883,7 +905,11 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireGrenade)
 		grenade->y += FixedMul (finesine[an], 15*FRACUNIT);
 
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThing( grenade, CM_XY|CM_VELZ );
+		{
+			UNLAGGED_UnlagAndReplicateMissile( self, grenade, false, false, false );
+			if ( !NETWORK_ClientsideFunctionsAllowed( self ) )
+				SERVERCOMMANDS_MoveThing( grenade, CM_XY|CM_VELZ );
+		}
 	}
 }
 
@@ -1103,7 +1129,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSigil1)
 		return;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( self, CHAN_WEAPON, "weapons/sigilcharge", 1, ATTN_NORM );
 		return;
@@ -1160,7 +1187,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSigil2)
 	player_t *player = self->player;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( self, CHAN_WEAPON, "weapons/sigilcharge", 1, ATTN_NORM );
 		return;
@@ -1195,7 +1223,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSigil3)
 		return;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( self, CHAN_WEAPON, "weapons/sigilcharge", 1, ATTN_NORM );
 		return;
@@ -1216,6 +1245,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSigil3)
 		if (spot != NULL)
 		{
 			spot->z = self->z + 32*FRACUNIT;
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				UNLAGGED_UnlagAndReplicateMissile( self, spot, false, false, false );
 		}
 	}
 	self->angle -= (ANGLE_180/20)*10;
@@ -1237,7 +1268,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSigil4)
 		return;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( self, CHAN_WEAPON, "weapons/sigilcharge", 1, ATTN_NORM );
 		return;
@@ -1284,7 +1316,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireSigil5)
 		return;
 
 	// [BC] Weapons are handled by the server.
-	if ( NETWORK_InClientMode() )
+	// [geNia] Unless clientside functions are allowed.
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
 		S_Sound( self, CHAN_WEAPON, "weapons/sigilcharge", 1, ATTN_NORM );
 		return;

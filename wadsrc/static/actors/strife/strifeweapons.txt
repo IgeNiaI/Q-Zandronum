@@ -11,6 +11,8 @@ ACTOR StrifePuff
 	+NOBLOCKMAP
 	+NOGRAVITY
 	+ALLOWPARTICLES
+	+PUFFGETSOWNER
+	+NONETID
 	RenderStyle Translucent
 	Alpha 0.25
 
@@ -344,6 +346,7 @@ ACTOR RocketTrail
 	ConversationID 51,-1,-1
 	+NOBLOCKMAP
 	+NOGRAVITY
+	+NONETID
 	RenderStyle Translucent
 	Alpha 0.25
 	SeeSound "misc/missileinflight"
@@ -570,6 +573,8 @@ ACTOR MaulerPuff
 	+NOBLOCKMAP
 	+NOGRAVITY
 	+PUFFONACTORS
+	+PUFFGETSOWNER
+	+NONETID
 	RenderStyle Add
 	DamageType Disintegrate
 	states
