@@ -143,7 +143,7 @@ void	P_BloodSplatter (fixed_t x, fixed_t y, fixed_t z, AActor *originator);
 void	P_BloodSplatter2 (fixed_t x, fixed_t y, fixed_t z, AActor *originator);
 void	P_RipperBlood (AActor *mo, AActor *bleeder);
 int		P_GetThingFloorType (AActor *thing);
-void	P_ExplodeMissile (AActor *missile, line_t *explodeline, AActor *target);
+void	P_ExplodeMissile (AActor *missile, line_t *explodeline, AActor *target, int playerNumToSkip = -1);
 
 AActor *P_SpawnMissile (AActor* source, AActor* dest, const PClass *type, AActor* owner = NULL, const bool bSpawnOnClient = false ); // [BB] Added bSpawnOnClient.
 AActor *P_SpawnMissileZ (AActor* source, fixed_t z, AActor* dest, const PClass *type, const bool bSpawnOnClient = false); // [BB] Added bSpawnOnClient.

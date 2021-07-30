@@ -119,7 +119,6 @@ EXTERN_CVAR (Int,  cl_rockettrails)
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
 static FRandom pr_actorSpawn ("ActorSpawn");
-static FRandom pr_explodemissile ("ExplodeMissile");
 FRandom pr_bounce ("Bounce");
 static FRandom pr_reflect ("Reflect");
 static FRandom pr_nightmarerespawn ("NightmareRespawn");
@@ -1563,7 +1562,7 @@ bool AActor::Massacre ()
 //
 //----------------------------------------------------------------------------
 
-void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target)
+void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target, int playerNumToSkip)
 {
 	if (mo->flags3 & MF3_EXPLOCOUNT)
 	{
@@ -1595,14 +1594,14 @@ void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target)
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
 		// No need to do this if the line struck a horizon line.
-		if (( line == NULL ) ||
-			( line->special != Line_Horizon ))
+		if ((( line == NULL ) ||
+			( line->special != Line_Horizon )))
 		{
-			SERVERCOMMANDS_MissileExplode( mo, line );
+			SERVERCOMMANDS_MissileExplode( mo, line, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 			// [BB] Since SERVERCOMMANDS_MissileExplode doesn't tell the clients the target, the clients
 			// always select the Death state. In case another state is used, inform the clients.
 			if ( ( nextstate != NULL ) && ( nextstate != mo->FindState(NAME_Death) ) )
-				SERVERCOMMANDS_SetThingFrame( mo, nextstate );
+				SERVERCOMMANDS_SetThingFrame( mo, nextstate, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 		}
 	}
 	
@@ -1731,7 +1730,7 @@ void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target)
 
 		if (mo->flags4 & MF4_RANDOMIZE)
 		{
-			mo->tics -= (pr_explodemissile() & 3) * TICRATE / 35;
+			mo->tics -= (mo->actorRandom() & 3) * TICRATE / 35;
 			if (mo->tics < 1)
 				mo->tics = 1;
 		}
@@ -1744,7 +1743,7 @@ void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target)
 		// the server tells the client to explode the missile before the server calls
 		// mo->SetState (nextstate).
 		if ( bFlagsChanged && ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
-			SERVERCOMMANDS_SetThingFlags( mo, FLAGSET_FLAGS );
+			SERVERCOMMANDS_SetThingFlags( mo, FLAGSET_FLAGS, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 
 	}
 }
