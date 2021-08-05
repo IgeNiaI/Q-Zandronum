@@ -86,6 +86,7 @@
 CVAR (Bool, sv_showwarnings, false, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
 
 EXTERN_CVAR( Float, sv_aircontrol )
+EXTERN_CVAR( Float, splashfactor )
 
 //*****************************************************************************
 //	FUNCTIONS
@@ -2048,6 +2049,8 @@ void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags f
 	command.addFloat( static_cast<float>(level.aircontrol) / 65536.f );
 	// [WS] Send in sv_coop_damagefactor.
 	command.addFloat( sv_coop_damagefactor );
+	// [geNia] Send in splashfactor.
+	command.addFloat( splashfactor );
 	// [WS] Send in alwaysapplydmflags.
 	command.addBit( alwaysapplydmflags );
 	// [AM] Send lobby map.
@@ -3554,7 +3557,7 @@ void SERVERCOMMANDS_SetThingFillColor( AActor* pActor, ULONG ulPlayerExtra, Serv
 	// [BB] Sanity check.
 	if ( pActor == NULL )
 		return;
-	
+
 	NetCommand command( SVC2_SETTHINGFILLCOLOR );
 	command.addShort( pActor->lNetID );
 	command.addLong( pActor->fillcolor );
@@ -3568,7 +3571,7 @@ void SERVERCOMMANDS_SetThingSprite( AActor* pActor, ULONG ulPlayerExtra, ServerC
 	// [BB] Sanity check.
 	if ( pActor == NULL )
 		return;
-	
+
 	NetCommand command( SVC2_SETTHINGSPRITE );
 	command.addShort( pActor->lNetID );
 	command.addLong( pActor->sprite );
