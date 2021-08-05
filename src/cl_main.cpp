@@ -144,6 +144,7 @@ EXTERN_CVAR( Bool, cl_oldfreelooklimit )
 EXTERN_CVAR( Float, turbo )
 EXTERN_CVAR( Float, sv_gravity )
 EXTERN_CVAR( Float, sv_aircontrol )
+EXTERN_CVAR( Float, splashfactor )
 EXTERN_CVAR( Bool, cl_hideaccount )
 EXTERN_CVAR( String, name )
 
@@ -5457,6 +5458,10 @@ static void client_SetGameModeLimits( BYTESTREAM_s *pByteStream )
 	// [WS] Read in, and set the value for sv_coop_damagefactor.
 	Value.Float = NETWORK_ReadFloat( pByteStream );
 	sv_coop_damagefactor.ForceSet( Value, CVAR_Float );
+
+	// [geNia] Read in, and set the value for splashfactor.
+	Value.Float = NETWORK_ReadFloat( pByteStream );
+	splashfactor.ForceSet( Value, CVAR_Float );
 
 	// [WS] Read in, and set the value for alwaysapplydmflags.
 	Value.Bool = NETWORK_ReadBit( pByteStream );

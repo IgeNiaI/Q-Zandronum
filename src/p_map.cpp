@@ -5616,6 +5616,9 @@ CUSTOM_CVAR(Float, splashfactor, 1.f, CVAR_SERVERINFO)
 		self = 1.f;
 	else
 		selfthrustscale = 1.f / self;
+
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+		SERVERCOMMANDS_SetCVar( splashfactor );
 }
 
 //==========================================================================
