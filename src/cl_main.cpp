@@ -1948,7 +1948,7 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 					// [TP] Only allow the server to set mod CVARs.
 					FBaseCVar* cvar = FindCVar( cvarName, NULL );
 
-					if (( cvar == NULL ) || (( cvar->GetFlags() & CVAR_MOD ) == 0 ))
+					if ( cvar == NULL )
 					{
 						CLIENT_PrintWarning( "SVC2_SETCVAR: The server attempted to set the value of "
 							"%s to \"%s\"\n", cvarName.GetChars(), cvarValue.GetChars() );
