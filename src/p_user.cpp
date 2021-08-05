@@ -4449,25 +4449,6 @@ void P_DeathThink (player_t *player)
 */
 }
 
-//==========================================================================
-//
-// P_AdjustFloorCeil
-//
-//==========================================================================
-
-void P_AdjustFloorCeil( player_t *player )
-{
-	FCheckPosition tm;
-	P_CheckPosition(player->mo, player->mo->x, player->mo->y, tm);
-	player->mo->floorz = tm.floorz;
-	player->mo->ceilingz = tm.ceilingz;
-	player->mo->dropoffz = tm.dropoffz;		// killough 11/98: remember dropoffs
-	player->mo->floorpic = tm.floorpic;
-	player->mo->floorsector = tm.floorsector;
-	player->mo->ceilingpic = tm.ceilingpic;
-	player->mo->ceilingsector = tm.ceilingsector;
-}
-
 
 //*****************************************************************************
 //
