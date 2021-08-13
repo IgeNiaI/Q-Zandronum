@@ -407,7 +407,7 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		pPlayer->onground = g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS];
 
 		if ( g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS] )
-			pPlayer->mo->z = pPlayer->mo->floorz;
+			pPlayer->mo->z = client_predict_GetPredictedFloorZ( pPlayer, lTick % CLIENT_PREDICTION_TICS );
 
 		// Use backed up values for prediction.
 		pPlayer->mo->angle = g_SavedAngle[lTick % CLIENT_PREDICTION_TICS];
@@ -474,7 +474,7 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	client_predict_AdjustZ( pPlayer->mo );
 
 	if ( g_bSavedOnFloor[g_ulGameTick % CLIENT_PREDICTION_TICS] )
-		pPlayer->mo->z = pPlayer->mo->floorz;
+		pPlayer->mo->z = client_predict_GetPredictedFloorZ( pPlayer, g_ulGameTick % CLIENT_PREDICTION_TICS );
 
 	pPlayer->mo->angle = g_SavedAngle[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->pitch = g_SavedPitch[g_ulGameTick % CLIENT_PREDICTION_TICS];
