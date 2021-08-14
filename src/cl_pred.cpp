@@ -253,13 +253,6 @@ void CLIENT_PREDICT_PlayerPredict( void )
 
 //*****************************************************************************
 //
-void CLIENT_PREDICT_SaveCmd( void )
-{
-	memcpy( &g_SavedTiccmd[gametic % CLIENT_PREDICTION_TICS], &players[consoleplayer].cmd, sizeof( ticcmd_t ));
-}
-
-//*****************************************************************************
-//
 void CLIENT_PREDICT_PlayerTeleported( void )
 {
 	ULONG	ulIdx;

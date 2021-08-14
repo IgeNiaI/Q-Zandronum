@@ -189,7 +189,6 @@ bool				CLIENT_ReadActorFromNetID( int netid, const PClass *subclass, bool allow
 
 void				CLIENT_PREDICT_Construct( void );
 void				CLIENT_PREDICT_PlayerPredict( void );
-void				CLIENT_PREDICT_SaveCmd( void );
 void				CLIENT_PREDICT_PlayerTeleported( void );
 bool				CLIENT_PREDICT_IsPredicting( void );
 
