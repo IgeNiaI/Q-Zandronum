@@ -5660,11 +5660,6 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 		if (thing->flags3 & MF3_NORADIUSDMG && !(bombspot->flags4 & MF4_FORCERADIUSDMG))
 			continue;
 
-		if (!(flags & RADF_HURTSOURCE) && (thing == bombsource || thing == bombspot))
-		{ // don't damage the source of the explosion
-			continue;
-		}
-
 		// a much needed option: monsters that fire explosive projectiles cannot 
 		// be hurt by projectiles fired by a monster of the same type.
 		// Controlled by the DONTHARMCLASS and DONTHARMSPECIES flags.
@@ -5744,11 +5739,12 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 				const fixed_t origvely = thing->vely;
 				int damage = abs((int)points);
 				int newdam = damage;
-
+				bool noSelfDamage = !(flags & RADF_HURTSOURCE) && (thing == bombsource || thing == bombspot);
+				
 				// [BC] Damage is server side.
 				if ( NETWORK_InClientMode() == false )
 				{
-					if (!(flags & RADF_NODAMAGE))
+					if (!(flags & RADF_NODAMAGE) && !noSelfDamage)
 						newdam = P_DamageMobj(thing, bombspot, bombsource, damage, bombmod);
 					else if (thing->player == NULL && !(flags & RADF_NOIMPACTDAMAGE))
 					{
