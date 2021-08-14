@@ -3473,13 +3473,12 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 
 	if ((mvFlags & MV_DOUBLETAPJUMP) && player->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
 	{
-		cmd->ucmd.buttons |= BT_JUMP;
 		player->secondJumpState = SJ_READY;
 		player->secondJumpTics = 0;
 	}
 
 	bool isClimbingLedge = player->onground && velz > 0 && cmd->ucmd.buttons & BT_CROUCH;
-	if (cmd->ucmd.buttons & BT_JUMP || isClimbingLedge)
+	if (cmd->ucmd.buttons & BT_JUMP || player->secondJumpState == SJ_READY || isClimbingLedge)
 	{
 		// [Leo] Spectators shouldn't be limited by the server settings.
 		if (player->onground && !player->jumpTics && player->secondJumpState != SJ_READY)
