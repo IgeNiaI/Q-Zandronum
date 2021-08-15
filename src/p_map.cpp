@@ -1079,10 +1079,16 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 			return true;
 		}
 
-		if ((tm.thing->flags6 & MF6_MTHRUSPECIES)
-			&& tm.thing->target // NULL pointer check
-			&& (tm.thing->target->GetSpecies() == thing->GetSpecies()))
-			return true;
+		if (tm.thing->target) // NULL pointer check
+		{
+			if ((tm.thing->flags6 & MF6_MTHRUSPECIES)
+				&& (tm.thing->target->GetSpecies() == thing->GetSpecies()))
+				return true;
+			else
+				if ((tm.thing->flags8 & MF8_MTHRUTEAMMATES)
+					&& (tm.thing->target->IsTeammate( thing )))
+					return true;
+		}
 
 		// Check for rippers passing through corpses
 		if ((thing->flags & MF_CORPSE) && (tm.thing->flags2 & MF2_RIP) && !(thing->flags & MF_SHOOTABLE))
@@ -4125,6 +4131,7 @@ struct Origin
 	AActor *Caller;
 	bool hitGhosts;
 	bool hitSameSpecies;
+	bool hitSameTeam;
 };
 
 static ETraceStatus CheckForActor(FTraceResults &res, void *userdata)
@@ -4142,6 +4149,10 @@ static ETraceStatus CheckForActor(FTraceResults &res, void *userdata)
 		return TRACE_Skip;
 	}
 
+	if (data->hitSameTeam && res.Actor->IsTeammate( data->Caller )) 
+	{
+		return TRACE_Skip;
+	}
 	if (data->hitSameSpecies && res.Actor->GetSpecies() == data->Caller->GetSpecies()) 
 	{
 		return TRACE_Skip;
@@ -4238,6 +4249,8 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		(puffDefaults && (puffDefaults->flags2 & MF2_THRUGHOST));
 
 	TData.hitSameSpecies = (puffDefaults && (puffDefaults->flags6 & MF6_MTHRUSPECIES));
+	
+	TData.hitSameTeam = (puffDefaults && (puffDefaults->flags8 & MF8_MTHRUTEAMMATES));
 
 	// if the puff uses a non-standard damage type, this will override default, hitscan and melee damage type.
 	// All other explicitly passed damage types (currenty only MDK) will be preserved.
