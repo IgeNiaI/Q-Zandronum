@@ -624,7 +624,9 @@ void P_Thing_SetVelocity(AActor *actor, fixed_t vx, fixed_t vy, fixed_t vz, bool
 			actor->player->vely += vy;
 		}
 		// [Dusk] Update velocity
-		SERVER_UpdateThingVelocity( actor, true );
+		// [geNia] But don't send velocity change for players as they are updated every tic anyway
+		if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( !actor->player || actor->player->mo != actor ) )
+			SERVER_UpdateThingVelocity( actor, true );
 	}
 }
 
