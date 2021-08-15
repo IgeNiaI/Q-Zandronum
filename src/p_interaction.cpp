@@ -1968,8 +1968,7 @@ bool AActor::OkayToSwitchTarget (AActor *other)
 	else if (level.flags2 & LEVEL2_NOINFIGHTING) infight=-1;	
 	else infight = infighting;
 	
-	// [BC] No infighting during invasion mode.
-	if ((infight < 0 || invasion )&&	other->player == NULL && !IsHostile (other))
+	if ( infight < 0 &&	other->player == NULL && !IsHostile (other))
 	{
 		return false;	// infighting off: Non-friendlies don't target other non-friendlies
 	}
