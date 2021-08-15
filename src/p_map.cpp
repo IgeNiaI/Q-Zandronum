@@ -1153,8 +1153,7 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 				else if (level.flags2 & LEVEL2_NOINFIGHTING) infight = -1;
 				else infight = infighting;
 
-				// [BC] No infighting during invasion mode.
-				if (infight < 0 || invasion)
+				if ( infight < 0 )
 				{
 					// -1: Monsters cannot hurt each other, but make exceptions for
 					//     friendliness and hate status.
