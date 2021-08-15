@@ -993,7 +993,9 @@ static void ThrustThingHelper (AActor *it, angle_t angle, int force, INTBOOL nol
 
 	// [BC] If we're the server, update the thing's velocity.
 	// [Dusk] Use SERVER_UpdateThingVelocity
-	if (NETWORK_GetState() == NETSTATE_SERVER)
+	// [geNia] But don't send velocity change for players as they are updated every tic anyway
+	if (NETWORK_GetState() == NETSTATE_SERVER
+		&& it->player && it->player->mo == it)
 		SERVER_UpdateThingVelocity( it, false );
 }
 
@@ -1026,7 +1028,9 @@ FUNC(LS_ThrustThingZ)	// [BC]
 			// [BC] If we're the server, update the thing's velocity.
 			// [BB] Unfortunately there are sync issues, if we don't also update the actual position.
 			// Is there a way to fix this without sending the position?
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			// [geNia] But don't send velocity change for players as they are updated every tic anyway
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER 
+				&& it->player && it->player->mo == it )
 				SERVERCOMMANDS_MoveThing( victim, CM_Z|CM_VELZ );
 		}
 		return true;
@@ -1044,7 +1048,9 @@ FUNC(LS_ThrustThingZ)	// [BC]
 		}
 
 		// [BC] If we're the server, update the thing's velocity.
-		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		// [geNia] But don't send velocity change for players as they are updated every tic anyway
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER
+			&& it->player && it->player->mo == it )
 			SERVER_UpdateThingVelocity ( it, true, false );
 
 		return true;
