@@ -1229,6 +1229,8 @@ public:
 	bool InState(FState *pState, unsigned int *pOffset = NULL, FState *pCurrentActorStateOverride = NULL ) const;
 	bool InState(FName label) const;
 
+	sector_t *GetSectorBelow(int flags) const;
+
 	virtual bool UpdateWaterLevel (fixed_t oldz, bool splash=true);
 	bool isFast();
 	bool isSlow();
