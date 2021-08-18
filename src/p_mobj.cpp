@@ -7957,7 +7957,35 @@ FDropItem *AActor::GetDropItems()
 fixed_t AActor::GetGravity() const
 {
 	if (flags & MF_NOGRAVITY) return 0;
+
+#ifdef _3DFLOORS
+	float sectorGravity = Sector->gravity;
+
+	//Check 3D floors
+	if (Sector->e->XFloor.ffloors.Size())
+	{
+		F3DFloor*  rover;
+		int        thingtop = z + (height == 0 ? 1 : height);
+
+		for (unsigned i = 0; i<Sector->e->XFloor.ffloors.Size(); i++)
+		{
+			rover = Sector->e->XFloor.ffloors[i];
+			if ( rover->flags & FF_EXISTS )
+			{
+				fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
+
+				if (z >= ff_top)
+				{
+					sectorGravity = rover->top.model->gravity;
+				}
+			}
+		}
+	}
+
+	return fixed_t(level.gravity * sectorGravity * FIXED2FLOAT(gravity) * 81.92);
+#else
 	return fixed_t(level.gravity * Sector->gravity * FIXED2FLOAT(gravity) * 81.92);
+#endif
 }
 
 // killough 11/98:
