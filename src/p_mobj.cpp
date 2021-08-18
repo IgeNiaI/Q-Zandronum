@@ -768,6 +768,44 @@ bool AActor::InState(FName label) const
 
 //============================================================================
 //
+// AActor :: Get3dSector
+//
+//============================================================================
+
+sector_t *AActor::Get3dSector(int flags) const
+{
+#ifdef _3DFLOORS
+	sector_t *sector = Sector;
+
+	//Check 3D floors
+	if (Sector->e->XFloor.ffloors.Size())
+	{
+		F3DFloor*  rover;
+		int        thingtop = z + (height == 0 ? 1 : height);
+
+		for (unsigned i = 0; i<Sector->e->XFloor.ffloors.Size(); i++)
+		{
+			rover = Sector->e->XFloor.ffloors[i];
+			if ( rover->flags & flags )
+			{
+				fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
+
+				if (z >= ff_top)
+				{
+					sector = rover->top.model;
+				}
+			}
+		}
+	}
+
+	return sector;
+#else
+	return Sector;
+#endif
+}
+
+//============================================================================
+//
 // AActor :: AddInventory
 //
 //============================================================================
@@ -7957,7 +7995,8 @@ FDropItem *AActor::GetDropItems()
 fixed_t AActor::GetGravity() const
 {
 	if (flags & MF_NOGRAVITY) return 0;
-	return fixed_t(level.gravity * Sector->gravity * FIXED2FLOAT(gravity) * 81.92);
+
+	return fixed_t(level.gravity * Get3dSector( FF_EXISTS )->gravity * FIXED2FLOAT(gravity) * 81.92);
 }
 
 // killough 11/98:
