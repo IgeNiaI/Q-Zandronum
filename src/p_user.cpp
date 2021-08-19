@@ -3709,6 +3709,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 					fixed_t scale = FixedDiv(LocalVelocityCap, velocity);
 					player->mo->velx = FixedMul(player->mo->velx, scale);
 					player->mo->vely = FixedMul(player->mo->vely, scale);
+					player->velx = player->mo->velx;
+					player->vely = player->mo->vely;
 				}
 			}
 
@@ -4019,6 +4021,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					float scale = LocalVelocityCap / velocity;
 					vel.X *= scale;
 					vel.Y *= scale;
+					player->velx = FLOAT2FIXED(vel.X);
+					player->vely = FLOAT2FIXED(vel.Y);
 				}
 			}
 		}
