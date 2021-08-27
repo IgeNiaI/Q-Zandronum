@@ -495,7 +495,7 @@ int AActor::GetTics(FState * newstate)
 }
 
 // [BB] To print the client side infinite loop workaround warning only once per actor type.
-static std::set<unsigned short> clientInfiniteLoopWarningPrintedActors;
+static std::set<unsigned short> infiniteLoopWarningPrintedActors;
 
 //==========================================================================
 //
@@ -589,13 +589,13 @@ bool AActor::SetState (FState *newstate, bool nofunction)
 		}
 		newstate = newstate->GetNextState();
 
-		// [BB] Workaround to break client side infinite loops in DECORATE definitions.
-		if ( NETWORK_InClientMode() && ( numActions++ > 10000 ) )
+		// [BB] Workaround to break infinite loops in DECORATE definitions.
+		if ( numActions++ > 10000 )
 		{
-			if ( clientInfiniteLoopWarningPrintedActors.find ( this->GetClass( )->getActorNetworkIndex() ) == clientInfiniteLoopWarningPrintedActors.end() )
+			if ( infiniteLoopWarningPrintedActors.find ( this->GetClass( )->getActorNetworkIndex() ) == infiniteLoopWarningPrintedActors.end() )
 			{
 				Printf ( "Warning: Breaking infinite loop in actor %s.\nCurrent offset from spawn state is %ld\n", this->GetClass()->TypeName.GetChars(), static_cast<LONG>(this->state - this->SpawnState) );
-				clientInfiniteLoopWarningPrintedActors.insert ( this->GetClass( )->getActorNetworkIndex() );
+				infiniteLoopWarningPrintedActors.insert ( this->GetClass( )->getActorNetworkIndex() );
 			}
 			break;
 		}
