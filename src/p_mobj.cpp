@@ -511,9 +511,6 @@ bool AActor::SetState (FState *newstate, bool nofunction)
 	if (debugfile && player && (player->cheats & CF_PREDICTING))
 		fprintf (debugfile, "for pl %td: SetState while predicting!\n", player-players);
 */
-	// [BB] Workaround to break client side infinite loops in DECORATE definitions.
-	int numActions = 0;
-
 	do
 	{
 		if (newstate == NULL)
@@ -588,17 +585,6 @@ bool AActor::SetState (FState *newstate, bool nofunction)
 				return false;
 		}
 		newstate = newstate->GetNextState();
-
-		// [BB] Workaround to break client side infinite loops in DECORATE definitions.
-		if ( NETWORK_InClientMode() && ( numActions++ > 10000 ) )
-		{
-			if ( clientInfiniteLoopWarningPrintedActors.find ( this->GetClass( )->getActorNetworkIndex() ) == clientInfiniteLoopWarningPrintedActors.end() )
-			{
-				Printf ( "Warning: Breaking infinite loop in actor %s.\nCurrent offset from spawn state is %ld\n", this->GetClass()->TypeName.GetChars(), static_cast<LONG>(this->state - this->SpawnState) );
-				clientInfiniteLoopWarningPrintedActors.insert ( this->GetClass( )->getActorNetworkIndex() );
-			}
-			break;
-		}
 	} while (tics == 0);
 
 	if (Renderer != NULL)
