@@ -77,7 +77,7 @@ CUSTOM_CVAR( Int, sv_fastweapons, 0, CVAR_SERVERINFO )
 	}
 }
 
-CVAR (Bool, cl_weaponsway, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+EXTERN_CVAR (Bool, cl_weaponsway)
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
