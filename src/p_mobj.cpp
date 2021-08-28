@@ -6659,8 +6659,7 @@ statedone:
 			// [BB] This saves bandwidth, but doesn't spawn the blood size based on the damage dealt,
 			// so only use this for players with a slow connection.
 			SERVERCOMMANDS_SpawnThing( th, MAXPLAYERS );
-			if ( th->renderflags & RF_INVISIBLE_TO_TARGET )
-				SERVERCOMMANDS_SetThingTarget( th );
+			SERVERCOMMANDS_SetThingTarget( th );
 			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS );
 		}
 		else
