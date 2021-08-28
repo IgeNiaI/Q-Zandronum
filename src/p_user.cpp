@@ -103,7 +103,9 @@ CUSTOM_CVAR (Float, cl_spectatormove, 1.0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG) {
 
 EXTERN_CVAR (Bool, cl_run)
 EXTERN_CVAR (Bool, cl_spykiller)
-EXTERN_CVAR (Bool, cl_weaponsway)
+
+CVAR (Bool, cl_weaponsway, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CVAR (Float, cl_weaponswayspeed, 1.0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
 // [GRB] Custom player classes
 TArray<FPlayerClass> PlayerClasses;
@@ -3182,11 +3184,21 @@ void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta)
 		player->swayy -= pitchDelta >> 5;
 		player->swayy += player->mo->velz << 2;
 
-		fixed_t SwaySpeed = MAX(weapon->SwaySpeed * 2, 72090); // SwaySpeed is doubled and clamped below at 1.1
+		fixed_t SwaySpeed = FixedMul(weapon->SwaySpeed, FLOAT2FIXED(cl_weaponswayspeed));
+		if (SwaySpeed == 0)
+		{
+			player->swayx = 0;
+			player->swayy = 0;
+		}
+		else
+		{
+			if (SwaySpeed < 72090)
+				SwaySpeed = 72090;
 
-		// Gradually lower sway down to 0, depending on weapon BobSpeed and current sway distance
-		player->swayx = FixedDiv(player->swayx, MAX(FixedMul(SwaySpeed, abs(player->swayx) >> 7), SwaySpeed));
-		player->swayy = FixedDiv(player->swayy, MAX(FixedMul(SwaySpeed, abs(player->swayy) >> 7), SwaySpeed));
+			// Gradually lower sway down to 0, depending on weapon BobSpeed and current sway distance
+			player->swayx = FixedDiv(player->swayx, MAX(FixedMul(SwaySpeed, abs(player->swayx) >> 7), SwaySpeed));
+			player->swayy = FixedDiv(player->swayy, MAX(FixedMul(SwaySpeed, abs(player->swayy) >> 7), SwaySpeed));
+		}
 	}
 	else
 	{
