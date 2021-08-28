@@ -61,7 +61,6 @@ EXTERN_CVAR (Bool, r_drawplayersprites)
 EXTERN_CVAR (Float, transsouls)
 EXTERN_CVAR (Bool, st_scale)
 EXTERN_CVAR (Int, gl_fuzztype)
-EXTERN_CVAR (Bool, cl_weaponsway)
 
 
 //==========================================================================
@@ -181,7 +180,8 @@ void FGLRenderer::DrawPlayerSprites(sector_t * viewsector, bool hudModelStep)
 	unsigned int i;
 	pspdef_t *psp;
 	int lightlevel=0;
-	fixed_t ofsx, ofsy;
+	fixed_t offsetBobX, offsetBobY;
+	fixed_t offsetSwayX, offsetSwayY;
 	FColormap cm;
 	sector_t * fakesec, fs;
 	AActor * playermo=players[consoleplayer].camera;
@@ -198,11 +198,9 @@ void FGLRenderer::DrawPlayerSprites(sector_t * viewsector, bool hudModelStep)
 	if(!player || playermo->renderflags&RF_INVISIBLE || !r_drawplayersprites ||
 		mViewActor!=playermo || playermo->RenderStyle.BlendOp == STYLEOP_None) return;
 	*/
-
-	if (cl_weaponsway)
-		P_SwayWeapon (player, &ofsx, &ofsy);
-	else
-		P_BobWeapon (player, &ofsx, &ofsy);
+	
+	P_BobWeapon (player, &offsetBobX, &offsetBobY);
+	P_SwayWeapon (player, &offsetSwayX, &offsetSwayY);
 
 	// check for fullbright
 	if (player->fixedcolormap==NOFIXEDCOLORMAP)
@@ -385,7 +383,7 @@ void FGLRenderer::DrawPlayerSprites(sector_t * viewsector, bool hudModelStep)
 			// set the lighting parameters (only calls glColor and glAlphaFunc)
 			gl_SetSpriteLighting(vis.RenderStyle, playermo, statebright[i]? 255 : lightlevel, 
 				0, &cmc, 0xffffff, trans, statebright[i], true);
-			DrawPSprite (player,psp,psp->sx+ofsx, psp->sy+ofsy, cm.colormap, hudModelStep, OverrideShader);
+			DrawPSprite (player,psp,psp->sx+offsetBobX+offsetSwayX, psp->sy+offsetBobY+offsetSwayY, cm.colormap, hudModelStep, OverrideShader);
 		}
 	}
 	gl_RenderState.EnableBrightmap(false);
