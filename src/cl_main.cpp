@@ -2764,6 +2764,7 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->wallClimbTics = 0;
 	pPlayer->isWallClimbing = 0;
 	pPlayer->respawn_time = 0;
+	pPlayer->force_respawn_time = 0;
 	pPlayer->camera = 0;
 	pPlayer->air_finished = 0;
 	pPlayer->BlendR = 0;

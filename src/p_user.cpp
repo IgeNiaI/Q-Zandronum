@@ -329,6 +329,7 @@ player_t::player_t()
   prepareTapValue(0),
   lastTapValue(0),
   respawn_time(0),
+  force_respawn_time(0),
   camera(0),
   air_finished(0),
   settings_controller(false),
@@ -486,6 +487,7 @@ player_t::player_t()
 	  prepareTapValue = p.prepareTapValue;
 	  lastTapValue = p.lastTapValue;
 	  respawn_time = p.respawn_time;
+	  force_respawn_time = p.force_respawn_time;
 	  camera = p.camera;
 	  air_finished = p.air_finished;
 	  LastDamageType = p.LastDamageType;
@@ -4384,18 +4386,11 @@ void P_DeathThink (player_t *player)
 		return;
 	}
 
-	// [RK] Handle player respawn time when force respawn is on
-	// normally players can't respawn manually until the level time is larger than respawn time
-	// since sv_forcerespawntime adds onto a player's respawn time, we'll set the time to 0 when they press use
-	// this statement factors in compat_instantrespawn and determines whether a player can respawn instantly or has to wait
-	if ( dmflags & DF_FORCE_RESPAWN )
+	bool wantsToRespawn = false;
+	if ( (zacompatflags & ZACOMPATF_INSTANTRESPAWN) || (level.time >= player->respawn_time) )
 	{
-		if (( level.time >= ( player->respawn_time - ( sv_forcerespawntime*TICRATE )) && (( zacompatflags & ZACOMPATF_INSTANTRESPAWN ) == false ))
-			|| ( level.time < player->respawn_time && ( zacompatflags & ZACOMPATF_INSTANTRESPAWN )))
-		{
-			if (( player->cmd.ucmd.buttons & BT_USE ) || (( player->userinfo.GetClientFlags() & CLIENTFLAGS_RESPAWNONFIRE ) && ( player->cmd.ucmd.buttons & BT_ATTACK ) && (( player->oldbuttons & BT_ATTACK ) == false )))
-				player->respawn_time = 0;
-		}
+		if (( player->cmd.ucmd.buttons & BT_USE ) || (( player->userinfo.GetClientFlags() & CLIENTFLAGS_RESPAWNONFIRE ) && ( player->cmd.ucmd.buttons & BT_ATTACK ) && (( player->oldbuttons & BT_ATTACK ) == false )))
+			wantsToRespawn = true;
 	}
 
 	// [BB] If lives are limited and the game is in progess, possibly put the player in dead spectator mode.
@@ -4437,7 +4432,7 @@ void P_DeathThink (player_t *player)
 			return;
 	}
 
-	if ( level.time >= player->respawn_time )
+	if ( !NETWORK_InClientMode() && ( wantsToRespawn || ( ( dmflags & DF_FORCE_RESPAWN ) && level.time >= player->force_respawn_time ) ) )
 	{
 		if (((( player->cmd.ucmd.buttons & BT_USE ) || ( ( player->userinfo.GetClientFlags() & CLIENTFLAGS_RESPAWNONFIRE ) && ( player->cmd.ucmd.buttons & BT_ATTACK ) && (( player->oldbuttons & BT_ATTACK ) == false ))) || 
 			(( deathmatch || teamgame || alwaysapplydmflags ) &&

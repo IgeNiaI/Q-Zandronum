@@ -251,7 +251,7 @@ enum
 //							  1 << 5	-- this space left blank --
 	DF_SAME_LEVEL			= 1 << 6,	// Stay on the same map when someone exits (DM)
 	DF_SPAWN_FARTHEST		= 1 << 7,	// Spawn players as far as possible from other players (DM)
-	DF_FORCE_RESPAWN		= 1 << 8,	// Automatically respawn dead players after respawn_time is up (DM)
+	DF_FORCE_RESPAWN		= 1 << 8,	// Automatically respawn dead players after force_respawn_time is up (DM)
 	DF_NO_ARMOR				= 1 << 9,	// Do not spawn armor (DM)
 	DF_NO_EXIT				= 1 << 10,	// Kill anyone who tries to exit the level (DM)
 	DF_INFINITE_AMMO		= 1 << 11,	// Don't use up ammo when firing

@@ -613,6 +613,7 @@ public:
 	int			lastTapValue;
 
 	int			respawn_time;			// [RH] delay respawning until this tic
+	int			force_respawn_time;		// [geNia] if enabled, force respawn after this tic
 	TObjPtr<AActor>		camera;			// [RH] Whose eyes this player sees through
 
 	int			air_finished;			// [RH] Time when you start drowning

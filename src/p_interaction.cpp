@@ -765,19 +765,8 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 			// [EP] Avoid instant body disappearing if the player had no lives left.
 			( GAMEMODE_AreLivesLimited() && GAMEMODE_IsGameInProgress() && ( player->ulLivesLeft == 0 )))
 		{
-			player->respawn_time = level.time + TICRATE;
-
-			// [BC] Don't respawn quite so fast on forced respawn. It sounds weird when your
-			// scream isn't completed.
-			// [RK] We can add on a custom force respawn delay instead drawn from the forcerespawn time CVAR
-			if ( dmflags & DF_FORCE_RESPAWN )
-				player->respawn_time += ( sv_forcerespawntime == 0 ? TICRATE/2 : sv_forcerespawntime * TICRATE );
-		}
-
-		// [RK] When instant respawn and force respawn are on, use sv_forcerespawntime to set the player's respawn time
-		if ( zacompatflags & ZACOMPATF_INSTANTRESPAWN && dmflags & DF_FORCE_RESPAWN )
-		{
-			player->respawn_time = level.time + (sv_forcerespawntime * TICRATE);
+			player->respawn_time = level.time + (sv_respawntime * TICRATE);
+			player->force_respawn_time = level.time + (sv_forcerespawntime * TICRATE);
 		}
 
 		// count environment kills against you
