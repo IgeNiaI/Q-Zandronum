@@ -887,10 +887,19 @@ void DoJumpIfInventory(AActor * owner, DECLARE_PARAMINFO)
 			if (Item->Amount >= ItemAmount)
 				ACTION_JUMP(JumpOffset, clientUpdateFlags);	// [BC] Clients don't necessarily have inventory information.
 		}
+		else if (ItemAmount == -1)
+		{
+			if (Item->Amount == 0)
+				ACTION_JUMP(JumpOffset, clientUpdateFlags);	// [BC] Clients don't necessarily have inventory information.
+		}
 		else if (Item->Amount >= Item->MaxAmount)
 		{
 			ACTION_JUMP(JumpOffset, clientUpdateFlags);	// [BC] Clients don't necessarily have inventory information.
 		}
+	}
+	else if (ItemAmount == -1)
+	{
+		ACTION_JUMP(JumpOffset, clientUpdateFlags);	// [BC] Clients don't necessarily have inventory information.
 	}
 }
 
