@@ -513,6 +513,8 @@ enum
 	RF_FORCEXYBILLBOARD		= 0x20000,	// [BB] OpenGL only: draw with xy axis billboard, i.e. unanchored (overrides gl_billboard_mode setting)
 
 	RF_INVISIBLE_TO_TARGET	= 0x20000000,	// [geNia] This actor is invisible to it's target
+	RF_INVISIBLE_TO_TRACER	= 0x40000000,	// [geNia] This actor is invisible to it's tracer
+	RF_INVISIBLE_TO_MASTER	= 0x80000000,	// [geNia] This actor is invisible to it's master
 
 // --- dummies for unknown/unimplemented Strife flags ---
 
