@@ -373,7 +373,7 @@ Actor Weapon : Inventory native
 	Weapon.BobSpeed 1.0
 	Weapon.BobRangeX 1.0
 	Weapon.BobRangeY 1.0
-	Weapon.SwaySpeed 1.1
+	Weapon.SwaySpeed 2.2
 	Weapon.AmmoDmScale 2.5
 	States
 	{
