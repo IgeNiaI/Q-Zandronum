@@ -102,7 +102,6 @@ extern fixed_t globaluclip, globaldclip;
 EXTERN_CVAR (Bool, st_scale)
 EXTERN_CVAR (Bool, r_shadercolormaps)
 EXTERN_CVAR (Int, r_drawfuzz)
-EXTERN_CVAR (Bool, cl_weaponsway)
 
 //
 // Sprite rotation 0 is facing the viewer,
@@ -1259,15 +1258,14 @@ void R_DrawPlayerSprites ()
 	if (camera->player != NULL)
 	{
 		fixed_t centerhack = centeryfrac;
-		fixed_t ofsx, ofsy;
+		fixed_t offsetBobX, offsetBobY;
+		fixed_t offsetSwayX, offsetSwayY;
 
 		centery = viewheight >> 1;
 		centeryfrac = centery << FRACBITS;
-
-		if ( cl_weaponsway )
-			P_SwayWeapon (camera->player, &ofsx, &ofsy);
-		else
-			P_BobWeapon (camera->player, &ofsx, &ofsy);
+		
+		P_BobWeapon (camera->player, &offsetBobX, &offsetBobY);
+		P_SwayWeapon (camera->player, &offsetSwayX, &offsetSwayY);
 
 		// add all active psprites
 		for (i = 0, psp = camera->player->psprites;
@@ -1277,12 +1275,12 @@ void R_DrawPlayerSprites ()
 			// [RH] Don't draw the targeter's crosshair if the player already has a crosshair set.
 			if (psp->state && (i != ps_targetcenter || CrosshairImage == NULL))
 			{
-				R_DrawPSprite (psp, i, camera, psp->sx + ofsx, psp->sy + ofsy);
+				R_DrawPSprite (psp, i, camera, psp->sx + offsetBobX + offsetSwayX, psp->sy + offsetBobY + offsetSwayY);
 			}
 			// [RH] Don't bob the targeter.
 			if (i == ps_flash)
 			{
-				ofsx = ofsy = 0;
+				offsetBobX = offsetBobY = offsetSwayX = offsetSwayY = 0;
 			}
 		}
 

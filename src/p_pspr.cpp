@@ -77,8 +77,6 @@ CUSTOM_CVAR( Int, sv_fastweapons, 0, CVAR_SERVERINFO )
 	}
 }
 
-CVAR (Bool, cl_weaponsway, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
 static FRandom pr_wpnreadysnd ("WpnReadySnd");
@@ -546,7 +544,7 @@ void P_BobWeapon (player_t *player, fixed_t *x, fixed_t *y)
 
 void P_SwayWeapon (player_t *player, fixed_t *x, fixed_t *y)
 {
-	// [geNia] Don't bob weapon if the player is spectating or if there is no weapon.
+	// [geNia] Don't sway weapon if the player is spectating or if there is no weapon.
 	if ( player->bSpectating || player->ReadyWeapon == NULL )
 		return;
 

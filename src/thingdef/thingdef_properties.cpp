@@ -2053,7 +2053,18 @@ DEFINE_CLASS_PROPERTY(bobrangey, F, Weapon)
 DEFINE_CLASS_PROPERTY(swayspeed, F, Weapon)
 {
 	PROP_FIXED_PARM(i, 0);
-	defaults->SwaySpeed = i;
+
+	if (i < 72090)
+	{
+		if (i == 0)
+			defaults->SwaySpeed = 0;
+		else
+			defaults->SwaySpeed = 72090;
+	}
+	else
+	{
+		defaults->SwaySpeed = i;
+	}
 }
 
 //==========================================================================
