@@ -117,7 +117,7 @@ static	ULONG			g_ulLMSSpectatorSettings;
 //==================================================================================
 // [RC] This big map of fun ties all of the DMFlags to their respective checkboxes.
 //==================================================================================
-#define NUMBER_OF_FLAGS 103
+#define NUMBER_OF_FLAGS 104
 
 static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] = 
 {
@@ -214,6 +214,7 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ ZACOMPATF_OLD_RANDOM_GENERATOR,					NULL,											&g_ulZacompatFlags, },
 	{ ZACOMPATF_NOGRAVITY_SPHERES,						NULL,											&g_ulZacompatFlags, },
 	{ ZACOMPATF_DONT_STOP_PLAYER_SCRIPTS_ON_DISCONNECT,	NULL,											&g_ulZacompatFlags, },
+	{ ZACOMPATF_NEW_FLY_FORMULA,						IDC_ZACOMPATF_NEW_FLY_FORMULA,					&g_ulZacompatFlags, },
 	{ LMS_AWF_CHAINSAW,									IDC_LMS_ALLOWCHAINSAW,							&g_ulLMSAllowedWeapons, },
 	{ LMS_AWF_PISTOL,									IDC_LMS_ALLOWPISTOL,							&g_ulLMSAllowedWeapons, },
 	{ LMS_AWF_SHOTGUN,									IDC_LMS_ALLOWSHOTGUN,							&g_ulLMSAllowedWeapons, },
