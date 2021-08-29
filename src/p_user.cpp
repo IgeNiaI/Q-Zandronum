@@ -3760,7 +3760,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	if (player->mo->waterlevel >= 2)
 	{
-		if (cmd->ucmd.buttons & BT_JUMP)
+		if (cmd->ucmd.buttons & BT_MOVEUP)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
@@ -3768,7 +3768,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			else
 				player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
-		else if (cmd->ucmd.buttons & BT_CROUCH)
+		else if (cmd->ucmd.buttons & BT_MOVEDOWN)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
@@ -3780,7 +3780,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
-		if (cmd->ucmd.buttons & BT_JUMP)
+		if (cmd->ucmd.buttons & BT_MOVEUP)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
@@ -3797,7 +3797,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 				}
 			}
 		}
-		else if (cmd->ucmd.buttons & BT_CROUCH)
+		else if (cmd->ucmd.buttons & BT_MOVEDOWN)
 		{
 			// [Leo] Apply cl_spectatormove here.
 			if (player->bSpectating)
@@ -3855,9 +3855,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		FVector3 accelerationZ = { 0.f, 0.f, 0.f };
 		// Calculate the vertical push according to the view pitch
-		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
+		if ((cmd->ucmd.buttons & BT_MOVEUP) || (cmd->ucmd.buttons & BT_MOVEDOWN))
 		{
-			accelerationZ.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
+			accelerationZ.Z = cmd->ucmd.buttons & BT_MOVEUP ? 1.f : -1.f;
 		}
 		else
 		{
@@ -3884,9 +3884,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	{
 		FVector3 accelerationZ = { 0.f, 0.f, 0.f };
 		// Calculate the vertical push according to the view pitch
-		if ((cmd->ucmd.buttons & BT_JUMP) || (cmd->ucmd.buttons & BT_CROUCH))
+		if ((cmd->ucmd.buttons & BT_MOVEUP) || (cmd->ucmd.buttons & BT_MOVEDOWN))
 		{
-			accelerationZ.Z = cmd->ucmd.buttons & BT_JUMP ? 1.f : -1.f;
+			accelerationZ.Z = cmd->ucmd.buttons & BT_MOVEUP ? 1.f : -1.f;
 		}
 		else
 		{
