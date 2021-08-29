@@ -72,7 +72,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Punch)
 	if ( self->player )
 	{
 		if ( self->player->bStruckPlayer )
-			PLAYER_StruckPlayer( self->player );
+			PLAYER_StruckPlayer( self );
 		else
 			self->player->ulConsecutiveHits = 0;
 
@@ -267,7 +267,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Saw)
 
 	// [BC] If the player hit a player with his attack, potentially give him a medal.
 	if ( self->player->bStruckPlayer )
-		PLAYER_StruckPlayer( self->player );
+		PLAYER_StruckPlayer( self );
 	else
 		self->player->ulConsecutiveHits = 0;
 
