@@ -2356,7 +2356,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 							if ((( mo->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && mo->target && mo->target->player )
 							{
 								if ( mo->target->player->bStruckPlayer )
-									PLAYER_StruckPlayer( mo->target->player );
+									PLAYER_StruckPlayer( mo->target );
 								else
 									mo->target->player->ulConsecutiveHits = 0;
 							}
@@ -2436,7 +2436,7 @@ explode:
 					if ((( mo->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && mo->target && mo->target->player )
 					{
 						if ( mo->target->player->bStruckPlayer )
-							PLAYER_StruckPlayer( mo->target->player );
+							PLAYER_StruckPlayer( mo->target );
 						else
 							mo->target->player->ulConsecutiveHits = 0;
 					}
@@ -3149,7 +3149,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 					if ((( mo->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && mo->target && mo->target->player )
 					{
 						if ( mo->target->player->bStruckPlayer )
-							PLAYER_StruckPlayer( mo->target->player );
+							PLAYER_StruckPlayer( mo->target );
 						else
 							mo->target->player->ulConsecutiveHits = 0;
 					}
@@ -3290,7 +3290,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				if ((( mo->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && mo->target && mo->target->player )
 				{
 					if ( mo->target->player->bStruckPlayer )
-						PLAYER_StruckPlayer( mo->target->player );
+						PLAYER_StruckPlayer( mo->target );
 					else
 						mo->target->player->ulConsecutiveHits = 0;
 				}
@@ -7170,7 +7170,7 @@ bool P_CheckMissileSpawn (AActor* th, fixed_t maxdist, bool bExplode)
 				if ((( th->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && th->target && th->target->player )
 				{
 					if ( th->target->player->bStruckPlayer )
-						PLAYER_StruckPlayer( th->target->player );
+						PLAYER_StruckPlayer( th->target );
 					else
 						th->target->player->ulConsecutiveHits = 0;
 				}
