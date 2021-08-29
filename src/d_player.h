@@ -850,7 +850,7 @@ bool	PLAYER_IsValidPlayer( const ULONG ulPlayer );
 bool	PLAYER_IsValidPlayerWithMo( const ULONG ulPlayer );
 bool	PLAYER_IsTrueSpectator( player_t *pPlayer );
 void	PLAYER_CheckStruckPlayer( AActor *pActor );
-void	PLAYER_StruckPlayer( player_t *pPlayer );
+void	PLAYER_StruckPlayer( AActor *pActor );
 bool	PLAYER_ShouldSpawnAsSpectator( player_t *pPlayer );
 bool	PLAYER_Taunt( player_t *pPlayer );
 LONG	PLAYER_GetRailgunColor( player_t *pPlayer );
