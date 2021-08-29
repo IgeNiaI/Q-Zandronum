@@ -3758,62 +3758,62 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// [Leo] cl_spectatormove is now applied here to avoid code duplication.
 	fixed_t spectatormove = FLOAT2FIXED(cl_spectatormove);
 
-	if (player->mo->waterlevel >= 2)
+	if (player->mo->waterlevel >= 2 || player->mo->flags & MF_NOGRAVITY)
 	{
-		if (cmd->ucmd.buttons & BT_MOVEUP)
+		if ( ( zadmflags & ZADF_NEW_FLY_FORMULA ) || player->bSpectating )
 		{
-			// [Leo] Apply cl_spectatormove here.
-			if (player->bSpectating)
-				player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
-			else
-				if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
-					player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
+			if ((cmd->ucmd.buttons & BT_MOVEUP) || (cmd->ucmd.buttons & BT_MOVEDOWN))
+			{
+				// [Leo] Apply cl_spectatormove here.
+				if (player->bSpectating)
+				{
+					if (cmd->ucmd.buttons & BT_MOVEDOWN)
+						player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
+					else
+						player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
+				}
+				else
+				{
+					if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
+					{
+						if ( player->mo->waterlevel >= 2 )
+						{
+							if (cmd->ucmd.buttons & BT_MOVEDOWN)
+								player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
+							else
+								player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
+						}
+						else
+						{
+							fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
+							if (abs(player->mo->velz) < abs(maxSpeed))
+							{
+								fixed_t velBonus = MIN(FixedMul(3 * FRACUNIT, player->mo->Speed), maxSpeed - abs(player->mo->velz));
+								if (cmd->ucmd.buttons & BT_MOVEDOWN)
+									player->mo->velz -= velBonus;
+								else
+									player->mo->velz += velBonus;
+							}
+						}
+					}
+				}
+			}
 		}
-		else if (cmd->ucmd.buttons & BT_MOVEDOWN)
+		else
 		{
-			// [Leo] Apply cl_spectatormove here.
-			if (player->bSpectating)
-				player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
-			else
-				if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
-					player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
-		}
+			if ( ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) ) || player->bSpectating )
+			{
+				int magnitude = abs (cmd->ucmd.upmove);
+				if (magnitude > 0x300)
+				{
+					cmd->ucmd.upmove = ksgn (cmd->ucmd.upmove) * 0x300;
+				}
 
-	}
-	else if (player->mo->flags & MF_NOGRAVITY)
-	{
-		if (cmd->ucmd.buttons & BT_MOVEUP)
-		{
-			// [Leo] Apply cl_spectatormove here.
-			if (player->bSpectating)
-			{
-				player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
-			}
-			else if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
-			{
-				fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
-				if (player->mo->velz < maxSpeed)
-				{
-					fixed_t velBonus = MIN(FixedMul(3 * FRACUNIT, player->mo->Speed), maxSpeed - player->mo->velz);
-					player->mo->velz += velBonus;
-				}
-			}
-		}
-		else if (cmd->ucmd.buttons & BT_MOVEDOWN)
-		{
-			// [Leo] Apply cl_spectatormove here.
-			if (player->bSpectating)
-			{
-				player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
-			}
-			else if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
-			{
-				fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
-				if (player->mo->velz > -maxSpeed)
-				{
-					fixed_t velBonus = MIN(FixedMul(3 * FRACUNIT, player->mo->Speed), maxSpeed + player->mo->velz);
-					player->mo->velz -= velBonus;
-				}
+				player->mo->velz = FixedMul(player->mo->Speed, cmd->ucmd.upmove << 9);
+
+				// [Leo] Apply cl_spectatormove here.
+				if ( player->bSpectating )
+					player->mo->velz = FixedMul(player->mo->velz, FLOAT2FIXED(cl_spectatormove));
 			}
 		}
 	}
