@@ -385,6 +385,9 @@ enum
 
 	// [geNia] Use Quake formula for all thrusts
 	ZADF_QUAKE_THRUST = 1 << 21,
+
+	// [geNia] Use new vertical swim and fly formula
+	ZADF_NEW_FLY_FORMULA = 1 << 22,
 };
 
 // [RH] Compatibility flags.
