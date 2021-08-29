@@ -1587,7 +1587,7 @@ void A_CustomFireBullets( AActor *self,
 
 	// [BB] If the player hit a player with his attack, potentially give him a medal.
 	if ( player->bStruckPlayer )
-		PLAYER_StruckPlayer( player );
+		PLAYER_StruckPlayer( self );
 	else
 		player->ulConsecutiveHits = 0;
 
