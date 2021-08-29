@@ -3632,7 +3632,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Detonate)
 	// credit for it.
 	if (( self->target ) && ( self->target->player ))
 	{
-		if ( self->target->player->bStruckPlayer )
+		if ( self->target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( self ) )
 			PLAYER_StruckPlayer( self->target->player );
 		else
 			self->target->player->ulConsecutiveHits = 0;

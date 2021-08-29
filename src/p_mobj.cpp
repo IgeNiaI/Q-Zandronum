@@ -2407,7 +2407,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 							// Potentially reward the player who shot this missile with an accuracy/precision medal.
 							if ((( mo->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && mo->target && mo->target->player )
 							{
-								if ( mo->target->player->bStruckPlayer )
+								if ( mo->target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( mo ) )
 									PLAYER_StruckPlayer( mo->target->player );
 								else
 									mo->target->player->ulConsecutiveHits = 0;
@@ -2487,7 +2487,7 @@ explode:
 					// Potentially reward the player who shot this missile with an accuracy/precision medal.
 					if ((( mo->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && mo->target && mo->target->player )
 					{
-						if ( mo->target->player->bStruckPlayer )
+						if ( mo->target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( mo ) )
 							PLAYER_StruckPlayer( mo->target->player );
 						else
 							mo->target->player->ulConsecutiveHits = 0;
@@ -3200,7 +3200,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 					// [BC] Potentially reward the player who shot this missile with an accuracy/precision medal.
 					if ((( mo->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && mo->target && mo->target->player )
 					{
-						if ( mo->target->player->bStruckPlayer )
+						if ( mo->target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( mo ) )
 							PLAYER_StruckPlayer( mo->target->player );
 						else
 							mo->target->player->ulConsecutiveHits = 0;
@@ -3341,7 +3341,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 				// [BC] Potentially reward the player who shot this missile with an accuracy/precision medal.
 				if ((( mo->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && mo->target && mo->target->player )
 				{
-					if ( mo->target->player->bStruckPlayer )
+					if ( mo->target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( mo ) )
 						PLAYER_StruckPlayer( mo->target->player );
 					else
 						mo->target->player->ulConsecutiveHits = 0;
@@ -7223,7 +7223,7 @@ bool P_CheckMissileSpawn (AActor* th, fixed_t maxdist, bool bExplode)
 				// Potentially reward the player who shot this missile with an accuracy/precision medal.
 				if ((( th->ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && th->target && th->target->player )
 				{
-					if ( th->target->player->bStruckPlayer )
+					if ( th->target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( th ) )
 						PLAYER_StruckPlayer( th->target->player );
 					else
 						th->target->player->ulConsecutiveHits = 0;
