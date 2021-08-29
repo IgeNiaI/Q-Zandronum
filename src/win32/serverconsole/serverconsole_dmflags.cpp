@@ -483,6 +483,7 @@ static void flags_ReadValuesFromForm( void )
 	g_ulDMFlags2 = 0;
 	g_ulCompatFlags = 0;
 	g_ulZacompatFlags = 0;
+	g_ulZADMFlags = 0;
 	g_ulLMSAllowedWeapons = 0;
 	g_ulLMSSpectatorSettings = 0;
 
