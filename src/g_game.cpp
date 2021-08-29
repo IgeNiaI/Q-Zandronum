@@ -670,6 +670,9 @@ static inline int joyint(double val)
 	}
 }
 
+// [geNia] When true, pressing jump/crouch key will also register as pressing fly up/down keys
+CVAR(Bool, cl_jumptoflyup, true, CVAR_ARCHIVE)
+
 //
 // G_BuildTiccmd
 // Builds a ticcmd from all of the available inputs
@@ -775,8 +778,18 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	if (Button_Attack.bDown)		cmd->ucmd.buttons |= BT_ATTACK;
 	if (Button_AltAttack.bDown)		cmd->ucmd.buttons |= BT_ALTATTACK;
 	if (Button_Use.bDown)			cmd->ucmd.buttons |= BT_USE;
-	if (Button_Jump.bDown)			cmd->ucmd.buttons |= BT_JUMP;
-	if (Button_Crouch.bDown)		cmd->ucmd.buttons |= BT_CROUCH;
+	if (Button_Jump.bDown)
+	{
+		cmd->ucmd.buttons |= BT_JUMP;
+		if (cl_jumptoflyup)
+			cmd->ucmd.buttons |= BT_MOVEUP;
+	}
+	if (Button_Crouch.bDown)
+	{
+		cmd->ucmd.buttons |= BT_CROUCH;
+		if (cl_jumptoflyup)
+			cmd->ucmd.buttons |= BT_MOVEDOWN;
+	}
 	if (Button_Zoom.bDown)			cmd->ucmd.buttons |= BT_ZOOM;
 	if (Button_Reload.bDown)		cmd->ucmd.buttons |= BT_RELOAD;
 
