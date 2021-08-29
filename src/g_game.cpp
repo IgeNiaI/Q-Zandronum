@@ -233,7 +233,7 @@ float	 		normsidemove[4] = {0x18, 0x28, 0xC, 0x18};			// [RH] Ditto
 
 fixed_t			forwardmove[4], sidemove[4];
 fixed_t 		angleturn[4] = {640, 1280, 320, 320};		// + slow turn
-fixed_t			flyspeed[2] = {1*256, 3*256};
+fixed_t			flyspeed[4] = {1*256, 3*256, 1*256, 3*256};
 int				lookspeed[2] = {450, 512};
 
 #define SLOWTURNTICS	6 
