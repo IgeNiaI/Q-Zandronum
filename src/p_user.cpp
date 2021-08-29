@@ -4921,7 +4921,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		P_MovePlayer (player, cmd);
 
 		// [BB] The server tells the client that it used the fly item.
-		if (cmd->ucmd.upmove > 0 && NETWORK_GetState() != NETSTATE_CLIENT)
+		if (NETWORK_GetState() != NETSTATE_CLIENT && cmd->ucmd.upmove > 0 && !(cmd->ucmd.buttons & BT_JUMP))
 		{
 			AInventory *fly = player->mo->FindInventory(NAME_ArtiFly);
 			if (fly != NULL)
