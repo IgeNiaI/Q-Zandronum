@@ -2923,6 +2923,16 @@ bool PLAYER_IsTrueSpectator( player_t *pPlayer )
 
 //*****************************************************************************
 //
+bool PLAYER_AwardMedalFromThisActor( AActor *actor )
+{
+	if ( actor && ( actor->flags8 & MF8_DONTMEDAL ) )
+		return false;
+
+	return true;
+}
+
+//*****************************************************************************
+//
 void PLAYER_CheckStruckPlayer( AActor *pActor )
 {
 	if ( pActor && pActor->player )

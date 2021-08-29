@@ -1590,7 +1590,7 @@ void A_CustomFireBullets( AActor *self,
 	}
 
 	// [BB] If the player hit a player with his attack, potentially give him a medal.
-	if ( player->bStruckPlayer )
+	if ( player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( weapon ) )
 		PLAYER_StruckPlayer( player );
 	else
 		player->ulConsecutiveHits = 0;

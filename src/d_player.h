@@ -850,6 +850,7 @@ void	PLAYER_SelectPlayersWithHighestValue ( LONG (*GetValue) ( ULONG ulPlayer ),
 bool	PLAYER_IsValidPlayer( const ULONG ulPlayer );
 bool	PLAYER_IsValidPlayerWithMo( const ULONG ulPlayer );
 bool	PLAYER_IsTrueSpectator( player_t *pPlayer );
+bool	PLAYER_AwardMedalFromThisActor( AActor *actor );
 void	PLAYER_CheckStruckPlayer( AActor *pActor );
 void	PLAYER_StruckPlayer( player_t *pPlayer );
 bool	PLAYER_ShouldSpawnAsSpectator( player_t *pPlayer );

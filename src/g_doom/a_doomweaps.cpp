@@ -39,9 +39,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_Punch)
 		return;
 	}
 
+	AWeapon *weapon = self->player->ReadyWeapon;
 	if (self->player != NULL)
 	{
-		AWeapon *weapon = self->player->ReadyWeapon;
 		if (weapon != NULL && !(weapon->WeaponFlags & WIF_DEHAMMO))
 		{
 			if (!weapon->DepleteAmmo (weapon->bAltFire))
@@ -71,7 +71,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Punch)
 	// [BC] If the player hit a player with his attack, potentially give him a medal.
 	if ( self->player )
 	{
-		if ( self->player->bStruckPlayer )
+		if ( self->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( weapon ) )
 			PLAYER_StruckPlayer( self->player );
 		else
 			self->player->ulConsecutiveHits = 0;
@@ -120,9 +120,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePistol)
 /*
 	bool accurate;
 
+	AWeapon *weapon = self->player->ReadyWeapon;
 	if (self->player != NULL)
 	{
-		AWeapon *weapon = self->player->ReadyWeapon;
 		if (weapon != NULL)
 		{
 			if (!weapon->DepleteAmmo (weapon->bAltFire, true, 1))
@@ -176,7 +176,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FirePistol)
 	// [BC] If the player hit a player with his attack, potentially give him a medal.
 	if ( actor->player )
 	{
-		if ( actor->player->bStruckPlayer )
+		if ( actor->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( weapon ) )
 			PLAYER_StruckPlayer( actor->player );
 		else
 			actor->player->ulConsecutiveHits = 0;
@@ -266,7 +266,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Saw)
 	}
 
 	// [BC] If the player hit a player with his attack, potentially give him a medal.
-	if ( self->player->bStruckPlayer )
+	if ( self->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( weapon ) )
 		PLAYER_StruckPlayer( self->player );
 	else
 		self->player->ulConsecutiveHits = 0;
@@ -413,7 +413,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireShotgun)
 	}
 
 	// [BC] If the player hit a player with his attack, potentially give him a medal.
-	if ( player->bStruckPlayer )
+	if ( player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( weapon ) )
 		PLAYER_StruckPlayer( player );
 	else
 		player->ulConsecutiveHits = 0;
@@ -508,7 +508,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireShotgun2)
 		return;
 
 	// [BC] If the player hit a player with his attack, potentially give him a medal.
-	if ( player->bStruckPlayer )
+	if ( player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( weapon ) )
 		PLAYER_StruckPlayer( player );
 	else
 		player->ulConsecutiveHits = 0;
@@ -705,7 +705,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireCGun)
 	}
 
 	// [BC] If the player hit a player with his attack, potentially give him a medal.
-	if ( player->bStruckPlayer )
+	if ( player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( weapon ) )
 		PLAYER_StruckPlayer( player );
 	else
 		player->ulConsecutiveHits = 0;

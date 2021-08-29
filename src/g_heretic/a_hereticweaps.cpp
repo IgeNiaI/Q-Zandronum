@@ -174,7 +174,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireGoldWandPL1)
 	}
 
 	// [BB] If the player hit a player with his attack, potentially give him a medal.
-	PLAYER_CheckStruckPlayer ( self );
+	if (  PLAYER_AwardMedalFromThisActor( weapon ) )
+		PLAYER_CheckStruckPlayer ( self );
 
 	S_Sound (self, CHAN_WEAPON, "weapons/wandhit", 1, ATTN_NORM);
 
@@ -1200,7 +1201,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_FireBlasterPL1)
 	}
 
 	// [BB] If the player hit a player with his attack, potentially give him a medal.
-	PLAYER_CheckStruckPlayer ( self );
+	if ( PLAYER_AwardMedalFromThisActor( weapon ) )
+		PLAYER_CheckStruckPlayer ( self );
 
 	S_Sound (self, CHAN_WEAPON, "weapons/blastershoot", 1, ATTN_NORM);
 

@@ -4976,7 +4976,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 
 			if (( hitactor->player ) && ( source->IsTeammate( hitactor ) == false ))
 			{
-				if ( source->player )
+				if ( source->player && PLAYER_AwardMedalFromThisActor( source->player->ReadyWeapon ) )
 				{
 					source->player->ulConsecutiveRailgunHits++;
 
@@ -5885,7 +5885,8 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 	}
 
 	// [BB] If the bombsource is a player and hit another player with his attack, potentially give him a medal.
-	PLAYER_CheckStruckPlayer( bombsource );
+	if ( PLAYER_AwardMedalFromThisActor( bombspot ) )
+		PLAYER_CheckStruckPlayer( bombsource );
 }
 
 //==========================================================================
