@@ -444,8 +444,9 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 	bPossessedTerminatorArtifact = !!(( player ) && ( player->cheats2 & CF2_TERMINATORARTIFACT ));
 
 	// [BC] Check to see if any medals need to be awarded.
-	if (( player ) &&
-		( NETWORK_InClientMode() == false ))
+	if (( player )
+		&& ( NETWORK_InClientMode() == false )
+		&& ( !source || !( source->flags8 & MF8_DONTMEDAL ) ))
 	{
 		if (( source ) &&
 			( source->player ))
@@ -2927,7 +2928,7 @@ void PLAYER_CheckStruckPlayer( AActor *pActor )
 	if ( pActor && pActor->player )
 	{
 		if ( pActor->player->bStruckPlayer )
-			PLAYER_StruckPlayer( pActor->player );
+			PLAYER_StruckPlayer( pActor );
 		else
 			pActor->player->ulConsecutiveHits = 0;
 	}
@@ -2935,10 +2936,15 @@ void PLAYER_CheckStruckPlayer( AActor *pActor )
 
 //*****************************************************************************
 //
-void PLAYER_StruckPlayer( player_t *pPlayer )
+void PLAYER_StruckPlayer( AActor *pActor )
 {
 	if ( NETWORK_InClientMode() )
 		return;
+
+	if ( pActor->flags8 & MF8_DONTMEDAL )
+		return;
+
+	player_t *pPlayer = pActor->player;
 
 	pPlayer->ulConsecutiveHits++;
 
