@@ -3776,7 +3776,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			if (player->bSpectating)
 				player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
 			else
-				player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
+				if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
+					player->mo->velz = FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
 		else if (cmd->ucmd.buttons & BT_MOVEDOWN)
 		{
@@ -3784,7 +3785,8 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			if (player->bSpectating)
 				player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
 			else
-				player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
+				if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
+					player->mo->velz = -FixedMul(4 * FRACUNIT, player->mo->Speed);
 		}
 
 	}
@@ -3797,7 +3799,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			{
 				player->mo->velz = FixedMul(8 * FRACUNIT, spectatormove);
 			}
-			else
+			else if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
 			{
 				fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
 				if (player->mo->velz < maxSpeed)
@@ -3814,7 +3816,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			{
 				player->mo->velz = -FixedMul(8 * FRACUNIT, spectatormove);
 			}
-			else
+			else if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
 			{
 				fixed_t maxSpeed = FixedMul(12 * FRACUNIT, player->mo->Speed);
 				if (player->mo->velz > -maxSpeed)
@@ -3867,7 +3869,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		// Calculate the vertical push according to the view pitch
 		if ((cmd->ucmd.buttons & BT_MOVEUP) || (cmd->ucmd.buttons & BT_MOVEDOWN))
 		{
-			accelerationZ.Z = cmd->ucmd.buttons & BT_MOVEUP ? 1.f : -1.f;
+			if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
+				accelerationZ.Z = cmd->ucmd.buttons & BT_MOVEUP ? 1.f : -1.f;
 		}
 		else
 		{
@@ -3896,7 +3899,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		// Calculate the vertical push according to the view pitch
 		if ((cmd->ucmd.buttons & BT_MOVEUP) || (cmd->ucmd.buttons & BT_MOVEDOWN))
 		{
-			accelerationZ.Z = cmd->ucmd.buttons & BT_MOVEUP ? 1.f : -1.f;
+			if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
+				accelerationZ.Z = cmd->ucmd.buttons & BT_MOVEUP ? 1.f : -1.f;
 		}
 		else
 		{
