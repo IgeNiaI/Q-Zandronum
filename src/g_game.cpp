@@ -747,11 +747,6 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 		G_AddViewPitch (-lookspeed[speed]);
 	}
 
-	if (Button_MoveUp.bDown)
-		fly += flyspeed[speed];
-	if (Button_MoveDown.bDown)
-		fly -= flyspeed[speed];
-
 	if (Button_Klook.bDown)
 	{
 		if (Button_Forward.bDown)
@@ -799,6 +794,11 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	if (Button_MoveDown.bDown)		cmd->ucmd.buttons |= BT_MOVEDOWN;
 	if (Button_MoveUp.bDown)		cmd->ucmd.buttons |= BT_MOVEUP;
 	if (Button_ShowScores.bDown)	cmd->ucmd.buttons |= BT_SHOWSCORES;
+	
+	if (cmd->ucmd.buttons & BT_MOVEUP)
+		fly += flyspeed[speed];
+	if (cmd->ucmd.buttons & BT_MOVEDOWN)
+		fly -= flyspeed[speed];
 
 	// Handle joysticks/game controllers.
 	float joyaxes[NUM_JOYAXIS];
