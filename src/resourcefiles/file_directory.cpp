@@ -314,8 +314,12 @@ void FDirectory::AddEntry(const char *fullpath, int size)
 {
 	FDirectoryLump *lump_p = &Lumps[Lumps.Reserve(1)];
 
+	// Convert filename to lowercase
+	FString name = fullpath + strlen(Filename);
+	name.ToLower();
+
 	// The lump's name is only the part relative to the main directory
-	lump_p->LumpNameSetup(fullpath + strlen(Filename));
+	lump_p->LumpNameSetup(name);
 	lump_p->LumpSize = size;
 	lump_p->Owner = this;
 	lump_p->Flags = 0;
