@@ -3553,6 +3553,102 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				vely += JumpVely;
 
 				velz = (isRampJumper ? MAX(0, velz) : 0) + JumpVelz;
+				if ( mvFlags & MV_ELEVATORJUMP )
+				{
+					sector_t *sector = Sector;
+					bool is3dSector = false;
+
+				#ifdef _3DFLOORS
+					//Check 3D floors
+					if (Sector->e->XFloor.ffloors.Size())
+					{
+						F3DFloor*  rover;
+						int        thingtop = z + (height == 0 ? 1 : height);
+
+						for (unsigned i = 0; i<Sector->e->XFloor.ffloors.Size(); i++)
+						{
+							rover = Sector->e->XFloor.ffloors[i];
+							if ( ( rover->flags & FF_EXISTS ) && ( rover->flags & FF_SOLID ) )
+							{
+								fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
+
+								if (z >= ff_top)
+								{
+									sector = rover->top.model;
+									is3dSector = true;
+								}
+							}
+						}
+					}
+				#endif
+
+					fixed_t elevatorSpeed = 0;
+
+					if ( is3dSector )
+					{
+						if ( sector->ceilingdata )
+						{
+							if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)))
+							{
+								DDoor *door = barrier_cast<DDoor *>(sector->ceilingdata);
+								if ( door->GetDirection() == 1 )
+									elevatorSpeed = door->GetSpeed();
+							}
+							else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DCeiling)))
+							{
+								DCeiling *ceiling = barrier_cast<DCeiling *>(sector->ceilingdata);
+								if ( ceiling->GetDirection() == 1 )
+									elevatorSpeed = ceiling->GetSpeed();
+							}
+							else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DElevator)))
+							{
+								DElevator *elevator = barrier_cast<DElevator *>(sector->ceilingdata);
+								if ( elevator->GetDirection() == 1 )
+									elevatorSpeed = elevator->GetSpeed();
+							}
+							else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DPillar)))
+							{
+								DPillar *pillar = barrier_cast<DPillar *>(sector->ceilingdata);
+								if ( pillar->GetType() == DPillar::pillarOpen )
+									elevatorSpeed = pillar->GetCeilingSpeed();
+							}
+						}
+					}
+					else
+					{
+						if ( sector->floordata )
+						{
+							if ( sector->floordata->IsKindOf(RUNTIME_CLASS(DFloor) ) )
+							{
+								DFloor *floor = barrier_cast<DFloor *>(sector->floordata);
+								if ( floor->GetDirection() == 1 )
+									elevatorSpeed = floor->GetSpeed();
+							}
+							else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DPlat)))
+							{
+								DPlat *plat = barrier_cast<DPlat *>(sector->floordata);
+								if ( plat->GetStatus() == DPlat::EPlatState::up )
+									elevatorSpeed = plat->GetSpeed();
+							}
+							else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DElevator)))
+							{
+								DElevator *elevator = barrier_cast<DElevator *>(sector->floordata);
+								if ( elevator->GetDirection() == 1 )
+									elevatorSpeed = elevator->GetSpeed();
+							}
+							else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DPillar)))
+							{
+								DPillar *pillar = barrier_cast<DPillar *>(sector->floordata);
+								if ( pillar->GetType() == DPillar::pillarBuild )
+									elevatorSpeed = pillar->GetFloorSpeed();
+							}
+						}
+					}
+
+					if ( elevatorSpeed > 0 )
+						velz += elevatorSpeed;
+				}
+
 				player->jumpTics = ulJumpTicks;
 			}
 		}
