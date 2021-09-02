@@ -4512,6 +4512,10 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 	case APROP_Silent:
 		if (value) actor->mvFlags |= MV_SILENT; else actor->mvFlags &= ~MV_SILENT;
 		break;
+		
+	case APROP_ElevatorJump:
+		if (value) actor->mvFlags |= MV_ELEVATORJUMP; else actor->mvFlags &= ~MV_ELEVATORJUMP;
+		break;
 
 
 	// Player actor specific
@@ -4755,6 +4759,7 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_WallClimb:				return !!(actor->mvFlags & MV_WALLCLIMB);
 	case APROP_RampJump:				return !!(actor->mvFlags & MV_RAMPJUMP);
 	case APROP_Silent:					return !!(actor->mvFlags & MV_SILENT);
+	case APROP_ElevatorJump:			return !!(actor->mvFlags & MV_ELEVATORJUMP);
 
 	// Player actor specitic
 	case APROP_SpawnHealth:				return playerActor ? playerActor->MaxHealth								: actor->SpawnHealth();
@@ -4889,6 +4894,7 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_WallClimb:
 		case APROP_RampJump:
 		case APROP_Silent:
+		case APROP_ElevatorJump:
 			return (GetActorProperty(tid, property, NULL, 0) == (!!value));
 
 		// Strings are covered by GetActorProperty, but they're fairly
