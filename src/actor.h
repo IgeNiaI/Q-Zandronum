@@ -366,6 +366,7 @@ enum
 	MV_WALLCLIMB		= 0x00000010,
 	MV_RAMPJUMP			= 0x00000020,
 	MV_SILENT			= 0x00000040,
+	MV_ELEVATORJUMP		= 0x00000080,
 
 	// [BC] More object flags for Skulltag.
 
