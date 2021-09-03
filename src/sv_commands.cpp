@@ -4373,3 +4373,11 @@ void APathFollower::SyncWithClient ( const ULONG ulClient )
 	command.addFloat( this->Time );
 	command.sendCommandToOneClient( ulClient );
 }
+
+//*****************************************************************************
+//
+void SERVERCOMMANDS_ReportLumps( ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	NetCommand command( SVC2_REPORTLUMPS );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
