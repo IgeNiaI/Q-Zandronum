@@ -773,3 +773,19 @@ void CLIENTCOMMANDS_SetVideoResolution()
 	NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, SCREENWIDTH );
 	NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, SCREENHEIGHT );
 }
+
+//*****************************************************************************
+// [geNia]
+void CLIENTCOMMANDS_ReportLumps()
+{
+	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_REPORTLUMPS );
+	NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, NETWORK_GetMainPWAD().name );
+	NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, NETWORK_GetMainPWAD().checksum );
+	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, NETWORK_GetPWADList().Size() );
+	for ( unsigned int i = 0; i < NETWORK_GetPWADList().Size(); ++i )
+	{
+		const NetworkPWAD& pwad = NETWORK_GetPWADList()[i];
+		NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, pwad.name );
+		NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, pwad.checksum );
+	}
+}
