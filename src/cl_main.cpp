@@ -1403,7 +1403,7 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 					
 					if ( stricmp( NETWORK_GetMainPWAD().checksum, MainPWAD.second ) != 0 )
 					{
-						Printf ( "- Your %s is different from the server: %s vs %s\n", NETWORK_GetMainPWAD().name.GetChars(), NETWORK_GetMainPWAD().checksum.GetChars(), MainPWAD.second.GetChars() );
+						Printf ( "- Your \"%s\" is different from the server: \"%s\" vs \"%s\"\n", NETWORK_GetMainPWAD().name.GetChars(), NETWORK_GetMainPWAD().checksum.GetChars(), MainPWAD.second.GetChars() );
 					}
 					
 					TArray<NetworkPWAD> LocalPWADs = NETWORK_GetPWADList();
@@ -1415,7 +1415,7 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 							{
 								if ( stricmp(LocalPWADs[i].checksum, j->second ) != 0 )
 								{
-									Printf ( "- Your %s is different from the server: %s vs %s\n", LocalPWADs[i].name.GetChars(), LocalPWADs[i].checksum.GetChars(), j->second.GetChars() );
+									Printf ( "- Your \"%s\" is different from the server: \"%s\" vs \"%s\"\n", LocalPWADs[i].name.GetChars(), LocalPWADs[i].checksum.GetChars(), j->second.GetChars() );
 								}
 
 								serverPWADs.remove( *j );
@@ -1423,13 +1423,13 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 							}
 						}
 
-						Printf ( "- You are using %s, but the server doesn't: %s\n", LocalPWADs[i].name.GetChars(), LocalPWADs[i].checksum.GetChars() );
+						Printf ( "- You are using \"%s\", but the server doesn't: \"%s\"\n", LocalPWADs[i].name.GetChars(), LocalPWADs[i].checksum.GetChars() );
 						cnt: ;
 					}
 
 					for ( std::list<std::pair<FString, FString> >::iterator j = serverPWADs.begin(); j != serverPWADs.end(); ++j )
 					{
-						Printf ( "- The server is using the %s, but you don't: %s\n", j->first.GetChars(), j->second.GetChars() );
+						Printf ( "- The server is using the \"%s\", but you don't: \"%s\"\n", j->first.GetChars(), j->second.GetChars() );
 					}
 
 					break;
@@ -2027,6 +2027,12 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 
 					if ( actor && tpl )
 						ShootDecal( tpl, actor, actor->Sector, actor->x, actor->y, z, angle, tracedist, permanent );
+				}
+				break;
+
+			case SVC2_REPORTLUMPS:
+				{
+					CLIENTCOMMANDS_ReportLumps( );
 				}
 				break;
 
