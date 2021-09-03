@@ -4723,6 +4723,76 @@ bool SERVER_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 			client->ScreenHeight = NETWORK_ReadShort( pByteStream );
 		}
 		return false;
+		
+	case CLC_REPORTLUMPS:
+		// [geNia] Client informs us of his loaded wads and pk3s.
+		{
+			// [TP] If the client is flooding the server with commands, the client is
+			// kicked and we don't need to handle the command.
+			if ( server_CheckForClientMinorCommandFlood ( g_lCurrentClient ) == true )
+				return ( true );
+			
+			char	szPlayerName[64];
+			sprintf( szPlayerName, "%s", players[SERVER_GetCurrentClient()].userinfo.GetName() );
+			V_RemoveColorCodes( szPlayerName );
+
+			std::pair<FString, FString> MainPWAD;
+			MainPWAD.first = NETWORK_ReadString( pByteStream );
+			MainPWAD.second = NETWORK_ReadString( pByteStream );
+
+			std::list<std::pair<FString, FString> > clientPWADs;
+			const int numServerPWADs = NETWORK_ReadByte( pByteStream );
+			for ( int i = 0; i < numServerPWADs; ++i )
+			{
+				std::pair<FString, FString> pwad;
+				pwad.first = NETWORK_ReadString( pByteStream );
+				pwad.second = NETWORK_ReadString( pByteStream );
+				clientPWADs.push_back ( pwad );
+			}
+
+			bool clientIsClean = true;
+
+			if ( stricmp( NETWORK_GetMainPWAD().checksum, MainPWAD.second ) != 0 )
+			{
+				Printf ( "%s - \"%s\" is different from the server: \"%s\" vs \"%s\"\n", szPlayerName, NETWORK_GetMainPWAD().name.GetChars(), NETWORK_GetMainPWAD().checksum.GetChars(), MainPWAD.second.GetChars() );
+				clientIsClean = false;
+			}
+			
+			TArray<NetworkPWAD> LocalPWADs = NETWORK_GetPWADList();
+			for ( unsigned int i = 0; i < LocalPWADs.Size(); ++i )
+			{
+				for ( std::list<std::pair<FString, FString> >::iterator j = clientPWADs.begin(); j != clientPWADs.end(); ++j )
+				{
+					if ( stricmp( LocalPWADs[i].name, j->first ) == 0 )
+					{
+						if ( stricmp(LocalPWADs[i].checksum, j->second ) != 0 )
+						{
+							Printf ( "%s - \"%s\" is different from the server: \"%s\" vs \"%s\"\n", szPlayerName, LocalPWADs[i].name.GetChars(), LocalPWADs[i].checksum.GetChars(), j->second.GetChars() );
+							clientIsClean = false;
+						}
+
+						clientPWADs.remove( *j );
+						goto cnt; // continue first loop
+					}
+				}
+
+				Printf ( "%s - The server is using \"%s\", but the client doesn't: \"%s\"\n", szPlayerName, LocalPWADs[i].name.GetChars(), LocalPWADs[i].checksum.GetChars() );
+				clientIsClean = false;
+				cnt: ;
+			}
+
+			for ( std::list<std::pair<FString, FString> >::iterator j = clientPWADs.begin(); j != clientPWADs.end(); ++j )
+			{
+				Printf ( "%s - The client is using \"%s\", but the server doesn't: \"%s\"\n", szPlayerName, j->first.GetChars(), j->second.GetChars() );
+				clientIsClean = false;
+			}
+
+			if ( clientIsClean )
+			{
+				Printf ( "%s - The client is using exact same wads as the server", szPlayerName );
+			}
+		}
+		return false;
 
 	default:
 
@@ -6840,6 +6910,46 @@ CCMD( forcespec_idx )
 		SERVER_ForceToSpectate( playerIndex, argv[2] );
 	else
 		SERVER_ForceToSpectate( playerIndex, "None given." );
+	return;
+}
+
+//*****************************************************************************
+//
+CCMD( reportlumps )
+{
+	ULONG	ulIdx;
+	char	szPlayerName[64];
+
+	// Only the server can execute this command!
+	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
+		return;
+	
+	if ( argv.argc( ) < 2 )
+	{
+		SERVERCOMMANDS_ReportLumps ();
+		return;
+	}
+
+	// Loop through all the players, and try to find one that matches the given name.
+	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+	{
+		if ( playeringame[ulIdx] == false )
+			continue;
+
+		// Removes the color codes from the player name so it appears as the server sees it in the window.
+		sprintf( szPlayerName, "%s", players[ulIdx].userinfo.GetName() );
+		V_RemoveColorCodes( szPlayerName );
+
+		if ( stricmp( szPlayerName, argv[1] ) == 0 )
+		{
+			SERVERCOMMANDS_ReportLumps ( ulIdx, SVCF_ONLYTHISCLIENT );
+
+			return;
+		}
+	}
+
+	// Didn't find a player that matches the name.
+	Printf( "Unknown player: %s\n", argv[1] );
 	return;
 }
 
