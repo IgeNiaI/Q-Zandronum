@@ -120,7 +120,11 @@ CVAR (Int, crosshair, 2, CVAR_ARCHIVE)
 CVAR (Bool, crosshairforce, false, CVAR_ARCHIVE)
 CVAR (Color, crosshaircolor, 0xff0000, CVAR_ARCHIVE);
 CVAR (Bool, crosshairhealth, true, CVAR_ARCHIVE);
-CVAR (Bool, crosshairscale, false, CVAR_ARCHIVE);
+fixed_t crosshairscale = FRACUNIT;
+CUSTOM_CVAR (Float, crosshairscalef, 1.0, CVAR_ARCHIVE)
+{
+	crosshairscale = FLOAT2FIXED(self);
+}
 CVAR (Bool, crosshairgrow, false, CVAR_ARCHIVE);
 CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
 {
@@ -1158,14 +1162,7 @@ void DBaseStatusBar::DrawCrosshair ()
 	if ( zacompatflags & ZACOMPATF_NO_CROSSHAIR )
 		return;
 
-	if (crosshairscale)
-	{
-		size = SCREENHEIGHT * FRACUNIT / 200;
-	}
-	else
-	{
-		size = FRACUNIT;
-	}
+	size = FixedMul(FRACUNIT, crosshairscale);
 
 	if (crosshairgrow)
 	{
