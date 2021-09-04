@@ -826,6 +826,7 @@ OptionMenu "HUDOptions"
 	Submenu "Message Options", 			"MessageOptions"
 	StaticText " "
 	Option "Default Crosshair",			"crosshair", "Crosshairs"
+	Slider "Crosshair Scale",			"crosshairscalef", 0, 10, 0.1
 	Option "Force default crosshair",	"crosshairforce", "OnOff"
 	Option "Grow crosshair when picking up items",	"crosshairgrow", "OnOff"
 	ColorPicker "Crosshair color", 		"crosshaircolor"
