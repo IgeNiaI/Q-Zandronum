@@ -820,6 +820,7 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< BT_USER2_Script
 		<< BT_USER3_Script
 		<< BT_USER4_Script
+		<< ALWAYS_Script
 		<< ClientX
 		<< ClientY
 		<< ClientZ
@@ -828,9 +829,11 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< ClientVelZ
 		<< ClientAngle
 		<< ClientPitch
-		<< Predictable1
-		<< Predictable2
-		<< Predictable3
+		<< Predictable[0]
+		<< Predictable[1]
+		<< Predictable[2]
+		<< Predictable[3]
+		<< Predictable[4]
 		<< DamageFade;
 }
 
@@ -1561,6 +1564,7 @@ void APlayerPawn::SetActionScript(int button, const char* scriptName)
 	case BT_USER2:		BT_USER2_Script = scriptName;		break;
 	case BT_USER3:		BT_USER3_Script = scriptName;		break;
 	case BT_USER4:		BT_USER4_Script = scriptName;		break;
+	default:			ALWAYS_Script = scriptName;
 	}
 }
 
@@ -1570,10 +1574,16 @@ void APlayerPawn::SetActionScript(int button, const char* scriptName)
 //
 //==========================================================================
 
-void APlayerPawn::ExecuteActionScript(ticcmd_t *cmd, int button)
+void APlayerPawn::ExecuteActionScript(DWORD buttons, DWORD oldbuttons, int button)
 {
+	if (player->bSpectating || player->bDeadSpectator)
+		return;
+
 	int script = 0;
-	if (cmd->ucmd.buttons & button)
+	bool wasJustPressed = !(oldbuttons & button) && (buttons & button);
+	bool wasJustReleased = (oldbuttons & button) && !(buttons & button);
+	bool shouldExecute = (buttons & button) || button == 0 || wasJustReleased;
+	if (shouldExecute)
 	{
 		switch (button)
 		{
@@ -1602,16 +1612,16 @@ void APlayerPawn::ExecuteActionScript(ticcmd_t *cmd, int button)
 		case BT_USER2:		script = BT_USER2_Script;		break;
 		case BT_USER3:		script = BT_USER3_Script;		break;
 		case BT_USER4:		script = BT_USER4_Script;		break;
-		default:			script = 0;
+		default:			script = ALWAYS_Script;
 		}
-	}
 
-	if (script != 0)
-	{
-		int flags = ACS_ALWAYS | ACS_WANTRESULT;
-		int args[4] = { CLIENT_PREDICT_IsPredicting() ? 1 : 0, Predictable1, Predictable2, Predictable3 };
+		if (script != 0)
+		{
+			int flags = ACS_ALWAYS | ACS_WANTRESULT;
+			int args[4] = { CLIENT_PREDICT_IsPredicting() ? 1 : 0, wasJustPressed ? 1 : 0, wasJustReleased ? 1 : 0, (int)buttons };
 
-		P_StartScript(player->mo, NULL, -script, level.mapname, args, 4, flags);
+			P_StartScript(player->mo, NULL, -script, level.mapname, args, 4, flags);
+		}
 	}
 }
 
@@ -4227,32 +4237,13 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	player->onground = player->mo->z <= player->mo->floorz || (player->mo->flags2 & MF2_ONMOBJ) ||
 					   (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
-	// Execute ACS scripts assigned to action buttons
-	player->mo->ExecuteActionScript(cmd, BT_ATTACK);
-	player->mo->ExecuteActionScript(cmd, BT_USE);
-	player->mo->ExecuteActionScript(cmd, BT_JUMP);
-	player->mo->ExecuteActionScript(cmd, BT_CROUCH);
-	player->mo->ExecuteActionScript(cmd, BT_TURN180);
-	player->mo->ExecuteActionScript(cmd, BT_ALTATTACK);
-	player->mo->ExecuteActionScript(cmd, BT_RELOAD);
-	player->mo->ExecuteActionScript(cmd, BT_ZOOM);
-	player->mo->ExecuteActionScript(cmd, BT_SPEED);
-	player->mo->ExecuteActionScript(cmd, BT_STRAFE);
-	player->mo->ExecuteActionScript(cmd, BT_MOVERIGHT);
-	player->mo->ExecuteActionScript(cmd, BT_MOVELEFT);
-	player->mo->ExecuteActionScript(cmd, BT_BACK);
-	player->mo->ExecuteActionScript(cmd, BT_FORWARD);
-	player->mo->ExecuteActionScript(cmd, BT_RIGHT);
-	player->mo->ExecuteActionScript(cmd, BT_LEFT);
-	player->mo->ExecuteActionScript(cmd, BT_LOOKUP);
-	player->mo->ExecuteActionScript(cmd, BT_LOOKDOWN);
-	player->mo->ExecuteActionScript(cmd, BT_MOVEUP);
-	player->mo->ExecuteActionScript(cmd, BT_MOVEDOWN);
-	player->mo->ExecuteActionScript(cmd, BT_SHOWSCORES);
-	player->mo->ExecuteActionScript(cmd, BT_USER1);
-	player->mo->ExecuteActionScript(cmd, BT_USER2);
-	player->mo->ExecuteActionScript(cmd, BT_USER3);
-	player->mo->ExecuteActionScript(cmd, BT_USER4);
+	if (!CLIENT_PREDICT_IsPredicting())
+	{
+		for (int i = 0; i < PREDICTABLES_SIZE; i++)
+		{
+			player->mo->Predictable[i] = 0;
+		}
+	}
 
 	if (player->mo->MvType == 0 || player->bSpectating)
 	{
@@ -4262,6 +4253,34 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	{
 		P_MovePlayer_Quake(player, cmd);
 	}
+
+	// Execute ACS scripts assigned to action buttons
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_ATTACK);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USE);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_JUMP);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_CROUCH);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_TURN180);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_ALTATTACK);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_RELOAD);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_ZOOM);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_SPEED);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_STRAFE);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_MOVERIGHT);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_MOVELEFT);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_BACK);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_FORWARD);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_RIGHT);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_LEFT);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_LOOKUP);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_LOOKDOWN);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_MOVEUP);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_MOVEDOWN);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_SHOWSCORES);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USER1);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USER2);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USER3);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USER4);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, 0);
 }
 
 //==========================================================================

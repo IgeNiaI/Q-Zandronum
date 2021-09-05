@@ -86,6 +86,8 @@ class player_t;
 class	CSkullBot;
 class	AFloatyIcon;
 
+#define PREDICTABLES_SIZE 20
+
 class APlayerPawn : public AActor
 {
 	DECLARE_CLASS (APlayerPawn, AActor)
@@ -219,7 +221,7 @@ public:
 		BT_SPEED_Script, BT_STRAFE_Script, BT_MOVERIGHT_Script, BT_MOVELEFT_Script,
 		BT_BACK_Script, BT_FORWARD_Script, BT_RIGHT_Script, BT_LEFT_Script,
 		BT_LOOKUP_Script, BT_LOOKDOWN_Script, BT_MOVEUP_Script, BT_MOVEDOWN_Script, BT_SHOWSCORES_Script,
-		BT_USER1_Script, BT_USER2_Script, BT_USER3_Script, BT_USER4_Script;
+		BT_USER1_Script, BT_USER2_Script, BT_USER3_Script, BT_USER4_Script, ALWAYS_Script;
 
 	// [geNia] The server updates player data before sending it to clients, but the player input is still old.
 	// That results in player input being one tic behind position, so we need to remember last position to send it to other clients.
@@ -229,7 +231,7 @@ public:
 	fixed_t		ClientPitch;
 
 	// Values that can be set from ACS and then passed to assigned action scripts
-	int	Predictable1, Predictable2, Predictable3;
+	int	Predictable[PREDICTABLES_SIZE];
 
 	// [CW] Fades for when you are being damaged.
 	PalEntry DamageFade;
@@ -241,7 +243,7 @@ public:
 
 	int ActionNameToNumber(const char* actionName);
 	void SetActionScript(int button, const char* scriptName);
-	void ExecuteActionScript(ticcmd_t *cmd, int button);
+	void ExecuteActionScript(DWORD buttons, DWORD oldbuttons, int button);
 };
 
 class APlayerChunk : public APlayerPawn

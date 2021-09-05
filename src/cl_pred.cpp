@@ -101,7 +101,8 @@ static	bool		g_bSavedOnFloor[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedOnMobj[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedWasJustThrustedZ[CLIENT_PREDICTION_TICS];
 static	fixed_t		g_SavedFloorZ[CLIENT_PREDICTION_TICS];
-static	int			g_SavedPredictable[CLIENT_PREDICTION_TICS][3];
+static  DWORD		g_SavedOldButtons[CLIENT_PREDICTION_TICS];
+static	int			g_SavedPredictable[CLIENT_PREDICTION_TICS][PREDICTABLES_SIZE];
 
 #ifdef	_DEBUG
 CVAR( Bool, cl_showpredictionsuccess, false, 0 );
@@ -249,6 +250,11 @@ void CLIENT_PREDICT_PlayerPredict( void )
 	// [BB] Due to recent ZDoom changes (ported in revision 2029), we need to save the old buttons.
 	pPlayer->oldbuttons = pPlayer->cmd.ucmd.buttons;
 	pPlayer->mo->Tick( );
+
+	for (int i = 0; i < PREDICTABLES_SIZE; i++)
+	{
+		g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][i] = pPlayer->mo->Predictable[i];
+	}
 }
 
 //*****************************************************************************
@@ -342,9 +348,7 @@ static void client_predict_BeginPrediction( player_t *pPlayer )
 	g_lSavedReactionTime[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->reactiontime;
 	g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->waterlevel;
 	g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->wasJustThrustedZ;
-	g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = pPlayer->mo->Predictable1;
-	g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = pPlayer->mo->Predictable2;
-	g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][2] = pPlayer->mo->Predictable3;
+	g_SavedOldButtons[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->oldbuttons;
 	memcpy( &g_SavedTiccmd[g_ulGameTick % CLIENT_PREDICTION_TICS], &pPlayer->cmd, sizeof( ticcmd_t ));
 }
 
@@ -423,9 +427,11 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		pPlayer->mo->reactiontime = g_lSavedReactionTime[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->waterlevel = g_lSavedWaterLevel[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[lTick % CLIENT_PREDICTION_TICS] != 0;
-		pPlayer->mo->Predictable1 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][0];
-		pPlayer->mo->Predictable2 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][1];
-		pPlayer->mo->Predictable3 = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][2];
+		pPlayer->oldbuttons = g_SavedOldButtons[lTick % CLIENT_PREDICTION_TICS];
+		for (int i = 0; i < PREDICTABLES_SIZE; i++)
+		{
+			pPlayer->mo->Predictable[i] = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][i];
+		}
 
 		// Tick the player.
 		P_PlayerThink( pPlayer, &g_SavedTiccmd[lTick % CLIENT_PREDICTION_TICS] );
@@ -487,9 +493,7 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->mo->reactiontime = g_lSavedReactionTime[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->waterlevel = g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] != 0;
-	pPlayer->mo->Predictable1 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][0];
-	pPlayer->mo->Predictable2 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][1];
-	pPlayer->mo->Predictable3 = g_SavedPredictable[g_ulGameTick % CLIENT_PREDICTION_TICS][2];
+	pPlayer->oldbuttons = g_SavedOldButtons[g_ulGameTick % CLIENT_PREDICTION_TICS];
 }
 
 static void client_predict_AdjustZ( APlayerPawn *mo )
