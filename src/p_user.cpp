@@ -821,9 +821,11 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< ClientVelZ
 		<< ClientAngle
 		<< ClientPitch
-		<< Predictable1
-		<< Predictable2
-		<< Predictable3
+		<< Predictable[0]
+		<< Predictable[1]
+		<< Predictable[2]
+		<< Predictable[3]
+		<< Predictable[4]
 		<< DamageFade;
 }
 
@@ -1563,10 +1565,12 @@ void APlayerPawn::SetActionScript(int button, const char* scriptName)
 //
 //==========================================================================
 
-void APlayerPawn::ExecuteActionScript(ticcmd_t *cmd, int button)
+void APlayerPawn::ExecuteActionScript(DWORD buttons, DWORD oldbuttons, int button)
 {
 	int script = 0;
-	if (cmd->ucmd.buttons & button)
+	bool wasJustReleased = (oldbuttons & button) && !(buttons & button);
+	bool shouldExecute = wasJustReleased || (buttons & button);
+	if (shouldExecute)
 	{
 		switch (button)
 		{
@@ -1602,9 +1606,9 @@ void APlayerPawn::ExecuteActionScript(ticcmd_t *cmd, int button)
 	if (script != 0)
 	{
 		int flags = ACS_ALWAYS | ACS_WANTRESULT;
-		int args[4] = { CLIENT_PREDICT_IsPredicting() ? 1 : 0, Predictable1, Predictable2, Predictable3 };
+		int args[3] = { CLIENT_PREDICT_IsPredicting() ? 1 : 0, wasJustReleased ? 1 : 0, (int) buttons };
 
-		P_StartScript(player->mo, NULL, -script, level.mapname, args, 4, flags);
+		P_StartScript(player->mo, NULL, -script, level.mapname, args, 3, flags);
 	}
 }
 
@@ -4182,7 +4186,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 =
 =================
 */
-void P_MovePlayer(player_t *player, ticcmd_t *cmd)
+void P_MovePlayer(player_t *player, ticcmd_t *cmd, DWORD oldbuttons)
 {
 	APlayerPawn *mo = player->mo;
 
@@ -4205,31 +4209,31 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 					   (player->mo->BounceFlags & BOUNCE_MBF) || (player->cheats & CF_NOCLIP2);
 
 	// Execute ACS scripts assigned to action buttons
-	player->mo->ExecuteActionScript(cmd, BT_ATTACK);
-	player->mo->ExecuteActionScript(cmd, BT_USE);
-	player->mo->ExecuteActionScript(cmd, BT_JUMP);
-	player->mo->ExecuteActionScript(cmd, BT_CROUCH);
-	player->mo->ExecuteActionScript(cmd, BT_TURN180);
-	player->mo->ExecuteActionScript(cmd, BT_ALTATTACK);
-	player->mo->ExecuteActionScript(cmd, BT_RELOAD);
-	player->mo->ExecuteActionScript(cmd, BT_ZOOM);
-	player->mo->ExecuteActionScript(cmd, BT_SPEED);
-	player->mo->ExecuteActionScript(cmd, BT_STRAFE);
-	player->mo->ExecuteActionScript(cmd, BT_MOVERIGHT);
-	player->mo->ExecuteActionScript(cmd, BT_MOVELEFT);
-	player->mo->ExecuteActionScript(cmd, BT_BACK);
-	player->mo->ExecuteActionScript(cmd, BT_FORWARD);
-	player->mo->ExecuteActionScript(cmd, BT_RIGHT);
-	player->mo->ExecuteActionScript(cmd, BT_LEFT);
-	player->mo->ExecuteActionScript(cmd, BT_LOOKUP);
-	player->mo->ExecuteActionScript(cmd, BT_LOOKDOWN);
-	player->mo->ExecuteActionScript(cmd, BT_MOVEUP);
-	player->mo->ExecuteActionScript(cmd, BT_MOVEDOWN);
-	player->mo->ExecuteActionScript(cmd, BT_SHOWSCORES);
-	player->mo->ExecuteActionScript(cmd, BT_USER1);
-	player->mo->ExecuteActionScript(cmd, BT_USER2);
-	player->mo->ExecuteActionScript(cmd, BT_USER3);
-	player->mo->ExecuteActionScript(cmd, BT_USER4);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_ATTACK);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_USE);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_JUMP);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_CROUCH);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_TURN180);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_ALTATTACK);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_RELOAD);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_ZOOM);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_SPEED);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_STRAFE);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_MOVERIGHT);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_MOVELEFT);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_BACK);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_FORWARD);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_RIGHT);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_LEFT);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_LOOKUP);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_LOOKDOWN);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_MOVEUP);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_MOVEDOWN);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_SHOWSCORES);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_USER1);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_USER2);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_USER3);
+	player->mo->ExecuteActionScript(cmd->ucmd.buttons, oldbuttons, BT_USER4);
 
 	if (player->mo->MvType == 0 || player->bSpectating)
 	{
@@ -5007,7 +5011,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 	else
 	{
-		P_MovePlayer (player, cmd);
+		P_MovePlayer (player, cmd, player->oldbuttons);
 
 		if (cmd->ucmd.upmove == -32768)
 		{ // Only land if in the air
