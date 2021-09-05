@@ -86,6 +86,8 @@ class player_t;
 class	CSkullBot;
 class	AFloatyIcon;
 
+#define PREDICTABLES_SIZE 5
+
 class APlayerPawn : public AActor
 {
 	DECLARE_CLASS (APlayerPawn, AActor)
@@ -229,7 +231,7 @@ public:
 	fixed_t		ClientPitch;
 
 	// Values that can be set from ACS and then passed to assigned action scripts
-	int	Predictable1, Predictable2, Predictable3;
+	int	Predictable[PREDICTABLES_SIZE];
 
 	// [CW] Fades for when you are being damaged.
 	PalEntry DamageFade;
@@ -241,7 +243,7 @@ public:
 
 	int ActionNameToNumber(const char* actionName);
 	void SetActionScript(int button, const char* scriptName);
-	void ExecuteActionScript(ticcmd_t *cmd, int button);
+	void ExecuteActionScript(DWORD buttons, DWORD oldbuttons, int button);
 };
 
 class APlayerChunk : public APlayerPawn
