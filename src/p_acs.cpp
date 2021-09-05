@@ -7552,17 +7552,9 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			{
 				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 				{
-					switch (args[1])
+					if (args[1] >= 0 && args[1] < PREDICTABLES_SIZE)
 					{
-					case 1:
-						static_cast<APlayerPawn *>(&*activator)->Predictable1 = args[2];
-						break;
-					case 2:
-						static_cast<APlayerPawn *>(&*activator)->Predictable2 = args[2];
-						break;
-					case 3:
-						static_cast<APlayerPawn *>(&*activator)->Predictable3 = args[2];
-						break;
+						static_cast<APlayerPawn *>(&*activator)->Predictable[args[1]] = args[2];
 					}
 				}
 			}
@@ -7571,22 +7563,13 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				AActor *actor;
 				FActorIterator iterator(args[0]);
 
-				const char* actionName = FBehavior::StaticLookupString(args[2]);
 				while ((actor = iterator.Next()) != NULL)
 				{
 					if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 					{
-						switch (args[1])
+						if (args[1] >= 0 && args[1] < PREDICTABLES_SIZE)
 						{
-						case 1:
-							static_cast<APlayerPawn *>(actor)->Predictable1 = args[2];
-							break;
-						case 2:
-							static_cast<APlayerPawn *>(actor)->Predictable2 = args[2];
-							break;
-						case 3:
-							static_cast<APlayerPawn *>(actor)->Predictable3 = args[2];
-							break;
+							static_cast<APlayerPawn *>(actor)->Predictable[args[1]] = args[2];
 						}
 					}
 				}
@@ -7598,14 +7581,9 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				AActor* actor = SingleActorFromTID(args[0], activator);
 				if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 				{
-					switch (args[1])
+					if (args[1] >= 0 && args[1] < PREDICTABLES_SIZE)
 					{
-					case 1:
-						return static_cast<APlayerPawn *>(actor)->Predictable1;
-					case 2:
-						return static_cast<APlayerPawn *>(actor)->Predictable2;
-					case 3:
-						return static_cast<APlayerPawn *>(actor)->Predictable3;
+						return static_cast<APlayerPawn *>(actor)->Predictable[args[1]];
 					}
 				}
 			}
