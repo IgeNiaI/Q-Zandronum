@@ -4774,7 +4774,10 @@ void ServerCommands::SetThingFlags::Execute()
 //
 void ServerCommands::SetThingArguments::Execute()
 {
-	actor->args[0] = arg0;
+	if (isNamed)
+		actor->args[0] = NETWORK_ACSScriptFromNetID( arg0 );
+	else
+		actor->args[0] = arg0;
 	actor->args[1] = arg1;
 	actor->args[2] = arg2;
 	actor->args[3] = arg3;
