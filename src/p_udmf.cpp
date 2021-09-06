@@ -730,6 +730,7 @@ public:
 		if (arg0str.IsNotEmpty() && (P_IsACSSpecial(th->special) || th->special == 0))
 		{
 			th->args[0] = -FName(arg0str);
+			th->wasNamedSpecial = true;
 		}
 		if (arg1str.IsNotEmpty() && (P_IsThingSpecial(th->special) || th->special == 0))
 		{
