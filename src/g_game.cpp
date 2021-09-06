@@ -3943,6 +3943,8 @@ void GAME_ResetMap( bool bRunEnterScripts )
 				pNewActor->SavedTID = pActor->SavedTID;
 				pNewActor->special = pActor->SavedSpecial;
 				pNewActor->SavedSpecial = pActor->SavedSpecial;
+				pNewActor->wasNamedSpecial = pActor->SavedWasNamedSpecial;
+				pNewActor->SavedWasNamedSpecial = pActor->SavedWasNamedSpecial;
 				for ( int i = 0; i < 5; ++i )
 				{
 					pNewActor->args[i] = pActor->SavedArgs[i];
@@ -4003,13 +4005,12 @@ void GAME_ResetMap( bool bRunEnterScripts )
 			( GAME_DormantStatusMatchesOriginal( pActor )) &&
 			( pActor->health == pActorInfo->health ))
 		{
-			if ( pActor->special != pActor->SavedSpecial )
-				pActor->special = pActor->SavedSpecial;
+			pActor->special = pActor->SavedSpecial;
+			pActor->wasNamedSpecial = pActor->SavedWasNamedSpecial;
 
 			// [Dusk] Args must be reset too
 			for ( ULONG i = 0; i < 5; ++i )
-				if ( pActor->args[i] != pActor->SavedArgs[i] )
-					pActor->args[i] = pActor->SavedArgs[i];
+				pActor->args[i] = pActor->SavedArgs[i];
 
 			// [BB] This is a valid monster on the map, count it.
 			if ( pActor->CountsAsKill( ) && !(pActor->flags & MF_FRIENDLY) )
@@ -4081,6 +4082,8 @@ void GAME_ResetMap( bool bRunEnterScripts )
 			pNewActor->SavedTID = pActor->SavedTID;
 			pNewActor->special = pActor->SavedSpecial;
 			pNewActor->SavedSpecial = pActor->SavedSpecial;
+			pNewActor->wasNamedSpecial = pActor->SavedWasNamedSpecial;
+			pNewActor->SavedWasNamedSpecial = pActor->SavedWasNamedSpecial;
 			for ( int i = 0; i < 5; ++i )
 			{
 				pNewActor->args[i] = pActor->SavedArgs[i];
