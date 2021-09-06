@@ -2631,6 +2631,12 @@ void SERVER_SendFullUpdate( ULONG ulClient )
 				if ( ulBits != 0 )
 					SERVERCOMMANDS_MoveThing( pActor, ulBits, ulClient, SVCF_ONLYTHISCLIENT );
 			}
+			
+			// [BB] Clients need to know the SectorAction specials to predict them.
+			// [EP] Spectators need to know the allowed specials to use them.
+			if ( ( NETWORK_IsClientPredictedSpecial ( pActor->special ) || GAMEMODE_IsSpectatorAllowedSpecial ( pActor->special ) )
+				&& pActor->IsKindOf( PClass::FindClass( "SectorAction" ) ) )
+				SERVERCOMMANDS_SetThingSpecial ( pActor, ulClient, SVCF_ONLYTHISCLIENT );
 
 			// If it's important to update this thing's arguments, do that now.
 			// [BB] Wouldn't it be better, if this is done for all things, for which
@@ -2647,12 +2653,6 @@ void SERVER_SendFullUpdate( ULONG ulClient )
 				|| ( pActor->args[3] != 0 )
 				|| ( pActor->args[4] != 0 ) )
 				SERVERCOMMANDS_SetThingArguments( pActor, ulClient, SVCF_ONLYTHISCLIENT );
-
-			// [BB] Clients need to know the SectorAction specials to predict them.
-			// [EP] Spectators need to know the allowed specials to use them.
-			if ( ( NETWORK_IsClientPredictedSpecial ( pActor->special ) || GAMEMODE_IsSpectatorAllowedSpecial ( pActor->special ) )
-				&& pActor->IsKindOf( PClass::FindClass( "SectorAction" ) ) )
-				SERVERCOMMANDS_SetThingSpecial ( pActor, ulClient, SVCF_ONLYTHISCLIENT );
 
 			// [BB] Some things like AMovingCamera rely on the AActor tid.
 			// So tell it to the client. I have no idea if this has unwanted side
