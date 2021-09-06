@@ -1207,6 +1207,20 @@ class CommandDrawNumber : public CommandDrawString
 							sc.ScriptError("'%s' is not a valid team.", sc.String);
 						valueArgument = t;
 					}
+					else if(sc.Compare("keys"))
+						value = KEYS;
+					else if(sc.Compare("jumptics"))
+						value = JUMPTICS;
+					else if(sc.Compare("secondjumptics"))
+						value = SECONDJUMPTICS;
+					else if(sc.Compare("secondjumps"))
+						value = SECONDJUMPS;
+					else if(sc.Compare("secondjumpstate"))
+						value = SECONDJUMPSTATE;
+					else if(sc.Compare("crouchslidetics"))
+						value = CROUCHSLIDETICS;
+					else if(sc.Compare("wallclimbtics"))
+						value = WALLCLIMBTICS;
 				}
 				if(value == INVENTORY)
 				{
@@ -1493,6 +1507,24 @@ class CommandDrawNumber : public CommandDrawString
 							num++;
 					}
 					break;
+				case JUMPTICS:
+					num = statusBar->CPlayer->jumpTics;
+					break;
+				case SECONDJUMPTICS:
+					num = statusBar->CPlayer->secondJumpTics;
+					break;
+				case SECONDJUMPS:
+					num = statusBar->CPlayer->secondJumpsRemaining;
+					break;
+				case SECONDJUMPSTATE:
+					num = statusBar->CPlayer->secondJumpState;
+					break;
+				case CROUCHSLIDETICS:
+					num = statusBar->CPlayer->crouchSlideTics;
+					break;
+				case WALLCLIMBTICS:
+					num = statusBar->CPlayer->wallClimbTics;
+					break;
 				default: break;
 			}
 			if(interpolationSpeed != 0 && (!hudChanged || level.time == 1))
@@ -1573,6 +1605,14 @@ class CommandDrawNumber : public CommandDrawString
 			KEYS,
 			// [BB]
 			TEAMSCORE,
+
+			// [geNia]
+			JUMPTICS,
+			SECONDJUMPTICS,
+			SECONDJUMPS,
+			SECONDJUMPSTATE,
+			CROUCHSLIDETICS,
+			WALLCLIMBTICS,
 
 			CONSTANT
 		};
@@ -2712,6 +2752,18 @@ class CommandDrawBar : public SBarInfoCommand
 					sc.ScriptError("'%s' is not a valid team.", sc.String);
 				typeArgument = t;
 			}
+			else if(sc.Compare("jumptics"))
+				type = JUMPTICS;
+			else if(sc.Compare("secondjumptics"))
+				type = SECONDJUMPTICS;
+			else if(sc.Compare("secondjumps"))
+				type = SECONDJUMPS;
+			else if(sc.Compare("secondjumpstate"))
+				type = SECONDJUMPSTATE;
+			else if(sc.Compare("crouchslidetics"))
+				type = CROUCHSLIDETICS;
+			else if(sc.Compare("wallclimbtics"))
+				type = WALLCLIMBTICS;
 			else
 			{
 				type = INVENTORY;
@@ -2911,6 +2963,24 @@ class CommandDrawBar : public SBarInfoCommand
 					max = 100;
 					break;
 				}
+				case JUMPTICS:
+					value = statusBar->CPlayer->jumpTics;
+					break;
+				case SECONDJUMPTICS:
+					value = statusBar->CPlayer->secondJumpTics;
+					break;
+				case SECONDJUMPS:
+					value = statusBar->CPlayer->secondJumpsRemaining;
+					break;
+				case SECONDJUMPSTATE:
+					value = statusBar->CPlayer->secondJumpState;
+					break;
+				case CROUCHSLIDETICS:
+					value = statusBar->CPlayer->crouchSlideTics;
+					break;
+				case WALLCLIMBTICS:
+					value = statusBar->CPlayer->wallClimbTics;
+					break;
 				default: return;
 			}
 
@@ -2980,7 +3050,14 @@ class CommandDrawBar : public SBarInfoCommand
 			AIRTIME,
 			SAVEPERCENT,
 			// [BB]
-			TEAMSCORE
+			TEAMSCORE,
+			// [geNia]
+			JUMPTICS,
+			SECONDJUMPTICS,
+			SECONDJUMPS,
+			SECONDJUMPSTATE,
+			CROUCHSLIDETICS,
+			WALLCLIMBTICS
 		};
 
 		struct AdditionalData
