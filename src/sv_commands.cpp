@@ -1442,7 +1442,11 @@ void SERVERCOMMANDS_SetThingArguments( AActor *pActor, ULONG ulPlayerExtra, Serv
 
 	ServerCommands::SetThingArguments command;
 	command.SetActor( pActor );
-	command.SetArg0( pActor->args[0] );
+	command.SetIsNamed( pActor->wasNamedSpecial );
+	if ( pActor->wasNamedSpecial )
+		command.SetArg0( NETWORK_ACSScriptToNetID( pActor->args[0] ) );
+	else
+		command.SetArg0( pActor->args[0] );
 	command.SetArg1( pActor->args[1] );
 	command.SetArg2( pActor->args[2] );
 	command.SetArg3( pActor->args[3] );
