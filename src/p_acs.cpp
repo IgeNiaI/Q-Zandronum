@@ -9956,12 +9956,14 @@ scriptwait:
 			{
 				int specnum = STACK(6);
 				int arg0 = STACK(5);
+				bool wasNamedSpecial = false;
 
 				// Convert named ACS "specials" into real specials.
 				if (specnum >= -ACSF_ACS_NamedExecuteAlways && specnum <= -ACSF_ACS_NamedExecute)
 				{
 					specnum = NamedACSToNormalACS[-specnum - ACSF_ACS_NamedExecute];
 					arg0 = -FName(FBehavior::StaticLookupString(arg0));
+					wasNamedSpecial = true;
 				}
 
 				if (STACK(7) != 0)
@@ -9972,6 +9974,7 @@ scriptwait:
 					while ( (actor = iterator.Next ()) )
 					{
 						actor->special = specnum;
+						actor->wasNamedSpecial = wasNamedSpecial;
 						actor->args[0] = arg0;
 						actor->args[1] = STACK(4);
 						actor->args[2] = STACK(3);
@@ -9991,6 +9994,7 @@ scriptwait:
 				else if (activator != NULL)
 				{
 					activator->special = specnum;
+					activator->wasNamedSpecial = wasNamedSpecial;
 					activator->args[0] = arg0;
 					activator->args[1] = STACK(4);
 					activator->args[2] = STACK(3);

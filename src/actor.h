@@ -1058,6 +1058,8 @@ public:
 	int				tid;			// thing identifier
 	int				special;		// special
 	BYTE			SavedSpecial;	// [BC] Saved actor special for when a map gets reset.
+	bool			wasNamedSpecial;// [geNia] Required for SetThingArguments command to send arguments properly
+	bool			SavedWasNamedSpecial;
 	int				args[5];		// special arguments
 	int				SavedArgs[5];	// [Dusk] More map reset stuff
 	int				SavedTID;		// [Dusk]
