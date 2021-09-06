@@ -354,6 +354,16 @@
 #define APROP_CpmMaxForwardAngleRad		85
 #define APROP_CrouchSlideEffectInterval	86
 #define APROP_WallClimbEffectInterval	87
+#define APROP_JumpTics					88
+#define APROP_SecondJumpTics			89
+#define APROP_SecondJumpsRemaining		90
+#define APROP_SecondJumpState			91
+#define APROP_IsCrouchSliding			92
+#define APROP_CrouchSlideTics			93
+#define APROP_IsWallClimbing			94
+#define APROP_WallClimbTics				95
+#define APROP_IsAirWallRunning			96
+#define APROP_AirWallRunTics			97
 
 // New to Eternity
 #define APROP_Counter0      100
@@ -364,6 +374,16 @@
 #define APROP_Counter5      105
 #define APROP_Counter6      106
 #define APROP_Counter7      107
+
+// Movement types
+#define MVTYPE_DOOM			0
+#define MVTYPE_VQ3			1
+#define MVTYPE_CPM			2
+
+// Q-Zandronum second jump states
+#define SJ_NOT_AVAILABLE	0
+#define SJ_AVAILABLE		1
+#define SJ_READY			2
 
 // Render Styles ------------------------------------------------------------
 
