@@ -6340,11 +6340,13 @@ AActor *P_SpawnMapThing (FMapThing *mthing, int position)
 	{
 		// [RH] Set the thing's special
 		mobj->special = mthing->special;
+		mobj->wasNamedSpecial = mthing->wasNamedSpecial;
 		for(int j=0;j<5;j++) mobj->args[j]=mthing->args[j];
 	}
 
 	// [BC] Save the thing's special for resetting the map.
 	mobj->SavedSpecial = mobj->special;
+	mobj->SavedWasNamedSpecial = mobj->wasNamedSpecial;
 
 	// [Dusk] Save args
 	for (int i = 0; i < 5; ++i)

@@ -343,6 +343,7 @@ struct FMapThing
 	WORD		ClassFilter;
 	DWORD		flags;
 	int			special;
+	bool		wasNamedSpecial;
 	int			args[5];
 	int			Conversation;
 	fixed_t		gravity;
