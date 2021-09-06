@@ -319,6 +319,16 @@ enum
 	APROP_CpmMaxForwardAngleRad = 85,
 	APROP_CrouchSlideEffectInterval = 86,
 	APROP_WallClimbEffectInterval	= 87,
+	APROP_JumpTics				= 88,
+	APROP_SecondJumpTics		= 89,
+	APROP_SecondJumpsRemaining	= 90,
+	APROP_SecondJumpState		= 91,
+	APROP_IsCrouchSliding		= 92,
+	APROP_CrouchSlideTics		= 93,
+	APROP_IsWallClimbing		= 94,
+	APROP_WallClimbTics			= 95,
+	APROP_IsAirWallRunning		= 96,
+	APROP_AirWallRunTics		= 97,
 };	
 
 // [Dusk] Enumeration for GetTeamProperty

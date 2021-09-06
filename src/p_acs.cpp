@@ -4698,6 +4698,42 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
+	case APROP_JumpTics:
+		if (playerActor) {
+			playerActor->jumpTics = value;
+		}
+		break;
+
+	case APROP_SecondJumpTics:
+		if (playerActor) {
+			playerActor->secondJumpTics = value;
+		}
+		break;
+
+	case APROP_SecondJumpsRemaining:
+		if (playerActor) {
+			playerActor->secondJumpsRemaining = value;
+		}
+		break;
+
+	case APROP_CrouchSlideTics:
+		if (playerActor) {
+			playerActor->crouchSlideTics = (float) value;
+		}
+		break;
+
+	case APROP_WallClimbTics:
+		if (playerActor) {
+			playerActor->wallClimbTics = (float) value;
+		}
+		break;
+
+	case APROP_AirWallRunTics:
+		if (playerActor) {
+			playerActor->airWallRunTics = (float) value;
+		}
+		break;
+
 	default:
 		// do nothing.
 		break;
@@ -4809,6 +4845,16 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad )	: 0;
 	case APROP_CrouchSlideEffectInterval:return playerActor? playerActor->CrouchSlideEffectInterval				: 0;
 	case APROP_WallClimbEffectInterval:	return playerActor ? playerActor->WallClimbEffectInterval				: 0;
+	case APROP_JumpTics:				return playerActor ? playerActor->jumpTics								: 0;
+	case APROP_SecondJumpTics:			return playerActor ? playerActor->secondJumpTics						: 0;
+	case APROP_SecondJumpsRemaining:	return playerActor ? playerActor->secondJumpsRemaining					: 0;
+	case APROP_SecondJumpState:			return playerActor ? playerActor->secondJumpState						: 0;
+	case APROP_IsCrouchSliding:			return playerActor ? playerActor->isCrouchSliding						: 0;
+	case APROP_CrouchSlideTics:			return playerActor ? (int) playerActor->crouchSlideTics					: 0;
+	case APROP_IsWallClimbing:			return playerActor ? playerActor->isWallClimbing						: 0;
+	case APROP_WallClimbTics:			return playerActor ? (int) playerActor->wallClimbTics					: 0;
+	case APROP_IsAirWallRunning:		return playerActor ? playerActor->isAirWallRunning						: 0;
+	case APROP_AirWallRunTics:			return playerActor ? (int) playerActor->airWallRunTics					: 0;
 
 	// Misc
 	case APROP_MasterTID:				return DoGetMasterTID(actor);
