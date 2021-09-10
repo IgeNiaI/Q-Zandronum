@@ -154,6 +154,13 @@ void DCeiling::Tick ()
 			case genCeilingChg:
 				m_Sector->SetTexture(sector_t::ceiling, m_Texture);
 
+				// [TP] If we're the server, tell the client to change the ceiling texture.
+				if ( NETWORK_GetState() == NETSTATE_SERVER )
+					if ( m_LastInstigator )
+						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
+
 				// [BB] Also, mark this sector as having its flat changed.
 				m_Sector->bFlatChange = true;
 
@@ -196,6 +203,13 @@ void DCeiling::Tick ()
 				// fall through
 			case genCeilingChg:
 				m_Sector->SetTexture(sector_t::ceiling, m_Texture);
+
+				// [TP] If we're the server, tell the client to change the ceiling texture.
+				if ( NETWORK_GetState() == NETSTATE_SERVER )
+					if ( m_LastInstigator )
+						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
 
 				// [BB] Also, mark this sector as having its flat changed.
 				m_Sector->bFlatChange = true;
@@ -402,6 +416,16 @@ int DCeiling::GetSilent( void )
 void DCeiling::SetSilent( int Silent )
 {
 	m_Silent = Silent;
+}
+
+FTextureID DCeiling::GetTexture( void )
+{
+	return ( m_Texture );
+}
+
+void DCeiling::SetTexture(FTextureID Texture )
+{
+	m_Texture = Texture;
 }
 
 //============================================================================

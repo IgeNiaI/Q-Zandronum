@@ -3702,6 +3702,12 @@ void SERVERCOMMANDS_DoFloor( DFloor *Floor, ULONG ulPlayerExtra, ServerCommandFl
 		command.SetCrush ( clamp<LONG>(Floor->GetCrush(),-128,127) );
 		command.SetHexenCrush ( Floor->GetHexencrush() );
 		command.SetNewSpecial ( Floor->GetNewSpecial() );
+		DFloor::EFloor type = Floor->GetType();
+		if (type == DFloor::floorLowerAndChange || type == DFloor::floorRaiseAndChange
+			|| type == DFloor::genFloorChg0 || type == DFloor::genFloorChg || type == DFloor::genFloorChgT)
+			command.SetTexture ( TexMan( Floor->GetTexture() )->Name );
+		else
+			command.SetTexture("");
 		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 }
@@ -3740,6 +3746,12 @@ void SERVERCOMMANDS_BuildStair( DFloor *Floor, ULONG ulPlayerExtra, ServerComman
 		command.SetPauseTime ( Floor->GetPauseTime() );
 		command.SetStepTime ( Floor->GetStepTime() );
 		command.SetPerStepTime ( Floor->GetPerStepTime() );
+		DFloor::EFloor type = Floor->GetType();
+		if (type == DFloor::floorLowerAndChange || type == DFloor::floorRaiseAndChange
+			|| type == DFloor::genFloorChg0 || type == DFloor::genFloorChg || type == DFloor::genFloorChgT)
+			command.SetTexture ( TexMan( Floor->GetTexture() )->Name );
+		else
+			command.SetTexture("");
 		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 }
@@ -3778,6 +3790,11 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 		command.SetCrush ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
 		command.SetHexenCrush ( Ceiling->GetHexencrush() );
 		command.SetSilent ( Ceiling->GetSilent() );
+		DCeiling::ECeiling type = Ceiling->GetType();
+		if (type == DCeiling::genCeilingChg0 || type == DCeiling::genCeilingChg || type == DCeiling::genCeilingChgT)
+			command.SetTexture ( TexMan( Ceiling->GetTexture() )->Name );
+		else
+			command.SetTexture("");
 		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 }
@@ -4001,7 +4018,7 @@ void SERVERCOMMANDS_Earthquake( AActor *pCenter, LONG lIntensity, LONG lDuration
 		return;
 
 	const char *pszQuakeSound = S_GetName( Quakesound );
-	
+
 	ServerCommands::EarthQuake command;
 	command.SetCenter ( pCenter );
 	command.SetIntensity ( lIntensity );
