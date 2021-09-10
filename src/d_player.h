@@ -538,6 +538,7 @@ public:
 	
 	const PClass *cls;					// class of associated PlayerPawn
 
+	int			lastFOVTic;				// [geNia] last tick this player used fov cmd
 	float		DesiredFOV;				// desired field of vision
 	float		FOV;					// current field of vision
 	fixed_t		viewz;					// focal origin above r.z

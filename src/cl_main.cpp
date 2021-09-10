@@ -162,6 +162,16 @@ CVAR( Bool, cl_emulatepacketloss, false, 0 )
 CVAR( Bool, cl_connectsound, true, CVAR_ARCHIVE )
 CVAR( Bool, cl_showwarnings, false, CVAR_ARCHIVE )
 
+CUSTOM_CVAR(Int, fov_change_cooldown_tics, 0, CVAR_SERVERINFO)
+{
+	if (self < 0)
+		self = 0;
+	else if (self > 255)
+		self = 255;
+
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		SERVERCOMMANDS_SetCVar(fov_change_cooldown_tics);
+}
 //*****************************************************************************
 //	VARIABLES
 
@@ -4982,6 +4992,10 @@ void ServerCommands::SetGameModeLimits::Execute()
 	// [TP] Yea.
 	Value.Bool = theLimitCommands;
 	sv_limitcommands.ForceSet( Value, CVAR_Bool );
+
+	// [geNia] Read in, and set the value for fov_change_cooldown_tics.
+	Value.Int = fovChangeCooldownTics;
+	fov_change_cooldown_tics.ForceSet( Value, CVAR_Int );
 }
 
 //*****************************************************************************
@@ -7683,16 +7697,36 @@ CVAR( Bool, cl_hitscandecalhack, true, CVAR_ARCHIVE )
 CUSTOM_CVAR( Int, fov, 90, CVAR_ARCHIVE )
 {
 	if (self < 5)
-		fov = 5;
+		self = 5;
 	else if (self > 179)
 		self = 179;
 
-	for (int i = 0; i < MAXPLAYERS; ++i)
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		if (playeringame[i])
+		for (int i = 0; i < MAXPLAYERS; ++i)
 		{
-			players[i].DesiredFOV = float(self);
+			if (playeringame[i])
+			{
+				players[i].DesiredFOV = float(self);
+			}
 		}
+	}
+	else if ( NETWORK_GetState( ) == NETSTATE_CLIENT )
+	{
+		if (gametic - players[consoleplayer].lastFOVTic >= fov_change_cooldown_tics)
+		{
+			players[consoleplayer].DesiredFOV = float(self);
+			players[consoleplayer].lastFOVTic = gametic;
+		}
+		else
+		{
+			int tics = fov_change_cooldown_tics;
+			Printf( "You can only use \"fov\" once in %d tics! \n", tics );
+		}
+	}
+	else
+	{
+		players[consoleplayer].DesiredFOV = float(self);
 	}
 }
 
