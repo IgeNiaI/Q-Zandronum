@@ -252,6 +252,7 @@ Command DoFloor
 	Byte crush
 	Bool hexenCrush
 	Long newSpecial
+	String texture
 EndCommand
 
 Command DestroyFloor
@@ -277,6 +278,7 @@ Command BuildStair
 	Long pauseTime
 	Long stepTime
 	Long perStepTime
+	String texture
 EndCommand
 
 Command DestroyStair
@@ -301,6 +303,7 @@ Command DoCeiling
 	Byte crush
 	Bool hexenCrush
 	Byte silent
+	String texture
 EndCommand
 
 Command DestroyCeiling
