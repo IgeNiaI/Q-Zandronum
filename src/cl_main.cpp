@@ -7673,16 +7673,35 @@ CVAR( Bool, cl_hitscandecalhack, true, CVAR_ARCHIVE )
 CUSTOM_CVAR( Int, fov, 90, CVAR_ARCHIVE )
 {
 	if (self < 5)
-		fov = 5;
+		self = 5;
 	else if (self > 179)
 		self = 179;
 
-	for (int i = 0; i < MAXPLAYERS; ++i)
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		if (playeringame[i])
+		for (int i = 0; i < MAXPLAYERS; ++i)
 		{
-			players[i].DesiredFOV = float(self);
+			if (playeringame[i])
+			{
+				players[i].DesiredFOV = float(self);
+			}
 		}
+	}
+	else if ( NETWORK_GetState( ) == NETSTATE_CLIENT )
+	{
+		if (gametic - players[consoleplayer].lastFOVTic >= 175)
+		{
+			players[consoleplayer].DesiredFOV = float(self);
+			players[consoleplayer].lastFOVTic = gametic;
+		}
+		else
+		{
+			Printf( "You can only use \"fov\" once in 5 seconds! \n" );
+		}
+	}
+	else
+	{
+		players[consoleplayer].DesiredFOV = float(self);
 	}
 }
 
