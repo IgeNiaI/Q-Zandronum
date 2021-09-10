@@ -36,6 +36,7 @@ Command SetGameModeLimits
 	Bool theAlwaysApplyDmFlags
 	String theLobby
 	Bool theLimitCommands
+	Byte fovChangeCooldownTics
 EndCommand
 
 Command SetGameEndLevelDelay
