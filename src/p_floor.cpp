@@ -170,6 +170,13 @@ void DFloor::Tick ()
 				case genFloorChg:
 					m_Sector->SetTexture(sector_t::floor, m_Texture);
 
+					// [BC] Update clients about this flat change.
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+						if ( m_LastInstigator )
+							SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT);
+						else
+							SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
+
 					// [BC] Also, mark this sector as having its flat changed.
 					m_Sector->bFlatChange = true;
 					break;
@@ -188,6 +195,13 @@ void DFloor::Tick ()
 					//fall thru
 				case genFloorChg:
 					m_Sector->SetTexture(sector_t::floor, m_Texture);
+
+					// [BC] Update clients about this flat change.
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+						if ( m_LastInstigator )
+							SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT);
+						else
+							SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
 
 					// [BC] Also, mark this sector as having its flat changed.
 					m_Sector->bFlatChange = true;
@@ -439,6 +453,16 @@ void DFloor::SetPerStepTime( int PerStepTime )
 	m_PerStepTime = PerStepTime;
 }
 
+FTextureID DFloor::GetTexture( void )
+{
+	return ( m_Texture );
+}
+
+void DFloor::SetTexture(FTextureID Texture )
+{
+	m_Texture = Texture;
+}
+
 //==========================================================================
 //
 // HANDLE FLOOR TYPES
@@ -643,6 +667,13 @@ manual_floor:
 				FTextureID oldpic = sec->GetTexture(sector_t::floor);
 				sec->SetTexture(sector_t::floor, line->frontsector->GetTexture(sector_t::floor));
 
+				// [BC] Update clients about this flat change.
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					if ( instigator )
+						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
 
@@ -671,6 +702,13 @@ manual_floor:
 			{
 				floor->m_Texture = modelsec->GetTexture(sector_t::floor);
 				floor->m_NewSpecial = modelsec->special & ~SECRET_MASK;
+
+				// [BC] Update clients about this flat change.
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					if ( instigator )
+						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;

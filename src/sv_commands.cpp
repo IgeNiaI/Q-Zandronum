@@ -3702,6 +3702,7 @@ void SERVERCOMMANDS_DoFloor( DFloor *Floor, ULONG ulPlayerExtra, ServerCommandFl
 		command.SetCrush ( clamp<LONG>(Floor->GetCrush(),-128,127) );
 		command.SetHexenCrush ( Floor->GetHexencrush() );
 		command.SetNewSpecial ( Floor->GetNewSpecial() );
+		command.SetTexture ( TexMan( Floor->GetTexture() )->Name );
 		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 }
@@ -3740,6 +3741,7 @@ void SERVERCOMMANDS_BuildStair( DFloor *Floor, ULONG ulPlayerExtra, ServerComman
 		command.SetPauseTime ( Floor->GetPauseTime() );
 		command.SetStepTime ( Floor->GetStepTime() );
 		command.SetPerStepTime ( Floor->GetPerStepTime() );
+		command.SetTexture ( TexMan( Floor->GetTexture() )->Name );
 		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 }
@@ -3778,6 +3780,7 @@ void SERVERCOMMANDS_DoCeiling( DCeiling *Ceiling, ULONG ulPlayerExtra, ServerCom
 		command.SetCrush ( clamp<LONG>(Ceiling->GetCrush(),-128,127) );
 		command.SetHexenCrush ( Ceiling->GetHexencrush() );
 		command.SetSilent ( Ceiling->GetSilent() );
+		command.SetTexture ( TexMan( Ceiling->GetTexture() )->Name );
 		command.sendCommandToClients ( ulPlayerExtra, flags );
 	}
 }
@@ -4001,7 +4004,7 @@ void SERVERCOMMANDS_Earthquake( AActor *pCenter, LONG lIntensity, LONG lDuration
 		return;
 
 	const char *pszQuakeSound = S_GetName( Quakesound );
-	
+
 	ServerCommands::EarthQuake command;
 	command.SetCenter ( pCenter );
 	command.SetIntensity ( lIntensity );
