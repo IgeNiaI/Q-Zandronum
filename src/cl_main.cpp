@@ -6419,6 +6419,7 @@ void ServerCommands::DoFloor::Execute()
 	pFloor->SetDirection( CLIENT_AdjustFloorDirection( direction ) );
 	pFloor->SetSpeed( speed );
 	pFloor->SetNewSpecial( newSpecial );
+	pFloor->SetTexture( TexMan.GetTexture( texture, FTexture::TEX_Flat ) );
 
 	if ( instigator == consoleplayer )
 	{
@@ -6492,6 +6493,7 @@ void ServerCommands::BuildStair::Execute()
 	pFloor->SetPauseTime( pauseTime );
 	pFloor->SetStepTime( stepTime );
 	pFloor->SetPerStepTime( perStepTime );
+	pFloor->SetTexture( TexMan.GetTexture( texture, FTexture::TEX_Flat ) );
 
 	if ( instigator == consoleplayer )
 	{
@@ -6563,6 +6565,7 @@ void ServerCommands::DoCeiling::Execute()
 	pCeiling->SetCrush( static_cast<SBYTE>( crush ) );
 	pCeiling->SetHexencrush( hexenCrush );
 	pCeiling->SetSilent( silent );
+	pCeiling->SetTexture( TexMan.GetTexture( texture, FTexture::TEX_Flat ) );
 
 	if ( instigator == consoleplayer )
 	{
@@ -6668,12 +6671,12 @@ void ServerCommands::DestroyPlat::Execute()
 void ServerCommands::DoElevator::Execute()
 {
 	DElevator *pElevator = P_GetElevatorBySectorNum( sectorID );
-	
+
 	sector_t *pSector = NULL;
 
 	if (( sectorID >= 0 ) && ( sectorID < numsectors ))
 		pSector = &sectors[sectorID];
-	
+
 	// Invalid sector.
 	if ( !pSector )
 		return;

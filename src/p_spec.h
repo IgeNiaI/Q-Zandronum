@@ -824,6 +824,9 @@ public:
 
 	int		GetSilent( void );
 	void	SetSilent( int Silent );
+	
+	FTextureID	GetTexture( void );
+	void	SetTexture( FTextureID Texture );
 
 protected:
 	ECeiling	m_Type;
@@ -965,6 +968,9 @@ public:
 
 	int		GetPerStepTime( void );
 	void	SetPerStepTime( int PerStepTime );
+	
+	FTextureID	GetTexture( void );
+	void	SetTexture( FTextureID Texture );
 
 protected:
 	EFloor	 	m_Type;
