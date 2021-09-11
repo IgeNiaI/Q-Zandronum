@@ -590,6 +590,8 @@ public:
 	FName		poisonpaintype;			// type of Pain state to enter for poison damage
 	TObjPtr<AActor>		poisoner;		// NULL for non-player actors
 	TObjPtr<AActor>		attacker;		// who did damage (NULL for floors)
+	int					attackerPlayer;	// who did damage (only remembers players)
+	int					damageTic;		// when last damage was received
 	int			extralight;				// so gun flashes light up areas
 	short		fixedcolormap;			// can be set to REDCOLORMAP, etc.
 	short		fixedlightlevel;
