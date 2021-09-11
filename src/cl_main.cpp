@@ -2966,6 +2966,7 @@ void ServerCommands::DamagePlayer::Execute()
 
 	// [BB] Set the inflictor of the damage (necessary to let the HUD mugshot look in direction of the inflictor).
 	player->attacker = attacker;
+	player->damageTic = gametic;
 
 	// Set the damagecount, for blood on the screen.
 	player->damagecount += damage;
@@ -2998,6 +2999,7 @@ void ServerCommands::KillPlayer::Execute()
 
 	// [BB] Set the attacker, necessary to let the death view follow the killer.
 	player->attacker = source;
+	player->damageTic = gametic;
 
 	// If health on the status bar is less than 0%, make it 0%.
 	if ( player->health <= 0 )
