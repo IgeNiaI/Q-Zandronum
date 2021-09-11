@@ -302,6 +302,8 @@ player_t::player_t()
   poisoncount(0),
   poisoner(0),
   attacker(0),
+  attackerPlayer( -1 ),
+  damageTic(0),
   extralight(0),
   fixedcolormap(0),
   fixedlightlevel(0),
@@ -458,6 +460,8 @@ player_t::player_t()
 	  poisonpaintype = p.poisonpaintype;
 	  poisoner = p.poisoner;
 	  attacker = p.attacker;
+	  attackerPlayer = p.attackerPlayer;
+	  damageTic = p.damageTic;
 	  extralight = p.extralight;
 	  fixedcolormap = p.fixedcolormap;
 	  fixedlightlevel = p.fixedlightlevel;
@@ -5443,6 +5447,7 @@ void player_t::Serialize (FArchive &arc)
 		<< poisoncount
 		<< poisoner
 		<< attacker
+		<< attackerPlayer
 		<< extralight
 		<< fixedcolormap << fixedlightlevel
 		<< morphTics
