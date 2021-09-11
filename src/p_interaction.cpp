@@ -95,6 +95,7 @@ static FRandom pr_switcher ("SwitchTarget");
 static FRandom pr_kickbackdir ("KickbackDir");
 
 CVAR( Int, sv_terminatorfragaward, 10, CVAR_SERVERINFO | CVAR_LATCH );
+CVAR( Int, sv_ringouttics, 0, CVAR_SERVERINFO | CVAR_LATCH )
 EXTERN_CVAR (Bool, show_obituaries)
 EXTERN_CVAR (Int, sv_endleveldelay)
 // [BB] FIXME
@@ -772,7 +773,18 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 		// count environment kills against you
 		if (!source)
 		{
-			PLAYER_SetFragcount( player, player->fragcount - (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );	// [RH] Cumulative frag count
+			if ( player->attackerPlayer != -1
+				&& playeringame[player->attackerPlayer]
+				&& player - players != player->attackerPlayer
+				&& gametic - player->damageTic <= sv_ringouttics )
+			{
+				PLAYER_SetFragcount( &players[player->attackerPlayer], players[player->attackerPlayer].fragcount + (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );	// [RH] Cumulative frag count
+				player->attackerPlayer = -1;
+			}
+			else
+			{
+				PLAYER_SetFragcount( player, player->fragcount - (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );	// [RH] Cumulative frag count
+			}
 
 			// Spawning in nukage or getting crushed is NOT
 			// somewhere where you would want to be at when you respawn again
@@ -1608,6 +1620,11 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 		}
 
 		player->attacker = source;
+		if ( source && source->player )
+		{
+			player->attackerPlayer = source->player - players;
+			player->damageTic = gametic;
+		}
 		player->damagecount += damage;	// add damage after armor / invuln
 		if (player->damagecount > 100)
 		{
@@ -2089,6 +2106,11 @@ void P_PoisonDamage (player_t *player, AActor *source, int damage,
 		player->health = 0;
 	}
 	player->attacker = source;
+	if ( source && source->player )
+	{
+		player->attackerPlayer = source->player - players;
+		player->damageTic = gametic;
+	}
 
 	// [Dusk] Update the player health
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
