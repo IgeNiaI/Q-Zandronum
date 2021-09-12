@@ -2684,7 +2684,7 @@ void APlayerPawn::CalcJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z)
 		y = FixedMul(dir.Y, JumpXY);
 	}
 
-	z = JumpZ * 35 / TICRATE;
+	z = JumpZ;
 
 	// [BC] If the player has the high jump power, double his jump velocity.
 	if ( player->cheats & CF_HIGHJUMP )
@@ -2709,7 +2709,7 @@ void APlayerPawn::CalcSecondJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed
 		y = FixedMul(dir.Y, SecondJumpXY);
 	}
 
-	z = SecondJumpZ * 35 / TICRATE;
+	z = SecondJumpZ;
 
 	// [BC] If the player has the high jump power, double his jump velocity.
 	if (player->cheats & CF_HIGHJUMP)
@@ -3540,17 +3540,17 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 					if ( ShouldPlaySound() )
 					{
 						if (isRampJumper && velz > 0)
-							S_Sound(player->mo, CHAN_BODY, "*rampjump", 1, ATTN_NORM, true, player - players);
-						else if (!player->mo->JumpSoundDelay)
-							S_Sound(player->mo, CHAN_BODY, "*jump", 1, ATTN_NORM, true, player - players);
+							S_Sound(this, CHAN_BODY, "*rampjump", 1, ATTN_NORM, true, player - players);
+						else if (!JumpSoundDelay)
+							S_Sound(this, CHAN_BODY, "*jump", 1, ATTN_NORM, true, player - players);
 
-						player->mo->JumpSoundDelay = 3;
+						JumpSoundDelay = 3;
 					}
 				}
 				else
 				{
-					if ( player->mo->JumpSoundDelay > 0 )
-						player->mo->JumpSoundDelay--;
+					if ( JumpSoundDelay > 0 )
+						JumpSoundDelay--;
 				}
 
 				flags2 &= ~MF2_ONMOBJ;
@@ -3678,7 +3678,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				for (int i = 0; i < 16; ++i)
 				{
 					// Start with int min (-2147483648) and go upward to int max
-					P_TraceForWall(player->mo, FixedMul(2147483648, -65536 + 8192 * i), secondJumpTrace);
+					P_TraceForWall(this, FixedMul(2147483648, -65536 + 8192 * i), secondJumpTrace);
 					if (secondJumpTrace.HitType == TRACE_HitWall)
 					{
 						doSecondJump = true;
@@ -3718,7 +3718,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 				if (!(mvFlags & MV_SILENT))
 				{
 					if ( ShouldPlaySound() )
-						S_Sound(player->mo, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, player - players);
+						S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, player - players);
 				}
 
 				player->jumpTics = JumpDelay;
@@ -3732,14 +3732,14 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 		}
 		else
 		{
-			if ( player->mo->JumpSoundDelay > 0 )
-				player->mo->JumpSoundDelay--;
+			if ( JumpSoundDelay > 0 )
+				JumpSoundDelay--;
 		}
 	}
 	else
 	{
-		if ( player->mo->JumpSoundDelay > 0 )
-			player->mo->JumpSoundDelay--;
+		if ( JumpSoundDelay > 0 )
+			JumpSoundDelay--;
 
 		if ( !player->onground && player->secondJumpState == SJ_AVAILABLE && player->secondJumpsRemaining != 0 )
 		{
