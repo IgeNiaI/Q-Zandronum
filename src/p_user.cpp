@@ -323,6 +323,8 @@ player_t::player_t()
   secondJumpsRemaining(0),
   onground(0),
   stepInterval(0),
+  crouchSlideEffectTics(0),
+  wallClimbEffectTics(0),
   secondJumpState(0),
   crouchSlideTics(0),
   isCrouchSliding(false),
@@ -483,6 +485,8 @@ player_t::player_t()
 	  secondJumpsRemaining = p.secondJumpsRemaining;
 	  onground = p.onground;
 	  stepInterval = p.stepInterval;
+	  crouchSlideEffectTics = p.crouchSlideEffectTics;
+	  wallClimbEffectTics = p.wallClimbEffectTics;
 	  secondJumpState = p.secondJumpState;
 	  crouchSlideTics = p.crouchSlideTics;
 	  isCrouchSliding = p.isCrouchSliding;
@@ -785,6 +789,8 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< CrouchScaleHalfWay
 		<< MvType
 		<< FootstepInterval
+		<< CrouchSlideEffectInterval
+		<< WallClimbEffectInterval
 		<< FootstepVolume
 		<< WallClimbMaxTics
 		<< WallClimbRegen
@@ -825,6 +831,13 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< BT_USER3_Script
 		<< BT_USER4_Script
 		<< ALWAYS_Script
+		<< EffectActors[EA_JUMP]
+		<< EffectActors[EA_SECOND_JUMP]
+		<< EffectActors[EA_LAND]
+		<< EffectActors[EA_GRUNT]
+		<< EffectActors[EA_FOOTSTEP]
+		<< EffectActors[EA_CROUCH_SLIDE]
+		<< EffectActors[EA_WALL_CLIMB]
 		<< ClientX
 		<< ClientY
 		<< ClientZ
@@ -1627,6 +1640,38 @@ void APlayerPawn::ExecuteActionScript(DWORD buttons, DWORD oldbuttons, int butto
 			P_StartScript(player->mo, NULL, -script, level.mapname, args, 4, flags);
 		}
 	}
+}
+
+//===========================================================================
+//
+// APlayerPawn :: EffectNameToIndex
+//
+//===========================================================================
+
+int APlayerPawn::EffectNameToIndex(const char* effectName)
+{
+	if		(!strcicmp(effectName, "jump"))			return EA_JUMP;
+	else if (!strcicmp(effectName, "secondjump"))	return EA_SECOND_JUMP;
+	else if (!strcicmp(effectName, "land"))			return EA_LAND;
+	else if (!strcicmp(effectName, "grunt"))		return EA_GRUNT;
+	else if (!strcicmp(effectName, "footstep"))		return EA_FOOTSTEP;
+	else if (!strcicmp(effectName, "crouchslide"))	return EA_CROUCH_SLIDE;
+	else if (!strcicmp(effectName, "wallclimb"))	return EA_WALL_CLIMB;
+	else											return -1;
+}
+
+//===========================================================================
+//
+// APlayerPawn :: SetEffectActor
+//
+//===========================================================================
+
+void APlayerPawn::SetEffectActor(int index, const PClass *pClass)
+{
+	if (index < 0 || index >= EA_COUNT)
+		return;
+
+	EffectActors[index] = pClass;
 }
 
 //===========================================================================
@@ -2570,6 +2615,8 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM, true, player - players);
 			}
 
+			CreateEffectActor( EA_FOOTSTEP );
+
 			player->stepInterval = player->mo->FootstepInterval;
 		}
 		else
@@ -2580,6 +2627,39 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 	else
 	{
 		player->stepInterval = player->mo->FootstepInterval / 2;
+	}
+}
+
+//===========================================================================
+//
+// APlayerPawn :: CreateEffectActor
+//
+//===========================================================================
+
+void APlayerPawn::CreateEffectActor (int index)
+{
+	if ( CLIENT_PREDICT_IsPredicting( ))
+		return;
+
+	const PClass *classToSpawn = EffectActors[index];
+
+	if ( classToSpawn )
+	{
+		bool isClientside = !!( GetDefaultByType( classToSpawn )->ulNetworkFlags & NETFL_CLIENTSIDEONLY );
+		bool shouldSpawn = ( NETWORK_GetState() == NETSTATE_SERVER ) == !isClientside;
+
+		if ( shouldSpawn )
+		{
+			AActor *EffectActor = Spawn (classToSpawn, x, y, z, ALLOW_REPLACE);
+			EffectActor->target = this;
+			EffectActor->angle = angle;
+			P_PlaySpawnSound( EffectActor, this );
+
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
+				SERVERCOMMANDS_SpawnMissile( EffectActor );
+			}
+		}
 	}
 }
 
@@ -3448,6 +3528,19 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 		S_StopSound(player->mo, CHAN_SEVEN);
 	}
 
+	if ( isSliding )
+	{
+		if ( player->crouchSlideEffectTics <= 0 )
+		{
+			player->mo->CreateEffectActor( EA_CROUCH_SLIDE );
+			player->crouchSlideEffectTics = player->mo->CrouchSlideEffectInterval;
+		}
+		else
+		{
+			player->crouchSlideEffectTics--;
+		}
+	}
+
 	player->isCrouchSliding = isSliding;
 }
 
@@ -3474,6 +3567,19 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	else if (!isClimbing && player->isWallClimbing)
 	{
 		S_StopSound(player->mo, CHAN_SEVEN);
+	}
+
+	if (isClimbing)
+	{
+		if ( player->wallClimbEffectTics <= 0 )
+		{
+			player->mo->CreateEffectActor( EA_WALL_CLIMB );
+			player->wallClimbEffectTics = player->mo->WallClimbEffectInterval;
+		}
+		else
+		{
+			player->wallClimbEffectTics--;
+		}
 	}
 
 	player->isWallClimbing = isClimbing;
@@ -3552,6 +3658,8 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 					if ( JumpSoundDelay > 0 )
 						JumpSoundDelay--;
 				}
+
+				CreateEffectActor( EA_JUMP );
 
 				flags2 &= ~MF2_ONMOBJ;
 
@@ -3720,6 +3828,8 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 					if ( ShouldPlaySound() )
 						S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, player - players);
 				}
+
+				CreateEffectActor( EA_SECOND_JUMP );
 
 				player->jumpTics = JumpDelay;
 				player->secondJumpTics = SecondJumpDelay;
@@ -4383,6 +4493,8 @@ void P_FallingDamage (AActor *actor)
 			S_Sound(actor, CHAN_AUTO, "*land", 1, ATTN_NORM);
 			P_NoiseAlert(actor, actor, true);
 		}
+
+		actor->player->mo->CreateEffectActor( EA_LAND );
 
 		if (damage == 1000000 && (actor->player->cheats & (CF_GODMODE | CF_BUDDHA)))
 		{

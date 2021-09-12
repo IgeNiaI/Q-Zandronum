@@ -3219,3 +3219,33 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, actionscript, S_S, PlayerPawn)
 
 	defaults->SetActionScript(defaults->ActionNameToNumber(buttonName), script);
 }
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, effectactor, S_S, PlayerPawn)
+{
+	PROP_STRING_PARM(effectName, 0);
+	PROP_STRING_PARM(className, 1);
+	defaults->SetEffectActor(defaults->EffectNameToIndex(effectName), FindClassTentative(className, "Actor"));
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, crouchslideeffectinterval, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->CrouchSlideEffectInterval = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbeffectinterval, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->WallClimbEffectInterval = i;
+}

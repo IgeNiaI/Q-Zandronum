@@ -49,6 +49,8 @@ Actor PlayerPawn : Actor native
 	
 	Player.FootstepInterval 12
 	Player.FootstepVolume 1.0
+	Player.CrouchSlideEffectInterval 12
+	Player.WallClimbEffectInterval 12
 	Player.WallClimbRegen 2.0
 	Player.WallClimbMaxTics 70
 	Player.WallClimbSpeed 5.0
@@ -66,7 +68,15 @@ Actor PlayerPawn : Actor native
 	// MvType 2 only
 	Player.CpmAirAcceleration 12
 	Player.CpmMaxForwardAngleRad 0.122173 // 7 degrees
-	
+
+	Player.EffectActor "jump" "none"
+	Player.EffectActor "secondjump" "none"
+	Player.EffectActor "land" "none"
+	Player.EffectActor "grunt" "none"
+	Player.EffectActor "footstep" "none"
+	Player.EffectActor "crouchslide" "none"
+	Player.EffectActor "wallclimb" "none"
+
 	Obituary "$OB_MPDEFAULT"
 }
 
