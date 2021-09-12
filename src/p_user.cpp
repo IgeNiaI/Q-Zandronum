@@ -318,6 +318,8 @@ player_t::player_t()
   secondJumpsRemaining(0),
   onground(0),
   stepInterval(0),
+  crouchSlideEffectInterval(0),
+  wallClimbEffectInterval(0),
   secondJumpState(0),
   crouchSlideTics(0),
   isCrouchSliding(false),
@@ -477,6 +479,8 @@ player_t::player_t()
 	  secondJumpsRemaining = p.secondJumpsRemaining;
 	  onground = p.onground;
 	  stepInterval = p.stepInterval;
+	  crouchSlideEffectInterval = p.crouchSlideEffectInterval;
+	  wallClimbEffectInterval = p.wallClimbEffectInterval;
 	  secondJumpState = p.secondJumpState;
 	  crouchSlideTics = p.crouchSlideTics;
 	  isCrouchSliding = p.isCrouchSliding;
@@ -778,6 +782,8 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< CrouchScaleHalfWay
 		<< MvType
 		<< FootstepInterval
+		<< CrouchSlideEffectInterval
+		<< WallClimbEffectInterval
 		<< FootstepVolume
 		<< WallClimbMaxTics
 		<< WallClimbRegen
@@ -817,6 +823,13 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< BT_USER2_Script
 		<< BT_USER3_Script
 		<< BT_USER4_Script
+		<< JumpEffectActor
+		<< SecondJumpEffectActor
+		<< LandEffectActor
+		<< GruntEffectActor
+		<< FootstepEffectActor
+		<< CrouchSlideEffectActor
+		<< WallClimbEffectActor
 		<< ClientX
 		<< ClientY
 		<< ClientZ
@@ -2557,6 +2570,8 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM, true, player - players);
 			}
 
+			CreateEffectActor( EA_FOOTSTEP );
+
 			player->stepInterval = player->mo->FootstepInterval;
 		}
 		else
@@ -2567,6 +2582,63 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 	else
 	{
 		player->stepInterval = player->mo->FootstepInterval / 2;
+	}
+}
+
+//===========================================================================
+//
+// APlayerPawn :: CreateEffectActor
+//
+//===========================================================================
+
+void APlayerPawn::CreateEffectActor (int effect)
+{
+	if ( NETWORK_InClientMode() && ( player - players != consoleplayer ) )
+		return;
+
+	const PClass *classToSpawn;
+
+	switch (effect)
+	{
+	case EA_JUMP:
+		classToSpawn = JumpEffectActor;
+		break;
+	case EA_SECOND_JUMP:
+		classToSpawn = SecondJumpEffectActor;
+		break;
+	case EA_LAND:
+		classToSpawn = LandEffectActor;
+		break;
+	case EA_GRUNT:
+		classToSpawn = GruntEffectActor;
+		break;
+	case EA_FOOTSTEP:
+		classToSpawn = FootstepEffectActor;
+		break;
+	case EA_CROUCH_SLIDE:
+		classToSpawn = CrouchSlideEffectActor;
+		break;
+	case EA_WALL_CLIMB:
+		classToSpawn = WallClimbEffectActor;
+		break;
+	default:
+		classToSpawn = NULL;
+	}
+
+	if ( classToSpawn )
+	{
+		if ( NETWORK_ShouldActorNotBeSpawned( this, classToSpawn ) )
+			return;
+	
+		AActor *EffectActor = Spawn (classToSpawn, x, y, z, ALLOW_REPLACE);
+		P_PlaySpawnSound( EffectActor, this );
+		EffectActor->angle = angle;
+
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		{
+			SERVERCOMMANDS_SpawnThing( EffectActor );
+			SERVERCOMMANDS_MoveThing( EffectActor, CM_ANGLE );
+		}
 	}
 }
 
@@ -3435,6 +3507,19 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 		S_StopSound(player->mo, CHAN_SEVEN);
 	}
 
+	if ( isSliding )
+	{
+		if ( player->crouchSlideEffectInterval <= 0 )
+		{
+			player->mo->CreateEffectActor( EA_CROUCH_SLIDE );
+			player->crouchSlideEffectInterval = player->mo->CrouchSlideEffectInterval;
+		}
+		else
+		{
+			player->crouchSlideEffectInterval--;
+		}
+	}
+
 	player->isCrouchSliding = isSliding;
 }
 
@@ -3461,6 +3546,19 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	else if (!isClimbing && player->isWallClimbing)
 	{
 		S_StopSound(player->mo, CHAN_SEVEN);
+	}
+
+	if (isClimbing)
+	{
+		if ( player->wallClimbEffectInterval <= 0 )
+		{
+			player->mo->CreateEffectActor( EA_WALL_CLIMB );
+			player->wallClimbEffectInterval = player->mo->WallClimbEffectInterval;
+		}
+		else
+		{
+			player->wallClimbEffectInterval--;
+		}
 	}
 
 	player->isWallClimbing = isClimbing;
@@ -3539,6 +3637,8 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 					if ( JumpSoundDelay > 0 )
 						JumpSoundDelay--;
 				}
+
+				CreateEffectActor( EA_JUMP );
 
 				flags2 &= ~MF2_ONMOBJ;
 
@@ -3699,6 +3799,8 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 					if ( ShouldPlaySound() )
 						S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, player - players);
 				}
+
+				CreateEffectActor( EA_SECOND_JUMP );
 
 				player->jumpTics = JumpDelay;
 				player->secondJumpTics = SecondJumpDelay;
@@ -4345,6 +4447,8 @@ void P_FallingDamage (AActor *actor)
 			S_Sound(actor, CHAN_AUTO, "*land", 1, ATTN_NORM);
 			P_NoiseAlert(actor, actor, true);
 		}
+
+		actor->player->mo->CreateEffectActor( EA_LAND );
 
 		if (damage == 1000000 && (actor->player->cheats & (CF_GODMODE | CF_BUDDHA)))
 		{

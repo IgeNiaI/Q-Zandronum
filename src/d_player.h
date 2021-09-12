@@ -116,6 +116,7 @@ public:
 	virtual bool ShouldPlaySound();
 	virtual bool ShouldPlayFootsteps(ticcmd_t *cmd, bool landing);
 	virtual void PlayFootsteps (ticcmd_t *cmd);
+	virtual void CreateEffectActor (int effect);
 	virtual void TweakSpeeds (ticcmd_t *cmd, int &forwardmove, int &sidemove);
 	virtual void MorphPlayerThink ();
 	virtual void ActivateMorphWeapon ();
@@ -195,6 +196,8 @@ public:
 
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
 	int			FootstepInterval;
+	int			CrouchSlideEffectInterval;
+	int			WallClimbEffectInterval;
 	float		FootstepVolume;
 	float		WallClimbMaxTics;
 	float		WallClimbRegen;
@@ -222,6 +225,10 @@ public:
 		BT_BACK_Script, BT_FORWARD_Script, BT_RIGHT_Script, BT_LEFT_Script,
 		BT_LOOKUP_Script, BT_LOOKDOWN_Script, BT_MOVEUP_Script, BT_MOVEDOWN_Script, BT_SHOWSCORES_Script,
 		BT_USER1_Script, BT_USER2_Script, BT_USER3_Script, BT_USER4_Script;
+	
+	// Movement effects
+	const PClass *JumpEffectActor, *SecondJumpEffectActor, *LandEffectActor, *GruntEffectActor,
+				 *FootstepEffectActor, *CrouchSlideEffectActor, *WallClimbEffectActor;
 
 	// [geNia] The server updates player data before sending it to clients, but the player input is still old.
 	// That results in player input being one tic behind position, so we need to remember last position to send it to other clients.
@@ -607,6 +614,8 @@ public:
 	int			secondJumpsRemaining;	// remaining second jump uses
 	bool		onground;				// Identifies if this player is on the ground or other object
 	int			stepInterval;
+	int			crouchSlideEffectInterval;
+	int			wallClimbEffectInterval;
 
 	// [Ivory] movement additions
 	int			secondJumpState;
@@ -902,6 +911,18 @@ enum
 	MV_QUAKE,
 	MV_QUAKE_CPM,
 	MV_TYPES_END
+};
+
+// [Ivory] movement vars
+enum
+{
+	EA_JUMP,
+	EA_SECOND_JUMP,
+	EA_LAND,
+	EA_GRUNT,
+	EA_FOOTSTEP,
+	EA_CROUCH_SLIDE,
+	EA_WALL_CLIMB,
 };
 
 // [geNia] second jump state

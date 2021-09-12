@@ -4682,6 +4682,60 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
+	case APROP_JumpEffectActor:
+		if (playerActor) {
+			playerActor->JumpEffectActor = PClass::FindClass(FBehavior::StaticLookupString(value));
+		}
+		break;
+
+	case APROP_SecondJumpEffectActor:
+		if (playerActor) {
+			playerActor->SecondJumpEffectActor = PClass::FindClass(FBehavior::StaticLookupString(value));
+		}
+		break;
+
+	case APROP_LandEffectActor:
+		if (playerActor) {
+			playerActor->LandEffectActor = PClass::FindClass(FBehavior::StaticLookupString(value));
+		}
+		break;
+
+	case APROP_GruntEffectActor:
+		if (playerActor) {
+			playerActor->GruntEffectActor = PClass::FindClass(FBehavior::StaticLookupString(value));
+		}
+		break;
+
+	case APROP_FootstepEffectActor:
+		if (playerActor) {
+			playerActor->FootstepEffectActor = PClass::FindClass(FBehavior::StaticLookupString(value));
+		}
+		break;
+
+	case APROP_CrouchSlideEffectActor:
+		if (playerActor) {
+			playerActor->CrouchSlideEffectActor = PClass::FindClass(FBehavior::StaticLookupString(value));
+		}
+		break;
+
+	case APROP_CrouchSlideEffectInterval:
+		if (playerActor) {
+			playerActor->CrouchSlideEffectInterval = value;
+		}
+		break;
+
+	case APROP_WallClimbEffectActor:
+		if (playerActor) {
+			playerActor->WallClimbEffectActor = PClass::FindClass(FBehavior::StaticLookupString(value));
+		}
+		break;
+
+	case APROP_WallClimbEffectInterval:
+		if (playerActor) {
+			playerActor->WallClimbEffectInterval = value;
+		}
+		break;
+
 	default:
 		// do nothing.
 		break;
@@ -4790,6 +4844,8 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_SlideRegen:				return playerActor ? FLOAT2FIXED( playerActor->SlideRegen )				: 0;
 	case APROP_CpmAirAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->CpmAirAcceleration )		: 0;
 	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad )	: 0;
+	case APROP_CrouchSlideEffectInterval:return playerActor? playerActor->CrouchSlideEffectInterval				: 0;
+	case APROP_WallClimbEffectInterval:	return playerActor ? playerActor->WallClimbEffectInterval				: 0;
 
 	// Misc
 	case APROP_MasterTID:				return DoGetMasterTID(actor);

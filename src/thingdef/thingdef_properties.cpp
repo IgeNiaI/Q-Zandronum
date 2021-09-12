@@ -3219,3 +3219,86 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, actionscript, S_S, PlayerPawn)
 
 	defaults->SetActionScript(defaults->ActionNameToNumber(buttonName), script);
 }
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, jumpeffectactor, S, PlayerPawn)
+{
+	PROP_STRING_PARM(str, 0);
+	defaults->JumpEffectActor = FindClassTentative(str, "Actor");
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, secondjumpeffectactor, S, PlayerPawn)
+{
+	PROP_STRING_PARM(str, 0);
+	defaults->SecondJumpEffectActor = FindClassTentative(str, "Actor");
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, landeffectactor, S, PlayerPawn)
+{
+	PROP_STRING_PARM(str, 0);
+	defaults->LandEffectActor = FindClassTentative(str, "Actor");
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, grunteffectactor, S, PlayerPawn)
+{
+	PROP_STRING_PARM(str, 0);
+	defaults->GruntEffectActor = FindClassTentative(str, "Actor");
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, footstepeffectactor, S, PlayerPawn)
+{
+	PROP_STRING_PARM(str, 0);
+	defaults->FootstepEffectActor = FindClassTentative(str, "Actor");
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, crouchslideeffectactor, S, PlayerPawn)
+{
+	PROP_STRING_PARM(str, 0);
+	defaults->CrouchSlideEffectActor = FindClassTentative(str, "Actor");
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, crouchslideeffectinterval, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->CrouchSlideEffectInterval = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbeffectactor, S, PlayerPawn)
+{
+	PROP_STRING_PARM(str, 0);
+	defaults->WallClimbEffectActor = FindClassTentative(str, "Actor");
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbeffectinterval, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->WallClimbEffectInterval = i;
+}
