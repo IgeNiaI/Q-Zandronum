@@ -4682,6 +4682,18 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
+	case APROP_CrouchSlideEffectInterval:
+		if (playerActor) {
+			playerActor->CrouchSlideEffectInterval = value;
+		}
+		break;
+
+	case APROP_WallClimbEffectInterval:
+		if (playerActor) {
+			playerActor->WallClimbEffectInterval = value;
+		}
+		break;
+
 	default:
 		// do nothing.
 		break;
@@ -4790,6 +4802,8 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_SlideRegen:				return playerActor ? FLOAT2FIXED( playerActor->SlideRegen )				: 0;
 	case APROP_CpmAirAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->CpmAirAcceleration )		: 0;
 	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad )	: 0;
+	case APROP_CrouchSlideEffectInterval:return playerActor? playerActor->CrouchSlideEffectInterval				: 0;
+	case APROP_WallClimbEffectInterval:	return playerActor ? playerActor->WallClimbEffectInterval				: 0;
 
 	// Misc
 	case APROP_MasterTID:				return DoGetMasterTID(actor);
@@ -5322,6 +5336,7 @@ enum EACSFunctions
 	ACSF_SetActionScript,
 	ACSF_SetPredictableValue,
 	ACSF_GetPredictableValue,
+	ACSF_SetEffectActor,
 	ACSF_ExecuteClientScript,
 	ACSF_NamedExecuteClientScript,
 	ACSF_SendNetworkString,
@@ -7584,6 +7599,31 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 					if (args[1] >= 0 && args[1] < PREDICTABLES_SIZE)
 					{
 						return static_cast<APlayerPawn *>(actor)->Predictable[args[1]];
+					}
+				}
+			}
+			return 0;
+
+		case ACSF_SetEffectActor:
+			if (args[0] == 0)
+			{
+				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				{
+					const PClass* pClass = PClass::FindClass(FBehavior::StaticLookupString(args[2]));
+					static_cast<APlayerPawn *>(&*activator)->SetEffectActor(args[1], pClass);
+				}
+			}
+			else
+			{
+				AActor *actor;
+				FActorIterator iterator(args[0]);
+
+				const PClass* pClass = PClass::FindClass(FBehavior::StaticLookupString(args[2]));
+				while ((actor = iterator.Next()) != NULL)
+				{
+					if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+					{
+						static_cast<APlayerPawn *>(actor)->SetEffectActor(args[1], pClass);
 					}
 				}
 			}

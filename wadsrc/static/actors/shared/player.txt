@@ -49,6 +49,8 @@ Actor PlayerPawn : Actor native
 	
 	Player.FootstepInterval 12
 	Player.FootstepVolume 1.0
+	Player.CrouchSlideEffectInterval 12
+	Player.WallClimbEffectInterval 12
 	Player.WallClimbRegen 2.0
 	Player.WallClimbMaxTics 70
 	Player.WallClimbSpeed 5.0

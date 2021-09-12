@@ -3460,14 +3460,18 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 				if (!(mo->mvFlags & MV_SILENT))
 					S_Sound (mo, CHAN_VOICE, "*grunt", 1, ATTN_NORM, true, mo->player - players);
 				grunted = true;
+
+				mo->player->mo->CreateEffectActor( EA_GRUNT );
 			}
 
-			if ((onmobj != NULL || !Terrains[P_GetThingFloorType (mo)].IsLiquid) && !(mo->mvFlags & MV_SILENT))
+			if ((onmobj != NULL || !Terrains[P_GetThingFloorType (mo)].IsLiquid))
 			{
 				if (!grunted || !S_AreSoundsEquivalent (mo, "*grunt", "*land"))
 				{
 					if (!(mo->mvFlags & MV_SILENT))
 						S_Sound (mo, CHAN_AUTO, "*land", 1, ATTN_NORM, true, mo->player - players);
+
+					mo->player->mo->CreateEffectActor( EA_LAND );
 				}
 			}
 		}
@@ -3477,6 +3481,8 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 	{
 		if (!(mo->mvFlags & MV_SILENT) && mo->player->mo->ShouldPlayFootsteps(&(mo->player->cmd), true))
 			S_Sound(mo, CHAN_SIX, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM, true, mo->player - players);
+
+		mo->player->mo->CreateEffectActor( EA_FOOTSTEP );
 	}
 
 	if (mo->player->secondJumpState == SJ_READY) {
