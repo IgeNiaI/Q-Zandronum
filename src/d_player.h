@@ -78,6 +78,20 @@ enum
 	APMETA_MaxSkinHeightFactor,
 };
 
+// [geNia] effect actor indexes
+enum
+{
+	EA_JUMP,
+	EA_SECOND_JUMP,
+	EA_LAND,
+	EA_GRUNT,
+	EA_FOOTSTEP,
+	EA_CROUCH_SLIDE,
+	EA_WALL_CLIMB,
+
+	EA_COUNT
+};
+
 FPlayerColorSet *P_GetPlayerColorSet(FName classname, int setnum);
 void P_EnumPlayerColorSets(FName classname, TArray<int> *out);
 const char *GetPrintableDisplayName(const PClass *cls);
@@ -116,6 +130,7 @@ public:
 	virtual bool ShouldPlaySound();
 	virtual bool ShouldPlayFootsteps(ticcmd_t *cmd, bool landing);
 	virtual void PlayFootsteps (ticcmd_t *cmd);
+	virtual void CreateEffectActor (int index);
 	virtual void TweakSpeeds (ticcmd_t *cmd, int &forwardmove, int &sidemove);
 	virtual void MorphPlayerThink ();
 	virtual void ActivateMorphWeapon ();
@@ -195,6 +210,8 @@ public:
 
 	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
 	int			FootstepInterval;
+	int			CrouchSlideEffectInterval;
+	int			WallClimbEffectInterval;
 	float		FootstepVolume;
 	float		WallClimbMaxTics;
 	float		WallClimbRegen;
@@ -222,6 +239,9 @@ public:
 		BT_BACK_Script, BT_FORWARD_Script, BT_RIGHT_Script, BT_LEFT_Script,
 		BT_LOOKUP_Script, BT_LOOKDOWN_Script, BT_MOVEUP_Script, BT_MOVEDOWN_Script, BT_SHOWSCORES_Script,
 		BT_USER1_Script, BT_USER2_Script, BT_USER3_Script, BT_USER4_Script;
+	
+	// Movement effects
+	const PClass* EffectActors[EA_COUNT - 1];
 
 	// [geNia] The server updates player data before sending it to clients, but the player input is still old.
 	// That results in player input being one tic behind position, so we need to remember last position to send it to other clients.
@@ -244,6 +264,9 @@ public:
 	int ActionNameToNumber(const char* actionName);
 	void SetActionScript(int button, const char* scriptName);
 	void ExecuteActionScript(DWORD buttons, DWORD oldbuttons, int button);
+
+	int EffectNameToIndex(const char* effectName);
+	void SetEffectActor(int index, const PClass *pClass);
 };
 
 class APlayerChunk : public APlayerPawn
@@ -607,6 +630,8 @@ public:
 	int			secondJumpsRemaining;	// remaining second jump uses
 	bool		onground;				// Identifies if this player is on the ground or other object
 	int			stepInterval;
+	int			crouchSlideEffectInterval;
+	int			wallClimbEffectInterval;
 
 	// [Ivory] movement additions
 	int			secondJumpState;

@@ -167,6 +167,16 @@
 #define BT_USER3				8388608
 #define BT_USER4				16777216
 
+// Effect Actors ------------------------------------------------------------
+
+#define EA_JUMP					0
+#define EA_SECOND_JUMP			1
+#define EA_LAND					2
+#define EA_GRUNT				3
+#define EA_FOOTSTEP				4
+#define EA_CROUCH_SLIDE			5
+#define EA_WALL_CLIMB			6
+
 // Text colors --------------------------------------------------------------
 
 #define CR_UNTRANSLATED         -1
@@ -300,38 +310,40 @@
 #define APROP_DamageType	46
 
 // Q-Zandronum stuff
-#define APROP_CrouchSlide				60
-#define APROP_WallJump					61
-#define APROP_WallJumpV2				62
-#define APROP_DoubleTapJump				63
-#define APROP_WallClimb					64
-#define APROP_RampJump					65
-#define APROP_ElevatorJump				66
-#define APROP_Silent					67
-#define APROP_JumpXY					68
-#define APROP_JumpDelay					69
-#define APROP_SecondJumpXY				70
-#define APROP_SecondJumpZ				71
-#define APROP_SecondJumpDelay			72
-#define APROP_SecondJumpAmount			73
-#define APROP_CrouchChangeSpeed			74
-#define APROP_CrouchScale				75
-#define APROP_MvType					76
-#define APROP_FootstepInterval			77
-#define APROP_FootstepVolume			78
-#define APROP_WallClimbSpeed			79
-#define APROP_WallClimbMaxTics			80
-#define APROP_WallClimbRegen			81
-#define APROP_AirAcceleration			82
-#define APROP_VelocityCap				83
-#define APROP_GroundAcceleration		84
-#define APROP_GroundFriction			85
-#define APROP_SlideAcceleration			86
-#define APROP_SlideFriction				87
-#define APROP_SlideMaxTics				88
-#define APROP_SlideRegen        		89
-#define APROP_CpmAirAcceleration		90
-#define APROP_CpmMaxForwardAngleRad		91
+#define APROP_CrouchSlide				50
+#define APROP_WallJump					51
+#define APROP_WallJumpV2				52
+#define APROP_DoubleTapJump				53
+#define APROP_WallClimb					54
+#define APROP_RampJump					55
+#define APROP_ElevatorJump				56
+#define APROP_Silent					57
+#define APROP_JumpXY					58
+#define APROP_JumpDelay					59
+#define APROP_SecondJumpXY				60
+#define APROP_SecondJumpZ				61
+#define APROP_SecondJumpDelay			62
+#define APROP_SecondJumpAmount			63
+#define APROP_CrouchChangeSpeed			64
+#define APROP_CrouchScale				65
+#define APROP_MvType					66
+#define APROP_FootstepInterval			67
+#define APROP_FootstepVolume			68
+#define APROP_WallClimbSpeed			69
+#define APROP_WallClimbMaxTics			70
+#define APROP_WallClimbRegen			71
+#define APROP_AirAcceleration			72
+#define APROP_VelocityCap				73
+#define APROP_GroundAcceleration		74
+#define APROP_GroundFriction			75
+#define APROP_SlideAcceleration			76
+#define APROP_SlideFriction				77
+#define APROP_SlideMaxTics				78
+#define APROP_SlideRegen        		79
+#define APROP_CpmAirAcceleration		80
+#define APROP_CpmMaxForwardAngleRad		81
+#define APROP_CrouchSlideEffectInterval	82
+#define APROP_WallClimbEffectInterval	83
 
 // New to Eternity
 #define APROP_Counter0      100

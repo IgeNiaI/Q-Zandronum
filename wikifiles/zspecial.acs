@@ -430,6 +430,7 @@ special
 	-141:SetActionScript(3),
 	-142:SetPredictableValue(3),
 	-143:GetPredictableValue(2),
+	-144:SetEffectActor(3),
 	
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),
