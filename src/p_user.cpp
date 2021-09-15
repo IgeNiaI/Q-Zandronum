@@ -78,6 +78,7 @@
 #include "d_netinf.h"
 #include "g_shared/pwo.h"
 #include "p_trace.h"
+#include "unlagged.h"
 
 static FRandom pr_skullpop ("SkullPop");
 
@@ -2753,18 +2754,20 @@ void APlayerPawn::CreateEffectActor (int index)
 	if ( classToSpawn )
 	{
 		bool isClientside = !!( GetDefaultByType( classToSpawn )->ulNetworkFlags & NETFL_CLIENTSIDEONLY );
-		bool shouldSpawn = ( NETWORK_GetState() == NETSTATE_SERVER ) == !isClientside;
+		bool shouldSpawn =
+			( ( NETWORK_GetState() == NETSTATE_SERVER ) == !isClientside )
+			|| ( !isClientside && NETWORK_ClientsideFunctionsAllowed( this ) );
 
 		if ( shouldSpawn )
 		{
-			AActor *EffectActor = Spawn (classToSpawn, x, y, z, ALLOW_REPLACE);
+			AActor *EffectActor = Spawn (classToSpawn, x, y, z, ALLOW_REPLACE, player);
 			EffectActor->target = this;
 			EffectActor->angle = angle;
 			P_PlaySpawnSound( EffectActor, this );
 
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				SERVERCOMMANDS_SpawnMissile( EffectActor );
+				UNLAGGED_UnlagAndReplicateThing( this, EffectActor, false, true, false );
 			}
 		}
 	}
