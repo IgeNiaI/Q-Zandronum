@@ -1653,6 +1653,7 @@ void A_FireCustomMissileHelper ( AActor *self,
 								 const fixed_t shootangle,
 								 const PClass *ti,
 								 const angle_t Angle,
+								 const fixed_t PitchOverride,
 								 const int flags,
 								 AActor *&linetarget)
 {
@@ -1680,6 +1681,8 @@ void A_FireCustomMissileHelper ( AActor *self,
 			misl->velx = FixedMul (missilespeed, finecosine[an]);
 			misl->vely = FixedMul (missilespeed, finesine[an]);
 		}
+
+		misl->pitch = PitchOverride;
 
 		if (misl->flags4 & MF4_SPECTRAL)
 			misl->health = -1;
@@ -1718,8 +1721,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 	if (ti) 
 	{
 		fixed_t shootangle = self->angle;
-		fixed_t SavedPlayerPitch = self->pitch;
-		self->pitch -= pitch;
+		fixed_t PitchOverride = self->pitch;
 
 		if (!(zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE))
 		{
@@ -1752,7 +1754,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 				fixed_t offset = (player->mo->height >> 1) - player->mo->floorclip - player->viewheight
 					+ player->mo->AttackZOffset - 4 * FRACUNIT - FixedMul(12 * FRACUNIT, FRACUNIT - player->crouchfactor);
 				float zOffs = float((atan2(distance, FIXED2FLOAT(SpawnHeight + offset))) * 180.f / PI);
-				self->pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
+				PitchOverride = fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
 			}
 			else
 			{
@@ -1768,15 +1770,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 		fixed_t x = SpawnOfs_XY * finecosine[ang];
 		fixed_t y = SpawnOfs_XY * finesine[ang];
 
-		A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle, ti, Angle, Flags, linetarget);
+		A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle, ti, Angle, PitchOverride, Flags, linetarget);
 
 		if ( self->player != NULL && self->player->cheats2 & CF2_SPREAD )
 		{
-			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle + ( ANGLE_45 / 3 ), ti, Angle, Flags, linetarget );
-			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle - ( ANGLE_45 / 3 ), ti, Angle, Flags, linetarget );
+			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle + ( ANGLE_45 / 3 ), ti, Angle, PitchOverride, Flags, linetarget );
+			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle - ( ANGLE_45 / 3 ), ti, Angle, PitchOverride, Flags, linetarget );
 		}
-
-		self->pitch = SavedPlayerPitch;
 	}
 }
 
