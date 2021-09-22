@@ -444,12 +444,6 @@ CCMD (weapnext)
 		return;
 
 	SendItemUse = players[consoleplayer].weapons.PickNextWeapon (&players[consoleplayer]);
- 	// [BC] Option to display the name of the weapon being cycled to.
- 	if ((displaynametags & 2) && StatusBar && SmallFont && SendItemUse)
- 	{
- 		StatusBar->AttachMessage(new DHUDMessageFadeOut(SmallFont, SendItemUse->GetTag(),
-			1.5f, 0.90f, 0, 0, (EColorRange)*nametagcolor, 2.f, 0.35f), MAKE_ID( 'W', 'E', 'P', 'N' ));
- 	}
 }
 
 CCMD (weapprev)
@@ -466,12 +460,6 @@ CCMD (weapprev)
 		return;
 
 	SendItemUse = players[consoleplayer].weapons.PickPrevWeapon (&players[consoleplayer]);
- 	// [BC] Option to display the name of the weapon being cycled to.
- 	if ((displaynametags & 2) && StatusBar && SmallFont && SendItemUse)
- 	{
- 		StatusBar->AttachMessage(new DHUDMessageFadeOut(SmallFont, SendItemUse->GetTag(),
-			1.5f, 0.90f, 0, 0, (EColorRange)*nametagcolor, 2.f, 0.35f), MAKE_ID( 'W', 'E', 'P', 'N' ));
- 	}
 }
 
 CCMD (invnext)
