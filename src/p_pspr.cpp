@@ -36,6 +36,7 @@
 #include "p_effect.h"
 #include "sv_commands.h"
 #include "unlagged.h"
+#include "sbar.h"
 
 
 // MACROS ------------------------------------------------------------------
@@ -78,6 +79,8 @@ CUSTOM_CVAR( Int, sv_fastweapons, 0, CVAR_SERVERINFO )
 }
 
 EXTERN_CVAR (Bool, cl_weaponsway)
+EXTERN_CVAR (Int, displaynametags)
+EXTERN_CVAR (Int, nametagcolor)
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
@@ -235,6 +238,12 @@ void P_BringUpWeapon (player_t *player)
 	}
 	player->PendingWeapon = WP_NOCHANGE;
 	player->ReadyWeapon = weapon;
+ 	// [BC] Option to display the name of the weapon being cycled to.
+ 	if ((displaynametags & 2) && StatusBar && SmallFont && weapon)
+ 	{
+ 		StatusBar->AttachMessage(new DHUDMessageFadeOut(SmallFont, weapon->GetTag(),
+			1.5f, 0.90f, 0, 0, (EColorRange)*nametagcolor, 2.f, 0.35f), MAKE_ID( 'W', 'E', 'P', 'N' ));
+ 	}
 	player->psprites[ps_weapon].sy = player->cheats & CF_INSTANTWEAPSWITCH
 		? WEAPONTOP : WEAPONBOTTOM;
 	P_SetPsprite (player, ps_weapon, newstate);
