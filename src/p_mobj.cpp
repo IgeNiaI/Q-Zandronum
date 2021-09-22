@@ -7532,13 +7532,13 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type)
 // [BC/BB] Added bSpawnSound.
 AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle, bool bSpawnSound )
 {
-	return P_SpawnPlayerMissile (source, 0, 0, 0, type, angle, NULL, NULL, false, bSpawnSound );
+	return P_SpawnPlayerMissile (source, 0, 0, 0, type, angle, NULL, NULL, 0, false, bSpawnSound );
 }
 
 // [BC/BB] Added bSpawnSound.
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
-							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
+							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor, angle_t pitchOffset,
 							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
@@ -7589,6 +7589,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		}
 	}
 	if (pLineTarget) *pLineTarget = linetarget;
+	pitch -= pitchOffset;
 
 	if (z != ONFLOORZ && z != ONCEILINGZ)
 	{
