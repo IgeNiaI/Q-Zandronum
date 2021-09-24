@@ -5187,6 +5187,13 @@ static FSoundID GetActorSound(const AActor *actor, int soundtype)
 	}
 }
 
+enum
+{
+	CSF_INAIR,
+	CSF_SOLIDGROUND,
+	CSF_SOLIDACTORS,
+};
+
 enum EACSFunctions
 {
 	ACSF_GetLineUDMFInt=1,
@@ -5341,6 +5348,7 @@ enum EACSFunctions
 	ACSF_NamedExecuteClientScript,
 	ACSF_SendNetworkString,
 	ACSF_NamedSendNetworkString,
+	ACSF_CheckSolidFooting,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7667,6 +7675,20 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			}
 			break;
 		}
+
+		case ACSF_CheckSolidFooting:
+			{
+				AActor* actor = SingleActorFromTID(args[0], activator);
+				int threshold = argCount > 1 ? args[1] : 0;
+				
+				if (actor->z <= actor->floorz + threshold)
+					return CSF_SOLIDGROUND;
+				else if (actor->flags2 & MF2_ONMOBJ)
+					return CSF_SOLIDACTORS;
+				else
+					return CSF_INAIR;
+			}
+			break;
 
 		default:
 			break;
