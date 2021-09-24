@@ -177,6 +177,12 @@
 #define EA_CROUCH_SLIDE			5
 #define EA_WALL_CLIMB			6
 
+// HUD message types --------------------------------------------------------
+
+#define CSF_INAIR				0
+#define CSF_SOLIDGROUND			1
+#define CSF_SOLIDACTORS			2
+
 // Text colors --------------------------------------------------------------
 
 #define CR_UNTRANSLATED         -1
