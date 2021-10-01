@@ -24,6 +24,10 @@ const int CMF_ABSOLUTEPITCH = 16;
 const int CMF_OFFSETPITCH = 32;
 const int CMF_SAVEPITCH = 64;
 const int CMF_ABSOLUTEANGLE = 128;
+const int CMF_NOUNLAGGED = 256;
+const int CMF_UNLAGDEATH = 512;
+const int CMF_SKIPOWNER = 1024;
+const int CMF_FORCESERVERSIDE = 2048;
 
 // Flags for A_FireCustomMissile
 const int FPF_AIMATANGLE = 1;

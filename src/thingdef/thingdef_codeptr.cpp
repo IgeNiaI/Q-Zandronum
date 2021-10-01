@@ -1093,7 +1093,12 @@ enum CM_Flags
 	CMF_OFFSETPITCH = 32,
 	CMF_SAVEPITCH = 64,
 
-	CMF_ABSOLUTEANGLE = 128
+	CMF_ABSOLUTEANGLE = 128,
+
+	CMF_NOUNLAGGED = 256,
+	CMF_UNLAGDEATH = 512,
+	CMF_SKIPOWNER = 1024,
+	CMF_FORCESERVERSIDE = 2048,
 };
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMissile)
@@ -1114,6 +1119,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMissile)
 	// [BB] Should the actor not be spawned, taking in account client side only actors?
 	if ( NETWORK_ShouldActorNotBeSpawned ( self, ti ) )
 		return;
+		
+	// [geNia] Don't spawn serverside actors on clients
+	if ( NETWORK_InClientMode( ) && ( flags & CMF_FORCESERVERSIDE ) )
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
 	if (self->target != NULL || aimmode==2)
 	{
@@ -1236,7 +1248,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMissile)
 					missile->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 				// [BC] If we're the server, tell clients to spawn the missile.
 				else if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SpawnMissile( missile );
+					UNLAGGED_UnlagAndReplicateMissile( self, missile, !!(flags & CMF_SKIPOWNER), !!(flags & CMF_NOUNLAGGED), !!(flags & CMF_UNLAGDEATH) );
 
 				P_CheckMissileSpawn(missile, self->radius);
 			}
