@@ -74,15 +74,15 @@ EndCommand
 Command SetSectorRotation
 	Sector sector
 	# The angle here is sent in degrees.
-	Short ceilingRotation
-	Short floorRotation
+	Angle ceilingRotation
+	Angle floorRotation
 EndCommand
 
 Command SetSectorRotationByTag
 	Short tag
 	# The angle here is sent in degrees.
-	Short ceilingRotation
-	Short floorRotation
+	Angle ceilingRotation
+	Angle floorRotation
 EndCommand
 
 Command SetSectorScale

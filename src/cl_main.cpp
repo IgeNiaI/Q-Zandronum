@@ -5431,8 +5431,8 @@ void ServerCommands::SetSectorPanning::Execute()
 //
 void ServerCommands::SetSectorRotation::Execute()
 {
-	sector->SetAngle(sector_t::ceiling, ceilingRotation * ANGLE_1 );
-	sector->SetAngle(sector_t::floor, floorRotation * ANGLE_1 );
+	sector->SetAngle(sector_t::ceiling, ceilingRotation );
+	sector->SetAngle(sector_t::floor, floorRotation );
 }
 
 //*****************************************************************************
@@ -5443,8 +5443,8 @@ void ServerCommands::SetSectorRotationByTag::Execute()
 
 	while (( secnum = P_FindSectorFromTag( tag, secnum )) >= 0 )
 	{
-		sectors[secnum].SetAngle( sector_t::floor, floorRotation * ANGLE_1 );
-		sectors[secnum].SetAngle( sector_t::ceiling, ceilingRotation * ANGLE_1 );
+		sectors[secnum].SetAngle( sector_t::floor, floorRotation );
+		sectors[secnum].SetAngle( sector_t::ceiling, ceilingRotation );
 	}
 }
 

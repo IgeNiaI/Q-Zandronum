@@ -2559,8 +2559,8 @@ void SERVERCOMMANDS_SetSectorRotation( ULONG ulSector, ULONG ulPlayerExtra, Serv
 
 	ServerCommands::SetSectorRotation command;
 	command.SetSector( &sectors[ulSector] );
-	command.SetCeilingRotation( sectors[ulSector].GetAngle( sector_t::ceiling, false ) / ANGLE_1 );
-	command.SetFloorRotation( sectors[ulSector].GetAngle( sector_t::floor, false ) / ANGLE_1 );
+	command.SetCeilingRotation( sectors[ulSector].GetAngle( sector_t::ceiling, false ) );
+	command.SetFloorRotation( sectors[ulSector].GetAngle( sector_t::floor, false ) );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
