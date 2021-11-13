@@ -3070,6 +3070,14 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 	if ((zacompatflags & ZACOMPATF_OLD_ZDOOM_ZMOVEMENT))
 		mo->z += mo->velz;
 
+	if (mo->flags3 & MF3_FLOORHUGGER)
+	{
+		mo->z = mo->floorz;
+	} else if (mo->flags3 & MF3_CEILINGHUGGER)
+	{
+		mo->z = mo->ceilingz - mo->height;
+	}
+
 	// [BC] Mark this item as having moved.
 	if ( mo->z != oldz )
 		mo->ulSTFlags |= STFL_POSITIONCHANGED;
