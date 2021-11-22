@@ -1502,6 +1502,9 @@ LONG SCOREBOARD_CalcSpread( ULONG ulPlayerNum )
 	bool	bInit = true;
 	ULONG	ulIdx;
 	LONG	lHighestFrags = 0;
+	
+	if ( ulPlayerNum < 0 || ulPlayerNum >= MAXPLAYERS )
+		return false;
 
 	// First, find the highest fragcount that isn't ours.
 	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
@@ -1577,6 +1580,9 @@ ULONG SCOREBOARD_CalcRank( ULONG ulPlayerNum )
 	ULONG	ulIdx;
 	ULONG	ulRank;
 
+	if ( ulPlayerNum < 0 || ulPlayerNum >= MAXPLAYERS )
+		return false;
+
 	ulRank = 0;
 	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
 	{
@@ -1608,6 +1614,9 @@ ULONG SCOREBOARD_CalcRank( ULONG ulPlayerNum )
 bool SCOREBOARD_IsTied( ULONG ulPlayerNum )
 {
 	ULONG	ulIdx;
+	
+	if ( ulPlayerNum < 0 || ulPlayerNum >= MAXPLAYERS )
+		return false;
 
 	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
 	{
