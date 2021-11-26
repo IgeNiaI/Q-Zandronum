@@ -2958,6 +2958,9 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		}
 	}
 
+	if (mo->player && mo->player->mo && mo->player->isAirWallRunning && mo->velz < 0)
+		mo->velz = 0;
+
 	// [W] Added old ZDoom physics compatibility
 	if (!(zacompatflags & ZACOMPATF_OLD_ZDOOM_ZMOVEMENT))
 		mo->z += mo->velz;
