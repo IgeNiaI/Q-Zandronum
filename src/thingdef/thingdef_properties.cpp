@@ -3120,6 +3120,36 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbspeed, F, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, airwallrunregen, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->AirWallRunRegen = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, airwallrunmaxtics, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->AirWallRunMaxTics = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, airwallrunminvelocity, F, PlayerPawn)
+{
+	PROP_FIXED_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->AirWallRunMinVelocity = i;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, airacceleration, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(f, 0);

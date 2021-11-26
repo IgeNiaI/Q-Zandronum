@@ -226,6 +226,9 @@ public:
 	float		SlideFriction;
 	float		SlideMaxTics;
 	float		SlideRegen;
+	float		AirWallRunMaxTics;
+	float		AirWallRunRegen;
+	fixed_t		AirWallRunMinVelocity;
 
 	// Quake CPM movement only
 	float		CpmAirAcceleration;
@@ -639,6 +642,8 @@ public:
 	bool		isCrouchSliding;
 	float		wallClimbTics;
 	bool		isWallClimbing;
+	float		airWallRunTics;
+	bool		isAirWallRunning;
 	int			prepareTapValue;
 	int			lastTapValue;
 

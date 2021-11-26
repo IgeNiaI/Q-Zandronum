@@ -330,6 +330,8 @@ player_t::player_t()
   isCrouchSliding(false),
   wallClimbTics(0),
   isWallClimbing(false),
+  airWallRunTics(0),
+  isAirWallRunning(false),
   prepareTapValue(0),
   lastTapValue(0),
   respawn_time(0),
@@ -492,6 +494,8 @@ player_t::player_t()
 	  isCrouchSliding = p.isCrouchSliding;
 	  wallClimbTics = p.wallClimbTics;
 	  isWallClimbing = p.isWallClimbing;
+	  airWallRunTics = p.airWallRunTics;
+	  isAirWallRunning = p.isAirWallRunning;
 	  prepareTapValue = p.prepareTapValue;
 	  lastTapValue = p.lastTapValue;
 	  respawn_time = p.respawn_time;
@@ -795,6 +799,9 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< WallClimbMaxTics
 		<< WallClimbRegen
 		<< WallClimbSpeed
+		<< AirWallRunMaxTics
+		<< AirWallRunRegen
+		<< AirWallRunMinVelocity
 		<< AirAcceleration
 		<< VelocityCap
 		<< GroundAcceleration
@@ -2559,7 +2566,7 @@ bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd, bool landing)
 	if ( NETWORK_InClientMode() && (player - players != consoleplayer) )
 		return false;
 
-	if ((!player->onground && !landing) || player->mo->waterlevel >= 2 ||
+	if ((!player->isAirWallRunning && !player->onground && !landing) || player->mo->waterlevel >= 2 ||
 		(player->mo->flags & MF_NOGRAVITY))
 	{
 		return false;
@@ -4035,6 +4042,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool isClimbing = false;
 	bool isSlider = player->mo->mvFlags & MV_CROUCHSLIDE ? true : false;
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
+	bool isAirWallRunner = player->mo->mvFlags & MV_AIRWALLRUN ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float moveFactor = player->mo->QCrouchWalkFactor( cmd );
@@ -4073,7 +4081,11 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Regen wall climb tics
-		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+		if ( isClimber )
+			player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+		// Regen air wall run tics
+		if ( isAirWallRunner )
+			player->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->airWallRunTics + player->mo->AirWallRunRegen);
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -4103,7 +4115,11 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		noJump = true;
 
 		// Regen wall climb tics
-		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+		if ( isClimber )
+			player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+		// Regen air wall run tics
+		if ( isAirWallRunner )
+			player->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->airWallRunTics + player->mo->AirWallRunRegen);
 	}
 	else
 	{
@@ -4151,7 +4167,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					{
 						FVector3 vel2D = { vel.X, vel.Y, 0 };
 						vel2D.MakeUnit();
-						acceleration.MakeUnit();
 						float dot = DotProduct(vel2D, acceleration);
 						if (!cmd->ucmd.sidemove && velocity && acceleration.Length() && dot > 0)
 						{
@@ -4178,6 +4193,43 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				else
 				{
 					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
+				}
+
+				if (isAirWallRunner) {
+					FTraceResults wallRunTrace;
+					FVector3 vel2D = { vel.X, vel.Y, 0 };
+					fixed_t fixedVelocity = FLOAT2FIXED(vel2D.Length());
+					bool isAirWallRunning = false;
+
+					if ( player->crouchfactor > player->mo->CrouchScaleHalfWay
+						&& fixedVelocity >= player->mo->AirWallRunMinVelocity
+						&& acceleration.Length() > 0
+						&& player->airWallRunTics > 0 )
+					{
+						FVector3 accel2D = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0 };
+						VectorRotate(accel2D.X, accel2D.Y, flAngle);
+						accel2D.MakeUnit();
+						// linetrace in 16 directions to see if there is a wall
+						for (int i = 0; i < 16; ++i)
+						{
+							// Start with int min (-2147483648) and go upward to int max
+							P_TraceForWall(player->mo, FixedMul(2147483648, -65536 + 8192 * i), wallRunTrace);
+							if (wallRunTrace.HitType == TRACE_HitWall)
+							{
+								FVector3 wallVector = { FIXED2FLOAT(wallRunTrace.Line->dx), FIXED2FLOAT(wallRunTrace.Line->dy), 0.f };
+								wallVector.MakeUnit();
+								float dot = DotProduct( accel2D, wallVector );
+								isAirWallRunning = abs(dot) > 0.75;
+								break;
+							}
+						}
+					}
+
+					player->isAirWallRunning = isAirWallRunning;
+					if (isAirWallRunning)
+					{
+						player->airWallRunTics--;
+					}
 				}
 
 				// Regen crouch slide tics
@@ -4217,8 +4269,11 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				}
 
 				// Regen wall climb tics
-				if (isClimber)
+				if ( isClimber )
 					player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+				// Regen air wall run tics
+				if ( isAirWallRunner )
+					player->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->airWallRunTics + player->mo->AirWallRunRegen);
 			}
 
 			// Limit player velocity if enabled
@@ -5561,6 +5616,8 @@ void player_t::Serialize (FArchive &arc)
 		<< isCrouchSliding
 		<< wallClimbTics
 		<< isWallClimbing
+		<< airWallRunTics
+		<< isAirWallRunning
 		<< respawn_time
 		<< air_finished
 		<< turnticks

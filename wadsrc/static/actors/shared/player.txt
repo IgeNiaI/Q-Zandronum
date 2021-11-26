@@ -54,6 +54,9 @@ Actor PlayerPawn : Actor native
 	Player.WallClimbRegen 2.0
 	Player.WallClimbMaxTics 70
 	Player.WallClimbSpeed 5.0
+	Player.AirWallRunRegen 2.0
+	Player.AirWallRunMaxTics 70
+	Player.AirWallRunMinVelocity 10.0
 	Player.AirAcceleration 0.25
 	Player.VelocityCap 0
 	
