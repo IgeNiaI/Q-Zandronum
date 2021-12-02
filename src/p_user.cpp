@@ -3532,7 +3532,7 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 	}
 	else if (!isSliding && player->isCrouchSliding)
 	{
-		S_StopSound(player->mo, CHAN_SEVEN);
+		S_StopSound(player->mo, CHAN_SEVEN, player - players);
 	}
 
 	if ( isSliding )
@@ -3573,7 +3573,7 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	}
 	else if (!isClimbing && player->isWallClimbing)
 	{
-		S_StopSound(player->mo, CHAN_SEVEN);
+		S_StopSound(player->mo, CHAN_SEVEN, player - players);
 	}
 
 	if (isClimbing)
