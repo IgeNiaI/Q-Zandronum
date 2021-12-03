@@ -407,7 +407,7 @@ nolead:						mobj->angle = R_PointToAngle2 (mobj->x, mobj->y, targ->x, targ->y);
 					bMissileExplode = false;
 					if (mobj->flags & MF_MISSILE)
 					{
-						if (P_CheckMissileSpawn (mobj, spot->radius))
+						if (P_CheckMissileSpawn (mobj, spot->radius, false))
 						{
 							rtn = true;
 						}
@@ -464,6 +464,9 @@ nolead:						mobj->angle = R_PointToAngle2 (mobj->x, mobj->y, targ->x, targ->y);
 						if ( bMissileExplode )
 							SERVERCOMMANDS_MissileExplode( mobj, NULL );
 					}
+
+					if ( bMissileExplode )
+						P_ExplodeMissile( mobj, NULL, mobj->BlockingMobj );
 				}
 			} while (dest != 0 && (targ = tit.Next()));
 		}
