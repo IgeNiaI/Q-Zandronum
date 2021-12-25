@@ -3606,7 +3606,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 			player->secondJumpState = SJ_AVAILABLE;
 		}
 
-		if ((zacompatflags & ZACOMPATF_SKULLTAG_JUMPING) || player->jumpTics < 0 || velz < -8 * FRACUNIT)
+		if (player->jumpTics < 0 || velz < -8 * FRACUNIT)
 			player->jumpTics = JumpDelay;
 	}
 	else if (player->secondJumpsRemaining != 0 && !((cmd->ucmd.buttons & BT_JUMP)))
