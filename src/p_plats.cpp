@@ -251,6 +251,7 @@ DPlat::DPlat (sector_t *sector)
 	: DMovingFloor (sector)
 {
 	m_LastInstigator = NULL;
+	m_Status = in_stasis;
 }
 
 // [BC]
