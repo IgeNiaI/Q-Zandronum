@@ -99,11 +99,12 @@ CUSTOM_CVAR( Bool, sv_enforcemasterbanlist, true, CVAR_ARCHIVE|CVAR_NOSETBYACS )
 
 //*****************************************************************************
 //
-+// [TSPG]
+// [TSPG]
 
 #if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
-CUSTOM_CVAR( String, sv_banfile, "banlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_NOSET|CVAR_SENSITIVESERVERSETTING )
+CUSTOM_CVAR( String, sv_banfile, "banlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_NOSET )
 #else
+CUSTOM_CVAR( String, sv_banfile, "banlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS )
 #endif
 {
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
@@ -118,10 +119,11 @@ CUSTOM_CVAR( String, sv_banfile, "banlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVA
 
 //*****************************************************************************
 //
-+// [TSPG]
+// [TSPG]
 #if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
-CUSTOM_CVAR( String, sv_banexemptionfile, "whitelist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_NOSET|CVAR_SENSITIVESERVERSETTING )
+CUSTOM_CVAR( String, sv_banexemptionfile, "whitelist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_NOSET )
 #else
+CUSTOM_CVAR( String, sv_banexemptionfile, "whitelist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS )
 #endif
 {
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
