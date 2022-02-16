@@ -117,7 +117,12 @@ static	bool				g_AuthServerAddressCached = false;
 static	NETBUFFER_s			g_AuthServerBuffer;
 
 // [BB] Hostname of the authentication server.
-CVAR( String, authhostname, "auth.zandronum.com:16666", CVAR_ARCHIVE|CVAR_GLOBALCONFIG )
+// [SB] force people to use official server on tspg blacklist mode
+#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+CVAR( String, authhostname, "auth.zandronum.com:16666", CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOSET )
+#else
+ CVAR( String, authhostname, "auth.zandronum.com:16666", CVAR_ARCHIVE|CVAR_GLOBALCONFIG )
+#endif
 
 //*****************************************************************************
 //	PROTOTYPES

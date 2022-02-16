@@ -95,7 +95,12 @@ extern char g_szDesiredLogFilename[256];
 extern char g_szActualLogFilename[256];
 
 
-CVAR (Bool, sv_cheats, false, CVAR_SERVERINFO | CVAR_LATCH)
++// [TSPG]
+#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+CVAR (Bool, sv_cheats, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOSET)
+#else
+CVAR (Bool, sv_cheats, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOSETBYACS)
+#endif
 CVAR (Bool, sv_unlimited_pickup, false, CVAR_SERVERINFO)
 CVAR (Bool, sv_logfilenametimestamp, true, CVAR_ARCHIVE)
 CVAR (Bool, sv_logfile_append, false, CVAR_ARCHIVE)
@@ -165,6 +170,12 @@ void StopLogging( void )
 
 CCMD (quit)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	// [BC] This function may not be used by ConsoleCommand.
 	if ( ACS_IsCalledFromConsoleCommand( ))
 		return;
@@ -174,6 +185,11 @@ CCMD (quit)
 
 CCMD (exit)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
 	// [BC] This function may not be used by ConsoleCommand.
 	if ( ACS_IsCalledFromConsoleCommand( ))
 		return;
@@ -722,6 +738,12 @@ CCMD (print)
 
 CCMD (exec)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+	
 	if (argv.argc() < 2)
 		return;
 
@@ -750,6 +772,12 @@ void execLogfile(const char *fn)
 
 CCMD (logfile)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	// [BC/BB] This function may not be used by ConsoleCommand.
 	if ( ACS_IsCalledFromConsoleCommand( ))
 		return;
@@ -941,6 +969,12 @@ CCMD (special)
 
 CCMD (error)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	// [BB] This function may not be used by ConsoleCommand.
 	if ( ACS_IsCalledFromConsoleCommand( ))
 		return;
@@ -958,6 +992,12 @@ CCMD (error)
 
 CCMD (error_fatal)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	// [BB] This function may not be used by ConsoleCommand.
 	if ( ACS_IsCalledFromConsoleCommand( ))
 		return;
@@ -985,6 +1025,12 @@ CCMD (error_fatal)
 #if !defined(_WIN32) || !defined(_DEBUG)
 CCMD (crashout)
 {
+		// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	// [BB] This function may not be used by ConsoleCommand.
 	if ( ACS_IsCalledFromConsoleCommand( ))
 		return;
@@ -996,6 +1042,12 @@ CCMD (crashout)
 
 CCMD (dir)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	FString dir, path;
 	char curdir[256];
 	const char *match;
@@ -1124,6 +1176,12 @@ CCMD (warp)
 
 CCMD (load)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
     // [BB] This function may not be used by ConsoleCommand.
     if ( ACS_IsCalledFromConsoleCommand() )
         return;
@@ -1207,6 +1265,12 @@ CCMD (save)
 
 CCMD (wdir)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	if (argv.argc() != 2)
 	{
 		Printf ("usage: wdir <wadfile>\n");

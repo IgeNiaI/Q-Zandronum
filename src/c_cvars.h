@@ -84,6 +84,14 @@ enum
 	CVAR_GAMEMODESETTING = 2097152,
 };
 
+// [TSPG] reduces need of wrapping everything we want to block in a macro
+#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+#define TSPG_NOSET CVAR_NOSET
+#else
+#define TSPG_NOSET 0
+#endif
+
+
 union UCVarValue
 {
 	bool Bool;

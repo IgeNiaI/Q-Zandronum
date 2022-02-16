@@ -1722,6 +1722,12 @@ void D_StartTitle (void)
 
 CCMD (endgame)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	// [Dusk] If we're a client, ending the game involves disconnecting.
 	// Therefore this should do whatever disconnect does so I'll just call that.
 	if ( NETWORK_GetState( ) == NETSTATE_CLIENT )

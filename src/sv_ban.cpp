@@ -99,7 +99,12 @@ CUSTOM_CVAR( Bool, sv_enforcemasterbanlist, true, CVAR_ARCHIVE|CVAR_NOSETBYACS )
 
 //*****************************************************************************
 //
-CUSTOM_CVAR( String, sv_banfile, "banlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS )
++// [TSPG]
+
+#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+CUSTOM_CVAR( String, sv_banfile, "banlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_NOSET|CVAR_SENSITIVESERVERSETTING )
+#else
+#endif
 {
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
 		return;
@@ -113,7 +118,11 @@ CUSTOM_CVAR( String, sv_banfile, "banlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS )
 
 //*****************************************************************************
 //
-CUSTOM_CVAR( String, sv_banexemptionfile, "whitelist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS )
++// [TSPG]
+#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+CUSTOM_CVAR( String, sv_banexemptionfile, "whitelist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_NOSET|CVAR_SENSITIVESERVERSETTING )
+#else
+#endif
 {
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
 		return;
@@ -463,6 +472,12 @@ static void serverban_KickBannedPlayers( void )
 		}
 	}
 }
+
+void TSPG_KickBannedPlayers()
+{
+	serverban_KickBannedPlayers();
+}
+
 
 //*****************************************************************************
 //

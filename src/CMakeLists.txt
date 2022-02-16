@@ -186,6 +186,9 @@ else( WIN32 )
 
 		# [BB] The server doesn't need sound, GTK or OpenGL.
 		if( SERVERONLY )
+			# [TSPG]
+			option( TSPG_BLACKLIST "Disable blacklisted commands and protect some cvars" )
+
 			set( NO_GTK ON )
 			set( NO_GL ON )
 			set( NO_SOUND ON )
@@ -194,6 +197,10 @@ else( WIN32 )
 			set( NO_DRPC ON )
 			add_definitions ( -DSERVER_ONLY=1 )
 			set( ZDOOM_EXE_NAME ${ZDOOM_EXE_NAME}-server )
+
+			if( TSPG_BLACKLIST )
+				add_definitions( -DSERVER_BLACKLIST=1 )
+			endif( TSPG_BLACKLIST )
 		endif( SERVERONLY )
 
 		set( FMOD_SEARCH_PATHS
@@ -326,13 +333,13 @@ if( NOT NO_FMOD )
 		find_path( FMOD_INCLUDE_DIR fmod.hpp
  			PATHS ${FMOD_LOCAL_INC_DIRS} )
  	endif( NOT WIN32 )
-  
+
  	if( NOT FMOD_INCLUDE_DIR )
  		find_path( FMOD_INCLUDE_DIR fmod.hpp
  			PATHS ${FMOD_SEARCH_PATHS}
  			${FMOD_INC_PATH_SUFFIXES} )
  	endif( NOT FMOD_INCLUDE_DIR )
-  
+
  	if( FMOD_INCLUDE_DIR )
  		message( STATUS "FMOD include files found at ${FMOD_INCLUDE_DIR}" )
  		include_directories( "${FMOD_INCLUDE_DIR}" )
@@ -341,21 +348,21 @@ if( NOT NO_FMOD )
  		set( NO_FMOD ON )
  	endif( FMOD_INCLUDE_DIR )
 endif( NOT NO_FMOD )
- 
+
 if( NOT NO_FMOD )
  	# Decide on the name of the FMOD library we want to use.
  	if( NOT FMOD_LIB_NAME AND MSVC )
  		set( FMOD_LIB_NAME fmodex${X64}_vc )
  	endif( NOT FMOD_LIB_NAME AND MSVC )
-  
+
  	if( NOT FMOD_LIB_NAME AND BORLAND )
  		set( FMOD_LIB_NAME fmodex${X64}_bc )
  	endif( NOT FMOD_LIB_NAME AND BORLAND )
-  
+
  	if( NOT FMOD_LIB_NAME )
  		set( FMOD_LIB_NAME fmodex${X64} )
  	endif( NOT FMOD_LIB_NAME )
-  
+
  	# Search for FMOD library
  	if( WIN32 OR APPLE )
  		find_library( FMOD_LIBRARY ${FMOD_LIB_NAME}
@@ -366,7 +373,7 @@ if( NOT NO_FMOD )
  			NAMES ${FMOD_VERSIONS}
  			PATHS ${FMOD_LOCAL_LIB_DIRS} )
  	endif( WIN32 OR APPLE )
- 	
+
  	if( FMOD_LIBRARY )
  		message( STATUS "FMOD library found at ${FMOD_LIBRARY}" )
  		set( ZDOOM_LIBS ${ZDOOM_LIBS} "${FMOD_LIBRARY}" )
@@ -375,7 +382,7 @@ if( NOT NO_FMOD )
  		set( NO_FMOD ON )
  	endif( FMOD_LIBRARY )
 endif( NOT NO_FMOD )
- 
+
 if( NO_FMOD )
  	add_definitions( -DNO_FMOD=1 )
 endif( NO_FMOD )
@@ -1088,6 +1095,7 @@ set( NOT_COMPILED_SOURCE_FILES
 	g_shared/sbarinfo_commands.cpp
 	xlat/xlat_parser.y
 	xlat_parser.c
+
 	xlat_parser.h
 
 	# [TP] Make the protocol specification and the code generator show up in IDEs
@@ -1120,6 +1128,11 @@ set( NOT_COMPILED_SOURCE_FILES
 # [TP] servercommands.cpp is generated from the protocol specification. CMake needs to know this or it raises an error
 # if it doesn't exist yet.
 set_source_files_properties( ${CMAKE_CURRENT_SOURCE_DIR}/network/servercommands.cpp PROPERTIES GENERATED TRUE )
+
+# [TSPG] dumb hack
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	add_definitions(-DTSPG_DEBUG)
+endif()
 
 add_executable( zdoom WIN32
 	${HEADER_FILES}
@@ -1504,6 +1517,10 @@ add_executable( zdoom WIN32
 	r_data/r_interpolate.cpp
 	r_data/r_translate.cpp
 	zzautozend.cpp
+
+	# [TSPG]
+	tspg_dnsbl.cpp
+	tspg_badwords.cpp
 )
 
 # [BB] To keep the delta to ZDoom small, we keep the target name 'zdoom', but

@@ -136,4 +136,12 @@ const char *GetVersionStringRev();
 // The maximum length of one save game description for the menus.
 #define SAVESTRINGSIZE		24
 
+#define TSPG_VERSION 26
+
+#ifdef TSPG_DEBUG
+#define TSPG_VERSION_STR SAVEVERSTRINGIFY(TSPG_VERSION) "-dbg"
+#else
+#define TSPG_VERSION_STR SAVEVERSTRINGIFY(TSPG_VERSION)
+#endif
+
 #endif //__VERSION_H__

@@ -7807,6 +7807,12 @@ void STACK_ARGS CLIENT_PrintWarning( const char* format, ... )
 
 CCMD( connect )
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	const char	*pszDemoName;
 	UCVarValue	Val;
 
@@ -7868,6 +7874,12 @@ CCMD( connect )
 //
 CCMD( disconnect )
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	// Nothing to do if we're not in client mode!
 	if ( NETWORK_GetState( ) != NETSTATE_CLIENT )
 		return;
@@ -7880,6 +7892,12 @@ CCMD( disconnect )
 #ifdef	_DEBUG
 CCMD( timeout )
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	// Nothing to do if we're not in client mode!
 	if ( NETWORK_GetState( ) != NETSTATE_CLIENT )
 		return;
@@ -7910,6 +7928,12 @@ CCMD( timeout )
 //
 CCMD( reconnect )
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+	
 	UCVarValue	Val;
 
 	// If we're in the middle of a game, we first need to disconnect from the server.

@@ -114,7 +114,12 @@ static int Inited = NOT_INITED;
 //
 //==========================================================================
 
+// [TSPG]
+#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+CUSTOM_CVAR (Bool, cd_enabled, false, CVAR_ARCHIVE|CVAR_NOINITCALL|CVAR_GLOBALCONFIG|CVAR_NOSET)
+#else
 CUSTOM_CVAR (Bool, cd_enabled, true, CVAR_ARCHIVE|CVAR_NOINITCALL|CVAR_GLOBALCONFIG)
+#endif
 {
 	if (self)
 		CD_Init ();
@@ -131,7 +136,12 @@ CUSTOM_CVAR (Bool, cd_enabled, true, CVAR_ARCHIVE|CVAR_NOINITCALL|CVAR_GLOBALCON
 //
 //==========================================================================
 
+// [TSPG]
+#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+CUSTOM_CVAR (String, cd_drive, "", CVAR_ARCHIVE|CVAR_NOINITCALL|CVAR_GLOBALCONFIG|CVAR_NOSET)
+#else
 CUSTOM_CVAR (String, cd_drive, "", CVAR_ARCHIVE|CVAR_NOINITCALL|CVAR_GLOBALCONFIG)
+#endif
 {
 	CD_Init ();
 }
