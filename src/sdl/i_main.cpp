@@ -273,7 +273,7 @@ int main (int argc, char **argv)
 
  	// [SB] I moved this below the ZA_PrintVersion call so it
 	//      doesn't get printed to stdout with --version's output.
-	printf(GAMENAME" %s - %s - SDL version\nCompiled on %s\n",
+	printf(GAMENAME" %s - %s - SDL version\nCompiled on %s for TSPG\n",
 		GetVersionString(), GetGitTime(), __DATE__);
 
 #ifdef SERVER_ONLY

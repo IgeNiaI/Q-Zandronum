@@ -243,6 +243,12 @@ void CLIENT_ProcessSRPServerCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 
 CCMD( login )
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	if ( NETWORK_GetState( ) != NETSTATE_CLIENT )
 		return;
 
