@@ -95,7 +95,7 @@ extern char g_szDesiredLogFilename[256];
 extern char g_szActualLogFilename[256];
 
 
-+// [TSPG]
+// [TSPG]
 #if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
 CVAR (Bool, sv_cheats, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOSET)
 #else
