@@ -125,7 +125,10 @@
 #include "p_enemy.h"
 #include "network/packetarchive.h"
 #include "p_lnspec.h"
+#include "maprotation.h"
 #include "unlagged.h"
+#include "tspg_dnsbl.h"
+#include "tspg_badwords.h"
 
 //*****************************************************************************
 //	MISC CRAP THAT SHOULDN'T BE HERE BUT HAS TO BE BECAUSE OF SLOPPY CODING
@@ -170,6 +173,7 @@ static	bool	server_Puke( BYTESTREAM_s *pByteStream );
 static	bool	server_ReceiveACSString( BYTESTREAM_s *pByteStream );
 static	bool	server_MorphCheat( BYTESTREAM_s *pByteStream );
 static	bool	server_CheckForClientMinorCommandFlood( ULONG ulClient );
+static	void	SendMaplistToPlayer(ULONG ulPlayer); // [K6]
 static	bool	server_CheckJoinPassword( const FString& clientPassword );
 static	bool	server_InfoCheat( BYTESTREAM_s* pByteStream );
 static	bool	server_CheckLogin( const ULONG ulClient );
@@ -244,6 +248,10 @@ static	TArray<EDITEDTRANSLATION_s>		g_EditedTranslationList;
 // [BB] List of all sector links created by calls to Sector_SetLink.
 static	TArray<SECTORLINK_s>		g_SectorLinkList;
 
+// [TSPG]
+static char *g_pszStartupTime;
+
+
 // [RC] File to log packets to.
 #ifdef CREATE_PACKET_LOG
 static	FILE		*PacketLogFile = NULL;
@@ -282,9 +290,18 @@ CVAR( Int, sv_maxclientsperip, 2, CVAR_ARCHIVE )
 CVAR( Int, sv_afk2spec, 0, CVAR_ARCHIVE ) // [K6]
 CVAR( Bool, sv_forcelogintojoin, false, CVAR_ARCHIVE|CVAR_NOSETBYACS )
 CVAR( Bool, sv_useticbuffer, true, CVAR_ARCHIVE|CVAR_NOSETBYACS )
+//[TSPG]
+CVAR( String, tspg_branding_name, "The Sentinel's Playground", CVAR_SERVERINFO|TSPG_NOSET );
+CVAR( String, tspg_branding_short, "TSPG", CVAR_SERVERINFO|TSPG_NOSET );
+CVAR( String, tspg_branding_url, "https://allfearthesentinel.net", CVAR_SERVERINFO|TSPG_NOSET );
 
-CUSTOM_CVAR( String, sv_adminlistfile, "adminlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS )
-{
+
+// [TSPG]
+#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+CUSTOM_CVAR( String, sv_adminlistfile, "adminlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_NOSET )
+#else
+CUSTOM_CVAR( String, sv_adminlistfile, "adminlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS)
+#endif{
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
 		return;
 
@@ -515,6 +532,9 @@ void SERVER_Construct( void )
 	}
 	// [BB] The voodoo doll dummy player also needs its userinfo reset.
 	COOP_InitVoodooDollDummyPlayer();
+
+	TSPG_InitDNSBL();
+	BADWORDS_Init();
 }
 
 //*****************************************************************************
@@ -537,6 +557,9 @@ void SERVER_Destruct( void )
 		g_aClients[ulIdx].UnreliablePacketBuffer.Free();
 		g_aClients[ulIdx].SavedPackets.Free();
 	}
+
+	TSPG_DeinitDNSBL();
+	BADWORDS_Shutdown();
 
 #ifdef CREATE_PACKET_LOG
 	if ( PacketLogFile )
@@ -707,6 +730,12 @@ void SERVER_Tick( void )
 
 		// Broadcast the server signal so it can be detected on a LAN.
 		SERVER_MASTER_Broadcast( );
+
+		// [TSPG]
+		TSPG_TickDNSBL();
+
+		// [SB]
+		BADWORDS_AttemptReload();
 
 		// Potentially re-parse the banfile.
 		SERVERBAN_Tick( );
@@ -1196,8 +1225,16 @@ void SERVER_SendChatMessage( ULONG ulPlayer, ULONG ulMode, const char *pszString
 		else
 			Printf( "%s: %s\n", players[ulPlayer].userinfo.GetName(), pszString );
 	}
+
 	if( sv_markchatlines && sv_logfiletimestampOldValue )
 		sv_logfiletimestamp = true;
+
+	//[TSPG]
+	if (stricmp("!music", pszString) == 0 && gamestate == GS_LEVEL)
+		SERVER_Printf(PRINT_HIGH, "%s\n", SERVER_GetMapMusic());
+
+	if (stricmp("!maplist", pszString) == 0)
+		SendMaplistToPlayer(ulPlayer);
 }
 
 //*****************************************************************************
@@ -1382,6 +1419,70 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 	// Tell the client that we're about to send him a snapshot of the level.
 	SERVERCOMMANDS_BeginSnapshot( g_lCurrentClient );
 
+	//[TSPG]
+	const char *owner = Args->CheckValue("-owner");
+	const char *brandingName = tspg_branding_name.GetGenericRep(CVAR_String).String;
+	const char *brandingShort = tspg_branding_short.GetGenericRep(CVAR_String).String;
+	const char *brandingUrl = tspg_branding_url.GetGenericRep(CVAR_String).String;
+
+	// Send welcome message.
+	SERVER_PrintfPlayer( g_lCurrentClient, "\n" );
+	SERVER_PrintfPlayer( g_lCurrentClient, TEXTCOLOR_LIGHTBLUE "Welcome to " TEXTCOLOR_WHITE "%s" TEXTCOLOR_LIGHTBLUE "! \n", brandingName );
+	SERVER_PrintfPlayer( g_lCurrentClient, TEXTCOLOR_LIGHTBLUE "This server is running " TEXTCOLOR_WHITE "%s %s (TSPGv%s)\n", GAMENAME, GetVersionStringRev(), TSPG_VERSION_STR);
+	SERVER_PrintfPlayer( g_lCurrentClient, TEXTCOLOR_LIGHTBLUE "Compiled on " TEXTCOLOR_WHITE "%s " TEXTCOLOR_LIGHTBLUE "at " TEXTCOLOR_WHITE  "%s\n", __DATE__, __TIME__ );
+	if (owner) SERVER_PrintfPlayer(g_lCurrentClient, TEXTCOLOR_LIGHTBLUE "This server was started by " TEXTCOLOR_WHITE "%s" TEXTCOLOR_LIGHTBLUE "at" TEXTCOLOR_WHITE "%s", owner, g_pszStartupTime);
+	SERVER_PrintfPlayer(g_lCurrentClient, TEXTCOLOR_LIGHTBLUE "If you wish to host your own server on " TEXTCOLOR_WHITE "%s " TEXTCOLOR_LIGHTBLUE "visit " TEXTCOLOR_WHITE "%s" TEXTCOLOR_LIGHTBLUE "!\n", brandingShort, brandingUrl);
+	SERVER_PrintfPlayer(g_lCurrentClient, "\n " TEXTCOLOR_GOLD "Server information:\n");
+
+	SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, TEXTCOLOR_RED " %s\n", sv_hostname.GetGenericRep(CVAR_String).String);
+	SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " dmflags=%lu dmflags2=%lu dmflags3=%lu compatflags=%lu compatflags2=%lu\n", (LONG)dmflags, (LONG)dmflags2, (LONG)zadmflags, (LONG)compatflags, (LONG)compatflags2);
+	if (instagib)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Instagib mode\n");
+	if (buckshot)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Buckshot mode\n");
+	if ((GAMEMODE_GetFlags(GAMEMODE_GetCurrentMode()) & GMF_PLAYERSONTEAMS) || cooperative)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Team damage factor: %lu%%\n", ((LONG)teamdamage.GetGenericRep(CVAR_Float).Float * 100));
+	if (fraglimit)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Frag limit: %d\n", fraglimit.GetGenericRep(CVAR_Int));
+	if (pointlimit)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Point limit: %d\n", pointlimit.GetGenericRep(CVAR_Int));
+	if (winlimit)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Win limit: %d\n", winlimit.GetGenericRep(CVAR_Int));
+	if (duellimit)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Duel limit: %d\n", duellimit.GetGenericRep(CVAR_Int));
+	if (timelimit)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Time limit: %d\n", timelimit.GetGenericRep(CVAR_Int));
+	if (GAMEMODE_GetFlags(GAMEMODE_GetCurrentMode()) & GMF_PLAYERSONTEAMS)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " %d teams\n", sv_maxteams.GetGenericRep(CVAR_Int));
+
+		FString FSVoting;
+	if (sv_nocallvote.GetGenericRep(CVAR_Int).Int != 1)
+		{
+		if (!sv_nomapvote)
+			FSVoting.AppendFormat(" map");
+		if (!sv_nochangemapvote)
+			FSVoting.AppendFormat(" changemap");
+		if (!sv_nokickvote)
+			FSVoting.AppendFormat(" kick");
+		if (!sv_noduellimitvote)
+			FSVoting.AppendFormat(" duellimit");
+		if (!sv_nofraglimitvote)
+			FSVoting.AppendFormat(" fraglimit");
+		if (!sv_nopointlimitvote)
+			FSVoting.AppendFormat(" pointlimit");
+		if (!sv_notimelimitvote)
+			FSVoting.AppendFormat(" timelimit");
+		if (!sv_nowinlimitvote)
+			FSVoting.AppendFormat(" winlimit");
+		}
+
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Voting:%s\n", FSVoting.IsEmpty() ? " off" : FSVoting.GetChars());
+	if (sv_coop_damagefactor != 1.0f)
+		SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, " Coop damage factor: %.2f\n", static_cast<float> (sv_coop_damagefactor));
+
+	SERVER_PrintfPlayer(PRINT_HIGH, g_lCurrentClient, "\n");
+
+
 	// Send welcome message.
 	SERVER_PrintfPlayer( g_lCurrentClient, "Version %s Server\n", DOTVERSIONSTR );
 
@@ -1534,7 +1635,7 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 
 	// [TP] Tell the client his account name.
 	SERVERCOMMANDS_SetPlayerAccountName( g_lCurrentClient, g_lCurrentClient, SVCF_ONLYTHISCLIENT );
-	
+
 	// [AK] Inform the client of the map rotation list.
 	SERVERCOMMANDS_SyncMapRotation( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
@@ -2033,6 +2134,9 @@ void SERVER_SetupNewConnection( BYTESTREAM_s *pByteStream, bool bNewPlayer )
 		return;
 	}
 
+	// [TSPG]
+	TSPG_CheckIPAgainstBlocklists(g_aClients[lClient].Address);
+
 	// Client is now connected to the server.
 	g_aClients[lClient].State = CLS_CONNECTED;
 
@@ -2182,6 +2286,8 @@ bool SERVER_GetUserInfo( BYTESTREAM_s *pByteStream, bool bAllowKick, bool bEnfor
 				kickReason = "User name contains illegal characters." ;
 			}
 
+			bool filtered = BADWORDS_ShouldFilter( value.GetChars( ) );
+
 			// [BB] Check whether the requested name is already in use.
 			// If so, give the player a generic unused name and inform the client.
 			if ( PLAYER_NameUsed ( value, g_lCurrentClient ) )
@@ -2189,7 +2295,7 @@ bool SERVER_GetUserInfo( BYTESTREAM_s *pByteStream, bool bAllowKick, bool bEnfor
 				FString message;
 				message.Format ( "The name '%s' is already in use. ", value.GetChars() );
 				value = PLAYER_GenerateUniqueName();
-				message.AppendFormat ( "You are renamed to '%s'.\n", value.GetChars() );
+				message.AppendFormat ( "You have been renamed to '%s'.\n", value.GetChars() );
 				SERVERCOMMANDS_PrintMid( message, true, g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 				bOverriddenName = true;
 			}
@@ -2820,7 +2926,7 @@ void SERVER_SendFullUpdate( ULONG ulClient )
 
 	// [TP] Inform the client of the state of the join queue
 	SERVERCOMMANDS_SyncJoinQueue( ulClient, SVCF_ONLYTHISCLIENT );
-	
+
 	// [BB] Let the client know that the full update is completed.
 	SERVERCOMMANDS_FullUpdateCompleted( ulClient );
 	// [BB] The client will let us know that it received the update.
@@ -4860,7 +4966,7 @@ bool SERVER_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 			}
 		}
 		return false;
-		
+
 	case CLC_READY:
 		// [geNia] Player is ready to start the match
 		{
@@ -5223,6 +5329,12 @@ static bool server_Say( BYTESTREAM_s *pByteStream )
 		}
 
 		SERVER_SendChatMessage( ulPlayer, ulChatMode, pszChatString );
+		if ( BADWORDS_ShouldFilter( pszChatString ) )
+		{
+			SERVER_PrintfPlayer(ulPlayer, "Your message was discarded because it contained inappropriate language. Please note that attempts to circumvent this system may result in you being banned.\n");
+			return ( false );
+		}
+
 		return ( false );
 	}
 }
@@ -6860,6 +6972,21 @@ FString CLIENT_s::GetAccountName() const
 		FString result;
 		result.Format ( "%td@localhost", this - g_aClients );
 		return result;
+	}
+}
+`
+//*****************************************************************************
+// [K6]
+extern std::vector<MAPROTATIONENTRY_t>	g_MapRotationEntries;
+static void SendMaplistToPlayer(ULONG ulPlayer)
+{
+	if (g_MapRotationEntries.size() == 0)
+		SERVER_PrintfPlayer(PRINT_HIGH, ulPlayer, "The map rotation list is empty.\n");
+	else
+	{
+		SERVER_PrintfPlayer(PRINT_HIGH, ulPlayer, "Map rotation list: \n");
+		for (ULONG ulIdx = 0; ulIdx < g_MapRotationEntries.size(); ulIdx++)
+			SERVER_PrintfPlayer(PRINT_HIGH, ulPlayer, "%lu. %s - %s\n", ulIdx + 1, g_MapRotationEntries[ulIdx].pMap->mapname, g_MapRotationEntries[ulIdx].pMap->LookupLevelName().GetChars());
 	}
 }
 

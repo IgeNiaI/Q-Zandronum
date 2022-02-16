@@ -422,7 +422,13 @@ void M_SaveDefaultsFinal ()
 
 CCMD (writeini)
 {
-	// [BB] This function may not be used by ConsoleCommand.
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
+// [BB] This function may not be used by ConsoleCommand.
 	if ( ACS_IsCalledFromConsoleCommand( ))
 		return;
 

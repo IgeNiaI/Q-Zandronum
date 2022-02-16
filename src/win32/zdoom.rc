@@ -9,7 +9,7 @@
 //
 #include "afxres.h"
 #include "../version.h"
-#include "../gitinfo.h"
+#include "../gitinfo_tspg.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -37,7 +37,7 @@ END
 BEGIN
     "#include ""afxres.h""\r\n"
     "#include ""../version.h""\r\r\n"
-    "#include ""../gitinfo.h""\r\0"
+    "#include ""../gitinfo_tspg.h""\r\0"
 END
 
 3 TEXTINCLUDE MOVEABLE PURE 
@@ -197,8 +197,8 @@ BEGIN
             VALUE "FileDescription", GAMENAME "\0"
             VALUE "FileVersion", "v" DOTVERSIONSTR_REV "\0"
             VALUE "InternalName", GAMENAME "\0"
-            VALUE "LegalCopyright", "Copyright © 1993-1996 id Software, 1998-2013 Randy Heit, Christoph Oelckers, Braden Obrzut, et al."
-            VALUE "LegalTrademarks", "Doom® is a Registered Trademark of id Software, Inc.\0"
+            VALUE "LegalCopyright", "Copyright ï¿½ 1993-1996 id Software, 1998-2013 Randy Heit, Christoph Oelckers, Braden Obrzut, et al."
+            VALUE "LegalTrademarks", "Doomï¿½ is a Registered Trademark of id Software, Inc.\0"
             VALUE "OriginalFilename", GAMENAMELOWERCASE ".exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", GAMENAME "\0"

@@ -246,6 +246,12 @@ CCMD (map)
 
 CCMD (open)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	if (( NETWORK_GetState( ) == NETSTATE_CLIENT ) ||
 		( NETWORK_GetState( ) == NETSTATE_SERVER ))
 	{
