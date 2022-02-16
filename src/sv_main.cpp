@@ -301,7 +301,8 @@ CVAR( String, tspg_branding_url, "https://allfearthesentinel.net", CVAR_SERVERIN
 CUSTOM_CVAR( String, sv_adminlistfile, "adminlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS|CVAR_NOSET )
 #else
 CUSTOM_CVAR( String, sv_adminlistfile, "adminlist.txt", CVAR_ARCHIVE|CVAR_NOSETBYACS)
-#endif{
+#endif
+{
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
 		return;
 
@@ -6974,7 +6975,7 @@ FString CLIENT_s::GetAccountName() const
 		return result;
 	}
 }
-`
+
 //*****************************************************************************
 // [K6]
 extern std::vector<MAPROTATIONENTRY_t>	g_MapRotationEntries;
