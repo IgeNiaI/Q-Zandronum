@@ -495,6 +495,12 @@ void C_InitConsole (int width, int height, bool ingame)
 
 CCMD (atexit)
 {
+	// [TSPG]
+	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
+		if ( gamestate != GS_STARTUP )
+			return;
+	#endif
+
 	if (argv.argc() == 1)
 	{
 		Printf ("Registered atexit commands:\n");

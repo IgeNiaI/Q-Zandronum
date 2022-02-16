@@ -128,9 +128,9 @@ void SERVER_MASTER_Construct( void )
 #ifndef _WIN32
 	struct utsname u_name;
 	if ( uname(&u_name) < 0 )
-		g_VersionWithOS.Format ( "%s", GetVersionStringRev() ); //error, no data
+		g_VersionWithOS.Format ( "%s (TSPGv%d)", GetVersionStringRev(), TSPG_VERSION ); //error, no data
 	else
-		g_VersionWithOS.Format ( "%s on %s %s", GetVersionStringRev(), u_name.sysname, u_name.release ); // "Linux 2.6.32.5-amd64" or "FreeBSD 9.0-RELEASE" etc
+		g_VersionWithOS.Format ( "%s (TSPGv%d) on %s %s", GetVersionStringRev(), TSPG_VERSION, u_name.sysname, u_name.release ); // "Linux 2.6.32.5-amd64" or "FreeBSD 9.0-RELEASE" etc
 #endif
 
 	// [TP] Which wads will we broadcast as optional to launchers?
@@ -687,9 +687,28 @@ CUSTOM_CVAR( Bool, sv_broadcast, true, CVAR_ARCHIVE|CVAR_NOSETBYACS )
 	SERVERCONSOLE_UpdateBroadcasting( );
 }
 
+CVAR(String, tspg_branding_hostnameprefix, "", CVAR_SERVERINFO|TSPG_NOSET);
+
 // Name of this server on launchers.
 CUSTOM_CVAR( String, sv_hostname, "Unnamed " GAMENAME " server", CVAR_ARCHIVE|CVAR_NOSETBYACS )
 {
+	static bool tspgPrefixLock = false;
+	if (tspgPrefixLock)
+	{
+		tspgPrefixLock = false;
+		return;
+	}
+
+	if (static_cast<const char *>(tspg_branding_hostnameprefix)[0] != '\0')
+	{
+		tspgPrefixLock = true;
+		const char *val = sv_hostname.GetGenericRep(CVAR_String).String;
+		const char *pre = tspg_branding_hostnameprefix.GetGenericRep(CVAR_String).String;
+		FString newval;
+		newval.Format("%s %s", pre, val);
+		self = newval.GetChars();
+	}
+
 	SERVERCONSOLE_UpdateTitleString( (const char *)self );
 }
 
@@ -701,7 +720,7 @@ CVAR( String, sv_hostemail, "", CVAR_ARCHIVE|CVAR_NOSETBYACS )
 
 // IP address of the master server.
 // [BB] Client and server use this now, therefore the name doesn't begin with "sv_"
-CVAR( String, masterhostname, "master.qzandronum.com", CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOSETBYACS )
+CVAR( String, masterhostname, "master.qzandronum.com", CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOSETBYACS|TSPG_NOSET )
 
 CCMD( wads )
 {
