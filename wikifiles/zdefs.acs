@@ -34,6 +34,11 @@
 #define GAME_NET_DEATHMATCH     2
 #define GAME_TITLE_MAP		3
 
+#define NETSTATE_SINGLE					0 // Program is being run in single player mode.
+#define NETSTATE_SINGLE_MULTIPLAYER		1 // Program is being run in single player mode, emulating a network game (bots, etc).
+#define NETSTATE_CLIENT					2 // Program is a client playing a network game.
+#define NETSTATE_SERVER					3 // Program is a server, hosting a game.
+
 // Classes are only useful with Hexen
 #define CLASS_FIGHTER           0
 #define CLASS_CLERIC            1

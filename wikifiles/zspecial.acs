@@ -432,6 +432,7 @@ special
 	-143:GetPredictableValue(2),
 	-144:SetEffectActor(3),
 	-149:CheckSolidFooting(2),
+	-150:GetNetworkState(0),
 	
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),
