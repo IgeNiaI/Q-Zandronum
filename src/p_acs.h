@@ -50,6 +50,14 @@ class FileReader;
 
 enum
 {
+	NETREP_NOUNLAGGED = 1,
+	NETREP_UNLAGDEATH = 2,
+	NETREP_SKIPOWNER = 4,
+	NETREP_DELAYTHRUST = 8
+};
+
+enum
+{
 	NUM_WORLDVARS = 256,
 	NUM_GLOBALVARS = 64
 };
@@ -1063,5 +1071,7 @@ bool	ACS_ExistsScript( int script );
 
 // [BB] Export DoGiveInv
 bool	DoGiveInv(AActor *actor, const PClass *info, int amount);
+
+int		GetNetworkReplicationFlags();
 
 #endif //__P_ACS_H__

@@ -1586,6 +1586,7 @@ special
 -150:GetNetworkState():int,
 -151:SetPlayerWeaponZoomFactor(int,int;int):void,
 -152:SetPlayerSkin(int,str;bool):void,
+-153:SetNetworkReplicationFlags(int):void,
 
 // ZDoom/GZDoom.
 -200:CheckClass(str):bool,

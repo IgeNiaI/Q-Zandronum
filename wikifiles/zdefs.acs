@@ -887,6 +887,13 @@
 #define ARMORINFO_MAXFULLABSORB		4
 #define ARMORINFO_ACTUALSAVEAMOUNT	5
 
+// Network replication flags
+
+#define NETREP_NOUNLAGGED		1
+#define NETREP_UNLAGDEATH		2
+#define NETREP_SKIPOWNER		4
+#define NETREP_DELAYTHRUST		8
+
 // ==========================================================================
 // Skulltag Definitions
 // ==========================================================================

@@ -336,6 +336,16 @@ SDWORD ACS_GlobalVars[NUM_GLOBALVARS];
 FWorldGlobalArray ACS_GlobalArrays[NUM_GLOBALVARS];
 
 
+// [geNia] This can be changed from ACS via SetReplicateToClientsEnabled( bool )
+// This is used to disable sending commands from server to clients to avoid duplication when using compat_allowmoreclientsidefunctions
+// It is done this way to avoid changing existing functions
+int	networkReplicationFlags = 0;
+
+int GetNetworkReplicationFlags()
+{
+	return networkReplicationFlags;
+}
+
 //----------------------------------------------------------------------------
 //
 // Global ACS strings (Formerly known as On the fly strings)
@@ -5416,6 +5426,7 @@ enum EACSFunctions
 	ACSF_GetNetworkState,
 	ACSF_SetPlayerWeaponZoomFactor,
 	ACSF_SetPlayerSkin,
+	ACSF_SetNetworkReplicationFlags,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7809,7 +7820,6 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 						bool		overrideWeaponPreferredSkin = ( argCount >= 3 ) ? !!args[2] : false;
 						players[ulPlayer].SkinOverride = skinName;
 						players[ulPlayer].overrideWeaponPreferredSkin = overrideWeaponPreferredSkin;
-
 						if ( NETWORK_GetState() == NETSTATE_SERVER )
 							SERVERCOMMANDS_SetPlayerSkin( ulPlayer );
 					}
@@ -7817,6 +7827,10 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			}
 
 			return 0;
+
+		case ACSF_SetNetworkReplicationFlags:
+			networkReplicationFlags = args[0];
+			break;
 
 		default:
 			break;
