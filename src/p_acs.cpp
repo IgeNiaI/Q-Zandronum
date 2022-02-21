@@ -5401,6 +5401,7 @@ enum EACSFunctions
 	ACSF_SendNetworkString,
 	ACSF_NamedSendNetworkString,
 	ACSF_CheckSolidFooting,
+	ACSF_GetNetworkState,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7741,6 +7742,9 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 					return CSF_INAIR;
 			}
 			break;
+
+		case ACSF_GetNetworkState:
+			return NETWORK_GetState( );
 
 		default:
 			break;

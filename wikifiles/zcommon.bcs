@@ -1583,6 +1583,7 @@ special
 -143:GetPredictableValue(int,int):int,
 -144:SetEffectActor(int,int,str):void,
 -149:CheckSolidFooting(int,int):int,
+-150:GetNetworkState():int,
 
 // ZDoom/GZDoom.
 -200:CheckClass(str):bool,
