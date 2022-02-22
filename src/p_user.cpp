@@ -5022,9 +5022,9 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		memset( cmd, 0, sizeof( ticcmd_t ));
 
 	// Handle crouching
-	if (player->cmd.ucmd.buttons & BT_JUMP)
+	if (cmd->ucmd.buttons & BT_JUMP)
 	{
-		player->cmd.ucmd.buttons &= ~BT_CROUCH;
+		cmd->ucmd.buttons &= ~BT_CROUCH;
 	}
 	// [BC] Don't do this for clients other than ourself in client mode.
 	// [BB] Also, don't do this while predicting.
@@ -5038,9 +5038,9 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 			
 				if (crouchdir == 0)
 				{
-					crouchdir = (player->cmd.ucmd.buttons & BT_CROUCH) ? -1 : 1;
+					crouchdir = (cmd->ucmd.buttons & BT_CROUCH) ? -1 : 1;
 				}
-				else if (player->cmd.ucmd.buttons & BT_CROUCH)
+				else if (cmd->ucmd.buttons & BT_CROUCH)
 				{
 					player->crouching = 0;
 				}
