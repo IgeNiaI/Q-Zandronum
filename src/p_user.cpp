@@ -3398,15 +3398,16 @@ float APlayerPawn::QVerticalFactor( ticcmd_t *cmd )
 
 float APlayerPawn::QTweakSpeed()
 {
+	float speedFactor = 1.0;
 	// Powerup speed multi
 	if (!player->morphTics && Inventory != NULL)
-		return FIXED2FLOAT(Inventory->GetSpeedFactor());
+		speedFactor *= FIXED2FLOAT(Inventory->GetSpeedFactor());
 
 	// [BC] Apply the 25% speed increase power.
 	if (player->cheats & CF_SPEED25)
-		return 1.25f;
+		speedFactor *= 1.25f;
 
-	return 1.f;
+	return speedFactor;
 }
 
 void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const float friction)
