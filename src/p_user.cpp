@@ -2718,9 +2718,21 @@ void APlayerPawn::TweakSpeeds (ticcmd_t *cmd, int &forward, int &side)
 	// [BC] This comes out to 50%, so we can use this for the turbosphere.
 	if (!player->morphTics && Inventory != NULL)
 	{
-		fixed_t factor = Inventory->GetSpeedFactor ();
+		fixed_t factor;
+		if ( CLIENT_PREDICT_IsPredicting( ))
+		{
+			factor = player->mo->SpeedFactor;
+		}
+		else
+		{
+			factor = player->mo->SpeedFactor = Inventory->GetSpeedFactor();
+		}
 		forward = FixedMul(forward, factor);
 		side = FixedMul(side, factor);
+	}
+	else if (!CLIENT_PREDICT_IsPredicting())
+	{
+		player->mo->SpeedFactor = FRACUNIT;
 	}
 
 	// [BC] Apply the 25% speed increase power.
@@ -3401,7 +3413,21 @@ float APlayerPawn::QTweakSpeed()
 	float speedFactor = 1.0;
 	// Powerup speed multi
 	if (!player->morphTics && Inventory != NULL)
-		speedFactor *= FIXED2FLOAT(Inventory->GetSpeedFactor());
+	{
+		if ( CLIENT_PREDICT_IsPredicting( ))
+		{
+			speedFactor *= FIXED2FLOAT(player->mo->SpeedFactor);
+		}
+		else
+		{
+			player->mo->SpeedFactor = Inventory->GetSpeedFactor();
+			speedFactor *= FIXED2FLOAT(Inventory->GetSpeedFactor());
+		}
+	}
+	else if (!CLIENT_PREDICT_IsPredicting())
+	{
+		player->mo->SpeedFactor = FRACUNIT;
+	}
 
 	// [BC] Apply the 25% speed increase power.
 	if (player->cheats & CF_SPEED25)
