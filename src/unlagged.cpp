@@ -210,7 +210,7 @@ int UNLAGGED_Gametic( player_t *player )
 
 // Shift stuff back in time before doing hitscan calculations
 // Call UNLAGGED_Restore afterwards to restore everything
-void UNLAGGED_Reconcile( AActor *actor )
+int UNLAGGED_Reconcile( AActor *actor )
 {
 	if ( sv_unlagged_debugactors && actor->player && NETWORK_GetState() == NETSTATE_CLIENT )
 		UNLAGGED_SpawnDebugActors( actor->player, false );
@@ -218,7 +218,7 @@ void UNLAGGED_Reconcile( AActor *actor )
 	//Only do anything if the actor to be reconciled is a player,
 	//it's on a server with unlagged on, and reconciliation is not being blocked
 	if ( !actor || !actor->player || (NETWORK_GetState() != NETSTATE_SERVER) || !NETWORK_IsUnlaggedEnabled( actor->player ) || ( reconciliationBlockers > 0 ) || actor->player->bIsBot )
-		return;
+		return 0;
 
 	//Something went wrong, reconciliation was attempted when the gamestate
 	//was already reconciled!
@@ -236,6 +236,8 @@ void UNLAGGED_Reconcile( AActor *actor )
 
 	if ( sv_unlagged_debugactors )
 		UNLAGGED_SpawnDebugActors( actor->player, true );
+
+	return gametic - unlaggedGametic;
 }
 
 void UNLAGGED_ReconcileTick( AActor *actor, int Tic )

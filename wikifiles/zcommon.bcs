@@ -1587,6 +1587,8 @@ special
 -151:SetPlayerWeaponZoomFactor(int,int;int):void,
 -152:SetPlayerSkin(int,str;bool):void,
 -153:SetNetworkReplicationFlags(int):void,
+-154:UnlaggedReconcile(int):int,
+-155:UnlaggedRestore(int):void,
 
 // ZDoom/GZDoom.
 -200:CheckClass(str):bool,

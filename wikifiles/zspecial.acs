@@ -436,6 +436,8 @@ special
 	-151:SetPlayerWeaponZoomFactor(2,3),
 	-152:SetPlayerSkin(2,3),
 	-153:SetNetworkReplicationFlags(1),
+	-154:UnlaggedReconcile(1),
+	-155:UnlaggedRestore(1),
 
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),

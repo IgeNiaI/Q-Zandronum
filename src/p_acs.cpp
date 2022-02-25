@@ -89,6 +89,7 @@
 #include "za_database.h"
 #include "cl_commands.h"
 #include "cl_main.h"
+#include "unlagged.h"
 
 #include "g_shared/a_pickups.h"
 
@@ -5427,6 +5428,8 @@ enum EACSFunctions
 	ACSF_SetPlayerWeaponZoomFactor,
 	ACSF_SetPlayerSkin,
 	ACSF_SetNetworkReplicationFlags,
+	ACSF_UnlaggedReconcile,
+	ACSF_UnlaggedRestore,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7830,6 +7833,20 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 		case ACSF_SetNetworkReplicationFlags:
 			networkReplicationFlags = args[0];
+			break;
+
+		case ACSF_UnlaggedReconcile:
+			if ( NETWORK_GetState() == NETSTATE_SERVER )
+			{
+				return UNLAGGED_Reconcile( SingleActorFromTID(args[0], activator) );
+			}
+			return 0;
+
+		case ACSF_UnlaggedRestore:
+			if ( NETWORK_GetState() == NETSTATE_SERVER )
+			{
+				UNLAGGED_Restore( SingleActorFromTID(args[0], activator) );
+			}
 			break;
 
 		default:
