@@ -9648,7 +9648,7 @@ scriptwait:
 					if (( pcd == PCD_ENDPRINTBOLD ) || ( screen == NULL ))
 						SERVERCOMMANDS_PrintMid( work.GetChars( ), false );
 					// Otherwise, if a player is the activator, send him the message.
-					else if ( screen->player )
+					else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
 						SERVERCOMMANDS_PrintMid( work.GetChars( ), false, screen->player - players, SVCF_ONLYTHISCLIENT );
 				}
 
@@ -9710,7 +9710,7 @@ scriptwait:
 						{
 							if (( pcd == PCD_ENDHUDMESSAGEBOLD ) || ( screen == NULL ))
 								SERVERCOMMANDS_PrintHUDMessage( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id );
-							else if ( screen->player )
+							else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
 								SERVERCOMMANDS_PrintHUDMessage( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, screen->player - players, SVCF_ONLYTHISCLIENT );
 						}
 						else
@@ -9726,7 +9726,7 @@ scriptwait:
 							{
 								if (( pcd == PCD_ENDHUDMESSAGEBOLD ) || ( screen == NULL ))
 									SERVERCOMMANDS_PrintHUDMessageFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id );
-								else if ( screen->player )
+								else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
 									SERVERCOMMANDS_PrintHUDMessageFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, screen->player - players, SVCF_ONLYTHISCLIENT );
 							}
 							else
@@ -9744,7 +9744,7 @@ scriptwait:
 							{
 								if (( pcd == PCD_ENDHUDMESSAGEBOLD ) || ( screen == NULL ))
 									SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, typeTime, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id );
-								else if ( screen->player )
+								else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
 									SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, typeTime, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, screen->player - players, SVCF_ONLYTHISCLIENT );
 							}
 							else
@@ -9762,7 +9762,7 @@ scriptwait:
 							{
 								if (( pcd == PCD_ENDHUDMESSAGEBOLD ) || ( screen == NULL ))
 									SERVERCOMMANDS_PrintHUDMessageFadeInOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, inTime, outTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id );
-								else if ( screen->player )
+								else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
 									SERVERCOMMANDS_PrintHUDMessageFadeInOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, inTime, outTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, screen->player - players, SVCF_ONLYTHISCLIENT );
 							}
 							else
