@@ -1070,7 +1070,7 @@ int		ACS_PushAndReturnDynamicString ( const FString &Work, const SDWORD *stack, 
 bool	ACS_ExistsScript( int script );
 
 // [BB] Export DoGiveInv
-bool	DoGiveInv(AActor *actor, const PClass *info, int amount);
+bool	DoGiveInv(AActor *actor, const PClass *info, int amount, player_t* ownerPlayer = NULL);
 
 int		GetNetworkReplicationFlags();
 

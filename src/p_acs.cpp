@@ -1208,7 +1208,7 @@ static void ClearInventory (AActor *activator)
 //============================================================================
 
 // [BB] I need this outside p_acs.cpp. Furthermore it now returns whether CallTryPickup was successful.
-/*static*/ bool DoGiveInv (AActor *actor, const PClass *info, int amount)
+/*static*/ bool DoGiveInv (AActor *actor, const PClass *info, int amount, player_t* ownerPlayer)
 {
 	// [BB]
 	bool bSuccess = true;
@@ -1217,7 +1217,7 @@ static void ClearInventory (AActor *activator)
 		? actor->player->PendingWeapon : NULL;
 	bool hadweap = actor->player != NULL ? actor->player->ReadyWeapon != NULL : true;
 
-	AInventory *item = static_cast<AInventory *>(Spawn (info, 0,0,0, NO_REPLACE));
+	AInventory *item = static_cast<AInventory *>(Spawn (info, 0,0,0, NO_REPLACE, ownerPlayer));
 
 	// This shouldn't count for the item statistics!
 	item->ClearCounters();
@@ -1270,10 +1270,20 @@ static void ClearInventory (AActor *activator)
 	// [BC] If we're the server, give the item to clients.
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( actor->player ) && ( item ))
 	{
-		SERVERCOMMANDS_GiveInventory( actor->player - players, item );
-		// [BB] The armor display amount has to be updated separately.
-		if( item->GetClass()->IsDescendantOf (RUNTIME_CLASS(AArmor)))
-			SERVERCOMMANDS_SetPlayerArmor( actor->player - players );
+		if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+		{
+			SERVERCOMMANDS_GiveInventory( actor->player - players, item, actor->player - players, SVCF_SKIPTHISCLIENT );
+			// [BB] The armor display amount has to be updated separately.
+			if( item->GetClass()->IsDescendantOf (RUNTIME_CLASS(AArmor)))
+				SERVERCOMMANDS_SetPlayerArmor( actor->player - players, actor->player - players, SVCF_SKIPTHISCLIENT );
+		}
+		else
+		{
+			SERVERCOMMANDS_GiveInventory( actor->player - players, item );
+			// [BB] The armor display amount has to be updated separately.
+			if( item->GetClass()->IsDescendantOf (RUNTIME_CLASS(AArmor)))
+				SERVERCOMMANDS_SetPlayerArmor( actor->player - players );
+		}
 	}
 
 	// [BB]
@@ -1288,7 +1298,7 @@ static void ClearInventory (AActor *activator)
 //
 //============================================================================
 
-static void GiveInventory (AActor *activator, const char *type, int amount)
+static void GiveInventory (AActor *activator, const char *type, int amount, player_t* ownerPlayer)
 {
 	const PClass *info;
 
@@ -1314,12 +1324,12 @@ static void GiveInventory (AActor *activator, const char *type, int amount)
 		for (int i = 0; i < MAXPLAYERS; ++i)
 		{
 			if (playeringame[i])
-				DoGiveInv (players[i].mo, info, amount);
+				DoGiveInv (players[i].mo, info, amount, NULL);
 		}
 	}
 	else
 	{
-		DoGiveInv (activator, info, amount);
+		DoGiveInv (activator, info, amount, ownerPlayer);
 	}
 }
 
@@ -1344,7 +1354,12 @@ static void DoTakeInv (AActor *actor, const PClass *info, int amount)
 		// [BB] We may not pass a negative amount to SERVERCOMMANDS_TakeInventory.
 		// [BB] Also only inform the client if it had actually had something that could be taken.
 		if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( actor->player ) && ( ( oldAmount > 0 ) || ( amount < 0 ) ) )
-			SERVERCOMMANDS_TakeInventory( actor->player - players, item->GetClass(), MAX( 0, item->Amount ) );
+		{
+			if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+				SERVERCOMMANDS_TakeInventory( actor->player - players, item->GetClass(), MAX( 0, item->Amount ), actor->player - players, SVCF_SKIPTHISCLIENT );
+			else
+				SERVERCOMMANDS_TakeInventory( actor->player - players, item->GetClass(), MAX( 0, item->Amount ) );
+		}
 		if (item->Amount <= 0)
 		{
 			// If it's not ammo or an internal armor, destroy it.
@@ -10365,7 +10380,7 @@ scriptwait:
 			break;
 
 		case PCD_GIVEINVENTORY:
-			GiveInventory (activator, FBehavior::StaticLookupString (STACK(2)), STACK(1));
+			GiveInventory (activator, FBehavior::StaticLookupString (STACK(2)), STACK(1), NETWORK_GetActorsOwnerPlayer( activator ));
 			sp -= 2;
 			break;
 
@@ -10374,7 +10389,7 @@ scriptwait:
 				const char *type = FBehavior::StaticLookupString(STACK(2));
 				if (STACK(3) == 0)
 				{
-					GiveInventory(NULL, FBehavior::StaticLookupString(STACK(2)), STACK(1));
+					GiveInventory(NULL, FBehavior::StaticLookupString(STACK(2)), STACK(1), NULL);
 				}
 				else
 				{
@@ -10382,7 +10397,7 @@ scriptwait:
 					AActor *actor;
 					for (actor = it.Next(); actor != NULL; actor = it.Next())
 					{
-						GiveInventory(actor, type, STACK(1));
+						GiveInventory(actor, type, STACK(1), NULL);
 					}
 				}
 				sp -= 3;
@@ -10390,7 +10405,7 @@ scriptwait:
 			break;
 
 		case PCD_GIVEINVENTORYDIRECT:
-			GiveInventory (activator, FBehavior::StaticLookupString (TAGSTR(uallong(pc[0]))), uallong(pc[1]));
+			GiveInventory (activator, FBehavior::StaticLookupString (TAGSTR(uallong(pc[0]))), uallong(pc[1]), NETWORK_GetActorsOwnerPlayer( activator ));
 			pc += 2;
 			break;
 
