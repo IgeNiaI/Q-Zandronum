@@ -233,6 +233,24 @@ public:
 	// Quake CPM movement only
 	float		CpmAirAcceleration;
 	float		CpmMaxForwardAngleRad;
+	
+	int			jumpTics;				// delay the next jump for a moment
+	int			secondJumpTics;			// delay the next second jump for a moment
+	int			secondJumpsRemaining;	// remaining second jump uses
+	int			stepInterval;
+	int			crouchSlideEffectTics;
+	int			wallClimbEffectTics;
+
+	// [Ivory] movement additions
+	int			secondJumpState;
+	float		crouchSlideTics;
+	bool		isCrouchSliding;
+	float		wallClimbTics;
+	bool		isWallClimbing;
+	float		airWallRunTics;
+	bool		isAirWallRunning;
+	int			prepareTapValue;
+	int			lastTapValue;
 
 	// Scripts to execute when the player presses the action buttons
 	FNameNoInit
@@ -628,24 +646,7 @@ public:
 	const PClass *MorphExitFlash;		// flash to apply when demorphing (cache of value given to P_MorphPlayer)
 	TObjPtr<AWeapon>	PremorphWeapon;		// ready weapon before morphing
 	int			chickenPeck;			// chicken peck countdown
-	int			jumpTics;				// delay the next jump for a moment
-	int			secondJumpTics;			// delay the next second jump for a moment
-	int			secondJumpsRemaining;	// remaining second jump uses
 	bool		onground;				// Identifies if this player is on the ground or other object
-	int			stepInterval;
-	int			crouchSlideEffectTics;
-	int			wallClimbEffectTics;
-
-	// [Ivory] movement additions
-	int			secondJumpState;
-	float		crouchSlideTics;
-	bool		isCrouchSliding;
-	float		wallClimbTics;
-	bool		isWallClimbing;
-	float		airWallRunTics;
-	bool		isAirWallRunning;
-	int			prepareTapValue;
-	int			lastTapValue;
 
 	int			respawn_time;			// [RH] delay respawning until this tic
 	int			force_respawn_time;		// [geNia] if enabled, force respawn after this tic

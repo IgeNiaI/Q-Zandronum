@@ -2958,7 +2958,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		}
 	}
 
-	if (mo->player && mo->player->mo && mo->player->isAirWallRunning && mo->velz < 0)
+	if (mo->player && mo->player->mo && mo->player->mo->isAirWallRunning && mo->velz < 0)
 		mo->velz = 0;
 
 	// [W] Added old ZDoom physics compatibility
@@ -3505,7 +3505,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 		}
 		//	mo->player->centering = true;
 	}
-	else if (mo->waterlevel < 2 && mo->player->mo && !mo->player->isCrouchSliding)
+	else if (mo->waterlevel < 2 && mo->player->mo && !mo->player->mo->isCrouchSliding)
 	{
 		if (!(mo->mvFlags & MV_SILENT) && mo->player->mo->ShouldPlayFootsteps(&(mo->player->cmd), true))
 			S_Sound(mo, CHAN_SIX, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM, true, mo->player - players);
@@ -3513,8 +3513,8 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 		mo->player->mo->CreateEffectActor( EA_FOOTSTEP );
 	}
 
-	if (mo->player->secondJumpState == SJ_READY) {
-		mo->player->secondJumpState = SJ_AVAILABLE;
+	if (mo->player->mo && mo->player->mo->secondJumpState == SJ_READY) {
+		mo->player->mo->secondJumpState = SJ_AVAILABLE;
 	}
 }
 

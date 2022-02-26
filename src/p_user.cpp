@@ -318,22 +318,6 @@ player_t::player_t()
   MorphExitFlash(0),
   PremorphWeapon(0),
   chickenPeck(0),
-  jumpTics(0),
-  secondJumpTics(0),
-  secondJumpsRemaining(0),
-  onground(0),
-  stepInterval(0),
-  crouchSlideEffectTics(0),
-  wallClimbEffectTics(0),
-  secondJumpState(0),
-  crouchSlideTics(0),
-  isCrouchSliding(false),
-  wallClimbTics(0),
-  isWallClimbing(false),
-  airWallRunTics(0),
-  isAirWallRunning(false),
-  prepareTapValue(0),
-  lastTapValue(0),
   respawn_time(0),
   force_respawn_time(0),
   camera(0),
@@ -482,22 +466,6 @@ player_t::player_t()
 	  MorphExitFlash = p.MorphExitFlash;
 	  PremorphWeapon = p.PremorphWeapon;
 	  chickenPeck = p.chickenPeck;
-	  jumpTics = p.jumpTics;
-	  secondJumpTics = p.secondJumpTics;
-	  secondJumpsRemaining = p.secondJumpsRemaining;
-	  onground = p.onground;
-	  stepInterval = p.stepInterval;
-	  crouchSlideEffectTics = p.crouchSlideEffectTics;
-	  wallClimbEffectTics = p.wallClimbEffectTics;
-	  secondJumpState = p.secondJumpState;
-	  crouchSlideTics = p.crouchSlideTics;
-	  isCrouchSliding = p.isCrouchSliding;
-	  wallClimbTics = p.wallClimbTics;
-	  isWallClimbing = p.isWallClimbing;
-	  airWallRunTics = p.airWallRunTics;
-	  isAirWallRunning = p.isAirWallRunning;
-	  prepareTapValue = p.prepareTapValue;
-	  lastTapValue = p.lastTapValue;
 	  respawn_time = p.respawn_time;
 	  force_respawn_time = p.force_respawn_time;
 	  camera = p.camera;
@@ -2566,7 +2534,7 @@ bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd, bool landing)
 	if ( NETWORK_InClientMode() && (player - players != consoleplayer) )
 		return false;
 
-	if ((!player->isAirWallRunning && !player->onground && !landing) || player->mo->waterlevel >= 2 ||
+	if ((!player->mo->isAirWallRunning && !player->onground && !landing) || player->mo->waterlevel >= 2 ||
 		(player->mo->flags & MF_NOGRAVITY))
 	{
 		return false;
@@ -2614,7 +2582,7 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 
 	if ( ShouldPlayFootsteps( cmd, false ) )
 	{
-		if (player->stepInterval <= 0)
+		if (player->mo->stepInterval <= 0)
 		{
 			if (!(player->mo->mvFlags & MV_SILENT))
 			{
@@ -2624,16 +2592,16 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 
 			CreateEffectActor( EA_FOOTSTEP );
 
-			player->stepInterval = player->mo->FootstepInterval;
+			player->mo->stepInterval = player->mo->FootstepInterval;
 		}
 		else
 		{
-			player->stepInterval--;
+			player->mo->stepInterval--;
 		}
 	}
 	else
 	{
-		player->stepInterval = player->mo->FootstepInterval / 2;
+		player->mo->stepInterval = player->mo->FootstepInterval / 2;
 	}
 }
 
@@ -3465,7 +3433,7 @@ void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const f
 	{
 		drop = velocity * friction / TICRATE;
 	}
-	else if ( (player->onground || player->isWallClimbing) && !player->mo->InState( FindState( NAME_Pain ) ) )
+	else if ( (player->onground || player->mo->isWallClimbing) && !player->mo->InState( FindState( NAME_Pain ) ) )
 	{
 		control = velocity < groundspeedlimit ? friction : velocity;
 		drop = control * friction / TICRATE;
@@ -3504,41 +3472,41 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 {
 	// dash cooler
-	if (player->secondJumpTics > 0)
+	if (player->mo->secondJumpTics > 0)
 		return false;
 
 	bool success = false;
 	int tapValue = cmd->ucmd.forwardmove | cmd->ucmd.sidemove;
 	int secondTapValue = 0;
 
-	if (tapValue & ~player->lastTapValue)
+	if (tapValue & ~player->mo->lastTapValue)
 	{
-		if (!player->prepareTapValue)
+		if (!player->mo->prepareTapValue)
 		{
-			player->secondJumpTics = -10;
-			player->prepareTapValue = tapValue;
+			player->mo->secondJumpTics = -10;
+			player->mo->prepareTapValue = tapValue;
 		}
 		else
 		{
-			if (tapValue != player->prepareTapValue)
-				player->prepareTapValue = 0;
+			if (tapValue != player->mo->prepareTapValue)
+				player->mo->prepareTapValue = 0;
 			else
 				secondTapValue = tapValue;
 		}
 	}
 
-	if (secondTapValue && player->secondJumpTics < 0)
+	if (secondTapValue && player->mo->secondJumpTics < 0)
 	{
-		player->prepareTapValue = 0;
+		player->mo->prepareTapValue = 0;
 
 		success = true;
 	}
-	else if (player->secondJumpTics >= 0)
+	else if (player->mo->secondJumpTics >= 0)
 	{
-		player->prepareTapValue = 0;
+		player->mo->prepareTapValue = 0;
 	}
 
-	player->lastTapValue = tapValue;
+	player->mo->lastTapValue = tapValue;
 
 	return success;
 }
@@ -3552,30 +3520,30 @@ bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 void P_SetSlideStatus(player_t *player, const bool& isSliding)
 {
 	// crouch slide sound start/stop
-	if (isSliding && !player->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
+	if (isSliding && !player->mo->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
 			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, true, player - players);
 	}
-	else if (!isSliding && player->isCrouchSliding)
+	else if (!isSliding && player->mo->isCrouchSliding)
 	{
 		S_StopSound(player->mo, CHAN_SEVEN, player - players);
 	}
 
 	if ( isSliding )
 	{
-		if ( player->crouchSlideEffectTics <= 0 )
+		if ( player->mo->crouchSlideEffectTics <= 0 )
 		{
 			player->mo->CreateEffectActor( EA_CROUCH_SLIDE );
-			player->crouchSlideEffectTics = player->mo->CrouchSlideEffectInterval;
+			player->mo->crouchSlideEffectTics = player->mo->CrouchSlideEffectInterval;
 		}
 		else
 		{
-			player->crouchSlideEffectTics--;
+			player->mo->crouchSlideEffectTics--;
 		}
 	}
 
-	player->isCrouchSliding = isSliding;
+	player->mo->isCrouchSliding = isSliding;
 }
 
 void P_TraceForWall(APlayerPawn *mo, angle_t angle, FTraceResults &trace) {
@@ -3593,30 +3561,30 @@ void P_TraceForWall(APlayerPawn *mo, angle_t angle, FTraceResults &trace) {
 void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 {
 	// Wall climb parameters and sound start/stop
-	if (isClimbing && !player->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
+	if (isClimbing && !player->mo->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
 			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, true, player - players);
 	}
-	else if (!isClimbing && player->isWallClimbing)
+	else if (!isClimbing && player->mo->isWallClimbing)
 	{
 		S_StopSound(player->mo, CHAN_SEVEN, player - players);
 	}
 
 	if (isClimbing)
 	{
-		if ( player->wallClimbEffectTics <= 0 )
+		if ( player->mo->wallClimbEffectTics <= 0 )
 		{
 			player->mo->CreateEffectActor( EA_WALL_CLIMB );
-			player->wallClimbEffectTics = player->mo->WallClimbEffectInterval;
+			player->mo->wallClimbEffectTics = player->mo->WallClimbEffectInterval;
 		}
 		else
 		{
-			player->wallClimbEffectTics--;
+			player->mo->wallClimbEffectTics--;
 		}
 	}
 
-	player->isWallClimbing = isClimbing;
+	player->mo->isWallClimbing = isClimbing;
 }
 
 void APlayerPawn::DoJump(ticcmd_t *cmd)
@@ -3626,35 +3594,35 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 
 	if (player->onground)
 	{
-		player->secondJumpsRemaining = SecondJumpAmount;
+		player->mo->secondJumpsRemaining = SecondJumpAmount;
 
 		if (!(mvFlags & MV_DOUBLETAPJUMP))
 		{
-			player->secondJumpState = SJ_AVAILABLE;
+			player->mo->secondJumpState = SJ_AVAILABLE;
 		}
 
-		if (player->jumpTics < 0 || velz < -8 * FRACUNIT)
-			player->jumpTics = JumpDelay;
+		if (player->mo->jumpTics < 0 || velz < -8 * FRACUNIT)
+			player->mo->jumpTics = JumpDelay;
 	}
-	else if (player->secondJumpsRemaining != 0 && !((cmd->ucmd.buttons & BT_JUMP)))
+	else if (player->mo->secondJumpsRemaining != 0 && !((cmd->ucmd.buttons & BT_JUMP)))
 	{
 		if (!(mvFlags & MV_DOUBLETAPJUMP))
 		{
-			player->secondJumpState = SJ_AVAILABLE;
+			player->mo->secondJumpState = SJ_AVAILABLE;
 		}
 	}
 
-	if ((mvFlags & MV_DOUBLETAPJUMP) && player->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
+	if ((mvFlags & MV_DOUBLETAPJUMP) && player->mo->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
 	{
-		player->secondJumpState = SJ_READY;
-		player->secondJumpTics = 0;
+		player->mo->secondJumpState = SJ_READY;
+		player->mo->secondJumpTics = 0;
 	}
 
 	bool isClimbingLedge = player->onground && velz > 0 && cmd->ucmd.buttons & BT_CROUCH;
-	if (cmd->ucmd.buttons & BT_JUMP || player->secondJumpState == SJ_READY || isClimbingLedge)
+	if (cmd->ucmd.buttons & BT_JUMP || player->mo->secondJumpState == SJ_READY || isClimbingLedge)
 	{
 		// [Leo] Spectators shouldn't be limited by the server settings.
-		if (player->onground && !player->jumpTics && player->secondJumpState != SJ_READY)
+		if (player->onground && !player->mo->jumpTics && player->mo->secondJumpState != SJ_READY)
 		{
 			bool isRampJumper = (mvFlags & MV_RAMPJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
@@ -3805,11 +3773,11 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 						velz += elevatorSpeed;
 				}
 
-				player->jumpTics = ulJumpTicks;
+				player->mo->jumpTics = ulJumpTicks;
 			}
 		}
 		// [Ivory]: Double Jump and wall jump
-		else if (player->secondJumpState == SJ_READY && player->secondJumpTics == 0)
+		else if (player->mo->secondJumpState == SJ_READY && player->mo->secondJumpTics == 0)
 		{
 			// Wall proximity check
 			bool doSecondJump = false;
@@ -3865,13 +3833,13 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 
 				CreateEffectActor( EA_SECOND_JUMP );
 
-				player->jumpTics = JumpDelay;
-				player->secondJumpTics = SecondJumpDelay;
+				player->mo->jumpTics = JumpDelay;
+				player->mo->secondJumpTics = SecondJumpDelay;
 
-				if (player->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
-					player->secondJumpsRemaining--;
+				if (player->mo->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
+					player->mo->secondJumpsRemaining--;
 
-				player->secondJumpState = SJ_NOT_AVAILABLE;
+				player->mo->secondJumpState = SJ_NOT_AVAILABLE;
 			}
 		}
 		else
@@ -3885,9 +3853,9 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 		if ( JumpSoundDelay > 0 )
 			JumpSoundDelay--;
 
-		if ( !player->onground && player->secondJumpState == SJ_AVAILABLE && player->secondJumpsRemaining != 0 )
+		if ( !player->onground && player->mo->secondJumpState == SJ_AVAILABLE && player->mo->secondJumpsRemaining != 0 )
 		{
-			player->secondJumpState = SJ_READY;
+			player->mo->secondJumpState = SJ_READY;
 		}
 	}
 }
@@ -3909,7 +3877,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
 
 	// Wall proximity check
-	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && anyMove && velocity <= 1048576) // 1048576 == 16.f
+	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->mo->wallClimbTics > 0 && anyMove && velocity <= 1048576) // 1048576 == 16.f
 	{
 		FTraceResults secondJumpTrace;
 		P_TraceForWall(player->mo, player->mo->angle, secondJumpTrace);
@@ -3921,7 +3889,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 		player->mo->velx /= 2;
 		player->mo->vely /= 2;
 		player->mo->velz = player->mo->WallClimbSpeed;
-		player->wallClimbTics--;
+		player->mo->wallClimbTics--;
 	}
 	else
 	{
@@ -4006,7 +3974,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 
 	// set wall climb parameters
 	if (player->onground || player->mo->waterlevel > 1 || (player->mo->flags & MF_NOGRAVITY))
-		player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+		player->mo->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->mo->wallClimbTics + player->mo->WallClimbRegen);
 	if (isClimber)
 		P_SetClimbStatus(player, isClimbing);
 
@@ -4109,10 +4077,10 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		// Regen wall climb tics
 		if ( isClimber )
-			player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+			player->mo->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->mo->wallClimbTics + player->mo->WallClimbRegen);
 		// Regen air wall run tics
 		if ( isAirWallRunner )
-			player->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->airWallRunTics + player->mo->AirWallRunRegen);
+			player->mo->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->mo->airWallRunTics + player->mo->AirWallRunRegen);
 	}
 	else if (player->mo->flags & MF_NOGRAVITY)
 	{
@@ -4143,15 +4111,15 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		// Regen wall climb tics
 		if ( isClimber )
-			player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+			player->mo->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->mo->wallClimbTics + player->mo->WallClimbRegen);
 		// Regen air wall run tics
 		if ( isAirWallRunner )
-			player->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->airWallRunTics + player->mo->AirWallRunRegen);
+			player->mo->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->mo->airWallRunTics + player->mo->AirWallRunRegen);
 	}
 	else
 	{
 		// Wall proximity check
-		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
+		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->mo->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
 			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxGroundSpeed + 2.f)
 		{
 			FTraceResults secondJumpTrace;
@@ -4163,7 +4131,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		{
 			player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction);
 			vel.Z = FIXED2FLOAT(player->mo->WallClimbSpeed);
-			player->wallClimbTics--;
+			player->mo->wallClimbTics--;
 			noJump = true;
 		}
 		else
@@ -4177,7 +4145,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				LocalVelocityCap = MAX(FIXED2FLOAT(player->mo->VelocityCap), float(FVector2(vel.X, vel.Y).Length()));
 			}
 
-			if (!player->onground || ((cmd->ucmd.buttons & BT_JUMP) && player->jumpTics <= 0))
+			if (!player->onground || ((cmd->ucmd.buttons & BT_JUMP) && player->mo->jumpTics <= 0))
 			{
 				maxGroundSpeed *= moveFactor;
 				velocity = float(FVector2(vel.X, vel.Y).Length());
@@ -4231,7 +4199,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					if ( player->crouchfactor > player->mo->CrouchScaleHalfWay
 						&& fixedVelocity >= player->mo->AirWallRunMinVelocity
 						&& acceleration.Length() > 0
-						&& player->airWallRunTics > 0 )
+						&& player->mo->airWallRunTics > 0 )
 					{
 						FVector3 accel2D = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0 };
 						VectorRotate(accel2D.X, accel2D.Y, flAngle);
@@ -4252,33 +4220,33 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 						}
 					}
 
-					player->isAirWallRunning = isAirWallRunning;
+					player->mo->isAirWallRunning = isAirWallRunning;
 					if (isAirWallRunning)
 					{
-						player->airWallRunTics--;
+						player->mo->airWallRunTics--;
 					}
 				}
 
 				// Regen crouch slide tics
 				if (isSlider)
 				{
-					if (player->crouchSlideTics < 0)
-						player->crouchSlideTics = -player->crouchSlideTics;
-					player->crouchSlideTics = MIN(player->mo->SlideMaxTics, player->crouchSlideTics + player->mo->SlideRegen);
+					if (player->mo->crouchSlideTics < 0)
+						player->mo->crouchSlideTics = -player->mo->crouchSlideTics;
+					player->mo->crouchSlideTics = MIN(player->mo->SlideMaxTics, player->mo->crouchSlideTics + player->mo->SlideRegen);
 				}
 			}
 			else if (!wasJustThrustedZ)
 			{
 				isSliding = isSlider &&									// player has the flag
 						   player->crouchfactor <= player->mo->CrouchScaleHalfWay &&	// player is crouching
-						   player->crouchSlideTics > 0;						// there is crouch slide charge to spend
+						   player->mo->crouchSlideTics > 0;						// there is crouch slide charge to spend
 
 				// Friction & Acceleration
 				if (isSliding)
 				{
 					player->mo->QFriction(vel, 0.f, player->mo->SlideFriction * floorFriction);
 					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->SlideAcceleration * floorFriction);
-					player->crouchSlideTics--;
+					player->mo->crouchSlideTics--;
 				}
 				else
 				{
@@ -4289,18 +4257,18 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					// Regen crouch slide tics
 					if (isSlider && player->crouchfactor > player->mo->CrouchScaleHalfWay)
 					{
-						if (player->crouchSlideTics > 0)
-							player->crouchSlideTics = -player->crouchSlideTics;
-						player->crouchSlideTics = MAX(-player->mo->SlideMaxTics, player->crouchSlideTics - player->mo->SlideRegen);
+						if (player->mo->crouchSlideTics > 0)
+							player->mo->crouchSlideTics = -player->mo->crouchSlideTics;
+						player->mo->crouchSlideTics = MAX(-player->mo->SlideMaxTics, player->mo->crouchSlideTics - player->mo->SlideRegen);
 					}
 				}
 
 				// Regen wall climb tics
 				if ( isClimber )
-					player->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->wallClimbTics + player->mo->WallClimbRegen);
+					player->mo->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->mo->wallClimbTics + player->mo->WallClimbRegen);
 				// Regen air wall run tics
 				if ( isAirWallRunner )
-					player->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->airWallRunTics + player->mo->AirWallRunRegen);
+					player->mo->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->mo->airWallRunTics + player->mo->AirWallRunRegen);
 			}
 
 			// Limit player velocity if enabled
@@ -4652,11 +4620,11 @@ void P_DeathThink (player_t *player)
 		}
 	}
 
-	if ( player->isCrouchSliding || player->isWallClimbing )
+	if ( player->mo->isCrouchSliding || player->mo->isWallClimbing )
 	{
 		S_StopSound( player->mo, CHAN_SEVEN );
-		player->isCrouchSliding = false;
-		player->isWallClimbing = false;
+		player->mo->isCrouchSliding = false;
+		player->mo->isWallClimbing = false;
 	}
 
 	// [BC] Respawning is server-side.
@@ -5100,21 +5068,21 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		return;
 	}
 
-	if (player->jumpTics && player->onground)
+	if (player->mo->jumpTics && player->onground)
 	{
-		player->jumpTics--;
-		if (player->jumpTics < -18)
+		player->mo->jumpTics--;
+		if (player->mo->jumpTics < -18)
 		{
-			player->jumpTics = 0;
+			player->mo->jumpTics = 0;
 		}
 	}
-	if (player->secondJumpTics > 0)
+	if (player->mo->secondJumpTics > 0)
 	{
-		player->secondJumpTics--;
+		player->mo->secondJumpTics--;
 	}
-	else if (player->secondJumpTics < 0)
+	else if (player->mo->secondJumpTics < 0)
 	{
-		player->secondJumpTics++;
+		player->mo->secondJumpTics++;
 	}
 
 	if (player->morphTics)// && !(player->cheats & CF_PREDICTING))
@@ -5637,14 +5605,6 @@ void player_t::Serialize (FArchive &arc)
 		<< MorphExitFlash
 		<< PremorphWeapon
 		<< chickenPeck
-		<< jumpTics
-		<< secondJumpState
-		<< crouchSlideTics
-		<< isCrouchSliding
-		<< wallClimbTics
-		<< isWallClimbing
-		<< airWallRunTics
-		<< isAirWallRunning
 		<< respawn_time
 		<< air_finished
 		<< turnticks
