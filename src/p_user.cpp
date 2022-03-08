@@ -2220,6 +2220,7 @@ void APlayerPawn::Die (AActor *source, AActor *inflictor, int dmgflags)
 	// [BC] Nothing for the client to do here.
 	if ( NETWORK_InClientMode() )
 	{
+		CLIENT_PREDICT_ClearSelfThrustBonuses( );
 		return;
 	}
 	

@@ -2670,6 +2670,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Recoil)
 	angle >>= ANGLETOFINESHIFT;
 	self->velx += FixedMul (xyvel, finecosine[angle]);
 	self->vely += FixedMul (xyvel, finesine[angle]);
+	
+	if ( NETWORK_InClientMode() && self->player == &players[consoleplayer] && self->player->mo == self )
+		CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( FixedMul (xyvel, finecosine[angle]), FixedMul (xyvel, finesine[angle]), false );
 
 	// [BB] Set the thing's velocity, also resync the position.
 	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( self->player == NULL ) )
@@ -3598,6 +3601,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCeiling)
 DEFINE_ACTION_FUNCTION(AActor, A_Stop)
 {
 	self->velx = self->vely = self->velz = 0;
+
+	if ( NETWORK_InClientMode() && self->player == &players[consoleplayer] && self->player->mo == self )
+	{
+		CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( 0, 0, true );
+		CLIENT_PREDICT_SaveSelfThrustBonusVertical( 0, true );
+	}
+
 	if (self->player && self->player->mo == self /*&& !(self->player->cheats & CF_PREDICTING)*/)
 	{
 		self->player->mo->PlayIdle();
@@ -4917,6 +4927,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ScaleVelocity)
 
 	INTBOOL was_moving = reference->velx | reference->vely | reference->velz;
 
+	if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
+	{
+		CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( FixedMul(reference->velx, scale), FixedMul(reference->vely, scale), true );
+		CLIENT_PREDICT_SaveSelfThrustBonusVertical( FixedMul(reference->velz, scale), true );
+	}
+
 	reference->velx = FixedMul(reference->velx, scale);
 	reference->vely = FixedMul(reference->vely, scale);
 	reference->velz = FixedMul(reference->velz, scale);
@@ -4975,12 +4991,24 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 		reference->velx = vx;
 		reference->vely = vy;
 		reference->velz = vz;
+
+		if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
+		{
+			CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( vx, vy, true );
+			CLIENT_PREDICT_SaveSelfThrustBonusVertical( vz, true );
+		}
 	}
 	else	// add new velocity to old velocity
 	{
 		reference->velx += vx;
 		reference->vely += vy;
 		reference->velz += vz;
+
+		if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
+		{
+			CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( vx, vy, false );
+			CLIENT_PREDICT_SaveSelfThrustBonusVertical( vz, false );
+		}
 	}
 
 	if (was_moving)
@@ -5187,6 +5215,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Teleport)
 		reference->z = reference->floorz;
 		reference->angle = spot->angle;
 		reference->velx = reference->vely = reference->velz = 0;
+
+		if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
+		{
+			CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( 0, 0, true );
+			CLIENT_PREDICT_SaveSelfThrustBonusVertical( 0, true );
+		}
 	}
 }
 
@@ -5563,6 +5597,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Warp)
 				self->velx = 0;
 				self->vely = 0;
 				self->velz = 0;
+
+				if ( NETWORK_InClientMode() && self->player == &players[consoleplayer] && self->player->mo == self )
+				{
+					CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( 0, 0, true );
+					CLIENT_PREDICT_SaveSelfThrustBonusVertical( 0, true );
+				}
 			}
 
 			if (flags & WARPF_WARPINTERPOLATION)

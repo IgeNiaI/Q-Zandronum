@@ -92,7 +92,6 @@ FRandom pr_damagemobj ("ActorTakeDamage");
 static FRandom pr_lightning ("LightningDamage");
 static FRandom pr_poison ("PoisonDamage");
 static FRandom pr_switcher ("SwitchTarget");
-static FRandom pr_kickbackdir ("KickbackDir");
 
 CVAR( Int, sv_terminatorfragaward, 10, CVAR_SERVERINFO | CVAR_LATCH | CVAR_GAMEMODESETTING );
 CVAR( Int, sv_ringouttics, 0, CVAR_SERVERINFO | CVAR_LATCH | CVAR_GAMEMODESETTING )
@@ -1383,7 +1382,7 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 			// haven't moved from their spawn spot at all.)
 			if (origin->x == target->x && origin->y == target->y)
 			{
-				ang = pr_kickbackdir.GenRand32();
+				ang = inflictor->actorRandom.GenRand32();
 			}
 			else
 			{
@@ -1419,37 +1418,52 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 				thrust *= 4;
 			}
 			ang >>= ANGLETOFINESHIFT;
+			fixed_t ThingThrustValues[3];
 			if (source && source->player && (flags & DMG_INFLICTOR_IS_PUFF)
 				&& source->player->ReadyWeapon != NULL &&
 				(source->player->ReadyWeapon->WeaponFlags & WIF_STAFF2_KICKBACK))
 			{
 				// Staff power level 2
-				target->velx += FixedMul (10*FRACUNIT, finecosine[ang]);
-				target->vely += FixedMul (10*FRACUNIT, finesine[ang]);
+				ThingThrustValues[0] = FixedMul (10*FRACUNIT, finecosine[ang]);
+				ThingThrustValues[1] = FixedMul (10*FRACUNIT, finesine[ang]);
 				if (!(target->flags & MF_NOGRAVITY))
 				{
-					target->velz += 5*FRACUNIT;
+					ThingThrustValues[2] = 5*FRACUNIT;
+				}
+				else
+				{
+					ThingThrustValues[2] = 0;
 				}
 			}
 			else if (zadmflags & ZADF_QUAKE_THRUST)
 			{
 				angle_t pitch = ((angle_t)(origin->pitch)) >> ANGLETOFINESHIFT;
 
-				target->velx += FixedMul (FixedMul (thrust, finecosine[ang]), finecosine[pitch]);
-				target->vely += FixedMul (FixedMul (thrust, finesine[ang]), finecosine[pitch]);
-				target->velz += FixedMul(thrust, -finesine[pitch]);
+				ThingThrustValues[0] = FixedMul (FixedMul (thrust, finecosine[ang]), finecosine[pitch]);
+				ThingThrustValues[1] = FixedMul (FixedMul (thrust, finesine[ang]), finecosine[pitch]);
+				ThingThrustValues[2] = FixedMul (thrust, -finesine[pitch]);
 			}
 			else
 			{
-				target->velx += FixedMul (thrust, finecosine[ang]);
-				target->vely += FixedMul (thrust, finesine[ang]);
+				ThingThrustValues[0] = FixedMul (thrust, finecosine[ang]);
+				ThingThrustValues[1] = FixedMul (thrust, finesine[ang]);
+				ThingThrustValues[2] = 0;
 			}
+
+			target->velx += ThingThrustValues[0];
+			target->vely += ThingThrustValues[1];
+			target->velz += ThingThrustValues[2];
 
 			// [BC] Set the thing's velocity.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
 				// [BB] Only update z-velocity if it has changed.
 				SERVER_UpdateThingVelocity ( target, oldTargetVelz != target->velz );
+			}
+			else if ( NETWORK_InClientMode( ) && target->player == &players[consoleplayer] && target->player->mo == target )
+			{
+				CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( ThingThrustValues[0], ThingThrustValues[1], false );
+				CLIENT_PREDICT_SaveSelfThrustBonusVertical( ThingThrustValues[2], false );
 			}
 		}
 	}

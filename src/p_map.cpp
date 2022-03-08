@@ -5709,6 +5709,9 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 			)
 			)	continue;
 
+		if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( thing ) )
+			continue;
+
 		// Barrels always use the original code, since this makes
 		// them far too "active." BossBrains also use the old code
 		// because some user levels require they have a height of 16,
@@ -5786,7 +5789,8 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 				int newdam = damage;
 
 				// [BC] Damage is server side.
-				if ( NETWORK_InClientMode() == false )
+				// [geNia] But allow calculating damage thrusts is clientside functions are allowed
+				if ( NETWORK_ClientsideFunctionsAllowedOrIsServer( thing ) )
 				{
 					if (!(flags & RADF_NODAMAGE))
 						newdam = P_DamageMobj(thing, bombspot, bombsource, damage, bombmod);
@@ -5819,6 +5823,8 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 
 					if (((flags & RADF_NODAMAGE) && bombsource == NULL) || !(bombspot->flags2 & MF2_NODMGTHRUST))
 					{
+						fixed_t ThingThrustValues[3];
+
 						// tweaked behavior rockets, only affects players
 						if ((zadmflags & ZADF_QUAKE_THRUST) && thing->player != NULL)
 						{
@@ -5834,9 +5840,9 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							}
 							explosionToPlayer *= points * 6 / (double)thing->Mass;
 
-							thing->velx += FLOAT2FIXED(explosionToPlayer.X);
-							thing->vely += FLOAT2FIXED(explosionToPlayer.Y);
-							thing->velz += FLOAT2FIXED(explosionToPlayer.Z);
+							ThingThrustValues[0] = FLOAT2FIXED(explosionToPlayer.X);
+							ThingThrustValues[1] = FLOAT2FIXED(explosionToPlayer.Y);
+							ThingThrustValues[2] = FLOAT2FIXED(explosionToPlayer.Z);
 						}
 						else
 						{
@@ -5850,22 +5856,34 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							// [BB] Potentially use the horizontal thrust of old ZDoom versions.
 							if ( zacompatflags & ZACOMPATF_OLD_EXPLOSION_THRUST )
 							{
-								thing->velx = origvelx + static_cast<fixed_t>((thing->x - bombspot->x) * thrust);
-								thing->vely = origvely + static_cast<fixed_t>((thing->y - bombspot->y) * thrust);
+								ThingThrustValues[0] = static_cast<fixed_t>((thing->x - bombspot->x) * thrust);
+								ThingThrustValues[1] = static_cast<fixed_t>((thing->y - bombspot->y) * thrust);
 							}
 							else
 							{
 								angle_t ang = R_PointToAngle2(bombspot->x, bombspot->y, thing->x, thing->y) >> ANGLETOFINESHIFT;
-								thing->velx += fixed_t(finecosine[ang] * thrust);
-								thing->vely += fixed_t(finesine[ang] * thrust);
+								ThingThrustValues[0] = fixed_t(finecosine[ang] * thrust);
+								ThingThrustValues[1] = fixed_t(finesine[ang] * thrust);
 							}
+							ThingThrustValues[2] = (fixed_t)velz;
+						}
 
-							// [BB] If ZADF_NO_ROCKET_JUMPING is on, don't give players any z-velocity if the attack was made by a player.
-							if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
-								( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
+						thing->velx += ThingThrustValues[0];
+						thing->vely += ThingThrustValues[1];
+
+						if ( NETWORK_InClientMode() && thing->player == &players[consoleplayer] && thing->player->mo == thing )
+							CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( ThingThrustValues[0], ThingThrustValues[1], false );
+
+						// [BB] If ZADF_NO_ROCKET_JUMPING is on, don't give players any z-velocity if the attack was made by a player.
+						if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
+							( bombsource == NULL ) || ( bombsource->player == NULL ) || ( thing->player == NULL ) )
+						{
+							if (!(flags & RADF_NODAMAGE) || (flags & RADF_THRUSTZ))
 							{
-								if (!(flags & RADF_NODAMAGE) || (flags & RADF_THRUSTZ))
-									thing->velz += (fixed_t)velz;	// this really doesn't work well
+								thing->velz += ThingThrustValues[2];
+
+								if ( NETWORK_InClientMode() && thing->player == &players[consoleplayer] && thing->player->mo == thing )
+									CLIENT_PREDICT_SaveSelfThrustBonusVertical( ThingThrustValues[2], false );
 							}
 						}
 

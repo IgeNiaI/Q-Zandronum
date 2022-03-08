@@ -107,6 +107,8 @@ static  DWORD		g_SavedOldButtons[CLIENT_PREDICTION_TICS];
 static	DWORD		g_SavedFlags[CLIENT_PREDICTION_TICS][9]; // 0 is mvFlags, 1 to 8 is flags to flags8
 static	int			g_SavedCheats[CLIENT_PREDICTION_TICS][2];
 static	int			g_SavedPredictable[CLIENT_PREDICTION_TICS][PREDICTABLES_SIZE];
+static	fixed_t		g_SelfThrustBonus[CLIENT_PREDICTION_TICS][3];
+static	bool		g_SelfThrustBonusOverride[CLIENT_PREDICTION_TICS][2];
 
 #ifdef	_DEBUG
 CVAR( Bool, cl_showpredictionsuccess, false, 0 );
@@ -319,6 +321,52 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 
 //*****************************************************************************
 //
+void CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( fixed_t velx, fixed_t vely, bool bOverride )
+{
+	if ( bOverride ) {
+		g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = velx;
+		g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = vely;
+		g_SelfThrustBonusOverride[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = true;
+	}
+	else
+	{
+		g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][0] += velx;
+		g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][1] += vely;
+	}
+}
+
+//*****************************************************************************
+//
+void CLIENT_PREDICT_SaveSelfThrustBonusVertical( fixed_t velz, bool bOverride )
+{
+	if ( bOverride ) {
+		g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][2] = velz;
+		g_SelfThrustBonusOverride[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = true;
+	}
+	else
+	{
+		g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][2] += velz;
+	}
+	if ( players[consoleplayer].mo->wasJustThrustedZ )
+		g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] = true;
+}
+
+//*****************************************************************************
+//
+void CLIENT_PREDICT_ClearSelfThrustBonuses( )
+{
+	for (int i = 0; i < CLIENT_PREDICTION_TICS; i++)
+	{
+		g_SelfThrustBonus[i][0] = 0;
+		g_SelfThrustBonus[i][1] = 0;
+		g_SelfThrustBonus[i][2] = 0;
+		g_SelfThrustBonusOverride[i][0] = false;
+		g_SelfThrustBonusOverride[i][1] = false;
+	}
+}
+
+//*****************************************************************************
+//
 static void client_predict_BeginPrediction( player_t *pPlayer )
 {
 	// Record the sectors
@@ -335,6 +383,13 @@ static void client_predict_BeginPrediction( player_t *pPlayer )
 	polyActionIt.Reinit();
 	while ((polyAction = polyActionIt.Next()))
 		polyAction->RecordPredict( g_ulGameTick % CLIENT_PREDICTION_TICS );
+
+	g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = 0;
+	g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = 0;
+	g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][2] = 0;
+	g_SelfThrustBonusOverride[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = false;
+	g_SelfThrustBonusOverride[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = false;
+	g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] = false;
 
 	g_SavedAngle[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->angle;
 	g_SavedPitch[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->pitch;
@@ -445,7 +500,7 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		pPlayer->turnticks = g_SavedTurnTicks[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->reactiontime = g_lSavedReactionTime[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->waterlevel = g_lSavedWaterLevel[lTick % CLIENT_PREDICTION_TICS];
-		pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[lTick % CLIENT_PREDICTION_TICS] != 0;
+		pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->oldbuttons = g_SavedOldButtons[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->mvFlags = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][0];
 		pPlayer->mo->flags = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][1];
@@ -468,6 +523,26 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		// Tick the player.
 		P_PlayerThink( pPlayer );
 		pPlayer->mo->Tick( );
+
+		if ( g_SelfThrustBonusOverride[lTick % CLIENT_PREDICTION_TICS][0] )
+		{
+			pPlayer->mo->velx = g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][0];
+			pPlayer->mo->vely = g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][1];
+		}
+		else
+		{
+			pPlayer->mo->velx += g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][0];
+			pPlayer->mo->vely += g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][1];
+		}
+
+		if ( g_SelfThrustBonusOverride[lTick % CLIENT_PREDICTION_TICS][1] )
+		{
+			pPlayer->mo->velz = g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][2];
+		}
+		else
+		{
+			pPlayer->mo->velz += g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][2];
+		}
 
 		// [BB] The effect of all DPushers needs to be manually predicted.
 		pusherIt.Reinit();
@@ -525,7 +600,7 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->turnticks = g_SavedTurnTicks[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->reactiontime = g_lSavedReactionTime[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->waterlevel = g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS];
-	pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] != 0;
+	pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->oldbuttons = g_SavedOldButtons[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->mvFlags = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][0];
 	pPlayer->mo->flags = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][1];
@@ -538,6 +613,7 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->mo->flags8 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][8];
 	pPlayer->cheats = g_SavedCheats[g_ulGameTick % CLIENT_PREDICTION_TICS][0];
 	pPlayer->cheats2 = g_SavedCheats[g_ulGameTick % CLIENT_PREDICTION_TICS][1];
+
 	memcpy( &pPlayer->cmd, &g_SavedTiccmd[g_ulGameTick % CLIENT_PREDICTION_TICS], sizeof( ticcmd_t ));
 }
 

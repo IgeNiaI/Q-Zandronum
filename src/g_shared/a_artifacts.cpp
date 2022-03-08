@@ -1004,6 +1004,11 @@ void APowerFlight::InitEffect ()
 	if (Owner->z <= Owner->floorz)
 	{
 		Owner->velz = 4*FRACUNIT;	// thrust the player in the air a bit
+
+		if ( NETWORK_InClientMode() )
+		{
+			CLIENT_PREDICT_SaveSelfThrustBonusVertical( 4*FRACUNIT, true );
+		}
 	}
 	if (Owner->velz <= -35*FRACUNIT)
 	{ // stop falling scream
