@@ -132,7 +132,6 @@ static FRandom pr_splat ("FAxeSplatter");
 static FRandom pr_ripperblood ("RipperBlood");
 static FRandom pr_chunk ("Chunk");
 static FRandom pr_checkmissilespawn ("CheckMissileSpawn");
-static FRandom pr_spawnmissile ("SpawnMissile");
 static FRandom pr_missiledamage ("MissileDamage");
 static FRandom pr_multiclasschoice ("MultiClassChoice");
 static FRandom pr_rockettrail("RocketTrail");
@@ -7479,14 +7478,14 @@ AActor *P_SpawnMissile (AActor *source, AActor *dest, const PClass *type, AActor
 		source, dest, type, true, owner, bSpawnOnClient); // [BB] Added bSpawnOnClient.
 }
 
-AActor *P_SpawnMissileZ (AActor *source, fixed_t z, AActor *dest, const PClass *type, const bool bSpawnOnClient) // [BB] Added bSpawnOnClient.
+AActor *P_SpawnMissileZ (AActor *source, fixed_t z, AActor *dest, const PClass *type, const bool bSpawnOnClient ) // [BB] Added bSpawnOnClient.
 {
 	return P_SpawnMissileXYZ (source->x, source->y, z, source, dest, type,
 		true, NULL, bSpawnOnClient ); // [BB] Added bSpawnOnClient.
 }
 
 AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
-	AActor *source, AActor *dest, const PClass *type, bool checkspawn, AActor *owner, const bool bSpawnOnClient ) // [BB] Added bSpawnOnClient.
+	AActor *source, AActor *dest, const PClass *type, bool checkspawn, AActor *owner, const bool bSpawnOnClient, const bool bNoUnlagged, const bool bUnlagDeath, const bool bSkipOwner ) // [BB] Added bSpawnOnClient.
 {
 	if (dest == NULL)
 	{
@@ -7500,8 +7499,10 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 		z -= source->floorclip;
 	}
 
-	AActor *th = Spawn (type, x, y, z, ALLOW_REPLACE);
+	AActor *th = Spawn (type, x, y, z, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( source ), bSkipOwner);
 
+	if ( !( th->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+		th->SetRandomSeed( source->actorRandom() );
 	P_PlaySpawnSound(th, source);
 
 	// record missile's originator
@@ -7536,7 +7537,7 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 	// [RC] Now monsters can aim at invisible player as if they were fully visible.
 	if (dest->flags & MF_SHADOW && !(source->flags6 & MF6_SEEINVISIBLE))
 	{
-		angle_t an = pr_spawnmissile.Random2 () << 20;
+		angle_t an = th->actorRandom.Random2 () << 20;
 		an >>= ANGLETOFINESHIFT;
 		
 		fixed_t newx = DMulScale16 (th->velx, finecosine[an], -th->vely, finesine[an]);
@@ -7555,9 +7556,19 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 	// [BB]
 	AActor *pMissile = (!checkspawn || P_CheckMissileSpawn (th, source->radius)) ? th : NULL;
 
+	// Mark actor as clientside if spawned on client
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( source ) && ( pMissile ) )
+		pMissile->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
+
 	// [BB] If we're the server, tell clients to spawn the missile.
-	if ( bSpawnOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
-		SERVERCOMMANDS_SpawnMissile( pMissile );
+	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
+	{
+		if ( bSpawnOnClient )
+		{
+			// [geNia] Compensate player ping when shooting missiles
+			UNLAGGED_UnlagAndReplicateMissile( source, pMissile, bSkipOwner, bNoUnlagged, bUnlagDeath );
+		}
+	}
 
 	return pMissile;
 }
@@ -7566,7 +7577,8 @@ AActor * P_OldSpawnMissile(AActor * source, AActor * owner, AActor * dest, const
 {
 	angle_t an;
 	fixed_t dist;
-	AActor *th = Spawn (type, source->x, source->y, source->z + 4*8*FRACUNIT, ALLOW_REPLACE);
+
+	AActor *th = Spawn (type, source->x, source->y, source->z + 4*8*FRACUNIT, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( source ));
 
 	P_PlaySpawnSound(th, source);
 	th->target = owner;		// record missile's originator
@@ -7607,7 +7619,7 @@ AActor *P_SpawnMissileAngle (AActor *source, const PClass *type,
 {
 	return P_SpawnMissileAngleZSpeed (source, source->z + 32*FRACUNIT + source->GetBobOffset(),
 		type, angle, velz, GetDefaultSpeed (type),
-		NULL, true, bSpawnOnClient ); // [BB] Added bSpawnOnClient.
+		NULL, true, bSpawnOnClient); // [BB] Added bSpawnOnClient.
 }
 
 AActor *P_SpawnMissileAngleZ (AActor *source, fixed_t z,
@@ -7629,7 +7641,7 @@ AActor *P_SpawnMissileZAimed (AActor *source, fixed_t z, AActor *dest, const PCl
 
 	if (dest->flags & MF_SHADOW)
 	{
-		an += pr_spawnmissile.Random2() << 20;
+		an += source->actorRandom.Random2() << 20;
 	}
 	dist = P_AproxDistance (dest->x - source->x, dest->y - source->y);
 	speed = GetDefaultSpeed (type);
@@ -7655,7 +7667,7 @@ AActor *P_SpawnMissileAngleSpeed (AActor *source, const PClass *type,
 }
 
 AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
-	const PClass *type, angle_t angle, fixed_t velz, fixed_t speed, AActor *owner, bool checkspawn, const bool bSpawnOnClient ) // [BB] Added bSpawnOnClient.
+	const PClass *type, angle_t angle, fixed_t velz, fixed_t speed, AActor *owner, bool checkspawn, const bool bSpawnOnClient, const bool bNoUnlagged, const bool bUnlagDeath, const bool bSkipOwner ) // [BB] Added bSpawnOnClient.
 {
 	AActor *mo;
 
@@ -7664,7 +7676,10 @@ AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
 		z -= source->floorclip;
 	}
 
-	mo = Spawn (type, source->x, source->y, z, ALLOW_REPLACE);
+	mo = Spawn (type, source->x, source->y, z, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( source ), bSkipOwner);
+
+	if ( !( mo->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+		mo->SetRandomSeed( source->actorRandom() );
 
 	P_PlaySpawnSound(mo, source);
 	if (owner == NULL) owner = source;
@@ -7683,9 +7698,18 @@ AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
 	// [BB]
 	AActor *pMissile = (!checkspawn || P_CheckMissileSpawn(mo, source->radius)) ? mo : NULL;
 
-	// [BB] If we're the server, tell clients to spawn the missile.
-	if ( bSpawnOnClient && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pMissile ))
-		SERVERCOMMANDS_SpawnMissile( pMissile );
+	// Mark actor as clientside if spawned on client
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( source ) && pMissile )
+		pMissile->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
+
+	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && pMissile )
+	{
+		if ( bSpawnOnClient )
+		{
+			// [geNia] Compensate player ping when shooting missiles
+			UNLAGGED_UnlagAndReplicateMissile( source, pMissile, bSkipOwner, bNoUnlagged, bUnlagDeath );
+		}
+	}
 
 	return pMissile;
 }
@@ -7713,8 +7737,8 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle,
 // [BC/BB] Added bSpawnSound.
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
-							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
-							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient, fixed_t pitchOffset)
+							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor, bool noautoaim, bool bSpawnSound, bool bSpawnOnClient,
+							  fixed_t pitchOffset, bool bNoUnlagged, bool bUnlagDeath, bool bSkipOwner)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
@@ -7823,8 +7847,18 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	if ( ( source->isMissile() ) && ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX ) )
 		z += source->height / 2;
 
-	AActor *MissileActor = Spawn (type, source->x + x, source->y + y, z, ALLOW_REPLACE, source->player);
+	player_t *ownerPlayer = NULL;
+	if ( !( GetDefaultByType( type )->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+		ownerPlayer = NETWORK_GetActorsOwnerPlayer( source );
+	AActor *MissileActor = Spawn (type, source->x + x, source->y + y, z, ALLOW_REPLACE, ownerPlayer, bSkipOwner);
 	if (pMissileActor) *pMissileActor = MissileActor;
+
+	if ( !( MissileActor->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+		MissileActor->SetRandomSeed( source->actorRandom() );
+
+	// Mark actor as clientside if spawned on client
+	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( source ) )
+		MissileActor->ulNetworkFlags |= NETFL_CLIENTSIDEONLY;
 
 	if ( bSpawnSound )
 	{
@@ -7860,17 +7894,29 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	bool bValidSpawn = P_CheckMissileSpawn (MissileActor, source->radius, false);
 
 	// [BC/BB] Possibly tell clients to spawn this missile.
-	// [WS] If we know the missile is going to explode,
-	// we need to spawn the missile for the clients.
-	if ( ( bSpawnOnClient || !bValidSpawn ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) )
-		SERVERCOMMANDS_SpawnMissile( MissileActor );
+	if ( bSpawnOnClient && NETWORK_GetState( ) == NETSTATE_SERVER )
+		// [geNia] Compensate player ping when shooting missiles
+		UNLAGGED_UnlagAndReplicateMissile( source, MissileActor, bSkipOwner, bNoUnlagged, bUnlagDeath );
 
 	if (bValidSpawn)
 	{
 		return MissileActor;
 	}
+
+	// [WS] If we know the missile is going to explode,
+	// we need to spawn the missile for the clients.
+	if ( bSpawnOnClient && NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
+		if ( NETWORK_ClientsideFunctionsAllowed( source->player ) || bSkipOwner )
+			SERVERCOMMANDS_SpawnMissile( MissileActor, source->player - players, SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_SpawnMissile( MissileActor );
+	}
 	// [WS] We are handling the explosion of the missile here instead of in P_CheckMissileSpawn.
-	P_ExplodeMissile(MissileActor, NULL, MissileActor->BlockingMobj);
+	if ( NETWORK_ClientsideFunctionsAllowed( source->player ) || bSkipOwner )
+		P_ExplodeMissile(MissileActor, NULL, MissileActor->BlockingMobj, source->player - players);
+	else
+		P_ExplodeMissile(MissileActor, NULL, MissileActor->BlockingMobj);
 	return NULL;
 }
 
