@@ -1666,7 +1666,8 @@ void A_FireCustomMissileHelper ( AActor *self,
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM) ? true : false, true, false, Pitch);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM) ? true : false, true, false,
+		Pitch, !!(flags & FPF_NOUNLAGGED), !!(flags & FPF_UNLAGDEATH), !!(flags & FPF_SKIPOWNER), !!(flags & FPF_FORCESERVERSIDE) );
 
 	// automatic handling of seeker missiles
 	if (misl)
@@ -1694,7 +1695,10 @@ void A_FireCustomMissileHelper ( AActor *self,
 
 		// [BC] If we're the server, tell clients to spawn this missile.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SpawnMissile( misl );
+		{
+			// [geNia] Compensate player ping when shooting missiles
+			UNLAGGED_UnlagAndReplicateMissile( self, misl, !!(flags & FPF_SKIPOWNER), !!(flags & FPF_NOUNLAGGED), !!(flags & FPF_UNLAGDEATH) );
+		}
 	}
 }
 
@@ -1718,6 +1722,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 	// out of ammo
 	if (UseAmmo && weapon && !weapon->DepleteAmmo(weapon->bAltFire, true))
 		return;
+
+	// [geNia] Don't spawn serverside actors on clients
+	if ( NETWORK_InClientMode( ) && ( Flags & FPF_FORCESERVERSIDE ) )
+	{
+		ACTION_SET_RESULT(false);
+		return;
+	}
 
 	// [BB] Should the actor not be spawned, taking in account client side only actors?
 	if ( NETWORK_ShouldActorNotBeSpawned ( self, ti ) )

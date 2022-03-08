@@ -7783,7 +7783,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle,
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor, bool noautoaim, bool bSpawnSound, bool bSpawnOnClient,
-							  fixed_t pitchOffset, bool bNoUnlagged, bool bUnlagDeath, bool bSkipOwner)
+							  fixed_t pitchOffset, bool bNoUnlagged, bool bUnlagDeath, bool bSkipOwner, bool bNoOwner)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
@@ -7893,12 +7893,12 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		z += source->height / 2;
 
 	player_t *ownerPlayer = NULL;
-	if ( !( GetDefaultByType( type )->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+	if ( !bNoOwner && !( GetDefaultByType( type )->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
 		ownerPlayer = NETWORK_GetActorsOwnerPlayer( source );
 	AActor *MissileActor = Spawn (type, source->x + x, source->y + y, z, ALLOW_REPLACE, ownerPlayer, bSkipOwner);
 	if (pMissileActor) *pMissileActor = MissileActor;
 
-	if ( !( MissileActor->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+	if ( !bNoOwner && !( MissileActor->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
 		MissileActor->SetRandomSeed( source->actorRandom() );
 
 	// Mark actor as clientside if spawned on client

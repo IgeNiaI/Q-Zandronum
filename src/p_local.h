@@ -158,7 +158,7 @@ AActor *P_SpawnPlayerMissile (AActor* source, const PClass *type);
 AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle, bool bSpawnSound = true );
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z, const PClass *type, angle_t angle,
 							  AActor **pLineTarget = NULL, AActor **MissileActor = NULL, bool noautoaim = false, bool bSpawnSound = true, bool bSpawnOnClient = true,
-							  fixed_t pitchOffset = 0, bool bNoUnlagged = false, bool bUnlagDeath = false, bool bSkipOwner = false );
+							  fixed_t pitchOffset = 0, bool bNoUnlagged = false, bool bUnlagDeath = false, bool bSkipOwner = false, bool bNoOwner = false );
 
 // [BB]
 inline void P_SpawnPlayerMissileWithPossibleSpread (AActor* source, const PClass *type)
@@ -192,6 +192,10 @@ enum
 	FPF_AIMATANGLE = 1,
 	FPF_TRANSFERTRANSLATION = 2,
 	FPF_NOAUTOAIM = 4,
+	FPF_NOUNLAGGED = 8,
+	FPF_UNLAGDEATH = 16,
+	FPF_SKIPOWNER = 32,
+	FPF_FORCESERVERSIDE = 64,
 };
 
 void P_CheckFakeFloorTriggers (AActor *mo, fixed_t oldz, bool oldz_has_viewheight=false);
