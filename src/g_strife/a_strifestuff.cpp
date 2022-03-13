@@ -646,7 +646,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_LoopActiveSound)
 
 DEFINE_ACTION_FUNCTION(AActor, A_CheckTerrain)
 {
-	sector_t *sec = self->Sector;
+	sector_t *sec = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? self->floorsector : self->Sector;
 
 	if (self->z == sec->floorplane.ZatPoint (self->x, self->y))
 	{

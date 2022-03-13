@@ -518,7 +518,7 @@ void P_PlayerInSpecialSector (player_t *player, sector_t * sector)
 	bool bSectorWasNull = false;
 	if (sector == NULL)
 	{
-		sector = player->mo->Sector;
+		sector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? player->mo->floorsector : player->mo->Sector;
 		bSectorWasNull = true;
 	}
 	int special = sector->special & ~SECRET_MASK;
@@ -850,7 +850,8 @@ void P_GiveSecret(AActor *actor, bool printmessage, bool playsound, bool allowcl
 
 void P_PlayerOnSpecialFlat (player_t *player, int floorType)
 {
-	if (player->mo->z > player->mo->Sector->floorplane.ZatPoint (
+	sector_t* theFloorSector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? player->mo->floorsector : player->mo->Sector;
+	if (player->mo->z > theFloorSector->floorplane.ZatPoint (
 		player->mo->x, player->mo->y) &&
 		!player->mo->waterlevel)
 	{ // Player is not touching the floor

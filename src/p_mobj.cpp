@@ -3143,10 +3143,11 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		if ((!mo->player || !(mo->player->cheats & CF_PREDICTING)) &&
 			mo->Sector->SecActTarget != NULL &&
 */
-		if  (mo->Sector->SecActTarget != NULL &&
-			mo->Sector->floorplane.ZatPoint (mo->x, mo->y) == mo->floorz)
+		sector_t* theFloorSector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? mo->floorsector : mo->Sector;
+		if  (theFloorSector->SecActTarget != NULL &&
+			theFloorSector->floorplane.ZatPoint (mo->x, mo->y) == mo->floorz)
 		{ // [RH] Let the sector do something to the actor
-			mo->Sector->SecActTarget->TriggerAction (mo, SECSPAC_HitFloor);
+			theFloorSector->SecActTarget->TriggerAction (mo, SECSPAC_HitFloor);
 		}
 		P_CheckFor3DFloorHit(mo);
 		// [RH] Need to recheck this because the sector action might have
@@ -3282,11 +3283,12 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 	// [WS] For clients, check to see if we are allowed to clip our actor's movement.
 	if (mo->z + mo->height > mo->ceilingz && CLIENT_CanClipMovement(mo))
 	{ // hit the ceiling
+		sector_t* theCeilingSector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? mo->ceilingsector : mo->Sector;
 		if (/*(!mo->player || !(mo->player->cheats & CF_PREDICTING)) &&*/
-			mo->Sector->SecActTarget != NULL &&
-			mo->Sector->ceilingplane.ZatPoint (mo->x, mo->y) == mo->ceilingz)
+			theCeilingSector->SecActTarget != NULL &&
+			theCeilingSector->ceilingplane.ZatPoint (mo->x, mo->y) == mo->ceilingz)
 		{ // [RH] Let the sector do something to the actor
-			mo->Sector->SecActTarget->TriggerAction (mo, SECSPAC_HitCeiling);
+			theCeilingSector->SecActTarget->TriggerAction (mo, SECSPAC_HitCeiling);
 		}
 		P_CheckFor3DCeilingHit(mo);
 		// [RH] Need to recheck this because the sector action might have
@@ -4738,23 +4740,27 @@ void AActor::CheckSectorTransition(sector_t *oldsec)
 		{
 			oldsec->SecActTarget->TriggerAction(this, SECSPAC_Exit);
 		}
+
+		sector_t* theFloorSector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? floorsector : Sector;
+		if (theFloorSector->SecActTarget != NULL && z <= theFloorSector->floorplane.ZatPoint(x, y))
+		{
+			theFloorSector->SecActTarget->TriggerAction(this, SECSPAC_HitFloor);
+		}
+		sector_t* theCeilingSector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? ceilingsector : Sector;
+		if (theCeilingSector->SecActTarget != NULL && z + height >= ceilingsector->ceilingplane.ZatPoint(x, y))
+		{
+			theCeilingSector->SecActTarget->TriggerAction(this, SECSPAC_HitCeiling);
+		}
 		if (Sector->SecActTarget != NULL)
 		{
 			int act = SECSPAC_Enter;
-			if (z <= Sector->floorplane.ZatPoint(x, y))
-			{
-				act |= SECSPAC_HitFloor;
-			}
-			if (z + height >= Sector->ceilingplane.ZatPoint(x, y))
-			{
-				act |= SECSPAC_HitCeiling;
-			}
 			if (Sector->heightsec != NULL && z == Sector->heightsec->floorplane.ZatPoint(x, y))
 			{
 				act |= SECSPAC_HitFakeFloor;
 			}
 			Sector->SecActTarget->TriggerAction(this, act);
 		}
+
 		if (z == floorz)
 		{
 			P_CheckFor3DFloorHit(this);
@@ -6904,7 +6910,10 @@ int P_GetThingFloorType (AActor *thing)
 	}
 	else
 	{
-		return TerrainTypes[thing->Sector->GetTexture(sector_t::floor)];
+		if (zadmflags & ZADF_ELEVATED_SPECIAL_FIX)
+			return TerrainTypes[thing->floorsector->GetTexture(sector_t::floor)];
+		else
+			return TerrainTypes[thing->Sector->GetTexture(sector_t::floor)];
 	}
 }
 

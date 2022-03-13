@@ -117,7 +117,7 @@ static	ULONG			g_ulLMSSpectatorSettings;
 //==================================================================================
 // [RC] This big map of fun ties all of the DMFlags to their respective checkboxes.
 //==================================================================================
-#define NUMBER_OF_FLAGS 104
+#define NUMBER_OF_FLAGS 105
 
 static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] = 
 {
@@ -177,6 +177,7 @@ static	FLAGMAPPING_t	g_Flags[NUMBER_OF_FLAGS] =
 	{ ZADF_DISABLE_WALL_FRICTION,						IDC_ZADF_DISABLE_WALL_FRICTION,					&g_ulZADMFlags, },
 	{ ZADF_ENABLE_PROJECTILE_HITBOX_FIX,				IDC_ZADF_ENABLE_PROJECTILE_HITBOX_FIX,			&g_ulZADMFlags, },
 	{ ZADF_QUAKE_THRUST,								IDC_ZADF_QUAKE_THRUST,							&g_ulZADMFlags, },
+	{ ZADF_ELEVATED_SPECIAL_FIX,						IDC_ZADF_ELEVATED_SPECIAL_FIX,					&g_ulZADMFlags, },
 	{ COMPATF_SHORTTEX,									IDC_SHORTTEX,									&g_ulCompatFlags, },
 	{ COMPATF_STAIRINDEX,								IDC_STAIRINDEX,									&g_ulCompatFlags, },
 	{ COMPATF_LIMITPAIN,								IDC_LIMITPAIN,									&g_ulCompatFlags, },
