@@ -5222,7 +5222,8 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	if ( CLIENT_PREDICT_IsPredicting( ) == false )
 	{
 		P_PlayerOnSpecial3DFloor (player);
-		if (player->mo->Sector->special || player->mo->Sector->damage)
+		sector_t* theFloorSector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? player->mo->floorsector : player->mo->Sector;
+		if (theFloorSector->special || theFloorSector->damage)
 		{
 			P_PlayerInSpecialSector (player);
 		}

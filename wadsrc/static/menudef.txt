@@ -1316,6 +1316,7 @@ OptionMenu GameplayOptions
 	Option "Disable wall friction",					"sv_disablewallfriction", "YesNo"
 	Option "Enable projectile hitbox fix",			"sv_enableprojectilehitboxfix", "YesNo"
 	Option "Enable Quake thrust formula",			"sv_quakethrust", "YesNo"
+	Option "Enable elevated special fix",			"sv_elevatedspecialfix", "YesNo"
 	// [TP] --
 
 	StaticText " "

@@ -385,6 +385,11 @@ enum
 
 	// [geNia] Use Quake formula for all thrusts
 	ZADF_QUAKE_THRUST = 1 << 21,
+
+	// [geNia] Fix cases when there is an elevated floor with a special,
+	// but an actor is standing on it's edge so that actor's center is in the air.
+	// The special won't activate in that case, but with this flag it will.
+	ZADF_ELEVATED_SPECIAL_FIX = 1 << 22,
 };
 
 // [RH] Compatibility flags.

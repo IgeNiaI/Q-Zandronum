@@ -319,7 +319,7 @@ static int P_Set3DFloor(line_t * line, int param, int param2, int alpha)
 
 void P_PlayerOnSpecial3DFloor(player_t* player)
 {
-	sector_t * sector = player->mo->Sector;
+	sector_t * sector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? player->mo->floorsector : player->mo->Sector;
 
 	for(unsigned i=0;i<sector->e->XFloor.ffloors.Size();i++)
 	{
@@ -355,7 +355,7 @@ void P_PlayerOnSpecial3DFloor(player_t* player)
 //==========================================================================
 bool P_CheckFor3DFloorHit(AActor * mo)
 {
-	sector_t * sector = mo->Sector;
+	sector_t * sector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? mo->floorsector : mo->Sector;
 
 	//if ((mo->player && (mo->player->cheats & CF_PREDICTING))) return false;
 
@@ -385,7 +385,7 @@ bool P_CheckFor3DFloorHit(AActor * mo)
 //==========================================================================
 bool P_CheckFor3DCeilingHit(AActor * mo)
 {
-	sector_t * sector = mo->Sector;
+	sector_t * sector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? mo->ceilingsector : mo->Sector;
 
 	//if ((mo->player && (mo->player->cheats & CF_PREDICTING))) return false;
 
