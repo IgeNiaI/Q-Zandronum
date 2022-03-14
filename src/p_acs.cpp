@@ -11077,7 +11077,12 @@ scriptwait:
 
 						// [BC] If we're the server, tell the client to change his weapon.
 						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							SERVERCOMMANDS_SetPlayerPendingWeapon( ULONG( activator->player - players ));
+						{
+							if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+								SERVERCOMMANDS_SetPlayerPendingWeapon( ULONG( activator->player - players ), activator->player - players, SVCF_SKIPTHISCLIENT );
+							else
+								SERVERCOMMANDS_SetPlayerPendingWeapon( ULONG( activator->player - players ));
+						}
 					}
 					else
 					{
