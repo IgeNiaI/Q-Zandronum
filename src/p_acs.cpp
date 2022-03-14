@@ -4801,7 +4801,12 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 	// [geNia] Update client property with new value
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
-		SERVERCOMMANDS_SetActorProperty( actor, property, value );
+		player_t* player = NETWORK_GetActorsOwnerPlayer( actor );
+
+		if ( player && ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
+			SERVERCOMMANDS_SetActorProperty( actor, property, value, player - players, SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_SetActorProperty( actor, property, value );
 	}
 }
 
