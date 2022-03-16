@@ -103,6 +103,8 @@ static	bool		g_bSavedOnMobj[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedWasJustThrustedZ[CLIENT_PREDICTION_TICS];
 static	fixed_t		g_SavedFloorZ[CLIENT_PREDICTION_TICS];
 static  DWORD		g_SavedOldButtons[CLIENT_PREDICTION_TICS];
+static	DWORD		g_SavedFlags[CLIENT_PREDICTION_TICS][9]; // 0 is mvFlags, 1 to 8 is flags to flags8
+static	int			g_SavedCheats[CLIENT_PREDICTION_TICS][2];
 static	int			g_SavedPredictable[CLIENT_PREDICTION_TICS][PREDICTABLES_SIZE];
 
 #ifdef	_DEBUG
@@ -351,6 +353,17 @@ static void client_predict_BeginPrediction( player_t *pPlayer )
 	g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->waterlevel;
 	g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->wasJustThrustedZ;
 	g_SavedOldButtons[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->oldbuttons;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = pPlayer->mo->mvFlags;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = pPlayer->mo->flags;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][2] = pPlayer->mo->flags2;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][3] = pPlayer->mo->flags3;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][4] = pPlayer->mo->flags4;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][5] = pPlayer->mo->flags5;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][6] = pPlayer->mo->flags6;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][7] = pPlayer->mo->flags7;
+	g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][8] = pPlayer->mo->flags8;
+	g_SavedCheats[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = pPlayer->cheats;
+	g_SavedCheats[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = pPlayer->cheats2;
 	memcpy( &g_SavedTiccmd[g_ulGameTick % CLIENT_PREDICTION_TICS], &pPlayer->cmd, sizeof( ticcmd_t ));
 }
 
@@ -431,6 +444,17 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		pPlayer->mo->waterlevel = g_lSavedWaterLevel[lTick % CLIENT_PREDICTION_TICS];
 		pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[lTick % CLIENT_PREDICTION_TICS] != 0;
 		pPlayer->oldbuttons = g_SavedOldButtons[lTick % CLIENT_PREDICTION_TICS];
+		pPlayer->mo->mvFlags = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][0];
+		pPlayer->mo->flags = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][1];
+		pPlayer->mo->flags2 = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][2];
+		pPlayer->mo->flags3 = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][3];
+		pPlayer->mo->flags4 = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][4];
+		pPlayer->mo->flags5 = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][5];
+		pPlayer->mo->flags6 = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][6];
+		pPlayer->mo->flags7 = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][7];
+		pPlayer->mo->flags8 = g_SavedFlags[lTick % CLIENT_PREDICTION_TICS][8];
+		pPlayer->cheats = g_SavedCheats[lTick % CLIENT_PREDICTION_TICS][0];
+		pPlayer->cheats2 = g_SavedCheats[lTick % CLIENT_PREDICTION_TICS][1];
 		for (int i = 0; i < PREDICTABLES_SIZE; i++)
 		{
 			pPlayer->mo->Predictable[i] = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][i];
@@ -498,6 +522,17 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->mo->waterlevel = g_lSavedWaterLevel[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	pPlayer->mo->wasJustThrustedZ = g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] != 0;
 	pPlayer->oldbuttons = g_SavedOldButtons[g_ulGameTick % CLIENT_PREDICTION_TICS];
+	pPlayer->mo->mvFlags = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][0];
+	pPlayer->mo->flags = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][1];
+	pPlayer->mo->flags2 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][2];
+	pPlayer->mo->flags3 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][3];
+	pPlayer->mo->flags4 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][4];
+	pPlayer->mo->flags5 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][5];
+	pPlayer->mo->flags6 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][6];
+	pPlayer->mo->flags7 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][7];
+	pPlayer->mo->flags8 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][8];
+	pPlayer->cheats = g_SavedCheats[g_ulGameTick % CLIENT_PREDICTION_TICS][0];
+	pPlayer->cheats2 = g_SavedCheats[g_ulGameTick % CLIENT_PREDICTION_TICS][1];
 }
 
 static void client_predict_AdjustZ( APlayerPawn *mo )
