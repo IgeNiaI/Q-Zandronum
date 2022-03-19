@@ -53,6 +53,7 @@
 #include "invasion.h"
 #include "cl_demo.h"
 #include "cooperative.h"
+#include "unlagged.h"
 
 // Set of spawnable things for the Thing_Spawn and Thing_Projectile specials.
 TMap<int, const PClass *> SpawnableThings;
@@ -252,7 +253,7 @@ bool P_Thing_Move (int tid, AActor *source, int mapspot, bool fog)
 
 bool P_Thing_Projectile (int tid, AActor *source, int type, const char *type_name, angle_t angle,
 	fixed_t speed, fixed_t vspeed, int dest, AActor *forcedest, int gravity, int newtid,
-	bool leadTarget)
+	bool leadTarget, bool bNoUnlagged, bool bUnlagDeath, bool bSkipOwner)
 {
 	int rtn = 0;
 	const PClass *kind;
@@ -313,13 +314,17 @@ bool P_Thing_Projectile (int tid, AActor *source, int type, const char *type_nam
 				{
 					z -= spot->floorclip;
 				}
-				mobj = Spawn (kind, spot->x, spot->y, z, ALLOW_REPLACE);
+				mobj = Spawn (kind, spot->x, spot->y, z, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( source ), bSkipOwner);
 
 				if (mobj)
 				{
 					mobj->tid = newtid;
 					mobj->AddToHash ();
 					P_PlaySpawnSound(mobj, spot);
+
+					if ( source != NULL && !( mobj->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+						mobj->SetRandomSeed( source->actorRandom() );
+
 					if (gravity)
 					{
 						mobj->flags &= ~MF_NOGRAVITY;
@@ -445,38 +450,71 @@ nolead:						mobj->angle = R_PointToAngle2 (mobj->x, mobj->y, targ->x, targ->y);
 					// it can potentially have velocity, etc. 
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 					{
-						SERVERCOMMANDS_SpawnMissile( mobj );
-
-						// Determine which flags we need to update.
-						if ( mobj->flags != mobj->GetDefault( )->flags )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS );
-						if ( mobj->flags2 != mobj->GetDefault( )->flags2 )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS2 );
-						if ( mobj->flags3 != mobj->GetDefault( )->flags3 )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS3 );
-						if ( mobj->flags4 != mobj->GetDefault( )->flags4 )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS4 );
-						if ( mobj->flags5 != mobj->GetDefault( )->flags5 )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS5 );
-						if ( mobj->flags6 != mobj->GetDefault( )->flags6 )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS6 );
-						if ( mobj->flags7 != mobj->GetDefault( )->flags7 )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS7 );
-						if ( mobj->flags8 != mobj->GetDefault( )->flags8 )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS8 );
-						if ( mobj->ulSTFlags != mobj->GetDefault( )->ulSTFlags )
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGSST );
-						if ( mobj->ulSTFlags != mobj->GetDefault( )->mvFlags)
-							SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_MVFLAGS );
-						// [BB] If necessary, also adjust gravity.
-						if ( mobj->gravity != mobj->GetDefault( )->gravity )
-							SERVERCOMMANDS_SetThingGravity( mobj );
-
 						// For missiles that exploded when P_CheckMissileSpawn() was
 						// called, we need to tell clients to explode the missile since
 						// it wasn't actually spawned at that point.
 						if ( bMissileExplode )
+						{
+							SERVERCOMMANDS_SpawnMissile( mobj );
+							
+							// Determine which flags we need to update.
+							if ( mobj->flags != mobj->GetDefault( )->flags )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS );
+							if ( mobj->flags2 != mobj->GetDefault( )->flags2 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS2 );
+							if ( mobj->flags3 != mobj->GetDefault( )->flags3 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS3 );
+							if ( mobj->flags4 != mobj->GetDefault( )->flags4 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS4 );
+							if ( mobj->flags5 != mobj->GetDefault( )->flags5 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS5 );
+							if ( mobj->flags6 != mobj->GetDefault( )->flags6 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS6 );
+							if ( mobj->flags7 != mobj->GetDefault( )->flags7 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS7 );
+							if ( mobj->flags8 != mobj->GetDefault( )->flags8 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS8 );
+							if ( mobj->ulSTFlags != mobj->GetDefault( )->ulSTFlags )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGSST );
+							if ( mobj->ulSTFlags != mobj->GetDefault( )->mvFlags)
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_MVFLAGS );
+
+							// [BB] If necessary, also adjust gravity.
+							if ( mobj->gravity != mobj->GetDefault( )->gravity )
+								SERVERCOMMANDS_SetThingGravity( mobj );
+
 							SERVERCOMMANDS_MissileExplode( mobj, NULL );
+						}
+						else
+						{
+							UNLAGGED_UnlagAndReplicateMissile( source, mobj, bSkipOwner, bNoUnlagged, bUnlagDeath );
+
+							// Determine which flags we need to update.
+							if ( mobj->flags != mobj->GetDefault( )->flags )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS );
+							if ( mobj->flags2 != mobj->GetDefault( )->flags2 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS2 );
+							if ( mobj->flags3 != mobj->GetDefault( )->flags3 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS3 );
+							if ( mobj->flags4 != mobj->GetDefault( )->flags4 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS4 );
+							if ( mobj->flags5 != mobj->GetDefault( )->flags5 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS5 );
+							if ( mobj->flags6 != mobj->GetDefault( )->flags6 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS6 );
+							if ( mobj->flags7 != mobj->GetDefault( )->flags7 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS7 );
+							if ( mobj->flags8 != mobj->GetDefault( )->flags8 )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGS8 );
+							if ( mobj->ulSTFlags != mobj->GetDefault( )->ulSTFlags )
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_FLAGSST );
+							if ( mobj->ulSTFlags != mobj->GetDefault( )->mvFlags)
+								SERVERCOMMANDS_SetThingFlags( mobj, FLAGSET_MVFLAGS );
+
+							// [BB] If necessary, also adjust gravity.
+							if ( mobj->gravity != mobj->GetDefault( )->gravity )
+								SERVERCOMMANDS_SetThingGravity( mobj );
+						}
 					}
 
 					if ( bMissileExplode )
