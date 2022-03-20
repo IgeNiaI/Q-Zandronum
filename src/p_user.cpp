@@ -3330,7 +3330,10 @@ float DotProduct(const FVector3 &v, const FVector3 &t)
 
 float APlayerPawn::QCrouchWalkFactor( ticcmd_t *cmd )
 {
-	FVector2 acceleration = FVector2 (FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f).Unit();
+	FVector3 acceleration = FVector3 (FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, .0f).Unit();
+	if (player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY))
+		acceleration.Z = FIXED2FLOAT(cmd->ucmd.upmove << 4);
+	acceleration = acceleration.Unit();
 	acceleration.Y /= 1.25f;
 
 	// [Dusk] Let the user move at whatever speed they desire when spectating.
@@ -3347,30 +3350,47 @@ float APlayerPawn::QCrouchWalkFactor( ticcmd_t *cmd )
 
 	// [GRB]
 	int speed = WalkCrouchState(cmd);
-	switch (speed) {
-		case 0: // walking
-			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove1) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove1) * 0.5f).Length();
-		case 1: // running
-			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove2),			acceleration.Y * FIXED2FLOAT(SideMove2)).Length();
-		case 2: // crouch walking
-			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove3) * 0.25f,	acceleration.Y * FIXED2FLOAT(SideMove3) * 0.25f).Length();
-		case 3: // crouch running
-			return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove4) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove4) * 0.5f).Length();
+	if (player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY))
+	{
+		switch (speed) {
+			case 0: // walking
+				return (float) FVector3(
+					acceleration.X * FIXED2FLOAT(ForwardMove1) * 0.5f,
+					acceleration.Y * FIXED2FLOAT(SideMove1) * 0.5f,
+					acceleration.Z * FIXED2FLOAT(ForwardMove1) * 0.5f
+				).Length();
+			case 1: // running
+				return (float) FVector3(
+					acceleration.X * FIXED2FLOAT(ForwardMove2),
+					acceleration.Y * FIXED2FLOAT(SideMove2),
+					acceleration.Z * FIXED2FLOAT(ForwardMove1)
+				).Length();
+			case 2: // crouch walking
+				return (float) FVector3(
+					acceleration.X * FIXED2FLOAT(ForwardMove3) * 0.25f,
+					acceleration.Y * FIXED2FLOAT(SideMove3) * 0.25f,
+					acceleration.Z * FIXED2FLOAT(ForwardMove1) * 0.25f
+				).Length();
+			case 3: // crouch running
+				return (float) FVector3(
+					acceleration.X * FIXED2FLOAT(ForwardMove4) * 0.5f,
+					acceleration.Y * FIXED2FLOAT(SideMove4) * 0.5f,
+					acceleration.Z * FIXED2FLOAT(ForwardMove1) * 0.5f
+				).Length();
+		}
 	}
-
-	return 1.f;
-}
-
-float APlayerPawn::QVerticalFactor( ticcmd_t *cmd )
-{
-	int speed = WalkCrouchState( cmd );
-	switch (speed) {
-		case 0: // walking
-		case 2: // crouch walking
-			return 0.5f;
-		case 1: // running
-		case 3: // crouch running
-			return 1.f;
+	else
+	{
+		switch (speed) {
+			case 0: // walking
+				return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove1) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove1) * 0.5f).Length();
+			case 1: // running
+				return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove2),			acceleration.Y * FIXED2FLOAT(SideMove2)).Length();
+			case 2: // crouch walking
+				return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove3) * 0.25f,	acceleration.Y * FIXED2FLOAT(SideMove3) * 0.25f).Length();
+			case 3: // crouch running
+				return (float) FVector2(acceleration.X * FIXED2FLOAT(ForwardMove4) * 0.5f,	acceleration.Y * FIXED2FLOAT(SideMove4) * 0.5f).Length();
+		}
 	}
 
 	return 1.f;
@@ -4081,69 +4101,37 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float moveFactor = player->mo->QCrouchWalkFactor( cmd );
 	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.f };
+	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.0f };
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
 	player->mo->wasJustThrustedZ = false;
 	float velocity = 0.f;
 
-	if (player->mo->waterlevel >= 2)
+	if (player->mo->waterlevel >= 2 || player->mo->flags & MF_NOGRAVITY)
 	{
-		FVector3 accelerationZ = { 0.f, 0.f, 0.f };
 		// Calculate the vertical push according to the view pitch
+		float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
+		acceleration.Z = acceleration.X * sin(-pitch);
+		acceleration.X *= cos(pitch);
+
 		if ((cmd->ucmd.buttons & BT_MOVEUP) || (cmd->ucmd.buttons & BT_MOVEDOWN))
 		{
 			if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
-				accelerationZ.Z = cmd->ucmd.buttons & BT_MOVEUP ? 1.f : -1.f;
+				acceleration.Z += FIXED2FLOAT(cmd->ucmd.upmove << 4);
 		}
-		else
-		{
-			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
-			accelerationZ.Z = acceleration.X * sin(-pitch);
-			acceleration.X *= cos(pitch);
-		}
+
 		//Friction
-		player->mo->QFriction(vel, 0, 2.f);
+		if (player->mo->waterlevel >= 2)
+			player->mo->QFriction(vel, 0.f, 2.f);
+		else
+			player->mo->QFriction(vel, 0.f, 3.f);
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		acceleration.MakeUnit();
-		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor(cmd);
 		maxGroundSpeed *= moveFactor;
-		player->mo->QAcceleration(vel, acceleration, (maxGroundSpeed * 3.f) / 5.f, 6.f);
-		player->mo->QAcceleration(vel, accelerationZ, (maxVerticalSpeed * 3.f) / 5.f, 6.f);
-
-		noJump = true;
-
-		// Regen wall climb tics
-		if ( isClimber )
-			player->mo->wallClimbTics = MIN(player->mo->WallClimbMaxTics, player->mo->wallClimbTics + player->mo->WallClimbRegen);
-		// Regen air wall run tics
-		if ( isAirWallRunner )
-			player->mo->airWallRunTics = MIN(player->mo->AirWallRunMaxTics, player->mo->airWallRunTics + player->mo->AirWallRunRegen);
-	}
-	else if (player->mo->flags & MF_NOGRAVITY)
-	{
-		FVector3 accelerationZ = { 0.f, 0.f, 0.f };
-		// Calculate the vertical push according to the view pitch
-		if ((cmd->ucmd.buttons & BT_MOVEUP) || (cmd->ucmd.buttons & BT_MOVEDOWN))
-		{
-			if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
-				accelerationZ.Z = cmd->ucmd.buttons & BT_MOVEUP ? 1.f : -1.f;
-		}
+		if (player->mo->waterlevel >= 2)
+			player->mo->QAcceleration(vel, acceleration, (maxGroundSpeed * 3.f) / 5.f, 6.f);
 		else
-		{
-			float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
-			accelerationZ.Z = acceleration.X * sin(-pitch);
-			acceleration.X *= cos(pitch);
-		}
-		//Friction
-		player->mo->QFriction(vel, 0.f, 3.f);
-		//Acceleration
-		VectorRotate(acceleration.X, acceleration.Y, flAngle);
-		acceleration.MakeUnit();
-		float maxVerticalSpeed = maxGroundSpeed * player->mo->QVerticalFactor(cmd);
-		maxGroundSpeed *= moveFactor;
-		player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, 8.f);
-		player->mo->QAcceleration(vel, accelerationZ, maxVerticalSpeed, 8.f);
+			player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, 8.f);
 
 		noJump = true;
 

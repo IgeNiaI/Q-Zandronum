@@ -144,7 +144,6 @@ public:
 
 	// Quake movement
 	float QCrouchWalkFactor( ticcmd_t *cmd );
-	float QVerticalFactor(ticcmd_t *cmd);
 	float QTweakSpeed();
 	void  QFriction(FVector3 &vel, const float speedlimit, const float friction);
 	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);
