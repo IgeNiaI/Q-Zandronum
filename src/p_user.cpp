@@ -3063,10 +3063,11 @@ void P_ForwardThrust (player_t *player, angle_t angle, fixed_t move)
 		&& player->mo->pitch != 0)
 	{
 		angle_t pitch = (angle_t)player->mo->pitch >> ANGLETOFINESHIFT;
-		fixed_t zpush = FixedMul (move, finesine[pitch]);
-		if (player->mo->waterlevel && player->mo->waterlevel < 2 && zpush < 0)
+		fixed_t zpush = -FixedMul (move, finesine[pitch]);
+		if ( zpush < 0 && ( ( player->mo->waterlevel && player->mo->waterlevel < 2 )
+			|| ( player->onground && !(player->cheats & CF_NOCLIP) && !(player->cheats & CF_NOCLIP2) && !player->bSpectating) ) )
 			zpush = 0;
-		player->mo->velz -= zpush;
+		player->mo->velz += zpush;
 		move = FixedMul (move, finecosine[pitch]);
 	}
 	player->mo->velx += FixedMul (move, finecosine[angle]);
