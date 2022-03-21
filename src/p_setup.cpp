@@ -1638,6 +1638,12 @@ void P_LoadSectors (MapData *map, FMissingTextureTracker &missingtex)
 		// [Dusk] Init 3d midtex move counter
 		if ( ss->e )
 			ss->e->Midtex.Floor.MoveDistance = ss->e->Midtex.Ceiling.MoveDistance = 0;
+
+		for ( int i = 0; i < CLIENT_PREDICTION_TICS; i++ )
+		{
+			ss->floorplane.predictD[i] = ss->floorplane.d;
+			ss->ceilingplane.predictD[i] = ss->ceilingplane.d;
+		}
 	}
 	delete[] msp;
 }
