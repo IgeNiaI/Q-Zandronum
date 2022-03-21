@@ -468,6 +468,12 @@ static void LoadSectors (sectortype *bsec)
 		{
 			sec->SetYScale(sector_t::ceiling, -sec->GetYScale(sector_t::ceiling));
 		}
+
+		for ( int i = 0; i < CLIENT_PREDICTION_TICS; i++ )
+		{
+			sec->floorplane.predictD[i] = sec->floorplane.d;
+			sec->ceilingplane.predictD[i] = sec->ceilingplane.d;
+		}
 	}
 }
 

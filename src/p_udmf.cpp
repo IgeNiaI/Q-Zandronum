@@ -1497,6 +1497,12 @@ public:
 
 			sec->ColorMap = GetSpecialLights (lightcolor, fadecolor, desaturation);
 		}
+
+		for ( int i = 0; i < CLIENT_PREDICTION_TICS; i++ )
+		{
+			sec->floorplane.predictD[i] = sec->floorplane.d;
+			sec->ceilingplane.predictD[i] = sec->ceilingplane.d;
+		}
 	}
 
 	//===========================================================================

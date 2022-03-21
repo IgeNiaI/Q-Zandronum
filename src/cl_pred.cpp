@@ -538,17 +538,19 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 static void client_predict_AdjustZ( APlayerPawn *mo )
 {
 	FCheckPosition tm;
-	bool isgood = P_CheckPosition (mo, mo->x, mo->y, tm);
-	mo->floorz = tm.floorz;
-	mo->ceilingz = tm.ceilingz;
-	mo->dropoffz = tm.dropoffz;		// killough 11/98: remember dropoffs
-	mo->floorpic = tm.floorpic;
-	mo->floorsector = tm.floorsector;
-	mo->ceilingpic = tm.ceilingpic;
-	mo->ceilingsector = tm.ceilingsector;
+	if (P_CheckPosition(mo, mo->x, mo->y, tm))
+	{
+		mo->floorz = tm.floorz;
+		mo->ceilingz = tm.ceilingz;
+		mo->dropoffz = tm.dropoffz;		// killough 11/98: remember dropoffs
+		mo->floorpic = tm.floorpic;
+		mo->floorsector = tm.floorsector;
+		mo->ceilingpic = tm.ceilingpic;
+		mo->ceilingsector = tm.ceilingsector;
 
-	if ( mo->z < mo->floorz )
-		mo->z = mo->floorz;
-	if ( mo->z > mo->ceilingz - mo->height )
-		mo->z = mo->ceilingz - mo->height;
+		if ( mo->z < mo->floorz )
+			mo->z = mo->floorz;
+		if ( mo->z > mo->ceilingz - mo->height )
+			mo->z = mo->ceilingz - mo->height;
+	}
 }
