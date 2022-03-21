@@ -1116,6 +1116,24 @@ CCMD (warp)
 
 //==========================================================================
 //
+// CCMD pos
+//
+// Shows console player's position
+//
+//==========================================================================
+
+CCMD (pos)
+{
+	// [geNia] Doesn't make sense on server
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+		return;
+
+	if ( players[consoleplayer].mo )
+		Printf("Pos : %d, %d, %d\n", players[consoleplayer].mo->x, players[consoleplayer].mo->y, players[consoleplayer].mo->z);
+}
+
+//==========================================================================
+//
 // CCMD load
 //
 // Load a saved game.
