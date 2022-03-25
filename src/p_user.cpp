@@ -3440,12 +3440,14 @@ void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const f
 		if (velocity < 0.5f)
 		{
 			vel.X = vel.Y = vel.Z = 0.f;
+			player->velx = player->vely = 0;
 			return;
 		}
 	}
 	else if (FVector2(vel.X, vel.Y).Length() < 1.f)
 	{
 		vel.X = vel.Y = 0.f;
+		player->velx = player->vely = 0;
 		return;
 	}
 
