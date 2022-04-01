@@ -971,7 +971,7 @@ FUNC(LS_Teleport_Line)
 	return EV_SilentLineTeleport (ln, backSide, it, arg1, arg2);
 }
 
-static void ThrustThingHelper (AActor *it, angle_t angle, int force, INTBOOL nolimit);
+static void ThrustThingHelper (AActor *it, angle_t angle, int force, INTBOOL nolimit, bool isFromAcs, bool isFromDecorate);
 FUNC(LS_ThrustThing)
 // ThrustThing (angle, force, nolimit, tid)
 {
@@ -980,19 +980,19 @@ FUNC(LS_ThrustThing)
 		FActorIterator iterator (arg3);
 		while ((it = iterator.Next()) != NULL)
 		{
-			ThrustThingHelper (it, BYTEANGLE(arg0), arg1, arg2);
+			ThrustThingHelper (it, BYTEANGLE(arg0), arg1, arg2, isFromAcs, isFromDecorate);
 		}
 		return true;
 	}
 	else if (it)
 	{
-		ThrustThingHelper (it, BYTEANGLE(arg0), arg1, arg2);
+		ThrustThingHelper (it, BYTEANGLE(arg0), arg1, arg2, isFromAcs, isFromDecorate);
 		return true;
 	}
 	return false;
 }
 
-static void ThrustThingHelper (AActor *it, angle_t angle, int force, INTBOOL nolimit)
+static void ThrustThingHelper (AActor *it, angle_t angle, int force, INTBOOL nolimit, bool isFromAcs, bool isFromDecorate)
 {
 	angle >>= ANGLETOFINESHIFT;
 	it->velx += force * finecosine[angle];
@@ -1007,7 +1007,9 @@ static void ThrustThingHelper (AActor *it, angle_t angle, int force, INTBOOL nol
 	// [Dusk] Use SERVER_UpdateThingVelocity
 	// [geNia] But don't send velocity change for players as they are updated every tic anyway
 	if ( ( NETWORK_GetState() == NETSTATE_SERVER ) && ( !it->player || it->player->mo != it ) )
-		SERVER_UpdateThingVelocity( it, false );
+	{
+		SERVERCOMMANDS_MoveThing( it, CM_XY|CM_VELXY, GetPlayerNumToSkip(it, isFromAcs, isFromDecorate), SVCF_SKIPTHISCLIENT );
+	}
 }
 
 FUNC(LS_ThrustThingZ)	// [BC]
@@ -1031,7 +1033,7 @@ FUNC(LS_ThrustThingZ)	// [BC]
 			else
 				victim->velz += thrust;
 
-			if (victim->player && victim->velz > 0)
+			if (victim->player && victim->player->mo == victim && victim->velz > 0)
 			{
 				victim->player->mo->wasJustThrustedZ = true;
 			}
@@ -1041,7 +1043,9 @@ FUNC(LS_ThrustThingZ)	// [BC]
 			// Is there a way to fix this without sending the position?
 			// [geNia] But don't send velocity change for players as they are updated every tic anyway
 			if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( !victim->player || victim->player->mo != victim ) )
-				SERVERCOMMANDS_MoveThing( victim, CM_Z|CM_VELZ );
+			{
+				SERVERCOMMANDS_MoveThing( victim, CM_Z|CM_VELZ, GetPlayerNumToSkip(it, isFromAcs, isFromDecorate), SVCF_SKIPTHISCLIENT );
+			}
 		}
 		return true;
 	}
@@ -1052,15 +1056,17 @@ FUNC(LS_ThrustThingZ)	// [BC]
 		else
 			it->velz += thrust;
 
-		if (it->player && it->velz > 0)
+		if (it->player && it->player->mo == it && it->velz > 0)
 		{
 			it->player->mo->wasJustThrustedZ = true;
 		}
 
 		// [BC] If we're the server, update the thing's velocity.
 		// [geNia] But don't send velocity change for players as they are updated every tic anyway
-		if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( !it->player && it->player->mo != it ) )
-			SERVER_UpdateThingVelocity ( it, true, false );
+		if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( !it->player || it->player->mo != it ) )
+		{
+			SERVERCOMMANDS_MoveThing( it, CM_Z|CM_VELZ, GetPlayerNumToSkip(it, isFromAcs, isFromDecorate), SVCF_SKIPTHISCLIENT );
+		}
 
 		return true;
 	}
