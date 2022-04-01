@@ -1654,8 +1654,12 @@ FUNC(LS_Thing_Stop)
 			if (it->player != NULL) it->player->velx = it->player->vely = 0;
 
 			// [Dusk] tell the clients about this
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( it, ( ( it->player == NULL ) ? (CM_XY|CM_Z) : 0 )|CM_VELXY|CM_VELZ );
+			// [geNia] But don't send velocity change for players as they are updated every tic anyway
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER && ( !it->player || it->player->mo != it ) )
+			{
+				SERVERCOMMANDS_MoveThing( it, ( ( it->player == NULL ) ? (CM_XY|CM_Z) : 0 )|CM_VELXY|CM_VELZ,
+					GetPlayerNumToSkip(it, isFromAcs, isFromDecorate), SVCF_SKIPTHISCLIENT );
+			}
 
 			ok = true;
 		}
@@ -1670,8 +1674,12 @@ FUNC(LS_Thing_Stop)
 			if (target->player != NULL) target->player->velx = target->player->vely = 0;
 
 			// [Dusk] tell the clients about this
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( target, ( ( target->player == NULL ) ? (CM_XY|CM_Z) : 0 )|CM_VELXY|CM_VELZ );
+			// [geNia] But don't send velocity change for players as they are updated every tic anyway
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER && ( !target->player || target->player->mo != target ) )
+			{
+				SERVERCOMMANDS_MoveThing( target, ( ( target->player == NULL ) ? (CM_XY|CM_Z) : 0 )|CM_VELXY|CM_VELZ,
+					GetPlayerNumToSkip(it, isFromAcs, isFromDecorate), SVCF_SKIPTHISCLIENT );
+			}
 
 			ok = true;
 		}
