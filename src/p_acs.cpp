@@ -5759,7 +5759,17 @@ static void SetActorAngle(AActor *activator, int tid, int angle, bool interpolat
 
 			// [BB] Tell the clients about the changed angle.
 			if( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetThingAngle( activator );
+			{
+				if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+				{
+					int ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator ) - players;
+					SERVERCOMMANDS_SetThingAngle( activator, ownerPlayer, SVCF_SKIPTHISCLIENT );
+				}
+				else
+				{
+					SERVERCOMMANDS_SetThingAngle( activator );
+				}
+			}
 		}
 	}
 	else
@@ -5774,7 +5784,17 @@ static void SetActorAngle(AActor *activator, int tid, int angle, bool interpolat
 			// [BB] Tell the clients about the changed angle.
 			// This fixes the "rave room" in SPACEDM5.wad.
 			if( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetThingAngle( actor );
+			{
+				if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+				{
+					int ownerPlayer = NETWORK_GetActorsOwnerPlayer( actor ) - players;
+					SERVERCOMMANDS_SetThingAngle( actor, ownerPlayer, SVCF_SKIPTHISCLIENT );
+				}
+				else
+				{
+					SERVERCOMMANDS_SetThingAngle( actor );
+				}
+			}
 		}
 	}
 }
@@ -5789,7 +5809,17 @@ static void SetActorPitch(AActor *activator, int tid, int angle, bool interpolat
 
 			// [BB] Tell the clients about the changed pitch.
 			if( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( activator, CM_PITCH );
+			{
+				if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+				{
+					int ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator ) - players;
+					SERVERCOMMANDS_MoveThing( activator, CM_PITCH, ownerPlayer, SVCF_SKIPTHISCLIENT );
+				}
+				else
+				{
+					SERVERCOMMANDS_MoveThing( activator, CM_PITCH );
+				}
+			}
 		}
 	}
 	else
@@ -5803,7 +5833,17 @@ static void SetActorPitch(AActor *activator, int tid, int angle, bool interpolat
 
 			// [BB] Tell the clients about the changed pitch.
 			if( NETWORK_GetState() == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( actor, CM_PITCH );
+			{
+				if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+				{
+					int ownerPlayer = NETWORK_GetActorsOwnerPlayer( actor ) - players;
+					SERVERCOMMANDS_MoveThing( actor, CM_PITCH, ownerPlayer, SVCF_SKIPTHISCLIENT );
+				}
+				else
+				{
+					SERVERCOMMANDS_MoveThing( actor, CM_PITCH );
+				}
+			}
 		}
 	}
 }
