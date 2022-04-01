@@ -10776,7 +10776,7 @@ scriptwait:
 				bool result = false;
 				AActor *actor = SingleActorFromTID (STACK(5), activator);
 				if (actor != NULL)
-					result = P_MoveThing(actor, STACK(4), STACK(3), STACK(2), !!STACK(1));
+					result = P_MoveThing(actor, STACK(4), STACK(3), STACK(2), !!STACK(1), !!( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ));
 				sp -= 4;
 				STACK(1) = result;
 			}

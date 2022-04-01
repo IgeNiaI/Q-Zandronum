@@ -167,7 +167,7 @@ bool P_Thing_Spawn (int tid, AActor *source, int type, angle_t angle, bool fog, 
 // [BC] Added
 // [RH] Fixed
 
-bool P_MoveThing(AActor *source, fixed_t x, fixed_t y, fixed_t z, bool fog)
+bool P_MoveThing(AActor *source, fixed_t x, fixed_t y, fixed_t z, bool fog, bool bSkipOwner)
 {
 	fixed_t oldx, oldy, oldz;
 	// [BC]
@@ -189,8 +189,17 @@ bool P_MoveThing(AActor *source, fixed_t x, fixed_t y, fixed_t z, bool fog)
 			// [BC] If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				SERVERCOMMANDS_SpawnThing( pFog );
-				SERVERCOMMANDS_SetThingTarget ( pFog );
+				if ( bSkipOwner )
+				{
+					int ownerPlayer = NETWORK_GetActorsOwnerPlayer( source ) - players;
+					SERVERCOMMANDS_SpawnThing( pFog, ownerPlayer, SVCF_SKIPTHISCLIENT );
+					SERVERCOMMANDS_SetThingTarget ( pFog, ownerPlayer, SVCF_SKIPTHISCLIENT );
+				}
+				else
+				{
+					SERVERCOMMANDS_SpawnThing( pFog );
+					SERVERCOMMANDS_SetThingTarget ( pFog );
+				}
 			}
 
 			pFog = Spawn<ATeleportFog> (oldx, oldy, oldz + TELEFOGHEIGHT, ALLOW_REPLACE);
@@ -200,8 +209,17 @@ bool P_MoveThing(AActor *source, fixed_t x, fixed_t y, fixed_t z, bool fog)
 			// [BC] If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				SERVERCOMMANDS_SpawnThing( pFog );
-				SERVERCOMMANDS_SetThingTarget ( pFog );
+				if ( bSkipOwner )
+				{
+					int ownerPlayer = NETWORK_GetActorsOwnerPlayer( source ) - players;
+					SERVERCOMMANDS_SpawnThing( pFog, ownerPlayer, SVCF_SKIPTHISCLIENT );
+					SERVERCOMMANDS_SetThingTarget ( pFog, ownerPlayer, SVCF_SKIPTHISCLIENT );
+				}
+				else
+				{
+					SERVERCOMMANDS_SpawnThing( pFog );
+					SERVERCOMMANDS_SetThingTarget ( pFog );
+				}
 			}
 		}
 		source->PrevX = x;
@@ -221,7 +239,17 @@ bool P_MoveThing(AActor *source, fixed_t x, fixed_t y, fixed_t z, bool fog)
 
 		// [BC] If we're the server, tell clients to move the object.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThing( source, ulFlags );
+		{
+			if ( bSkipOwner )
+			{
+				int ownerPlayer = NETWORK_GetActorsOwnerPlayer( source ) - players;
+				SERVERCOMMANDS_MoveThing( source, ulFlags, ownerPlayer, SVCF_SKIPTHISCLIENT );
+			}
+			else
+			{
+				SERVERCOMMANDS_MoveThing( source, ulFlags );
+			}
+		}
 
 		return true;
 	}

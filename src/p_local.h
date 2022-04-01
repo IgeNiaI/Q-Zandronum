@@ -209,7 +209,7 @@ bool	P_Thing_Spawn (int tid, AActor *source, int type, angle_t angle, bool fog, 
 bool	P_Thing_Projectile (int tid, AActor *source, int type, const char * type_name, angle_t angle,
 			fixed_t speed, fixed_t vspeed, int dest, AActor *forcedest, int gravity, int newtid,
 			bool leadTarget, bool bNoUnlagged = false, bool bUnlagDeath = false, bool bSkipOwner = false);
-bool	P_MoveThing(AActor *source, fixed_t x, fixed_t y, fixed_t z, bool fog);
+bool	P_MoveThing(AActor *source, fixed_t x, fixed_t y, fixed_t z, bool fog, bool bSkipOwner = false);
 bool	P_Thing_Move (int tid, AActor *source, int mapspot, bool fog);
 int		P_Thing_Damage (int tid, AActor *whofor0, int amount, FName type);
 void	P_Thing_SetVelocity(AActor *actor, fixed_t vx, fixed_t vy, fixed_t vz, bool add, bool setbob);
