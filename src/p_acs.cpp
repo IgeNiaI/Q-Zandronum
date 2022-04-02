@@ -3933,7 +3933,7 @@ void DLevelScript::ReplaceTextures (const char *fromname, const char *toname, in
 	}
 }
 
-int DLevelScript::DoSpawn (int type, fixed_t x, fixed_t y, fixed_t z, int tid, int angle, bool force)
+int DLevelScript::DoSpawn (int type, fixed_t x, fixed_t y, fixed_t z, int tid, int angle, bool force, player_t* ownerPlayer)
 {
 	const PClass *info = PClass::FindClass (FBehavior::StaticLookupString (type));
 	AActor *actor = NULL;
@@ -3941,7 +3941,7 @@ int DLevelScript::DoSpawn (int type, fixed_t x, fixed_t y, fixed_t z, int tid, i
 
 	if (info != NULL)
 	{
-		actor = Spawn (info, x, y, z, ALLOW_REPLACE);
+		actor = Spawn (info, x, y, z, ALLOW_REPLACE, ownerPlayer, !!( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ));
 		if (actor != NULL)
 		{
 			DWORD oldFlags2 = actor->flags2;
@@ -3959,23 +3959,46 @@ int DLevelScript::DoSpawn (int type, fixed_t x, fixed_t y, fixed_t z, int tid, i
 				// [BC] If we're the server, tell clients to spawn the thing.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					SERVERCOMMANDS_SpawnThing( actor );
-
-					// [BB] If the thing is not at its spawn point, let the client know about the spawn point.
-					if ( ( actor->x != actor->SpawnPoint[0] )
-						|| ( actor->y != actor->SpawnPoint[1] )
-						|| ( actor->z != actor->SpawnPoint[2] )
-						)
+					if ( ownerPlayer && ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
 					{
-						SERVERCOMMANDS_SetThingSpawnPoint( actor );
+						SERVERCOMMANDS_SpawnThing( actor, ownerPlayer - players, SVCF_SKIPTHISCLIENT );
+
+						// [BB] If the thing is not at its spawn point, let the client know about the spawn point.
+						if ( ( actor->x != actor->SpawnPoint[0] )
+							|| ( actor->y != actor->SpawnPoint[1] )
+							|| ( actor->z != actor->SpawnPoint[2] )
+							)
+						{
+							SERVERCOMMANDS_SetThingSpawnPoint( actor, ownerPlayer - players, SVCF_SKIPTHISCLIENT );
+						}
+
+						if ( actor->angle != 0 )
+							SERVERCOMMANDS_SetThingAngle( actor, ownerPlayer - players, SVCF_SKIPTHISCLIENT );
+
+						// [TP] If we're the server, sync the tid to clients (if this actor has one)
+						if ( actor->tid != 0 )
+							SERVERCOMMANDS_SetThingTID( actor, ownerPlayer - players, SVCF_SKIPTHISCLIENT );
 					}
+					else
+					{
+						SERVERCOMMANDS_SpawnThing( actor );
 
-					if ( actor->angle != 0 )
-						SERVERCOMMANDS_SetThingAngle( actor );
+						// [BB] If the thing is not at its spawn point, let the client know about the spawn point.
+						if ( ( actor->x != actor->SpawnPoint[0] )
+							|| ( actor->y != actor->SpawnPoint[1] )
+							|| ( actor->z != actor->SpawnPoint[2] )
+							)
+						{
+							SERVERCOMMANDS_SetThingSpawnPoint( actor );
+						}
 
-					// [TP] If we're the server, sync the tid to clients (if this actor has one)
-					if ( actor->tid != 0 )
-						SERVERCOMMANDS_SetThingTID( actor );
+						if ( actor->angle != 0 )
+							SERVERCOMMANDS_SetThingAngle( actor );
+
+						// [TP] If we're the server, sync the tid to clients (if this actor has one)
+						if ( actor->tid != 0 )
+							SERVERCOMMANDS_SetThingTID( actor );
+					}
 				}
 			}
 			else
@@ -3991,7 +4014,7 @@ int DLevelScript::DoSpawn (int type, fixed_t x, fixed_t y, fixed_t z, int tid, i
 	return spawncount;
 }
 
-int DLevelScript::DoSpawnSpot (int type, int spot, int tid, int angle, bool force)
+int DLevelScript::DoSpawnSpot (int type, int spot, int tid, int angle, bool force, player_t* ownerPlayer)
 {
 	int spawned = 0;
 
@@ -4002,17 +4025,17 @@ int DLevelScript::DoSpawnSpot (int type, int spot, int tid, int angle, bool forc
 
 		while ( (aspot = iterator.Next ()) )
 		{
-			spawned += DoSpawn (type, aspot->x, aspot->y, aspot->z, tid, angle, force);
+			spawned += DoSpawn (type, aspot->x, aspot->y, aspot->z, tid, angle, force, ownerPlayer);
 		}
 	}
 	else if (activator != NULL)
 	{
-			spawned += DoSpawn (type, activator->x, activator->y, activator->z, tid, angle, force);
+			spawned += DoSpawn (type, activator->x, activator->y, activator->z, tid, angle, force, ownerPlayer);
 	}
 	return spawned;
 }
 
-int DLevelScript::DoSpawnSpotFacing (int type, int spot, int tid, bool force)
+int DLevelScript::DoSpawnSpotFacing (int type, int spot, int tid, bool force, player_t* ownerPlayer)
 {
 	int spawned = 0;
 
@@ -4023,12 +4046,12 @@ int DLevelScript::DoSpawnSpotFacing (int type, int spot, int tid, bool force)
 
 		while ( (aspot = iterator.Next ()) )
 		{
-			spawned += DoSpawn (type, aspot->x, aspot->y, aspot->z, tid, aspot->angle >> 24, force);
+			spawned += DoSpawn (type, aspot->x, aspot->y, aspot->z, tid, aspot->angle >> 24, force, ownerPlayer);
 		}
 	}
 	else if (activator != NULL)
 	{
-			spawned += DoSpawn (type, activator->x, activator->y, activator->z, tid, activator->angle >> 24, force);
+			spawned += DoSpawn (type, activator->x, activator->y, activator->z, tid, activator->angle >> 24, force, ownerPlayer);
 	}
 	return spawned;
 }
@@ -5980,10 +6003,16 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
 		}
 
 		case ACSF_SpawnSpotForced:
-			return DoSpawnSpot(args[0], args[1], args[2], args[3], true);
+		{
+			player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
+			return DoSpawnSpot(args[0], args[1], args[2], args[3], true, ownerPlayer);
 
+		}
 		case ACSF_SpawnSpotFacingForced:
-			return DoSpawnSpotFacing(args[0], args[1], args[2], true);
+		{
+			player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
+			return DoSpawnSpotFacing(args[0], args[1], args[2], true, ownerPlayer);
+		}
 
 		case ACSF_CheckActorProperty:
 			return (CheckActorProperty(args[0], args[1], args[2]));
@@ -6221,7 +6250,10 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
         }
 
 		case ACSF_SpawnForced:
-			return DoSpawn(args[0], args[1], args[2], args[3], args[4], args[5], true);
+		{
+			player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
+			return DoSpawn(args[0], args[1], args[2], args[3], args[4], args[5], true, ownerPlayer);
+		}
 
 		case ACSF_ACS_NamedExecute:
 		case ACSF_ACS_NamedSuspend:
@@ -10334,28 +10366,43 @@ scriptwait:
 			break;
 
 		case PCD_SPAWN:
-			STACK(6) = DoSpawn (STACK(6), STACK(5), STACK(4), STACK(3), STACK(2), STACK(1), false);
-			sp -= 5;
+			{
+				player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
+				STACK(6) = DoSpawn (STACK(6), STACK(5), STACK(4), STACK(3), STACK(2), STACK(1), false, ownerPlayer);
+				sp -= 5;
+			}
 			break;
 
 		case PCD_SPAWNDIRECT:
-			PushToStack (DoSpawn (TAGSTR(uallong(pc[0])), uallong(pc[1]), uallong(pc[2]), uallong(pc[3]), uallong(pc[4]), uallong(pc[5]), false));
-			pc += 6;
+			{
+				player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
+				PushToStack (DoSpawn (TAGSTR(uallong(pc[0])), uallong(pc[1]), uallong(pc[2]), uallong(pc[3]), uallong(pc[4]), uallong(pc[5]), false, ownerPlayer));
+				pc += 6;
+			}
 			break;
 
 		case PCD_SPAWNSPOT:
-			STACK(4) = DoSpawnSpot (STACK(4), STACK(3), STACK(2), STACK(1), false);
-			sp -= 3;
+			{
+				player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
+				STACK(4) = DoSpawnSpot (STACK(4), STACK(3), STACK(2), STACK(1), false, ownerPlayer);
+				sp -= 3;
+			}
 			break;
 
 		case PCD_SPAWNSPOTDIRECT:
-			PushToStack (DoSpawnSpot (TAGSTR(uallong(pc[0])), uallong(pc[1]), uallong(pc[2]), uallong(pc[3]), false));
-			pc += 4;
+			{
+				player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
+				PushToStack (DoSpawnSpot (TAGSTR(uallong(pc[0])), uallong(pc[1]), uallong(pc[2]), uallong(pc[3]), false, ownerPlayer));
+				pc += 4;
+			}
 			break;
 
 		case PCD_SPAWNSPOTFACING:
-			STACK(3) = DoSpawnSpotFacing (STACK(3), STACK(2), STACK(1), false);
-			sp -= 2;
+			{
+				player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
+				STACK(3) = DoSpawnSpotFacing (STACK(3), STACK(2), STACK(1), false, ownerPlayer);
+				sp -= 2;
+			}
 			break;
 
 		case PCD_CLEARINVENTORY:

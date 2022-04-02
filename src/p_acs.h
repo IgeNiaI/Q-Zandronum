@@ -983,10 +983,10 @@ protected:
 	static void ReplaceTextures (int fromname, int toname, int flags);
 	// [BB]
 	static void ReplaceTextures (const char *fromname, const char *toname, int flags);
-	static int DoSpawn (int type, fixed_t x, fixed_t y, fixed_t z, int tid, int angle, bool force);
+	static int DoSpawn (int type, fixed_t x, fixed_t y, fixed_t z, int tid, int angle, bool force, player_t* ownerPlayer);
 	static bool DoCheckActorTexture(int tid, AActor *activator, int string, bool floor);
-	int DoSpawnSpot (int type, int spot, int tid, int angle, bool forced);
-	int DoSpawnSpotFacing (int type, int spot, int tid, bool forced);
+	int DoSpawnSpot (int type, int spot, int tid, int angle, bool forced, player_t* ownerPlayer);
+	int DoSpawnSpotFacing (int type, int spot, int tid, bool forced, player_t* ownerPlayer);
 	int DoClassifyActor (int tid);
 	int CallFunction(int argCount, int funcIndex, SDWORD *args, const SDWORD *stack, int stackdepth);
 
