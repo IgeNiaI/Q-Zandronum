@@ -60,6 +60,8 @@ TMap<int, const PClass *> SpawnableThings;
 
 static FRandom pr_leadtarget ("LeadTarget");
 
+EXTERN_CVAR (Bool, sv_showactorrandom)
+
 bool P_Thing_Spawn (int tid, AActor *source, int type, angle_t angle, bool fog, int newtid)
 {
 	int rtn = 0;
@@ -351,7 +353,11 @@ bool P_Thing_Projectile (int tid, AActor *source, int type, const char *type_nam
 					P_PlaySpawnSound(mobj, spot);
 
 					if ( source != NULL && !( mobj->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+					{
+						if ( sv_showactorrandom )
+							Printf("Checking random for \"%s\" in \"%s\" : %d\n", source->GetClass()->TypeName.GetChars( ), "Thing_Projectile", source->actorRandom());
 						mobj->SetRandomSeed( source->actorRandom() );
+					}
 
 					if (gravity)
 					{

@@ -156,6 +156,8 @@ CUSTOM_CVAR( Bool, demo_pure, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG )
 		"Demos may get played back with completely incorrect WADs!\\c-\n" );
 }
 
+EXTERN_CVAR(Bool, sv_showactorrandom)
+
 //*****************************************************************************
 //	FUNCTIONS
 
@@ -163,6 +165,12 @@ void CLIENTDEMO_BeginRecording( const char *pszDemoName )
 {
 	if ( pszDemoName == NULL )
 		return;
+
+	if ( sv_showactorrandom )
+	{
+		Printf("Can't record demo while \"sv_showactorrandom\" is TRUE, because it will desync the demo playback");
+		return;
+	}
 
 	// First, setup the demo name.
 	g_DemoName = pszDemoName;

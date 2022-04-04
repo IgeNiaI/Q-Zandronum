@@ -92,6 +92,8 @@ DEFINE_MEMBER_VARIABLE(reactiontime, AActor)
 DEFINE_MEMBER_VARIABLE(meleerange, AActor)
 DEFINE_MEMBER_VARIABLE(Speed, AActor)
 
+EXTERN_CVAR (Bool, sv_showactorrandom)
+
 //==========================================================================
 //
 // EvalExpression
@@ -1888,11 +1890,15 @@ ExpVal FxARandom::EvalExpression (AActor *self)
 		{
 			swapvalues (maxval, minval);
 		}
-
+		
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "arandom", self->actorRandom());
 		val.Int = self->actorRandom(maxval - minval + 1) + minval;
 	}
 	else
 	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "arandom", self->actorRandom());
 		val.Int = self->actorRandom();
 	}
 	return val;
@@ -1924,6 +1930,8 @@ ExpVal FxAFRandom::EvalExpression (AActor *self)
 {
 	ExpVal val;
 	val.Type = VAL_Float;
+	if ( sv_showactorrandom )
+		Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "afrandom", self->actorRandom());
 	int random = self->actorRandom(0x40000000);
 	double frandom = random / double(0x40000000);
 
@@ -1996,6 +2004,8 @@ ExpVal FxARandom2::EvalExpression (AActor *self)
 	int imaskval = maskval.GetInt();
 
 	maskval.Type = VAL_Int;
+	if ( sv_showactorrandom )
+		Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "arandom2", self->actorRandom());
 	maskval.Int = self->actorRandom.Random2(imaskval);
 	return maskval;
 }

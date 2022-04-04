@@ -93,6 +93,8 @@ static FRandom pr_burst ("Burst");
 static FRandom pr_monsterrefire ("MonsterRefire");
 static FRandom pr_teleport("A_Teleport");
 
+EXTERN_CVAR (Bool, sv_showactorrandom)
+
 //==========================================================================
 //
 // [BB] Used in all code pointers that spawn actors to handle
@@ -606,6 +608,8 @@ DEFINE_ACTION_FUNCTION(AActor, A_BulletAttack)
 	S_Sound (self, CHAN_WEAPON, self->AttackSound, 1, ATTN_NORM, true );	// [BC] Inform the clients.
 	for (i = self->GetMissileDamage (0, 1); i > 0; --i)
     {
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_BulletAttack", self->actorRandom());
 		int angle = bangle + (self->actorRandom.Random2() << 20);
 		int damage = ((pr_cabullet()%5)+1)*3;
 		P_LineAttack(self, angle, MISSILERANGE, slope, damage,
@@ -708,6 +712,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Jump)
 		return;
 	}
 
+	if ( sv_showactorrandom )
+		Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_Jump", self->actorRandom());
 	if (count >= 2 && (maxchance >= 256 || self->actorRandom() < maxchance))
 	{
 		int jumps = 2 + (count == 2? 0 : (self->actorRandom() % (count - 1)));
@@ -1341,6 +1347,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomBulletAttack)
 			}
 			else
 			{
+				if ( sv_showactorrandom )
+					Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_CustomBulletAttack", self->actorRandom());
 				angle += self->actorRandom.Random2() * (Spread_XY / 255);
 				slope += self->actorRandom.Random2() * (Spread_Z / 255);
 			}
@@ -1525,6 +1533,8 @@ void A_FireBulletsHelper ( AActor *self,
 			}
 			else
 			{
+				if ( sv_showactorrandom )
+					Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_CustomFireBullets", self->actorRandom());
 				angle += self->actorRandom.Random2() * (Spread_XY / 255);
 				slope += self->actorRandom.Random2() * (Spread_Z / 255);
 			}
@@ -1842,6 +1852,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomPunch)
 
 	if (!norandom) Damage *= (pr_cwpunch()%8+1);
 
+	if ( sv_showactorrandom )
+		Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_CustomPunch", self->actorRandom());
 	angle = self->angle + (self->actorRandom.Random2() << 18);
 	if (Range == 0) Range = MELEERANGE;
 	pitch = P_AimLineAttack (self, angle, Range, &linetarget);
@@ -1952,6 +1964,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RailAttack)
 	}
 	else
 	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_RailAttack", self->actorRandom());
 		angle = self->actorRandom.Random2() * (Spread_XY / 255);
 		slope = self->actorRandom.Random2() * (Spread_Z / 255);
 	}
@@ -2059,6 +2073,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 
 		if (self->target->flags & MF_SHADOW)
 		{
+			if ( sv_showactorrandom )
+				Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_CustomRailgun", self->actorRandom());
 			angle_t rnd = self->actorRandom.Random2() << 21;
 			self->angle += rnd;
 			saved_angle = rnd;
@@ -2077,6 +2093,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomRailgun)
 	}
 	else
 	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_CustomRailgun", self->actorRandom());
 		angleoffset = self->actorRandom.Random2() * (Spread_XY / 255);
 		slopeoffset = self->actorRandom.Random2() * (Spread_Z / 255);
 	}
@@ -2575,6 +2593,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 		}
 		else
 		{
+			if ( sv_showactorrandom )
+				Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_SpawnItemEx", self->actorRandom());
 			if ( self->actorRandom() < chance )
 				return;
 		}
@@ -2649,7 +2669,11 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 		mo->angle = Angle;
 
 		if ( !( flags & SXF_FORCESERVERSIDE ) && !( mo->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+		{
+			if ( sv_showactorrandom )
+				Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_SpawnItemEx", self->actorRandom());
 			mo->SetRandomSeed( self->actorRandom() );
+		}
 
 		// [BC] Flag this actor as being client-spawned.
 		if ( NETWORK_InClientMode() )
@@ -2744,6 +2768,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ThrowGrenade)
 		P_PlaySpawnSound(bo, self);
 		if (xyvel != 0)
 			bo->Speed = xyvel;
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", self->GetClass()->TypeName.GetChars( ), "A_ThrowGrenade", self->actorRandom());
 		bo->angle = self->angle + (((self->actorRandom()&7) - 4) << 24);
 
 		angle_t pitch = angle_t(-self->pitch) >> ANGLETOFINESHIFT;

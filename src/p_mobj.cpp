@@ -167,6 +167,14 @@ CVAR (Int, cl_bloodtype, 0, CVAR_ARCHIVE);
 
 // [BB]
 CVAR (Int, sv_showspawnnames, 0, 0)
+CUSTOM_CVAR (Bool, sv_showactorrandom, false, 0)
+{
+	if ( self == true && ( CLIENTDEMO_IsRecording( ) || CLIENTDEMO_IsPlaying( ) ) )
+	{
+		self = false;
+		Printf( "Can't use \"sv_showactorrandom\" while recording or playing demo, because it will desync" );
+	}
+}
 
 // CODE --------------------------------------------------------------------
 
@@ -1727,6 +1735,8 @@ void P_ExplodeMissile (AActor *mo, line_t *line, AActor *target, int playerNumTo
 
 		if (mo->flags4 & MF4_RANDOMIZE)
 		{
+			if ( sv_showactorrandom )
+				Printf("Checking random for \"%s\" in \"%s\" : %d\n", mo->GetClass()->TypeName.GetChars( ), "P_ExplodeMissile", mo->actorRandom());
 			mo->tics -= (mo->actorRandom() & 3) * TICRATE / 35;
 			if (mo->tics < 1)
 				mo->tics = 1;
@@ -6649,13 +6659,21 @@ AActor *P_SpawnPuff (AActor *source, const PClass *pufftype, fixed_t x, fixed_t 
 	ULONG	ulState = STATE_SPAWN;
 	
 	if (!(flags & PF_NORANDOMZ))
+	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", source->GetClass()->TypeName.GetChars( ), "P_SpawnPuff", source->actorRandom());
 		z += source->actorRandom.Random2 () << 10;
+	}
 
 	puff = Spawn (pufftype, x, y, z, ALLOW_REPLACE, ( GetDefaultByType( pufftype )->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) ? NULL : NETWORK_GetActorsOwnerPlayer( source ));
 	if (puff == NULL) return NULL;
 	
 	if ( !( puff->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", source->GetClass()->TypeName.GetChars( ), "P_SpawnPuff", source->actorRandom());
 		puff->SetRandomSeed( source->actorRandom() );
+	}
 
 	//Moved puff creation and target/master/tracer setting to here.
 	if (puff && vict)
@@ -7386,6 +7404,8 @@ bool P_CheckMissileSpawn (AActor* th, fixed_t maxdist, bool bExplode)
 	// [RH] Don't decrement tics if they are already less than 1
 	if ((th->flags4 & MF4_RANDOMIZE) && th->tics > 0)
 	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", th->GetClass()->TypeName.GetChars( ), "P_CheckMissileSpawn", th->actorRandom());
 		th->tics -= th->actorRandom() & 3;
 		if (th->tics < 1)
 			th->tics = 1;
@@ -7547,7 +7567,12 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 	AActor *th = Spawn (type, x, y, z, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( source ), bSkipOwner);
 
 	if ( !( th->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", source->GetClass()->TypeName.GetChars( ), "P_SpawnMissileXYZ", source->actorRandom());
 		th->SetRandomSeed( source->actorRandom() );
+	}
+
 	P_PlaySpawnSound(th, source);
 
 	// record missile's originator
@@ -7582,6 +7607,8 @@ AActor *P_SpawnMissileXYZ (fixed_t x, fixed_t y, fixed_t z,
 	// [RC] Now monsters can aim at invisible player as if they were fully visible.
 	if (dest->flags & MF_SHADOW && !(source->flags6 & MF6_SEEINVISIBLE))
 	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", th->GetClass()->TypeName.GetChars( ), "P_SpawnMissileXYZ", th->actorRandom());
 		angle_t an = th->actorRandom.Random2 () << 20;
 		an >>= ANGLETOFINESHIFT;
 		
@@ -7686,6 +7713,8 @@ AActor *P_SpawnMissileZAimed (AActor *source, fixed_t z, AActor *dest, const PCl
 
 	if (dest->flags & MF_SHADOW)
 	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", source->GetClass()->TypeName.GetChars( ), "P_SpawnMissileZAimed", source->actorRandom());
 		an += source->actorRandom.Random2() << 20;
 	}
 	dist = P_AproxDistance (dest->x - source->x, dest->y - source->y);
@@ -7724,7 +7753,11 @@ AActor *P_SpawnMissileAngleZSpeed (AActor *source, fixed_t z,
 	mo = Spawn (type, source->x, source->y, z, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( source ), bSkipOwner);
 
 	if ( !( mo->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", source->GetClass()->TypeName.GetChars( ), "P_SpawnMissileAngleZSpeed", source->actorRandom());
 		mo->SetRandomSeed( source->actorRandom() );
+	}
 
 	P_PlaySpawnSound(mo, source);
 	if (owner == NULL) owner = source;
@@ -7899,7 +7932,11 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 	if (pMissileActor) *pMissileActor = MissileActor;
 
 	if ( !bNoOwner && !( MissileActor->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) )
+	{
+		if ( sv_showactorrandom )
+			Printf("Checking random for \"%s\" in \"%s\" : %d\n", source->GetClass()->TypeName.GetChars( ), "P_SpawnPlayerMissile", source->actorRandom());
 		MissileActor->SetRandomSeed( source->actorRandom() );
+	}
 
 	// Mark actor as clientside if spawned on client
 	if ( NETWORK_InClientMode() && NETWORK_ClientsideFunctionsAllowed( source ) )
