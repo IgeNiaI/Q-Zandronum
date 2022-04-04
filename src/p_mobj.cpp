@@ -130,7 +130,6 @@ static FRandom pr_takedamage ("TakeDamage");
 static FRandom pr_splat ("FAxeSplatter");
 static FRandom pr_ripperblood ("RipperBlood");
 static FRandom pr_chunk ("Chunk");
-static FRandom pr_checkmissilespawn ("CheckMissileSpawn");
 static FRandom pr_missiledamage ("MissileDamage");
 static FRandom pr_multiclasschoice ("MultiClassChoice");
 static FRandom pr_rockettrail("RocketTrail");
@@ -7350,7 +7349,7 @@ bool P_CheckMissileSpawn (AActor* th, fixed_t maxdist, bool bExplode)
 	// [RH] Don't decrement tics if they are already less than 1
 	if ((th->flags4 & MF4_RANDOMIZE) && th->tics > 0)
 	{
-		th->tics -= pr_checkmissilespawn() & 3;
+		th->tics -= th->actorRandom() & 3;
 		if (th->tics < 1)
 			th->tics = 1;
 	}
