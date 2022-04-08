@@ -2904,6 +2904,7 @@ FUNC(LS_ChangeCamera)
 	if (!it || !it->player || arg1)
 	{
 		int i;
+		int playerNumToSkip = GetPlayerNumToSkip(it, isFromAcs, isFromDecorate);
 
 		for (i = 0; i < MAXPLAYERS; i++)
 		{
@@ -2919,7 +2920,7 @@ FUNC(LS_ChangeCamera)
 
 				// [BC] If we're the server, tell this player to change his camera.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SetPlayerCamera( i, camera, ( arg2 ) ? true : false );
+					SERVERCOMMANDS_SetPlayerCamera( i, camera, ( arg2 ) ? true : false, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 			}
 			else
 			{
@@ -2928,7 +2929,7 @@ FUNC(LS_ChangeCamera)
 
 				// [BC] If we're the server, tell this player to change his camera.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_SetPlayerCamera( i, players[i].mo, false );
+					SERVERCOMMANDS_SetPlayerCamera( i, players[i].mo, false, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 			}
 			if (oldcamera != players[i].camera)
 			{
@@ -2938,6 +2939,7 @@ FUNC(LS_ChangeCamera)
 	}
 	else
 	{
+		int playerNumToSkip = GetPlayerNumToSkip(it, isFromAcs, isFromDecorate);
 		AActor *oldcamera = it->player->camera;
 		if (camera)
 		{
@@ -2947,7 +2949,7 @@ FUNC(LS_ChangeCamera)
 
 			// [BC] If we're the server, tell this player to change his camera.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetPlayerCamera( ULONG( it->player - players ), camera, ( arg2 ) ? true : false );
+				SERVERCOMMANDS_SetPlayerCamera( ULONG( it->player - players ), camera, ( arg2 ) ? true : false, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 		}
 		else
 		{
@@ -2956,7 +2958,7 @@ FUNC(LS_ChangeCamera)
 
 			// [BC] If we're the server, tell this player to change his camera.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_SetPlayerCamera( ULONG( it->player - players ), it, false );
+				SERVERCOMMANDS_SetPlayerCamera( ULONG( it->player - players ), it, false, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 		}
 		if (oldcamera != it->player->camera)
 		{
