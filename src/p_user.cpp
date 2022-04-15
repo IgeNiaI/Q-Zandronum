@@ -2741,7 +2741,10 @@ void APlayerPawn::CalcJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z)
 {
 	if (cmd)
 	{
-		TVector2<fixed_t> dir = TVector2<fixed_t>(cmd->ucmd.forwardmove, -cmd->ucmd.sidemove).FixedUnit();
+		TVector2<fixed_t> dir = TVector2<fixed_t>(
+			FixedMul(cmd->ucmd.forwardmove, ForwardMove2),
+			FixedMul(-cmd->ucmd.sidemove, SideMove2)
+		).FixedUnit();
 		dir = TVector2<fixed_t>(
 			FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
 			FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
@@ -2766,7 +2769,10 @@ void APlayerPawn::CalcSecondJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed
 {
 	if (cmd)
 	{
-		TVector2<fixed_t> dir = TVector2<fixed_t>(cmd->ucmd.forwardmove, -cmd->ucmd.sidemove).FixedUnit();
+		TVector2<fixed_t> dir = TVector2<fixed_t>(
+			FixedMul(cmd->ucmd.forwardmove, ForwardMove2),
+			FixedMul(-cmd->ucmd.sidemove, SideMove2)
+		).FixedUnit();
 		dir = TVector2<fixed_t>(
 			FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
 			FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
