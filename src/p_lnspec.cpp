@@ -3418,12 +3418,13 @@ FUNC(LS_GlassBreak)
 	// [BC] If we're the server, update this line's blocking.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		SERVERCOMMANDS_SetSomeLineFlags( ULONG( ln - lines ));
-
-	switched = P_ChangeSwitchTexture (ln->sidedef[0], false, 0, &quest1);
+	
+	int playerNum = GetInstigator( it, isFromAcs ) - players;
+	switched = P_ChangeSwitchTexture (ln->sidedef[0], false, 0, &quest1, playerNum);
 	ln->special = 0;
 	if (ln->sidedef[1] != NULL)
 	{
-		switched |= P_ChangeSwitchTexture (ln->sidedef[1], false, 0, &quest2);
+		switched |= P_ChangeSwitchTexture (ln->sidedef[1], false, 0, &quest2, playerNum);
 	}
 	else
 	{

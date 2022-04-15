@@ -210,7 +210,7 @@ bool P_CheckSwitchRange(AActor *user, line_t *line, int sideno)
 //
 //==========================================================================
 
-bool P_ChangeSwitchTexture (side_t *side, int useAgain, BYTE special, bool *quest)
+bool P_ChangeSwitchTexture (side_t *side, int useAgain, BYTE special, bool *quest, int playernumtoskip)
 {
 	int texture;
 	int sound;
@@ -283,7 +283,7 @@ bool P_ChangeSwitchTexture (side_t *side, int useAgain, BYTE special, bool *ques
 
 	// [BC] If we're the server, tell clients to set the line texture.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_SetLineTexture( static_cast<ULONG>( side->linedef - lines ) );
+		SERVERCOMMANDS_SetLineTexture( static_cast<ULONG>( side->linedef - lines ), playernumtoskip, SVCF_SKIPTHISCLIENT );
 
 	if (useAgain || Switch->NumFrames > 1)
 	{
@@ -299,7 +299,7 @@ bool P_ChangeSwitchTexture (side_t *side, int useAgain, BYTE special, bool *ques
 
 		// [BC] If we're the server, tell clients to play the sound.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_SoundPoint( pt[0], pt[1], 0, CHAN_VOICE|CHAN_LISTENERZ, S_GetName( sound ), 1, ATTN_STATIC );
+			SERVERCOMMANDS_SoundPoint( pt[0], pt[1], 0, CHAN_VOICE|CHAN_LISTENERZ, S_GetName( sound ), 1, ATTN_STATIC, playernumtoskip, SVCF_SKIPTHISCLIENT );
 	}
 	if (quest != NULL)
 	{

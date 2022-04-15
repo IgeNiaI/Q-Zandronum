@@ -430,7 +430,7 @@ void	EV_StartLightFading (int tag, int value, int tics);
 
 #define BUTTONTIME TICRATE		// 1 second, in ticks. 
 
-bool	P_ChangeSwitchTexture (side_t *side, int useAgain, BYTE special, bool *quest=NULL);
+bool	P_ChangeSwitchTexture (side_t *side, int useAgain, BYTE special, bool *quest=NULL, int playernumtoskip = -1);
 bool	P_CheckSwitchRange(AActor *user, line_t *line, int sideno);
 
 //
