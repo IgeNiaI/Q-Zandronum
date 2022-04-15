@@ -7026,7 +7026,16 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 				// [BB] Inform the clients.
 				if ( NETWORK_GetState() == NETSTATE_SERVER )
-					SERVERCOMMANDS_MoveThingIfChanged( caller, oldPositionData, noInterpolation );
+				{
+					if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+					{
+						SERVERCOMMANDS_MoveThingIfChanged( caller, oldPositionData, noInterpolation, NETWORK_GetActorsOwnerPlayer( caller ) - players, SVCF_SKIPTHISCLIENT );
+					}
+					else
+					{
+						SERVERCOMMANDS_MoveThingIfChanged( caller, oldPositionData, noInterpolation );
+					}
+				}
 
 				return true;
 			}
