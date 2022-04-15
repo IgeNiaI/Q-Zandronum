@@ -344,7 +344,10 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 	{
 		if (activationType == SPAC_Use || activationType == SPAC_Impact)
 		{
-			P_ChangeSwitchTexture (line->sidedef[0], repeat, special);
+			int playerNum = -1;
+			if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) )
+				playerNum = mo->player - players;
+			P_ChangeSwitchTexture (line->sidedef[0], repeat, special, NULL, playerNum);
 
 			// [BC] Tell the clients of the switch texture change.
 //			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -361,7 +364,10 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 		line->args[0] &&										// only if there's a tag (which is stored in the first arg)
 		P_FindSectorFromTag (line->args[0], -1) == -1)			// only if no sector is tagged to this linedef
 	{
-		P_ChangeSwitchTexture (line->sidedef[0], repeat, special);
+		int playerNum = -1;
+		if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) )
+			playerNum = mo->player - players;
+		P_ChangeSwitchTexture (line->sidedef[0], repeat, special, NULL, playerNum);
 		line->special = 0;
 
 		// [BC] Tell the clients of the switch texture change.
