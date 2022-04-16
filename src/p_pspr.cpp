@@ -502,9 +502,8 @@ void P_BobWeapon (player_t *player, fixed_t *x, fixed_t *y)
 
 	if (curbob != 0)
 	{
-		fixed_t bobFrac = player->prevbob + FixedMul(r_TicFrac, player->bob - player->prevbob);
-		fixed_t bobx = FixedMul(bobFrac, rangex);
-		fixed_t boby = FixedMul(bobFrac, rangey);
+		fixed_t bobx = FixedMul(player->bob, rangex);
+		fixed_t boby = FixedMul(player->bob, rangey);
 		switch (bobstyle)
 		{
 		case AWeapon::BobNormal:
@@ -558,8 +557,8 @@ void P_SwayWeapon (player_t *player, fixed_t *x, fixed_t *y)
 	if ( player->bSpectating || player->ReadyWeapon == NULL )
 		return;
 
-	*x = player->prevswayx + FixedMul(r_TicFrac, player->swayx - player->prevswayx);
-	*y = player->prevswayy + FixedMul(r_TicFrac, player->swayy - player->prevswayy);
+	*x = player->swayx;
+	*y = player->swayy;
 }
 
 //============================================================================

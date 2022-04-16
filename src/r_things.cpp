@@ -1260,6 +1260,8 @@ void R_DrawPlayerSprites ()
 		fixed_t centerhack = centeryfrac;
 		fixed_t offsetBobX, offsetBobY;
 		fixed_t offsetSwayX, offsetSwayY;
+		
+		fixed_t x, y;
 
 		centery = viewheight >> 1;
 		centeryfrac = centery << FRACBITS;
@@ -1272,10 +1274,22 @@ void R_DrawPlayerSprites ()
 			 i < NUMPSPRITES;
 			 i++, psp++)
 		{
+			if (gametic > psp->otic)
+			{
+				psp->osx = psp->nsx;
+				psp->osy = psp->nsy;
+				psp->otic = gametic;
+			}
+			psp->nsx = psp->sx + offsetBobX + offsetSwayX;
+			psp->nsy = psp->sy + offsetBobY + offsetSwayY;
+
+			x = psp->osx + FixedMul (r_TicFrac, psp->nsx - psp->osx);
+			y = psp->osy + FixedMul (r_TicFrac, psp->nsy - psp->osy);
+
 			// [RH] Don't draw the targeter's crosshair if the player already has a crosshair set.
 			if (psp->state && (i != ps_targetcenter || CrosshairImage == NULL))
 			{
-				R_DrawPSprite (psp, i, camera, psp->sx + offsetBobX + offsetSwayX, psp->sy + offsetBobY + offsetSwayY);
+				R_DrawPSprite (psp, i, camera, x, y);
 			}
 			// [RH] Don't bob the targeter.
 			if (i == ps_flash)

@@ -358,9 +358,23 @@ void FGLRenderer::DrawPlayerSprites(sector_t * viewsector, bool hudModelStep)
 	// light mode here to draw the weapon sprite.
 	int oldlightmode = glset.lightmode;
 	if (glset.lightmode == 8) glset.lightmode = 2;
-	
+
+	fixed_t x, y;
+
 	for (i=0, psp=player->psprites; i<=ps_flash; i++,psp++)
 	{
+		if (gametic > psp->otic)
+		{
+			psp->osx = psp->nsx;
+			psp->osy = psp->nsy;
+			psp->otic = gametic;
+		}
+		psp->nsx = psp->sx + offsetBobX + offsetSwayX;
+		psp->nsy = psp->sy + offsetBobY + offsetSwayY;
+
+		x = psp->osx + FixedMul (r_TicFrac, psp->nsx - psp->osx);
+		y = psp->osy + FixedMul (r_TicFrac, psp->nsy - psp->osy);
+
 		if (psp->state) 
 		{
 			FColormap cmc = cm;
@@ -383,7 +397,7 @@ void FGLRenderer::DrawPlayerSprites(sector_t * viewsector, bool hudModelStep)
 			// set the lighting parameters (only calls glColor and glAlphaFunc)
 			gl_SetSpriteLighting(vis.RenderStyle, playermo, statebright[i]? 255 : lightlevel, 
 				0, &cmc, 0xffffff, trans, statebright[i], true);
-			DrawPSprite (player,psp,psp->sx+offsetBobX+offsetSwayX, psp->sy+offsetBobY+offsetSwayY, cm.colormap, hudModelStep, OverrideShader);
+			DrawPSprite (player, psp, x, y, cm.colormap, hudModelStep, OverrideShader);
 		}
 	}
 	gl_RenderState.EnableBrightmap(false);
