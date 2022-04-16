@@ -71,6 +71,9 @@ struct pspdef_t
 	int			sprite;
 	int			frame;
 	bool		processPending; // true: waiting for periodic processing on this tick
+	
+	int			otic;
+	fixed_t		osx, osy, nsx, nsy;
 };
 
 class FArchive;

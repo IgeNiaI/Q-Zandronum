@@ -272,12 +272,9 @@ player_t::player_t()
   viewz(0),
   viewheight(0),
   deltaviewheight(0),
-  prevbob(0),
   bob(0),
   velx(0),
   vely(0),
-  prevswayx(0),
-  prevswayy(0),
   swayx(0),
   swayy(0),
   centering(0),
@@ -417,12 +414,9 @@ player_t::player_t()
 	  viewz = p.viewz;
 	  viewheight = p.viewheight;
 	  deltaviewheight = p.deltaviewheight;
-	  prevbob = p.prevbob;
 	  bob = p.bob;
 	  velx = p.velx;
 	  vely = p.vely;
-	  prevswayx = p.prevswayx;
-	  prevswayy = p.prevswayy;
 	  swayx = p.swayx;
 	  swayy = p.swayy;
 	  centering = p.centering;
@@ -3129,8 +3123,6 @@ void P_CalcHeight (player_t *player)
 	if ( CLIENT_PREDICT_IsPredicting( ))
 		return;
 
-	player->prevbob = player->bob;
-
 	// Regular movement bobbing
 	// (needs to be calculated for gun swing even if not on ground)
 
@@ -3270,10 +3262,6 @@ void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta)
 
 	if ( weapon && player->WeaponState & WF_WEAPONBOBBING && !(weapon->WeaponFlags & WIF_DONTBOB) )
 	{
-		// Save previous sway for sprite interpolation
-		player->prevswayx = player->swayx;
-		player->prevswayy = player->swayy;
-
 		// Add sway based on turn delta and velz
 		player->swayx += angleDelta >> 5;
 		player->swayy -= pitchDelta >> 5;
@@ -3297,8 +3285,8 @@ void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta)
 	}
 	else
 	{
-		player->prevswayx = player->swayx = 0;
-		player->prevswayy = player->swayy = 0;
+		player->swayx = 0;
+		player->swayy = 0;
 	}
 }
 
