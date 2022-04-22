@@ -737,7 +737,7 @@ void DUEL_SetStartNextDuelOnLevelLoad( bool bStart )
 
 // [AK] Added CVAR_GAMEMODESETTING.
 CVAR( Int, sv_duelcountdowntime, 10, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );
-CVAR( Bool, sv_duelwarmup, false, CVAR_ARCHIVE );
+CVAR( Bool, sv_duelwarmup, false, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );
 CUSTOM_CVAR( Int, duellimit, 0, CVAR_CAMPAIGNLOCK )
 {
 	if ( self >= 256 )
