@@ -148,7 +148,8 @@ static	cycle_t	g_StaleSpawnCycles;
 
 FRandom pr_spawnmobj ("SpawnActor");
 
-CUSTOM_CVAR (Float, sv_gravity, 800.f, CVAR_SERVERINFO|CVAR_NOSAVE)
+// [AK] Added CVAR_GAMEMODESETTING.
+CUSTOM_CVAR (Float, sv_gravity, 800.f, CVAR_SERVERINFO|CVAR_NOSAVE|CVAR_GAMEMODESETTING)
 {
 	level.gravity = self;
 

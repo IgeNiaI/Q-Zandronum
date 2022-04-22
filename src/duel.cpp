@@ -735,7 +735,8 @@ void DUEL_SetStartNextDuelOnLevelLoad( bool bStart )
 //*****************************************************************************
 //	CONSOLE COMMANDS/VARIABLES
 
-CVAR( Int, sv_duelcountdowntime, 10, CVAR_ARCHIVE );
+// [AK] Added CVAR_GAMEMODESETTING.
+CVAR( Int, sv_duelcountdowntime, 10, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );
 CVAR( Bool, sv_duelwarmup, false, CVAR_ARCHIVE );
 CUSTOM_CVAR( Int, duellimit, 0, CVAR_CAMPAIGNLOCK )
 {

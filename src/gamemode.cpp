@@ -75,10 +75,11 @@
 //*****************************************************************************
 //	CONSOLE VARIABLES
 
-CVAR( Bool, instagib, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_CAMPAIGNLOCK );
-CVAR( Bool, buckshot, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_CAMPAIGNLOCK );
+// [AK] Added CVAR_GAMEMODESETTING.
+CVAR( Bool, instagib, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_CAMPAIGNLOCK | CVAR_GAMEMODESETTING );
+CVAR( Bool, buckshot, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_CAMPAIGNLOCK | CVAR_GAMEMODESETTING );
 
-CVAR( Bool, sv_suddendeath, true, CVAR_SERVERINFO | CVAR_LATCH );
+CVAR( Bool, sv_suddendeath, true, CVAR_SERVERINFO | CVAR_LATCH | CVAR_GAMEMODESETTING );
 
 EXTERN_CVAR( Bool, sv_respawnonnewwave );
 
