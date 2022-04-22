@@ -783,8 +783,8 @@ CUSTOM_CVAR( Int, winlimit, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK )
 	}
 }
 
-// [AK] Added CVAR_GAMEMODELOCK.
-CUSTOM_CVAR( Int, lmsallowedweapons, LMS_AWF_ALLALLOWED, CVAR_SERVERINFO | CVAR_GAMEMODELOCK )
+// [AK] Added CVAR_GAMEMODESETTING.
+CUSTOM_CVAR( Int, lmsallowedweapons, LMS_AWF_ALLALLOWED, CVAR_SERVERINFO | CVAR_GAMEMODESETTING )
 {
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
 	{
@@ -804,8 +804,8 @@ CVAR( Flag, lms_allowplasma, lmsallowedweapons, LMS_AWF_PLASMA );
 CVAR( Flag, lms_allowrailgun, lmsallowedweapons, LMS_AWF_RAILGUN );
 CVAR( Flag, lms_allowchainsaw, lmsallowedweapons, LMS_AWF_CHAINSAW );
 
-// [AK] Added CVAR_GAMEMODELOCK.
-CUSTOM_CVAR( Int, lmsspectatorsettings, LMS_SPF_VIEW, CVAR_SERVERINFO | CVAR_GAMEMODELOCK )
+// [AK] Added CVAR_GAMEMODESETTING.
+CUSTOM_CVAR( Int, lmsspectatorsettings, LMS_SPF_VIEW, CVAR_SERVERINFO | CVAR_GAMEMODESETTING )
 {
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
 	{
