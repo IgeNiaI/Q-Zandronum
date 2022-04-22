@@ -2431,9 +2431,6 @@ static void D_DoomInit()
 
 	gamestate = GS_STARTUP;
 
-	// Initialize the game mode module.
-	GAMEMODE_Construct( );
-
 	// Determine if we're going to be a server, client, or local player.
 	if ( Args->CheckParm( "-host" ))
 		NETWORK_SetState( NETSTATE_SERVER );

@@ -98,125 +98,6 @@ static	GAMEMODE_e				g_CurrentGameMode;
 //*****************************************************************************
 //	FUNCTIONS
 
-void GAMEMODE_Construct( void )
-{
-	// Regular co-op.
-	g_GameModes[GAMEMODE_COOPERATIVE].ulFlags = GMF_COOPERATIVE|GMF_PLAYERSEARNKILLS;
-	strcpy( g_GameModes[GAMEMODE_COOPERATIVE].szName, "Cooperative" );
-	strncpy( g_GameModes[GAMEMODE_COOPERATIVE].szShortName, "COOP", 8 );
-	strncpy( g_GameModes[GAMEMODE_COOPERATIVE].szF1Texture, "F1_COOP", 8 );
-
-	// Survival co-op.
-	g_GameModes[GAMEMODE_SURVIVAL].ulFlags = GMF_COOPERATIVE|GMF_PLAYERSEARNKILLS|GMF_MAPRESETS|GMF_DEADSPECTATORS|GMF_USEMAXLIVES|GMF_MAPRESET_RESETS_MAPTIME;
-	strcpy( g_GameModes[GAMEMODE_SURVIVAL].szName, "Survival" );
-	strncpy( g_GameModes[GAMEMODE_SURVIVAL].szShortName, "SURV", 8 );
-	strncpy( g_GameModes[GAMEMODE_SURVIVAL].szF1Texture, "F1_SCP", 8 );
-
-	// Invasion.
-	g_GameModes[GAMEMODE_INVASION].ulFlags = GMF_COOPERATIVE|GMF_PLAYERSEARNKILLS|GMF_MAPRESETS|GMF_DEADSPECTATORS|GMF_USEMAXLIVES;
-	strcpy( g_GameModes[GAMEMODE_INVASION].szName, "Invasion" );
-	strncpy( g_GameModes[GAMEMODE_INVASION].szShortName, "INVAS", 8 );
-	strncpy( g_GameModes[GAMEMODE_INVASION].szF1Texture, "F1_INV", 8 );
-
-	// Regular deathmatch.
-	g_GameModes[GAMEMODE_DEATHMATCH].ulFlags = GMF_DEATHMATCH|GMF_PLAYERSEARNFRAGS;
-	strcpy( g_GameModes[GAMEMODE_DEATHMATCH].szName, "Deathmatch" );
-	strncpy( g_GameModes[GAMEMODE_DEATHMATCH].szShortName, "DM", 8 );
-	strncpy( g_GameModes[GAMEMODE_DEATHMATCH].szF1Texture, "F1_DM", 8 );
-
-	// Teamplay DM.
-	g_GameModes[GAMEMODE_TEAMPLAY].ulFlags = GMF_DEATHMATCH|GMF_PLAYERSEARNFRAGS|GMF_PLAYERSONTEAMS;
-	strcpy( g_GameModes[GAMEMODE_TEAMPLAY].szName, "Team DM" );
-	strncpy( g_GameModes[GAMEMODE_TEAMPLAY].szShortName, "TDM", 8 );
-	strncpy( g_GameModes[GAMEMODE_TEAMPLAY].szF1Texture, "F1_TDM", 8 );
-
-	// Duel.
-	g_GameModes[GAMEMODE_DUEL].ulFlags = GMF_DEATHMATCH|GMF_PLAYERSEARNFRAGS|GMF_MAPRESETS|GMF_MAPRESET_RESETS_MAPTIME;
-	strcpy( g_GameModes[GAMEMODE_DUEL].szName, "Duel" );
-	strncpy( g_GameModes[GAMEMODE_DUEL].szShortName, "DUEL", 8 );
-	strncpy( g_GameModes[GAMEMODE_DUEL].szF1Texture, "F1_DUEL", 8 );
-
-	// Terminator DM.
-	g_GameModes[GAMEMODE_TERMINATOR].ulFlags = GMF_DEATHMATCH|GMF_PLAYERSEARNFRAGS;
-	strcpy( g_GameModes[GAMEMODE_TERMINATOR].szName, "Terminator" );
-	strncpy( g_GameModes[GAMEMODE_TERMINATOR].szShortName, "TERM", 8 );
-	strncpy( g_GameModes[GAMEMODE_TERMINATOR].szF1Texture, "F1_TERM", 8 );
-
-	// Last man standing.
-	g_GameModes[GAMEMODE_LASTMANSTANDING].ulFlags = GMF_DEATHMATCH|GMF_PLAYERSEARNWINS|GMF_DONTSPAWNMAPTHINGS|GMF_MAPRESETS|GMF_DEADSPECTATORS|GMF_USEMAXLIVES|GMF_MAPRESET_RESETS_MAPTIME;
-	strcpy( g_GameModes[GAMEMODE_LASTMANSTANDING].szName, "LMS" );
-	strncpy( g_GameModes[GAMEMODE_LASTMANSTANDING].szShortName, "LMS", 8 );
-	strncpy( g_GameModes[GAMEMODE_LASTMANSTANDING].szF1Texture, "F1_LMS", 8 );
-
-	// Team LMS.
-	g_GameModes[GAMEMODE_TEAMLMS].ulFlags = GMF_DEATHMATCH|GMF_PLAYERSEARNWINS|GMF_DONTSPAWNMAPTHINGS|GMF_MAPRESETS|GMF_DEADSPECTATORS|GMF_PLAYERSONTEAMS|GMF_USEMAXLIVES|GMF_MAPRESET_RESETS_MAPTIME;
-	strcpy( g_GameModes[GAMEMODE_TEAMLMS].szName, "Team LMS" );
-	strncpy( g_GameModes[GAMEMODE_TEAMLMS].szShortName, "TLMS", 8 );
-	strncpy( g_GameModes[GAMEMODE_TEAMLMS].szF1Texture, "F1_TLMS", 8 );
-
-	// Possession DM.
-	// [BB] Even though possession doesn't do a full map reset, it still resets the map time during its partial reset.
-	g_GameModes[GAMEMODE_POSSESSION].ulFlags = GMF_DEATHMATCH|GMF_PLAYERSEARNPOINTS|GMF_MAPRESET_RESETS_MAPTIME;
-	strcpy( g_GameModes[GAMEMODE_POSSESSION].szName, "Possession" );
-	strncpy( g_GameModes[GAMEMODE_POSSESSION].szShortName, "POSS", 8 );
-	strncpy( g_GameModes[GAMEMODE_POSSESSION].szF1Texture, "F1_POSS", 8 );
-
-	// Team possession.
-	g_GameModes[GAMEMODE_TEAMPOSSESSION].ulFlags = GMF_DEATHMATCH|GMF_PLAYERSEARNPOINTS|GMF_PLAYERSONTEAMS|GMF_MAPRESET_RESETS_MAPTIME;
-	strcpy( g_GameModes[GAMEMODE_TEAMPOSSESSION].szName, "Team Possession" );
-	strncpy( g_GameModes[GAMEMODE_TEAMPOSSESSION].szShortName, "TM POSS", 8 );
-	strncpy( g_GameModes[GAMEMODE_TEAMPOSSESSION].szF1Texture, "F1_TPOSS", 8 );
-
-	// Regular teamgame.
-	g_GameModes[GAMEMODE_TEAMGAME].ulFlags = GMF_TEAMGAME|GMF_PLAYERSEARNPOINTS|GMF_PLAYERSONTEAMS;
-	strcpy( g_GameModes[GAMEMODE_TEAMGAME].szName, "Team Game" );
-	strncpy( g_GameModes[GAMEMODE_TEAMGAME].szShortName, "TM GAME", 8 );
-	strncpy( g_GameModes[GAMEMODE_TEAMGAME].szF1Texture, "F1_TMGM", 8 );
-
-	// Capture the flag.
-	g_GameModes[GAMEMODE_CTF].ulFlags = GMF_TEAMGAME|GMF_USEFLAGASTEAMITEM|GMF_PLAYERSEARNPOINTS|GMF_PLAYERSONTEAMS|GMF_USETEAMITEM;
-	strcpy( g_GameModes[GAMEMODE_CTF].szName, "CTF" );
-	strncpy( g_GameModes[GAMEMODE_CTF].szShortName, "CTF", 8 );
-	strncpy( g_GameModes[GAMEMODE_CTF].szF1Texture, "F1_CTF", 8 );
-
-	// One flag CTF.
-	g_GameModes[GAMEMODE_ONEFLAGCTF].ulFlags = GMF_TEAMGAME|GMF_USEFLAGASTEAMITEM|GMF_PLAYERSEARNPOINTS|GMF_PLAYERSONTEAMS|GMF_USETEAMITEM;
-	strcpy( g_GameModes[GAMEMODE_ONEFLAGCTF].szName, "1-Flag CTF" );
-	strncpy( g_GameModes[GAMEMODE_ONEFLAGCTF].szShortName, "1F-CTF", 8 );
-	strncpy( g_GameModes[GAMEMODE_ONEFLAGCTF].szF1Texture, "F1_1FCTF", 8 );
-
-	// Skulltag.
-	g_GameModes[GAMEMODE_SKULLTAG].ulFlags = GMF_TEAMGAME|GMF_PLAYERSEARNPOINTS|GMF_PLAYERSONTEAMS|GMF_USETEAMITEM;
-	strcpy( g_GameModes[GAMEMODE_SKULLTAG].szName, "Skulltag" );
-	strncpy( g_GameModes[GAMEMODE_SKULLTAG].szShortName, "ST", 8 );
-	strncpy( g_GameModes[GAMEMODE_SKULLTAG].szF1Texture, "F1_ST", 8 );
-
-	// Domination
-	g_GameModes[GAMEMODE_DOMINATION].ulFlags = GMF_TEAMGAME|GMF_PLAYERSEARNPOINTS|GMF_PLAYERSONTEAMS;
-	strcpy( g_GameModes[GAMEMODE_DOMINATION].szName, "Domination" );
-	strncpy( g_GameModes[GAMEMODE_DOMINATION].szShortName, "DOM", 8 );
-	strncpy( g_GameModes[GAMEMODE_DOMINATION].szF1Texture, "F1_DOM", 8 );
-	
-	// [AK] Set the default values of all flagsets for all gamemodes.
-	for ( int i = GAMEMODE_COOPERATIVE; i < NUM_GAMEMODES; i++ )
-	{
-		for ( int j = 0; j <= 1; j++ )
-		{
-			g_GameModes[i].lDMFlags[j] = 0;
-			g_GameModes[i].lDMFlags[j] = 0;
-			g_GameModes[i].lCompatFlags[j] = 0;
-			g_GameModes[i].lCompatFlags[j] = 0;
-			g_GameModes[i].lZaDMFlags[j] = 0;
-			g_GameModes[i].lZaCompatFlags[j] = 0;
-		}
-	}
-
-	// Our default game mode is co-op.
-	g_CurrentGameMode = GAMEMODE_COOPERATIVE;
-}
-
-//*****************************************************************************
-//
 void GAMEMODE_Tick( void )
 {
 	static GAMESTATE_e oldState = GAMESTATE_UNSPECIFIED;
@@ -305,6 +186,24 @@ void GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode )
 		{
 			g_GameModes[GameMode].ulFlags |= GAMEMODE_ParserMustGetEnumName( sc, "flag", "GMF_", GetValueGMF );
 		}
+		else if (0 == stricmp (sc.String, "name"))
+		{
+			sc.MustGetString();
+			strncpy( g_GameModes[GameMode].szName, sc.String, 31 );
+			g_GameModes[GameMode].szName[31] = 0;
+		}
+		else if (0 == stricmp (sc.String, "shortname"))
+		{
+			sc.MustGetString();
+			strncpy( g_GameModes[GameMode].szShortName, sc.String, 8 );
+			g_GameModes[GameMode].szShortName[8] = 0;
+		}
+		else if (0 == stricmp (sc.String, "f1texture"))
+		{
+			sc.MustGetString();
+			strncpy( g_GameModes[GameMode].szF1Texture, sc.String, 8 );
+			g_GameModes[GameMode].szF1Texture[8] = 0;
+		}
 		else if ((0 == stricmp (sc.String, "gamesettings")) || (0 == stricmp (sc.String, "lockedgamesettings")))
  		{
 			bool bLockFlags = !stricmp( sc.String, "lockedgamesettings" );
@@ -360,6 +259,20 @@ void GAMEMODE_ParseGamemodeInfo( void )
 {
 	int lastlump = 0, lump;
 
+	// [AK] Before we start parsing any GAMEMODE lumps, initialize the flagset values used by all game modes to zero.
+	for ( unsigned int gamemode = GAMEMODE_COOPERATIVE; gamemode < NUM_GAMEMODES; gamemode++ )
+	{
+		for ( unsigned int flagset = FLAGSET_VALUE; flagset <= FLAGSET_LOCKEDMASK; flagset++ )
+		{
+			g_GameModes[gamemode].lDMFlags[flagset] = 0;
+			g_GameModes[gamemode].lDMFlags2[flagset] = 0;
+			g_GameModes[gamemode].lCompatFlags[flagset] = 0;
+			g_GameModes[gamemode].lCompatFlags2[flagset] = 0;
+			g_GameModes[gamemode].lZaDMFlags[flagset] = 0;
+			g_GameModes[gamemode].lZaCompatFlags[flagset] = 0;
+		}
+	}
+
 	while ((lump = Wads.FindLump ("GAMEMODE", &lastlump)) != -1)
 	{
 		FScanner sc(lump);
@@ -369,6 +282,9 @@ void GAMEMODE_ParseGamemodeInfo( void )
 			GAMEMODE_ParseGamemodeInfoLump ( sc, GameMode );
 		}
 	}
+
+	// Our default game mode is co-op.
+	g_CurrentGameMode = GAMEMODE_COOPERATIVE;
 }
 
 //*****************************************************************************
