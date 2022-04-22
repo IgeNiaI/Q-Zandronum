@@ -1,0 +1,215 @@
+// [AK] This is just to initialize the flagsets of all game modes to zero.
+DefaultGameSettings
+{
+}
+
+// Regular co-op
+Cooperative
+{
+	AddFlag COOPERATIVE
+	AddFlag PLAYERSEARNKILLS
+
+	Name "Cooperative"
+	ShortName "COOP"
+	F1Texture "F1_COOP"
+}
+
+// Survival co-op
+Survival
+{
+	AddFlag COOPERATIVE
+	AddFlag PLAYERSEARNKILLS
+	AddFlag MAPRESETS
+	AddFlag DEADSPECTATORS
+	AddFlag USEMAXLIVES
+	AddFlag MAPRESET_RESETS_MAPTIME
+
+	Name "Survival"
+	ShortName "SURV"
+	F1Texture "F1_SCP"
+}
+
+// Invasion
+Invasion
+{
+	AddFlag COOPERATIVE
+	AddFlag PLAYERSEARNKILLS
+	AddFlag MAPRESETS
+	AddFlag DEADSPECTATORS
+	AddFlag USEMAXLIVES
+
+	Name "Invasion"
+	ShortName "INVAS"
+	F1Texture "F1_INV"
+}
+
+// Regular deathmatch
+Deathmatch
+{
+	AddFlag DEATHMATCH
+	AddFlag PLAYERSEARNFRAGS
+
+	Name "Deathmatch"
+	ShortName "DM"
+	F1Texture "F1_DM"
+}
+
+// Teamplay DM
+Teamplay
+{
+	AddFlag DEATHMATCH
+	AddFlag PLAYERSEARNFRAGS
+	AddFlag PLAYERSONTEAMS
+
+	Name "Team Deathmatch"
+	ShortName "TDM"
+	F1Texture "F1_TDM"
+}
+
+// Duel
+Duel
+{
+	AddFlag DEATHMATCH
+	AddFlag PLAYERSEARNFRAGS
+	AddFlag MAPRESETS
+	AddFlag MAPRESET_RESETS_MAPTIME
+
+	Name "Duel"
+	ShortName "DUEL"
+	F1Texture "F1_DUEL"
+}
+
+// Terminator DM
+Terminator
+{
+	AddFlag DEATHMATCH
+	AddFlag PLAYERSEARNFRAGS
+
+	Name "Terminator"
+	ShortName "TERM"
+	F1Texture "F1_TERM"
+}
+
+// Last man standing
+LastManStanding
+{
+	AddFlag DEATHMATCH
+	AddFlag PLAYERSEARNWINS
+	AddFlag DONTSPAWNMAPTHINGS
+	AddFlag MAPRESETS
+	AddFlag DEADSPECTATORS
+	AddFlag USEMAXLIVES
+	AddFlag MAPRESET_RESETS_MAPTIME
+
+	Name "Last Man Standing"
+	ShortName "LMS"
+	F1Texture "F1_LMS"
+}
+
+// Team LMS
+TeamLMS
+{
+	AddFlag DEATHMATCH
+	AddFlag PLAYERSEARNWINS
+	AddFlag DONTSPAWNMAPTHINGS
+	AddFlag MAPRESETS
+	AddFlag DEADSPECTATORS
+	AddFlag PLAYERSONTEAMS
+	AddFlag USEMAXLIVES
+	AddFlag MAPRESET_RESETS_MAPTIME
+
+	Name "Team Last Man Standing"
+	ShortName "TLMS"
+	F1Texture "F1_TLMS"
+}
+
+// Possession DM
+Possession
+{
+	AddFlag DEATHMATCH
+	AddFlag PLAYERSEARNPOINTS
+	// [BB] Even though possession doesn't do a full map reset, it still resets the map time during its partial reset.
+	AddFlag MAPRESET_RESETS_MAPTIME
+
+	Name "Possession"
+	ShortName "POSS"
+	F1Texture "F1_POSS"
+}
+
+// Team possession
+TeamPossession
+{
+	AddFlag DEATHMATCH
+	AddFlag PLAYERSEARNPOINTS
+	AddFlag PLAYERSONTEAMS
+	AddFlag MAPRESET_RESETS_MAPTIME
+
+	Name "Team Possession"
+	ShortName "TM POSS"
+	F1Texture "F1_TPOSS"
+}
+
+// Regular teamgame
+TeamGame
+{
+	AddFlag TEAMGAME
+	AddFlag PLAYERSEARNPOINTS
+	AddFlag PLAYERSONTEAMS
+
+	Name "Team Game"
+	ShortName "TM GAME"
+	F1Texture "F1_TMGM"
+}
+
+// Capture the flag
+CTF
+{
+	AddFlag TEAMGAME
+	AddFlag USEFLAGASTEAMITEM
+	AddFlag PLAYERSEARNPOINTS
+	AddFlag PLAYERSONTEAMS
+	AddFlag USETEAMITEM
+
+	Name "Capture the Flag"
+	ShortName "CTF"
+	F1Texture "F1_CTF"
+}
+
+// One flag CTF
+OneFlagCTF
+{
+	AddFlag TEAMGAME
+	AddFlag USEFLAGASTEAMITEM
+	AddFlag PLAYERSEARNPOINTS
+	AddFlag PLAYERSONTEAMS
+	AddFlag USETEAMITEM
+
+	Name "1-Flag CTF"
+	ShortName "1F-CTF"
+	F1Texture "F1_1FCTF"
+}
+
+// Skulltag
+Skulltag
+{
+	AddFlag TEAMGAME
+	AddFlag PLAYERSEARNPOINTS
+	AddFlag PLAYERSONTEAMS
+	AddFlag USETEAMITEM
+
+	Name "Skulltag"
+	ShortName "ST"
+	F1Texture "F1_ST"
+}
+
+// Domination
+Domination
+{
+	AddFlag TEAMGAME
+	AddFlag PLAYERSEARNPOINTS
+	AddFlag PLAYERSONTEAMS
+
+	Name "Domination"
+	ShortName "DOM"
+	F1Texture "F1_DOM"
+}

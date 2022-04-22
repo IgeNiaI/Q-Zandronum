@@ -166,7 +166,6 @@ typedef struct
 //*****************************************************************************
 //	PROTOTYPES
 
-void		GAMEMODE_Construct( void );
 void		GAMEMODE_Tick( void );
 void		GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode );
 void		GAMEMODE_ParseGamemodeInfo( void );
