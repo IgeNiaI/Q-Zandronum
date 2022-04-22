@@ -94,8 +94,8 @@ static FRandom pr_poison ("PoisonDamage");
 static FRandom pr_switcher ("SwitchTarget");
 static FRandom pr_kickbackdir ("KickbackDir");
 
-CVAR( Int, sv_terminatorfragaward, 10, CVAR_SERVERINFO | CVAR_LATCH );
-CVAR( Int, sv_ringouttics, 0, CVAR_SERVERINFO | CVAR_LATCH )
+CVAR( Int, sv_terminatorfragaward, 10, CVAR_SERVERINFO | CVAR_LATCH | CVAR_GAMEMODESETTING );
+CVAR( Int, sv_ringouttics, 0, CVAR_SERVERINFO | CVAR_LATCH | CVAR_GAMEMODESETTING )
 EXTERN_CVAR (Bool, show_obituaries)
 EXTERN_CVAR (Int, sv_endleveldelay)
 // [BB] FIXME
