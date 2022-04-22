@@ -305,8 +305,10 @@ void GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode )
 		{
 			g_GameModes[GameMode].ulFlags |= GAMEMODE_ParserMustGetEnumName( sc, "flag", "GMF_", GetValueGMF );
 		}
-		else if (0 == stricmp (sc.String, "gamesettings"))
-		{
+		else if ((0 == stricmp (sc.String, "gamesettings")) || (0 == stricmp (sc.String, "lockedgamesettings")))
+ 		{
+			bool bLockFlags = !stricmp( sc.String, "lockedgamesettings" );
+
 			sc.MustGetStringName( "{" );
 			while ( !sc.CheckString( "}" ))
 			{
@@ -332,6 +334,10 @@ void GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode )
 					flagset[FLAGSET_VALUE] &= ~ulBit;
 
 				flagset[FLAGSET_MASK] |= ulBit;
+
+				// [AK] Lock this flag so it can't be manually changed.
+				if ( bLockFlags )
+					flagset[FLAGSET_LOCKEDMASK] |= ulBit;
 			}
 		}
 		else if (0 == stricmp (sc.String, "removegamesetting"))
@@ -341,6 +347,7 @@ void GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode )
 
 			flagset[FLAGSET_VALUE] &= ~ulBit;
 			flagset[FLAGSET_MASK] &= ~ulBit;
+			flagset[FLAGSET_LOCKEDMASK] &= ~ulBit;
 		}
 		else
 			sc.ScriptError ( "Unknown option '%s', on line %d in GAMEMODE.", sc.String, sc.Line );
@@ -413,20 +420,22 @@ char *GAMEMODE_GetF1Texture( GAMEMODE_e GameMode )
 
 //*****************************************************************************
 //
-int GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset )
+int GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset, bool bLocked )
 {
+	ULONG ulMask = bLocked ? FLAGSET_LOCKEDMASK : FLAGSET_MASK;
+
 	if ( Flagset == &dmflags )
-		return ( g_GameModes[GameMode].lDMFlags[FLAGSET_MASK] );
+		return ( g_GameModes[GameMode].lDMFlags[ulMask] );
 	else if ( Flagset == &dmflags2 )
-		return ( g_GameModes[GameMode].lDMFlags2[FLAGSET_MASK] );
+		return ( g_GameModes[GameMode].lDMFlags2[ulMask] );
 	else if ( Flagset == &compatflags )
-		return ( g_GameModes[GameMode].lCompatFlags[FLAGSET_MASK] );
+		return ( g_GameModes[GameMode].lCompatFlags[ulMask] );
 	else if ( Flagset == &compatflags2 )
-		return ( g_GameModes[GameMode].lCompatFlags2[FLAGSET_MASK] );
+		return ( g_GameModes[GameMode].lCompatFlags2[ulMask] );
 	else if ( Flagset == &zadmflags )
-		return ( g_GameModes[GameMode].lZaDMFlags[FLAGSET_MASK] );
+		return ( g_GameModes[GameMode].lZaDMFlags[ulMask] );
 	else if ( Flagset == &zacompatflags )
-		return ( g_GameModes[GameMode].lZaCompatFlags[FLAGSET_MASK] );
+		return ( g_GameModes[GameMode].lZaCompatFlags[ulMask] );
 	
 	// [AK] We passed an invalid flagset, just return zero.
 	return ( 0 );
@@ -434,9 +443,9 @@ int GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset )
 
 //*****************************************************************************
 //
-int GAMEMODE_GetCurrentFlagsetMask( FIntCVar *Flagset )
+int GAMEMODE_GetCurrentFlagsetMask( FIntCVar *Flagset, bool bLocked )
 {
-	return ( GAMEMODE_GetFlagsetMask( g_CurrentGameMode, Flagset ) );
+	return ( GAMEMODE_GetFlagsetMask( g_CurrentGameMode, Flagset, bLocked ) );
 }
 
 //*****************************************************************************
@@ -1324,32 +1333,33 @@ void GAMEMODE_SetLimit( GAMELIMIT_e GameLimit, int value )
 
 //*****************************************************************************
 //
-void GAMEMODE_ReconfigureGameSettings( void )
+void GAMEMODE_ReconfigureGameSettings( bool bLockedOnly )
 {
+	ULONG ulMask = bLockedOnly ? FLAGSET_LOCKEDMASK : FLAGSET_MASK;
 	GAMEMODE_s *GameMode = &g_GameModes[g_CurrentGameMode];
 	UCVarValue value;
 
 	// [AK] Apply the mask to dmflags, but don't change the values of any unlocked flags.
-	value.Int = ( dmflags & ~GameMode->lDMFlags[FLAGSET_MASK] ) | GameMode->lDMFlags[FLAGSET_VALUE];
+	value.Int = ( dmflags & ~GameMode->lDMFlags[ulMask] ) | ( GameMode->lDMFlags[FLAGSET_VALUE] & GameMode->lDMFlags[ulMask] );
 	dmflags.ForceSet( value, CVAR_Int );
 
 	// ...and dmflags2.
-	value.Int = ( dmflags2 & ~GameMode->lDMFlags2[FLAGSET_MASK] ) | GameMode->lDMFlags2[FLAGSET_VALUE];
+	value.Int = ( dmflags2 & ~GameMode->lDMFlags2[ulMask] ) | ( GameMode->lDMFlags2[FLAGSET_VALUE] & GameMode->lDMFlags2[ulMask] );
 	dmflags2.ForceSet( value, CVAR_Int );
 
 	// ...and compatflags.
-	value.Int = ( compatflags & ~GameMode->lCompatFlags[FLAGSET_MASK] ) | GameMode->lCompatFlags[FLAGSET_VALUE];
+	value.Int = ( compatflags & ~GameMode->lCompatFlags[ulMask] ) | ( GameMode->lCompatFlags[FLAGSET_VALUE] & GameMode->lCompatFlags[ulMask] );
 	compatflags.ForceSet( value, CVAR_Int );
 
 	// ...and compatflags2.
-	value.Int = ( compatflags2 & ~GameMode->lCompatFlags2[FLAGSET_MASK] ) | GameMode->lCompatFlags2[FLAGSET_VALUE];
+	value.Int = ( compatflags2 & ~GameMode->lCompatFlags2[ulMask] ) | ( GameMode->lCompatFlags2[FLAGSET_VALUE] & GameMode->lCompatFlags2[ulMask] );
 	compatflags2.ForceSet( value, CVAR_Int );
 
 	// ...and zadmflags.
-	value.Int = ( zadmflags & ~GameMode->lZaDMFlags[FLAGSET_MASK] ) | GameMode->lZaDMFlags[FLAGSET_VALUE];
+	value.Int = ( zadmflags & ~GameMode->lZaDMFlags[ulMask] ) | ( GameMode->lZaDMFlags[FLAGSET_VALUE] & GameMode->lZaDMFlags[ulMask] );
 	zadmflags.ForceSet( value, CVAR_Int );
 
 	// ...and zacompatflags.
-	value.Int = ( zacompatflags & ~GameMode->lZaCompatFlags[FLAGSET_MASK] ) | GameMode->lZaCompatFlags[FLAGSET_VALUE];
+	value.Int = ( zacompatflags & ~GameMode->lZaCompatFlags[ulMask] ) | ( GameMode->lZaCompatFlags[FLAGSET_VALUE] & GameMode->lZaCompatFlags[ulMask] );
 	zacompatflags.ForceSet( value, CVAR_Int );
 }

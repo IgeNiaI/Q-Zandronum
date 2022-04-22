@@ -194,7 +194,7 @@ void FBaseCVar::SetGenericRep (UCVarValue value, ECVarType type)
 		// [AK] Check if we (indirectly) changed any flags locked in the current game mode.
 		else if ( Flags & CVAR_GAMEMODELOCK )
 		{
-			int mask = GAMEMODE_GetCurrentFlagsetMask( static_cast<FIntCVar *>( this ));
+			int mask = GAMEMODE_GetCurrentFlagsetMask( static_cast<FIntCVar *>( this ), true );
 			int oldValue = GetGenericRep( CVAR_Int ).Int;
 			int newValue = ToInt( value, type );
 

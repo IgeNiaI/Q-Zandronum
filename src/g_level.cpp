@@ -416,6 +416,9 @@ void G_InitNew (const char *mapname, bool bTitleLevel)
 		paused = 0;
 		S_ResumeSound (false);
 	}
+	
+	// [AK] Set any flags to what the need to be in the new game mode.
+	GAMEMODE_ReconfigureGameSettings( );
 
 	// [BC] Reset the end level delay.
 	GAME_SetEndLevelDelay( 0 );
@@ -1057,7 +1060,7 @@ void G_DoLoadLevel (int position, bool autosave)
 	NETTRAFFIC_Reset();
 	
 	// [AK] Reset all locked gameplay/compatibility flags to what they're supposed to be, in case they somehow changed.
-	GAMEMODE_ReconfigureGameSettings();
+	GAMEMODE_ReconfigureGameSettings( true );
 
 	// Loop through the teams, and reset the scores.
 	for ( i = 0; i < teams.Size( ); i++ )
