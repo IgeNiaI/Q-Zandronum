@@ -406,7 +406,8 @@ void D_RemoveNextCharEvent()
 //
 //==========================================================================
 
-CUSTOM_CVAR (Int, dmflags, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK)
+// [AK] Added CVAR_GAMEMODELOCK.
+CUSTOM_CVAR (Int, dmflags, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK | CVAR_GAMEMODELOCK)
 {
 	// In case DF_NO_FREELOOK was changed, reinitialize the sky
 	// map. (If no freelook, then no need to stretch the sky.)
@@ -478,7 +479,8 @@ CVAR (Mask, sv_fallingdamage,	dmflags, DF_FORCE_FALLINGHX|DF_FORCE_FALLINGZD);
 //
 //==========================================================================
 
-CUSTOM_CVAR (Int, dmflags2, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK)
+// [AK] Added CVAR_GAMEMODELOCK.
+CUSTOM_CVAR (Int, dmflags2, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK | CVAR_GAMEMODELOCK)
 {
 	// [BC] If we're the server, tell clients that the dmflags changed.
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
@@ -567,7 +569,8 @@ EXTERN_CVAR(Int, gl_lightmode)
 EXTERN_CVAR(Int, gl_distfog)
 #endif
 
-CUSTOM_CVAR (Int, zadmflags, 0, CVAR_SERVERINFO)
+// [AK] Added CVAR_CAMPAIGNLOCK and CVAR_GAMEMODELOCK.
+CUSTOM_CVAR (Int, zadmflags, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK | CVAR_GAMEMODELOCK)
 {
 	// [Dusk] If we just turned sv_sharedkeys on, share keys now.
 	if ((( self ^ self.GetPastValue() ) & ZADF_SHARE_KEYS ) & ( self & ZADF_SHARE_KEYS ))
@@ -638,7 +641,8 @@ static int GetCompatibility2(int mask)
 }
 
 // [BB] Removed the CVAR_ARCHIVE flag.
-CUSTOM_CVAR (Int, compatflags, 0, CVAR_SERVERINFO)
+// [AK] Added CVAR_CAMPAIGNLOCK and CVAR_GAMEMODELOCK.
+CUSTOM_CVAR (Int, compatflags, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK | CVAR_GAMEMODELOCK)
 {
 	int old = i_compatflags;
 	i_compatflags = GetCompatibility(self) | ii_compatflags;
@@ -656,7 +660,8 @@ CUSTOM_CVAR (Int, compatflags, 0, CVAR_SERVERINFO)
 }
 
 // [BB] Removed the CVAR_ARCHIVE flag.
-CUSTOM_CVAR (Int, compatflags2, 0, CVAR_SERVERINFO)
+// [AK] Added CVAR_CAMPAIGNLOCK and CVAR_GAMEMODELOCK.
+CUSTOM_CVAR (Int, compatflags2, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK | CVAR_GAMEMODELOCK)
 {
 	i_compatflags2 = GetCompatibility2(self) | ii_compatflags2;
 
@@ -674,7 +679,8 @@ CUSTOM_CVAR (Int, compatflags2, 0, CVAR_SERVERINFO)
 //
 //==========================================================================
 
-CUSTOM_CVAR (Int, zacompatflags, 0, CVAR_SERVERINFO)
+// [AK] Added CVAR_CAMPAIGNLOCK and CVAR_GAMEMODELOCK.
+CUSTOM_CVAR (Int, zacompatflags, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK | CVAR_GAMEMODELOCK)
 {
 	// [BC] If we're the server, tell clients that the dmflags changed.
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
