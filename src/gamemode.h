@@ -83,6 +83,22 @@ EXTERN_CVAR( Bool, sv_suddendeath )
 //*****************************************************************************
 typedef enum
 {
+	FLAGSET_DMFLAGS,
+	FLAGSET_DMFLAGS2,
+	FLAGSET_COMPATFLAGS,
+	FLAGSET_COMPATFLAGS2,
+	FLAGSET_ZADMFLAGS,
+	FLAGSET_ZACOMPATFLAGS,
+	FLAGSET_LMSALLOWEDWEAPONS,
+	FLAGSET_LMSSPECTATORSETTINGS,
+
+	NUM_FLAGSETS
+
+} FLAGSET_e;
+
+//*****************************************************************************
+typedef enum
+{
 	MODIFIER_NONE,
 	MODIFIER_INSTAGIB,
 	MODIFIER_BUCKSHOT,
@@ -143,29 +159,9 @@ typedef struct
 	// this game mode.
 	char	szF1Texture[9];
 
-	// [AK] The dmflags we set for this gamemode.
-	LONG	lDMFlags[3];
-
-	// [AK] The dmflags2 we set for this gamemode.
-	LONG	lDMFlags2[3];
-
-	// [AK] The compatflags we set for this gamemode.
-	LONG	lCompatFlags[3];
-
-	// [AK] The compatflags2 we set for this gamemode.
-	LONG	lCompatFlags2[3];
-
-	// [AK] The zadmflags we set for this gamemode.
-	LONG	lZaDMFlags[3];
-
-	// [AK] The zacompatflags we set for this gamemode.
-	LONG	lZaCompatFlags[3];
-	
-	// [AK] The lmsallowedweapons we set for this gamemode.
-	LONG	lLMSAllowedWeapons[3];
-
-	// [AK] The lmsspectatorsettings we set for this gamemode.
-	LONG	lLMSSpectatorSettings[3];
+	// [AK] All of the gameplay or compatibility flags we set for this game mode
+	// (dmflags, compatflags, lmsallowedweapons, lmsspectatorsettings, etc.).
+	LONG	lFlagsets[NUM_FLAGSETS][3];
 
 } GAMEMODE_s;
 
