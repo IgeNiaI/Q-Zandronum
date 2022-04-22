@@ -210,38 +210,7 @@ void GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode )
 		}
 		else if ((0 == stricmp (sc.String, "gamesettings")) || (0 == stricmp (sc.String, "lockedgamesettings")))
  		{
-			bool bLockFlags = !stricmp( sc.String, "lockedgamesettings" );
-
-			sc.MustGetStringName( "{" );
-			while ( !sc.CheckString( "}" ))
-			{
-				FFlagCVar *flag = GAMEMODE_ParserMustGetFlagset( sc, GameMode, flagset );
-				ULONG ulBit = flag->GetBitVal();
-				bool bEnableFlag;
-	
-				// [AK] There must be an equal sign following the name of the flag.
-				sc.MustGetStringName( "=" );
-				sc.GetString();
-
-				if ( stricmp( sc.String, "true" ) == 0 )
-					bEnableFlag = true;
-				else if ( stricmp( sc.String, "false" ) == 0 )
-					bEnableFlag = false;
-				else
-					bEnableFlag = !!atoi( sc.String );
-
-				// [AK] Enable or disable the flag as desired.
-				if ( bEnableFlag )
-					g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_VALUE] |= ulBit;
-				else
-					g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_VALUE] &= ~ulBit;
-
-				g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_MASK] |= ulBit;
-
-				// [AK] Lock this flag so it can't be manually changed.
-				if ( bLockFlags )
-					g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_LOCKEDMASK] |= ulBit;
-			}
+			GAMEMODE_ParseGameSettingBlock( sc, GameMode, !stricmp( sc.String, "lockedgamesettings" ));
 		}
 		else if (0 == stricmp (sc.String, "removegamesetting"))
 		{
@@ -255,6 +224,96 @@ void GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode )
 		else
 			sc.ScriptError ( "Unknown option '%s', on line %d in GAMEMODE.", sc.String, sc.Line );
 	}
+
+	// [AK] Get the game mode type (cooperative, deathmatch, or team game). There shouldn't be more than one enabled or none at all.
+	ULONG ulFlags = g_GameModes[GameMode].ulFlags & ( GMF_COOPERATIVE | GMF_DEATHMATCH | GMF_TEAMGAME );
+	if (( ulFlags == 0 ) || (( ulFlags & ( ulFlags - 1 )) != 0 ))
+		sc.ScriptError( "Can't determine if '%s' is cooperative, deathmatch, or team-based.", g_GameModes[GameMode].szName );
+
+	// [AK] Get the type of "players earn" flag this game mode is currently using.
+	ulFlags = g_GameModes[GameMode].ulFlags & ( GMF_PLAYERSEARNKILLS | GMF_PLAYERSEARNFRAGS | GMF_PLAYERSEARNPOINTS | GMF_PLAYERSEARNWINS );
+
+	// [AK] If all of these flags were removed or if more than one was added, then throw an error.
+	if ( ulFlags == 0 )
+		sc.ScriptError( "Players have no way of earning kills, frags, points, or wins in '%s'.", g_GameModes[GameMode].szName );
+	else if (( ulFlags & ( ulFlags - 1 )) != 0 )
+		sc.ScriptError( "There is more than one PLAYERSEARN flag enabled in '%s'.", g_GameModes[GameMode].szName );
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_ParseGameSettingBlock ( FScanner &sc, const GAMEMODE_e GameMode, bool bLockFlags, bool bResetFlags )
+{
+	FLAGSET_e flagset;
+	sc.MustGetStringName( "{" );
+
+	// [AK] If this is the start of a "defaultgamesettings" or "defaultlockedgamesettings" block, reset the
+	// flagsets of all game modes to zero. We don't want to do this more than once in a single GAMEMODE lump,
+	// in case both blocks are declared in the same lump.
+	if (( GameMode == NUM_GAMEMODES ) && ( bResetFlags ))
+	{
+		for ( unsigned int mode = GAMEMODE_COOPERATIVE; mode < NUM_GAMEMODES; mode++ )
+		{
+			for ( unsigned int set = FLAGSET_DMFLAGS; set < NUM_FLAGSETS; set++ )
+			{
+				g_GameModes[mode].lFlagsets[set][FLAGSET_VALUE] = 0;
+				g_GameModes[mode].lFlagsets[set][FLAGSET_MASK] = 0;
+				g_GameModes[mode].lFlagsets[set][FLAGSET_LOCKEDMASK] = 0;
+			}
+		}
+	}
+
+	while ( !sc.CheckString( "}" ))
+	{
+		FFlagCVar *flag = GAMEMODE_ParserMustGetFlagset( sc, GameMode, flagset );
+		ULONG ulBit = flag->GetBitVal();
+		bool bEnableFlag;
+
+		// [AK] There must be an equal sign following the name of the flag.
+		sc.MustGetStringName( "=" );
+		sc.GetString();
+
+		if ( stricmp( sc.String, "true" ) == 0 )
+			bEnableFlag = true;
+		else if ( stricmp( sc.String, "false" ) == 0 )
+			bEnableFlag = false;
+		else
+			bEnableFlag = !!atoi( sc.String );
+
+		// [AK] If this flag was added inside a "defaultgamesettings" or "defaultlockedgamesettings" block, apply
+		// it to all the game modes. Otherwise, just apply it to the one we specified.
+		if ( GameMode == NUM_GAMEMODES )
+		{
+			for ( unsigned int mode = GAMEMODE_COOPERATIVE; mode < NUM_GAMEMODES; mode++ )
+			{
+				// [AK] Enable or disable the flag as desired.
+				if ( bEnableFlag )
+					g_GameModes[mode].lFlagsets[flagset][FLAGSET_VALUE] |= ulBit;
+				else
+					g_GameModes[mode].lFlagsets[flagset][FLAGSET_VALUE] &= ~ulBit;
+
+				g_GameModes[mode].lFlagsets[flagset][FLAGSET_MASK] |= ulBit;
+
+				// [AK] Lock this flag so it can't be manually changed.
+				if ( bLockFlags )
+					g_GameModes[mode].lFlagsets[flagset][FLAGSET_LOCKEDMASK] |= ulBit;
+			}
+		}
+		else
+		{
+			// [AK] Enable or disable the flag as desired.
+			if ( bEnableFlag )
+				g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_VALUE] |= ulBit;
+			else
+				g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_VALUE] &= ~ulBit;
+
+			g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_MASK] |= ulBit;
+
+			// [AK] Lock this flag so it can't be manually changed.
+			if ( bLockFlags )
+				g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_LOCKEDMASK] |= ulBit;
+		}
+	}
 }
 
 //*****************************************************************************
@@ -263,24 +322,37 @@ void GAMEMODE_ParseGamemodeInfo( void )
 {
 	int lastlump = 0, lump;
 
-	// [AK] Before we start parsing any GAMEMODE lumps, initialize the flagset values used by all game modes to zero.
-	for ( unsigned int gamemode = GAMEMODE_COOPERATIVE; gamemode < NUM_GAMEMODES; gamemode++ )
-	{
-		for ( unsigned int flagset = FLAGSET_DMFLAGS; flagset < NUM_FLAGSETS; flagset++ )
-		{
-			g_GameModes[gamemode].lFlagsets[flagset][FLAGSET_VALUE] = 0;
-			g_GameModes[gamemode].lFlagsets[flagset][FLAGSET_MASK] = 0;
-			g_GameModes[gamemode].lFlagsets[flagset][FLAGSET_LOCKEDMASK] = 0;
-		}
-	}
-
 	while ((lump = Wads.FindLump ("GAMEMODE", &lastlump)) != -1)
 	{
 		FScanner sc(lump);
+		bool bParsedDefGameSettings = false;
+		bool bParsedDefLockedSettings = false;
+
 		while (sc.GetString ())
 		{
-			GAMEMODE_e GameMode = static_cast<GAMEMODE_e>( GAMEMODE_ParserMustGetEnumName( sc, "gamemode", "GAMEMODE_", GetValueGAMEMODE_e, true ) );
-			GAMEMODE_ParseGamemodeInfoLump ( sc, GameMode );
+			if (stricmp(sc.String, "defaultgamesettings") == 0)
+			{
+				// [AK] Don't allow more than one "defaultgamesettings" block in the same lump.
+				if ( bParsedDefGameSettings )
+					sc.ScriptError( "There is already a \"DefaultGameSettings\" block defined in this lump." );
+
+				GAMEMODE_ParseGameSettingBlock( sc, NUM_GAMEMODES, false, !( bParsedDefGameSettings || bParsedDefLockedSettings ) );
+				bParsedDefGameSettings = true;
+			}
+			else if (stricmp(sc.String, "defaultlockedgamesettings") == 0)
+			{
+				// [AK] Don't allow more than one "defaultlockedgamesettings" block in the same lump.
+				if ( bParsedDefLockedSettings )
+					sc.ScriptError( "There is already a \"DefaultLockedGameSettings\" block defined in this lump." );
+
+				GAMEMODE_ParseGameSettingBlock( sc, NUM_GAMEMODES, true, !( bParsedDefGameSettings || bParsedDefLockedSettings ) );
+				bParsedDefLockedSettings = true;
+			}
+			else
+			{
+				GAMEMODE_e GameMode = static_cast<GAMEMODE_e>( GAMEMODE_ParserMustGetEnumName( sc, "gamemode", "GAMEMODE_", GetValueGAMEMODE_e, true ) );
+				GAMEMODE_ParseGamemodeInfoLump ( sc, GameMode );
+			}
 		}
 	}
 

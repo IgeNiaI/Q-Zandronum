@@ -170,6 +170,7 @@ typedef struct
 
 void		GAMEMODE_Tick( void );
 void		GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode );
+void		GAMEMODE_ParseGameSettingBlock ( FScanner &sc, const GAMEMODE_e GameMode, bool bLockFlags, bool bResetFlags = false );
 void		GAMEMODE_ParseGamemodeInfo( void );
 ULONG		GAMEMODE_GetFlags( GAMEMODE_e GameMode );
 ULONG		GAMEMODE_GetCurrentFlags( void );
