@@ -68,33 +68,10 @@
 #define GAMEEVENT_RETURN_TIMEOUTRETURN 0
 #define GAMEEVENT_RETURN_PLAYERRETURN 1
 
-// [AK] The combined values of all flags set in a game mode.
-#define FLAGSET_VALUE 0
-// [AK] The bits of a flagset to be set.
-#define FLAGSET_MASK 1
-// [AK] The bits of a flagset that are locked and cannot be changed.
-#define FLAGSET_LOCKEDMASK 2
-
 //*****************************************************************************
 //  EXTERNAL CONSOLE VARIABLES
 
 EXTERN_CVAR( Bool, sv_suddendeath )
-
-//*****************************************************************************
-typedef enum
-{
-	FLAGSET_DMFLAGS,
-	FLAGSET_DMFLAGS2,
-	FLAGSET_COMPATFLAGS,
-	FLAGSET_COMPATFLAGS2,
-	FLAGSET_ZADMFLAGS,
-	FLAGSET_ZACOMPATFLAGS,
-	FLAGSET_LMSALLOWEDWEAPONS,
-	FLAGSET_LMSSPECTATORSETTINGS,
-
-	NUM_FLAGSETS
-
-} FLAGSET_e;
 
 //*****************************************************************************
 typedef enum
@@ -144,6 +121,26 @@ typedef enum
 //*****************************************************************************
 //	STRUCTURES
 
+struct GAMESETTING_s
+{
+	~GAMESETTING_s ( void );
+	void DeleteStrings ( bool bDeleteDefault = true );
+
+	// [AK] A pointer to the CVar that we want to set.
+	FBaseCVar	*pCVar;
+
+	// [AK] The type of value to set for this CVar.
+	ECVarType	Type;
+
+	// [AK] The value we wish to set this CVar to.
+	UCVarValue	Val;
+
+	// [AK] The default value of this CVar.
+	UCVarValue	DefaultVal;
+
+};
+
+//*****************************************************************************
 typedef struct
 {
 	// Flags for this game mode.
@@ -159,9 +156,11 @@ typedef struct
 	// this game mode.
 	char	szF1Texture[9];
 
-	// [AK] All of the gameplay or compatibility flags we set for this game mode
-	// (dmflags, compatflags, lmsallowedweapons, lmsspectatorsettings, etc.).
-	LONG	lFlagsets[NUM_FLAGSETS][3];
+	// [AK] All unlocked CVars that we want to configure for this game mode.
+	TArray<GAMESETTING_s> GameSettings;
+
+	// [AK] All locked CVars that we want to configure for this game mode.
+	TArray<GAMESETTING_s> LockedGameSettings;
 
 } GAMEMODE_s;
 
@@ -171,14 +170,13 @@ typedef struct
 void		GAMEMODE_Tick( void );
 void		GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode );
 void		GAMEMODE_ParseGameSettingBlock ( FScanner &sc, const GAMEMODE_e GameMode, bool bLockFlags, bool bResetFlags = false );
+void		GAMEMODE_CondenseGameSettingBlock ( TArray<GAMESETTING_s> *pList );
 void		GAMEMODE_ParseGamemodeInfo( void );
 ULONG		GAMEMODE_GetFlags( GAMEMODE_e GameMode );
 ULONG		GAMEMODE_GetCurrentFlags( void );
 char		*GAMEMODE_GetShortName( GAMEMODE_e GameMode );
 char		*GAMEMODE_GetName( GAMEMODE_e GameMode );
 char		*GAMEMODE_GetF1Texture( GAMEMODE_e GameMode );
-int			GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset, bool bLocked = false );
-int			GAMEMODE_GetCurrentFlagsetMask( FIntCVar *Flagset, bool bLocked = false );
 void		GAMEMODE_DetermineGameMode( void );
 bool		GAMEMODE_IsGameInCountdown( void );
 bool		GAMEMODE_IsGameInProgress( void );
@@ -221,7 +219,7 @@ void		GAMEMODE_SetModifier( MODIFIER_e Modifier );
 ULONG		GAMEMODE_GetCountdownTicks( void );
 void		GAMEMODE_SetCountdownTicks( const ULONG Ticks );
 void		GAMEMODE_SetLimit( GAMELIMIT_e GameLimit, int value );
-
-void		GAMEMODE_ReconfigureGameSettings( bool bLockedOnly = false );
+bool		GAMEMODE_IsCVarLocked( FBaseCVar *cvar );
+void		GAMEMODE_ReconfigureGameSettings( bool bLockedOnly = false, bool bResetToDefault = false );
 
 #endif // __GAMEMODE_H__

@@ -416,9 +416,9 @@ void G_InitNew (const char *mapname, bool bTitleLevel)
 		paused = 0;
 		S_ResumeSound (false);
 	}
-	
+
 	// [AK] Set any flags to what the need to be in the new game mode.
-	GAMEMODE_ReconfigureGameSettings( );
+	GAMEMODE_ReconfigureGameSettings( false, true );
 
 	// [BC] Reset the end level delay.
 	GAME_SetEndLevelDelay( 0 );

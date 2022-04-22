@@ -80,8 +80,8 @@ enum
 	// (These CVars ideally shouldn't be userinfo in the first place but that would cause a lot of delta.)
 	CVAR_UNSYNCED_USERINFO = 524288,
 
-	// [AK] The CVar is locked for a particular game mode and cannot be set from the console during play.
-	CVAR_GAMEMODELOCK = 2097152,
+	// [AK] The CVar can be modified for a game mode (e.g. the GAMEMODE lump).
+	CVAR_GAMEMODESETTING = 2097152,
 };
 
 union UCVarValue
@@ -149,6 +149,9 @@ public:
 	virtual bool IsMaskCVar() { return false; }
 	bool IsServerInfo();
 
+	// [AK] Disables the lock on any CVars with CVAR_GAMEMODESETTING.
+	static void DisableGameModeLock (bool bDisable) { m_GameModeLockDisabled = bDisable; }
+
 protected:
 	FBaseCVar () {}
 	virtual void DoSet (UCVarValue value, ECVarType type) = 0;
@@ -176,6 +179,7 @@ private:
 
 	static bool m_UseCallback;
 	static bool m_DoNoSet;
+	static bool m_GameModeLockDisabled; // [AK]
 
 	friend FString C_GetMassCVarString (uint32 filter, bool compact);
 	friend void C_ReadCVars (BYTE **demo_p);
