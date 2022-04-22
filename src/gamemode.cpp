@@ -297,6 +297,8 @@ void GAMEMODE_ParseGameSettingBlock ( FScanner &sc, const GAMEMODE_e GameMode, b
 				// [AK] Lock this flag so it can't be manually changed.
 				if ( bLockFlags )
 					g_GameModes[mode].lFlagsets[flagset][FLAGSET_LOCKEDMASK] |= ulBit;
+				else
+					g_GameModes[mode].lFlagsets[flagset][FLAGSET_LOCKEDMASK] &= ~ulBit;
 			}
 		}
 		else
@@ -312,6 +314,8 @@ void GAMEMODE_ParseGameSettingBlock ( FScanner &sc, const GAMEMODE_e GameMode, b
 			// [AK] Lock this flag so it can't be manually changed.
 			if ( bLockFlags )
 				g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_LOCKEDMASK] |= ulBit;
+			else
+				g_GameModes[GameMode].lFlagsets[flagset][FLAGSET_LOCKEDMASK] &= ~ulBit;
 		}
 	}
 }
