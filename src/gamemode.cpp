@@ -160,6 +160,10 @@ FFlagCVar *GAMEMODE_ParserMustGetFlagset ( FScanner &sc, const GAMEMODE_e GameMo
 		*GameModeFlagset = &g_GameModes[GameMode].lZaDMFlags[FLAGSET_VALUE];
 	else if ( flagset == &zacompatflags )
 		*GameModeFlagset = &g_GameModes[GameMode].lZaCompatFlags[FLAGSET_VALUE];
+	else if ( flagset == &lmsallowedweapons )
+		*GameModeFlagset = &g_GameModes[GameMode].lLMSAllowedWeapons[FLAGSET_VALUE];
+	else if ( flagset == &lmsspectatorsettings )
+		*GameModeFlagset = &g_GameModes[GameMode].lLMSSpectatorSettings[FLAGSET_VALUE];
 	else
 		sc.ScriptError ( "Invalid gameplay or compatibility flag '%s'.", sc.String, sc.Line );
 
@@ -270,6 +274,8 @@ void GAMEMODE_ParseGamemodeInfo( void )
 			g_GameModes[gamemode].lCompatFlags2[flagset] = 0;
 			g_GameModes[gamemode].lZaDMFlags[flagset] = 0;
 			g_GameModes[gamemode].lZaCompatFlags[flagset] = 0;
+			g_GameModes[gamemode].lLMSAllowedWeapons[flagset] = 0;
+			g_GameModes[gamemode].lLMSSpectatorSettings[flagset] = 0;
 		}
 	}
 
@@ -352,6 +358,10 @@ int GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset, bool bLocke
 		return ( g_GameModes[GameMode].lZaDMFlags[ulMask] );
 	else if ( Flagset == &zacompatflags )
 		return ( g_GameModes[GameMode].lZaCompatFlags[ulMask] );
+	else if ( Flagset == &lmsallowedweapons )
+		return ( g_GameModes[GameMode].lLMSAllowedWeapons[ulMask] );
+	else if ( Flagset == &lmsspectatorsettings )
+		return ( g_GameModes[GameMode].lLMSSpectatorSettings[ulMask] );
 	
 	// [AK] We passed an invalid flagset, just return zero.
 	return ( 0 );

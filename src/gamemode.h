@@ -160,6 +160,12 @@ typedef struct
 
 	// [AK] The zacompatflags we set for this gamemode.
 	LONG	lZaCompatFlags[3];
+	
+	// [AK] The lmsallowedweapons we set for this gamemode.
+	LONG	lLMSAllowedWeapons[3];
+
+	// [AK] The lmsspectatorsettings we set for this gamemode.
+	LONG	lLMSSpectatorSettings[3];
 
 } GAMEMODE_s;
 
