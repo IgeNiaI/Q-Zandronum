@@ -68,7 +68,8 @@
 #include "sv_commands.h"
 #include "v_video.h"
 
-CUSTOM_CVAR( Int, sv_maxlives, 0, CVAR_SERVERINFO | CVAR_LATCH )
+// [AK] Added CVAR_GAMEMODESETTING.
+CUSTOM_CVAR( Int, sv_maxlives, 0, CVAR_SERVERINFO | CVAR_LATCH | CVAR_GAMEMODESETTING )
 {
 	if ( self >= 256 )
 		self = 255;
@@ -407,4 +408,5 @@ void SURVIVAL_SetState( SURVIVALSTATE_e State )
 //*****************************************************************************
 //	CONSOLE COMMANDS/VARIABLES
 
-CVAR( Int, sv_survivalcountdowntime, 10, CVAR_ARCHIVE );
+// [AK] Added CVAR_GAMEMODESETTING.
+CVAR( Int, sv_survivalcountdowntime, 10, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );

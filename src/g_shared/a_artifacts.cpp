@@ -1982,7 +1982,8 @@ void APowerMorph::EndEffect( )
 // the automatic return of these objects to a spawn point.
 //===========================================================================
 
-CVAR( Int, sv_artifactreturntime, 30, CVAR_SERVERINFO );
+// [AK] Added CVAR_GAMEMODESETTING.
+CVAR( Int, sv_artifactreturntime, 30, CVAR_SERVERINFO | CVAR_GAMEMODESETTING );
 
 class AReturningPowerupGiver : public APowerupGiver
 {

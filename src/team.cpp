@@ -2350,9 +2350,11 @@ CUSTOM_CVAR( Int, pointlimit, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK )
 }
 
 // Allow the server to set the return time for flags/skulls.
-CVAR( Int, sv_flagreturntime, 15, CVAR_CAMPAIGNLOCK );
+// [AK] Added CVAR_GAMEMODESETTING.
+CVAR( Int, sv_flagreturntime, 15, CVAR_CAMPAIGNLOCK | CVAR_SERVERINFO | CVAR_GAMEMODESETTING );
 
-CUSTOM_CVAR( Int, sv_maxteams, 2, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK | CVAR_LATCH )
+// [AK] Added CVAR_GAMEMODESETTING.
+CUSTOM_CVAR( Int, sv_maxteams, 2, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK | CVAR_LATCH | CVAR_GAMEMODESETTING )
 {
 	// [BB] We didn't initialize TEAMINFO yet, so we can't use teams.Size() to clamp sv_maxteams right now.
 	// In order to ensure that sv_maxteams stays in its limits, we have to clamp it in TEAMINFO_Init.

@@ -3290,7 +3290,8 @@ void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta)
 	}
 }
 
-CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE)
+// [AK] Added CVAR_GAMEMODESETTING.
+CUSTOM_CVAR (Float, sv_aircontrol, 0.00390625f, CVAR_SERVERINFO|CVAR_NOSAVE|CVAR_GAMEMODESETTING)
 {
 	level.aircontrol = (fixed_t)(self * FRACUNIT);
 	G_AirControlChanged ();

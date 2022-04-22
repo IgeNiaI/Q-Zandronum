@@ -101,7 +101,8 @@ static	std::vector<AActor*> g_MonsterCorpsesFromPreviousWave;
 //*****************************************************************************
 //	CONSOLE COMMANDS/VARIABLES
 
-CVAR( Int, sv_invasioncountdowntime, 10, CVAR_ARCHIVE );
+// [AK] Added CVAR_GAMEMODESETTING.
+CVAR( Int, sv_invasioncountdowntime, 10, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );
 CUSTOM_CVAR( Int, wavelimit, 0, CVAR_CAMPAIGNLOCK | CVAR_SERVERINFO )
 {
 	if ( self >= 256 )
@@ -118,7 +119,8 @@ CUSTOM_CVAR( Int, wavelimit, 0, CVAR_CAMPAIGNLOCK | CVAR_SERVERINFO )
 		SERVERCONSOLE_UpdateScoreboard( );
 	}
 }
-CVAR( Bool, sv_usemapsettingswavelimit, true, CVAR_ARCHIVE );
+// [AK] Added CVAR_GAMEMODESETTING.
+CVAR( Bool, sv_usemapsettingswavelimit, true, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );
 CVAR( Bool, sv_respawnonnewwave, true, CVAR_ARCHIVE );
 
 EXTERN_CVAR( Int, sv_endleveldelay )

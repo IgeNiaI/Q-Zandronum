@@ -264,7 +264,7 @@ CVAR( Bool, sv_defaultdmflags, false, 0 )
 CVAR( Bool, sv_forcepassword, false, CVAR_ARCHIVE|CVAR_NOSETBYACS )
 CVAR( Bool, sv_forcejoinpassword, false, CVAR_ARCHIVE|CVAR_NOSETBYACS )
 CVAR( Int, sv_respawntime, 1, CVAR_ARCHIVE ) // [geNia]
-CVAR( Int, sv_forcerespawntime, 0, CVAR_ARCHIVE ) // [RK]
+CVAR( Int, sv_forcerespawntime, 0, CVAR_ARCHIVE|CVAR_SERVERINFO|CVAR_GAMEMODESETTING ) // [RK]
 CVAR( Bool, sv_showlauncherqueries, false, CVAR_ARCHIVE )
 CVAR( Bool, sv_timestamp, false, CVAR_ARCHIVE|CVAR_NOSETBYACS )
 CVAR( Int, sv_timestampformat, 0, CVAR_ARCHIVE|CVAR_NOSETBYACS )
@@ -304,7 +304,8 @@ CUSTOM_CVAR( Int, sv_maxclients, MIN ( MAXPLAYERS, 32 ), CVAR_ARCHIVE )
 
 //*****************************************************************************
 // [BB] To stay compatible with old mods, the default value is at most 32.
-CUSTOM_CVAR( Int, sv_maxplayers, MIN ( MAXPLAYERS, 32 ), CVAR_ARCHIVE )
+// [AK] Added CVAR_GAMEMODESETTING.
+CUSTOM_CVAR( Int, sv_maxplayers, MIN ( MAXPLAYERS, 32 ), CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_GAMEMODESETTING )
 {
 	if ( self < 0 )
 		self = 0;
