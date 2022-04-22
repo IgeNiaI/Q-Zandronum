@@ -178,14 +178,60 @@ void FBaseCVar::SetGenericRep (UCVarValue value, ECVarType type)
 		return;
 	}
 	// [BB] ConsoleCommand may not mess with the cvar.
-	else if ( ( Flags & CVAR_NOSETBYACS ) && ( ACS_IsCalledFromConsoleCommand() ) )
-		return;
-	else if (( Flags & CVAR_CAMPAIGNLOCK ) && ( CAMPAIGN_InCampaign( )) && ( sv_cheats == false ))
+	if (( Flags & CVAR_NOSETBYACS ) && ( ACS_IsCalledFromConsoleCommand( )))
 	{
-		Printf( "%s cannot be changed during a campaign.\n", GetName( ));
 		return;
 	}
-	else if ((Flags & CVAR_LATCH) && gamestate != GS_FULLCONSOLE && gamestate != GS_STARTUP)
+
+	if ( sv_cheats == false )
+	{
+		// [AK] Don't change this CVar if it's locked in campaign mode.
+		if (( Flags & CVAR_CAMPAIGNLOCK ) && ( CAMPAIGN_InCampaign( )))
+		{
+			Printf( "%s cannot be changed during a campaign.\n", GetName( ));
+			return;
+		}
+		// [AK] Check if we (indirectly) changed any flags locked in the current game mode.
+		else if ( Flags & CVAR_GAMEMODELOCK )
+		{
+			int mask = GAMEMODE_GetCurrentFlagsetMask( static_cast<FIntCVar *>( this ));
+			int oldValue = GetGenericRep( CVAR_Int ).Int;
+			int newValue = ToInt( value, type );
+
+			// [AK] If we changed any flags that are supposed to be locked, we need to switch them back.
+			// Also print the names of all affected locked flags.
+			if (( mask ) && ( oldValue & mask ) ^ ( newValue & mask ))
+			{
+				for ( unsigned int i = 0; i < 32; i++ )
+				{
+					int bit = ( 1 << i );
+
+					if (( mask & bit ) && (( oldValue & bit ) ^ ( newValue & bit )))
+					{
+						for ( FBaseCVar* cvar = CVars; cvar; cvar = cvar->GetNext( ))
+						{
+							if ( cvar->IsFlagCVar( ) == false )
+								continue;
+
+							FFlagCVar *flag = static_cast<FFlagCVar *>( cvar );
+
+							if (( flag->GetValueVar( ) == this ) && ( flag->GetBitVal( ) == bit ))
+							{
+								Printf( "%s cannot be changed in this game mode.\n", flag->GetName( ));
+								break;
+							}
+						}
+					}
+				}
+
+				// [AK] It's easier if we just switch the CVar type to an integer.
+				value.Int = ( newValue & ~mask ) | ( oldValue & mask );
+				type = CVAR_Int;
+			}
+		}
+	}
+
+	if ((Flags & CVAR_LATCH) && gamestate != GS_FULLCONSOLE && gamestate != GS_STARTUP)
 	{
 		FLatchedValue latch;
 

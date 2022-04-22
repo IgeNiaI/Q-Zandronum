@@ -79,6 +79,9 @@ enum
 	// [TP] Despite being userinfo this CVar is not synced between client and server.
 	// (These CVars ideally shouldn't be userinfo in the first place but that would cause a lot of delta.)
 	CVAR_UNSYNCED_USERINFO = 524288,
+
+	// [AK] The CVar is locked for a particular game mode and cannot be set from the console during play.
+	CVAR_GAMEMODELOCK = 2097152,
 };
 
 union UCVarValue

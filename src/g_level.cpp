@@ -1055,6 +1055,9 @@ void G_DoLoadLevel (int position, bool autosave)
 
 	// [BB] Reset the net traffic measurements when a new map starts.
 	NETTRAFFIC_Reset();
+	
+	// [AK] Reset all locked gameplay/compatibility flags to what they're supposed to be, in case they somehow changed.
+	GAMEMODE_ReconfigureGameSettings();
 
 	// Loop through the teams, and reset the scores.
 	for ( i = 0; i < teams.Size( ); i++ )

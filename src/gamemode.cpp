@@ -196,6 +196,20 @@ void GAMEMODE_Construct( void )
 	strcpy( g_GameModes[GAMEMODE_DOMINATION].szName, "Domination" );
 	strncpy( g_GameModes[GAMEMODE_DOMINATION].szShortName, "DOM", 8 );
 	strncpy( g_GameModes[GAMEMODE_DOMINATION].szF1Texture, "F1_DOM", 8 );
+	
+	// [AK] Set the default values of all flagsets for all gamemodes.
+	for ( int i = GAMEMODE_COOPERATIVE; i < NUM_GAMEMODES; i++ )
+	{
+		for ( int j = 0; j <= 1; j++ )
+		{
+			g_GameModes[i].lDMFlags[j] = 0;
+			g_GameModes[i].lDMFlags[j] = 0;
+			g_GameModes[i].lCompatFlags[j] = 0;
+			g_GameModes[i].lCompatFlags[j] = 0;
+			g_GameModes[i].lZaDMFlags[j] = 0;
+			g_GameModes[i].lZaCompatFlags[j] = 0;
+		}
+	}
 
 	// Our default game mode is co-op.
 	g_CurrentGameMode = GAMEMODE_COOPERATIVE;
@@ -240,11 +254,43 @@ int GAMEMODE_ParserMustGetEnumName ( FScanner &sc, const char *EnumName, const c
 	return flagNum;
 }
 
+FFlagCVar *GAMEMODE_ParserMustGetFlagset ( FScanner &sc, const GAMEMODE_e GameMode, LONG **GameModeFlagset )
+{
+	sc.MustGetString();
+	FBaseCVar *cvar = FindCVar( sc.String, NULL );
+
+	// [AK] Make sure this a flag-type CVar.
+	if (( cvar == NULL ) || ( cvar->IsFlagCVar() == false ))
+		sc.ScriptError ( "'%s' is not a valid flag CVar.", sc.String );
+
+	FFlagCVar* flag = static_cast<FFlagCVar *>( cvar );
+	FIntCVar* flagset = flag->GetValueVar();
+
+	// [AK] Make sure the flag belongs to a valid gameplay or compatibility flagset.
+	if ( flagset == &dmflags )
+		*GameModeFlagset = &g_GameModes[GameMode].lDMFlags[0];
+	else if ( flagset == &dmflags2 )
+		*GameModeFlagset = &g_GameModes[GameMode].lDMFlags2[0];
+	else if ( flagset == &compatflags )
+		*GameModeFlagset = &g_GameModes[GameMode].lCompatFlags[0];
+	else if ( flagset == &compatflags2 )
+		*GameModeFlagset = &g_GameModes[GameMode].lCompatFlags2[0];
+	else if ( flagset == &zadmflags )
+		*GameModeFlagset = &g_GameModes[GameMode].lZaDMFlags[0];
+	else if ( flagset == &zacompatflags )
+		*GameModeFlagset = &g_GameModes[GameMode].lZaCompatFlags[0];
+	else
+		sc.ScriptError ( "Invalid gameplay or compatibility flag '%s'.", sc.String, sc.Line );
+
+	return flag;
+}
+
 //*****************************************************************************
 //
 void GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode )
 {
 	TEAMINFO team;
+	LONG *flagset = NULL;
 
 	sc.MustGetStringName("{");
 	while (!sc.CheckString("}"))
@@ -258,6 +304,43 @@ void GAMEMODE_ParseGamemodeInfoLump ( FScanner &sc, const GAMEMODE_e GameMode )
 		else if (0 == stricmp (sc.String, "addflag"))
 		{
 			g_GameModes[GameMode].ulFlags |= GAMEMODE_ParserMustGetEnumName( sc, "flag", "GMF_", GetValueGMF );
+		}
+		else if (0 == stricmp (sc.String, "gamesettings"))
+		{
+			sc.MustGetStringName( "{" );
+			while ( !sc.CheckString( "}" ))
+			{
+				FFlagCVar *flag = GAMEMODE_ParserMustGetFlagset( sc, GameMode, &flagset );
+				ULONG ulBit = flag->GetBitVal();
+				bool bEnableFlag;
+	
+				// [AK] There must be an equal sign following the name of the flag.
+				sc.MustGetStringName( "=" );
+				sc.GetString();
+
+				if ( stricmp( sc.String, "true" ) == 0 )
+					bEnableFlag = true;
+				else if ( stricmp( sc.String, "false" ) == 0 )
+					bEnableFlag = false;
+				else
+					bEnableFlag = !!atoi( sc.String );
+
+				// [AK] Enable or disable the flag as desired.
+				if ( bEnableFlag )
+					flagset[FLAGSET_VALUE] |= ulBit;
+				else
+					flagset[FLAGSET_VALUE] &= ~ulBit;
+
+				flagset[FLAGSET_MASK] |= ulBit;
+			}
+		}
+		else if (0 == stricmp (sc.String, "removegamesetting"))
+		{
+			FFlagCVar *flag = GAMEMODE_ParserMustGetFlagset( sc, GameMode, &flagset );
+			ULONG ulBit = flag->GetBitVal();
+
+			flagset[FLAGSET_VALUE] &= ~ulBit;
+			flagset[FLAGSET_MASK] &= ~ulBit;
 		}
 		else
 			sc.ScriptError ( "Unknown option '%s', on line %d in GAMEMODE.", sc.String, sc.Line );
@@ -326,6 +409,34 @@ char *GAMEMODE_GetF1Texture( GAMEMODE_e GameMode )
 		return ( NULL );
 
 	return ( g_GameModes[GameMode].szF1Texture );
+}
+
+//*****************************************************************************
+//
+int GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset )
+{
+	if ( Flagset == &dmflags )
+		return ( g_GameModes[GameMode].lDMFlags[FLAGSET_MASK] );
+	else if ( Flagset == &dmflags2 )
+		return ( g_GameModes[GameMode].lDMFlags2[FLAGSET_MASK] );
+	else if ( Flagset == &compatflags )
+		return ( g_GameModes[GameMode].lCompatFlags[FLAGSET_MASK] );
+	else if ( Flagset == &compatflags2 )
+		return ( g_GameModes[GameMode].lCompatFlags2[FLAGSET_MASK] );
+	else if ( Flagset == &zadmflags )
+		return ( g_GameModes[GameMode].lZaDMFlags[FLAGSET_MASK] );
+	else if ( Flagset == &zacompatflags )
+		return ( g_GameModes[GameMode].lZaCompatFlags[FLAGSET_MASK] );
+	
+	// [AK] We passed an invalid flagset, just return zero.
+	return ( 0 );
+}
+
+//*****************************************************************************
+//
+int GAMEMODE_GetCurrentFlagsetMask( FIntCVar *Flagset )
+{
+	return ( GAMEMODE_GetFlagsetMask( g_CurrentGameMode, Flagset ) );
 }
 
 //*****************************************************************************
@@ -1020,6 +1131,9 @@ void GAMEMODE_SetCurrentMode( GAMEMODE_e GameMode )
 	UCVarValue	 Val;
 	g_CurrentGameMode = GameMode;	
 	
+	// [AK] Set any locked flags to what they're supposed to be in the new game mode.
+	GAMEMODE_ReconfigureGameSettings();
+
 	// [RC] Set all the CVars. We can't just use "= true;" because of the latched cvars.
 	// (Hopefully Blzut's update will save us from this garbage.)
 
@@ -1206,4 +1320,36 @@ void GAMEMODE_SetLimit( GAMELIMIT_e GameLimit, int value )
 			wavelimit.ForceSet( Val, CVAR_Int );
 			break;
 	}
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_ReconfigureGameSettings( void )
+{
+	GAMEMODE_s *GameMode = &g_GameModes[g_CurrentGameMode];
+	UCVarValue value;
+
+	// [AK] Apply the mask to dmflags, but don't change the values of any unlocked flags.
+	value.Int = ( dmflags & ~GameMode->lDMFlags[FLAGSET_MASK] ) | GameMode->lDMFlags[FLAGSET_VALUE];
+	dmflags.ForceSet( value, CVAR_Int );
+
+	// ...and dmflags2.
+	value.Int = ( dmflags2 & ~GameMode->lDMFlags2[FLAGSET_MASK] ) | GameMode->lDMFlags2[FLAGSET_VALUE];
+	dmflags2.ForceSet( value, CVAR_Int );
+
+	// ...and compatflags.
+	value.Int = ( compatflags & ~GameMode->lCompatFlags[FLAGSET_MASK] ) | GameMode->lCompatFlags[FLAGSET_VALUE];
+	compatflags.ForceSet( value, CVAR_Int );
+
+	// ...and compatflags2.
+	value.Int = ( compatflags2 & ~GameMode->lCompatFlags2[FLAGSET_MASK] ) | GameMode->lCompatFlags2[FLAGSET_VALUE];
+	compatflags2.ForceSet( value, CVAR_Int );
+
+	// ...and zadmflags.
+	value.Int = ( zadmflags & ~GameMode->lZaDMFlags[FLAGSET_MASK] ) | GameMode->lZaDMFlags[FLAGSET_VALUE];
+	zadmflags.ForceSet( value, CVAR_Int );
+
+	// ...and zacompatflags.
+	value.Int = ( zacompatflags & ~GameMode->lZaCompatFlags[FLAGSET_MASK] ) | GameMode->lZaCompatFlags[FLAGSET_VALUE];
+	zacompatflags.ForceSet( value, CVAR_Int );
 }

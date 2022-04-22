@@ -68,6 +68,11 @@
 #define GAMEEVENT_RETURN_TIMEOUTRETURN 0
 #define GAMEEVENT_RETURN_PLAYERRETURN 1
 
+// [AK] The combined bit values of all flags that are locked in a game mode.
+#define FLAGSET_VALUE 0
+// [AK] All the bits of a flagset to be locked in a game mode.
+#define FLAGSET_MASK 1
+
 //*****************************************************************************
 //  EXTERNAL CONSOLE VARIABLES
 
@@ -136,6 +141,24 @@ typedef struct
 	// this game mode.
 	char	szF1Texture[9];
 
+	// [AK] The dmflags we set for this gamemode.
+	LONG	lDMFlags[2];
+
+	// [AK] The dmflags2 we set for this gamemode.
+	LONG	lDMFlags2[2];
+
+	// [AK] The compatflags we set for this gamemode.
+	LONG	lCompatFlags[2];
+
+	// [AK] The compatflags2 we set for this gamemode.
+	LONG	lCompatFlags2[2];
+
+	// [AK] The zadmflags we set for this gamemode.
+	LONG	lZaDMFlags[2];
+
+	// [AK] The zacompatflags we set for this gamemode.
+	LONG	lZaCompatFlags[2];
+
 } GAMEMODE_s;
 
 //*****************************************************************************
@@ -150,6 +173,8 @@ ULONG		GAMEMODE_GetCurrentFlags( void );
 char		*GAMEMODE_GetShortName( GAMEMODE_e GameMode );
 char		*GAMEMODE_GetName( GAMEMODE_e GameMode );
 char		*GAMEMODE_GetF1Texture( GAMEMODE_e GameMode );
+int			GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset );
+int			GAMEMODE_GetCurrentFlagsetMask( FIntCVar *Flagset );
 void		GAMEMODE_DetermineGameMode( void );
 bool		GAMEMODE_IsGameInCountdown( void );
 bool		GAMEMODE_IsGameInProgress( void );
@@ -192,5 +217,7 @@ void		GAMEMODE_SetModifier( MODIFIER_e Modifier );
 ULONG		GAMEMODE_GetCountdownTicks( void );
 void		GAMEMODE_SetCountdownTicks( const ULONG Ticks );
 void		GAMEMODE_SetLimit( GAMELIMIT_e GameLimit, int value );
+
+void		GAMEMODE_ReconfigureGameSettings( void );
 
 #endif // __GAMEMODE_H__
