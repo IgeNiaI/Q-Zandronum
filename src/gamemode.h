@@ -68,10 +68,12 @@
 #define GAMEEVENT_RETURN_TIMEOUTRETURN 0
 #define GAMEEVENT_RETURN_PLAYERRETURN 1
 
-// [AK] The combined bit values of all flags that are locked in a game mode.
+// [AK] The combined values of all flags set in a game mode.
 #define FLAGSET_VALUE 0
-// [AK] All the bits of a flagset to be locked in a game mode.
+// [AK] The bits of a flagset to be set.
 #define FLAGSET_MASK 1
+// [AK] The bits of a flagset that are locked and cannot be changed.
+#define FLAGSET_LOCKEDMASK 2
 
 //*****************************************************************************
 //  EXTERNAL CONSOLE VARIABLES
@@ -142,22 +144,22 @@ typedef struct
 	char	szF1Texture[9];
 
 	// [AK] The dmflags we set for this gamemode.
-	LONG	lDMFlags[2];
+	LONG	lDMFlags[3];
 
 	// [AK] The dmflags2 we set for this gamemode.
-	LONG	lDMFlags2[2];
+	LONG	lDMFlags2[3];
 
 	// [AK] The compatflags we set for this gamemode.
-	LONG	lCompatFlags[2];
+	LONG	lCompatFlags[3];
 
 	// [AK] The compatflags2 we set for this gamemode.
-	LONG	lCompatFlags2[2];
+	LONG	lCompatFlags2[3];
 
 	// [AK] The zadmflags we set for this gamemode.
-	LONG	lZaDMFlags[2];
+	LONG	lZaDMFlags[3];
 
 	// [AK] The zacompatflags we set for this gamemode.
-	LONG	lZaCompatFlags[2];
+	LONG	lZaCompatFlags[3];
 
 } GAMEMODE_s;
 
@@ -173,8 +175,8 @@ ULONG		GAMEMODE_GetCurrentFlags( void );
 char		*GAMEMODE_GetShortName( GAMEMODE_e GameMode );
 char		*GAMEMODE_GetName( GAMEMODE_e GameMode );
 char		*GAMEMODE_GetF1Texture( GAMEMODE_e GameMode );
-int			GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset );
-int			GAMEMODE_GetCurrentFlagsetMask( FIntCVar *Flagset );
+int			GAMEMODE_GetFlagsetMask( GAMEMODE_e GameMode, FIntCVar *Flagset, bool bLocked = false );
+int			GAMEMODE_GetCurrentFlagsetMask( FIntCVar *Flagset, bool bLocked = false );
 void		GAMEMODE_DetermineGameMode( void );
 bool		GAMEMODE_IsGameInCountdown( void );
 bool		GAMEMODE_IsGameInProgress( void );
@@ -218,6 +220,6 @@ ULONG		GAMEMODE_GetCountdownTicks( void );
 void		GAMEMODE_SetCountdownTicks( const ULONG Ticks );
 void		GAMEMODE_SetLimit( GAMELIMIT_e GameLimit, int value );
 
-void		GAMEMODE_ReconfigureGameSettings( void );
+void		GAMEMODE_ReconfigureGameSettings( bool bLockedOnly = false );
 
 #endif // __GAMEMODE_H__
