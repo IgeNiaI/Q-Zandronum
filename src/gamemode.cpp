@@ -268,17 +268,17 @@ FFlagCVar *GAMEMODE_ParserMustGetFlagset ( FScanner &sc, const GAMEMODE_e GameMo
 
 	// [AK] Make sure the flag belongs to a valid gameplay or compatibility flagset.
 	if ( flagset == &dmflags )
-		*GameModeFlagset = &g_GameModes[GameMode].lDMFlags[0];
+		*GameModeFlagset = &g_GameModes[GameMode].lDMFlags[FLAGSET_VALUE];
 	else if ( flagset == &dmflags2 )
-		*GameModeFlagset = &g_GameModes[GameMode].lDMFlags2[0];
+		*GameModeFlagset = &g_GameModes[GameMode].lDMFlags2[FLAGSET_VALUE];
 	else if ( flagset == &compatflags )
-		*GameModeFlagset = &g_GameModes[GameMode].lCompatFlags[0];
+		*GameModeFlagset = &g_GameModes[GameMode].lCompatFlags[FLAGSET_VALUE];
 	else if ( flagset == &compatflags2 )
-		*GameModeFlagset = &g_GameModes[GameMode].lCompatFlags2[0];
+		*GameModeFlagset = &g_GameModes[GameMode].lCompatFlags2[FLAGSET_VALUE];
 	else if ( flagset == &zadmflags )
-		*GameModeFlagset = &g_GameModes[GameMode].lZaDMFlags[0];
+		*GameModeFlagset = &g_GameModes[GameMode].lZaDMFlags[FLAGSET_VALUE];
 	else if ( flagset == &zacompatflags )
-		*GameModeFlagset = &g_GameModes[GameMode].lZaCompatFlags[0];
+		*GameModeFlagset = &g_GameModes[GameMode].lZaCompatFlags[FLAGSET_VALUE];
 	else
 		sc.ScriptError ( "Invalid gameplay or compatibility flag '%s'.", sc.String, sc.Line );
 
