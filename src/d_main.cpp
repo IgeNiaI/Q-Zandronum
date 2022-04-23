@@ -1320,10 +1320,7 @@ void D_DoomLoop ()
 					S_UpdateSounds( players[consoleplayer].camera );
 
 				// Update display, next frame, with current state.
-
-//		if ( players[consoleplayer].mo )
-//		players[consoleplayer].viewz = players[consoleplayer].mo->z + 41*FRACUNIT;
-
+				I_StartTic( );
 				D_Display( );
 				break;
 			case NETSTATE_SERVER:

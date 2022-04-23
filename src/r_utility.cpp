@@ -57,6 +57,8 @@
 #include "farchive.h"
 // [BB] New #includes.
 #include "sv_commands.h"
+#include "cl_main.h"
+#include "g_game.h"
 
 
 // EXTERNAL DATA DECLARATIONS ----------------------------------------------
@@ -588,8 +590,6 @@ void R_InterpolateView (player_t *player, fixed_t frac, InterpolationViewer *ivi
 	viewx = iview->oviewx + FixedMul (frac, iview->nviewx - iview->oviewx);
 	viewy = iview->oviewy + FixedMul (frac, iview->nviewy - iview->oviewy);
 	viewz = iview->oviewz + FixedMul (frac, iview->nviewz - iview->oviewz);
-	// [BC] This makes the mouse incredibly jerky for client games.
-/*
 	if (player != NULL &&
 		!(player->cheats & CF_INTERPVIEW) &&
 		player - players == consoleplayer &&
@@ -603,7 +603,12 @@ void R_InterpolateView (player_t *player, fixed_t frac, InterpolationViewer *ivi
 		!NoInterpolateView &&
 		!paused &&
 		( NETWORK_GetState( ) != NETSTATE_CLIENT || !cl_noprediction) &&
-		!LocalKeyboardTurner)
+		!LocalKeyboardTurner &&
+		// [Leo] Zandronum-specific checks
+		( CLIENT_GetServerLagging( ) == false ) &&
+		( CLIENT_GetClientLagging( ) == false ) &&
+		( GAME_GetEndLevelDelay( ) == false ) &&
+		( ~level.flags2 & LEVEL2_FROZEN || player->timefreezer != 0 ))
 	{
 		viewangle = iview->nviewangle + (LocalViewAngle & 0xFFFF0000);
 
@@ -636,7 +641,6 @@ void R_InterpolateView (player_t *player, fixed_t frac, InterpolationViewer *ivi
 		}
 	}
 	else
-*/
 	{
 		viewpitch = iview->oviewpitch + FixedMul (frac, iview->nviewpitch - iview->oviewpitch);
 		viewangle = iview->oviewangle + FixedMul (frac, iview->nviewangle - iview->oviewangle);

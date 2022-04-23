@@ -590,7 +590,7 @@ OptionMenu "MouseOptions"
 	}
 	Option "Prescale mouse movement",	"m_noprescale", "NoYes"
 	// [BB] smooth_mouse doesn't do anything in Skulltag (Carn deactivated it long ago), so link this to m_filter.
-	Option "Smooth mouse movement",		"m_filter", "YesNo"
+	Option "Smooth mouse movement",		"smooth_mouse", "YesNo"
 	StaticText 	""
 	Slider "Horizontal mouse speed",	"mouse_yaw", 0.1, 2.5, 0.1, 4
 	Slider "Vertical mouse speed",		"mouse_pitch", 0.1, 2.5, 0.1, 4
