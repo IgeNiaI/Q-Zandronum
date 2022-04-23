@@ -1,0 +1,2442 @@
+//////////////////////////////////////////////
+/////= NEW COLOUR CODES BY FUZZBALLFOX! =/////
+//////////////////////////////////////////////
+
+A0 MiamiRetro "Miami Retro"
+{
+	#E80092 #E80092 0 10
+	#006CFF #00FFFF 11 256
+Console:
+	#E80092 #00FFFF 0 256
+}
+
+A1 LargeCola "Large Cola"
+{
+	#110301 #6E3028 0 256
+Console:
+	#110301 #6E3028 0 256
+}
+
+A2 AllNatural "All Natural"
+{
+	#113218 #1D6018 0 70
+	#237E26 #6AC045 71 256
+Console:
+	#113218 #1D6018 0 80
+	#237E26 #6AC045 81 169
+}
+
+A3 SaharaNights "Sahara Nights"
+{
+	#1F1326 #4B2743 0 70
+	#582C43 #8F493F 71 200
+	#9F5746 #B16443 201 256
+Console:
+	#1F1326 #4B2743 0 70
+	#582C43 #8F493F 71 200
+	#9F5746 #B16443 201 256
+}
+
+A4 CoalSmudges "Coal Smudges"
+{
+	#000000 #2B2525 0 204
+	#2E2828 #383442 205 256
+Console:
+	#000000 #2B2525 0 189
+	#2E2828 #383442 190 256
+}
+
+A5 AbstractPastel "Abstract Pastel"
+{
+	#F4F4F4 #F4F4F4 0 9
+	#F5D334 #F16C1B 10 30
+	#0091ED #4EC8F4 31 61
+	#C242E7 #F976F7 62 92
+	#88F070 #4EDE47 93 113
+	#F5E183 #F17D37 114 145
+	#40AEF4 #76D6F9 146 186
+	#C242E7 #F976F7 187 217
+	#88F070 #4EDE47 218 256
+Console:
+	#4EDE47 #F18C4F 0 189
+	#FBF8DA #FFFFFF 190 256
+}
+
+A6 Midori
+{
+	#002B13 #005526 0 35
+	#006621 #009215 36 100
+	#10A60E #31D000 101 164
+	#50E400 #78FF00 165 256
+Console:
+	#002B13 #005526 0 35
+	#006621 #009215 36 100
+	#10A60E #31D000 101 164
+	#50E400 #78FF00 165 256
+}
+
+A7 HopefulFuture "Hopeful Future"
+{
+	#171420 #171420 0 35
+	#98D8EB #8AA6D1 36 100
+	#8185C0 #7049A1 101 164
+	#8185C0 #171420 165 256
+Console:
+	#98D8EB #171420 0 256
+}
+
+A8 RaspberryPop "Raspberry Pop"
+{
+	#5A0065 #E04A7C 0 256
+Console:
+	#F35D8F #E04A7C 0 256
+}
+
+A9 Suikawari
+{
+	#1E3816 #1E3816 0 10
+	#891026 #891026 11 77
+	#1A191B #1E1E1D 78 84
+	#B41D39 #E72B5B 85 199
+	#1A191B #1E1E1D 202 207
+	#E93D5E #E9625E 208 229
+	#1A191B #1E1E1D 230 234
+	#E96E5E #E9835E 235 256
+Console:
+	#891026 #E9625E 0 256
+}
+
+// =================================================================================================
+
+B0 PinkBorder "Pink Border"
+{
+	#EB51ED #E64CAA 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #E54B97 0 127
+	#AE9780 #FFFFFF 128 256
+}
+
+B1 RedBorder "Red Border"
+{
+	#E00000 #FF0000 0 7
+	#000000 #222222 8 256
+Console:
+	#111111 #353535 0 127
+	#FF0000 #FFFFFF 128 256
+}
+
+B2 BlueBorder "Blue Border"
+{
+	#0072FF #009CFF 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #353535 0 127
+	#009CFF #FFFFFF 128 256
+}
+
+B3 GreenBorder "Green Border"
+{
+	#009E0F #00D714 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #353535 0 127
+	#00D90F #FFFFFF 128 256
+}
+
+B4 YellowBorder "Yellow Border"
+{
+	#FFEA00 #FFC000 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #353535 0 127
+	#D9C200 #FFFFFF 128 256
+}
+
+B5 PurpleBorder "Purple Border"
+{
+	#A800FF #7000E2 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #353535 0 127
+	#B933FF #FFFFFF 128 256
+}
+
+B6 OrangeBorder "Orange Border"
+{
+	#FF8929 #F96900 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #353535 0 127
+	#FE8900 #FFFFFF 128 256
+}
+
+B7 WhiteBorder "White Border"
+{
+	#E4E4E4 #C3C3C3 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #353535 0 127
+	#B1B1B1 #FFFFFF 128 256
+}
+
+B8 BrownBorder "Brown Border"
+{
+	#763312 #57240B 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #353535 0 127
+	#763312 #FFFFFF 128 256
+}
+
+B9 TanBorder "Tan Border"
+{
+	#AE9780 #897360 0 6
+	#000000 #222222 7 256
+Console:
+	#111111 #353535 0 127
+	#AE9780 #FFFFFF 128 256
+}
+
+// =================================================================================================
+
+C0 Fabulous
+{
+	#81003D #F14ED8 0 256
+Console:
+	#81003D #F14ED8 0 256
+}
+
+C1 SkyBlue "Sky Blue"
+{
+	#0440BC #00D8FF 0 256
+Console:
+	#0440BC #00D8FF 0 256
+}
+
+C2 LimeGreen "Lime Green"
+{
+	#005A1C #88D600 0 256
+Console:
+	#005A1C #88D600 0 256
+}
+
+C3 RichYellow "Rich Yellow"
+{
+	#805B0A #FFDE00 0 256
+Console:
+	#805B0A #FFDE00 0 256
+}
+
+C4 StrawberryRed "Strawberry Red"
+{
+	#3F0018 #BF001F 0 256
+Console:
+	#3F0018 #BF001F 0 256
+}
+
+C5 Tangerine
+{
+	#5A0404 #FF7200 0 256
+Console:
+	#5A0404 #FF7200 0 256
+}
+
+C6 Eggplant
+{
+	#250648 #6E229A 0 256
+Console:
+	#250648 #6E229A 0 256
+}
+
+C7 Bubblegum
+{
+	#923A74 #EEBDF2 0 256
+Console:
+	#923A74 #EEBDF2 0 256
+}
+
+C8 Coffee
+{
+	#281203 #816958 0 256
+Console:
+	#281203 #816958 0 256
+}
+
+C9 Turquoise
+{
+	#006247 #00D4C3 0 256
+Console:
+	#006247 #00D4C3 0 256
+}
+
+// =================================================================================================
+
+D0 Doomlings
+{
+	#FEDD00 #FFEA5A 0 9
+	#005B00 #60CD00 11 256
+Console:
+	#295700 #60CD00 0 256
+}
+
+D1 Terracotta
+{
+	#310F18 #702841 0 100
+	#802A16 #D56819 101 256
+Console:
+	#310F18 #702841 0 100
+	#802A16 #D56819 101 256
+}
+
+D2 TheSequel "The Sequel"
+{
+	#ABABAB #8B8B8B 0 9
+	#1F170B #6B4727 10 256
+Console:
+	#1F170B #6B4727 0 256
+}
+
+D3 SquidPaste "Squid Paste"
+{
+	#000000 #29272C 0 158
+	#271E41 #65389C 159 256
+Console:
+	#000000 #29272C 0 158
+	#271E41 #65389C 159 256
+}
+
+D4 MenschMaschine "Mensch Maschine"
+{
+	#000000 #0D0D0D 0 6
+	#550C15 #F40000 7 256
+Console:
+	#F40000 #480A12 0 256
+}
+
+D5 EarthwormFood "Earthworm Food"
+{
+	#301501 #6A3926 0 136
+	#77422D #AB6F3A 137 256
+Console:
+	#301501 #6A3926 0 136
+	#77422D #AB6F3A 137 256
+}
+
+D6 PassionFruit "Passion Fruit"
+{
+	#5D1D2F #97DA06 0 200
+	#CADC07 #FCFF00 201 256
+Console:
+	#5D1D2F #AEFF00 0 256
+}
+
+D7 Majestic
+{
+	#240D4B #DB345C 0 256
+Console:
+	#DB345C #240D4B 0 256
+}
+
+D8 Apparitions
+{
+	#FFFFFF #715E85 0 150
+	#715E85 #311E45 151 256
+Console:
+	#FFFFFF #715E85 0 150
+	#715E85 #311E45 151 256
+}
+
+D9 DriedClay "Dried Clay"
+{
+	#1B1714 #423F3A 0 70
+	#57544F #BDB4AD 71 256
+Console:
+	#1B1714 #423F3A 0 70
+	#57544F #BDB4AD 71 256
+}
+
+// =================================================================================================
+
+E0 Pearlescent
+{
+	#593454 #A9808E 0 50
+	#9A7586 #B4B3DB 51 167
+	#B9B8E4 #C5F1FF 168 225
+	#CCF3FF #FFFFEB 226 256
+Console:
+	#694151 #B9B8E4 0 256
+}
+
+E1 AcidRush "Acid Rush"
+{
+	#00378A #00BF3F 0 110
+	#00BF3F #FCFE5B 111 256
+Console:
+	#00378A #00BF3F 0 110
+	#00BF3F #FCFE5B 111 256
+}
+
+E2 Honeycomb
+{
+	#631500 #D57800 0 149
+	#D57800 #FFE400 150 256
+Console:
+	#631500 #D57800 0 149
+	#D57800 #FFE400 150 256
+}
+
+E3 ShavedIce "Shaved Ice"
+{
+	#134795 #1042C6 0 55
+	#BCF2FF #447AA9 56 206
+	#4F78BC #9AE9EF 207 256
+Console:
+	#134795 #1042C6 0 55
+	#BCF2FF #447AA9 56 206
+	#4F78BC #9AE9EF 207 256
+}
+
+E4 Autobahn
+{
+	#F1F1F1 #FFFFFF 0 6
+	#0F308F #006CFF 7 256
+Console:
+	#07299A #006CFF 0 256
+}
+
+E5 BrickWall "Brick Wall"
+{
+	#B39F95 #B98C8C 0 6
+	#552C24 #BF3131 7 256
+Console:
+	#552C24 #BF3131 0 256
+}
+
+E6 DippedInInk "Dipped In Ink"
+{
+	#000000 #05010F 0 60
+	#05010F #3E3454 61 179
+	#473A62 #9177C4 180 256
+Console:
+	#141316 #585263 0 256
+}
+
+E7 ScorchedPlasma "Scorched Plasma"
+{
+	#FFFCA1 #DDAF24 0 20
+	#DCA204 #FFC100 21 149
+	#FFC100 #AA0000 150 256
+Console:
+	#F7F14F #AA0000 0 256
+}
+
+E8 PartyTime "Party Time"
+{
+	#330048 #9B0078 0 99
+	#BA0076 #ED3C19 100 179
+	#ED5519 #F9D300 180 256
+Console:
+	#330048 #9B0078 0 99
+	#BA0076 #ED3C19 100 179 
+	#ED5519 #F9D300 180 256
+}
+
+E9 WarningStrip "Warning Strip"
+{
+	#000000 #0D0D0D 0 6
+	#8E6E22 #FFF000 7 256
+Console:
+	#98741C #FFF000 0 256
+}
+
+// =================================================================================================
+
+F0 Unterwasser
+{
+	#0A578D #59B6D3 0 120
+	#59BBD3 #B6FBFF 121 256
+Console:
+	#501C40 #F59C8D 0 256
+}
+
+F1 LuvSucka "Luv Sucka"
+{
+	#4F0618 #AF1328 0 60
+	#910D24 #C8213B 61 169
+	#CF3456 #FC94BD 170 256
+Console:
+	#4F0618 #AF1328 0 60
+	#910D24 #C8213B 61 169
+	#CF3456 #FC94BD 170 256
+}
+
+F2 Arghoplatz
+{
+	#5A353C #AD8347 0 55
+	#B9AC4C #D5FE57 56 130
+	#E4FF7C #FFFFED 131 256
+Console:
+	#ABD32E #E4FF7C 0 256
+}
+
+F3 Harmorgasbord
+{
+	#30113B #501C40 0 36
+	#571A41 #9A274C 37 100
+	#BB2B4D #F16E75 101 167
+	#F59C8D #FFEBA8 168 256
+Console:
+	#501C40 #F59C8D 0 256
+}
+
+F4 Assimilation
+{
+	#241827 #614665 0 130
+	#795B77 #AE8AA4 131 256
+Console:
+	#241827 #614665 0 130
+	#795B77 #AE8AA4 131 256
+}
+
+F5 OozingMagix "Oozing Magix"
+{
+	#6B40AB #C34DA5 0 79
+	#84619E #A7EE89 80 198
+	#78D9AD #4751A1 199 256
+Console:
+	#210F25 #352540 0 68
+	#382843 #4E4A5B 69 175
+	#565366 #737278 176 256
+}
+
+F6 RaveGreen "Rave Green"
+{
+	#80EE71 #85FF74 0 11
+	#151515 #3A9910 12 209
+	#4AB23F #85FF74 210 256
+Console:
+	#151515 #85FF74 0 256
+}
+
+F7 RavePink "Rave Pink"
+{
+	#DE499D #FF55B4 0 11
+	#151515 #9F256A 12 209
+	#C12E83 #DE499D 210 256
+Console:
+	#151515 #DE499D 0 256
+}
+
+F8 RaveYellow "Rave Yellow"
+{
+	#FFF281 #FFFF81 0 11
+	#151515 #D9A300 12 209
+	#E0C000 #FFFF81 210 256
+Console:
+	#151515 #FFFF81 0 256
+}
+
+F9 RaveBlue "Rave Blue"
+{
+	#80F2FC #80FCFC 0 11
+	#151515 #258C9F 12 209
+	#26AFB8 #80FCFC 210 256
+Console:
+	#151515 #80FCFC 0 256
+}
+
+// =================================================================================================
+
+G0 Doomcom
+{
+	#003F97 #003F97 0 6
+	#E29000 #FDD100 7 256
+Console:
+	#BC7C00 #FED825 0 256
+}
+
+G1 GhostWhite "Ghost White"
+{
+	#86818C #DADBE6 0 200
+	#DADBE6 #FFFFFF 201 256
+Console:
+	#86818C #DADBE6 0 256
+}
+
+G2 BlackSteel "Black Steel"
+{
+	#0A0A0A #1D1A20 0 200
+	#1D1A20 #27212D 201 256
+Console:
+	#0A0A0A #27212D 0 256
+}
+
+G3 Contrast
+{
+	#000000 #3D3841 0 150
+	#3D3841 #FFFFFF 151 256
+Console:
+	#000000 #FFFFFF 0 256
+}
+
+G4 AlienBlood "Alien Blood"
+{
+	#101010 #2B3B24 0 139
+	#2B3B24 #6CDB00 140 256
+Console:
+	#192C17 #16BA00 0 256
+}
+
+G5 Explosion
+{
+	#230E0E #DB2900 0 100
+	#DB2900 #FFE958 101 200
+	#FFE958 #FFFFFF 201 256
+Console:
+	#DB2900 #FFE958 0 256
+}
+
+G6 Cacodemon
+{
+	#0011EB #172092 0 7
+	#610000 #EA0000 8 179
+	#EA0000 #FF7061 180 256
+Console:
+	#310300 #DF1000 0 256
+}
+
+G7 ChocChipCookie "Choc Chip Cookie"
+{
+	#462513 #976C38 0 85
+	#3D362E #2C2720 86 100
+	#976C38 #E0BC5C 101 200
+	#3D362E #2C2720 201 206
+	#E0BC5C #E9D981 207 256
+Console:
+	#EFDF89 #C8A66A 0 256
+}
+
+G8 RustyNails "Rusty Nails"
+{
+	#11100E #37332E 0 75
+	#442B0D #463E34 76 100
+	#4C4A47 #3E291C 101 159
+	#454545 #333333 160 189
+	#574F4F #66584A 190 256
+Console:
+	#11100E #66584A 0 256
+}
+
+G9 MrBones "Mr. Bones"
+{
+	#6A4735 #D1BA7C 0 120
+	#D1BA7C #FFF9D9 121 256
+Console:
+	#633E2C #D1BA7C 0 256
+}
+
+// =================================================================================================
+
+H0 Oyasumi
+{
+	#292B5E #676594 0 78
+	#8883A7 #D0C1CF 79 256
+Console:
+	#292B5E #676594 0 78
+	#8883A7 #D0C1CF 79 256
+}
+
+H1 Z3R0
+{
+	#331624 #B2383D 0 170
+	#CB3738 #DB5F52 171 210
+	#CB3738 #E17D67 211 256
+Console:
+	#331624 #B2383D 0 170
+	#CB3738 #DB5F52 171 210
+	#CB3738 #E17D67 211 256
+}
+
+H2 Konayuki
+{
+	#3E3F55 #B6ACC3 0 170
+	#DDD9DA #F1EEE7 171 256
+Console:
+	#625B6F #F1EEE7 0 256
+}
+
+H3 Fireblu
+{
+	#04002A #0031E6 0 60
+	#540000 #910000 61 100
+	#001CAD #0041E7 101 130
+	#760000 #C40000 131 140
+	#001CAD #0041E7 141 170
+	#A30000 #ED0000 171 199
+	#0022CF #1456FF 200 220
+	#FF0000 #FF2621 221 256
+Console:
+	#540000 #FF2621 0 256
+}
+
+H4 Tsuyukusa
+{
+	#00396F #B2DCFF 0 256
+Console:
+	#00396F #B2DCFF 0 256
+}
+
+H5 BugGuts "Bug Guts"
+{
+	#0BAC0E #0BAC0E 0 9
+	#2B2147 #5D4088 10 200
+	#5B448F #D129CF 201 256
+Console:
+	#B1F50C #D129CF 0 256
+}
+
+H6 Akebi
+{
+	#2E2041 #4F3A7D 0 100
+	#5F418B #9E7CDC 101 256
+Console:
+	#2E2041 #4F3A7D 0 100
+	#5F418B #9E7CDC 101 256
+}
+
+H7 FreshlyBaked "Freshly Baked"
+{
+	#8E4500 #8E4500 0 10
+	#AA8643 #FEFBF3 11 256
+Console:
+	#8E4500 #FEFBF3 0 256
+}
+
+H8 MomjiiLeaves "Momjii Leaves"
+{
+	#BE2934 #B69133 0 111
+	#ABAC2D #B2E525 112 256
+Console:
+	#8C1700 #8EB200 0 256
+}
+
+H9 Borealis
+{
+	#121D28 #303344 0 99
+	#2A3547 #30A240 100 256
+Console:
+	#121D28 #303344 0 99
+	#2A3547 #30A240 100 256
+}
+
+// =================================================================================================
+
+I0 DarkAndMoist "Dark And Moist"
+{
+	#1A2E40 #40576A 0 111
+	#40656A #BFC063 112 200
+	#C9CA61 #F1F2BD 201 256
+Console:
+	#1A2E40 #40576A 0 111
+	#40656A #BFC063 112 200
+	#C9CA61 #F1F2BD 201 256
+}
+
+I1 CreamSoda "Cream Soda"
+{
+	#D33C83 #F0C05A 0 130
+	#EAAF3E #FFEE8D 131 256
+Console:
+	#D33C83 #F0C05A 0 130
+	#EAAF3E #FFEE8D 131 256
+}
+
+I2 StickPile "Stick Pile"
+{
+	#1A0A06 #432119 0 120
+	#6C260E #802814 121 180
+	#9F4D31 #301913 181 256
+Console:
+	#1A0A06 #432119 0 120
+	#6C260E #802814 121 180
+	#9F4D31 #301913 181 256
+}
+
+I3 Marshmellow
+{
+	#913BAA #C75BDB 0 59
+	#C96AE8 #C776F1 60 80
+	#CD7FF5 #FC91FB 81 100
+	#FAA2F1 #FDF2FF 101 256
+Console:
+	#913BAA #C75BDB 0 59
+	#C96AE8 #C776F1 60 80
+	#CD7FF5 #FC91FB 81 100
+	#FAA2F1 #FDF2FF 101 256
+}
+
+I4 CrimboTime "Crimbo Time"
+{
+	#930000 #B30000 0 9
+	#034E00 #7EC57B 10 169
+	#8CD088 #FFFFFF 170 256
+Console:
+	#930000 #B30000 0 9
+	#034E00 #7EC57B 10 169
+	#8CD088 #FFFFFF 170 256
+}
+
+I5 PearSalad "Pear Salad"
+{
+	#272B1F #8EBF30 0 170
+	#A9BF30 #E4F48F 171 256
+Console:
+	#1F2514 #8EBF30 0 170
+	#A9BF30 #E4F48F 171 256
+}
+
+I6 Startan
+{
+	#20180C #78502C 0 90
+	#685440 #9B806C 91 159
+	#787878 #E0E0E0 160 256
+Console:
+	#20180C #78502C 0 90
+	#685440 #9B806C 91 159
+	#787878 #E0E0E0 160 256
+}
+
+I7 SeeingRed "Seeing Red"
+{
+	#240000 #8C0000 0 170
+	#9B0B07 #E20000 171 256
+Console:
+	#240000 #8C0000 0 170
+	#9B0B07 #E20000 171 256
+}
+
+I8 Chlorine
+{
+	#0E281E #1A7F58 0 100
+	#198973 #16D3AD 101 180
+	#16D3BF #FFFFFF 181 256
+Console:
+	#0E281E #1A7F58 0 100
+	#198973 #16D3AD 101 180
+	#16D3BF #FFFFFF 181 256
+}
+
+I9 IodineSubstance "Iodine Substance"
+{
+	#AE27AD #640943 0 129
+	#7219A0 #400B40 130 256
+Console:
+	#AE27AD #400B40 0 256
+}
+
+// =================================================================================================
+
+J0 FreezerBurn "Freezer Burn"
+{
+	#FFFFFF #06537F 0 150
+	#1975AA #B2E3FF 151 256
+Console:
+	#FFFFFF #1975AA 0 256
+}
+
+J1 BlueberryPie "Blueberry Pie"
+{
+	#171A62 #024BC4 0 100
+	#1163D3 #3A8DFD 101 256
+Console:
+	#171A62 #024BC4 0 100
+	#1163D3 #3A8DFD 101 256
+}
+
+J2 LotusPetals "Lotus Petals"
+{
+	#8E003F #FE89DC 0 111
+	#FE89DC #FFFDFE 112 256
+Console:
+	#8E003F #FE89DC 0 111
+	#FE89DC #FFFDFE 112 256
+}
+
+J3 Appletizer
+{
+	#3A0007 #DD0000 0 159
+	#DD1000 #ACDD00 160 256
+Console:
+	#3A0007 #DD0000 0 159
+	#DD1000 #ACDD00 160 256
+}
+
+J4 Cardboard
+{
+	#3D2618 #A3825F 0 170
+	#A0805D #BDA891 171 256
+Console:
+	#3D2618 #A3825F 0 170
+	#A0805D #BDA891 171 256
+}
+
+J5 SourTaste "Sour Taste"
+{
+	#234000 #48FF00 0 169
+	#48FF00 #C2FF6C 170 256
+Console:
+	#234000 #48FF00 0 169
+	#48FF00 #C2FF6C 170 256
+}
+
+J6 Steampunk
+{
+	#1E1A17 #533523 0 119
+	#533523 #9B6535 120 178
+	#9B6535 #6BBD9F 179 256
+Console:
+	#1E1A17 #533523 0 119
+	#533523 #9B6535 120 178
+	#9B6535 #6BBD9F 179 256
+}
+
+J7 Sandstone
+{
+	#493523 #988855 0 127
+	#9E8E5C #DFC061 128 200
+	#DFC061 #EFD891 201 256
+Console:
+	#493523 #988855 0 127
+	#9E8E5C #DFC061 128 200
+	#DFC061 #EFD891 201 256
+}
+
+J8 FuzzyHandcuffs "Fuzzy Handcuffs"
+{
+	#21152A #7300C4 0 138
+	#8A00C4 #EF67B1 139 256
+Console:
+	#21152A #7300C4 0 127
+	#8A00C4 #EF67B1 128 256
+}
+
+J9 DustBunnies "Dust Bunnies"
+{
+	#321F27 #6C5B74 0 110
+	#78637B #DDCDAC 111 256
+Console:
+	#321F27 #6C5B74 0 110
+	#78637B #DDCDAC 111 256
+}
+
+// =================================================================================================
+
+K0 MintySnaps "Minty Snaps"
+{
+	#16DFAD #16DFAD 0 10
+	#1F0D03 #6E2E0A 11 256
+Console:
+	#1F0D03 #16DFAD 0 256
+}
+
+K1 Electrified
+{
+	#57BAFF #2736A7 0 145
+	#152494 #000525 146 256
+Console:
+	#000525 #2736A7 0 256
+}
+
+K2 Chillout
+{
+	#363E7B #9EA3C6 0 130
+	#ADB2D7 #E7EAFF 131 256
+Console:
+	#363E7B #9EA3C6 0 130
+	#ADB2D7 #E7EAFF 131 256
+}
+
+K3 Gameimp
+{
+	#204631 #204631 0 40
+	#527F39 #527F39 41 110
+	#AEC440 #AEC440 111 179
+	#D7E894 #D7E894 180 256
+Console:
+	#204631 #204631 0 40
+	#527F39 #527F39 41 125
+	#AEC440 #AEC440 126 193
+	#D7E894 #D7E894 194 256
+}
+
+K4 P-C-B
+{
+	#F2D966 #F9D52E 0 10
+	#032E1D #087743 11 179
+	#087743 #5DD953 180 256
+Console:
+	#032E1D #087743 0 130
+	#087743 #5DD953 131 256
+}
+
+K5 AmethystGemstone "Amethyst Gemstone"
+{
+	#130316 #130316 0 10
+	#100C10 #410A5B 11 149
+	#460D61 #B449B3 150 256
+Console:
+	#100C10 #410A5B 0 130
+	#460D61 #B449B3 131 256
+}
+
+K6 SepiaPhoto "Sepia Photo"
+{
+	#341C1D #6E3517 0 129
+	#804422 #BA7331 130 180
+	#C3803C #E5A85B 181 256
+Console:
+	#341C1D #6E3517 0 130
+	#804422 #BA7331 131 190
+	#C3803C #E5A85B 191 256
+}
+
+K7 BruiserPT2 "Bruiser PT2"
+{
+	#000000 #251E1F 0 149
+	#390B0C #A22C03 150 256
+Console:
+	#000000 #A22C03 0 256
+}
+
+K8 Knockout
+{
+	#1D0E12 #D60449 0 256
+Console:
+	#1D0E12 #D60449 0 256
+}
+
+K9 Lambada
+{
+	#0B0B0B #0B0B0B 0 10
+	#742F06 #FEA42F 11 256
+Console:
+	#742F06 #FEA42F 0 256
+}
+
+// =================================================================================================
+
+L0 SkulkingAbout "Skulking About"
+{
+	#111012 #612646 0 145
+	#60202B #C9215C 146 256
+Console:
+	#111012 #C9215C 0 256
+} 
+
+L1 Parma
+{
+	#1F1720 #65306D 0 79
+	#8C3898 #EA6EFC 80 150
+	#B97DFC #FFFFFF 151 256
+Console:
+	#65306D #FFFFFF 0 256
+}
+
+L2 HollyBush "Holly Bush"
+{
+	#00160B #015911 0 199
+	#006714 #0AB45A 200 256
+Console:
+	#002213 #0AB45A 0 256
+}
+
+L3 Advanced
+{
+	#EDEDED #FFFFFF 0 9
+	#790000 #FF0000 11 256
+Console:
+	#4F0000 #FF0000 0 256
+}
+
+L4 LemonCheesecake "Lemon Cheesecake"
+{
+	#824600 #FFF000 0 169
+	#FFF000 #FFEF00 170 256
+Console:
+	#824600 #FFF000 0 256
+}
+
+L5 FakeWater "Fake Water"
+{
+	#000C2E #0045D1 0 120
+	#005DD1 #2FCCFF 121 256
+Console:
+	#0045D1 #2FCCFF 0 256
+} 
+
+L6 Bruiser
+{
+	#1A0000 #7C0A04 0 130
+	#8A1408 #EE6C28 131 221
+	#FD7F2D #FFCF2E 222 256
+Console:
+	#1A0000 #7C0A04 0 110
+	#8A1408 #EE6C28 111 221
+	#FD7F2D #FFCF2E 222 256
+} 
+
+L7 Unidronum
+{
+	#000C18 #003050 0 50
+	#003C64 #408BB4 51 160
+	#549EC0 #B0F7F7 161 256
+Console:
+	#000C18 #003050 0 80
+	#003C64 #408BB4 81 140
+	#549EC0 #B0F7F7 141 256
+} 
+
+L8 Beetlejuice
+{
+	#292929 #8CB188 0 120
+	#B2CCA3 #E3FFD4 121 256
+Console:
+	#292929 #E3FFD4 0 256
+} 
+
+L9 GoldenNails "Golden Nails"
+{
+	#253219 #2F1F0F 0 50
+	#573C00 #A28C27 51 170
+	#B8A136 #F8E966 171 256
+Console:
+	#253219 #2F1F0F 0 50
+	#573C00 #A28C27 51 170
+	#B8A136 #F8E966 171 256
+}
+
+// =================================================================================================
+
+M0 LuxuryRug "Luxury Rug"
+{
+	#DEBD4B #F6C500 0 6
+	#4C1C7E #AB19A9 7 99
+	#AB19A9 #DB35C6 100 256
+Console:
+	#56208E #AE1CC4 0 256
+}
+
+M1 MetalGold "Metal Gold"
+{
+	#653C0D #E9B026 0 200
+	#E9B026 #FFF6E0 201 256
+Console:
+	#855004 #FFFBD0 0 256
+}
+
+M2 MetalBronze "Metal Bronze"
+{
+	#4E1B02 #C06642 0 200
+	#C06642 #FFDBC8 201 256
+Console:
+	#672302 #FFDBC8 0 256
+}
+
+M3 MetalSilver "Metal Silver"
+{
+	#282834 #848EA0 0 200
+	#848EA0 #F3F3F3 201 256
+Console:
+	#30303F #F3F3F3 0 256
+}
+
+M4 EmeraldOre "Emerald Ore"
+{
+	#003312 #05D000 0 160
+	#05D000 #FFFFFF 161 256
+Console:
+	#05D000 #FFFFFF 0 256
+}
+
+M5 SapphireOre "Sapphire Ore"
+{
+	#00026D #2228FF 0 160
+	#2228FF #B6B7FF 161 256
+Console:
+	#2228FF #FFFFFF 0 256
+}
+
+M6 RubyOre "Ruby Ore"
+{
+	#3C0000 #DD0000 0 160
+	#DD0000 #FFD2D2 161 256
+Console:
+	#DD0000 #FFFFFF 0 256
+}
+
+M7 DiamondStash "Diamond Stash"
+{
+	#2B5366 #899398 0 139
+	#899398 #CDDBE6 140 189
+	#CDDBE6 #FFFFFF 190 256
+Console:
+	#353544 #FFFFFF 0 256
+}
+
+M8 HexagonalTiles "Hexagonal Tiles"
+{
+	#2F2517 #292013 0 6
+	#343434 #5F5F5F 7 84
+	#203417 #2B5720 85 101
+	#5F5F5F #CECECE 102 256
+Console:
+	#2F2517 #A7A7A7 0 256
+}
+
+M9 FamiconPad "Famicon Pad"
+{
+	#4E0000 #77000E 0 7
+	#6B492B #B69259 8 170
+	#B69259 #EBD9B3 171 256
+Console:
+	#111111 #353535 0 127
+	#B70000 #C0B37E 128 256
+}
+
+// =================================================================================================
+
+N0 Ultraviolent
+{
+	#94F9FF #42278F 0 256
+Console:
+	#42278F #94F9FF 0 256
+}
+
+N1 NeonPink "Neon Pink"
+{
+	#9B009D #FF00FC 0 100
+	#FF00FC #FF6EEC 101 256
+Console:
+	#9B009D #FF00FC 0 100
+	#FF00FC #FF6EEC 101 256
+}
+
+N2 NeonYellow "Neon Yellow"
+{
+	#CDA900 #E4FF00 0 100
+	#E4FF00 #FFF88A 101 256
+Console:
+	#CDA900 #E4FF00 0 100
+	#E4FF00 #FFF88A 101 256
+}
+
+N3 NeonOrange "Neon Orange"
+{
+	#BA5300 #FF8A00 0 100
+	#FF8A00 #FFA95C 101 256
+Console:
+	#BA5300 #FF8A00 0 100
+	#FF8A00 #FFA95C 101 256
+}
+
+N4 NeonGreen "Neon Green"
+{
+	#009916 #24FF00 0 100
+	#24FF00 #63FF5F 101 256
+Console:
+	#009916 #24FF00 0 100
+	#24FF00 #63FF5F 101 256
+}
+
+N5 NeonBlue "Neon Blue"
+{
+	#005CCD #0096FF 0 100
+	#0096FF #5FD0FF 101 256
+Console:
+	#005CCD #0096FF 0 100
+	#0096FF #5FD0FF 101 256
+}
+
+N6 NeonPurple "Neon Purple"
+{
+	#6700BF #C600FF 0 100
+	#C600FF #D05FFF 101 256
+Console:
+	#6700BF #C600FF 0 100
+	#C600FF #D05FFF 101 256
+}
+
+N7 NeonRed "Neon Red"
+{
+	#B60000 #FF3434 0 100
+	#FF3434 #FF6A5F 101 256
+Console:
+	#B60000 #FF3434 0 100
+	#FF3434 #FF6A5F 101 256
+}
+
+N8 NeonCyan "Neon Cyan"
+{
+	#009683 #34FFCD 0 100
+	#34FFCD #98FFFE 101 256
+Console:
+	#009683 #34FFCD 0 100
+	#34FFCD #98FFFE 101 256
+}
+
+N9 Phosphorescence
+{
+	#CAF589 #40772C 0 256
+Console:
+	#53ED8E #0F652A 0 256
+}
+
+// =================================================================================================
+
+O0 SixtyFour "Sixty Four"
+{
+	#13151F #231C24 0 80
+	#262029 #3C2E3C 81 179
+	#3D303F #47425A 180 256
+Console:
+	#13151F #231C24 0 80
+	#262029 #3C2E3C 81 179
+	#3D303F #47425A 180 256
+}
+
+O1 Phox
+{
+	#210F13 #702F2E 0 199
+	#783231 #A8504F 200 256
+Console:
+	#30171C #A8504F 0 256
+}
+
+O2 SweetTooth "Sweet Tooth"
+{
+	#2A1E3C #C74063 0 100
+	#DC577A #F4E0E0 101 256
+Console:
+	#2A1E3C #C74063 0 100
+	#DC577A #F4E0E0 101 256
+}
+
+O3 Hindsight
+{
+	#1B071A #5A3E55 0 100
+	#6E687A #8DA0A3 101 190
+	#8DA0A3 #D2CEBF 191 256
+Console:
+	#1B071A #5A3E55 0 79
+	#6E687A #8DA0A3 80 179
+	#8DA0A3 #D2CEBF 180 256
+}
+
+O4 PumpkinPatch "Pumpkin Patch"
+{
+	#42071B #D6521E 0 170
+	#F25C2E #EA9F1C 171 256
+Console:
+	#42071B #D6521E 0 170
+	#F25C2E #EA9F1C 171 256
+}
+
+O5 BleedOut "Bleed Out"
+{
+	#9F0101 #B91010 0 10
+	#583F5B #0A0808 11 256
+Console:
+	#543E3E #1D1818 0 256
+}
+
+O6 MarbleHell "Marble Hell"
+{
+	#11140A #2F371F 0 31
+	#373F27 #6F7357 32 170
+	#7B7F63 #BFA78F 171 256
+Console:
+	#0F1700 #2F371F 0 29
+	#373F27 #6F7357 30 219
+	#7B7F63 #BFA78F 220 256
+}
+
+O7 Soaked
+{
+	#0B174A #0324AE 0 124
+	#0035CD #23AFFF 125 256
+Console:
+	#0B174A #0324AE 0 170
+	#0035CD #23AFFF 171 256
+}
+
+O8 FruitOfDragons "Fruit Of Dragons"
+{
+	#CE085C #E4154F 0 30
+	#847788 #EEE7F1 31 256
+Console:
+	#CE085C #BBAEBB 0 110
+	#BFB9C1 #EEE7F1 111 256
+}
+
+O9 Hallucinogenic
+{
+	#8AFF00 #48DA00 0 70
+	#6DA822 #4E02B6 71 178
+	#8900B6 #26095A 179 256
+Console:
+	#8AFF00 #48DA00 0 70
+	#6DA822 #EA0095 71 178
+	#AE037F #48095A 179 256
+}
+
+// =================================================================================================
+
+P0 CMYK
+{
+	#121212 #121212 0 12
+	#FF2484 #A75CB2 13 120
+	#23B2FC #A0C36B 121 163
+	#FECF00 #FFE451 164 256
+Console:
+	#FF2484 #FFE451 0 256
+}
+
+P1 Yaytso
+{
+	#412300 #8B4700 0 60
+	#A35500 #EEA131 61 178
+	#E6A549 #F5D371 179 256
+Console:
+	#412300 #A35500 0 100
+	#EEA131 #F5D371 101 256
+}
+
+P2 DrowsyComfort "Drowsy Comfort"
+{
+	#2E4882 #6C8CD3 0 53
+	#908EDF #FB9DE0 54 164
+	#FFBAD2 #FFD9C4 165 256
+Console:
+	#2E4882 #6C8CD3 0 53
+	#908EDF #FB9DE0 54 164
+	#FFBAD2 #FFD9C4 165 256
+}
+
+P3 Sabisarada
+{
+	#232527 #613A36 0 88
+	#864439 #BC523D 89 187
+	#CB6040 #F09957 188 256
+Console:
+	#232527 #613A36 0 88
+	#864439 #BC523D 89 187
+	#CB6040 #F09957 188 256
+}
+
+P4 Omoiyari
+{
+	#02002F #4E1681 0 58
+	#712BA8 #F392FF 59 160
+	#FFC7FE #510471 161 256
+Console:
+	#02002F #4E1681 0 121
+	#712BA8 #F392FF 122 256
+}
+
+P5 Iris
+{
+	#DAE930 #DAE930 0 12
+	#40268B #9F94C1 13 256
+Console:
+	#40268B #9F94C1 0 256
+}
+
+P6 BellsOfTime "Bells Of Time"
+{
+	#182D34 #7DB3A8 0 99
+	#8EBD96 #E3E9B3 100 256
+Console:
+	#182D34 #7DB3A8 0 99
+	#8EBD96 #E3E9B3 100 256
+}
+
+P7 Neurofunk
+{
+	#000000 #2F0A34 0 94
+	#390F65 #4624B6 95 142
+	#101CB5 #B927BB 143 183
+	#5E54CB #6FBFFD 184 256
+Console:
+	#4A0C13 #741E8D 0 94
+	#6D27BB #6FBFFD 95 142
+}
+
+P8 Sineline
+{
+	#F4EC8C #F4EC8C 0 11
+	#F4D18C #F45E8C 12 159
+	#D34379 #261A37 160 256
+Console:
+	#261A37 #D34379 0 99
+	#F45E8C #F4D18C 100 256
+}
+
+P9 CocktailTears "Cocktail Tears"
+{
+	#3696B0 #3696B0 0 12
+	#E9EC72 #A8EC2A 13 142
+	#5CEC86 #E5ECB2 143 183
+	#DCECF5 #4BCB9A 184 256
+Console:
+	#3696B0 #D5ECA0 0 256
+}
+
+// =================================================================================================
+
+Q0 ChilledSunset "Chilled Sunset"
+{
+	#1B1859 #6F33BA 0 110
+	#6F33BA #CF60F3 111 189
+	#CF60F3 #FAB7ED 190 256
+Console:
+	#1B1859 #FAB7ED 0 256
+}
+
+Q1 ToughLove "Tough Love"
+{
+	#2F171B #8B4F6B 0 256
+Console:
+	#2F171B #8B4F6B 0 256
+}
+
+Q2 WarpedHeat "Warped Heat"
+{
+	#360000 #5F0707 0 90
+	#5F0707 #872300 91 179
+	#872300 #DF670F 180 256
+Console:
+	#5F0707 #DF670F 0 256
+}
+
+Q3 OxygenRich "Oxygen Rich"
+{
+	#260000 #660000 0 160
+	#660000 #800B16 161 256
+Console:
+	#280000 #980614 0 256
+}
+
+Q4 QuakeBricks "Quake Bricks"
+{
+	#0F0B07 #8F6F23 0 256
+Console:
+	#0F0B07 #8F6F23 0 256
+}
+
+Q5 BabyBoy "Baby Boy"
+{
+	#2887E4 #ABE7FF 0 139
+	#ABE7FF #D7FFFF 140 256
+Console:
+	#2887E4 #ABE7FF 0 139
+	#ABE7FF #D7FFFF 140 256
+}
+
+Q6 NuclearFumes "Nuclear Fumes"
+{
+	#B2EB1C #4A8A15 0 124
+	#4A8A15 #1A0D23 125 256
+Console:
+	#1A0D23 #B2EB1C 0 256
+}
+
+Q7 TrickOrTreat "Trick Or Treat"
+{
+	#0F0911 #382033 0 99
+	#382033 #BF3C0E 100 199
+	#BF3C0E #ED8412 200 256
+Console:
+	#0F0911 #ED8412 0 256
+}
+
+Q8 PearlyWhites "Pearly Whites"
+{
+	#877E6E #D7CAB4 0 99
+	#D7CAB4 #D3D0C2 100 139
+	#D3D0C2 #FFFFFF 140 256
+Console:
+	#877E6E #FFFFFF 0 256
+}
+
+Q9 Zandronum
+{
+	#1B2D06 #355613 0 119
+	#355613 #669832 120 199
+	#669832 #9CC96B 200 256
+Console:
+	#1B2D06 #9CC96B 0 256
+}
+
+// =================================================================================================
+
+R0 MeatEater "Meat Eater"
+{
+	#F0B79D #F0B79D 0 10
+	#942537 #F17382 11 256
+Console:
+	#942537 #F0B79D 0 256
+}
+
+R1 BlueLock "Blue Lock"
+{
+	#636363 #636363 0 10
+	#000047 #0000E4 11 256
+Console:
+	#0000E4 #030047 0 256
+}
+
+R2 RedLock "Red Lock"
+{
+	#636363 #636363 0 10
+	#470000 #D80000 11 256
+Console:
+	#D80000 #340000 0 256
+}
+
+R3 YellowLock "Yellow Lock"
+{
+	#636363 #636363 0 10
+	#874307 #AF7B1F 11 90
+	#BD962C #E8C83E 91 256
+Console:
+	#E8C83E #874307 0 256
+}
+
+R4 SlabOFudge "Slab O Fudge"
+{
+	#DE4420 #DE8220 0 70
+	#DE9020 #FFD74D 71 120
+	#FFE179 #FFF2B9 121 184
+	#FFFBDC #EAA414 185 256
+Console:
+	#DE4420 #F2B00D 0 70
+	#FFC600 #FFD74D 71 120
+	#FFE179 #FFF2B9 121 184
+	#FFFBDC #FFFFFF 185 256
+}
+
+R5 AluminiumFoil "Aluminium Foil"
+{
+	#252528 #8A8490 0 170
+	#9990A1 #DDD3E6 171 256
+Console:
+	#252528 #8A8490 0 170
+	#9990A1 #DDD3E6 171 256
+}
+
+R6 ChildsPlay "Childs Play"
+{
+	#FFEA00 #FF0000 0 128
+	#00C205 #0064EB 129 256
+Console:
+	#00C205 #0064EB 0 256
+}
+
+R7 MorningAfter "Morning After"
+{
+	#521F3B #B16D78 0 44
+	#A97AA8 #DBB3A3 45 140
+	#E2D265 #D8FD63 141 215
+	#D3FFC1 #FEFFBD 216 256
+Console:
+	#DBB3A3 #F9FFD8 0 256
+}
+
+R8 MyColourII "My Colour II"
+{
+	#5D0350 #BC49B1 0 121
+	#C45FBB #EC8FE4 122 256
+Console:
+	#5D0350 #BC49B1 0 79
+	#C45FBB #EC8FE4 80 256
+}
+
+R9 CannotSleep "Cannot Sleep"
+{
+	#5D0350 #710361 0 10
+	#0B080A #271E26 11 201
+	#2A2129 #7F0B67 202 256
+Console:
+	#5D0350 #2B212B 0 79
+	#4D1645 #6F035F 80 256
+}
+
+// =================================================================================================
+
+S0 LycheeSeeds "Lychee Seeds"
+{
+	#0C0001 #44060C 0 180
+	#44060C #7E1322 181 256
+Console:
+	#44060C #7E1322 0 256
+}
+
+S1 PeppermintCream "Peppermint Cream"
+{
+	#35754B #C1FFBB 0 256
+Console:
+	#59A574 #C1FFBB 0 256
+}
+
+S2 MelonJuice "Melon Juice"
+{
+	#005904 #EAA92B 0 97
+	#EAA92B #FFD75D 98 256
+Console:
+	#005904 #FFD75D 0 256
+}
+
+S3 Inversion
+{
+	#C6C6C6 #000000 0 256
+Console:
+	#C6C6C6 #000000 0 256
+}
+
+S4 Jellyfish
+{
+	#387077 #D18FD0 0 110
+	#D18FD0 #DEFDFF 111 256
+Console:
+	#387077 #DEFDFF 0 256
+}
+
+S5 StaticTelly "Static Telly"
+{
+	#000000 #FFFFFF 0 20
+	#000000 #FFFFFF 21 57
+	#000000 #FFFFFF 58 81
+	#000000 #FFFFFF 82 100
+	#000000 #FFFFFF 101 130
+	#000000 #FFFFFF 131 179
+	#000000 #FFFFFF 180 209
+	#000000 #FFFFFF 210 231
+	#000000 #FFFFFF 232 256
+Console:
+	#000000 #FFFFFF 0 256
+}
+
+S6 Goop
+{
+	#554634 #81459A 0 70
+	#81459A #80C140 71 150
+	#80C140 #B6D778 151 256
+Console:
+	#554634 #81459A 0 70
+	#81459A #80C140 71 150
+	#80C140 #B6D778 151 256
+}
+
+S7 Meteallic
+{
+	#111411 #384642 0 149
+	#384642 #79948D 150 256
+Console:
+	#111411 #384642 0 256
+}
+
+S8 JustPeachy "Just Peachy"
+{
+	#CC5200 #F979B2 0 60
+	#F979B2 #F9CF29 61 206
+	#F9CF29 #FFEB9B 207 256
+Console:
+	#CC5200 #F979B2 0 60
+	#F979B2 #F9CF29 61 206
+	#F9CF29 #FFEB9B 207 256
+}
+
+S9 RobotPlums "Robot Plums"
+{
+	#3C2154 #A35495 0 200
+	#A35495 #F2AAFF 201 256
+Console:
+	#402359 #A35495 0 256
+}
+
+// =================================================================================================
+
+T0 CyanTeam "Cyan Team"
+{
+	#55FFE1 #44FEE6 0 6
+	#00523C #1AE5C6 7 256
+Console:
+	#7A1A00 #22FFDD 0 256
+}
+
+T1 RedTeam "Red Team"
+{
+	#FF0000 #D40000 0 6
+	#3E0000 #B40000 7 256
+Console:
+	#460000 #A00000 0 256
+}
+
+T2 BlueTeam "Blue Team"
+{
+	#2E64FF #1E00FF 0 6
+	#00006F #0005D1 7 256
+Console:
+	#000046 #0005C4 0 256
+}
+
+T3 YellowTeam "Yellow Team"
+{
+	#F0FF00 #E6CE00 0 6
+	#6B3C00 #F2C700 7 256
+Console:
+	#7A5600 #F2C700 0 256
+}
+
+T4 GreenTeam "Green Team"
+{
+	#5AFF00 #56F400 0 6
+	#236300 #4CD700 7 256
+Console:
+	#194700 #39A200 0 256
+}
+
+T5 WhiteTeam "White Team"
+{
+	#FFFFFF #DFDFDF 0 6
+	#827E86 #DADADA 7 256
+Console:
+	#444444 #CACACA 0 256
+}
+
+T6 BlackTeam "Black Team"
+{
+	#3D3D3D #131313 0 6
+	#000000 #282828 7 256
+Console:
+	#000000 #232323 0 256
+}
+
+T7 PurpleTeam "Purple Team"
+{
+	#B82EFF #8200D5 0 6
+	#250157 #9300D7 7 256
+Console:
+	#3C007A #9F00F2 0 256
+}
+
+T8 PinkTeam "Pink Team"
+{
+	#FF93E7 #F475FF 0 6
+	#6C006B #FF36FD 7 256
+Console:
+	#7A004E #FF3EF8 0 256
+}
+
+T9 OrangeTeam "Orange Team"
+{
+	#FFB155 #FE7D44 0 6
+	#722300 #F96C17 7 256
+Console:
+	#7A1A00 #FF9422 0 256
+}
+
+// =================================================================================================
+
+U0 PatchedDarkness "Patched Darkness"
+{
+	#000000 #2A2834 0 60
+	#2A2834 #38313E 61 81
+	#302B46 #1C1B21 82 100
+	#FFFFFF #E6E3F1 101 110
+	#38313E #776586 111 120
+	#464160 #1C1B21 121 256
+Console:
+	#000000 #1C1B21 0 256
+}
+
+U1 Citrus
+{
+	#5A7C00 #ADD11E 0 150
+	#ADD11E #FFEA00 151 256
+Console:
+	#5A7C00 #FFEA00 0 256
+}
+
+U2 BloodyMess "Bloody Mess"
+{
+	#120000 #5A0A0A 0 30
+	#A30000 #7D0000 31 78
+	#521717 #7D0000 79 101
+	#5B2828 #000000 102 222
+	#7D0000 #DF0000 223 256
+Console:
+	#130000 #290000 0 101
+	#F20000 #9D0000 102 256
+}
+
+U3 CrazyRainbow "Crazy Rainbow"
+{
+	#FF0000 #FF00F6 0 20
+	#FF00F6 #6C00FF 21 50
+	#6C00FF #0018FF 51 85
+	#0018FF #0096FF 86 100
+	#0096FF #00FFDE 101 126
+	#00FFDE #00FF3C 127 157
+	#00FF3C #78FF00 158 185
+	#78FF00 #D8FF00 186 200
+	#D8FF00 #FFAE00 201 222
+	#FFAE00 #FF3600 223 256
+Console:
+	#FF0000 #FF00F6 0 20
+	#FF00F6 #6C00FF 21 50
+	#6C00FF #0018FF 51 85
+	#0018FF #0096FF 86 100
+	#0096FF #00FFDE 101 126
+	#00FFDE #00FF3C 127 157
+	#00FF3C #78FF00 158 185
+	#78FF00 #D8FF00 186 200
+	#D8FF00 #FFAE00 201 222
+	#FFAE00 #FF3600 223 256
+}
+
+U4 Creeper
+{
+	#6A5B7E #D3CCDC 0 191
+	#352B3B #D3CCDC 192 256
+Console:
+	#57535C #D3CCDC 0 256
+}
+
+U5 OldJeans "Old Jeans"
+{
+	#0C1A36 #3C357C 0 170
+	#3C357C #59698B 171 256
+Console:
+	#0C1A36 #59698B 0 256
+}
+
+U6 MuddyPit "Muddy Pit"
+{
+	#22150C #443926 0 220
+	#443926 #4C4E2E 221 256
+Console:
+	#22150C #4C4E2E 0 256
+}
+
+U7 Lavender
+{
+	#765782 #BA8BCB 0 99
+	#BA8BCB #D6C7DC 100 256
+Console:
+	#765782 #D6C7DC 0 256
+}
+
+U8 SkinTone "Skin Tone"
+{
+	#78392A #D38E7E 0 99
+	#D38E7E #F3C2B7 100 256
+Console:
+	#78392A #F3C2B7 0 256
+}
+
+U9 Nightshade
+{
+	#7B43A6 #3F007A 0 150
+	#26103A #4B2D77 151 256
+Console:
+	#320F48 #9157B5 0 256
+}
+
+// =================================================================================================
+
+V0 MyColour "My Colour"
+{
+	#0E0911 #261C34 0 159
+	#261C34 #453152 160 256
+Console:
+	#0E0911 #261C34 0 159
+	#261C34 #453152 160 256
+}
+
+V1 IvyRopes "Ivy Ropes"
+{
+	#263420 #2B5D17 0 110
+	#2B5D17 #56792D 111 150
+	#0F901E #43883E 151 189
+	#56792D #62B500 190 256
+Console:
+	#0D2D01 #62B500 0 256
+}  
+
+V2 SleakHardware "Sleak Hardware"
+{
+	#141415 #1D1C1E 0 9
+	#817C8F #C9C9C9 10 180
+	#C9C9C9 #FFFFFF 181 256
+Console:
+	#686573 #E7E7E7 0 256
+}
+
+V3 TropicalLagoon "Tropical Lagoon"
+{
+	#163E99 #0C886D 0 130
+	#0C886D #25C260 131 199
+	#25C260 #05EFE7 200 256
+Console:
+	#082167 #05EFE7 0 256
+}
+
+V4 TechnoPunk "Techno Punk"
+{
+	#381346 #8D1E4D 0 108
+	#8D1E4D #239AED 109 256
+Console:
+	#381346 #239AED 0 256
+}
+
+V5 DullBulb "Dull Bulb"
+{
+	#B5AC72 #2A2A22 0 60
+	#2A2A22 #6D683A 61 149
+	#6D683A #9E9E9E 150 256
+Console:
+	#54502C #9E9E9E 0 256
+}
+
+V6 20000Leagues "20000 Leagues"
+{
+	#05022C #1B1547 0 145
+	#1C1871 #312BA8 146 256
+Console:
+	#060332 #2A267E 0 256
+}
+
+V7 HotStuff "Hot Stuff"
+{
+	#591D0D #7F3B2B 0 89
+	#8F4333 #BF772F 90 179
+	#CF8F2B #FFF31B 180 256
+Console:
+	#591D0D #BF772F 0 256
+}
+
+V8 AFineWine "A Fine Wine"
+{
+	#1D0619 #450D32 0 145
+	#450D32 #92062E 146 256
+Console:
+	#1D0619 #450D32 0 145
+	#450D32 #92062E 146 256
+}
+
+V9 GateOfEvil "Gate Of Evil"
+{
+	#000000 #0B0B0B 0 60
+	#0B0B0B #1F170B 61 121
+	#1F170B #2B230F 122 159
+	#2B230F #735C49 160 256
+Console:
+	#0B0B0B #2B230F 0 256
+}
+
+// =================================================================================================
+
+W0 LunarDance "Lunar Dance"
+{
+	#E8CAFF #E33FF7 0 119
+	#A33FF7 #050724 120 256
+Console:
+	#E8CAFF #E33FF7 0 119
+	#A33FF7 #050724 120 256
+}
+
+W1 UnderTheSheets "Under The Sheets"
+{
+	#05080F #1E314A 0 256
+Console:
+	#05080F #1E314A 0 256
+}
+
+W2 Bitmapped
+{
+	#000000 #000000 0 10
+	#FFFFFF #FFFFFF 11 256
+Console:
+	#000000 #000000 0 10
+	#FFFFFF #FFFFFF 11 256
+}
+
+W3 GunMetal "Gun Metal"
+{
+	#0A0D14 #161925 0 96
+	#1D2030 #2D324A 97 172
+	#393F58 #4F5776 173 256
+Console:
+	#0A0D14 #161925 0 144
+	#171927 #2C324B 145 210
+	#363D5C #3F486C 211 256
+}
+
+W4 BarleyFields "Barley Fields"
+{
+	#371509 #BB8A06 0 170
+	#C8A014 #E1D8A5 171 256
+Console:
+	#371509 #BB8A06 0 170
+	#C8A014 #E1D8A5 171 256
+}
+
+W5 Orangeberry
+{
+	#721F0D #E45131 0 165
+	#E76448 #F39582 166 256
+Console:
+	#721F0D #E45131 0 165
+	#E76448 #F39582 166 256
+}
+
+W6 CarmineJewel "Carmine Jewel"
+{
+	#1D112E #4B0854 0 111
+	#5D0A5A #761447 112 189
+	#8A0F60 #E730C1 190 256
+Console:
+	#1D112E #4B0854 0 111
+	#5D0A5A #761447 112 189
+	#8A0F60 #E730C1 190 256
+}
+
+W7 AztecTreasures "Aztec Treasures"
+{
+	#EFB400 #DDB100 0 11
+	#03227A #035179 12 119
+	#045B7B #1489B5 120 256
+Console:
+	#033879 #14ACB5 0 256
+}
+
+W8 VirtualGuy
+{
+	#F20000 #840000 0 119
+	#700000 #090000 120 256
+Console:
+	#1C0000 #090000 0 256
+}
+
+W9 TakeASeat "Take A Seat"
+{
+	#000000 #0D0D0D 0 6
+	#061379 #004C92 7 256
+Console:
+	#004C92 #061379 0 256
+}
+
+// =================================================================================================
+
+X0 BananaSplit "Banana Split"
+{
+	#E3C33F #E3C33F 0 10
+	#351C0A #615035 11 180
+	#6E5D43 #B28C59 181 256
+Console:
+	#2E2112 #615035 0 170
+	#6E5D43 #E3C33F 171 256
+}
+
+X1 Halogen
+{
+	#190600 #4C1301 0 60
+	#771D02 #EF4905 61 152
+	#FC6E11 #FFCD3C 153 219
+	#FFF07A #FFFFFE 220 256
+Console:
+	#771D02 #FFF07A 0 256
+}
+
+X2 RottenTomato "Rotten Tomato"
+{
+	#030101 #460A0A 0 99
+	#601111 #E63939 100 256
+Console:
+	#030101 #460A0A 0 99
+	#601111 #E63939 100 256
+}
+
+X3 CrystalIris "Crystal Iris"
+{
+	#840164 #6658BD 0 80
+	#677AD1 #7CDDFE 81 162
+	#94E5FF #FFFFFF 163 256
+Console:
+	#840164 #6658BD 0 139
+	#677AD1 #7CDDFE 140 256
+}
+
+X4 Cafelatte
+{
+	#7F5638 #C89F74 0 99
+	#D4B88B #EFD494 100 167
+	#EDE3CC #FFFFFF 168 256
+Console:
+	#7F5638 #C89F74 0 99
+	#D4B88B #EFD494 100 167
+	#EDE3CC #FFFFFF 168 256
+}
+
+X5 ReturnTicket "Return Ticket"
+{
+	#03163A #1C3C56 0 52
+	#264D68 #5EB8D1 53 161
+	#45BEE0 #D7FFF7 162 256
+Console:
+	#03163A #1C3C56 0 50
+	#264D68 #5EB8D1 51 150
+	#45BEE0 #D7FFF7 151 256
+}
+
+X6 MartianBrunch "Martian Brunch"
+{
+	#4B09C3 #4B09C3 0 10
+	#B6381F #EE5400 11 119
+	#EE7000 #F9AC30 120 256
+Console:
+	#CD462B #FFC948 0 256
+}
+
+X7 MothsNest "Moths Nest"
+{
+	#CA5269 #CA5269 0 10
+	#62BF4C #DFFF93 11 159
+Console:
+	#CA5269 #DFFF93 0 256
+}
+
+X8 AncientTripping "Ancient Tripping"
+{
+	#451852 #D41978 0 32
+	#EC5C55 #ECE155 33 158
+	#451852 #D41978 159 256
+Console:
+	#451852 #D41978 0 100
+	#E4205D #EC5C55 101 201
+	#EA6B47 #ECE155 202 256
+}
+
+X9 MidnightZircon "Midnight Zircon"
+{
+	#080F22 #202944 0 120
+	#142F2A #349C07 121 210
+	#5CBE3A #D3FE11 211 256
+Console:
+	#080F22 #202944 0 120
+	#142F2A #349C07 121 210
+	#5CBE3A #D3FE11 211 256
+}
+
+// =================================================================================================
+
+Y0 PsychoticMind "Psychotic Mind"
+{
+	#C50C3C #B12731 0 20
+	#B41E1E #7F0830 21 149
+	#7F0830 #4A0000 150 256
+Console:
+	#4A0000 #B12731 0 256
+}
+
+Y1 CottonCandy "Cotton Candy"
+{
+	#CB4C6D #FFFFFF 0 256
+Console:
+	#CB4C6D #FFFFFF 0 256
+}
+
+Y2 DeepForest "Deep Forest"
+{
+	#001101 #06480C 0 256
+Console:
+	#001101 #06480C 0 256
+}
+
+Y3 SharpBreath "Sharp Breath"
+{
+	#006160 #003255 0 145
+	#003255 #19191C 146 256
+Console:
+	#006160 #003255 0 145
+	#003255 #19191C 146 256
+}
+
+Y4 CreamyButter "Creamy Butter"
+{
+	#B88420 #FFFF82 0 119
+	#FFFF82 #FFFFFF 120 256
+Console:
+	#DCA02D #FFFFDD 0 256
+}
+
+Y5 Blowtorch
+{
+	#141414 #393939 0 60
+	#393939 #767676 61 129
+	#807059 #CE7C00 130 199
+	#FF9900 #FFD016 200 256
+Console:
+	#393939 #FFD016 0 256
+}
+
+Y6 ChocolateCaramel "Chocolate Caramel"
+{
+	#120300 #3B0800 0 79
+	#3B0800 #974B31 80 199
+	#974B31 #EAAF49 200 256
+Console:
+	#3B0800 #EAAF49 0 256
+}
+
+Y7 SpaceshipPanels "Spaceship Panels"
+{
+	#211D23 #433F5D 0 149
+	#433F5D #8E7999 150 256
+Console:
+	#211D23 #8E7999 0 256
+}
+
+Y8 ToxicChemicals "Toxic Chemicals"
+{
+	#131D05 #360000 0 60
+	#410000 #5B3600 61 111
+	#693E00 #8E8600 112 180
+	#909D00 #AEE000 181 210
+	#AEE000 #C6FF00 211 256
+Console:
+	#5B3600 #C6FF00 0 256
+}
+
+Y9 Toothpaste
+{
+	#002318 #1252BA 0 80
+	#00A3C1 #0064D5 81 198
+	#0064D5 #65EBFF 199 256
+Console:
+	#002318 #0049C1 0 80
+	#00A3C1 #0064D5 81 199
+	#0064D5 #65EBFF 200 256
+}
+
+// =================================================================================================
+
+Z0 CremeDelight "Creme Delight"
+{
+	#772E28 #9E635B 0 49
+	#B06F6D #D4A595 50 152
+	#DDBFA7 #FDE7D0 153 256
+Console:
+	#772E28 #9E635B 0 49
+	#B06F6D #D4A595 50 152
+	#DDBFA7 #FDE7D0 153 256
+}
+
+Z1 SwitchOn "Switch On"
+{
+	#2E5500 #AAE900 0 160
+	#D0F500 #FFFFDF 161 256
+Console:
+	#2E5500 #AAE900 0 160
+	#D0F500 #FFFFDF 161 256
+}
+
+Z2 ReefSurfing "Reef Surfing"
+{
+	#001F10 #194979 0 129
+	#1B5E85 #00ACEC 130 200
+	#0DBDFF #64FAFF 201 256
+Console:
+	#001F10 #194979 0 129
+	#1B5E85 #00ACEC 130 200
+	#0DBDFF #64FAFF 201 256
+}
+
+Z3 StrikingItRich "Striking It Rich"
+{
+	#452B13 #85460A 0 80
+	#9F520A #E4B539 81 160
+	#EAC550 #FCF6E2 161 256
+Console:
+	#452B13 #85460A 0 80
+	#9F520A #E4B539 81 160
+	#EAC550 #FCF6E2 161 256
+}
+
+Z4 AutumnCrunch "Autumn Crunch"
+{
+	#3E0000 #830000 0 90
+	#AC0300 #C93300 91 150
+	#D84200 #F55D00 151 195
+	#FF9300 #FFD201 196 256
+Console:
+	#3E0000 #830000 0 90
+	#AC0300 #C93300 91 150
+	#D84200 #F55D00 151 195
+	#FF9300 #FFD201 196 256
+}
+
+Z5 LimestoneQuarry "Limestone Quarry"
+{
+	#483B44 #736369 0 40
+	#89757A #EBCDCF 41 167
+	#ECE3E2 #EDEDEB 168 256
+Console:
+	#483B44 #736369 0 40
+	#89757A #EBCDCF 41 167
+	#ECE3E2 #EDEDEB 168 256
+}
+
+Z6 Bijou
+{
+	#44001D #8C003E 0 30
+	#A00047 #FF1090 31 121
+	#FF2AA0 #FFCEEF 123 256
+Console:
+	#44001D #780035 0 20
+	#920041 #3A1406 21 119
+	#FF0386 #FFCEEF 120 256
+}
+
+Z7 TalayPeaks "Talay Peaks"
+{
+	#1C0C4D #65388E 0 108
+	#79499E #FFCBFF 109 256
+Console:
+	#1C0C4D #65388E 0 100
+	#79499E #FFCBFF 101 256
+}
+
+Z8 DuskBlanket "Dusk Blanket"
+{
+	#392D47 #67484F 0 90
+	#815049 #CC7E21 91 180
+	#DBA030 #E7CD4F 181 256
+Console:
+	#36364D #674738 0 50
+	#81502E #CC7E21 51 130
+	#DBA030 #E7CD4F 131 256
+}
+
+Z9 MerlotRose "Merlot Rose"
+{
+	#611F23 #9E2F39 0 45
+	#AD3C46 #E67684 46 130
+	#F18D8F #FBCAC3 131 256
+Console:
+	#611F23 #9E2F39 0 45
+	#AD3C46 #E67684 46 130
+	#F18D8F #FBCAC3 131 256
+}
