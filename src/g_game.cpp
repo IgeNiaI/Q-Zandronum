@@ -839,7 +839,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 		forward += (int)((float)mousey * mouse_forward);
 	}
 
-	cmd->ucmd.pitch = LocalViewPitch >> 16;
+	cmd->ucmd.pitch = LocalViewPitch;
 
 	if (SendLand)
 	{
@@ -864,7 +864,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 
 	cmd->ucmd.forwardmove += forward;
 	cmd->ucmd.sidemove += side;
-	cmd->ucmd.yaw = LocalViewAngle >> 16;
+	cmd->ucmd.yaw = LocalViewAngle;
 	cmd->ucmd.upmove = fly;
 	LocalViewAngle = 0;
 	LocalViewPitch = 0;

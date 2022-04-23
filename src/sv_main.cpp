@@ -5165,13 +5165,13 @@ ClientMoveCommand::ClientMoveCommand ( BYTESTREAM_s *pByteStream )
 	const ULONG ulBits = NETWORK_ReadByte( pByteStream );
 
 	if ( ulBits & CLIENT_UPDATE_YAW )
-		pCmd->ucmd.yaw = NETWORK_ReadShort( pByteStream );
+		pCmd->ucmd.yaw = NETWORK_ReadLong( pByteStream );
 
 	if ( ulBits & CLIENT_UPDATE_PITCH )
-		pCmd->ucmd.pitch = NETWORK_ReadShort( pByteStream );
+		pCmd->ucmd.pitch = NETWORK_ReadLong( pByteStream );
 
 	if ( ulBits & CLIENT_UPDATE_ROLL )
-		pCmd->ucmd.roll = NETWORK_ReadShort( pByteStream );
+		pCmd->ucmd.roll = NETWORK_ReadLong( pByteStream );
 
 	if ( ulBits & CLIENT_UPDATE_BUTTONS )
 		pCmd->ucmd.buttons = NETWORK_ReadLong( pByteStream );

@@ -43,9 +43,9 @@ Command MovePlayer
 		Short ucmd_forwardmove
 		Short ucmd_sidemove
 		Short ucmd_upmove
-		Short ucmd_yaw
-		Short ucmd_pitch
-		# Short ucmd_roll
+		Fixed ucmd_yaw
+		Fixed ucmd_pitch
+		# Fixed ucmd_roll
 		Long ucmd_buttons
 	EndIf
 EndCommand

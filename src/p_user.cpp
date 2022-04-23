@@ -4070,7 +4070,7 @@ void P_MovePlayer(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
-		player->mo->angle += cmd->ucmd.yaw << 16;
+		player->mo->angle += cmd->ucmd.yaw;
 	}
 
 	// [TP] Allow spectators to move freely even if the game is suspended.
@@ -4838,7 +4838,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		// Servers read in the pitch value. It is not calculated.
 		if (( NETWORK_GetState( ) != NETSTATE_SERVER ) || ( player->pSkullBot != NULL ))
 		{
-			int look = cmd->ucmd.pitch << 16;
+			int look = cmd->ucmd.pitch;
 
 			// The player's view pitch is clamped between -90 and +90 degrees
 			if (look)

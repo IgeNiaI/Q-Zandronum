@@ -181,17 +181,17 @@ int UnpackUserCmd (usercmd_t *ucmd, const usercmd_t *basis, BYTE **stream)
 			ucmd->buttons = buttons;
 		}
 		if (flags & UCMDF_PITCH)
-			ucmd->pitch = ReadWord (stream);
+			ucmd->pitch = ReadLong (stream);
 		if (flags & UCMDF_YAW)
-			ucmd->yaw = ReadWord (stream);
+			ucmd->yaw = ReadLong (stream);
 		if (flags & UCMDF_FORWARDMOVE)
 			ucmd->forwardmove = ReadWord (stream);
 		if (flags & UCMDF_SIDEMOVE)
-			ucmd->sidemove = ReadWord (stream);
+			ucmd->sidemove = ReadLong (stream);
 		if (flags & UCMDF_UPMOVE)
-			ucmd->upmove = ReadWord (stream);
+			ucmd->upmove = ReadLong (stream);
 		if (flags & UCMDF_ROLL)
-			ucmd->roll = ReadWord (stream);
+			ucmd->roll = ReadLong (stream);
 	}
 
 	return int(*stream - start);
@@ -253,12 +253,12 @@ int PackUserCmd (const usercmd_t *ucmd, const usercmd_t *basis, BYTE **stream)
 	if (ucmd->pitch != basis->pitch)
 	{
 		flags |= UCMDF_PITCH;
-		WriteWord (ucmd->pitch, stream);
+		WriteLong (ucmd->pitch, stream);
 	}
 	if (ucmd->yaw != basis->yaw)
 	{
 		flags |= UCMDF_YAW;
-		WriteWord (ucmd->yaw, stream);
+		WriteLong (ucmd->yaw, stream);
 	}
 	if (ucmd->forwardmove != basis->forwardmove)
 	{
@@ -268,17 +268,17 @@ int PackUserCmd (const usercmd_t *ucmd, const usercmd_t *basis, BYTE **stream)
 	if (ucmd->sidemove != basis->sidemove)
 	{
 		flags |= UCMDF_SIDEMOVE;
-		WriteWord (ucmd->sidemove, stream);
+		WriteLong (ucmd->sidemove, stream);
 	}
 	if (ucmd->upmove != basis->upmove)
 	{
 		flags |= UCMDF_UPMOVE;
-		WriteWord (ucmd->upmove, stream);
+		WriteLong (ucmd->upmove, stream);
 	}
 	if (ucmd->roll != basis->roll)
 	{
 		flags |= UCMDF_ROLL;
-		WriteWord (ucmd->roll, stream);
+		WriteLong (ucmd->roll, stream);
 	}
 
 	// Write the packing bits

@@ -5033,18 +5033,18 @@ int DLevelScript::GetPlayerInput(int playernum, int inputnum)
 	{
 	case INPUT_OLDBUTTONS:		return p->original_oldbuttons;		break;
 	case INPUT_BUTTONS:			return p->original_cmd.buttons;		break;
-	case INPUT_PITCH:			return p->original_cmd.pitch;		break;
-	case INPUT_YAW:				return p->original_cmd.yaw;			break;
-	case INPUT_ROLL:			return p->original_cmd.roll;		break;
+	case INPUT_PITCH:			return p->original_cmd.pitch >> 16;	break;
+	case INPUT_YAW:				return p->original_cmd.yaw >> 16;	break;
+	case INPUT_ROLL:			return p->original_cmd.roll >> 16;	break;
 	case INPUT_FORWARDMOVE:		return p->original_cmd.forwardmove;	break;
 	case INPUT_SIDEMOVE:		return p->original_cmd.sidemove;	break;
 	case INPUT_UPMOVE:			return p->original_cmd.upmove;		break;
 
 	case MODINPUT_OLDBUTTONS:	return p->oldbuttons;				break;
 	case MODINPUT_BUTTONS:		return p->cmd.ucmd.buttons;			break;
-	case MODINPUT_PITCH:		return p->cmd.ucmd.pitch;			break;
-	case MODINPUT_YAW:			return p->cmd.ucmd.yaw;				break;
-	case MODINPUT_ROLL:			return p->cmd.ucmd.roll;			break;
+	case MODINPUT_PITCH:		return p->cmd.ucmd.pitch >> 16;		break;
+	case MODINPUT_YAW:			return p->cmd.ucmd.yaw >> 16;		break;
+	case MODINPUT_ROLL:			return p->cmd.ucmd.roll >> 16;		break;
 	case MODINPUT_FORWARDMOVE:	return p->cmd.ucmd.forwardmove;		break;
 	case MODINPUT_SIDEMOVE:		return p->cmd.ucmd.sidemove;		break;
 	case MODINPUT_UPMOVE:		return p->cmd.ucmd.upmove;			break;

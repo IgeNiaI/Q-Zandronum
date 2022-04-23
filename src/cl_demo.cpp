@@ -386,15 +386,15 @@ void CLIENTDEMO_WriteTiccmd( ticcmd_t *pCmd )
 {
 	// First, make sure we have enough space to write this command. If not, add
 	// more space.
-	clientdemo_CheckDemoBuffer( 14 );
+	clientdemo_CheckDemoBuffer( 20 );
 
 	// Write the header.
 	NETWORK_WriteByte( &g_ByteStream, CLD_TICCMD );
 
 	// Write the contents of the ticcmd.
-	NETWORK_WriteShort( &g_ByteStream, pCmd->ucmd.yaw );
-	NETWORK_WriteShort( &g_ByteStream, pCmd->ucmd.roll );
-	NETWORK_WriteShort( &g_ByteStream, pCmd->ucmd.pitch );
+	NETWORK_WriteLong( &g_ByteStream, pCmd->ucmd.yaw );
+	NETWORK_WriteLong( &g_ByteStream, pCmd->ucmd.roll );
+	NETWORK_WriteLong( &g_ByteStream, pCmd->ucmd.pitch );
 	NETWORK_WriteByte( &g_ByteStream, pCmd->ucmd.buttons );
 	NETWORK_WriteShort( &g_ByteStream, pCmd->ucmd.upmove );
 	NETWORK_WriteShort( &g_ByteStream, pCmd->ucmd.forwardmove );
@@ -406,9 +406,9 @@ void CLIENTDEMO_WriteTiccmd( ticcmd_t *pCmd )
 void CLIENTDEMO_ReadTiccmd( ticcmd_t *pCmd )
 {
 	// Read the contents of ticcmd.
-	pCmd->ucmd.yaw = NETWORK_ReadShort( &g_ByteStream );
-	pCmd->ucmd.roll = NETWORK_ReadShort( &g_ByteStream );
-	pCmd->ucmd.pitch = NETWORK_ReadShort( &g_ByteStream );
+	pCmd->ucmd.yaw = NETWORK_ReadLong( &g_ByteStream );
+	pCmd->ucmd.roll = NETWORK_ReadLong( &g_ByteStream );
+	pCmd->ucmd.pitch = NETWORK_ReadLong( &g_ByteStream );
 	pCmd->ucmd.buttons = NETWORK_ReadByte( &g_ByteStream );
 	pCmd->ucmd.upmove = NETWORK_ReadShort( &g_ByteStream );
 	pCmd->ucmd.forwardmove = NETWORK_ReadShort( &g_ByteStream );

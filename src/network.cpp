@@ -1360,7 +1360,7 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 SDWORD NETWORK_Check ( ticcmd_t *pCmd )
 {
 	FString string;
-	string.AppendFormat ( "%d%d%d", pCmd->ucmd.pitch, pCmd->ucmd.yaw, pCmd->ucmd.roll );
+	string.AppendFormat ( "%ld%ld%ld", pCmd->ucmd.pitch, pCmd->ucmd.yaw, pCmd->ucmd.roll );
 	FString hash;
 	CMD5Checksum::GetMD5( reinterpret_cast<const BYTE*>(string.GetChars()), string.Len(), hash );
 

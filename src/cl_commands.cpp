@@ -352,11 +352,11 @@ void CLIENTCOMMANDS_ClientMove( void )
 
 	// Send the necessary movement/steering information.
 	if ( ulBits & CLIENT_UPDATE_YAW )
-		NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.yaw );
+		NETWORK_WriteLong( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.yaw );
 	if ( ulBits & CLIENT_UPDATE_PITCH )
-		NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.pitch );
+		NETWORK_WriteLong( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.pitch );
 	if ( ulBits & CLIENT_UPDATE_ROLL )
-		NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.roll );
+		NETWORK_WriteLong( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.roll );
 	if ( ulBits & CLIENT_UPDATE_BUTTONS )
 		NETWORK_WriteLong( &CLIENT_GetLocalBuffer( )->ByteStream, pCmd->ucmd.buttons );
 	if ( ulBits & CLIENT_UPDATE_FORWARDMOVE )
