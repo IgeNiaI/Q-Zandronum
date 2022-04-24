@@ -10115,7 +10115,12 @@ scriptwait:
 
 					// [BC] If we're the server, tell clients to play this sound.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						SERVERCOMMANDS_SoundSector( activationline->frontsector, CHAN_AUTO, (char *)lookup, (float)(STACK(1)) / 127.f, ATTN_NORM );
+					{
+						if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+							SERVERCOMMANDS_SoundSector( activationline->frontsector, CHAN_AUTO, (char *)lookup, (float)(STACK(1)) / 127.f, ATTN_NORM, activator->player - players, SVCF_SKIPTHISCLIENT );
+						else
+							SERVERCOMMANDS_SoundSector( activationline->frontsector, CHAN_AUTO, (char *)lookup, (float)(STACK(1)) / 127.f, ATTN_NORM );
+					}
 				}
 				else
 				{
@@ -10127,7 +10132,12 @@ scriptwait:
 
 					// [BC] If we're the server, tell clients to play this sound.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						SERVERCOMMANDS_Sound( CHAN_AUTO, (char *)lookup, (float)( STACK( 1 ) / 127.f ), ATTN_NORM );
+					{
+						if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+							SERVERCOMMANDS_Sound( CHAN_AUTO, (char *)lookup, (float)( STACK( 1 ) / 127.f ), ATTN_NORM, activator->player - players, SVCF_SKIPTHISCLIENT );
+						else
+							SERVERCOMMANDS_Sound( CHAN_AUTO, (char *)lookup, (float)( STACK( 1 ) / 127.f ), ATTN_NORM );
+					}
 				}
 			}
 			sp -= 2;
@@ -10143,7 +10153,12 @@ scriptwait:
 
 				// [BC] If we're the server, tell clients to play this sound.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVERCOMMANDS_Sound( CHAN_AUTO, (char *)lookup, (float)( STACK( 1 ) / 127.f ), ATTN_NONE );
+				{
+					if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+						SERVERCOMMANDS_Sound( CHAN_AUTO, (char *)lookup, (float)( STACK( 1 ) / 127.f ), ATTN_NONE, activator->player - players, SVCF_SKIPTHISCLIENT );
+					else
+						SERVERCOMMANDS_Sound( CHAN_AUTO, (char *)lookup, (float)( STACK( 1 ) / 127.f ), ATTN_NONE );
+				}
 			}
 			sp -= 2;
 			break;
@@ -10161,7 +10176,7 @@ scriptwait:
 				}
 
 				// [BC] If we're the server, tell clients to play this sound.
-				if (( lookup != NULL ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( activator->player ))
+				if (( lookup != NULL ) && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( activator->player ) && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ))
 					SERVERCOMMANDS_Sound( CHAN_AUTO, (char *)lookup, (float)( STACK( 1 ) / 127.f ), ATTN_NONE, activator->player - players, SVCF_ONLYTHISCLIENT );
 			}
 
@@ -10198,7 +10213,12 @@ scriptwait:
 
 					// [BB] Tell the clients to play the sound.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-						SERVERCOMMANDS_StartSectorSequence( activationline->frontsector, CHAN_FULLHEIGHT, lookup, 0 );
+					{
+						if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+							SERVERCOMMANDS_StartSectorSequence( activationline->frontsector, CHAN_FULLHEIGHT, lookup, 0, activator->player - players, SVCF_SKIPTHISCLIENT );
+						else
+							SERVERCOMMANDS_StartSectorSequence( activationline->frontsector, CHAN_FULLHEIGHT, lookup, 0 );
+					}
 				}
 			}
 			sp--;
