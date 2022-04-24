@@ -404,16 +404,12 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				if (MyGetRawInputData((HRAWINPUT)lParam, RID_INPUT, buffer, &size, sizeof(RAWINPUTHEADER)) == size)
 				{
 					int code = GET_RAWINPUT_CODE_WPARAM(wParam);
-					if (Keyboard == NULL || !Keyboard->ProcessRawInput((RAWINPUT *)buffer, code))
-					{
-						if (Mouse == NULL || !Mouse->ProcessRawInput((RAWINPUT *)buffer, code))
-						{
-							if (JoyDevices[INPUT_RawPS2] != NULL)
-							{
-								JoyDevices[INPUT_RawPS2]->ProcessRawInput((RAWINPUT *)buffer, code);
-							}
-						}
-					}
+					if (Keyboard != NULL)
+						Keyboard->ProcessRawInput((RAWINPUT *)buffer, code);
+					if (Mouse != NULL)
+						Mouse->ProcessRawInput((RAWINPUT *)buffer, code);
+					if (JoyDevices[INPUT_RawPS2] != NULL)
+						JoyDevices[INPUT_RawPS2]->ProcessRawInput((RAWINPUT *)buffer, code);
 				}
 			}
 		}
