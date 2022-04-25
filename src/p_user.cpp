@@ -3605,7 +3605,7 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	player->mo->isWallClimbing = isClimbing;
 }
 
-void APlayerPawn::DoJump(ticcmd_t *cmd)
+void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 {
 	if (!player->bSpectating && !level.IsJumpingAllowed())
 		return;
@@ -3644,7 +3644,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd)
 		{
 			bool isRampJumper = (mvFlags & MV_RAMPJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
-			if (!wasJustThrustedZ || isRampJumper)
+			if (!bWasJustThrustedZ || isRampJumper)
 			{
 				ULONG	ulJumpTicks;
 
@@ -4032,7 +4032,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// [RH] check for jump
 	else
 	{
-		player->mo->DoJump(cmd);
+		player->mo->DoJump(cmd, wasJustThrustedZ);
 	}
 }
 
@@ -4308,7 +4308,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		return;
 
 	// Stop here if not in good condition to jump
-	player->mo->DoJump(cmd);
+	player->mo->DoJump(cmd, wasJustThrustedZ);
 }
 
 /*
