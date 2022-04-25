@@ -2667,8 +2667,6 @@ explode:
 				player->velx = FixedMul (player->velx, ORIG_FRICTION);
 				player->vely = FixedMul (player->vely, ORIG_FRICTION);
 			}
-
-			player->mo->wasJustThrustedZ = false;
 		}
 		else
 		{
