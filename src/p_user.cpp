@@ -4316,8 +4316,9 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 =
 =================
 */
-void P_MovePlayer(player_t *player, ticcmd_t *cmd)
+void P_MovePlayer(player_t *player)
 {
+	ticcmd_t *cmd = &player->cmd;
 	APlayerPawn *mo = player->mo;
 
 	// [RH] 180-degree turn overrides all other yaws
@@ -4798,7 +4799,7 @@ void P_CrouchMove(player_t * player, int direction)
 //
 //----------------------------------------------------------------------------
 
-void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
+void P_PlayerThink (player_t *player)
 {
 	ticcmd_t *cmd;
 
@@ -4924,12 +4925,8 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 		player->mo->flags5 |= MF5_NOINTERACTION;
 	else
 		player->mo->flags5 &= ~MF5_NOINTERACTION;
-
-	// If we're predicting, use the ticcmd we pass in.
-	if ( CLIENT_PREDICT_IsPredicting( ))
-		cmd = pCmd;
-	else
-		cmd = &player->cmd;
+	
+	cmd = &player->cmd;
 
 	// Make unmodified copies for ACS's GetPlayerInput.
 	player->original_oldbuttons = player->original_cmd.buttons;
@@ -5131,7 +5128,7 @@ void P_PlayerThink (player_t *player, ticcmd_t *pCmd)
 	}
 	else
 	{
-		P_MovePlayer (player, cmd);
+		P_MovePlayer (player);
 
 		if (cmd->ucmd.upmove == -32768)
 		{ // Only land if in the air

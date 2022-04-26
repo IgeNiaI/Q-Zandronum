@@ -64,7 +64,7 @@
 #include "cl_demo.h"
 #include "cl_main.h"
 
-void P_MovePlayer (player_t *player, ticcmd_t *cmd);
+void P_MovePlayer (player_t *player);
 void P_CalcHeight (player_t *player);
 void P_CalcSway (player_t *player, fixed_t angleDelta, fixed_t pitchDelta);
 void P_DeathThink (player_t *player);
@@ -460,8 +460,10 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 			pPlayer->mo->Predictable[i] = g_SavedPredictable[lTick % CLIENT_PREDICTION_TICS][i];
 		}
 
+		memcpy( &pPlayer->cmd, &g_SavedTiccmd[lTick % CLIENT_PREDICTION_TICS], sizeof( ticcmd_t ));
+
 		// Tick the player.
-		P_PlayerThink( pPlayer, &g_SavedTiccmd[lTick % CLIENT_PREDICTION_TICS] );
+		P_PlayerThink( pPlayer );
 		pPlayer->mo->Tick( );
 
 		// [BB] The effect of all DPushers needs to be manually predicted.
@@ -533,6 +535,7 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	pPlayer->mo->flags8 = g_SavedFlags[g_ulGameTick % CLIENT_PREDICTION_TICS][8];
 	pPlayer->cheats = g_SavedCheats[g_ulGameTick % CLIENT_PREDICTION_TICS][0];
 	pPlayer->cheats2 = g_SavedCheats[g_ulGameTick % CLIENT_PREDICTION_TICS][1];
+	memcpy( &pPlayer->cmd, &g_SavedTiccmd[g_ulGameTick % CLIENT_PREDICTION_TICS], sizeof( ticcmd_t ));
 }
 
 static void client_predict_AdjustZ( APlayerPawn *mo )
