@@ -3001,6 +3001,8 @@ FUNC(LS_SetPlayerProperty)
 	if ((!it || !it->player) && !arg0)
 		return false;
 
+	int playerNumToSkip = GetPlayerNumToSkip(it, isFromAcs, isFromDecorate);
+	
 	// Add or remove a power
 	if (arg2 >= PROP_INVULNERABILITY && arg2 <= PROP_SPEED)
 	{
@@ -3046,10 +3048,10 @@ FUNC(LS_SetPlayerProperty)
 					// [WS] Inform clients of the powerup and blend color.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 					{
-						SERVERCOMMANDS_GivePowerup( ULONG( it->player - players ), item );
+						SERVERCOMMANDS_GivePowerup( ULONG( it->player - players ), item, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 						// [WS] If it is an invulnerability powerup, we need to inform the clients of the blend color.
 						if ( power == 0 )
-							SERVERCOMMANDS_SetPowerupBlendColor( ULONG( it->player - players ), item );
+							SERVERCOMMANDS_SetPowerupBlendColor( ULONG( it->player - players ), item, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 					}
 				}
 				else if (it->player - players == consoleplayer)
@@ -3066,7 +3068,7 @@ FUNC(LS_SetPlayerProperty)
 					{
 						// [WS] Destroy the powerup.
 						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							SERVERCOMMANDS_TakeInventory( ULONG( it->player - players ), item->GetClass(), 0 );
+							SERVERCOMMANDS_TakeInventory( ULONG( it->player - players ), item->GetClass(), 0, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 
 						item->Destroy ();
 					}
@@ -3099,7 +3101,7 @@ FUNC(LS_SetPlayerProperty)
 
 						// [WS] Inform clients of powerup.
 						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-							SERVERCOMMANDS_GivePowerup( i, static_cast<APowerup *>( item ) );
+							SERVERCOMMANDS_GivePowerup( i, static_cast<APowerup *>( item ), playerNumToSkip, SVCF_SKIPTHISCLIENT );
 					}
 					else if (i == consoleplayer)
 					{
@@ -3115,7 +3117,7 @@ FUNC(LS_SetPlayerProperty)
 						{
 							// [WS] Destroy the powerup.
 							if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-								SERVERCOMMANDS_TakeInventory( i, item->GetClass(), 0 );
+								SERVERCOMMANDS_TakeInventory( i, item->GetClass(), 0, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 
 							item->Destroy ();
 						}
@@ -3183,9 +3185,10 @@ FUNC(LS_SetPlayerProperty)
 		// [BB] Tell the client that his cheats have changed.
 		if ( NETWORK_GetState() == NETSTATE_SERVER && oldCheats != it->player->cheats )
 		{
-			SERVERCOMMANDS_SetPlayerCheats( ULONG( it->player - players ), ULONG( it->player - players ), SVCF_ONLYTHISCLIENT );
-			SERVERCOMMANDS_SetThingFlags( it, FLAGSET_FLAGS );
-			SERVERCOMMANDS_SetThingFlags( it, FLAGSET_FLAGS2 );
+			if ( it->player - players != playerNumToSkip )
+				SERVERCOMMANDS_SetPlayerCheats( ULONG( it->player - players ), ULONG( it->player - players ), SVCF_ONLYTHISCLIENT );
+			SERVERCOMMANDS_SetThingFlags( it, FLAGSET_FLAGS, playerNumToSkip, SVCF_SKIPTHISCLIENT );
+			SERVERCOMMANDS_SetThingFlags( it, FLAGSET_FLAGS2, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 		}
 	}
 	else
@@ -3227,9 +3230,10 @@ FUNC(LS_SetPlayerProperty)
 			// [BB] Tell the client that his cheats have changed.
 			if ( NETWORK_GetState() == NETSTATE_SERVER && oldCheats != players[i].cheats )
 			{
-				SERVERCOMMANDS_SetPlayerCheats( i, i, SVCF_ONLYTHISCLIENT );
-				SERVERCOMMANDS_SetThingFlags( players[i].mo, FLAGSET_FLAGS );
-				SERVERCOMMANDS_SetThingFlags( players[i].mo, FLAGSET_FLAGS2 );
+				if ( i != playerNumToSkip )
+					SERVERCOMMANDS_SetPlayerCheats( i, i, SVCF_ONLYTHISCLIENT );
+				SERVERCOMMANDS_SetThingFlags( players[i].mo, FLAGSET_FLAGS, playerNumToSkip, SVCF_SKIPTHISCLIENT );
+				SERVERCOMMANDS_SetThingFlags( players[i].mo, FLAGSET_FLAGS2, playerNumToSkip, SVCF_SKIPTHISCLIENT );
 			}
 		}
 	}
