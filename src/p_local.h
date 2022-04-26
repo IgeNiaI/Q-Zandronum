@@ -103,7 +103,7 @@ void P_DropWeapon (player_t* player);
 //
 void	P_FallingDamage (AActor *ent);
 bool	PLAYER_Responder( event_t *pEvent );
-void	P_PlayerThink (player_t *player, ticcmd_t *pCmd = NULL );
+void	P_PlayerThink (player_t *player );
 /*
 void	P_PredictPlayer (player_t *player);
 void	P_UnPredictPlayer ();
