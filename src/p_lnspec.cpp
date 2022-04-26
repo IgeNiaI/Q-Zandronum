@@ -1788,7 +1788,7 @@ FUNC(LS_ACS_Execute)
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 		( ACS_IsScriptClientSide( arg0 )))
 	{
-		SERVERCOMMANDS_ACSScriptExecute( arg0, it, LONG( ln - lines ), arg1, backSide, args, 3, false );
+		SERVERCOMMANDS_ACSScriptExecute( arg0, it, LONG( ln - lines ), arg1, backSide, args, 3, false, GetPlayerNumToSkip(it, isFromAcs, isFromDecorate), SVCF_SKIPTHISCLIENT );
 		return ( true );
 	}
 
@@ -1819,7 +1819,7 @@ FUNC(LS_ACS_ExecuteAlways)
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 		( ACS_IsScriptClientSide( arg0 )))
 	{
-		SERVERCOMMANDS_ACSScriptExecute( arg0, it, LONG( ln - lines ), arg1, backSide, args, 3, true );
+		SERVERCOMMANDS_ACSScriptExecute( arg0, it, LONG( ln - lines ), arg1, backSide, args, 3, true, GetPlayerNumToSkip(it, isFromAcs, isFromDecorate), SVCF_SKIPTHISCLIENT );
 		return ( true );
 	}
 
@@ -1869,7 +1869,7 @@ FUNC(LS_ACS_ExecuteWithResult)
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 		( ACS_IsScriptClientSide( arg0 )))
 	{
-		SERVERCOMMANDS_ACSScriptExecute( arg0, it, LONG( ln - lines ), 0, backSide, args, 4, true );
+		SERVERCOMMANDS_ACSScriptExecute( arg0, it, LONG( ln - lines ), 0, backSide, args, 4, true, GetPlayerNumToSkip(it, isFromAcs, isFromDecorate), SVCF_SKIPTHISCLIENT );
 		return ( false );
 	}
 
