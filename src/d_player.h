@@ -934,6 +934,14 @@ enum
 	MV_TYPES_END
 };
 
+#define Q_MAX_GROUND_SPEED 14.17f
+#define Q_MAX_AIR_SPEED 12.f
+#define Q_AIR_ACCELERATION_SCALE 6.f
+#define Q_WATER_SPEED_SCALE 0.6f
+#define Q_WATER_ACCELERATION_SCALE 6.f
+#define Q_FLY_ACCELERATION_SCALE 8.f
+#define Q_CMP_WISHSPEED 1.5f
+
 // [geNia] second jump state
 enum
 {
