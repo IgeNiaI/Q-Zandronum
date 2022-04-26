@@ -100,6 +100,7 @@ static	LONG		g_lSavedReactionTime[CLIENT_PREDICTION_TICS];
 static	LONG		g_lSavedWaterLevel[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedOnFloor[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedOnMobj[CLIENT_PREDICTION_TICS];
+static	bool		g_bSavedOnGround[CLIENT_PREDICTION_TICS];
 static	bool		g_bSavedWasJustThrustedZ[CLIENT_PREDICTION_TICS];
 static	fixed_t		g_SavedFloorZ[CLIENT_PREDICTION_TICS];
 static  DWORD		g_SavedOldButtons[CLIENT_PREDICTION_TICS];
@@ -312,6 +313,8 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 
 	// [BB] Remember whether the player was standing on another actor.
 	g_bSavedOnMobj[Tick % CLIENT_PREDICTION_TICS] = !!(pPlayer->mo->flags2 & MF2_ONMOBJ);
+	// The "onground" status is not necessarily the same as g_bSavedOnFloor.
+	g_bSavedOnGround[Tick % CLIENT_PREDICTION_TICS] = pPlayer->onground;
 }
 
 //*****************************************************************************
@@ -416,7 +419,7 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 			pPlayer->mo->flags2 |= MF2_ONMOBJ;
 		else
 			pPlayer->mo->flags2 &= ~MF2_ONMOBJ;
-		pPlayer->onground = g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS];
+		pPlayer->onground = g_bSavedOnGround[lTick % CLIENT_PREDICTION_TICS];
 
 		if ( g_bSavedOnFloor[lTick % CLIENT_PREDICTION_TICS] )
 			pPlayer->mo->z = client_predict_GetPredictedFloorZ( pPlayer, lTick % CLIENT_PREDICTION_TICS );
