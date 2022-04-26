@@ -1084,7 +1084,15 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CallSpecial)
 	// [BC] Don't do this in client mode.
 	if ( NETWORK_InClientMode() )
 	{
-		if (( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) == false )
+		bool isAllowedOnClient = !!( self->ulNetworkFlags & NETFL_CLIENTSIDEONLY );
+		if ( !isAllowedOnClient && ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS ) )
+		{
+			isAllowedOnClient =
+				special == ACS_Execute || special == ACS_ExecuteAlways || special == ACS_ExecuteWithResult
+				|| special == ThrustThingZ || special == ThrustThingZ
+				|| special == ChangeCamera || special == SetPlayerProperty;
+		}
+		if ( !isAllowedOnClient )
 		{
 			ACTION_SET_RESULT( false );
 			return;
