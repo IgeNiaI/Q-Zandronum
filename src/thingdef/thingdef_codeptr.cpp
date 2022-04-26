@@ -1072,7 +1072,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CallSpecial)
 		}
 	}
 
-	bool res = !!P_ExecuteSpecial(special, NULL, self, false, false, arg1, arg2, arg3, arg4, arg5);
+	bool res = !!P_ExecuteSpecial(special, NULL, self, false, false, true, arg1, arg2, arg3, arg4, arg5);
 
 	ACTION_SET_RESULT(res);
 }
@@ -5306,7 +5306,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_LineEffect)
 		{
 			oldjunk.tag = tag;								// Sector tag for linedef
 			P_TranslateLineDef(&junk, &oldjunk);			// Turn into native type
-			res = !!P_ExecuteSpecial(junk.special, NULL, self, false, false,
+			res = !!P_ExecuteSpecial(junk.special, NULL, self, false, false, false,
 				junk.args[0], junk.args[1], junk.args[2], junk.args[3], junk.args[4]); 
 			if (res && !(junk.flags & ML_REPEAT_SPECIAL))	// If only once,
 				self->flags6 |= MF6_LINEDONE;				// no more for this thing
@@ -5634,7 +5634,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedExecuteWithResult)
 	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
 		return;
 
-	bool res = !!P_ExecuteSpecial(ACS_ExecuteWithResult, NULL, self, false, false, -scriptname, arg1, arg2, arg3, arg4);
+	bool res = !!P_ExecuteSpecial(ACS_ExecuteWithResult, NULL, self, false, false, true, -scriptname, arg1, arg2, arg3, arg4);
 
 	ACTION_SET_RESULT(res);
 }
@@ -5653,7 +5653,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedExecute)
 	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
 		return;
 
-	bool res = !!P_ExecuteSpecial(ACS_Execute, NULL, self, false, false, -scriptname, mapnum, arg1, arg2, arg3);
+	bool res = !!P_ExecuteSpecial(ACS_Execute, NULL, self, false, false, true, -scriptname, mapnum, arg1, arg2, arg3);
 
 	ACTION_SET_RESULT(res);
 }
@@ -5672,7 +5672,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedExecuteAlways)
 	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
 		return;
 
-	bool res = !!P_ExecuteSpecial(ACS_ExecuteAlways, NULL, self, false, false, -scriptname, mapnum, arg1, arg2, arg3);
+	bool res = !!P_ExecuteSpecial(ACS_ExecuteAlways, NULL, self, false, false, true, -scriptname, mapnum, arg1, arg2, arg3);
 
 	ACTION_SET_RESULT(res);
 }
@@ -5691,7 +5691,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedLockedExecute)
 	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
 		return;
 
-	bool res = !!P_ExecuteSpecial(ACS_LockedExecute, NULL, self, false, false, -scriptname, mapnum, arg1, arg2, lock);
+	bool res = !!P_ExecuteSpecial(ACS_LockedExecute, NULL, self, false, false, true, -scriptname, mapnum, arg1, arg2, lock);
 
 	ACTION_SET_RESULT(res);
 }
@@ -5710,7 +5710,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedLockedExecuteDoor)
 	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
 		return;
 
-	bool res = !!P_ExecuteSpecial(ACS_LockedExecuteDoor, NULL, self, false, false, -scriptname, mapnum, arg1, arg2, lock);
+	bool res = !!P_ExecuteSpecial(ACS_LockedExecuteDoor, NULL, self, false, false, true, -scriptname, mapnum, arg1, arg2, lock);
 
 	ACTION_SET_RESULT(res);
 }
@@ -5722,7 +5722,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedSuspend)
 	ACTION_PARAM_NAME(scriptname, 0);
 	ACTION_PARAM_INT(mapnum, 1);
 
-	bool res = !!P_ExecuteSpecial(ACS_Suspend, NULL, self, false, false, -scriptname, mapnum, 0, 0, 0);
+	bool res = !!P_ExecuteSpecial(ACS_Suspend, NULL, self, false, false, true, -scriptname, mapnum, 0, 0, 0);
 
 	ACTION_SET_RESULT(res);
 }
@@ -5734,7 +5734,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedTerminate)
 	ACTION_PARAM_NAME(scriptname, 0);
 	ACTION_PARAM_INT(mapnum, 1);
 
-	bool res = !!P_ExecuteSpecial(ACS_Terminate, NULL, self, false, false, -scriptname, mapnum, 0, 0, 0);
+	bool res = !!P_ExecuteSpecial(ACS_Terminate, NULL, self, false, false, true, -scriptname, mapnum, 0, 0, 0);
 
 	ACTION_SET_RESULT(res);
 }

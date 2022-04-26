@@ -1274,7 +1274,7 @@ bool NETWORK_ClientsideFunctionsAllowed( const player_t* player )
 	return (player
 		&& ( ( NETWORK_GetState() == NETSTATE_SERVER ) || ( player - players == consoleplayer ) )
 		&& NETWORK_IsUnlaggedEnabled( player ) )
-		&& ( zacompatflags & ZACOMPATF_ALLOW_MORE_CLIENTSIDE_FUNCTIONS );
+		&& ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS );
 }
 
 //*****************************************************************************

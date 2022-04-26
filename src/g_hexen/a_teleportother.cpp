@@ -141,7 +141,7 @@ int ATelOtherFX1::DoSpecialDamage (AActor *target, int damage, FName damagetype)
 			{
 				target->RemoveFromHash ();
 				P_ExecuteSpecial(target->special, NULL, level.flags & LEVEL_ACTOWNSPECIAL
-					? target : (AActor *)(this->target), false, false,
+					? target : (AActor *)(this->target), false, false, true,
 					target->args[0], target->args[1], target->args[2], target->args[3], target->args[4]);
 				target->special = 0;
 			}

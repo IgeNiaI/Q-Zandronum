@@ -2656,7 +2656,7 @@ ExpVal FxActionSpecialCall::EvalExpression (AActor *self)
 	}
 	ExpVal ret;
 	ret.Type = VAL_Int;
-	ret.Int = P_ExecuteSpecial(special, NULL, self, false, false, v[0], v[1], v[2], v[3], v[4]);
+	ret.Int = P_ExecuteSpecial(special, NULL, self, false, false, true, v[0], v[1], v[2], v[3], v[4]);
 	return ret;
 }
 

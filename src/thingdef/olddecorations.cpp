@@ -88,7 +88,7 @@ public:
 			return ( true );
 		}
 
-		INTBOOL success = P_ExecuteSpecial(special, NULL, toucher, false, false,
+		INTBOOL success = P_ExecuteSpecial(special, NULL, toucher, false, false, false,
 			args[0], args[1], args[2], args[3], args[4]);
 
 		if (success)

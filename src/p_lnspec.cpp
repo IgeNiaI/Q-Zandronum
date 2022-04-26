@@ -68,7 +68,7 @@
 #include "cl_demo.h"
 #include "p_acs.h"
 
-#define FUNC(a) static int a (line_t *ln, AActor *it, bool backSide, bool isFromAcs, \
+#define FUNC(a) static int a (line_t *ln, AActor *it, bool backSide, bool isFromAcs, bool isFromDecorate, \
 	int arg0, int arg1, int arg2, int arg3, int arg4)
 
 #define SPEED(a)		((a)*(FRACUNIT/8))
@@ -129,7 +129,7 @@ int GetPlayerNumToSkip(AActor *it, bool isFromAcs, bool isFromDecorate)
 	if (
 		( isFromAcs && ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
 		||
-		( isFromDecorate && ( zacompatflags & ZACOMPATF_ALLOW_MORE_CLIENTSIDE_FUNCTIONS ) && ( it->ulNetworkFlags & NETFL_SKIPOWNER ) )
+		( isFromDecorate && ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS ) && ( it->ulNetworkFlags & NETFL_SKIPOWNER ) )
 	)
 		return NETWORK_GetActorsOwnerPlayer( it ) - players;
 
@@ -1838,7 +1838,7 @@ FUNC(LS_ACS_LockedExecute)
 	if (arg4 && !P_CheckKeys (it, arg4, true))
 		return false;
 	else
-		return LS_ACS_Execute (ln, it, backSide, true, arg0, arg1, arg2, arg3, 0);
+		return LS_ACS_Execute (ln, it, backSide, true, false, arg0, arg1, arg2, arg3, 0);
 }
 
 FUNC(LS_ACS_LockedExecuteDoor)
@@ -1847,7 +1847,7 @@ FUNC(LS_ACS_LockedExecuteDoor)
 	if (arg4 && !P_CheckKeys (it, arg4, false))
 		return false;
 	else
-		return LS_ACS_Execute (ln, it, backSide, true, arg0, arg1, arg2, arg3, 0);
+		return LS_ACS_Execute (ln, it, backSide, true, false, arg0, arg1, arg2, arg3, 0);
 }
 
 FUNC(LS_ACS_ExecuteWithResult)
@@ -3921,6 +3921,7 @@ int P_ExecuteSpecial(int			num,
 					 class AActor	*activator,
 					 bool			backSide,
 					 bool			isFromAcs,
+					 bool			isFromDecorate,
 					 int			arg1,
 					 int			arg2,
 					 int			arg3,
@@ -3929,7 +3930,7 @@ int P_ExecuteSpecial(int			num,
 {
 	if (num >= 0 && num <= 255)
 	{
-		return LineSpecials[num](line, activator, backSide, isFromAcs, arg1, arg2, arg3, arg4, arg5);
+		return LineSpecials[num](line, activator, backSide, isFromAcs, isFromDecorate, arg1, arg2, arg3, arg4, arg5);
 	}
 	return 0;
 }
