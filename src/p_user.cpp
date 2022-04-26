@@ -4059,7 +4059,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 	float moveFactor = player->mo->QCrouchWalkFactor( cmd );
-	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * 12.f * player->mo->QTweakSpeed();
+	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.0f };
 	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
@@ -4079,19 +4079,15 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				acceleration.Z += FIXED2FLOAT(cmd->ucmd.upmove << 4);
 		}
 
-		//Friction
-		if (player->mo->waterlevel >= 2)
-			player->mo->QFriction(vel, 0.f, 2.f);
-		else
-			player->mo->QFriction(vel, 0.f, 3.f);
 		//Acceleration
 		VectorRotate(acceleration.X, acceleration.Y, flAngle);
 		acceleration.MakeUnit();
+		maxGroundSpeed *= Q_MAX_GROUND_SPEED;
 		maxGroundSpeed *= moveFactor;
 		if (player->mo->waterlevel >= 2)
-			player->mo->QAcceleration(vel, acceleration, (maxGroundSpeed * 3.f) / 5.f, 6.f);
+			player->mo->QAcceleration(vel, acceleration, maxGroundSpeed * Q_WATER_SPEED_SCALE, Q_WATER_ACCELERATION_SCALE);
 		else
-			player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, 8.f);
+			player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, Q_FLY_ACCELERATION_SCALE);
 
 		noJump = true;
 
@@ -4115,7 +4111,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 		if (isClimbing)
 		{
-			player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction);
 			vel.Z = FIXED2FLOAT(player->mo->WallClimbSpeed);
 			player->mo->wallClimbTics--;
 			noJump = true;
@@ -4133,6 +4128,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 			if (!player->onground || ((cmd->ucmd.buttons & BT_JUMP) && player->mo->jumpTics <= 0))
 			{
+				maxGroundSpeed *= Q_MAX_AIR_SPEED;
 				maxGroundSpeed *= moveFactor;
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
@@ -4142,7 +4138,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxGroundSpeed)
 					{
 						// Side acceleration only
-						player->mo->QAcceleration(vel, acceleration, 1.5f, player->mo->CpmAirAcceleration * 6.f);
+						player->mo->QAcceleration(vel, acceleration, Q_CMP_WISHSPEED, player->mo->CpmAirAcceleration * Q_AIR_ACCELERATION_SCALE);
 					}
 					else
 					{
@@ -4168,12 +4164,12 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 							vel.Y = forwardVel.Y;
 						}
 
-						player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
+						player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * Q_AIR_ACCELERATION_SCALE);
 					}
 				}
 				else
 				{
-					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * 6.f);
+					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, FIXED2FLOAT(player->mo->AirAcceleration) * Q_AIR_ACCELERATION_SCALE);
 				}
 
 				if (isAirWallRunner) {
@@ -4223,6 +4219,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			}
 			else if (!wasJustThrustedZ)
 			{
+				maxGroundSpeed *= Q_MAX_GROUND_SPEED;
+
 				isSliding = isSlider &&									// player has the flag
 						   player->crouchfactor <= player->mo->CrouchScaleHalfWay &&	// player is crouching
 						   player->mo->crouchSlideTics > 0;						// there is crouch slide charge to spend
@@ -4230,14 +4228,12 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				// Friction & Acceleration
 				if (isSliding)
 				{
-					player->mo->QFriction(vel, 0.f, player->mo->SlideFriction * floorFriction);
 					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->SlideAcceleration * floorFriction);
 					player->mo->crouchSlideTics--;
 				}
 				else
 				{
 					maxGroundSpeed *= moveFactor;
-					player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction * floorFriction);
 					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->GroundAcceleration / moveFactor * floorFriction);
 
 					// Regen crouch slide tics
@@ -4508,15 +4504,6 @@ void P_DeathThink (player_t *player)
 	P_MovePsprites (player);
 
 	player->onground = (player->mo->z <= player->mo->floorz);
-
-	if (player->mo->MvType > 0 && player->onground)
-	{
-		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-		player->mo->QFriction(vel, FIXED2FLOAT(player->mo->Speed) * 12.f, 6.f);
-		player->mo->velx = FLOAT2FIXED(vel.X);
-		player->mo->vely = FLOAT2FIXED(vel.Y);
-		player->mo->velz = FLOAT2FIXED(vel.Z);
-	}
 
 	if (player->mo->IsKindOf (RUNTIME_CLASS(APlayerChunk)))
 	{ // Flying bloody skull or flying ice chunk

@@ -2551,10 +2551,31 @@ explode:
 		return oldfloorz;
 	}
 
-	// [Ivory] everything below this point make strafe jumping
-	// feel terrible. Avoid at all costs.
+	// [geNia] Calculate quake friction and exit
 	if (quakeMovement)
 	{
+		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
+		float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed() * Q_MAX_GROUND_SPEED * player->mo->QCrouchWalkFactor( &player->cmd );
+
+		if (player->mo->waterlevel >= 2)
+			player->mo->QFriction(vel, 0.f, 2.f);
+		else if (player->mo->flags & MF_NOGRAVITY)
+			player->mo->QFriction(vel, 0.f, 3.f);
+		else if (player->mo->isWallClimbing)
+			player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction);
+		else if (player->onground && player->mo->velz <= 0)
+		{
+			float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
+			if (player->mo->isCrouchSliding)
+				player->mo->QFriction(vel, 0.f, player->mo->SlideFriction * floorFriction);
+			else
+				player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction * floorFriction);
+		}
+
+		player->mo->velx = FLOAT2FIXED(vel.X);
+		player->mo->vely = FLOAT2FIXED(vel.Y);
+		player->mo->velz = FLOAT2FIXED(vel.Z);
+
 		return oldfloorz;
 	}
 
