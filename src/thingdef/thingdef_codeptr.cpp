@@ -5674,7 +5674,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedExecuteWithResult)
 	ACTION_PARAM_INT(arg4, 4);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	bool res = !!P_ExecuteSpecial(ACS_ExecuteWithResult, NULL, self, false, false, true, -scriptname, arg1, arg2, arg3, arg4);
@@ -5693,7 +5694,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedExecute)
 	ACTION_PARAM_INT(arg3, 4);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	bool res = !!P_ExecuteSpecial(ACS_Execute, NULL, self, false, false, true, -scriptname, mapnum, arg1, arg2, arg3);
@@ -5712,7 +5714,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedExecuteAlways)
 	ACTION_PARAM_INT(arg3, 4);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	bool res = !!P_ExecuteSpecial(ACS_ExecuteAlways, NULL, self, false, false, true, -scriptname, mapnum, arg1, arg2, arg3);
@@ -5731,7 +5734,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedLockedExecute)
 	ACTION_PARAM_INT(lock, 4);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	bool res = !!P_ExecuteSpecial(ACS_LockedExecute, NULL, self, false, false, true, -scriptname, mapnum, arg1, arg2, lock);
@@ -5750,7 +5754,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedLockedExecuteDoor)
 	ACTION_PARAM_INT(lock, 4);
 
 	// [BB] This is handled server-side.
-	if ( NETWORK_InClientModeAndActorNotClientHandled( self ) )
+	// [geNia] Unless clientside functions are allowed
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 		return;
 
 	bool res = !!P_ExecuteSpecial(ACS_LockedExecuteDoor, NULL, self, false, false, true, -scriptname, mapnum, arg1, arg2, lock);
