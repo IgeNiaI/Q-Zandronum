@@ -5800,10 +5800,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							FVector3 explosionToPlayer = thingPos - FVector3(FIXED2FLOAT(bombspot->x), FIXED2FLOAT(bombspot->y), FIXED2FLOAT(bombspot->z + bombspotHeightOffset));
 							explosionToPlayer.MakeUnit();
 
-							int pushDamage = damage;
-							if ( bombsource && bombsource->Inventory )
-								bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
-							explosionToPlayer *= pushDamage * 20 / (double)thing->Mass;
+							explosionToPlayer *= points * 20 / (double)thing->Mass;
 
 							thing->velx += FLOAT2FIXED(explosionToPlayer.X);
 							thing->vely += FLOAT2FIXED(explosionToPlayer.Y);
