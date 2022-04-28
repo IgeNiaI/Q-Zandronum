@@ -112,6 +112,11 @@ CUSTOM_CVAR (Float, movesway, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 		self = 2;
 }
 
+CUSTOM_CVAR(Float, cl_fovchangespeed, 7.0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG) {
+	if (self < 1.f)
+		self = 1.f;
+}
+
 // [GRB] Custom player classes
 TArray<FPlayerClass> PlayerClasses;
 
@@ -4869,13 +4874,14 @@ void P_PlayerThink (player_t *player)
 		}
 		if (player->FOV != desired)
 		{
-			if (fabsf (player->FOV - desired) < 7.f)
+			float fovChangeSpeed = cl_fovchangespeed;
+			if (fabsf (player->FOV - desired) < fovChangeSpeed)
 			{
 				player->FOV = desired;
 			}
 			else
 			{
-				float zoom = MAX(7.f, fabsf(player->FOV - desired) * 0.025f);
+				float zoom = MAX(fovChangeSpeed, fabsf(player->FOV - desired) * 0.025f);
 				if (player->FOV > desired)
 				{
 					player->FOV = player->FOV - zoom;
