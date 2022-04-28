@@ -5804,10 +5804,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							{
 								points *= selfthrustscale;
 							}
-							int pushDamage = damage;
-							if ( bombsource && bombsource->Inventory )
-								bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
-							explosionToPlayer *= pushDamage * 6 / (double)thing->Mass;
+							explosionToPlayer *= points * 6 / (double)thing->Mass;
 
 							thing->velx += FLOAT2FIXED(explosionToPlayer.X);
 							thing->vely += FLOAT2FIXED(explosionToPlayer.Y);
