@@ -95,6 +95,7 @@ EXTERN_CVAR (Bool, r_deathcamera)
 // [BB]
 CVAR( Bool, cl_disallowfullpitch, false, CVAR_ARCHIVE )
 EXTERN_CVAR (Bool, cl_oldfreelooklimit)
+EXTERN_CVAR (Float, cl_fovchangespeed)
 
 extern int viewpitch;
  
@@ -1061,8 +1062,41 @@ void FGLRenderer::RenderView (player_t* player)
 	// Check if there's some lights. If not some code can be skipped.
 	TThinkerIterator<ADynamicLight> it(STAT_DLIGHT);
 	GLRenderer->mLightCount = ((it.Next()) != NULL);
+	
+	player_t* cameraPlayer;
+	if (player->camera && player->camera->player)
+		cameraPlayer = player->camera->player;
+	else
+		cameraPlayer = player;
+	float desiredFOV = cameraPlayer->DesiredFOV;
+	// Adjust FOV using on the currently held weapon.
+	if (cameraPlayer->playerstate != PST_DEAD &&		// No adjustment while dead.
+		cameraPlayer->ReadyWeapon != NULL &&			// No adjustment if no weapon.
+		cameraPlayer->ReadyWeapon->FOVScale != 0)		// No adjustment if the adjustment is zero.
+	{
+		// A negative scale is used to prevent G_AddViewAngle/G_AddViewPitch
+		// from scaling with the FOV scale.
+		desiredFOV *= fabsf(cameraPlayer->ReadyWeapon->FOVScale);
+	}
+	float fovDiff = .0f;
+	if (cameraPlayer->FOV != desiredFOV)
+	{
+		float fovChangeSpeed = cl_fovchangespeed;
+		if (fabsf(cameraPlayer->FOV - desiredFOV) < fovChangeSpeed)
+		{
+			fovDiff = desiredFOV - cameraPlayer->FOV;
+		}
+		else
+		{
+			fovDiff = MAX(fovChangeSpeed, fabsf(cameraPlayer->FOV - desiredFOV) * 0.025f);
+			if (cameraPlayer->FOV > desiredFOV)
+				fovDiff = -fovDiff;
+		}
 
-	sector_t * viewsector = RenderViewpoint(player->camera, NULL, FieldOfView * 360.0f / FINEANGLES, ratio, fovratio, true, true);
+		fovDiff = FixedMul(r_TicFrac, fovDiff);
+	}
+
+	sector_t * viewsector = RenderViewpoint(player->camera, NULL, cameraPlayer->FOV + fovDiff, ratio, fovratio, true, true);
 	EndDrawScene(viewsector);
 
 	All.Unclock();
