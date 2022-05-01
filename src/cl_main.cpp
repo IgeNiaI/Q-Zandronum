@@ -7376,6 +7376,13 @@ void ServerCommands::UpdateClientNetID::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::UpdateActorRandom::Execute()
+{
+	actor->SetRandomSeed( randomSeed );
+}
+
+//*****************************************************************************
+//
 void ServerCommands::CreateTranslation::Execute()
 {
 	EDITEDTRANSLATION_s	Translation = EDITEDTRANSLATION_s();

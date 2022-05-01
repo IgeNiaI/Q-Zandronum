@@ -355,3 +355,8 @@ Command SetCameraToTexture
 	String texture
 	Byte fov
 EndCommand
+
+Command UpdateActorRandom
+	Actor actor
+	Byte randomSeed
+EndCommand

@@ -438,6 +438,7 @@ special
 	-153:SetNetworkReplicationFlags(1),
 	-154:UnlaggedReconcile(1),
 	-155:UnlaggedRestore(1),
+	-156:SyncPlayerNetwork(1),
 
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),

@@ -1589,6 +1589,7 @@ special
 -153:SetNetworkReplicationFlags(int):void,
 -154:UnlaggedReconcile(int):int,
 -155:UnlaggedRestore(int):void,
+-156:SyncPlayerNetwork(int):void,
 
 // ZDoom/GZDoom.
 -200:CheckClass(str):bool,

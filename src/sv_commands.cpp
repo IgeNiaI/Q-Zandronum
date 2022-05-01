@@ -4180,6 +4180,20 @@ void SERVERCOMMANDS_UpdateClientNetID( const ULONG ulPlayer, const bool force )
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_UpdateActorRandom( AActor *pActor )
+{
+	player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( pActor );
+	if (ownerPlayer == NULL)
+		return;
+
+	ServerCommands::UpdateActorRandom command;
+	command.SetActor( pActor );
+	command.SetRandomSeed ( pActor->randomSeed );
+	command.sendCommandToClients ( ownerPlayer - players, SVCF_ONLYTHISCLIENT );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_CreateTranslation( ULONG ulTranslation, ULONG ulStart, ULONG ulEnd, ULONG ulPal1, ULONG ulPal2, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	const bool bIsEdited = SERVER_IsTranslationEdited ( ulTranslation );

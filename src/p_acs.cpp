@@ -5430,6 +5430,7 @@ enum EACSFunctions
 	ACSF_SetNetworkReplicationFlags,
 	ACSF_UnlaggedReconcile,
 	ACSF_UnlaggedRestore,
+	ACSF_SyncPlayerNetwork,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7846,6 +7847,22 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			if ( NETWORK_GetState() == NETSTATE_SERVER )
 			{
 				UNLAGGED_Restore( SingleActorFromTID(args[0], activator) );
+			}
+			break;
+
+		case ACSF_SyncPlayerNetwork:
+			if ( NETWORK_GetState() == NETSTATE_SERVER )
+			{
+				int playerNum = args[0];
+				if ( playerNum >= 0 && playerNum < MAXPLAYERS && playeringame[playerNum] )
+				{
+					SERVERCOMMANDS_UpdateClientNetID( playerNum, true );
+					if ( players[playerNum].mo )
+					{
+						players[playerNum].mo->SetRandomSeed( players[playerNum].mo->actorRandom() );
+						SERVERCOMMANDS_UpdateActorRandom( players[playerNum].mo );
+					}
+				}
 			}
 			break;
 
