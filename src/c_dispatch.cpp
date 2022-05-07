@@ -761,7 +761,10 @@ void AddCommandString (char *cmd, int keynum)
 					{
 						tics = 1;
 					}
-					if (tics > 0)
+					// [AK] wait was always off by one tic, meaning that "wait" or "wait 1" actually
+					// delayed a command by 2 tics. To fix this and still remain compatible with older
+					// aliases, "wait 0" is now accepted and will properly wait one tic.
+					if (tics >= 0)
 					{
 						if (more)
 						{ // The remainder of the command will be executed later
