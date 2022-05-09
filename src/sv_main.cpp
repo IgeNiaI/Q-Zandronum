@@ -125,6 +125,7 @@
 #include "network/packetarchive.h"
 #include "p_lnspec.h"
 #include "unlagged.h"
+#include "maprotation.h"
 
 //*****************************************************************************
 //	MISC CRAP THAT SHOULDN'T BE HERE BUT HAS TO BE BECAUSE OF SLOPPY CODING
@@ -4795,7 +4796,29 @@ bool SERVER_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 			}
 		}
 		return false;
-
+		
+	case CLC_REQUESTMAPLIST:
+		// [geNia] Client asks about the server maplist.
+		{
+			// [TP] If the client is flooding the server with commands, the client is
+			// kicked and we don't need to handle the command.
+			if ( server_CheckForClientMinorCommandFlood ( g_lCurrentClient ) == true )
+				return ( true );
+			
+			std::string mapsString = "Map rotation list:\n";
+			for ( ULONG ulIdx = 0; ulIdx < MAPROTATION_GetNumEntries(); ulIdx++ )
+			{
+				mapsString += std::to_string(ulIdx + 1);
+				mapsString += ". ";
+				mapsString += MAPROTATION_GetMap(ulIdx)->mapname;
+				mapsString += " - ";
+				mapsString += MAPROTATION_GetMap(ulIdx)->LookupLevelName().GetChars();
+				mapsString += "\n";
+			}
+			SERVERCOMMANDS_Print(mapsString.c_str(), PRINT_CHAT, g_lCurrentClient, SVCF_ONLYTHISCLIENT);
+		}
+		return false;
+		
 	default:
 
 		Printf( PRINT_HIGH, "SERVER_ParseCommands: Unknown client message: %d\n", static_cast<int> (lCommand) );
