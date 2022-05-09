@@ -2395,6 +2395,19 @@ void SERVERCOMMANDS_WeaponRailgun( AActor *source, const FVector3 &start, const 
 }
 
 //*****************************************************************************
+//
+void SERVERCOMMANDS_SetWeaponFovScale( const ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( PLAYER_IsValidPlayer( ulPlayer ) == false || players[ulPlayer].ReadyWeapon == NULL )
+		return;
+
+	ServerCommands::SetWeaponFovScale command;
+	command.SetPlayer( &players[ulPlayer] );
+	command.SetFovScale( players[ulPlayer].ReadyWeapon->FOVScale );
+	command.sendCommandToClients ( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
 //*****************************************************************************
 //
 void SERVERCOMMANDS_SetSectorFloorPlane( ULONG ulSector, ULONG ulPlayerExtra, ServerCommandFlags flags )

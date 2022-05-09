@@ -5410,6 +5410,7 @@ enum EACSFunctions
 	ACSF_NamedSendNetworkString,
 	ACSF_CheckSolidFooting,
 	ACSF_GetNetworkState,
+	ACSF_SetPlayerWeaponZoomFactor,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7753,6 +7754,38 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 		case ACSF_GetNetworkState:
 			return NETWORK_GetState( );
+
+		case ACSF_SetPlayerWeaponZoomFactor:
+			{
+				if (argCount == 2)
+				{
+					const ULONG ulPlayer = static_cast<ULONG> (args[0]);
+
+					if (PLAYER_IsValidPlayer(ulPlayer))
+					{
+						if (players[ulPlayer].playerstate != PST_DEAD &&	// No adjustment while dead.
+							players[ulPlayer].ReadyWeapon != NULL)			// No adjustment if no weapon.
+						{
+							float zoom = FIXED2FLOAT(args[1]);
+							int flags = argCount > 2 ? args[2] : 0;
+							zoom = 1 / clamp(zoom, 0.1f, 50.f);
+							if (flags & 1)
+							{ // Make the zoom instant.
+								players[ulPlayer].FOV = players[ulPlayer].DesiredFOV * zoom;
+							}
+							if (flags & 2)
+							{ // Disable pitch/yaw scaling.
+								zoom = -zoom;
+							}
+							players[ulPlayer].ReadyWeapon->FOVScale = zoom;
+							
+							if ( NETWORK_GetState() == NETSTATE_SERVER )
+								SERVERCOMMANDS_SetWeaponFovScale( ulPlayer );
+						}
+					}
+				}
+			}
+			return 0;
 
 		default:
 			break;

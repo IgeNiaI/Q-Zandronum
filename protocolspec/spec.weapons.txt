@@ -46,3 +46,8 @@ Command WeaponRailgun
 		Float drift
 	EndIf
 EndCommand
+
+Command SetWeaponFovScale
+	Player player with MoTest
+	Float fovScale
+EndCommand
