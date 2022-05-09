@@ -789,3 +789,10 @@ void CLIENTCOMMANDS_ReportLumps()
 		NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, pwad.checksum );
 	}
 }
+
+//*****************************************************************************
+// [geNia]
+void CLIENTCOMMANDS_RequestMaplist()
+{
+	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_REQUESTMAPLIST );
+}
