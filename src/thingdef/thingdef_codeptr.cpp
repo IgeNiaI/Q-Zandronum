@@ -3640,6 +3640,10 @@ DEFINE_ACTION_FUNCTION(AActor, A_Stop)
 		self->player->mo->PlayIdle();
 		self->player->velx = self->player->vely = 0;
 	}
+
+	// [TP] Inform the clients about the velocity change.
+	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
+		SERVERCOMMANDS_MoveThing( self, CM_VELX|CM_VELY|CM_VELZ );
 }
 
 static void CheckStopped(AActor *self)
