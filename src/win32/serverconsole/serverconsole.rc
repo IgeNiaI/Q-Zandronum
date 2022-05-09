@@ -189,7 +189,7 @@ FONT 8, "Tahoma", 0, 0, 1
     AUTOCHECKBOX    "Instantly moving floors aren't slient",			IDC_COMPATF_SILENT_INSTANT_FLOORS,				20, 160, 129, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Sector sounds use original method",				IDC_COMPATF_SECTORSOUNDS,						20, 170, 125, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "NET scripts are clientside",						IDC_ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE,		169, 10, 95, 10, 0, WS_EX_LEFT
-	AUTOCHECKBOX    "Don't execute prediction ACS on client",			IDC_ZACOMPATF_NO_PREDICTION_ACS,				169, 20, 132, 10, 0, WS_EX_LEFT
+	AUTOCHECKBOX    "Predict clientside functions",						IDC_ZACOMPATF_PREDICT_FUNCTIONS,				169, 20, 160, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Find shortest textures like Doom",					IDC_SHORTTEX,									169, 30, 116, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Use buggier stair building",						IDC_STAIRINDEX,									169, 40, 95, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Limit pain elementals to 20 lost souls",			IDC_LIMITPAIN,									169, 50, 129, 10, 0, WS_EX_LEFT

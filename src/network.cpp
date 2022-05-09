@@ -1316,7 +1316,7 @@ bool NETWORK_InClientModeAndActorNotClientHandled( const AActor *pActor )
 //
 bool NETWORK_IsClientPredictedSpecial( const int Special )
 {
-	if ((NETWORK_GetState() == NETSTATE_SERVER) || !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS))
+	if ((NETWORK_GetState() == NETSTATE_SERVER) || (zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS))
 		// TODO [geNia] replace ACS_ExecuteWithResult with a new special that indicates that the script is bound to client prediction
 		if (Special == ACS_ExecuteWithResult)
 			return true;

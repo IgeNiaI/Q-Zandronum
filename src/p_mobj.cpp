@@ -5341,7 +5341,7 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 
 	if ( ( ( actor->ulNetworkFlags & NETFL_NONETID ) == false ) && ( ( actor->ulNetworkFlags & NETFL_SERVERSIDEONLY ) == false )
 		&& ( ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			|| ( NETWORK_InClientMode( ) && !( zacompatflags & ZACOMPATF_NO_PREDICTION_ACS ) && ( ownerPlayer - players == consoleplayer ) ) ) )
+			|| ( NETWORK_InClientMode( ) && ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS ) && ( ownerPlayer - players == consoleplayer ) ) ) )
 	{
 		actor->lNetID = g_NetIDList.getNewID( ownerPlayer );
 		g_NetIDList.useID ( actor->lNetID, actor );

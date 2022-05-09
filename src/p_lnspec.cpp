@@ -118,7 +118,7 @@ FName MODtoDamageType (int mod)
 
 player_t* GetInstigator(AActor *it, bool isFromAcs)
 {
-	if (isFromAcs && (zacompatflags & ZACOMPATF_NO_PREDICTION_ACS))
+	if (isFromAcs && !(zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS))
 		return NULL;
 
 	return it ? it->player : NULL;

@@ -502,9 +502,8 @@ enum
 	// [BB] Clients use the vanilla Doom weapon on pickup behavior.
 	ZACOMPATF_OLD_WEAPON_SWITCH		= 1 << 26,
 
-	// [geNia] Disable executing ACS_ExecuteWithResult on client
-	// TODO add new prediction ACS type for this
-	ZACOMPATF_NO_PREDICTION_ACS = 1 << 27,
+	// [geNia] Enable predicting Decorate and ACS functions on clients
+	ZACOMPATF_PREDICT_FUNCTIONS = 1 << 27,
 };
 
 // Emulate old bugs for select maps. These are not exposed by a cvar

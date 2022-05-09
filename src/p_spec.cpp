@@ -345,7 +345,7 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 		if (activationType == SPAC_Use || activationType == SPAC_Impact)
 		{
 			int playerNum = -1;
-			if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) )
+			if ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS )
 				playerNum = mo->player - players;
 			P_ChangeSwitchTexture (line->sidedef[0], repeat, special, NULL, playerNum);
 
@@ -365,7 +365,7 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 		P_FindSectorFromTag (line->args[0], -1) == -1)			// only if no sector is tagged to this linedef
 	{
 		int playerNum = -1;
-		if ( !(zacompatflags & ZACOMPATF_NO_PREDICTION_ACS) )
+		if ( zacompatflags & ZACOMPATF_PREDICT_FUNCTIONS )
 			playerNum = mo->player - players;
 		P_ChangeSwitchTexture (line->sidedef[0], repeat, special, NULL, playerNum);
 		line->special = 0;
