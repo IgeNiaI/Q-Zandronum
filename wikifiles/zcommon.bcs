@@ -1584,6 +1584,7 @@ special
 -144:SetEffectActor(int,int,str):void,
 -149:CheckSolidFooting(int,int):int,
 -150:GetNetworkState():int,
+-151:SetPlayerWeaponZoomFactor(int,int;int):void,
 
 // ZDoom/GZDoom.
 -200:CheckClass(str):bool,

@@ -433,7 +433,8 @@ special
 	-144:SetEffectActor(3),
 	-149:CheckSolidFooting(2),
 	-150:GetNetworkState(0),
-	
+	-151:SetPlayerWeaponZoomFactor(2,3),
+
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),
 	-201:DamageActor(6), // [arookas]

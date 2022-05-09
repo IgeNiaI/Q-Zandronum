@@ -5325,6 +5325,14 @@ void ServerCommands::WeaponRailgun::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetWeaponFovScale::Execute()
+{
+	if (player->ReadyWeapon)
+		player->ReadyWeapon->FOVScale = fovScale;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetSectorFloorPlane::Execute()
 {
 	P_SetFloorPlane( sector, height );

@@ -391,6 +391,10 @@
 #define SJ_AVAILABLE		1
 #define SJ_READY			2
 
+// SetPlayerWeaponZoomFactor flags
+#define ZOOM_INSTANT		1
+#define ZOOM_NOSCALETURNING 2
+
 // Render Styles ------------------------------------------------------------
 
 #define STYLE_None			0	// Do not draw
