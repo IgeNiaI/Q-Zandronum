@@ -176,7 +176,7 @@ CUSTOM_CVAR(Bool, norawinput, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITC
 }
 
 // [geNia] Always render the game even when it's not focusesd
-CVAR(Bool, vid_alwaysrender, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+CVAR(Bool, vid_activeinbackground, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 
 extern int chatmodeon;
 
@@ -545,7 +545,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_ACTIVATEAPP:
-		AppActive = vid_alwaysrender || wParam;
+		AppActive = vid_activeinbackground || wParam;
 		if (wParam)
 		{
 			SetPriorityClass (GetCurrentProcess (), INGAME_PRIORITY_CLASS);
