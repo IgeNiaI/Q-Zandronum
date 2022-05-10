@@ -7899,7 +7899,12 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 							players[ulPlayer].ReadyWeapon->FOVScale = zoom;
 							
 							if ( NETWORK_GetState() == NETSTATE_SERVER )
-								SERVERCOMMANDS_SetWeaponFovScale( ulPlayer );
+							{
+								if ( GetNetworkReplicationFlags() & NETREP_SKIPOWNER )
+									SERVERCOMMANDS_SetWeaponFovScale( ulPlayer, ulPlayer, SVCF_SKIPTHISCLIENT );
+								else
+									SERVERCOMMANDS_SetWeaponFovScale( ulPlayer );
+							}
 						}
 					}
 				}
