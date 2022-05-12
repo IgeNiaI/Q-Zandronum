@@ -2993,13 +2993,10 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	hitcount = 3;
 	slidemo = mo;
 
-	if (playerNotVoodoo)
-	{
-		if (mo->reactiontime > 0) // player coming right out of a teleporter.
-			return;
-	}
+	if (mo->player && mo->player->mo == mo && mo->reactiontime > 0)
+		return;	// player coming right out of a teleporter.
 
-	FVector2 preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };}
+	FVector2 preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };
 
 retry:
 	if (!--hitcount)
@@ -3086,24 +3083,24 @@ retry:
 	mo->velx = tmxmove * numsteps;
 	mo->vely = tmymove * numsteps;
 
+	// [Ivory]: Quake like wall friction
+	if ((zadmflags & ZADF_DISABLE_WALL_FRICTION) && (mo->velx || mo->vely))
+	{
+		FVector2 slideVel = FVector2(FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely)).Unit();
+		FVector2 velUnit = preSlideVel.Unit();
+		float velDot = velUnit.X * slideVel.X + velUnit.Y * slideVel.Y;
+		if (velDot > 0)
+		{
+			velDot = velDot > 0.75f ? 1.f : velDot * 0.75f;
+			preSlideVel = velDot * preSlideVel.Length() * slideVel;
+			mo->velx = FLOAT2FIXED(preSlideVel.X);
+			mo->vely = FLOAT2FIXED(preSlideVel.Y);
+		}
+	}
+
 	// killough 10/98: affect the bobbing the same way (but not voodoo dolls)
 	if (playerNotVoodoo)
 	{
-		// [Ivory]: Quake like wall friction
-		if ((zadmflags & ZADF_DISABLE_WALL_FRICTION) && (mo->velx || mo->vely))
-		{
-			FVector2 slideVel = FVector2(FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely)).Unit();
-			FVector2 velUnit = preSlideVel.Unit();
-			float velDot = velUnit.X * slideVel.X + velUnit.Y * slideVel.Y;
-			if (velDot > 0)
-			{
-				velDot = velDot > 0.75f ? 1.f : velDot * 0.75f;
-				preSlideVel = velDot * preSlideVel.Length() * slideVel;
-				mo->velx = FLOAT2FIXED(preSlideVel.X);
-				mo->vely = FLOAT2FIXED(preSlideVel.Y);
-			}
-		}
-
 		if (abs(mo->player->velx) > abs(mo->velx))
 			mo->player->velx = mo->velx;
 		if (abs(mo->player->vely) > abs(mo->vely))
