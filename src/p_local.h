@@ -157,7 +157,7 @@ AActor *P_SpawnMissileZAimed (AActor *source, fixed_t z, AActor *dest, const PCl
 AActor *P_SpawnPlayerMissile (AActor* source, const PClass *type);
 AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle, bool bSpawnSound = true );
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z, const PClass *type, angle_t angle,
-							  AActor **pLineTarget = NULL, AActor **MissileActor = NULL, angle_t pitchOffset = 0, bool noautoaim = false, bool bSpawnSound = true, bool bSpawnOnClient = true);
+							  AActor **pLineTarget = NULL, AActor **MissileActor = NULL, bool noautoaim = false, bool bSpawnSound = true, bool bSpawnOnClient = true, fixed_t pitchOffset = 0);
 
 // [BB]
 inline void P_SpawnPlayerMissileWithPossibleSpread (AActor* source, const PClass *type)
@@ -543,7 +543,7 @@ enum
 	RADF_NODAMAGE = 8,
 	RADF_THRUSTZ = 16
 };
-void	P_RadiusAttack (AActor *spot, AActor *source, int damage, int distance, 
+void	P_RadiusAttack (AActor *spot, AActor *source, int damage, int distance,
 						FName damageType, int flags, int fulldamagedistance=0);
 
 void	P_DelSector_List();

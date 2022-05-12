@@ -4864,7 +4864,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
 			float distance = FIXED2FLOAT(trace.Distance);
 
-			float xyOffs = float(atan2(FIXED2FLOAT(trace.Distance), offset_xy) * 180.f / PI);
+			float xyOffs = float(atan2(distance, offset_xy) * 180.f / PI);
 			angleoffset += angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
 
 			fixed_t offset = (source->height >> 1) - source->player->viewheight;

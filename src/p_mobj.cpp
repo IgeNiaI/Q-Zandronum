@@ -7581,14 +7581,14 @@ AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type)
 // [BC/BB] Added bSpawnSound.
 AActor *P_SpawnPlayerMissile (AActor *source, const PClass *type, angle_t angle, bool bSpawnSound )
 {
-	return P_SpawnPlayerMissile (source, 0, 0, 0, type, angle, NULL, NULL, 0, false, bSpawnSound );
+	return P_SpawnPlayerMissile (source, 0, 0, 0, type, angle, NULL, NULL, false, bSpawnSound );
 }
 
 // [BC/BB] Added bSpawnSound.
 // [BB] Added bSpawnOnClient.
 AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
-							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor, angle_t pitchOffset,
-							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient)
+							  const PClass *type, angle_t angle, AActor **pLineTarget, AActor **pMissileActor,
+							  bool noautoaim, bool bSpawnSound, bool bSpawnOnClient, fixed_t pitchOffset)
 {
 	static const int angdiff[3] = { -1<<26, 1<<26, 0 };
 	angle_t an = angle;
@@ -7647,6 +7647,39 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
 		{
 			z += source->player->mo->AttackZOffset - 4 * FRACUNIT - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
+			if (!(zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE) && source->player)
+			{
+				//*************************************************************************************************************************
+				// [Ivory] make the missile hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
+
+				// Set origin of the trace
+				fixed_t shootz = source->z - source->floorclip + source->player->viewheight;
+
+				// Get pitch and angle, and calculate direction of the tracer
+				angle_t aAngle = source->angle >> ANGLETOFINESHIFT;
+				angle_t aPitch = angle_t(-source->pitch) >> ANGLETOFINESHIFT;
+				fixed_t vx = FixedMul(finecosine[aPitch], finecosine[aAngle]);
+				fixed_t vy = FixedMul(finecosine[aPitch], finesine[aAngle]);
+				fixed_t vz = finesine[aPitch];
+
+				// Fire the tracer
+				FTraceResults trace;
+				Trace(source->x, source->y, shootz, source->Sector, vx, vy, vz, 0x20000000,
+					MF_SHOOTABLE, ML_BLOCKEVERYTHING, source, trace);
+
+				if (trace.Distance > MIN_TRACE_DISTANCE_4_ACCURATE)
+				{
+					// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
+					float distance = FIXED2FLOAT(trace.Distance);
+					fixed_t cosine = finecosine[(source->angle - ANGLE_90) >> ANGLETOFINESHIFT];
+
+					float xyOffs = float(atan2(distance, (cosine != 0 ? x / cosine : y / FRACUNIT)) * 180.f / PI);
+					an += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
+
+					float zOffs = float((atan2(distance, FIXED2FLOAT(z - source->z + source->floorclip - source->player->viewheight))) * 180.f / PI);
+					pitch += fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
+				}
+			}
 		}
 		else
 		{
