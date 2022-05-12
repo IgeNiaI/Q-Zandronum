@@ -1657,13 +1657,13 @@ void A_FireCustomMissileHelper ( AActor *self,
 								 const fixed_t shootangle,
 								 const PClass *ti,
 								 const angle_t Angle,
-								 const fixed_t PitchOffset,
+								 const fixed_t Pitch,
 								 const int flags,
 								 AActor *&linetarget)
 {
 	// [BB] Don't tell the clients to spawn the missile yet. This is done later
 	// after we are done manipulating angle and velocity.
-	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, PitchOffset, (flags & FPF_NOAUTOAIM) ? true : false, true, false);
+	AActor *misl = P_SpawnPlayerMissile (self, x, y, z, ti, shootangle, &linetarget, NULL, (flags & FPF_NOAUTOAIM) ? true : false, true, false, Pitch);
 
 	// automatic handling of seeker missiles
 	if (misl)
@@ -1723,57 +1723,20 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireCustomMissile)
 	if (ti) 
 	{
 		fixed_t shootangle = self->angle;
-		angle_t PitchOffset = 0;
-
-		if (!(zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE))
-		{
-			//*************************************************************************************************************************
-			// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
-
-			// Set origin of the trace
-			fixed_t shootz = player->mo->z - player->mo->floorclip + player->viewheight;
-
-			// Get pitch and angle, and calculate direction of the tracer
-			angle_t aAngle = self->angle >> ANGLETOFINESHIFT;
-			angle_t aPitch = angle_t(-self->pitch) >> ANGLETOFINESHIFT;
-			fixed_t vx = FixedMul(finecosine[aPitch], finecosine[aAngle]);
-			fixed_t vy = FixedMul(finecosine[aPitch], finesine[aAngle]);
-			fixed_t vz = finesine[aPitch];
-
-			// Fire the tracer
-			FTraceResults trace;
-			Trace(self->x, self->y, shootz, self->Sector, vx, vy, vz, 0x20000000,
-				MF_SHOOTABLE, ML_BLOCKEVERYTHING, self, trace);
-
-			if (trace.Distance > MIN_TRACE_DISTANCE_4_ACCURATE)
-			{
-				// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
-				float distance = FIXED2FLOAT(trace.Distance);
-
-				float xyOffs = float(atan2(distance, SpawnOfs_XY) * 180.f / PI);
-				shootangle += fixed_t((90.f - xyOffs) * (ANGLE_MAX / 360));
-
-				fixed_t offset = (player->mo->height >> 1) - player->mo->floorclip - player->viewheight
-					+ player->mo->AttackZOffset - 4 * FRACUNIT - FixedMul(12 * FRACUNIT, FRACUNIT - player->crouchfactor);
-				float zOffs = float((atan2(distance, FIXED2FLOAT(SpawnHeight + offset))) * 180.f / PI);
-				PitchOffset = fixed_t((90.f - zOffs) * (ANGLE_MAX / 360));
-			}
-		}
 
 		if (Flags & FPF_AIMATANGLE)
 			shootangle += Angle;
-		PitchOffset -= pitch;
 
 		angle_t ang = (self->angle - ANGLE_90) >> ANGLETOFINESHIFT;
 		fixed_t x = SpawnOfs_XY * finecosine[ang];
 		fixed_t y = SpawnOfs_XY * finesine[ang];
 
-		A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle, ti, Angle, PitchOffset, Flags, linetarget);
+		A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle, ti, Angle, pitch, Flags, linetarget);
 
 		if ( self->player != NULL && self->player->cheats2 & CF2_SPREAD )
 		{
-			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle + ( ANGLE_45 / 3 ), ti, Angle, PitchOffset, Flags, linetarget );
-			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle - ( ANGLE_45 / 3 ), ti, Angle, PitchOffset, Flags, linetarget );
+			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle + ( ANGLE_45 / 3 ), ti, Angle, pitch, Flags, linetarget );
+			A_FireCustomMissileHelper( self, x, y, SpawnHeight, shootangle - ( ANGLE_45 / 3 ), ti, Angle, pitch, Flags, linetarget );
 		}
 	}
 }
@@ -2103,7 +2066,7 @@ static void DoGiveInventory(AActor * receiver, DECLARE_PARAMINFO)
 			return;
 	}
 
-	
+
 	if (amount==0) amount=1;
 	if (mi) 
 	{

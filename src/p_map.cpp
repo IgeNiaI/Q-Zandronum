@@ -4853,18 +4853,22 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	{
 		//*************************************************************************************************************************
 		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values
+		
+		//*************************************************************************************************************************
+		// Screw the crosshair is where you look not where you aim, my homies always hit the projection of the player's
+		// viewcenter onto the map geometry
 
 		// Fire the tracer
 		fixed_t viewz = source->z - source->floorclip + source->player->viewheight;
 		Trace(x1, y1, viewz, source->Sector, vx, vy, vz, distance,
-			MF_SHOOTABLE, ML_BLOCKEVERYTHING, source, trace, flags);
+			MF_SHOOTABLE, ML_BLOCKEVERYTHING, source, trace);
 
 		if (trace.Distance > MIN_TRACE_DISTANCE_4_ACCURATE)
 		{
 			// SUPER TRIGONOMETRY POWERS ACTIVAAAAAAATE!!!!
 			float distance = FIXED2FLOAT(trace.Distance);
 
-			float xyOffs = float(atan2(FIXED2FLOAT(trace.Distance), offset_xy) * 180.f / PI);
+			float xyOffs = float(atan2(distance, offset_xy) * 180.f / PI);
 			angleoffset += angle_t((90.f - xyOffs) * (ANGLE_MAX / 360));
 
 			fixed_t offset = (source->height >> 1) - source->player->viewheight;
@@ -4875,10 +4879,6 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			float zOffs = float(atan2(distance, FIXED2FLOAT(-offset_z - offset)) * 180.f / PI);
 			pitchoffset += angle_t((90.f - zOffs) * (ANGLE_MAX / 360));
 		}
-
-		//*************************************************************************************************************************
-		// Screw the crosshair is where you look not where you aim, my homies always hit the projection of the player's
-		// viewcenter onto the map geometry
 
 		pitch = (angle_t(-source->pitch + pitchoffset)) >> ANGLETOFINESHIFT;
 		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
