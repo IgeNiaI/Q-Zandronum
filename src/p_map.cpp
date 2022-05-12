@@ -66,6 +66,7 @@
 #include "unlagged.h"
 #include "d_netinf.h"
 #include "v_video.h"
+#include "float.h"
 
 // [BB] Helper function to handle ZADF_UNBLOCK_PLAYERS.
 bool P_CheckUnblock ( AActor *pActor1, AActor *pActor2 )
@@ -1467,7 +1468,7 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y, FCheckPosition &tm, bo
 			rover = newsec->e->XFloor.ffloors[i];
 			if (!(rover->flags & FF_SOLID)
 				|| !(rover->flags & FF_EXISTS)
-				|| (thing->flags & MF_MISSILE) && (rover->flags & FF_SHOOTTHROUGH))
+				|| ((thing->flags & MF_MISSILE) && (rover->flags & FF_SHOOTTHROUGH)))
 				continue;
 
 			fixed_t ff_bottom = rover->bottom.plane->ZatPoint(x, y);
@@ -2512,6 +2513,8 @@ struct FSlide
 	fixed_t 		bestslidefrac;
 	fixed_t 		secondslidefrac;
 
+	double			closestdist;
+
 	line_t* 		bestslideline;
 	line_t* 		secondslideline;
 
@@ -2875,12 +2878,28 @@ void FSlide::SlideTraverse(fixed_t startx, fixed_t starty, fixed_t endx, fixed_t
 		// the line does block movement,
 		// see if it is closer than best so far
 	isblocking:
-		if (in->frac < bestslidefrac)
+		if (zadmflags & ZADF_DISABLE_WALL_FRICTION)
 		{
-			secondslidefrac = bestslidefrac;
-			secondslideline = bestslideline;
-			bestslidefrac = in->frac;
-			bestslideline = li;
+			double dist = P_InterceptDist(startx, starty, endx, endy,
+										  li->v1->x, li->v1->y, li->v2->x, li->v2->y);
+			if (dist < closestdist)
+			{
+				closestdist = dist;
+				secondslidefrac = bestslidefrac;
+				secondslideline = bestslideline;
+				bestslidefrac = in->frac;
+				bestslideline = li;
+			}
+		}
+		else
+		{
+			if (in->frac < bestslidefrac)
+			{
+				secondslidefrac = bestslidefrac;
+				secondslideline = bestslideline;
+				bestslidefrac = in->frac;
+				bestslideline = li;
+			}
 		}
 
 		return;		// stop
@@ -2974,14 +2993,13 @@ void FSlide::SlideMove(AActor *mo, fixed_t tryx, fixed_t tryy, int numsteps)
 	hitcount = 3;
 	slidemo = mo;
 
-	FVector2 preSlideVel;
 	if (playerNotVoodoo)
 	{
 		if (mo->reactiontime > 0) // player coming right out of a teleporter.
 			return;
-		else if(zadmflags & ZADF_DISABLE_WALL_FRICTION)
-			preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };
 	}
+
+	FVector2 preSlideVel = { FIXED2FLOAT(mo->velx), FIXED2FLOAT(mo->vely) };}
 
 retry:
 	if (!--hitcount)
@@ -3011,6 +3029,7 @@ retry:
 	}
 
 	bestslidefrac = FRACUNIT + 1;
+	closestdist = DBL_MAX;
 
 	SlideTraverse(leadx, leady, leadx + tryx, leady + tryy);
 	SlideTraverse(trailx, leady, trailx + tryx, leady + tryy);

@@ -131,6 +131,56 @@ fixed_t P_InterceptVector (const divline_t *v2, const divline_t *v1)
 
 //==========================================================================
 //
+// P_InterceptDist
+//
+// Returns the distance to intercept point of lines from the start of first line
+//
+//==========================================================================
+
+inline double Det(double a, double b, double c, double d)
+{
+	return a*d - b*c;
+}
+
+// https://gist.github.com/TimSC/47203a0f5f15293d2099507ba5da44e6#file-linelineintersect-cpp-L21
+double P_InterceptDist(fixed_t v1x, fixed_t v1y, fixed_t v2x, fixed_t v2y,
+					   fixed_t v3x, fixed_t v3y, fixed_t v4x, fixed_t v4y)
+{
+	double x1 = FIXED2DBL(v1x);
+	double y1 = FIXED2DBL(v1y);
+	double x2 = FIXED2DBL(v2x);
+	double y2 = FIXED2DBL(v2y);
+	double x3 = FIXED2DBL(v3x);
+	double y3 = FIXED2DBL(v3y);
+	double x4 = FIXED2DBL(v4x);
+	double y4 = FIXED2DBL(v4y);
+
+    double detL1 = Det(x1, y1, x2, y2);
+    double detL2 = Det(x3, y3, x4, y4);
+    double x1mx2 = x1 - x2;
+    double x3mx4 = x3 - x4;
+    double y1my2 = y1 - y2;
+    double y3my4 = y3 - y4;
+
+    double xnom = Det(detL1, x1mx2, detL2, x3mx4);
+    double ynom = Det(detL1, y1my2, detL2, y3my4);
+    double denom = Det(x1mx2, y1my2, x3mx4, y3my4);
+    if(denom == 0.0)//Lines don't seem to cross
+        return 0;
+
+    double ixOut = xnom / denom;   
+    double iyOut = ynom / denom;
+    if(!isfinite(ixOut) || !isfinite(iyOut)) //Probably a numerical issue
+        return 0;
+
+	double distx = ixOut - x1;
+	double disty = iyOut - y1;
+
+    return sqrt(distx*distx + disty*disty);
+}
+
+//==========================================================================
+//
 // P_LineOpening
 //
 // Sets opentop and openbottom to the window
@@ -974,20 +1024,13 @@ void FPathTraverse::AddLineIntercepts(int bx, int by)
 		fixed_t 			frac;
 		divline_t			dl;
 
-		// avoid precision problems with two routines
-		if ( trace.dx > FRACUNIT*16
-			 || trace.dy > FRACUNIT*16
-			 || trace.dx < -FRACUNIT*16
-			 || trace.dy < -FRACUNIT*16)
-		{
-			s1 = P_PointOnDivlineSide (ld->v1->x, ld->v1->y, &trace);
-			s2 = P_PointOnDivlineSide (ld->v2->x, ld->v2->y, &trace);
-		}
-		else
-		{
-			s1 = P_PointOnLineSide (trace.x, trace.y, ld);
-			s2 = P_PointOnLineSide (trace.x+trace.dx, trace.y+trace.dy, ld);
-		}
+		s1 = P_PointOnDivlineSide (ld->v1->x, ld->v1->y, &trace);
+		s2 = P_PointOnDivlineSide (ld->v2->x, ld->v2->y, &trace);
+
+		if (s1 == s2) continue;	// line isn't crossed
+
+		s1 = P_PointOnLineSide (trace.x, trace.y, ld);
+		s2 = P_PointOnLineSide (trace.x+trace.dx, trace.y+trace.dy, ld);
 		
 		if (s1 == s2) continue;	// line isn't crossed
 		
@@ -996,7 +1039,7 @@ void FPathTraverse::AddLineIntercepts(int bx, int by)
 		frac = P_InterceptVector (&trace, &dl);
 
 		if (frac < 0) continue;	// behind source
-			
+
 		intercept_t newintercept;
 
 		newintercept.frac = frac;

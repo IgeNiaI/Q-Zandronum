@@ -283,6 +283,8 @@ inline void P_MakeDivline (const line_t *li, divline_t *dl)
 }
 
 fixed_t P_InterceptVector (const divline_t *v2, const divline_t *v1);
+double P_InterceptDist(fixed_t v1x, fixed_t v1y, fixed_t v2x, fixed_t v2y,
+					   fixed_t v3x, fixed_t v3y, fixed_t v4x, fixed_t v4y);
 
 struct FLineOpening
 {
