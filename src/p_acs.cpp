@@ -4648,6 +4648,12 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 			playerActor->GroundFriction = FIXED2FLOAT(value);
 		}
 		break;
+		
+	case APROP_WallClimbFriction:
+		if (playerActor) {
+			playerActor->WallClimbFriction = FIXED2FLOAT(value);
+		}
+		break;
 
 	case APROP_SlideAcceleration:
 		if (playerActor) {
@@ -4837,6 +4843,7 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_VelocityCap:				return playerActor ? playerActor->VelocityCap							: 0;
 	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration)		: 0;
 	case APROP_GroundFriction:			return playerActor ? FLOAT2FIXED( playerActor->GroundFriction)			: 0;
+	case APROP_WallClimbFriction:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbFriction)		: 0;
 	case APROP_SlideAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->SlideAcceleration)		: 0;
 	case APROP_SlideFriction:			return playerActor ? FLOAT2FIXED( playerActor->SlideFriction)			: 0;
 	case APROP_SlideMaxTics:			return playerActor ? FLOAT2FIXED( playerActor->SlideMaxTics)			: 0;
@@ -4934,6 +4941,7 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_VelocityCap:
 		case APROP_GroundAcceleration:
 		case APROP_GroundFriction:
+		case APROP_WallClimbFriction:
 		case APROP_SlideAcceleration:
 		case APROP_SlideFriction:
 		case APROP_SlideMaxTics:

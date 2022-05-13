@@ -768,6 +768,7 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< VelocityCap
 		<< GroundAcceleration
 		<< GroundFriction
+		<< WallClimbFriction
 		<< SlideAcceleration
 		<< SlideFriction
 		<< SlideMaxTics
@@ -3895,17 +3896,15 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
 
 	// Wall proximity check
-	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->mo->wallClimbTics > 0 && anyMove && velocity <= 1048576) // 1048576 == 16.f
+	if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->mo->wallClimbTics > 0) // 1048576 == 16.f
 	{
-		FTraceResults secondJumpTrace;
-		P_TraceForWall(player->mo, player->mo->angle, secondJumpTrace);
-		isClimbing = secondJumpTrace.HitType == TRACE_HitWall;
+		FTraceResults wallClimbTrace;
+		P_TraceForWall(player->mo, player->mo->angle, wallClimbTrace);
+		isClimbing = wallClimbTrace.HitType == TRACE_HitWall;
 	}
 
 	if (isClimbing)
 	{
-		player->mo->velx /= 2;
-		player->mo->vely /= 2;
 		player->mo->velz = player->mo->WallClimbSpeed;
 		player->mo->wallClimbTics--;
 	}
@@ -4139,12 +4138,11 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	else
 	{
 		// Wall proximity check
-		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->mo->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
-			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxGroundSpeed + 2.f)
+		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->mo->wallClimbTics > 0)
 		{
-			FTraceResults secondJumpTrace;
-			P_TraceForWall(player->mo, player->mo->angle, secondJumpTrace);
-			isClimbing = secondJumpTrace.HitType == TRACE_HitWall;
+			FTraceResults wallClimbTrace;
+			P_TraceForWall(player->mo, player->mo->angle, wallClimbTrace);
+			isClimbing = wallClimbTrace.HitType == TRACE_HitWall;
 		}
 
 		if (isClimbing)
