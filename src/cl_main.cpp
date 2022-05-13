@@ -147,6 +147,10 @@ EXTERN_CVAR( Float, sv_aircontrol )
 EXTERN_CVAR( Bool, cl_hideaccount )
 EXTERN_CVAR( String, name )
 
+// [AK] Restores the old mouse behaviour from Skulltag.
+CVAR( Bool, cl_useskulltagmouse, false, CVAR_GLOBALCONFIG | CVAR_ARCHIVE )
+
+
 //*****************************************************************************
 //	CONSOLE COMMANDS/VARIABLES
 

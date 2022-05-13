@@ -347,12 +347,14 @@ void D_PostEvent (const event_t *ev)
 			int look = int(ev->y * mouse_sensitivity * 8.0);
 			if (invertmouse)
 				look = -look;
-			G_AddViewPitch (look, true);
+			// [AK] Force interpolation if we're using the old Skulltag mouse movement.
+			G_AddViewPitch (look, !cl_useskulltagmouse);
 			events[eventhead].y = 0;
 		}
 		if (!Button_Strafe.bDown && !lookstrafe)
 		{
-			G_AddViewAngle (int(ev->x * mouse_sensitivity * 8.0), true);
+			// [AK] Force interpolation if we're using the old Skulltag mouse movement.
+			G_AddViewAngle (int(ev->x * mouse_sensitivity * 8.0), !cl_useskulltagmouse);
 			events[eventhead].x = 0;
 		}
 		if ((events[eventhead].x | events[eventhead].y) == 0)
@@ -1320,7 +1322,10 @@ void D_DoomLoop ()
 					S_UpdateSounds( players[consoleplayer].camera );
 
 				// Update display, next frame, with current state.
-				I_StartTic( );
+				// [AK] Don't call I_StartTic() if we're currently using the old
+				// Skulltag mouse behaviour.
+				if ( cl_useskulltagmouse == false )
+					I_StartTic( );
 				D_Display( );
 				break;
 			case NETSTATE_SERVER:
