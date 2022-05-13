@@ -611,7 +611,7 @@ CVAR (Flag, sv_unblockallies,				zadmflags, ZADF_UNBLOCK_ALLIES);
 CVAR (Flag, sv_nodrop,						zadmflags, ZADF_NODROP);
 CVAR (Flag, sv_survival_nomapresetondeath,	zadmflags, ZADF_SURVIVAL_NO_MAP_RESET_ON_DEATH);
 CVAR (Flag, sv_deadplayerscankeepinventory,	zadmflags, ZADF_DEAD_PLAYERS_CAN_KEEP_INVENTORY);
-CVAR (Flag, sv_noaccuratecrosshair,			zadmflags, ZADF_DISABLE_CROSSHAIR_ACCURATE);
+CVAR (Flag, sv_accuratecrosshair,			zadmflags, ZADF_ACCURATE_CROSSHAIR);
 CVAR (Flag, sv_disablewallfriction,			zadmflags, ZADF_DISABLE_WALL_FRICTION);
 CVAR (Flag, sv_enableprojectilehitboxfix,	zadmflags, ZADF_ENABLE_PROJECTILE_HITBOX_FIX);
 CVAR (Flag, sv_quakethrust,					zadmflags, ZADF_QUAKE_THRUST);

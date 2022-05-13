@@ -4237,14 +4237,14 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 	
 	if (t1->player != NULL)
 	{
-		if (zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE)
+		if (zadmflags & ZADF_ACCURATE_CROSSHAIR)
 		{
-			shootz = t1->z - t1->floorclip + (t1->height >> 1) + 
-					 FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
+			shootz = t1->z - t1->floorclip + t1->player->viewheight;
 		}
 		else
 		{
-			shootz = t1->z - t1->floorclip + t1->player->viewheight;
+			shootz = t1->z - t1->floorclip + (t1->height >> 1) + 
+					 FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
 		}
 
 		if (damageType == NAME_Melee || damageType == NAME_Hitscan)
@@ -4868,7 +4868,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	vy = FixedMul(finecosine[pitch], finesine[angle]);
 	vz = finesine[pitch];
 
-	if (!(zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE) && source->player)
+	if ((zadmflags & ZADF_ACCURATE_CROSSHAIR) && source->player)
 	{
 		//*************************************************************************************************************************
 		// [Ivory] make the rail hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values

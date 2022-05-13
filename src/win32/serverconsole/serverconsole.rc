@@ -182,7 +182,7 @@ FONT 8, "Tahoma", 0, 0, 1
     AUTOCHECKBOX    "Allow instant respawn",							IDC_INSTANTRESPAWN,								24, 79, 84, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Use old intermission screens/music",				IDC_OLDINTERMISSION,							24, 89, 126, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Disable stealth monsters",							IDC_DISABLESTEALTHMONSTERS,						24, 99, 92, 10, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Disable shooting where crosshair is",				IDC_ZADF_DISABLE_CROSSHAIR_ACCURATE,			24, 109, 127, 10, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Enable shooting where crosshair is",				IDC_ZADF_ACCURATE_CROSSHAIR,					24, 109, 127, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "No monster dropoff move",							IDC_COMPATF_DROPOFF,							20, 130, 130, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Scrolling sectors are additive",					IDC_COMPATF_BOOMSCROLL,							20, 140, 130, 10, 0, WS_EX_LEFT
     AUTOCHECKBOX    "Monsters see semi-invisible players",				IDC_COMPATF_INVISIBILITY,						20, 150, 130, 10, 0, WS_EX_LEFT
