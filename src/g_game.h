@@ -130,10 +130,10 @@ void G_PlayerFinishLevel (int player, EFinishLevelType mode, int flags);
 void G_DoReborn (int playernum, bool freshbot);
 
 // Adds pitch to consoleplayer's viewpitch and clamps it
-void G_AddViewPitch (int look);
+void G_AddViewPitch (int look, bool mouse = false);
 
 // Adds to consoleplayer's viewangle if allowed
-void G_AddViewAngle (int yaw);
+void G_AddViewAngle (int yaw, bool mouse = false);
 
 #define BODYQUESIZE 	32
 class AActor;
