@@ -7649,7 +7649,7 @@ AActor *P_SpawnPlayerMissile (AActor *source, fixed_t x, fixed_t y, fixed_t z,
 		if (source->player != NULL)	// Considering this is for player missiles, it better not be NULL.
 		{
 			z += source->player->mo->AttackZOffset - 4 * FRACUNIT - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
-			if (!(zadmflags & ZADF_DISABLE_CROSSHAIR_ACCURATE) && source->player)
+			if ((zadmflags & ZADF_ACCURATE_CROSSHAIR) && source->player)
 			{
 				//*************************************************************************************************************************
 				// [Ivory] make the missile hit WHERE THE CROSSHAIR IS. Calculate the correct angleoffset and pitchoffset values

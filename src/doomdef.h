@@ -374,8 +374,8 @@ enum
 	// regardless of the DF_COOP_* flags.
 	ZADF_DEAD_PLAYERS_CAN_KEEP_INVENTORY = 1 << 17,
 
-	// [geNia] Disable crosshair accurate weapons
-	ZADF_DISABLE_CROSSHAIR_ACCURATE = 1 << 18,
+	// [geNia] Enable crosshair accurate firing
+	ZADF_ACCURATE_CROSSHAIR = 1 << 18,
 
 	// [geNia] Disable wall friction
 	ZADF_DISABLE_WALL_FRICTION = 1 << 19,

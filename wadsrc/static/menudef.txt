@@ -1313,7 +1313,7 @@ OptionMenu GameplayOptions
 	Option "Force OpenGL defaults",	"sv_forcegldefaults", "YesNo"
 	Option "Force translucency",	"sv_forcealpha", "YesNo"
 	Option "Full blood brightness",	"sv_maxbloodscalar", "YesNo"
-	Option "Disable shooting where crosshair is",	"sv_noaccuratecrosshair", "YesNo"
+	Option "Enable shooting where crosshair is",	"sv_accuratecrosshair", "YesNo"
 	Option "Disable wall friction",					"sv_disablewallfriction", "YesNo"
 	Option "Enable projectile hitbox fix",			"sv_enableprojectilehitboxfix", "YesNo"
 	Option "Enable Quake thrust formula",			"sv_quakethrust", "YesNo"
