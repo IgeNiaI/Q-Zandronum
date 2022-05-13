@@ -2562,7 +2562,7 @@ explode:
 		else if (player->mo->flags & MF_NOGRAVITY)
 			player->mo->QFriction(vel, 0.f, 3.f);
 		else if (player->mo->isWallClimbing)
-			player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction);
+			player->mo->QFriction(vel, maxGroundSpeed, player->mo->WallClimbFriction);
 		else if (player->onground && player->mo->velz <= 0)
 		{
 			float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
@@ -2583,8 +2583,18 @@ explode:
 		!mo->IsNoClip2() &&
 		(!(mo->flags2 & MF2_FLY) || !(mo->flags & MF_NOGRAVITY)) &&
 		!mo->waterlevel)
-	{ // [RH] Friction when falling is available for larger aircontrols
-		if (player != NULL && level.airfriction != FRACUNIT)
+	{
+		// [RH] Friction when falling is available for larger aircontrols
+		if (player && player->mo && player->mo->isWallClimbing)
+		{
+			fixed_t friction = FLOAT2FIXED(player->mo->WallClimbFriction);
+			player->mo->velx = FixedDiv(player->mo->velx, friction);
+			player->mo->vely = FixedDiv(player->mo->vely, friction);
+
+			player->velx = FixedDiv(player->velx, friction);
+			player->vely = FixedDiv(player->vely, friction);
+		}
+		else if (player != NULL && level.airfriction != FRACUNIT)
 		{
 			mo->velx = FixedMul (mo->velx, level.airfriction);
 			mo->vely = FixedMul (mo->vely, level.airfriction);

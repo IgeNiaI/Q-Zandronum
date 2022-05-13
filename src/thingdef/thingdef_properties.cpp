@@ -3187,6 +3187,15 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, groundfriction, F, PlayerPawn)
 //==========================================================================
 // [geNia]
 //==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbfriction, F, PlayerPawn)
+{
+	PROP_FLOAT_PARM(f, 0);
+	defaults->WallClimbFriction = f;
+}
+
+//==========================================================================
+// [geNia]
+//==========================================================================
 DEFINE_CLASS_PROPERTY_PREFIX(player, slideacceleration, F, PlayerPawn)
 {
 	PROP_FLOAT_PARM(f, 0);

@@ -221,6 +221,7 @@ public:
 	// Quake movement only
 	float		GroundAcceleration;
 	float		GroundFriction;
+	float		WallClimbFriction;
 	float		SlideAcceleration;
 	float		SlideFriction;
 	float		SlideMaxTics;
