@@ -82,7 +82,7 @@ EXTERN_CVAR( Int, sv_endleveldelay )
 static	ULONG		g_ulDuelCountdownTicks = 0;
 static	ULONG		g_ulDuelLoser = 0;
 static	ULONG		g_ulNumDuels = 0;
-static	LONG		g_ulReadyPlayers[2] = {-1, -1};
+static	ULONG		g_ulReadyPlayers[2] = {MAXPLAYERS, MAXPLAYERS };
 static	bool		g_bStartNextDuelOnLevelLoad = false;
 static	DUELSTATE_e	g_DuelState;
 
@@ -501,9 +501,9 @@ void DUEL_AddPlayerReady( ULONG ulPlayer )
 		return;
 	}
 
-	ULONG ulIdx = (g_ulReadyPlayers[0] == -1 ? 0 : (g_ulReadyPlayers[1] == -1 ? 1 : -1));
+	ULONG ulIdx = (g_ulReadyPlayers[0] == MAXPLAYERS ? 0 : (g_ulReadyPlayers[1] == MAXPLAYERS ? 1 : MAXPLAYERS));
 
-	if(ulIdx == -1)
+	if(ulIdx == MAXPLAYERS)
 	{
 		return;
 	}
@@ -519,18 +519,18 @@ void DUEL_RemovePlayerReady( ULONG ulPlayer )
 	if ( NETWORK_InClientMode() )
 		return;
 
-	ULONG ulIdx = (g_ulReadyPlayers[0] == ulPlayer ? 0 : (g_ulReadyPlayers[1] == ulPlayer ? 1 : -1));
+	ULONG ulIdx = (g_ulReadyPlayers[0] == ulPlayer ? 0 : (g_ulReadyPlayers[1] == ulPlayer ? 1 : MAXPLAYERS));
 
-	if ( DUEL_IsDueler(ulPlayer) && ulIdx == -1 )
+	if ( DUEL_IsDueler(ulPlayer) && ulIdx == MAXPLAYERS )
 	{
 		SERVER_PrintfPlayer(ulPlayer, "* You already are marked as not ready!\n");
 		return;
 	}
 
-	if ( ulIdx != -1 )
+	if ( ulIdx != MAXPLAYERS )
 	{
 		SERVER_Printf("* %s \\cfis not ready to fight anymore.\n", players[ulPlayer].userinfo.GetName());
-		g_ulReadyPlayers[ulIdx] = -1;
+		g_ulReadyPlayers[ulIdx] = MAXPLAYERS;
 	}
 }
 
@@ -541,9 +541,9 @@ void DUEL_TogglePlayerReady( ULONG ulPlayer )
 	if ( NETWORK_InClientMode() )
 		return;
 
-	ULONG ulIdx = (g_ulReadyPlayers[0] == ulPlayer ? 0 : (g_ulReadyPlayers[1] == ulPlayer ? 1 : -1));
+	ULONG ulIdx = (g_ulReadyPlayers[0] == ulPlayer ? 0 : (g_ulReadyPlayers[1] == ulPlayer ? 1 : MAXPLAYERS));
 
-	if ( ulIdx == -1 )
+	if ( ulIdx == MAXPLAYERS )
 	{
 		DUEL_AddPlayerReady(ulPlayer);
 	}
@@ -560,8 +560,8 @@ void DUEL_ResetReadyPlayers( void )
 	if ( NETWORK_InClientMode() )
 		return;
 
-	g_ulReadyPlayers[0] = -1;
-	g_ulReadyPlayers[1] = -1;
+	g_ulReadyPlayers[0] = MAXPLAYERS;
+	g_ulReadyPlayers[1] = MAXPLAYERS;
 
 	DUEL_ClearWarmupHUDMessage();
 }
@@ -573,7 +573,7 @@ bool DUEL_ArePlayersReady( void )
 	if ( NETWORK_InClientMode() )
 		return true;
 
-	return (g_ulReadyPlayers[0] != -1 && g_ulReadyPlayers[1] != -1);
+	return (g_ulReadyPlayers[0] != MAXPLAYERS && g_ulReadyPlayers[1] != MAXPLAYERS);
 }
 
 //*****************************************************************************
@@ -596,12 +596,12 @@ void DUEL_UpdateWarmupHUDMessage( void )
 	char warmupString[90];
 	int playersReady = 0;
 
-	if( g_ulReadyPlayers[0] != -1 )
+	if( g_ulReadyPlayers[0] != MAXPLAYERS )
 	{
 		playersReady++;
 	}
 
-	if( g_ulReadyPlayers[1] != -1 )
+	if( g_ulReadyPlayers[1] != MAXPLAYERS )
 	{
 		playersReady++;
 	}
