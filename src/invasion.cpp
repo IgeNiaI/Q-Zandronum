@@ -827,7 +827,7 @@ void INVASION_StartCountdown( ULONG ulTicks )
 		INVASION_SetState( IS_COUNTDOWN );
 
 		// If sv_respawnonnewwave then respawn dead players, pop queue and reset lives
-		if ( sv_respawnonnewwave && wavelimit <= 0 || (LONG)g_ulCurrentWave < wavelimit )
+		if ( ( sv_respawnonnewwave && wavelimit <= 0 ) || (LONG)g_ulCurrentWave < wavelimit )
 		{
 			GAMEMODE_RespawnDeadSpectatorsAndPopQueue();
 
