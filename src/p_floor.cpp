@@ -172,10 +172,12 @@ void DFloor::Tick ()
 
 					// [BC] Update clients about this flat change.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					{
 						if ( m_LastInstigator )
 							SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT);
 						else
 							SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
+					}
 
 					// [BC] Also, mark this sector as having its flat changed.
 					m_Sector->bFlatChange = true;
@@ -198,10 +200,12 @@ void DFloor::Tick ()
 
 					// [BC] Update clients about this flat change.
 					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					{
 						if ( m_LastInstigator )
 							SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT);
 						else
 							SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
+					}
 
 					// [BC] Also, mark this sector as having its flat changed.
 					m_Sector->bFlatChange = true;
@@ -669,10 +673,12 @@ manual_floor:
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				{
 					if ( instigator )
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+				}
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -705,10 +711,12 @@ manual_floor:
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				{
 					if ( instigator )
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+				}
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -1542,10 +1550,12 @@ bool EV_DoChange (player_t *instigator, line_t *line, EChange changetype, int ta
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				{
 					if (instigator)
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+				}
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
@@ -1560,10 +1570,12 @@ bool EV_DoChange (player_t *instigator, line_t *line, EChange changetype, int ta
 
 				// [BC] Update clients about this flat change.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				{
 					if (instigator)
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ), ULONG(instigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat( ULONG( sec - sectors ));
+				}
 
 				// [BC] Also, mark this sector as having its flat changed.
 				sec->bFlatChange = true;
