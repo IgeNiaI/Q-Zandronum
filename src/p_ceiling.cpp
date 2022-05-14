@@ -156,10 +156,12 @@ void DCeiling::Tick ()
 
 				// [TP] If we're the server, tell the client to change the ceiling texture.
 				if ( NETWORK_GetState() == NETSTATE_SERVER )
+				{
 					if ( m_LastInstigator )
 						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
+				}
 
 				// [BB] Also, mark this sector as having its flat changed.
 				m_Sector->bFlatChange = true;
@@ -206,10 +208,12 @@ void DCeiling::Tick ()
 
 				// [TP] If we're the server, tell the client to change the ceiling texture.
 				if ( NETWORK_GetState() == NETSTATE_SERVER )
+				{
 					if ( m_LastInstigator )
 						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ), ULONG(m_LastInstigator - players), SVCF_SKIPTHISCLIENT);
 					else
 						SERVERCOMMANDS_SetSectorFlat( ULONG( m_Sector - sectors ));
+				}
 
 				// [BB] Also, mark this sector as having its flat changed.
 				m_Sector->bFlatChange = true;

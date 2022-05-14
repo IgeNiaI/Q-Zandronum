@@ -6999,7 +6999,7 @@ void ServerCommands::DoRotatePoly::Execute()
 	FPolyObj *pPoly = PO_GetPolyobj( polyObj );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", polyObj );
+		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %d\n", polyObj );
 		return;
 	}
 
@@ -7046,7 +7046,7 @@ void ServerCommands::DoMovePoly::Execute()
 	FPolyObj *pPoly = PO_GetPolyobj( polyObj );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %ld\n", polyObj );
+		CLIENT_PrintWarning( "client_DoMovePoly: Invalid polyobj number: %d\n", polyObj );
 		return;
 	}
 
@@ -7096,7 +7096,7 @@ void ServerCommands::DoMovePolyTo::Execute()
 	FPolyObj *pPoly = PO_GetPolyobj( polyObj );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoMovePolyTo: Invalid polyobj number: %ld\n", polyObj );
+		CLIENT_PrintWarning( "client_DoMovePolyTo: Invalid polyobj number: %d\n", polyObj );
 		return;
 	}
 
@@ -7147,7 +7147,7 @@ void ServerCommands::DoPolyDoor::Execute()
 	FPolyObj *pPoly = PO_GetPolyobj( polyObj );
 	if ( pPoly == NULL )
 	{
-		CLIENT_PrintWarning( "client_DoPolyDoor: Invalid polyobj number: %ld\n", polyObj );
+		CLIENT_PrintWarning( "client_DoPolyDoor: Invalid polyobj number: %d\n", polyObj );
 		return;
 	}
 
@@ -7235,13 +7235,13 @@ void ServerCommands::DoScroller::Execute()
 	{
 		if (( affectee < 0 ) || ( affectee >= numsides ))
 		{
-			CLIENT_PrintWarning( "client_DoScroller: Invalid side ID: %ld!\n", affectee );
+			CLIENT_PrintWarning( "client_DoScroller: Invalid side ID: %d!\n", affectee );
 			return;
 		}
 	}
 	else if (( affectee < 0 ) || ( affectee >= numsectors ))
 	{
-		CLIENT_PrintWarning( "client_DoScroller: Invalid sector ID: %ld!\n", affectee );
+		CLIENT_PrintWarning( "client_DoScroller: Invalid sector ID: %d!\n", affectee );
 		return;
 	}
 
