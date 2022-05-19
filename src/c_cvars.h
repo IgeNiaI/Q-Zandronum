@@ -466,6 +466,9 @@ void C_ForgetCVars (void);
 // [Dusk] For CVar iteration
 FBaseCVar* C_GetRootCVar();
 
+// [AK] Restores values set for ServerInfo CVars on the command line.
+void C_RestoreServerInfoCVars (void);
+
 #define CUSTOM_CVAR(type,name,def,flags) \
 	static void cvarfunc_##name(F##type##CVar &); \
 	F##type##CVar name (#name, def, flags, cvarfunc_##name); \
