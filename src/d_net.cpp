@@ -1649,6 +1649,10 @@ void D_CheckNetGame (void)
 	{
 		GameConfig->ReadNetVars ();	// [RH] Read network ServerInfo cvars
 //		D_ArbitrateNetStart ();
+
+		// [AK] Reading these CVars from the config file overwrites any values we had
+		// set for them on the command line. We need to restore them afterwards.
+		C_RestoreServerInfoCVars ();
 	}
 
 	// read values out of doomcom
