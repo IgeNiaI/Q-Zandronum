@@ -82,9 +82,7 @@ static const FBinding DefBindings[] =
 	{ "6", "slot 6" },
 	{ "q", "slot 6" },
 	{ "7", "slot 7" },
-	{ "e", "slot 7" },
 	{ "8", "slot 8" },
-	{ "r", "slot 8" },
 	{ "9", "slot 9" },
 	{ "0", "slot 0" },
 	{ "mwheeldown", "weapnext" },
@@ -122,7 +120,7 @@ static const FBinding DefBindings[] =
 	{ "f12", "spynext" },
 
 	// Etc
-	{ "alt", "+use" },
+	{ "e", "+use" },
 	{ "-", "sizedown" },
 	{ "=", "sizeup" },
 	{ "sysrq", "screenshot" },
