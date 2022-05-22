@@ -2492,16 +2492,16 @@ void APlayerPawn::DropImportantItems( bool bLeavingGame, AActor *pSource )
 
 int APlayerPawn::WalkCrouchState (ticcmd_t *cmd)
 {
-	// [geNia] BT_SPEED is considered pressed when the player is walking, regardless of whether the button is actually pressed
+	// [geNia] BT_SPEED is considered pressed when the player is running, regardless of whether the button is actually pressed
 	if (cmd->ucmd.buttons & BT_SPEED)
-	{
-		// player is walking
-		return (cmd->ucmd.buttons & BT_CROUCH) ? 2 : 0;
-	}
-	else
 	{
 		// player is running
 		return (cmd->ucmd.buttons & BT_CROUCH) ? 3 : 1;
+	}
+	else
+	{
+		// player is walking
+		return (cmd->ucmd.buttons & BT_CROUCH) ? 2 : 0;
 	}
 }
 
