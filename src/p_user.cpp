@@ -2765,30 +2765,6 @@ void APlayerPawn::CalcJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z)
 		z /= 2;
 }
 
-void APlayerPawn::CalcSecondJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z)
-{
-	if (cmd)
-	{
-		TVector2<fixed_t> dir = TVector2<fixed_t>(
-			FixedMul(cmd->ucmd.forwardmove, ForwardMove2),
-			FixedMul(-cmd->ucmd.sidemove, SideMove2)
-		).FixedUnit();
-		dir = TVector2<fixed_t>(
-			FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
-			FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
-			);
-
-		x = FixedMul(dir.X, SecondJumpXY);
-		y = FixedMul(dir.Y, SecondJumpXY);
-	}
-
-	z = SecondJumpZ;
-
-	// [BC] If the player has the high jump power, double his jump velocity.
-	if (player->cheats & CF_HIGHJUMP)
-		z *= 2;
-}
-
 //===========================================================================
 //
 // [Dusk] Calculate the height a player can reach with a jump
@@ -3827,18 +3803,32 @@ void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 
 			if (doSecondJump)
 			{
-				fixed_t	JumpVelx, JumpVely, JumpVelz;
-				CalcSecondJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
-
 				if (mvFlags & MV_WALLJUMPV2)
 				{
 					angle_t lineangle = R_PointToAngle2(0, 0, secondJumpTrace.Line->dx, secondJumpTrace.Line->dy) - ANG90;
-					JumpVelx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
-					JumpVely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+					velx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+					vely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+				}
+				else if (cmd)
+				{
+					TVector2<fixed_t> dir = TVector2<fixed_t>(
+						FixedMul(cmd->ucmd.forwardmove, ForwardMove2),
+						FixedMul(-cmd->ucmd.sidemove, SideMove2)
+					).FixedUnit();
+					dir = TVector2<fixed_t>(
+						FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
+						FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
+						);
+
+					velx += FixedMul(dir.X, SecondJumpXY);
+					vely += FixedMul(dir.Y, SecondJumpXY);
 				}
 
-				velx += JumpVelx;
-				vely += JumpVely;
+				fixed_t JumpVelz = SecondJumpZ;
+
+				// [BC] If the player has the high jump power, double his jump velocity.
+				if (player->cheats & CF_HIGHJUMP)
+					JumpVelz *= 2;
 
 				if (velz < 0)
 				{
