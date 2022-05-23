@@ -316,7 +316,7 @@ void I_SetFPSLimit(int limit)
 }
 #endif
 
-CUSTOM_CVAR (Int, vid_maxfps, 200, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+CUSTOM_CVAR (Int, vid_maxfps, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 {
 	if (vid_maxfps < TICRATE && vid_maxfps != 0)
 	{

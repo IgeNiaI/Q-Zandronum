@@ -231,6 +231,7 @@ OptionMenu "VideoOptions"
 		Option "Render when in background",	"vid_activeinbackground",		"OnOff"
 	}
 	Option "Display FPS",				"vid_fps",						"OnOff"
+	Slider "Max FPS",					"vid_maxfps",					0,1000,5
 	// [TP]
 	Slider "Blood brightness",			"blood_fade_scalar",			0.0, 1.0, 0.05
 
