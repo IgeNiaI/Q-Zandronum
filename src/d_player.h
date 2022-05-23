@@ -222,10 +222,10 @@ public:
 	float		GroundAcceleration;
 	float		GroundFriction;
 	float		WallClimbFriction;
-	float		SlideAcceleration;
-	float		SlideFriction;
-	float		SlideMaxTics;
-	float		SlideRegen;
+	float		CrouchSlideAcceleration;
+	float		CrouchSlideFriction;
+	float		CrouchSlideMaxTics;
+	float		CrouchSlideRegen;
 	float		AirWallRunMaxTics;
 	float		AirWallRunRegen;
 	fixed_t		AirWallRunMinVelocity;

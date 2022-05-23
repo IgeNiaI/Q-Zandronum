@@ -64,10 +64,10 @@ Actor PlayerPawn : Actor native
 	// MvType 1 or 2 only
 	Player.GroundAcceleration 10.0
 	Player.GroundFriction 6.0
-	Player.SlideAcceleration 10.0
-	Player.SlideFriction 1.0
-	Player.SlideRegen 2.0
-	Player.SlideMaxTics 70
+	Player.CrouchSlideAcceleration 10.0
+	Player.CrouchSlideFriction 1.0
+	Player.CrouchSlideRegen 2.0
+	Player.CrouchSlideMaxTics 70
 	
 	// MvType 2 only
 	Player.CpmAirAcceleration 12

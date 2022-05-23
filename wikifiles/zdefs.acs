@@ -352,10 +352,10 @@
 #define APROP_GroundAcceleration		78
 #define APROP_GroundFriction			79
 #define APROP_WallClimbFriction			80
-#define APROP_SlideAcceleration			81
-#define APROP_SlideFriction				82
-#define APROP_SlideMaxTics				83
-#define APROP_SlideRegen        		84
+#define APROP_CrouchSlideAcceleration	81
+#define APROP_CrouchSlideFriction		82
+#define APROP_CrouchSlideMaxTics		83
+#define APROP_CrouchSlideRegen        	84
 #define APROP_CpmAirAcceleration		85
 #define APROP_CpmMaxForwardAngleRad		86
 #define APROP_CrouchSlideEffectInterval	87

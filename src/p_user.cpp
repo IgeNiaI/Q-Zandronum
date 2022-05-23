@@ -774,10 +774,10 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< GroundAcceleration
 		<< GroundFriction
 		<< WallClimbFriction
-		<< SlideAcceleration
-		<< SlideFriction
-		<< SlideMaxTics
-		<< SlideRegen
+		<< CrouchSlideAcceleration
+		<< CrouchSlideFriction
+		<< CrouchSlideMaxTics
+		<< CrouchSlideRegen
 		<< CpmAirAcceleration
 		<< CpmMaxForwardAngleRad
 		<< BT_ATTACK_Script
@@ -3547,7 +3547,7 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 	if (isSliding && !player->mo->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*slide", 1, ATTN_NORM, true, player - players);
+			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*crouchslide", 1, ATTN_NORM, true, player - players);
 	}
 	else if (!isSliding && player->mo->isCrouchSliding)
 	{
@@ -4255,7 +4255,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				{
 					if (player->mo->crouchSlideTics < 0)
 						player->mo->crouchSlideTics = -player->mo->crouchSlideTics;
-					player->mo->crouchSlideTics = MIN(player->mo->SlideMaxTics, player->mo->crouchSlideTics + player->mo->SlideRegen);
+					player->mo->crouchSlideTics = MIN(player->mo->CrouchSlideMaxTics, player->mo->crouchSlideTics + player->mo->CrouchSlideRegen);
 				}
 			}
 			else if (!wasJustThrustedZ)
@@ -4269,7 +4269,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				// Friction & Acceleration
 				if (isSliding)
 				{
-					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->SlideAcceleration * floorFriction);
+					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->CrouchSlideAcceleration * floorFriction);
 					player->mo->crouchSlideTics--;
 				}
 				else
@@ -4282,7 +4282,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					{
 						if (player->mo->crouchSlideTics > 0)
 							player->mo->crouchSlideTics = -player->mo->crouchSlideTics;
-						player->mo->crouchSlideTics = MAX(-player->mo->SlideMaxTics, player->mo->crouchSlideTics - player->mo->SlideRegen);
+						player->mo->crouchSlideTics = MAX(-player->mo->CrouchSlideMaxTics, player->mo->crouchSlideTics - player->mo->CrouchSlideRegen);
 					}
 				}
 

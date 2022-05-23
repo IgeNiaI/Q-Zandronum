@@ -2977,7 +2977,7 @@ class CommandDrawBar : public SBarInfoCommand
 					break;
 				case CROUCHSLIDETICS:
 					value = (fixed_t) statusBar->CPlayer->mo->crouchSlideTics;
-					max = (fixed_t) statusBar->CPlayer->mo->SlideMaxTics;
+					max = (fixed_t) statusBar->CPlayer->mo->CrouchSlideMaxTics;
 					break;
 				case WALLCLIMBTICS:
 					value = (fixed_t) statusBar->CPlayer->mo->wallClimbTics;
