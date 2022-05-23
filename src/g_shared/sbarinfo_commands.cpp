@@ -3799,6 +3799,208 @@ class CommandIfSpying : public SBarInfoCommandFlowControl
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// [geNia] Q-Zandronum-exclusive commands.
+
+class CommandIfProperty : public SBarInfoCommandFlowControl
+{
+	public:
+		CommandIfProperty(SBarInfo *script) : SBarInfoCommandFlowControl(script),
+			negate(false), percentage(false), type(NONE),
+			inventoryItem(NULL)
+		{
+		}
+
+		void	Parse(FScanner &sc, bool fullScreenOffsets)
+		{
+			sc.MustGetToken(TK_Identifier);
+			type = NONE;
+			if(sc.Compare("health"))
+				type = HEALTH;
+			else if(sc.Compare("armor"))
+				type = ARMOR;
+			else if(sc.Compare("ammo1"))
+				type = AMMO1;
+			else if(sc.Compare("ammo2"))
+				type = AMMO2;
+			else if(sc.Compare("ammo")) //request the next string to be an ammo type
+			{
+				bool parenthesized = sc.CheckToken('(');
+
+				type = AMMO;
+				if(!parenthesized || !sc.CheckToken(TK_StringConst))
+					sc.MustGetToken(TK_Identifier);
+				inventoryItem = PClass::FindClass(sc.String);
+				if(inventoryItem == NULL || !RUNTIME_CLASS(AAmmo)->IsAncestorOf(inventoryItem)) //must be a kind of ammo
+				{
+					sc.ScriptMessage("'%s' is not a type of ammo.", sc.String);
+					inventoryItem = RUNTIME_CLASS(AAmmo);
+				}
+
+				if(parenthesized) sc.MustGetToken(')');
+			}
+			else if(sc.Compare("savepercent"))
+				type = SAVEPERCENT;
+			else if(sc.Compare("airtime"))
+				type = AIRTIME;
+			else if(sc.Compare("jumptics"))
+				type = JUMPTICS;
+			else if(sc.Compare("secondjumptics"))
+				type = SECONDJUMPTICS;
+			else if(sc.Compare("secondjumpsremaining"))
+				type = SECONDJUMPSREMAINING;
+			else if(sc.Compare("crouchslidetics"))
+				type = CROUCHSLIDETICS;
+			else if(sc.Compare("wallclimbtics"))
+				type = WALLCLIMBTICS;
+			else if(sc.Compare("airwallruntics"))
+				type = AIRWALLRUNTICS;
+			
+			if (sc.CheckToken(TK_Identifier))
+			{
+				if (sc.Compare("not"))
+					negate = true;
+				else
+					sc.ScriptError("Expected 'not', but got '%s' instead.", sc.String);
+			}
+
+			sc.MustGetToken(TK_IntConst);
+			percentage = sc.CheckToken('%');
+			propValue = sc.Number;
+
+			SBarInfoCommandFlowControl::Parse(sc, fullScreenOffsets);
+		}
+		void	Tick(const SBarInfoMainBlock *block, const DSBarInfo *statusBar, bool hudChanged)
+		{
+			SBarInfoCommandFlowControl::Tick(block, statusBar, hudChanged);
+
+			int value;
+			int max;
+			switch(type)
+			{
+				case HEALTH:
+					value = statusBar->CPlayer->mo->health;
+					if(value < 0) //health shouldn't display negatives
+						value = 0;
+					max = statusBar->CPlayer->mo->GetMaxHealth() + statusBar->CPlayer->mo->stamina;
+					break;
+				case ARMOR:
+					value = statusBar->armor != NULL ? statusBar->armor->Amount : 0;
+					max = 100;
+					break;
+				case AMMO1:
+					value = statusBar->ammocount1;
+					if(statusBar->ammo1 == NULL) //no ammo, draw as empty
+					{
+						value = 0;
+						max = 1;
+					}
+					else
+						max = statusBar->ammo1->MaxAmount;
+					break;
+				case AMMO2:
+					value = statusBar->ammocount2;
+					if(statusBar->ammo2 == NULL) //no ammo, draw as empty
+					{
+						value = 0;
+						max = 1;
+					}
+					else
+						max = statusBar->ammo2->MaxAmount;
+					break;
+				case AMMO:
+				{
+					AInventory* item = statusBar->CPlayer->mo->FindInventory(inventoryItem);
+					if (item != NULL)
+					{
+						value = item->Amount;
+						max = item->MaxAmount;
+					}
+					else
+						value = 0;
+					break;
+				}
+				case AIRTIME:
+					value = clamp<int>(statusBar->CPlayer->air_finished - level.time, 0, INT_MAX);
+					max = level.airsupply;
+					break;
+				case SAVEPERCENT:
+				{
+					AHexenArmor *harmor = statusBar->CPlayer->mo->FindInventory<AHexenArmor>();
+					if(harmor != NULL)
+					{
+						value = harmor->Slots[0] + harmor->Slots[1] +
+							harmor->Slots[2] + harmor->Slots[3] + harmor->Slots[4];
+					}
+					//Hexen counts basic armor also so we should too.
+					if(statusBar->armor != NULL)
+					{
+						value += FixedMul(statusBar->armor->SavePercent, 100*FRACUNIT);
+					}
+					value >>= FRACBITS;
+					max = 100;
+					break;
+				}
+				case JUMPTICS:
+					value = statusBar->CPlayer->mo->jumpTics;
+					max = statusBar->CPlayer->mo->JumpDelay;
+					break;
+				case SECONDJUMPTICS:
+					value = statusBar->CPlayer->mo->secondJumpTics;
+					max = statusBar->CPlayer->mo->SecondJumpDelay;
+					break;
+				case SECONDJUMPSREMAINING:
+					value = statusBar->CPlayer->mo->secondJumpsRemaining;
+					max = statusBar->CPlayer->mo->SecondJumpAmount;
+					break;
+				case CROUCHSLIDETICS:
+					value = (fixed_t) statusBar->CPlayer->mo->crouchSlideTics;
+					max = (fixed_t) statusBar->CPlayer->mo->CrouchSlideMaxTics;
+					break;
+				case WALLCLIMBTICS:
+					value = (fixed_t) statusBar->CPlayer->mo->wallClimbTics;
+					max = (fixed_t) statusBar->CPlayer->mo->WallClimbMaxTics;
+					break;
+				case AIRWALLRUNTICS:
+					value = (fixed_t) statusBar->CPlayer->mo->airWallRunTics;
+					max = (fixed_t) statusBar->CPlayer->mo->AirWallRunMaxTics;
+					break;
+				default: return;
+			}
+
+			if (percentage)
+				value = value * 100 / max;
+
+			SetTruth((value >= propValue) ^ negate, block, statusBar);
+		}
+	protected:
+		enum ValueType
+		{
+			HEALTH,
+			ARMOR,
+			AMMO1,
+			AMMO2,
+			AMMO,
+			AIRTIME,
+			SAVEPERCENT,
+			JUMPTICS,
+			SECONDJUMPTICS,
+			SECONDJUMPSREMAINING,
+			CROUCHSLIDETICS,
+			WALLCLIMBTICS,
+			AIRWALLRUNTICS,
+
+			NONE
+		};
+
+		ValueType			type;
+		const PClass		*inventoryItem;
+
+		int		propValue;
+		bool	negate;
+		bool	percentage;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 
 static const char *SBarInfoCommandNames[] =
 {
@@ -3813,6 +4015,9 @@ static const char *SBarInfoCommandNames[] =
 
 	// [AK] Zandronum-exclusive commands.
 	"ifspectator", "ifspying",
+
+	// [geNia] Q-Zandronum-exclusive commands.
+	"ifproperty",
 	NULL
 };
 
@@ -3829,6 +4034,9 @@ enum SBarInfoCommands
 
 	// [AK] Zandronum-exclusive commands.
 	SBARINFO_IFSPECTATOR, SBARINFO_IFSPYING,
+
+	// [geNia] Q-Zandronum-exclusive commands.
+	SBARINFO_IFPROPERTY,
 };
 
 SBarInfoCommand *SBarInfoCommandFlowControl::NextCommand(FScanner &sc)
@@ -3865,6 +4073,9 @@ SBarInfoCommand *SBarInfoCommandFlowControl::NextCommand(FScanner &sc)
 			// [AK] Zandronum-exclusive commands.
 			case SBARINFO_IFSPECTATOR: return new CommandIfSpectator(script);
 			case SBARINFO_IFSPYING: return new CommandIfSpying(script);
+
+			// [geNia] Q-Zandronum-exclusive commands.
+			case SBARINFO_IFPROPERTY: return new CommandIfProperty(script);
 		}
 
 		sc.ScriptError("Unknown command '%s'.\n", sc.String);
