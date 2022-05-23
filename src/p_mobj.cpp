@@ -2567,7 +2567,7 @@ explode:
 		{
 			float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
 			if (player->mo->isCrouchSliding)
-				player->mo->QFriction(vel, 0.f, player->mo->SlideFriction * floorFriction);
+				player->mo->QFriction(vel, 0.f, player->mo->CrouchSlideFriction * floorFriction);
 			else
 				player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction * floorFriction);
 		}

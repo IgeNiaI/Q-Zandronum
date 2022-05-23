@@ -4655,28 +4655,28 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
-	case APROP_SlideAcceleration:
+	case APROP_CrouchSlideAcceleration:
 		if (playerActor) {
-			playerActor->SlideAcceleration = FIXED2FLOAT(value);
+			playerActor->CrouchSlideAcceleration = FIXED2FLOAT(value);
 		}
 		break;
 
-	case APROP_SlideFriction:
+	case APROP_CrouchSlideFriction:
 		if (playerActor) {
-			playerActor->SlideFriction = FIXED2FLOAT(value);
+			playerActor->CrouchSlideFriction = FIXED2FLOAT(value);
 		}
 		break;
 
-	case APROP_SlideMaxTics:
+	case APROP_CrouchSlideMaxTics:
 		if (playerActor) {
-			playerActor->SlideMaxTics = FIXED2FLOAT(value);
+			playerActor->CrouchSlideMaxTics = FIXED2FLOAT(value);
 		}
 		break;
 		
-	case APROP_SlideRegen:
+	case APROP_CrouchSlideRegen:
 		if (playerActor) {
 			if (value < 0) value = 0;
-			playerActor->SlideRegen = FIXED2FLOAT(value);
+			playerActor->CrouchSlideRegen = FIXED2FLOAT(value);
 		}
 		break;
 
@@ -4844,10 +4844,10 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration)		: 0;
 	case APROP_GroundFriction:			return playerActor ? FLOAT2FIXED( playerActor->GroundFriction)			: 0;
 	case APROP_WallClimbFriction:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbFriction)		: 0;
-	case APROP_SlideAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->SlideAcceleration)		: 0;
-	case APROP_SlideFriction:			return playerActor ? FLOAT2FIXED( playerActor->SlideFriction)			: 0;
-	case APROP_SlideMaxTics:			return playerActor ? FLOAT2FIXED( playerActor->SlideMaxTics)			: 0;
-	case APROP_SlideRegen:				return playerActor ? FLOAT2FIXED( playerActor->SlideRegen )				: 0;
+	case APROP_CrouchSlideAcceleration:	return playerActor ? FLOAT2FIXED( playerActor->CrouchSlideAcceleration)	: 0;
+	case APROP_CrouchSlideFriction:		return playerActor ? FLOAT2FIXED( playerActor->CrouchSlideFriction)		: 0;
+	case APROP_CrouchSlideMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->CrouchSlideMaxTics)		: 0;
+	case APROP_CrouchSlideRegen:		return playerActor ? FLOAT2FIXED( playerActor->CrouchSlideRegen )		: 0;
 	case APROP_CpmAirAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->CpmAirAcceleration )		: 0;
 	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad )	: 0;
 	case APROP_CrouchSlideEffectInterval:return playerActor? playerActor->CrouchSlideEffectInterval				: 0;
@@ -4942,10 +4942,10 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_GroundAcceleration:
 		case APROP_GroundFriction:
 		case APROP_WallClimbFriction:
-		case APROP_SlideAcceleration:
-		case APROP_SlideFriction:
-		case APROP_SlideMaxTics:
-		case APROP_SlideRegen:
+		case APROP_CrouchSlideAcceleration:
+		case APROP_CrouchSlideFriction:
+		case APROP_CrouchSlideMaxTics:
+		case APROP_CrouchSlideRegen:
 		case APROP_CpmAirAcceleration:
 		case APROP_CpmMaxForwardAngleRad:
 			return (GetActorProperty(tid, property, NULL, 0) == value);
