@@ -3917,8 +3917,13 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			int fm, sm;
 
 			fixed_t LocalVelocityCap;
-			if (player->mo->VelocityCap) {
+			if (player->mo->VelocityCap)
+			{
 				LocalVelocityCap = MAX(player->mo->VelocityCap, (fixed_t)TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length());
+			}
+			else
+			{
+				LocalVelocityCap = 0;
 			}
 
 			movefactor = P_GetMoveFactor(player->mo, &friction);
@@ -4157,8 +4162,13 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 			acceleration.MakeUnit();
 
 			float LocalVelocityCap;
-			if (player->mo->VelocityCap) {
+			if (player->mo->VelocityCap)
+			{
 				LocalVelocityCap = MAX(FIXED2FLOAT(player->mo->VelocityCap), float(FVector2(vel.X, vel.Y).Length()));
+			}
+			else
+			{
+				LocalVelocityCap = 0;
 			}
 
 			if (!player->onground || ((cmd->ucmd.buttons & BT_JUMP) && player->mo->jumpTics <= 0))
