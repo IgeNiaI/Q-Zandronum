@@ -3353,6 +3353,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 		}
 	}
 	P_CheckFakeFloorTriggers (mo, oldz);
+	P_CheckFor3DSectorEnter (mo);
 
 	// [TIHan/BB] If it's a missile that is bounceable and it bounced, send info to the client
 	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( mo->ulNetworkFlags & NETFL_BOUNCED_OFF_ACTOR ) )
@@ -4743,6 +4744,7 @@ void AActor::CheckSectorTransition(sector_t *oldsec)
 		{
 			P_CheckFor3DCeilingHit(this);
 		}
+		P_CheckFor3DSectorEnter(this);
 
 		// [BL] Trigger Domination check if player enters a new sector in Domination
 		if (this->player)

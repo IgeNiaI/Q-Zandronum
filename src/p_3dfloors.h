@@ -127,6 +127,7 @@ void P_PlayerOnSpecial3DFloor(player_t* player);
 void P_Get3DFloorAndCeiling(AActor * thing, sector_t * sector, fixed_t * floorz, fixed_t * ceilingz, int * floorpic);
 bool P_CheckFor3DFloorHit(AActor * mo);
 bool P_CheckFor3DCeilingHit(AActor * mo);
+void P_CheckFor3DSectorEnter(AActor * mo);
 void P_Recalculate3DFloors(sector_t *);
 void P_RecalculateAttached3DFloors(sector_t * sec);
 void P_RecalculateLights(sector_t *sector);
@@ -163,6 +164,7 @@ inline void P_PlayerOnSpecial3DFloor(player_t* player) {}
 inline void P_Get3DFloorAndCeiling(AActor * thing, sector_t * sector, fixed_t * floorz, fixed_t * ceilingz, int * floorpic) {}
 inline bool P_CheckFor3DFloorHit(AActor * mo) { return false; }
 inline bool P_CheckFor3DCeilingHit(AActor * mo) { return false; }
+inline void P_CheckFor3DSectorEnter(AActor * mo) {}
 inline void P_Recalculate3DFloors(sector_t *) {}
 inline void P_RecalculateAttached3DFloors(sector_t * sec) {}
 inline lightlist_t * P_GetPlaneLight(sector_t * , secplane_t * plane, bool underside) { return NULL; }

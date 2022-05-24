@@ -409,6 +409,48 @@ bool P_CheckFor3DCeilingHit(AActor * mo)
 
 //==========================================================================
 //
+// P_CheckFor3DSectorEnter
+// Checks to see if an actor entered a 3d sector
+//
+//==========================================================================
+
+void P_CheckFor3DSectorEnter(AActor * mo)
+{
+	for(unsigned i=0;i<mo->Sector->e->XFloor.ffloors.Size();i++)
+	{
+		F3DFloor* rover=mo->Sector->e->XFloor.ffloors[i];
+
+		if (!(rover->flags & FF_EXISTS)) continue;
+		if (rover->flags & FF_FIX) continue;
+
+		// Check the 3D floor's type...
+		if(!(rover->flags & FF_SOLID))
+		{
+			//Water and DEATH FOG!!! heh
+			if (mo->z > rover->top.plane->ZatPoint(mo->x, mo->y) || 
+				(mo->z + mo->height) < rover->bottom.plane->ZatPoint(mo->x, mo->y))
+				continue;
+
+			if (mo->Sector3D != rover->model)
+			{
+				if (mo->Sector3D && mo->Sector3D->SecActTarget)
+					mo->Sector3D->SecActTarget->TriggerAction(mo, SECSPAC_Exit);
+				if (rover->model && rover->model->SecActTarget)
+					rover->model->SecActTarget->TriggerAction(mo, SECSPAC_Enter);
+				mo->Sector3D = rover->model;
+			}
+		
+			return;
+		}
+	}
+
+	if (mo->Sector3D && mo->Sector3D->SecActTarget)
+		mo->Sector3D->SecActTarget->TriggerAction(mo, SECSPAC_Exit);
+	mo->Sector3D = NULL;
+}
+
+//==========================================================================
+//
 // P_Recalculate3DFloors
 //
 // This function sorts the ffloors by height and creates the lightlists 
