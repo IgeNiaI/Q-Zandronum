@@ -2380,8 +2380,9 @@ static fixed_t PlayersRangeFromSpot (FPlayerStart *spot)
 		if (!playeringame[i] || players[i].bSpectating || !players[i].mo || players[i].health <= 0)
 			continue;
 
-		distance = P_AproxDistance (players[i].mo->x - spot->x,
-									players[i].mo->y - spot->y);
+		distance = P_Distance3d (players[i].mo->x - spot->x,
+								 players[i].mo->y - spot->y,
+								 players[i].mo->z - spot->z);
 
 		if (distance < closest)
 			closest = distance;
@@ -2408,8 +2409,9 @@ static fixed_t TeamLMSPlayersRangeFromSpot( ULONG ulPlayer, FPlayerStart *spot )
 			continue;
 
 		ulNumSpots++;
-		distance += P_AproxDistance (players[i].mo->x - spot->x,
-									players[i].mo->y - spot->y);
+		distance += P_Distance3d (players[i].mo->x - spot->x,
+								  players[i].mo->y - spot->y,
+								  players[i].mo->z - spot->z);
 	}
 
 	if ( ulNumSpots )

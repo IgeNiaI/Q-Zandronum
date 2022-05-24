@@ -239,6 +239,7 @@ struct intercept_t
 typedef bool (*traverser_t) (intercept_t *in);
 
 fixed_t P_AproxDistance (fixed_t dx, fixed_t dy);
+fixed_t P_Distance3d (fixed_t dx, fixed_t dy, fixed_t dz);
 
 //==========================================================================
 //
