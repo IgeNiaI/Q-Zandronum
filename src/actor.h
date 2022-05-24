@@ -982,6 +982,7 @@ public:
 	angle_t			roll;	// This was fixed_t before, which is probably wrong
 	FBlockNode		*BlockNode;			// links in blocks (if needed)
 	struct sector_t	*Sector;
+	struct sector_t *Sector3D;			// A 3d sector the actor is currently in
 	subsector_t *		subsector;
 	fixed_t			floorz, ceilingz;	// closest together of contacted secs
 	fixed_t			dropoffz;		// killough 11/98: the lowest floor over all contacted Sectors.
