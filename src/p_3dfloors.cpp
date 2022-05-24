@@ -754,7 +754,9 @@ void P_LineOpening_XFloors (FLineOpening &open, AActor * thing, const line_t *li
 		if(xf[0]->ffloors.Size() || xf[1]->ffloors.Size())
 		{
 			fixed_t    lowestceiling = open.top;
+			sector_t   *lowestceilingsec = open.topsec;
 			fixed_t    highestfloor = open.bottom;
+			sector_t   *highestfloorsec = open.bottomsec;
 			fixed_t    lowestfloor[2] = {
 				linedef->frontsector->floorplane.ZatPoint(x, y), 
 				linedef->backsector->floorplane.ZatPoint(x, y) };
@@ -783,12 +785,14 @@ void P_LineOpening_XFloors (FLineOpening &open, AActor * thing, const line_t *li
 					if(ff_bottom < lowestceiling && delta1 >= delta2) 
 					{
 						lowestceiling = ff_bottom;
+						lowestceilingsec = j == 0 ? linedef->frontsector : linedef->backsector;
 						lowestceilingpic = *rover->bottom.texture;
 					}
 					
 					if(ff_top > highestfloor && delta1 < delta2 && (!restrict || thing->z >= ff_top))
 					{
 						highestfloor = ff_top;
+						highestfloorsec = j == 0 ? linedef->frontsector : linedef->backsector;
 						highestfloorpic = *rover->top.texture;
 					}
 					if(ff_top > lowestfloor[j] && ff_top <= thing->z + thing->MaxStepHeight) lowestfloor[j] = ff_top;
@@ -798,12 +802,14 @@ void P_LineOpening_XFloors (FLineOpening &open, AActor * thing, const line_t *li
 			if(highestfloor > open.bottom)
 			{
 				open.bottom = highestfloor;
+				open.bottomsec = highestfloorsec;
 				open.floorpic = highestfloorpic;
 			}
 			
 			if(lowestceiling < open.top) 
 			{
 				open.top = lowestceiling;
+				open.topsec = lowestceilingsec;
 				open.ceilingpic = lowestceilingpic;
 			}
 			
