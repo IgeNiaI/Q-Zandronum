@@ -61,6 +61,17 @@ fixed_t P_AproxDistance (fixed_t dx, fixed_t dy)
 
 //==========================================================================
 //
+// P_Distance3d
+// 
+//==========================================================================
+
+fixed_t P_Distance3d (fixed_t dx, fixed_t dy, fixed_t dz)
+{
+	return FLOAT2FIXED((float) FVector3(FIXED2FLOAT(dx), FIXED2FLOAT(dy), FIXED2FLOAT(dz)).Length());
+}
+
+//==========================================================================
+//
 // P_InterceptVector
 //
 // Returns the fractional intercept point along the first divline.
