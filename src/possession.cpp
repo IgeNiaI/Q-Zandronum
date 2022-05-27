@@ -647,6 +647,7 @@ bool POSSESSION_ShouldRespawnArtifact( void )
 void POSSESSION_TimeExpired( void )
 {
 	char				szString[64];
+	DHUDMessageFadeOut	*pMsg;
 
 	// Don't end the level if we're not playing.
 	if (( POSSESSION_GetState( ) == PSNS_WAITINGFORPLAYERS ) ||
@@ -666,7 +667,25 @@ void POSSESSION_TimeExpired( void )
 		{
 			sprintf( szString, "\\cdSUDDEN DEATH!" );
 			V_ColorizeString( szString );
-			GAMEMODE_DisplayStandardMessage ( szString, true );
+
+			if ( NETWORK_GetState( ) != NETSTATE_SERVER )
+			{
+				// Display the HUD message.
+				pMsg = new DHUDMessageFadeOut( BigFont, szString,
+					160.4f,
+					75.0f,
+					320,
+					200,
+					CR_RED,
+					2.0f,
+					1.0f );
+
+				StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
+			}
+			else
+			{
+				SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_RED, 2.0f, 1.0f, "BigFont", false, MAKE_ID('C','N','T','R') );
+			}
 		}
 
 		return;
