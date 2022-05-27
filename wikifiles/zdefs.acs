@@ -327,7 +327,7 @@
 #define APROP_AirWallRun				53
 #define APROP_DoubleTapJump				54
 #define APROP_WallClimb					55
-#define APROP_RampJump					56
+#define APROP_EdgeJump					56
 #define APROP_ElevatorJump				57
 #define APROP_Silent					58
 #define APROP_JumpXY					59

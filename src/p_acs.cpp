@@ -4509,8 +4509,8 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		if (value) actor->mvFlags |= MV_WALLCLIMB; else actor->mvFlags &= ~MV_WALLCLIMB;
 		break;
 
-	case APROP_RampJump:
-		if (value) actor->mvFlags |= MV_RAMPJUMP; else actor->mvFlags &= ~MV_RAMPJUMP;
+	case APROP_EdgeJump:
+		if (value) actor->mvFlags |= MV_EDGEJUMP; else actor->mvFlags &= ~MV_EDGEJUMP;
 		break;
 
 	case APROP_Silent:
@@ -4816,7 +4816,7 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_AirWallRun:				return !!(actor->mvFlags & MV_AIRWALLRUN);
 	case APROP_DoubleTapJump:			return !!(actor->mvFlags & MV_DOUBLETAPJUMP);
 	case APROP_WallClimb:				return !!(actor->mvFlags & MV_WALLCLIMB);
-	case APROP_RampJump:				return !!(actor->mvFlags & MV_RAMPJUMP);
+	case APROP_EdgeJump:				return !!(actor->mvFlags & MV_EDGEJUMP);
 	case APROP_Silent:					return !!(actor->mvFlags & MV_SILENT);
 	case APROP_ElevatorJump:			return !!(actor->mvFlags & MV_ELEVATORJUMP);
 
@@ -4966,7 +4966,7 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_AirWallRun:
 		case APROP_DoubleTapJump:
 		case APROP_WallClimb:
-		case APROP_RampJump:
+		case APROP_EdgeJump:
 		case APROP_Silent:
 		case APROP_ElevatorJump:
 			return (GetActorProperty(tid, property, NULL, 0) == (!!value));
