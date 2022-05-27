@@ -898,6 +898,23 @@ void SERVERCOMMANDS_MoveLocalPlayer( ULONG ulPlayer )
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_FutureThrustLocalPlayer( ULONG ulPlayer, int ticDelay, fixed_t futureVelx, fixed_t futureVely, fixed_t futureVelz, bool overrideVelocity, bool setBob )
+{
+	if ( SERVER_IsValidClient( ulPlayer ) == false || players[ulPlayer].mo == NULL )
+		return;
+
+	ServerCommands::FutureThrustLocalPlayer command;
+	command.SetFutureTic( SERVER_GetClient( ulPlayer )->ulClientGameTic + ticDelay );
+	command.SetFutureVelx( futureVelx );
+	command.SetFutureVely( futureVely );
+	command.SetFutureVelz( futureVelz );
+	command.SetOverrideVelocity( overrideVelocity );
+	command.SetBob( setBob );
+	command.sendCommandToClients( ulPlayer, SVCF_ONLYTHISCLIENT );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_DisconnectPlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )

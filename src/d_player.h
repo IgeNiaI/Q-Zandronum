@@ -114,6 +114,17 @@ typedef struct futureradiusattack {
 	struct futureradiusattack *next = NULL;
 } sFUTURERADIUSATTACK;
 
+typedef struct futurethrust {
+	int tic;
+	AActor *thing;
+	fixed_t velx;
+	fixed_t vely;
+	fixed_t velz;
+	bool overrideVelocity;
+	bool setBob;
+	struct futurethrust *next = NULL;
+} sFUTURETHRUST;
+
 #define PREDICTABLES_SIZE 20
 
 class APlayerPawn : public AActor
@@ -585,6 +596,7 @@ public:
 	void SendPitchLimits() const;
 
 	void AddFutureRadiusAttack( sFUTURERADIUSATTACK* NewFutureRadiusAttack );
+	void AddFutureThrust( sFUTURETHRUST* NewFutureThrust );
 
 	APlayerPawn	*mo;
 	BYTE		playerstate;
@@ -850,6 +862,7 @@ public:
 	fixed_t		restoreCeilingZ;
 
 	sFUTURERADIUSATTACK *FutureRadiusAttack;
+	sFUTURETHRUST *FutureThrust;
 
 	// [BC] End of ST additions.
 

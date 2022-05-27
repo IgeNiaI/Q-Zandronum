@@ -3640,6 +3640,13 @@ void ServerCommands::MoveLocalPlayer::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::FutureThrustLocalPlayer::Execute()
+{
+	CLIENT_PREDICT_SaveFutureThrust( futureTic, futureVelx, futureVely, futureVelz, overrideVelocity, bob );
+}
+
+//*****************************************************************************
+//
 void ServerCommands::DisconnectPlayer::Execute()
 {
 	// If we were a spectator and looking through this player's eyes, revert them.

@@ -760,6 +760,58 @@ void player_t::AddFutureRadiusAttack( sFUTURERADIUSATTACK* NewFutureRadiusAttack
 
 //===========================================================================
 //
+// player_t :: AddFutureThrust
+//
+// Adds a struct with thrust details to thrust the unlagged player
+// with an proper delay
+//
+//===========================================================================
+
+void player_t::AddFutureThrust( sFUTURETHRUST* NewFutureThrust )
+{
+	if ( NewFutureThrust == NULL )
+		return;
+
+	if ( FutureThrust != NULL )
+	{
+		sFUTURETHRUST *tempFutureThrust = FutureThrust;
+
+		if ( FutureThrust->tic > NewFutureThrust->tic )
+		{
+			FutureThrust = NewFutureThrust;
+			FutureThrust->next = tempFutureThrust;
+		}
+		else
+		{
+			while ( tempFutureThrust )
+			{
+				if (tempFutureThrust->next == NULL)
+				{
+					tempFutureThrust->next = NewFutureThrust;
+					tempFutureThrust = NULL;
+				}
+				else if (tempFutureThrust->next->tic > NewFutureThrust->tic)
+				{
+					NewFutureThrust->next = tempFutureThrust->next;
+					tempFutureThrust->next = NewFutureThrust;
+					tempFutureThrust = NULL;
+				}
+				else
+				{
+					tempFutureThrust = tempFutureThrust->next;
+				}
+			}
+
+		}
+	}
+	else
+	{
+		FutureThrust = NewFutureThrust;
+	}
+}
+
+//===========================================================================
+//
 // APlayerPawn
 //
 //===========================================================================
@@ -5410,6 +5462,46 @@ void P_PlayerThink (player_t *player)
 				{
 					P_DamageMobj (player->mo, NULL, NULL, 2 + ((level.time-player->air_finished)/TICRATE), NAME_Drowning);
 				}
+			}
+		}
+	}
+	
+	if ( player && NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
+		sFUTURETHRUST *tempFutureThrust = player->FutureThrust;
+		while ( tempFutureThrust != NULL )
+		{
+			tempFutureThrust->tic--;
+			if ( tempFutureThrust->tic <= 0 )
+			{
+				if ( player->FutureThrust->thing != NULL && !( player->FutureThrust->thing->ObjectFlags & OF_EuthanizeMe ) )
+				{
+					if (player->FutureThrust->overrideVelocity)
+					{
+						player->FutureThrust->thing->velx = player->FutureThrust->velx;
+						player->FutureThrust->thing->vely = player->FutureThrust->vely;
+						player->FutureThrust->thing->velz = player->FutureThrust->velz;
+					}
+					else
+					{
+						player->FutureThrust->thing->velx += player->FutureThrust->velx;
+						player->FutureThrust->thing->vely += player->FutureThrust->vely;
+						player->FutureThrust->thing->velz += player->FutureThrust->velz;
+					}
+					if (player->FutureThrust->setBob)
+					{
+						player->velx = player->FutureThrust->thing->velx;
+						player->vely = player->FutureThrust->thing->vely;
+					}
+				}
+
+				player->FutureThrust = tempFutureThrust->next;
+				free(tempFutureThrust);
+				tempFutureThrust = player->FutureThrust;
+			}
+			else
+			{
+				tempFutureThrust = tempFutureThrust->next;
 			}
 		}
 	}

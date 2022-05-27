@@ -109,6 +109,7 @@ static	int			g_SavedCheats[CLIENT_PREDICTION_TICS][2];
 static	int			g_SavedPredictable[CLIENT_PREDICTION_TICS][PREDICTABLES_SIZE];
 static	fixed_t		g_SelfThrustBonus[CLIENT_PREDICTION_TICS][3];
 static	bool		g_SelfThrustBonusOverride[CLIENT_PREDICTION_TICS][2];
+static	bool		g_SelfThrustBonusSetBob[CLIENT_PREDICTION_TICS];
 
 #ifdef	_DEBUG
 CVAR( Bool, cl_showpredictionsuccess, false, 0 );
@@ -321,6 +322,22 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 
 //*****************************************************************************
 //
+void CLIENT_PREDICT_SaveFutureThrust( int futureTic, fixed_t velx, fixed_t vely, fixed_t velz, bool bOverride, bool setBob )
+{
+	g_SelfThrustBonus[futureTic % CLIENT_PREDICTION_TICS][0] += velx;
+	g_SelfThrustBonus[futureTic % CLIENT_PREDICTION_TICS][1] += vely;
+	g_SelfThrustBonus[futureTic % CLIENT_PREDICTION_TICS][2] += velz;
+	if (bOverride)
+	{
+		g_SelfThrustBonusOverride[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = true;
+		g_SelfThrustBonusOverride[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = true;
+	}
+	if (setBob)
+		g_SelfThrustBonusSetBob[g_ulGameTick & CLIENT_PREDICTION_TICS] = true;
+}
+
+//*****************************************************************************
+//
 void CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( fixed_t velx, fixed_t vely, bool bOverride )
 {
 	if ( bOverride ) {
@@ -362,6 +379,7 @@ void CLIENT_PREDICT_ClearSelfThrustBonuses( )
 		g_SelfThrustBonus[i][2] = 0;
 		g_SelfThrustBonusOverride[i][0] = false;
 		g_SelfThrustBonusOverride[i][1] = false;
+		g_SelfThrustBonusSetBob[i] = false;
 	}
 }
 
@@ -389,6 +407,7 @@ static void client_predict_BeginPrediction( player_t *pPlayer )
 	g_SelfThrustBonus[g_ulGameTick % CLIENT_PREDICTION_TICS][2] = 0;
 	g_SelfThrustBonusOverride[g_ulGameTick % CLIENT_PREDICTION_TICS][0] = false;
 	g_SelfThrustBonusOverride[g_ulGameTick % CLIENT_PREDICTION_TICS][1] = false;
+	g_SelfThrustBonusSetBob[g_ulGameTick % CLIENT_PREDICTION_TICS] = false;
 	g_bSavedWasJustThrustedZ[g_ulGameTick % CLIENT_PREDICTION_TICS] = false;
 
 	g_SavedAngle[g_ulGameTick % CLIENT_PREDICTION_TICS] = pPlayer->mo->angle;
@@ -542,6 +561,12 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		else
 		{
 			pPlayer->mo->velz += g_SelfThrustBonus[lTick % CLIENT_PREDICTION_TICS][2];
+		}
+
+		if ( g_SelfThrustBonusSetBob[lTick % CLIENT_PREDICTION_TICS] )
+		{
+			pPlayer->velx = pPlayer->mo->velx;
+			pPlayer->vely = pPlayer->mo->vely;
 		}
 
 		// [BB] The effect of all DPushers needs to be manually predicted.

@@ -5930,12 +5930,19 @@ void P_DoRadiusAttack( AActor *thing, AActor *bombspot, AActor *bombsource, doub
 					}
 					ThingThrustValues[2] = (fixed_t)velz;
 				}
+				
+				bool shouldDelayThrust = (NETWORK_GetState( ) == NETSTATE_SERVER) && ( thing->player )
+					&& ( thing->player->mo == thing ) && ( !bombsource || thing->player != bombsource->player );
+				bool bonusVelZ = false;
 
-				thing->velx += ThingThrustValues[0];
-				thing->vely += ThingThrustValues[1];
+				if (!shouldDelayThrust)
+				{
+					thing->velx += ThingThrustValues[0];
+					thing->vely += ThingThrustValues[1];
 
-				if ( NETWORK_InClientMode() && thing->player == &players[consoleplayer] && thing->player->mo == thing )
-					CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( ThingThrustValues[0], ThingThrustValues[1], false );
+					if ( NETWORK_InClientMode() && thing->player == &players[consoleplayer] && thing->player->mo == thing )
+						CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( ThingThrustValues[0], ThingThrustValues[1], false );
+				}
 
 				// [BB] If ZADF_NO_ROCKET_JUMPING is on, don't give players any z-velocity if the attack was made by a player.
 				if ( ( (zadmflags & ZADF_NO_ROCKET_JUMPING) == false ) ||
@@ -5943,17 +5950,40 @@ void P_DoRadiusAttack( AActor *thing, AActor *bombspot, AActor *bombsource, doub
 				{
 					if (!(attackFlags & RADF_NODAMAGE) || (attackFlags & RADF_THRUSTZ))
 					{
-						thing->velz += ThingThrustValues[2];
+						bonusVelZ = true;
+						if (!shouldDelayThrust)
+						{
+							thing->velz += ThingThrustValues[2];
 
-						if ( NETWORK_InClientMode() && thing->player == &players[consoleplayer] && thing->player->mo == thing )
-							CLIENT_PREDICT_SaveSelfThrustBonusVertical( ThingThrustValues[2], false );
+							if ( NETWORK_InClientMode() && thing->player == &players[consoleplayer] && thing->player->mo == thing )
+								CLIENT_PREDICT_SaveSelfThrustBonusVertical( ThingThrustValues[2], false );
+						}
 					}
 				}
+				
+				if (shouldDelayThrust)
+				{
+					sFUTURETHRUST *FutureThrust = (struct futurethrust*) malloc(sizeof(struct futurethrust));
+					FutureThrust->tic = gametic - UNLAGGED_Gametic( thing->player );
+					FutureThrust->next = NULL;
+					FutureThrust->thing = thing;
+					FutureThrust->velx = ThingThrustValues[0];
+					FutureThrust->vely = ThingThrustValues[1];
+					FutureThrust->velz = bonusVelZ ? ThingThrustValues[2] : 0;
+					FutureThrust->overrideVelocity = false;
+					FutureThrust->setBob = false;
 
-				// [BC] If we're the server, update the thing's velocity.
-				// [BB] Use SERVER_UpdateThingVelocity to prevent sync problems.
-				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-					SERVER_UpdateThingVelocity( thing, true );
+					thing->player->AddFutureThrust( FutureThrust );
+					SERVERCOMMANDS_FutureThrustLocalPlayer( thing->player - players, FutureThrust->tic,
+						ThingThrustValues[0], ThingThrustValues[1], bonusVelZ ? ThingThrustValues[2] : 0, false, false );
+				}
+				else
+				{
+					// [BC] If we're the server, update the thing's velocity.
+					// [BB] Use SERVER_UpdateThingVelocity to prevent sync problems.
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+						SERVER_UpdateThingVelocity( thing, true );
+				}
 			}
 		}
 	}

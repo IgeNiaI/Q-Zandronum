@@ -240,6 +240,15 @@ Command MoveLocalPlayer
 	Fixed velz
 EndCommand
 
+Command FutureThrustLocalPlayer
+	Long futureTic
+	Fixed futureVelx
+	Fixed futureVely
+	Fixed futureVelz
+	Bool overrideVelocity
+	Bool bob
+EndCommand
+
 Command DisconnectPlayer
 	Player player
 EndCommand

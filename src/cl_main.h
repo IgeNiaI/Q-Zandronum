@@ -190,6 +190,7 @@ void				CLIENT_PREDICT_Construct( void );
 void				CLIENT_PREDICT_PlayerPredict( void );
 void				CLIENT_PREDICT_PlayerTeleported( void );
 bool				CLIENT_PREDICT_IsPredicting( void );
+void				CLIENT_PREDICT_SaveFutureThrust( int futureTic, fixed_t velx, fixed_t vely, fixed_t velz, bool bOverride, bool setBob );
 void				CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( fixed_t velx, fixed_t vely, bool bOverride );
 void				CLIENT_PREDICT_SaveSelfThrustBonusVertical( fixed_t velz, bool bOverride );
 void				CLIENT_PREDICT_ClearSelfThrustBonuses( void );

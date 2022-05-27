@@ -80,6 +80,7 @@
 #include "p_enemy.h"
 #include "r_data/colormaps.h"
 #include "v_video.h"
+#include "unlagged.h"
 
 // [BC] Ugh.
 void SERVERCONSOLE_UpdatePlayerInfo( LONG lPlayer, ULONG ulUpdateFlags );
@@ -1450,15 +1451,39 @@ int P_DamageMobj (AActor *target, AActor *inflictor, AActor *source, int damage,
 				ThingThrustValues[2] = 0;
 			}
 
-			target->velx += ThingThrustValues[0];
-			target->vely += ThingThrustValues[1];
-			target->velz += ThingThrustValues[2];
+			bool shouldDelayThrust = (NETWORK_GetState( ) == NETSTATE_SERVER) && ( target->player )
+				&& ( target->player->mo == target ) && ( !source || target->player != source->player );
+			if (!shouldDelayThrust)
+			{
+				target->velx += ThingThrustValues[0];
+				target->vely += ThingThrustValues[1];
+				target->velz += ThingThrustValues[2];
+			}
 
 			// [BC] Set the thing's velocity.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				// [BB] Only update z-velocity if it has changed.
-				SERVER_UpdateThingVelocity ( target, oldTargetVelz != target->velz );
+				if (shouldDelayThrust)
+				{
+					sFUTURETHRUST *FutureThrust = (struct futurethrust*) malloc(sizeof(struct futurethrust));
+					FutureThrust->tic = gametic - UNLAGGED_Gametic( target->player );
+					FutureThrust->next = NULL;
+					FutureThrust->thing = target;
+					FutureThrust->velx = ThingThrustValues[0];
+					FutureThrust->vely = ThingThrustValues[1];
+					FutureThrust->velz = ThingThrustValues[2];
+					FutureThrust->overrideVelocity = false;
+					FutureThrust->setBob = false;
+
+					target->player->AddFutureThrust( FutureThrust );
+					SERVERCOMMANDS_FutureThrustLocalPlayer( target->player - players, FutureThrust->tic,
+						ThingThrustValues[0], ThingThrustValues[1], ThingThrustValues[2], false, false );
+				}
+				else
+				{
+					// [BB] Only update z-velocity if it has changed.
+					SERVER_UpdateThingVelocity ( target, oldTargetVelz != target->velz );
+				}
 			}
 			else if ( NETWORK_InClientMode( ) && target->player == &players[consoleplayer] && target->player->mo == target )
 			{
