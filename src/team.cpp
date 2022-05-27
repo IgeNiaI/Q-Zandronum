@@ -856,14 +856,14 @@ void TEAM_TimeExpired( void )
 						320,
 						200,
 						CR_UNTRANSLATED,
-						3.0f,
-						2.0f );
+						2.0f,
+						1.0f );
 
 					StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
 				}
 				else
 				{
-					SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_RED, 3.0f, 2.0f, "BigFont", false, MAKE_ID('C','N','T','R') );
+					SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_RED, 2.0f, 1.0f, "BigFont", false, MAKE_ID('C','N','T','R') );
 				}
 			}
 
