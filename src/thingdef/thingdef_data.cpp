@@ -266,7 +266,7 @@ static FFlagDef ActorFlags[]=
 	DEFINE_FLAG(MV, WALLJUMPV2, AActor, mvFlags),
 	DEFINE_FLAG(MV, DOUBLETAPJUMP, AActor, mvFlags),
 	DEFINE_FLAG(MV, WALLCLIMB, AActor, mvFlags),
-	DEFINE_FLAG(MV, RAMPJUMP, AActor, mvFlags),
+	DEFINE_FLAG(MV, EDGEJUMP, AActor, mvFlags),
 	DEFINE_FLAG(MV, SILENT, AActor, mvFlags),
 	DEFINE_FLAG(MV, ELEVATORJUMP, AActor, mvFlags),
 	DEFINE_FLAG(MV, AIRWALLRUN, AActor, mvFlags),

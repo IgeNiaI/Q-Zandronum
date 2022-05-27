@@ -287,7 +287,7 @@ enum
 	APROP_AirWallRun			= 53,
 	APROP_DoubleTapJump			= 54,
 	APROP_WallClimb				= 55,
-	APROP_RampJump				= 56,
+	APROP_EdgeJump				= 56,
 	APROP_ElevatorJump			= 57,
 	APROP_Silent				= 58,
 	APROP_JumpXY				= 59,

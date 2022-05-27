@@ -3624,9 +3624,9 @@ void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 		// [Leo] Spectators shouldn't be limited by the server settings.
 		if (player->onground && !player->mo->jumpTics && player->mo->secondJumpState != SJ_READY)
 		{
-			bool isRampJumper = (mvFlags & MV_RAMPJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
+			bool isEdgeJumper = (mvFlags & MV_EDGEJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
-			if (!bWasJustThrustedZ || isRampJumper)
+			if (!bWasJustThrustedZ || isEdgeJumper)
 			{
 				ULONG	ulJumpTicks;
 
@@ -3647,8 +3647,8 @@ void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
 					if ( ShouldPlaySound() )
 					{
-						if (isRampJumper && velz > 0)
-							S_Sound(this, CHAN_BODY, "*rampjump", 1, ATTN_NORM, true, player - players);
+						if (isEdgeJumper && velz > 0)
+							S_Sound(this, CHAN_BODY, "*edgejump", 1, ATTN_NORM, true, player - players);
 						else if (!JumpSoundDelay)
 							S_Sound(this, CHAN_BODY, "*jump", 1, ATTN_NORM, true, player - players);
 
@@ -3676,7 +3676,7 @@ void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 				velx += JumpVelx;
 				vely += JumpVely;
 
-				velz = (isRampJumper ? MAX(0, velz) : 0) + JumpVelz;
+				velz = (isEdgeJumper ? MAX(0, velz) : 0) + JumpVelz;
 				if ( mvFlags & MV_ELEVATORJUMP )
 				{
 					sector_t *sector = Sector;
