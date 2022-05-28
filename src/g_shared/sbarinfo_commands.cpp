@@ -41,6 +41,8 @@
 //      classes.
 ////////////////////////////////////////////////////////////////////////////////
 
+EXTERN_CVAR( Int, sv_maxlives )
+
 class CommandDrawImage : public SBarInfoCommandFlowControl
 {
 	public:
@@ -1207,6 +1209,8 @@ class CommandDrawNumber : public CommandDrawString
 							sc.ScriptError("'%s' is not a valid team.", sc.String);
 						valueArgument = t;
 					}
+					else if(sc.Compare("lives")) //Takes in a number for team
+						value = LIVES;
 					else if(sc.Compare("keys"))
 						value = KEYS;
 					else if(sc.Compare("jumptics"))
@@ -1463,6 +1467,9 @@ class CommandDrawNumber : public CommandDrawString
 				case TEAMSCORE:
 					num = TEAM_GetScore(valueArgument);
 					break;
+				case LIVES:
+					num = PLAYER_GetLivesLeft(consoleplayer) + 1;
+					break;
 				case POWERUPTIME:
 				{
 					//Get the PowerupType and check to see if the player has any in inventory.
@@ -1607,6 +1614,7 @@ class CommandDrawNumber : public CommandDrawString
 			TEAMSCORE,
 
 			// [geNia]
+			LIVES,
 			JUMPTICS,
 			SECONDJUMPTICS,
 			SECONDJUMPSREMAINING,
@@ -2752,6 +2760,8 @@ class CommandDrawBar : public SBarInfoCommand
 					sc.ScriptError("'%s' is not a valid team.", sc.String);
 				typeArgument = t;
 			}
+			else if(sc.Compare("lives"))
+				type = LIVES;
 			else if(sc.Compare("jumptics"))
 				type = JUMPTICS;
 			else if(sc.Compare("secondjumptics"))
@@ -2963,6 +2973,10 @@ class CommandDrawBar : public SBarInfoCommand
 					max = 100;
 					break;
 				}
+				case LIVES:
+					value = PLAYER_GetLivesLeft(consoleplayer) + 1;
+					max = sv_maxlives;
+					break;
 				case JUMPTICS:
 					value = statusBar->CPlayer->mo->jumpTics;
 					max = statusBar->CPlayer->mo->JumpDelay;
@@ -3058,6 +3072,7 @@ class CommandDrawBar : public SBarInfoCommand
 			// [BB]
 			TEAMSCORE,
 			// [geNia]
+			LIVES,
 			JUMPTICS,
 			SECONDJUMPTICS,
 			SECONDJUMPSREMAINING,
@@ -3842,6 +3857,8 @@ class CommandIfProperty : public SBarInfoCommandFlowControl
 				type = SAVEPERCENT;
 			else if(sc.Compare("airtime"))
 				type = AIRTIME;
+			else if(sc.Compare("lives"))
+				type = LIVES;
 			else if(sc.Compare("jumptics"))
 				type = JUMPTICS;
 			else if(sc.Compare("secondjumptics"))
@@ -3933,6 +3950,10 @@ class CommandIfProperty : public SBarInfoCommandFlowControl
 					max = 100;
 					break;
 				}
+				case LIVES:
+					value = PLAYER_GetLivesLeft(consoleplayer) + 1;
+					max = sv_maxlives;
+					break;
 				case JUMPTICS:
 					value = statusBar->CPlayer->mo->jumpTics;
 					max = statusBar->CPlayer->mo->JumpDelay;
@@ -3975,6 +3996,7 @@ class CommandIfProperty : public SBarInfoCommandFlowControl
 			AMMO,
 			AIRTIME,
 			SAVEPERCENT,
+			LIVES,
 			JUMPTICS,
 			SECONDJUMPTICS,
 			SECONDJUMPSREMAINING,
