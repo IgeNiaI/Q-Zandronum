@@ -74,6 +74,7 @@
 #include "duel.h"
 #include "invasion.h"
 #include "lastmanstanding.h"
+#include "i_system.h"
 #include <cl_commands.h>
 
 static void M_StartSkirmishGame();
@@ -866,6 +867,28 @@ CCMD ( menu_joingamewithclass )
 			playerclass = GetPrintableDisplayName( PlayerClasses[menu_joinclassidx].Type );
 		M_DoJoinFromMenu();
 	}
+}
+
+static FRandom pr_randomclass ("RandomClass");
+static int lastRandomTic;
+
+CCMD ( randomclass )
+{
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		return;
+
+	if (gametic - lastRandomTic < 35)
+	{
+		Printf( "You can only random your class once per second\n" );
+		return;
+	}
+
+	pr_randomclass.Init(I_MakeRNGSeed());
+	int classNum = pr_randomclass( PlayerClasses.Size() );
+
+	playerclass = GetPrintableDisplayName( PlayerClasses[classNum].Type );
+	Printf( "Your respawn class is now \"%s\"\n", *playerclass );
+	lastRandomTic = gametic;
 }
 
 CCMD ( menu_ignore )
