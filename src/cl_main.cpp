@@ -6109,7 +6109,7 @@ void ServerCommands::GiveInventory::Execute()
 	}
 */
 	// [BB] Prevent the client from trying to switch to a different weapon while morphed.
-	if ( player->morphTics )
+	if ( player->morphTics && !( player->mo && (player->mo->PlayerFlags & PPF_NOMORPHLIMITATIONS) ) )
 		player->PendingWeapon = WP_NOCHANGE;
 
 	// Since an item displayed on the HUD may have been given, refresh the HUD.

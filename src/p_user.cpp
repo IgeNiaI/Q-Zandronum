@@ -2684,7 +2684,7 @@ void APlayerPawn::TweakSpeeds (ticcmd_t *cmd, int &forward, int &side)
 	}
 
 	// [BC] This comes out to 50%, so we can use this for the turbosphere.
-	if (!player->morphTics && Inventory != NULL)
+	if (( !player->morphTics || ( PlayerFlags & PPF_NOMORPHLIMITATIONS ) ) && Inventory != NULL)
 	{
 		fixed_t factor;
 		if ( CLIENT_PREDICT_IsPredicting( ))
@@ -3378,7 +3378,7 @@ float APlayerPawn::QTweakSpeed()
 {
 	float speedFactor = 1.0;
 	// Powerup speed multi
-	if (!player->morphTics && Inventory != NULL)
+	if (( !player->morphTics || ( PlayerFlags & PPF_NOMORPHLIMITATIONS ) ) && Inventory != NULL)
 	{
 		if ( CLIENT_PREDICT_IsPredicting( ))
 		{

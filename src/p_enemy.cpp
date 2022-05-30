@@ -3554,7 +3554,7 @@ void P_TossItem (AActor *item)
 DEFINE_ACTION_FUNCTION(AActor, A_Pain)
 {
 	// [RH] Vary player pain sounds depending on health (ala Quake2)
-	if (self->player && self->player->morphTics == 0)
+	if ( self->player && ( ( self->player->morphTics == 0 ) || ( self->player->mo && self->player->mo->PlayerFlags & PPF_NOMORPHLIMITATIONS ) ) )
 	{
 		const char *pain_amount;
 		FSoundID sfx_id;
