@@ -815,7 +815,11 @@ public:
 	// [BL] Should the player be able to use weapons?
 	bool		bUnarmed;
 
-	// [geNia] 
+	// [geNia] Force override the player skin. This can only be set from ACS.
+	FNameNoInit SkinOverride;
+	bool		overrideWeaponPreferredSkin;
+
+	// [geNia]
 	int			ticsToSpyNext;
 	int			pnumToSpyNext;
 

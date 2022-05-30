@@ -1585,6 +1585,7 @@ special
 -149:CheckSolidFooting(int,int):int,
 -150:GetNetworkState():int,
 -151:SetPlayerWeaponZoomFactor(int,int;int):void,
+-152:SetPlayerSkin(int,str;bool):void,
 
 // ZDoom/GZDoom.
 -200:CheckClass(str):bool,

@@ -4308,6 +4308,19 @@ void SERVERCOMMANDS_SetPlayerLogNumber ( const ULONG ulPlayer, const int Arg0, U
 }
 
 //*****************************************************************************
+void SERVERCOMMANDS_SetPlayerSkin ( const ULONG ulPlayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
+		return;
+
+	ServerCommands::SetPlayerSkin command;
+	command.SetPlayer ( &players[ulPlayer] );
+	command.SetSkinName ( players[ulPlayer].SkinOverride );
+	command.SetOverrideWeaponSkin ( players[ulPlayer].overrideWeaponPreferredSkin );
+	command.sendCommandToClients ( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
 //
 void SERVERCOMMANDS_SetCVar( const FBaseCVar &CVar, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
