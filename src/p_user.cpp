@@ -2962,8 +2962,18 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 	if (( cl_skins <= 0 ) || ((( cl_skins >= 2 ) && ( skins[player->userinfo.GetSkin()].bCheat ))) || (actor->flags4 & MF4_NOSKIN) || player->morphTics )
 		lSkin = R_FindSkin( "base", player->CurrentPlayerClass );
 
+	if ( player->SkinOverride != NAME_None )
+	{
+		LONG lDesiredSkin = R_FindSkin( player->SkinOverride.GetChars(), player->CurrentPlayerClass );
+		if ( lDesiredSkin != lSkin )
+		{
+			lSkin = lDesiredSkin;
+			spritenum = skins[lSkin].sprite;
+		}
+	}
+
 	// [BB] If the weapon has a PreferredSkin defined, make the player use it here.
-	if ( player->ReadyWeapon && ( player->ReadyWeapon->PreferredSkin != NAME_None ) )
+	if ( player->ReadyWeapon && ( player->ReadyWeapon->PreferredSkin != NAME_None ) && !player->overrideWeaponPreferredSkin )
 	{
 		LONG lDesiredSkin = R_FindSkin( player->ReadyWeapon->PreferredSkin.GetChars(), player->CurrentPlayerClass );
 		if ( lDesiredSkin != lSkin )

@@ -400,3 +400,10 @@ Command SetPlayerLogNumber
 	Player player
 	Short arg0
 EndCommand
+
+Command SetPlayerSkin
+	ExtendedCommand
+	Player player
+	Name skinName
+	bool overrideWeaponSkin
+EndCommand

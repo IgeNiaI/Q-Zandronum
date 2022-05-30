@@ -7366,6 +7366,14 @@ void ServerCommands::SetPlayerLogNumber::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetPlayerSkin::Execute()
+{
+	player->SkinOverride = skinName;
+	player->overrideWeaponPreferredSkin = overrideWeaponSkin;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::ReplaceTextures::Execute()
 {
 	DLevelScript::ReplaceTextures( fromTexture, toTexture, textureFlags );

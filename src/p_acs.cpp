@@ -5411,6 +5411,7 @@ enum EACSFunctions
 	ACSF_CheckSolidFooting,
 	ACSF_GetNetworkState,
 	ACSF_SetPlayerWeaponZoomFactor,
+	ACSF_SetPlayerSkin,
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -7785,6 +7786,27 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 					}
 				}
 			}
+			return 0;
+
+		case ACSF_SetPlayerSkin:
+			{
+				if (argCount >= 2)
+				{
+					const ULONG ulPlayer = static_cast<ULONG> (args[0]);
+
+					if (PLAYER_IsValidPlayer(ulPlayer))
+					{
+						const char* skinName = FBehavior::StaticLookupString( args[1] );
+						bool		overrideWeaponPreferredSkin = ( argCount >= 3 ) ? !!args[2] : false;
+						players[ulPlayer].SkinOverride = skinName;
+						players[ulPlayer].overrideWeaponPreferredSkin = overrideWeaponPreferredSkin;
+
+						if ( NETWORK_GetState() == NETSTATE_SERVER )
+							SERVERCOMMANDS_SetPlayerSkin( ulPlayer );
+					}
+				}
+			}
+
 			return 0;
 
 		default:
