@@ -938,11 +938,12 @@ void G_AddViewPitch (int look, bool mouse)
 	if (CLIENTDEMO_IsPlaying())
 		mouse = false;
 	look <<= 16;
+	look = (int) (look * mouse_pitch);
 	if (players[consoleplayer].playerstate != PST_DEAD &&		// No adjustment while dead.
 		players[consoleplayer].ReadyWeapon != NULL &&			// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)		// No adjustment if it is non-positive.
 	{
-		look = int(look * mouse_pitch * pow(players[consoleplayer].ReadyWeapon->FOVScale, 1 / mouse_zoomedscale));
+		look = int(look * pow(players[consoleplayer].ReadyWeapon->FOVScale, 1 / mouse_zoomedscale));
 	}
 	// [BB] Allow spectators to freelook no matter what. Note: This probably causes some
 	// sky rendering errors in software mode.
@@ -989,11 +990,12 @@ void G_AddViewAngle (int yaw, bool mouse)
 	if (CLIENTDEMO_IsPlaying())
 		mouse = false;
 	yaw <<= 16;
+	yaw = (int) (yaw * mouse_yaw);
 	if (players[consoleplayer].playerstate != PST_DEAD &&	// No adjustment while dead.
 		players[consoleplayer].ReadyWeapon != NULL &&		// No adjustment if no weapon.
 		players[consoleplayer].ReadyWeapon->FOVScale > 0)	// No adjustment if it is non-positive.
 	{
-		yaw = int(yaw * mouse_yaw * pow(players[consoleplayer].ReadyWeapon->FOVScale, 1 / mouse_zoomedscale));
+		yaw = int(yaw * pow(players[consoleplayer].ReadyWeapon->FOVScale, 1 / mouse_zoomedscale));
 	}
 	LocalViewAngle -= yaw;
 	if (yaw != 0)
