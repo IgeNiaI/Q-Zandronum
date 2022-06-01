@@ -5661,9 +5661,13 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 {
 	if (bombdistance <= 0)
 		return;
-	fulldamagedistance = clamp<int>(fulldamagedistance, 0, bombdistance - 1);
+	fulldamagedistance = clamp<int>(fulldamagedistance, 0, bombdistance);
 
-	double bombdistancefloat = 1.f / (double)(bombdistance - fulldamagedistance);
+	double bombdistancefloat;
+	if (fulldamagedistance < bombdistance)
+		bombdistancefloat = 1.f / (double)(bombdistance - fulldamagedistance);
+	else
+		bombdistancefloat = 1.f;
 	double bombdamagefloat = (double)bombdamage;
 
 	FVector3 bombvec(FIXED2FLOAT(bombspot->x), FIXED2FLOAT(bombspot->y), FIXED2FLOAT(bombspot->z));
@@ -5717,6 +5721,13 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 			double len;
 			fixed_t dx, dy;
 			double boxradius;
+
+			double bombdistancefloat;
+			if (fulldamagedistance < bombdistance)
+				bombdistancefloat = 1.f / (double)(bombdistance - fulldamagedistance);
+			else
+				bombdistancefloat = 0.f;
+			double bombdamagefloat = (double)bombdamage;
 
 			dx = abs(thing->x - bombspot->x);
 			dy = abs(thing->y - bombspot->y);
