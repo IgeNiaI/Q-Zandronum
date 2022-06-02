@@ -96,6 +96,14 @@ void AFastProjectile::Tick ()
 							return;
 						}
 					}
+					
+					if ((( ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && target && target->player )
+					{
+						if ( target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( this ) )
+							PLAYER_StruckPlayer( target->player );
+						else
+							target->player->ulConsecutiveHits = 0;
+					}
 
 					P_ExplodeMissile (this, BlockingLine, BlockingMobj);
 					return;
@@ -117,6 +125,15 @@ void AFastProjectile::Tick ()
 
 				z = floorz;
 				P_HitFloor (this);
+				
+				if ((( ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && target && target->player )
+				{
+					if ( target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( this ) )
+						PLAYER_StruckPlayer( target->player );
+					else
+						target->player->ulConsecutiveHits = 0;
+				}
+
 				P_ExplodeMissile (this, NULL, NULL);
 				return;
 			}
@@ -127,6 +144,14 @@ void AFastProjectile::Tick ()
 				{
 					Destroy ();
 					return;
+				}
+				
+				if ((( ulSTFlags & STFL_EXPLODEONDEATH ) == false ) && target && target->player )
+				{
+					if ( target->player->bStruckPlayer && PLAYER_AwardMedalFromThisActor( this ) )
+						PLAYER_StruckPlayer( target->player );
+					else
+						target->player->ulConsecutiveHits = 0;
 				}
 
 				z = ceilingz - height;
