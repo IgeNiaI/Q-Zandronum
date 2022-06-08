@@ -834,7 +834,11 @@ void P_DrawRailTrail (AActor *source, const FVector3 &start, const FVector3 &end
 			pos += spiral_step;
 			deg += FAngle(r_rail_spiralsparsity * 14);
 
-			if (color1 == -1)
+			if (flags & RAF_TRANSFERTRANSLATION)
+			{
+				p->color = source->Translation;
+			}
+			else if (color1 == -1)
 			{
 				int rand = M_Random();
 
@@ -907,8 +911,12 @@ void P_DrawRailTrail (AActor *source, const FVector3 &start, const FVector3 &end
 			pos += trail_step;
 
 			p->bright = fullbright;
-
-			if (color2 == -1)
+			
+			if (flags & RAF_TRANSFERTRANSLATION)
+			{
+				p->color = source->Translation;
+			}
+			else if (color2 == -1)
 			{
 				int rand = M_Random();
 
@@ -960,6 +968,10 @@ void P_DrawRailTrail (AActor *source, const FVector3 &start, const FVector3 &end
 			if (thing) {
 				thing->angle = angle;
 				thing->target = source;
+				if (flags & RAF_TRANSFERTRANSLATION)
+				{
+					thing->Translation = source->Translation;
+				}
 			}
 			pos += trail_step;
 		}
