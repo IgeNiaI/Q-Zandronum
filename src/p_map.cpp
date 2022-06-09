@@ -4217,7 +4217,7 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		{
 			shootz = t1->z - t1->floorclip + t1->player->viewheight;
 		}
-		
+
 		if (damageType == NAME_Melee || damageType == NAME_Hitscan)
 		{
 			// this is coming from a weapon attack function which needs to transfer information to the obituary code,
@@ -5662,7 +5662,7 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 			continue;
 		}
 
-		// a much needed option: monsters that fire explosive projectiles cannot 
+		// a much needed option: monsters that fire explosive projectiles cannot
 		// be hurt by projectiles fired by a monster of the same type.
 		// Controlled by the DONTHARMCLASS and DONTHARMSPECIES flags.
 		if ((bombsource && !thing->player) // code common to both checks
@@ -5785,10 +5785,14 @@ void P_RadiusAttack(AActor *bombspot, AActor *bombsource, int bombdamage, int bo
 							FVector3 explosionToPlayer = thingPos - FVector3(FIXED2FLOAT(bombspot->x), FIXED2FLOAT(bombspot->y), FIXED2FLOAT(bombspot->z + bombspotHeightOffset));
 							explosionToPlayer.MakeUnit();
 
+							if (bombsource == thing)
+							{
+								points *= selfthrustscale;
+							}
 							int pushDamage = damage;
 							if ( bombsource && bombsource->Inventory )
 								bombsource->Inventory->ModifyDamage(damage, bombmod, pushDamage, false); // check for attacker PowerDamage
-							explosionToPlayer *= pushDamage * 0.35f;
+							explosionToPlayer *= pushDamage * 6 / (double)thing->Mass;
 
 							thing->velx += FLOAT2FIXED(explosionToPlayer.X);
 							thing->vely += FLOAT2FIXED(explosionToPlayer.Y);
