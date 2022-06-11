@@ -324,6 +324,7 @@ public:
 	virtual FState *GetAltAtkState (bool hold);
 	virtual FState *GetRelState ();
 	virtual FState *GetZoomState ();
+	virtual FState *GetUserState (int userNum);
 
 	virtual void PostMorphWeapon ();
 	virtual void EndPowerup ();
