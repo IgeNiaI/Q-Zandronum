@@ -145,6 +145,7 @@ EXTERN_CVAR( Float, turbo )
 EXTERN_CVAR( Float, sv_gravity )
 EXTERN_CVAR( Float, sv_aircontrol )
 EXTERN_CVAR( Float, splashfactor )
+EXTERN_CVAR( Float, sv_headbob )
 EXTERN_CVAR( Bool, cl_hideaccount )
 EXTERN_CVAR( String, name )
 
@@ -4992,6 +4993,10 @@ void ServerCommands::SetGameModeLimits::Execute()
 	// [geNia] Read in, and set the value for fov_change_cooldown_tics.
 	Value.Int = fovChangeCooldownTics;
 	fov_change_cooldown_tics.ForceSet( Value, CVAR_Int );
+
+	// [geNia] Read in, and set the value for sv_headbob.
+	Value.Float = headbob;
+	sv_headbob.ForceSet( Value, CVAR_Float );
 }
 
 //*****************************************************************************

@@ -87,6 +87,7 @@ CVAR (Bool, sv_showwarnings, false, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
 
 EXTERN_CVAR( Float, sv_aircontrol )
 EXTERN_CVAR( Float, splashfactor )
+EXTERN_CVAR( Float, sv_headbob )
 EXTERN_CVAR( Int, fov_change_cooldown_tics )
 
 //*****************************************************************************
@@ -2047,6 +2048,8 @@ void SERVERCOMMANDS_SetGameModeLimits( ULONG ulPlayerExtra, ServerCommandFlags f
 	command.SetTheLimitCommands( sv_limitcommands );
 	// [geNia] Send fov_change_cooldown_tics
 	command.SetFovChangeCooldownTics( fov_change_cooldown_tics );
+	// [geNia] Send sv_headbob
+	command.SetHeadbob( sv_headbob );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
