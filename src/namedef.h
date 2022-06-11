@@ -219,6 +219,10 @@ xx(Flash)
 xx(AltFlash)
 xx(Reload)
 xx(Zoom)
+xx(User1)
+xx(User2)
+xx(User3)
+xx(User4)
 
 // State names used by ASwitchableDecoration
 xx(Active)

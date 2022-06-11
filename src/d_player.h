@@ -387,6 +387,10 @@ enum
 	WF_WEAPONRELOADOK	= 1 << 5,		// [XA] Okay to reload this weapon.
 	WF_WEAPONZOOMOK		= 1 << 6,		// [XA] Okay to use weapon zoom function.
 	WF_REFIRESWITCHOK	= 1 << 7,		// Mirror WF_WEAPONSWITCHOK for A_ReFire
+	WF_WEAPONUSER1OK	= 1 << 8,		// [geNia] Okay to use user1 state
+	WF_WEAPONUSER2OK	 = 1 << 9,		// [geNia] Okay to use user2 state
+	WF_WEAPONUSER3OK	 = 1 << 10,		// [geNia] Okay to use user3 state
+	WF_WEAPONUSER4OK	 = 1 << 11,		// [geNia] Okay to use user4 state
 };	
 
 
@@ -615,7 +619,7 @@ public:
 	bool		backpack;
 	
 	int			fragcount;				// [RH] Cumulative frags for this player
-	BYTE		WeaponState;
+	int			WeaponState;
 
 	AWeapon	   *ReadyWeapon;
 	AWeapon	   *PendingWeapon;			// WP_NOCHANGE if not changing
