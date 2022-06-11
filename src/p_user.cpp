@@ -104,6 +104,13 @@ CUSTOM_CVAR (Float, cl_spectatormove, 1.0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG) {
 EXTERN_CVAR (Bool, cl_run)
 EXTERN_CVAR (Bool, cl_spykiller)
 
+CUSTOM_CVAR (Float, sv_headbob, 0.25f, CVAR_SERVERINFO|CVAR_NOSAVE|CVAR_GAMEMODESETTING)
+{
+	// [geNia] Let the clients know about the change.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_SetCVar(sv_headbob);
+}
+
 CUSTOM_CVAR (Float, movesway, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
 	if (self < 0)
@@ -3141,10 +3148,7 @@ void P_CalcHeight (player_t *player)
 		}
 		else
 		{
-			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				player->bob = FixedMul( player->bob, 16384 );
-			else
-				player->bob = FixedMul (player->bob, players[consoleplayer].userinfo.GetMoveBob());
+			player->bob = FixedMul( player->bob, 16384 );
 
 			// [BB] I've seen bob becoming negative for a high ping clients (250+) on low gravity servers (sv_gravity 200)
 			// when moving forward in the air for too long. Overflow problem? Nevertheless, setting negative values
@@ -3218,7 +3222,7 @@ void P_CalcHeight (player_t *player)
 	{
 		bob = 0;
 	}
-	player->viewz = player->mo->z + player->viewheight + bob;
+	player->viewz = player->mo->z + player->viewheight + (fixed_t)(bob * sv_headbob * 4);
 
 	if (cl_spectsource && player->bSpectating)
 		return;

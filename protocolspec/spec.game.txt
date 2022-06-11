@@ -37,6 +37,7 @@ Command SetGameModeLimits
 	String theLobby
 	Bool theLimitCommands
 	Byte fovChangeCooldownTics
+	Float headbob
 EndCommand
 
 Command SetGameEndLevelDelay

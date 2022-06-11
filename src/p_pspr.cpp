@@ -540,8 +540,9 @@ void P_BobWeapon (player_t *player, fixed_t *x, fixed_t *y)
 
 	if (curbob != 0)
 	{
-		fixed_t bobx = FixedMul(player->bob, rangex);
-		fixed_t boby = FixedMul(player->bob, rangey);
+		fixed_t bob = FixedMul(player->bob, players[consoleplayer].userinfo.GetMoveBob()) * 4;
+		fixed_t bobx = FixedMul(bob, rangex);
+		fixed_t boby = FixedMul(bob, rangey);
 		switch (bobstyle)
 		{
 		case AWeapon::BobNormal:
