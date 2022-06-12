@@ -168,7 +168,7 @@ void P_SetPsprite (player_t *player, int position, FState *state, bool nofunctio
 		}
 		if (state->GetMisc2())
 		{
-			psp->sy = state->GetMisc2()<<FRACBITS;
+			psp->sy = (state->GetMisc2()<<FRACBITS) + 0x6000;
 		}
 
 		// [BB] Some action functions rely on the fact that ReadyWeapon is not NULL.
