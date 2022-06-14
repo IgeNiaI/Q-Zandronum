@@ -228,10 +228,15 @@ void ABaseMonsterInvasionSpot::Tick( void )
 		if (( this->flags & MF_AMBUSH ) == false )
 		{
 			pFog = Spawn<ATeleportFog>( x, y, z + TELEFOGHEIGHT, ALLOW_REPLACE );
+			if ( pFog )
+				pFog->target = pActor;
 
 			// If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 		}
 		pActor->pMonsterSpot = this;
 		pActor->ulInvasionWave = g_ulCurrentWave;
@@ -398,10 +403,15 @@ void ABasePickupInvasionSpot::Tick( void )
 		if (( this->flags & MF_AMBUSH ) == false )
 		{
 			pFog = Spawn<ATeleportFog>( x, y, z + TELEFOGHEIGHT, ALLOW_REPLACE );
+			if ( pFog )
+				pFog->target = pActor;
 
 			// If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 		}
 		pActor->pPickupSpot = this;
 	}
@@ -564,10 +574,15 @@ void ABaseWeaponInvasionSpot::Tick( void )
 		if (( this->flags & MF_AMBUSH ) == false )
 		{
 			pFog = Spawn<ATeleportFog>( x, y, z + TELEFOGHEIGHT, ALLOW_REPLACE );
+			if ( pFog )
+				pFog->target = pActor;
 
 			// If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 		}
 
 		// Destroy the weapon spot since it doesn't need to persist.
@@ -1061,10 +1076,15 @@ void INVASION_BeginWave( ULONG ulWave )
 		if (( pMonsterSpot->flags & MF_AMBUSH ) == false )
 		{
 			pFog = Spawn<ATeleportFog>( pMonsterSpot->x, pMonsterSpot->y, pMonsterSpot->z + TELEFOGHEIGHT, ALLOW_REPLACE );
+			if ( pFog )
+				pFog->target = pActor;
 
 			// If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 		}
 		pActor->pMonsterSpot = pMonsterSpot;
 		pActor->ulInvasionWave = g_ulCurrentWave;
@@ -1142,10 +1162,15 @@ void INVASION_BeginWave( ULONG ulWave )
 		if (( pPickupSpot->flags & MF_AMBUSH ) == false )
 		{
 			pFog = Spawn<ATeleportFog>( pPickupSpot->x, pPickupSpot->y, pPickupSpot->z + TELEFOGHEIGHT, ALLOW_REPLACE );
+			if ( pFog )
+				pFog->target = pActor;
 
 			// If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 		}
 		pActor->pPickupSpot = pPickupSpot;
 	}
@@ -1191,10 +1216,15 @@ void INVASION_BeginWave( ULONG ulWave )
 		if (( pWeaponSpot->flags & MF_AMBUSH ) == false )
 		{
 			pFog = Spawn<ATeleportFog>( pWeaponSpot->x, pWeaponSpot->y, pWeaponSpot->z + TELEFOGHEIGHT, ALLOW_REPLACE );
+			if ( pFog )
+				pFog->target = pActor;
 
 			// If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 		}
 
 		// Destroy the weapon spot since it doesn't need to persist.
