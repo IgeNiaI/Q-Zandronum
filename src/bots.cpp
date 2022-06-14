@@ -371,6 +371,8 @@ void	SERVERCONSOLE_ReListPlayers( void );
 // Ugh.
 EXTERN_CVAR( Bool, sv_cheats );
 
+EXTERN_CVAR (Bool, cl_run)
+
 //*****************************************************************************
 //	FUNCTIONS
 
@@ -2002,6 +2004,8 @@ void CSkullBot::EndTick( void )
 	if ( m_bSideMovePersist )
 		m_pPlayer->cmd.ucmd.sidemove = static_cast<short> ( m_lSideMove << 8 );
 	m_pPlayer->cmd.ucmd.buttons |= m_lButtons;
+	if ( cl_run )
+		m_pPlayer->cmd.ucmd.buttons |= BT_SPEED;
 
 	g_BotCycles.Unclock();
 
