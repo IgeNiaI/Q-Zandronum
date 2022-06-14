@@ -135,11 +135,14 @@ DEFINE_ACTION_FUNCTION(AActor, A_Beacon)
 	rebel->angle = self->angle;
 	an = self->angle >> ANGLETOFINESHIFT;
 	pFog = Spawn<ATeleportFog> (rebel->x + 20*finecosine[an], rebel->y + 20*finesine[an], rebel->z + TELEFOGHEIGHT, ALLOW_REPLACE);
+	if ( pFog )
+		pFog->target = rebel;
 	// [BC] Spawn the teleport fog.
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 		( pFog ))
 	{
 		SERVERCOMMANDS_SpawnThing( pFog );
+		SERVERCOMMANDS_SetThingTarget( pFog );
 	}
 
 	if (--self->health < 0)

@@ -351,10 +351,15 @@ DEFINE_ACTION_FUNCTION(AActor, A_GenWizard)
 
 			// Heretic did not offset it by TELEFOGHEIGHT, so I won't either.
 			mo = Spawn<ATeleportFog> (self->x, self->y, self->z, ALLOW_REPLACE);
+			if ( mo )
+				mo->target = self;
 
 			// [BC]
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( mo );
+				SERVERCOMMANDS_SetThingTarget( mo );
+			}
 		}
 	}
 }

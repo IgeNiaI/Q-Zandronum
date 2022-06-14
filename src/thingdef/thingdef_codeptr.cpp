@@ -3715,10 +3715,15 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Respawn)
 		if (flags & RSF_FOG)
 		{
 			AActor *pFog = Spawn<ATeleportFog> (self->x, self->y, self->z + TELEFOGHEIGHT, ALLOW_REPLACE);
+			if ( pFog )
+				pFog->target = self;
 
 			// [BB] If we're the server, tell the clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 		}
 		if (self->CountsAsKill())
 		{

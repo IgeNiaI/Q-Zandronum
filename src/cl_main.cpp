@@ -2808,9 +2808,13 @@ void ServerCommands::SpawnPlayer::Execute()
 		unsigned an = pActor->angle >> ANGLETOFINESHIFT;
 		// [CK] Don't spawn fog for facing west spawners online, if compatflag is on.
 		if (!(pActor->angle == ANGLE_180 && (zacompatflags & ZACOMPATF_SILENT_WEST_SPAWNS)))
-			Spawn( "TeleportFog", pActor->x + 20 * finecosine[an],
+		{
+			AActor *fog = Spawn( "TeleportFog", pActor->x + 20 * finecosine[an],
 				pActor->y + 20 * finesine[an],
 				pActor->z + TELEFOGHEIGHT, ALLOW_REPLACE );
+			if ( fog )
+				fog->target = pActor;
+		}
 	}
 
 	pPlayer->playerstate = PST_LIVE;
@@ -4549,7 +4553,11 @@ void ServerCommands::TeleportThing::Execute()
 {
 	// Spawn teleport fog at the source.
 	if ( sourcefog )
-		Spawn<ATeleportFog>( actor->x, actor->y, actor->z + (( actor->flags & MF_MISSILE ) ? 0 : TELEFOGHEIGHT ), ALLOW_REPLACE );
+	{
+		AActor *fog = Spawn<ATeleportFog>( actor->x, actor->y, actor->z + (( actor->flags & MF_MISSILE ) ? 0 : TELEFOGHEIGHT ), ALLOW_REPLACE );
+		if ( fog )
+			fog->target = actor;
+	}
 
 	// Set the thing's new position.
 	CLIENT_MoveThing( actor, x, y, z );
@@ -4560,10 +4568,12 @@ void ServerCommands::TeleportThing::Execute()
 		// Spawn the fog slightly in front of the thing's destination.
 		angle_t fineangle = angle >> ANGLETOFINESHIFT;
 
-		Spawn<ATeleportFog>( actor->x + ( 20 * finecosine[fineangle] ),
+		AActor *fog = Spawn<ATeleportFog>( actor->x + ( 20 * finecosine[fineangle] ),
 			actor->y + ( 20 * finesine[fineangle] ),
 			actor->z + (( actor->flags & MF_MISSILE ) ? 0 : TELEFOGHEIGHT ),
 			ALLOW_REPLACE );
+		if ( fog )
+			fog->target = actor;
 	}
 
 	// Set the thing's new momentum.

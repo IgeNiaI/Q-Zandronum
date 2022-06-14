@@ -121,10 +121,15 @@ bool P_Thing_Spawn (int tid, AActor *source, int type, angle_t angle, bool fog, 
 					AActor	*pFog;
 
 					pFog = Spawn<ATeleportFog> (spot->x, spot->y, spot->z + TELEFOGHEIGHT, ALLOW_REPLACE);
+					if ( pFog )
+						pFog->target = mobj;
 
 					// [BC] If we're the server, tell clients to spawn the thing.
 					if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( pFog ))
+					{
 						SERVERCOMMANDS_SpawnThing( pFog );
+						SERVERCOMMANDS_SetThingTarget ( pFog );
+					}
 				}
 
 				// [BC] Respawned keys in Skulltag CANNOT be dropped items.
@@ -177,16 +182,26 @@ bool P_MoveThing(AActor *source, fixed_t x, fixed_t y, fixed_t z, bool fog)
 		if (fog)
 		{
 			pFog = Spawn<ATeleportFog> (x, y, z + TELEFOGHEIGHT, ALLOW_REPLACE);
+			if ( pFog )
+				pFog->target = source;
 
 			// [BC] If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 
 			pFog = Spawn<ATeleportFog> (oldx, oldy, oldz + TELEFOGHEIGHT, ALLOW_REPLACE);
+			if ( pFog )
+				pFog->target = source;
 
 			// [BC] If we're the server, tell clients to spawn the fog.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			{
 				SERVERCOMMANDS_SpawnThing( pFog );
+				SERVERCOMMANDS_SetThingTarget ( pFog );
+			}
 		}
 		source->PrevX = x;
 		source->PrevY = y;
