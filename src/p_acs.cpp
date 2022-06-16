@@ -6866,9 +6866,11 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 			if ((flags & WARPF_NOCHECKPOSITION) || P_TestMobjLocation(caller))
 			{
+				bool noInterpolation = true;
 				if (flags & WARPF_TESTONLY)
 				{
 					caller->SetOrigin(oldx, oldy, oldz);
+					noInterpolation = false;
 				}
 				else
 				{
@@ -6886,18 +6888,21 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 						caller->PrevX += caller->x - oldx;
 						caller->PrevY += caller->y - oldy;
 						caller->PrevZ += caller->z - oldz;
+						noInterpolation = false;
 					}
 					else if (flags & WARPF_COPYINTERPOLATION)
 					{
 						caller->PrevX = caller->x + reference->PrevX - reference->x;
 						caller->PrevY = caller->y + reference->PrevY - reference->y;
 						caller->PrevZ = caller->z + reference->PrevZ - reference->z;
+						noInterpolation = false;
 					}
 					else if (flags & WARPF_INTERPOLATE)
 					{
 						caller->PrevX = caller->x;
 						caller->PrevY = caller->y;
 						caller->PrevZ = caller->z;
+						noInterpolation = false;
 					}
 				}
 
@@ -6908,7 +6913,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 				// [BB] Inform the clients.
 				if ( NETWORK_GetState() == NETSTATE_SERVER )
-					SERVERCOMMANDS_MoveThingIfChanged( caller, oldPositionData );
+					SERVERCOMMANDS_MoveThingIfChanged( caller, oldPositionData, noInterpolation );
 
 				return true;
 			}

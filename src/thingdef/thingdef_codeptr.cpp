@@ -5549,6 +5549,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Warp)
 	
 	if ((flags & WARPF_NOCHECKPOSITION) || P_TestMobjLocation(self))
 	{
+		bool noInterpolation = false;
 		if (flags & WARPF_TESTONLY)
 		{
 			self->SetOrigin(oldx, oldy, oldz);
@@ -5581,12 +5582,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Warp)
 				self->PrevX = self->x;
 				self->PrevY = self->y;
 				self->PrevZ = self->z;
+				noInterpolation = true;
 			}
 		}
 
 		// [BB] Inform the clients.
 		if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
-			SERVERCOMMANDS_MoveThingIfChanged( self, oldPositionData );
+			SERVERCOMMANDS_MoveThingIfChanged( self, oldPositionData, noInterpolation );
 
 		if (success_state)
 		{

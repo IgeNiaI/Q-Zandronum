@@ -79,7 +79,7 @@ enum
 	CM_LAST_X		= 1 << 12,
 	CM_LAST_Y		= 1 << 13,
 	CM_LAST_Z		= 1 << 14,
-	CM_NOLAST		= 1 << 15, // [WS] We do not have enough room for more flags here.
+	CM_NOSMOOTH		= 1 << 15, // [WS] We do not have enough room for more flags here.
 };
 
 // [BB] Flags for client_MovePlayer/SERVERCOMMANDS_MovePlayer

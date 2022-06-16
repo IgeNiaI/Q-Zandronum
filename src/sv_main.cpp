@@ -4927,7 +4927,10 @@ void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor )
 		ulBits |= CM_VELZ;
 
 	if ( ulBits )
+	{
+		ulBits |= CM_NOSMOOTH;
 		SERVERCOMMANDS_MoveThing( pActor, ulBits );
+	}
 }
 
 //*****************************************************************************

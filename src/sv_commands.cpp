@@ -1193,7 +1193,7 @@ void SERVERCOMMANDS_LevelSpawnThingNoNetID( AActor *pActor, ULONG ulPlayerExtra,
 /*
  * [TP] Compares actor position data to a previous state and calls SERVERCOMMANDS_MoveThing to send appropriate updates.
  */
-void SERVERCOMMANDS_MoveThingIfChanged( AActor *actor, const MoveThingData &oldData, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_MoveThingIfChanged( AActor *actor, const MoveThingData &oldData, bool noSmooth, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( EnsureActorHasNetID( actor ) )
 	{
@@ -1226,6 +1226,9 @@ void SERVERCOMMANDS_MoveThingIfChanged( AActor *actor, const MoveThingData &oldD
 		if ( actor->movedir != oldData.movedir )
 			bits |= CM_MOVEDIR;
 
+		if ( noSmooth )
+			bits |= CM_NOSMOOTH;
+
 		if ( bits != 0 )
 			SERVERCOMMANDS_MoveThing( actor, bits, ulPlayerExtra, flags );
 	}
@@ -1241,8 +1244,6 @@ void SERVERCOMMANDS_MoveThing( AActor *actor, ULONG bits, ULONG ulPlayerExtra, S
 	// [BB] Only skip updates, if sent to all players.
 	if ( flags == 0 )
 		RemoveUnnecessaryPositionUpdateFlags ( actor, bits );
-	else // [WS] This will inform clients not to set their lastX/Y/Z with the new position.
-		bits |= CM_NOLAST;
 
 	// [WS] Check to see if the position can be re-used by the client.
 	CheckPositionReuse( actor, bits );
