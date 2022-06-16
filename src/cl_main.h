@@ -159,7 +159,6 @@ void				CLIENT_WaitForServer( void );
 void				CLIENT_AuthenticateLevel( const char *pszMapName );
 AActor				*CLIENT_SpawnThing( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, LONG lNetID, BYTE spawnFlags = 0 );
 void				CLIENT_SpawnMissile( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, fixed_t VelX, fixed_t VelY, fixed_t VelZ, LONG lNetID, LONG lTargetNetID );
-void				CLIENT_MoveThing( AActor *pActor, fixed_t X, fixed_t Y, fixed_t Z );
 AActor				*CLIENT_FindThingByNetID( LONG lID );
 void				CLIENT_DisplayMOTD( void );
 void				CLIENT_RestoreSpecialPosition( AActor *pActor );

@@ -210,10 +210,11 @@ void CLIENT_PREDICT_PlayerPredict( void )
 	client_predict_SaveOnGroundStatus ( pPlayer, g_ulGameTick );
 
 	// Set the player's position as told to him by the server.
-	CLIENT_MoveThing( pPlayer->mo,
-		pPlayer->ServerXYZ[0],
-		pPlayer->ServerXYZ[1],
-		pPlayer->ServerXYZ[2] );
+	pPlayer->mo->serverX = pPlayer->ServerXYZ[0];
+	pPlayer->mo->serverY = pPlayer->ServerXYZ[1];
+	pPlayer->mo->serverZ = pPlayer->ServerXYZ[2];
+	pPlayer->mo->serverPosUpdated = true;
+	pPlayer->mo->MoveToServerPosition();
 
 	// Set the player's velocity as told to him by the server.
 	pPlayer->mo->velx = pPlayer->ServerXYZVel[0];

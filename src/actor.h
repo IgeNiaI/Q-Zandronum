@@ -760,6 +760,7 @@ public:
 	virtual bool IsActive( void ) const;
 
 	virtual void Tick ();
+	virtual void MoveToServerPosition ();
 
 	// Called when actor dies
 	virtual void Die (AActor *source, AActor *inflictor, int dmgflags = 0);
@@ -969,8 +970,12 @@ public:
 // info for drawing
 // NOTE: The first member variable *must* be x.
 	fixed_t	 		x,y,z;
+	fixed_t			serverX, serverY, serverZ;
+	bool			serverPosUpdated;
 	AActor			*snext, **sprev;	// links in sector (if needed)
 	angle_t			angle;
+	angle_t			serverAngle;
+	bool			serverAngleUpdated;
 	WORD			sprite;				// used to find patch_t and flip value
 	BYTE			frame;				// sprite frame to draw
 	fixed_t			scaleX, scaleY;		// Scaling values; FRACUNIT is normal size
@@ -984,6 +989,8 @@ public:
 
 // interaction info
 	fixed_t			pitch;
+	fixed_t			serverPitch;
+	bool			serverPitchUpdated;
 	angle_t			roll;	// This was fixed_t before, which is probably wrong
 	FBlockNode		*BlockNode;			// links in blocks (if needed)
 	struct sector_t	*Sector;
@@ -999,6 +1006,8 @@ public:
 	fixed_t			radius, height;		// for movement checking
 	fixed_t			projectilepassheight;	// height for clipping projectile movement against this actor
 	fixed_t			velx, vely, velz;	// velocity
+	fixed_t			serverVelX, serverVelY, serverVelZ;
+	bool			serverVelXUpdated, serverVelYUpdated, serverVelZUpdated;
 	SDWORD			tics;				// state tic counter
 	FState			*state;
 	SDWORD			Damage;			// For missiles and monster railgun

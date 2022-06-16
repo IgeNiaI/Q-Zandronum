@@ -99,6 +99,8 @@
 
 // EXTERNAL FUNCTION PROTOTYPES --------------------------------------------
 
+bool	P_OldAdjustFloorCeil (AActor *thing);
+
 // [BB] Added bGiveInventory and moved the declaration to g_game.h.
 //void G_PlayerReborn (int player);
 
@@ -4144,6 +4146,37 @@ void AActor::Tick ()
 	PrevZ = z;
 	PrevAngle = angle;
 
+	if (serverPosUpdated)
+	{
+		MoveToServerPosition();
+		serverPosUpdated = false;
+	}
+	if (serverAngleUpdated)
+	{
+		angle = serverAngle;
+		serverAngleUpdated = false;
+	}
+	if (serverPitchUpdated)
+	{
+		pitch = serverPitch;
+		serverPitchUpdated = false;
+	}
+	if (serverVelXUpdated)
+	{
+		velx = serverVelX;
+		serverVelXUpdated = false;
+	}
+	if (serverVelYUpdated)
+	{
+		vely = serverVelY;
+		serverVelYUpdated = false;
+	}
+	if (serverVelZUpdated)
+	{
+		velz = serverVelZ;
+		serverVelZUpdated = false;
+	}
+
 	// [BC] There are times when we don't want to tick this actor if it's a player.
 	// [BB] Voodoo dolls are an exemption.
 	if ( player && player->mo == this )
@@ -4752,6 +4785,36 @@ void AActor::Tick ()
 
 	// [BB] Stop the net traffic measurement and add the result to this actor's traffic.
 	NETTRAFFIC_AddActorTraffic ( this, NETWORK_StopTrafficMeasurement ( ) );
+}
+
+void AActor::MoveToServerPosition()
+{
+	if ( gamestate != GS_LEVEL )
+		return;
+
+	SetOrigin( serverX, serverY, serverZ );
+
+	// [BB] SetOrigin doesn't set the actor's floorz value properly, so we need to correct this.
+	if ( ( flags & MF_NOBLOCKMAP ) == false )
+	{
+		// [BB] Unfortunately, P_OldAdjustFloorCeil messes up the floorz value under some circumstances.
+		// Save the old value, so that we can restore it if necessary.
+		// [EP] It seems it messes also with the ceilingz value.
+		fixed_t oldfloorz = floorz;
+		fixed_t oldceilingz = ceilingz;
+		P_OldAdjustFloorCeil( this );
+		// [BB] An actor can't be below its floorz, if the value is correct.
+		// In this case, P_OldAdjustFloorCeil apparently didn't work, so revert to the old value.
+		// [BB] But don't do this for the console player, it messes up the prediction.
+		// [EP] Ditto for ceilingz.
+		if ( NETWORK_IsConsolePlayer ( this ) == false )
+		{
+			if ( floorz > z )
+				floorz = oldfloorz;
+			if ( ceilingz < z + height )
+				ceilingz = oldceilingz;
+		}
+	}
 }
 
 //==========================================================================

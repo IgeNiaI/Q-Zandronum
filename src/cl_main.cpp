@@ -124,7 +124,6 @@
 
 //void	ChangeSpy (bool forward);
 int		D_PlayerClassToInt (const char *classname);
-bool	P_OldAdjustFloorCeil (AActor *thing);
 void	ClientObituary (AActor *self, AActor *inflictor, AActor *attacker, int dmgflags, FName MeansOfDeath);
 void	P_CrouchMove(player_t * player, int direction);
 extern	bool	SpawningMapThing;
@@ -1833,38 +1832,6 @@ void CLIENT_SpawnMissile( const PClass *pType, fixed_t X, fixed_t Y, fixed_t Z, 
 
 //*****************************************************************************
 //
-void CLIENT_MoveThing( AActor *pActor, fixed_t X, fixed_t Y, fixed_t Z )
-{
-	if (( pActor == NULL ) || ( gamestate != GS_LEVEL ))
-		return;
-
-	pActor->SetOrigin( X, Y, Z );
-
-	// [BB] SetOrigin doesn't set the actor's floorz value properly, so we need to correct this.
-	if ( ( pActor->flags & MF_NOBLOCKMAP ) == false )
-	{
-		// [BB] Unfortunately, P_OldAdjustFloorCeil messes up the floorz value under some circumstances.
-		// Save the old value, so that we can restore it if necessary.
-		// [EP] It seems it messes also with the ceilingz value.
-		fixed_t oldfloorz = pActor->floorz;
-		fixed_t oldceilingz = pActor->ceilingz;
-		P_OldAdjustFloorCeil( pActor );
-		// [BB] An actor can't be below its floorz, if the value is correct.
-		// In this case, P_OldAdjustFloorCeil apparently didn't work, so revert to the old value.
-		// [BB] But don't do this for the console player, it messes up the prediction.
-		// [EP] Ditto for ceilingz.
-		if ( NETWORK_IsConsolePlayer ( pActor ) == false )
-		{
-			if ( pActor->floorz > pActor->z )
-				pActor->floorz = oldfloorz;
-			if ( pActor->ceilingz < pActor->z + pActor->height )
-				pActor->ceilingz = oldceilingz;
-		}
-	}
-}
-
-//*****************************************************************************
-//
 void CLIENT_AdjustPredictionToServerSideConsolePlayerMove( fixed_t X, fixed_t Y, fixed_t Z )
 {
 	players[consoleplayer].ServerXYZ[0] = X;
@@ -2922,9 +2889,11 @@ void ServerCommands::MovePlayer::Execute()
 	else
 		player->mo->renderflags &= ~RF_INVISIBLE;
 
-	// Set the player's XYZ position.
-	// [BB] But don't just set the position, but also properly set floorz and ceilingz, etc.
-	CLIENT_MoveThing( player->mo, x, y, z );
+	// [geNia] Set the player server position, which will be actually applied on next tick
+	player->mo->serverX = x;
+	player->mo->serverY = y;
+	player->mo->serverZ = z;
+	player->mo->serverPosUpdated = true;
 
 	// [BB] If the spectated player uses the GL renderer and we are using software,
 	// the viewangle has to be limited.	We don't care about cl_disallowfullpitch here.
@@ -2941,13 +2910,18 @@ void ServerCommands::MovePlayer::Execute()
 	player->mo->waterlevel = waterlevel;
 
 	// Set the player's angle.
-	player->mo->angle = angle;
-	player->mo->pitch = pitch;
+	player->mo->serverAngle = angle;
+	player->mo->serverAngleUpdated = true;
+	player->mo->serverPitch = pitch;
+	player->mo->serverPitchUpdated = true;
 
 	// Set the player's XYZ momentum.
-	player->mo->velx = velx;
-	player->mo->vely = vely;
-	player->mo->velz = velz;
+	player->mo->serverVelX = velx;
+	player->mo->serverVelXUpdated = true;
+	player->mo->serverVelY = vely;
+	player->mo->serverVelYUpdated = true;
+	player->mo->serverVelZ = velz;
+	player->mo->serverVelZUpdated = true;
 
 	player->cmd.ucmd.forwardmove = ucmd_forwardmove;
 	player->cmd.ucmd.sidemove = ucmd_sidemove;
@@ -3591,9 +3565,12 @@ void ServerCommands::MoveLocalPlayer::Execute()
 	}
 	else
 	{
-		// [BB] Calling CLIENT_MoveThing instead of setting the x,y,z position directly should make
-		// sure that the spectator body doesn't get stuck.
-		CLIENT_MoveThing ( pPlayer->mo, x, y, z );
+		// [geNia] Set the player server position and apply it immediately
+		pPlayer->mo->serverX = x;
+		pPlayer->mo->serverY = y;
+		pPlayer->mo->serverZ = z;
+		pPlayer->mo->serverPosUpdated = true;
+		pPlayer->mo->MoveToServerPosition();
 
 		pPlayer->mo->velx = velx;
 		pPlayer->mo->vely = vely;
@@ -4000,20 +3977,19 @@ void ServerCommands::MoveThing::Execute()
 	fixed_t y = ContainsNewY() ? newY : actor->y;
 	fixed_t z = ContainsNewZ() ? newZ : actor->z;
 
-	if ( ContainsNewX() && (( bits & CM_NOLAST ) == 0 ))
-		actor->lastX = x;
-	if ( ContainsNewY() && (( bits & CM_NOLAST ) == 0 ))
-		actor->lastY = y;
-	if ( ContainsNewZ() && (( bits & CM_NOLAST ) == 0 ))
-		actor->lastZ = z;
-
 	// Read in the last position data.
 	if ( ContainsLastX() )
 		actor->lastX = lastX;
+	else
+		actor->lastX = x;
 	if ( ContainsLastY() )
 		actor->lastY = lastY;
+	else
+		actor->lastY = y;
 	if ( ContainsLastZ() )
 		actor->lastZ = lastZ;
+	else
+		actor->lastZ = z;
 
 	// [WS] Clients will reuse their last updated position.
 	if ( bits & CM_REUSE_X )
@@ -4025,19 +4001,77 @@ void ServerCommands::MoveThing::Execute()
 
 	// Update the thing's position.
 	if ( bits & ( CM_X|CM_Y|CM_Z|CM_REUSE_X|CM_REUSE_Y|CM_REUSE_Z ))
-		CLIENT_MoveThing( actor, x, y, z );
+	{
+		if ( bits & CM_NOSMOOTH )
+		{
+			actor->x = x;
+			actor->y = y;
+			actor->z = z;
+			actor->PrevX = x;
+			actor->PrevY = y;
+			actor->PrevZ = z;
+		}
+		else
+		{
+			actor->serverX = x;
+			actor->serverY = y;
+			actor->serverZ = z;
+			actor->serverPosUpdated = true;
+		}
+	}
 
 	// Read in the angle data.
 	if ( ContainsAngle() )
-		actor->angle = angle;
+	{
+		if ( bits & CM_NOSMOOTH )
+		{
+			actor->angle = angle;
+			actor->PrevAngle = angle;
+		}
+		else
+		{
+			actor->serverAngle = angle;
+			actor->serverAngleUpdated = true;
+		}
+	}
 
 	// Read in the momentum data.
 	if ( ContainsVelX() )
-		actor->velx = velX;
+	{
+		if ( bits & CM_NOSMOOTH )
+		{
+			actor->velx = velX;
+		}
+		else
+		{
+			actor->serverVelX = velX;
+			actor->serverVelXUpdated = true;
+		}
+	}
 	if ( ContainsVelY() )
-		actor->vely = velY;
+	{
+		if ( bits & CM_NOSMOOTH )
+		{
+			actor->vely = velY;
+		}
+		else
+		{
+			actor->serverVelY = velY;
+			actor->serverVelYUpdated = true;
+		}
+	}
 	if ( ContainsVelZ() )
-		actor->velz = velZ;
+	{
+		if ( bits & CM_NOSMOOTH )
+		{
+			actor->velz = velZ;
+		}
+		else
+		{
+			actor->serverVelZ = velZ;
+			actor->serverVelZUpdated = true;
+		}
+	}
 
 	// [TP] If this is a player that's being moved around, and his velocity becomes zero,
 	// we need to stop his bobbing as well.
@@ -4046,7 +4080,17 @@ void ServerCommands::MoveThing::Execute()
 
 	// Read in the pitch data.
 	if ( ContainsPitch() )
-		actor->pitch = pitch;
+	{
+		if ( bits & CM_NOSMOOTH )
+		{
+			actor->pitch = pitch;
+		}
+		else
+		{
+			actor->serverPitch = pitch;
+			actor->serverPitchUpdated = true;
+		}
+	}
 
 	// Read in the movedir data.
 	if ( ContainsMovedir() )
@@ -4187,7 +4231,8 @@ void ServerCommands::DestroyThing::Execute()
 //
 void ServerCommands::SetThingAngle::Execute()
 {
-	actor->angle = angle;
+	actor->serverAngle = angle;
+	actor->serverAngleUpdated = true;
 }
 
 //*****************************************************************************
@@ -4559,8 +4604,14 @@ void ServerCommands::TeleportThing::Execute()
 			fog->target = actor;
 	}
 
-	// Set the thing's new position.
-	CLIENT_MoveThing( actor, x, y, z );
+	// [geNia] Set the actor server position, which will be actually applied on next tick
+	actor->x = x;
+	actor->y = y;
+	actor->z = z;
+
+	actor->PrevX = x;
+	actor->PrevY = y;
+	actor->PrevZ = z;
 
 	// Spawn a teleport fog at the destination.
 	if ( destfog )
@@ -4597,6 +4648,7 @@ void ServerCommands::TeleportThing::Execute()
 
 	// Set the thing's new angle.
 	actor->angle = angle;
+	actor->PrevAngle = angle;
 
 	// User variable to do a weird zoom thingy when you teleport.
 	if (( teleportzoom ) && ( telezoom ) && ( actor->player ))
@@ -5272,8 +5324,10 @@ void ServerCommands::MissileExplode::Execute()
 	else
 		line = NULL;
 
-	// Move the new actor to the position.
-	CLIENT_MoveThing( missile, x, y, z );
+	// [geNia] Set the actor server position, which will be actually applied on next tick
+	missile->x = x;
+	missile->y = y;
+	missile->z = z;
 
 	// Blow it up!
 	// [BB] Only if it's not already in its death state.

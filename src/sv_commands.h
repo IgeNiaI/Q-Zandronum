@@ -166,7 +166,7 @@ void	SERVERCOMMANDS_SpawnThingNoNetID( AActor *pActor, ULONG ulPlayerExtra = MAX
 void	SERVERCOMMANDS_LevelSpawnThing( AActor *mobj, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_LevelSpawnThingNoNetID( AActor *mobj, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_MoveThing( AActor *pActor, ULONG ulBits, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_MoveThingIfChanged( AActor *pActor, const MoveThingData &oldData, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_MoveThingIfChanged( AActor *pActor, const MoveThingData &oldData, bool noSmooth = false, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_KillThing( AActor *pActor, AActor *pSource, AActor *pInflictor );
 void	SERVERCOMMANDS_SetThingState( AActor *pActor, NetworkActorState state, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetThingTarget( AActor *pActor );
