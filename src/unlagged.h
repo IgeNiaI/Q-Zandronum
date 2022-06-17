@@ -71,7 +71,7 @@ void	UNLAGGED_GetHitOffset ( const AActor *attacker, const FTraceResults &trace,
 bool	UNLAGGED_IsReconciled ( );
 void	UNLAGGED_AddReconciliationBlocker ( );
 void	UNLAGGED_RemoveReconciliationBlocker ( );
-void	UNLAGGED_SpawnDebugActors ( );
+void	UNLAGGED_SpawnDebugActors ( player_t *player, bool server );
 void	UNLAGGED_UnlagAndReplicateThing ( AActor *source, AActor *thing, bool bSkipOwner, bool bNoUnlagged, bool bUnlagDeath );
 void	UNLAGGED_UnlagAndReplicateMissile ( AActor *source, AActor *missile, bool bSkipOwner, bool bNoUnlagged, bool bUnlagDeath );
 

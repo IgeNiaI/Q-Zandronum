@@ -59,10 +59,23 @@
 #include "p_local.h"
 #include "i_system.h"
 #include "sv_commands.h"
+#include "cl_commands.h"
 #include "templates.h"
 #include "d_netinf.h"
-#include "a_sharedglobal.h"
 
+
+IMPLEMENT_CLASS(ADebugUnlaggedHitbox)
+
+void ADebugUnlaggedHitbox::PostBeginPlay()
+{
+	Super::PostBeginPlay();
+	drawHitbox = true;
+	if (target)
+	{
+		radius = target->radius;
+		height = target->height;
+	}
+}
 
 IMPLEMENT_CLASS(AUnlaggedActor)
 
@@ -111,7 +124,13 @@ void AUnlaggedActor::Destroy()
 
 
 CVAR(Flag, sv_nounlagged, zadmflags, ZADF_NOUNLAGGED);
-CVAR( Bool, sv_unlagged_debugactors, false, 0 )
+CUSTOM_CVAR( Bool, sv_unlagged_debugactors, false, CVAR_SERVERINFO )
+{
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+		SERVERCOMMANDS_SetCVar( sv_unlagged_debugactors );
+	else if (self)
+		self = false;
+}
 
 bool reconciledGame = false;
 bool unlagInProgress = false;
@@ -145,10 +164,6 @@ void UNLAGGED_Tick( void )
 		UNLAGGED_RecordActor( unlaggedActor, unlaggedIndex );
 		unlaggedActor = unlaggedActor->nextUnlaggedActor;
 	}
-
-	// [BB] Spawn debug actors if the server runner wants them.
-	if ( sv_unlagged_debugactors )
-		UNLAGGED_SpawnDebugActors( );
 }
 
 //Figure out which tic to use for reconciliation
@@ -197,6 +212,9 @@ int UNLAGGED_Gametic( player_t *player )
 // Call UNLAGGED_Restore afterwards to restore everything
 void UNLAGGED_Reconcile( AActor *actor )
 {
+	if ( sv_unlagged_debugactors && actor->player && NETWORK_GetState() == NETSTATE_CLIENT )
+		UNLAGGED_SpawnDebugActors( actor->player, false );
+
 	//Only do anything if the actor to be reconciled is a player,
 	//it's on a server with unlagged on, and reconciliation is not being blocked
 	if ( !actor || !actor->player || (NETWORK_GetState() != NETSTATE_SERVER) || !NETWORK_IsUnlaggedEnabled( actor->player ) || ( reconciliationBlockers > 0 ) || actor->player->bIsBot )
@@ -215,6 +233,9 @@ void UNLAGGED_Reconcile( AActor *actor )
 	const int unlaggedGametic = UNLAGGED_Gametic( actor->player );
 
 	UNLAGGED_ReconcileTick( actor, unlaggedGametic );
+
+	if ( sv_unlagged_debugactors )
+		UNLAGGED_SpawnDebugActors( actor->player, true );
 }
 
 void UNLAGGED_ReconcileTick( AActor *actor, int Tic )
@@ -654,45 +675,37 @@ void UNLAGGED_RemoveReconciliationBlocker ( )
 		reconciliationBlockers--;
 }
 
-void UNLAGGED_SpawnDebugActors ( )
+void UNLAGGED_SpawnDebugActor ( player_t *player, AActor *actor, bool server )
 {
-	const PClass *pType = PClass::FindClass( "UnlaggedDebugActor" );
-	if ( pType == NULL )
-		I_FatalError( "To spawn unlagged debug actors a DECORATE actor called \"UnlaggedDebugActor\" needs to be defined!\n" );
+	AActor *pActor = Spawn( "DebugUnlaggedHitbox", actor->x, actor->y, actor->z, NO_REPLACE );
+	pActor->projectilepassheight = actor->projectilepassheight;
+	pActor->target = actor;
 
-	// [BB] Since there is no function that lets the server instruct a client to spawn an actor
-	// of a certain type at a specified position without actually having such an actor at that
-	// position (and I don't feel like adding such a thing just for this debug function) we
-	// create and move a dummy actor here.
-	AActor *pActor = Spawn( pType, 0, 0, 0, NO_REPLACE );
-	if ( pActor )
+	if ( server )
 	{
-		for ( ULONG ulPlayer = 0; ulPlayer < MAXPLAYERS; ++ulPlayer )
+		SERVERCOMMANDS_SpawnThing( pActor, player - players, SVCF_ONLYTHISCLIENT );
+		SERVERCOMMANDS_SetThingTarget( pActor );
+	}
+	else
+	{
+		pActor->hitboxColor = 255 * 256; // green color
+	}
+}
+
+void UNLAGGED_SpawnDebugActors ( player_t *player, bool server )
+{
+	for ( ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ++ulIdx )
+	{
+		if ( PLAYER_IsValidPlayerWithMo( ulIdx ) )
 		{
-			if ( SERVER_IsValidClient( ulPlayer ) == false )
-				continue;
-
-			const int unlaggedGametic = UNLAGGED_Gametic( &players[ulPlayer] );
-
-			if ( unlaggedGametic == gametic )
-				continue;
-
-			const int unlaggedIndex = unlaggedGametic % UNLAGGEDTICS;
-
-			for ( ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ++ulIdx )
-			{
-				if ( ( ulPlayer == ulIdx ) || ( PLAYER_IsValidPlayer ( ulIdx ) == false ) || players[ulIdx].bSpectating )
-					continue;
-
-				pActor->x = players[ulIdx].unlaggedX[unlaggedIndex];
-				pActor->y = players[ulIdx].unlaggedY[unlaggedIndex];
-				pActor->z = players[ulIdx].unlaggedZ[unlaggedIndex];
-
-				SERVERCOMMANDS_SpawnThingNoNetID( pActor, ulPlayer, SVCF_ONLYTHISCLIENT );
-			}
+			UNLAGGED_SpawnDebugActor( player, players[ulIdx].mo, server );
 		}
-		// [BB] Get rid ot the dummy actor.
-		pActor->Destroy();
+	}
+
+	AUnlaggedActor* unlaggedActor = firstUnlaggedActor;
+	while ( unlaggedActor) {
+		UNLAGGED_SpawnDebugActor( player, unlaggedActor, server );
+		unlaggedActor = unlaggedActor->nextUnlaggedActor;
 	}
 }
 
@@ -804,7 +817,11 @@ void UNLAGGED_DoUnlagActors( AActor *source, int StartingTick )
 		for (int Tick = StartingTick; Tick <= gametic; Tick++)
 		{
 			if (!reconciledGame) // it is possible that an actor to unlag spawned while the game is reconciled. We can just skip reconciliation.
+			{
 				UNLAGGED_ReconcileTick( source, Tick );
+				if ( sv_unlagged_debugactors )
+					UNLAGGED_SpawnDebugActors( source->player, true );
+			}
 			UNLAGGED_AddReconciliationBlocker();
 
 			allActorsFinished = currentlyUnlaggingActors[0]->finishedUnlagging;

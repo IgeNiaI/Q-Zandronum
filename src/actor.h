@@ -984,6 +984,7 @@ public:
 	angle_t			serverAngle;
 	bool			serverAngleUpdated;
 	WORD			sprite;				// used to find patch_t and flip value
+	bool			drawHitbox;			// used to draw this actor even if sprite doesn't exist
 	BYTE			frame;				// sprite frame to draw
 	fixed_t			scaleX, scaleY;		// Scaling values; FRACUNIT is normal size
 	FRenderStyle	RenderStyle;		// Style to draw this actor with

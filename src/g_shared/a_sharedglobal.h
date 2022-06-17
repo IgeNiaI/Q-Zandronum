@@ -289,5 +289,12 @@ public:
 	void Destroy();
 };
 
+class ADebugUnlaggedHitbox : public AActor
+{
+	DECLARE_CLASS(ADebugUnlaggedHitbox, AActor)
+public:
+	void PostBeginPlay();
+};
+
 
 #endif //__A_SHAREDGLOBAL_H__

@@ -349,7 +349,7 @@ void GLSprite::Draw(int pass)
 		gl_RenderModel(this, Colormap.colormap);
 	}
 
-	if (gl_show_hitbox && actor) {
+	if ( actor && ( gl_show_hitbox || actor->drawHitbox ) ) {
 		glLineWidth(gl_hitbox_line_width);
 		gl_RenderState.EnableTexture(false);
 		gl_RenderState.Apply(true);
@@ -566,7 +566,7 @@ void GLSprite::Process(AActor* thing,sector_t * sector)
 	if (thing==GLRenderer->mViewActor) return;
 
 	// Don't waste time projecting sprites that are definitely not visible.
-	if (thing == NULL || thing->sprite == 0 || !thing->IsVisibleToPlayer())
+	if (thing == NULL || (thing->sprite == 0 && !thing->drawHitbox) || !thing->IsVisibleToPlayer())
 	{
 		return;
 	}

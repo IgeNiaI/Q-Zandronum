@@ -158,6 +158,22 @@ ACTOR UnlaggedActor native
 {
 }
 
+ACTOR DebugUnlaggedHitbox native
+{
+	+NOBLOCKMAP
+	+NOGRAVITY
+	+NOINTERACTION
+	height 2
+	radius 1
+	ReactionTime 1050 // 30 seconds
+	States
+	{
+	Spawn:
+		TNT1 A 1 A_Countdown
+		Loop
+	}
+}
+
 // Sector flag setter ------------------------------------------------------
 
 ACTOR SectorFlagSetter 9041 native
