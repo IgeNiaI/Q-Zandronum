@@ -23,10 +23,10 @@ EndCommand
 Command MovePlayer
 	UnreliableCommand
 	Player player with MoTest
-	Byte flags
+	Bool isVisible
 
 	# The server only sends position, angle, etc. information if the player is actually visible.
-	If (flags & PLAYER_VISIBLE)
+	If (isVisible)
 		CheckFunction IsVisible
 		ULong clientTicOnServerEnd
 		# [BB] The x/y position has to be sent at full precision, otherwise the player may be rounded to a neighboring
