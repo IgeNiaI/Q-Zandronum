@@ -935,6 +935,8 @@ void G_AddViewPitch (int look, bool mouse)
 	{
 		return;
 	}
+	if (CLIENTDEMO_IsPlaying())
+		mouse = false;
 	look <<= 16;
 	if (players[consoleplayer].playerstate != PST_DEAD &&		// No adjustment while dead.
 		players[consoleplayer].ReadyWeapon != NULL &&			// No adjustment if no weapon.
@@ -984,6 +986,8 @@ void G_AddViewAngle (int yaw, bool mouse)
 	{
 		return;
 	}
+	if (CLIENTDEMO_IsPlaying())
+		mouse = false;
 	yaw <<= 16;
 	if (players[consoleplayer].playerstate != PST_DEAD &&	// No adjustment while dead.
 		players[consoleplayer].ReadyWeapon != NULL &&		// No adjustment if no weapon.
