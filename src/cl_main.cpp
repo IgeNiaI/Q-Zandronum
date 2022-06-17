@@ -2896,7 +2896,7 @@ void ServerCommands::MovePlayer::Execute()
 	}
 
 	// If we're not allowed to know the player's location, then just make him invisible.
-	if ( IsVisible() == false )
+	if ( isVisible == false )
 	{
 		player->mo->renderflags |= RF_INVISIBLE;
 
