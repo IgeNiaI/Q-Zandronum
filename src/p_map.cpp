@@ -454,7 +454,7 @@ bool P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z, bool telefra
 		thing->AdjustFloorClip();
 	}
 
-	if (thing == players[consoleplayer].camera)
+	if (thing == players[consoleplayer].camera && !CLIENT_PREDICT_IsPredicting())
 	{
 		R_ResetViewInterpolation();
 	}
