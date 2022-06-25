@@ -86,6 +86,7 @@ CVAR(Bool, gl_no_skyclear, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 // [BB] Don't allow this in release builds.
 CVAR(Float, gl_mask_threshold, 0.5f,CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_DEBUGONLY)
 CVAR(Float, gl_mask_sprite_threshold, 0.5f,CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CVAR(Bool, gl_true_fov, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR(Bool, gl_forcemultipass, false, 0)
 
 EXTERN_CVAR (Int, screenblocks)
@@ -114,7 +115,7 @@ angle_t FGLRenderer::FrustumAngle()
 {
 	float tilt= fabs(mAngles.Pitch);
 
-	// If the pitch is larger than this you can look all around at a FOV of 90°
+	// If the pitch is larger than this you can look all around at a FOV of 90ï¿½
 	if (tilt>46.0f) return 0xffffffff;
 
 	// ok, this is a gross hack that barely works...
@@ -973,6 +974,12 @@ extern char myGlBeginCharArray[4];
 int crashoutTic = 0;
 #endif
 
+// I stopped using BaseRatioSizes here because the information there wasn't well presented.
+#define RMUL (1.6f/1.333333f)
+//									4:3				16:9			16:10		17:10		5:4			17:10		21:9
+static float ratiosStretched[] = {	RMUL*1.333333f,	RMUL*1.777777f,	RMUL*1.6f,	RMUL*1.7f,	RMUL*1.25f,	RMUL*1.7f,	RMUL*2.333333f};
+static float ratiosNormal[] = {		1.333333f,		1.777777f,		1.6f,		1.7f,		1.25f,		1.7f,		2.333333f};
+
 void FGLRenderer::RenderView (player_t* player)
 {
 #ifdef _WIN32 // [BB] Detect some kinds of glBegin hooking.
@@ -1039,15 +1046,13 @@ void FGLRenderer::RenderView (player_t* player)
 	// prepare all camera textures that have been used in the last frame
 	FCanvasTextureInfo::UpdateAll();
 
-
-	// I stopped using BaseRatioSizes here because the information there wasn't well presented.
-	#define RMUL (1.6f/1.333333f)
-	//							4:3				16:9		16:10		17:10		5:4			17:10		21:9
-	static float ratios[]={RMUL*1.333333f, RMUL*1.777777f, RMUL*1.6f, RMUL*1.7f, RMUL*1.25f, RMUL*1.7f, RMUL*2.333333f};
-
 	// now render the main view
 	float fovratio;
-	float ratio = ratios[WidescreenRatio];
+	float ratio;
+	if (gl_true_fov)
+		ratio = ratiosNormal[WidescreenRatio];
+	else
+		ratio = ratiosStretched[WidescreenRatio];
 	if (!(WidescreenRatio&4))
 	{
 		fovratio = 1.6f;

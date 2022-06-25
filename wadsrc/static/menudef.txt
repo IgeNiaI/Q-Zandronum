@@ -1761,9 +1761,10 @@ OptionMenu VideoModeMenu
 	Option "Fullscreen",			"fullscreen", "YesNo"
 	Option "Aspect ratio",			"menu_screenratios", "Ratios"
 	// [BB]
-	Option "Renderer",			"vid_renderer", "Renderers"
+	Option "Renderer",				"vid_renderer", "Renderers"
 	Option "Force aspect ratio",	"vid_aspect", "ForceRatios"
 	Option "Enable 5:4 aspect ratio","vid_tft", "YesNo"
+	Option "True horizontal fov",	"gl_true_fov", "YesNo"
 	StaticText " "
 	ScreenResolution "res_0"
 	ScreenResolution "res_1"
