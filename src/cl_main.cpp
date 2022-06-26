@@ -2924,11 +2924,16 @@ void ServerCommands::MovePlayer::Execute()
 
 	player->mo->waterlevel = waterlevel;
 
-	// Set the player's angle.
-	player->mo->serverAngle = angle;
-	player->mo->serverAngleUpdated = true;
-	player->mo->serverPitch = pitch;
-	player->mo->serverPitchUpdated = true;
+	// [geNia] Don't set player's angle and pitch when dead, this is handled by P_DeathThink
+	if (player->mo->health > 0)
+	{
+		// Set the player's angle.
+		player->mo->serverAngle = angle;
+		player->mo->serverAngleUpdated = true;
+		// Set the player's pitch.
+		player->mo->serverPitch = pitch;
+		player->mo->serverPitchUpdated = true;
+	}
 
 	// Set the player's XYZ momentum.
 	player->mo->serverVelX = velx;
