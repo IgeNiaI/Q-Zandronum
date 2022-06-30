@@ -178,6 +178,12 @@ static ticcmd_t emptycmd;
 static bool HasExited;
 
 static DWORD basetime = 0;
+static int baseTimeOffset = 0;
+static int ticDriftLow = 9;
+static int ticDriftHigh = 19;
+static int pingAndTicDelta = 0;
+static int pingAndTicDeltaAverages = 0;
+static DWORD lastPingTime = 0;
 // These are for the polled timer.
 static DWORD TicStart;
 static DWORD TicNext;
@@ -293,6 +299,57 @@ static void I_SelectTimer()
 
 //==========================================================================
 //
+// I_SaveLastPingTime
+//
+//==========================================================================
+
+void I_SaveLastPingTime()
+{
+	lastPingTime = timeGetTime();
+}
+
+//==========================================================================
+//
+// I_SavePlayerPing
+//
+//==========================================================================
+
+void I_SavePlayerPing( unsigned int ping )
+{
+	int driftMiddle = ping / 2 % 28;
+	if (driftMiddle < 14)
+		driftMiddle = (28 - driftMiddle) / 2;
+	else
+		driftMiddle = 28 - (driftMiddle / 2);
+
+	ticDriftHigh = driftMiddle + 5;
+	ticDriftLow = driftMiddle - 5;
+}
+
+//==========================================================================
+//
+// I_CalculateBasetimeDrift
+//
+//==========================================================================
+
+void I_CalculateBasetimeDrift()
+{
+	if (lastPingTime) {
+		pingAndTicDelta = ( pingAndTicDeltaAverages * pingAndTicDelta + timeGetTime() - lastPingTime ) / ( 1 + pingAndTicDeltaAverages );
+		if ( pingAndTicDeltaAverages < 5 )
+			pingAndTicDeltaAverages++;
+
+		lastPingTime = 0;
+
+		if (pingAndTicDelta > ticDriftHigh)
+			baseTimeOffset += 2;
+		else if (pingAndTicDelta < ticDriftLow)
+			baseTimeOffset--;
+	}
+}
+
+//==========================================================================
+//
 // I_MSTime
 //
 // Returns the current time in milliseconds, where 0 is the first call
@@ -303,7 +360,7 @@ static void I_SelectTimer()
 unsigned int I_MSTime()
 {
 	assert(basetime != 0);
-	return timeGetTime() - basetime;
+	return timeGetTime() - basetime + baseTimeOffset;
 }
 
 //==========================================================================
@@ -345,14 +402,14 @@ static int I_GetTimePolled(bool saveMS)
 	{
 		basetime = tm;
 	}
+	DWORD CurrentTic = ((tm - basetime + baseTimeOffset) * TICRATE) / 1000;
 	if (saveMS)
 	{
-		DWORD CurrentTic = ((tm - basetime) * TICRATE) / 1000;
-		TicStart = (CurrentTic * 1000 / TICRATE) + basetime;
+		TicStart = TicNext;
 		TicNext = ((CurrentTic + 1) * 1000 / TICRATE) + basetime;
 	}
 
-	return ((tm-basetime)*TICRATE)/1000;
+	return CurrentTic;
 }
 
 float I_GetTimeFloat( void )
@@ -363,7 +420,7 @@ float I_GetTimeFloat( void )
 	if (!basetime)
 		basetime = tm;
 
-	return (( (float)tm - (float)basetime ) * (float)TICRATE ) / 1000.0f;
+	return (( (float)tm - (float)(basetime) + (float)(baseTimeOffset)) * (float)TICRATE ) / 1000.0f;
 }
 
 /*
@@ -495,7 +552,7 @@ static void CALLBACK TimerTicked(UINT id, UINT msg, DWORD_PTR user, DWORD_PTR dw
 		tics++;
 	}
 	ted_start = timeGetTime ();
-	ted_next = ted_start + MillisecondsPerTic;
+	ted_next = ted_start + MillisecondsPerTic + baseTimeOffset;
 	SetEvent(NewTicArrived);
 }
 
@@ -522,7 +579,7 @@ fixed_t I_GetTimeFrac(uint32 *ms)
 	}
 	else
 	{
-		fixed_t frac = clamp<fixed_t> ((now - TicStart)*FRACUNIT/step, 0, FRACUNIT);
+		fixed_t frac = clamp<fixed_t> ((now - TicStart + baseTimeOffset)*FRACUNIT/step, 0, FRACUNIT);
 		return frac;
 	}
 }

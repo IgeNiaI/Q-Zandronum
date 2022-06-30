@@ -2360,6 +2360,9 @@ void ServerCommands::Ping::Execute()
 	// We send the time back to the server, so that it can tell how many milliseconds passed since it sent the
 	// ping message to us.
 	CLIENTCOMMANDS_Pong( time );
+
+	// Also use the time to drift client tics
+	I_SaveLastPingTime( );
 }
 
 //*****************************************************************************
@@ -3509,6 +3512,9 @@ void ServerCommands::SetPlayerViewHeight::Execute()
 void ServerCommands::UpdatePlayerPing::Execute()
 {
 	player->ulPing = ping;
+
+	if (player - players == consoleplayer)
+		I_SavePlayerPing( ping );
 }
 
 //*****************************************************************************

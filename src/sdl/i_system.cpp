@@ -139,6 +139,12 @@ void I_EndRead(void)
 static DWORD TicStart;
 static DWORD TicNext;
 static DWORD BaseTime;
+static int baseTimeOffset = 0;
+static int ticDriftLow = 9;
+static int ticDriftHigh = 19;
+static int pingAndTicDelta = 0;
+static int pingAndTicDeltaAverages = 0;
+static DWORD lastPingTime = 0;
 static int TicFrozen;
 
 // Signal based timer.
@@ -148,11 +154,47 @@ static DWORD sig_start, sig_next;
 
 void I_SelectTimer();
 
+// I_SaveLastPingTime
+void I_SaveLastPingTime()
+{
+	lastPingTime = SDL_GetTicks();
+}
+
+// I_SavePlayerPing
+void I_SavePlayerPing(unsigned int ping)
+{
+	int driftMiddle = ping / 2 % 28;
+	if (driftMiddle < 14)
+		driftMiddle = (28 - driftMiddle) / 2;
+	else
+		driftMiddle = 28 - (driftMiddle / 2);
+
+	ticDriftHigh = driftMiddle + 5;
+	ticDriftLow = driftMiddle - 5;
+}
+
+// I_CalculateBasetimeDrift
+void I_CalculateBasetimeDrift()
+{
+	if (lastPingTime) {
+		pingAndTicDelta = ( pingAndTicDeltaAverages * pingAndTicDelta + SDL_GetTicks() - lastPingTime) / ( 1 + pingAndTicDeltaAverages );
+		if ( pingAndTicDeltaAverages < 5 )
+			pingAndTicDeltaAverages++;
+
+		lastPingTime = 0;
+
+		if (pingAndTicDelta > ticDriftHigh)
+			baseTimeOffset += 2;
+		else if (pingAndTicDelta < ticDriftLow)
+			baseTimeOffset--;
+	}
+}
+
 // [RH] Returns time in milliseconds
 unsigned int I_MSTime (void)
 {
 	unsigned int time = SDL_GetTicks ();
-	return time - BaseTime;
+	return time - BaseTime + baseTimeOffset;
 }
 
 // Exactly the same thing, but based does no modification to the time.
@@ -185,7 +227,7 @@ int I_GetTimePolled (bool saveMS)
 		TicStart = tm;
 		TicNext = Scale((Scale (tm, TICRATE, 1000) + 1), 1000, TICRATE);
 	}
-	return Scale(tm - BaseTime, TICRATE, 1000);
+	return Scale(tm - BaseTime + baseTimeOffset, TICRATE, 1000);
 }
 
 int I_GetTimeSignaled (bool saveMS)
