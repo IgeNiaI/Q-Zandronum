@@ -145,6 +145,11 @@ int I_PickIWad (WadStuff *wads, int numwads, bool queryiwad, int defaultiwad);
 // The ini could not be saved at exit
 bool I_WriteIniFailed ();
 
+// Offset basetime on clients to compensate client-server ticrate drift
+void I_SaveLastPingTime();
+void I_SavePlayerPing( unsigned int ping );
+void I_CalculateBasetimeDrift();
+
 // [RH] Returns millisecond-accurate time
 unsigned int I_MSTime (void);
 unsigned int I_FPSTime();

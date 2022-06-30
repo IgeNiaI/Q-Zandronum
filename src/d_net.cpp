@@ -71,6 +71,9 @@
 #include "sv_commands.h"
 #include "team.h"
 #include "chat.h"
+#ifdef WIN32
+#include "cl_main.h"
+#endif
 
 EXTERN_CVAR (Int, disableautosave)
 EXTERN_CVAR (Int, autosavecount)
@@ -947,13 +950,14 @@ void NetUpdate (void)
 	// check time
 	nowtime = I_GetTime (false);
 	newtics = nowtime - gametime;
-	gametime = nowtime;
 
 	if (newtics <= 0)	// nothing new to update
 	{
 		GetPackets ();
 		return;
 	}
+
+	gametime = nowtime;
 
 	if (skiptics <= newtics)
 	{
@@ -968,7 +972,6 @@ void NetUpdate (void)
 
 	// build new ticcmds for console player (and bots if I am the arbitrator)
 	AdjustBots (gametic / ticdup);
-
 	for (i = 0; i < newtics; i++)
 	{
 		I_StartTic ();
@@ -1894,7 +1897,13 @@ void TryRunTics (void)
 		{
 			if (gametic > lowtic)
 			{
-				I_Error ("gametic>lowtic");
+				// [geNia] gametic > lowtic means that our client tic is ahead of the server.
+				// This almost never happens normally, but recently introduced tic shift makes this a fairly common event.
+				// So, instead of stopping the game due to an error, we just skip the tics.
+
+				// Printf ("gametic>lowtic\n");
+				NetUpdate();	// check for new console commands
+				break;
 			}
 			if (advancedemo)
 			{
@@ -1910,6 +1919,9 @@ void TryRunTics (void)
 			NetUpdate ();	// check for new console commands
 		}
 		S_UpdateSounds (players[consoleplayer].camera);	// move positional sounds
+#ifdef WIN32
+		I_CalculateBasetimeDrift();
+#endif
 	}
 }
 
