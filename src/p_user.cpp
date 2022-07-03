@@ -820,14 +820,6 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< EffectActors[EA_FOOTSTEP]
 		<< EffectActors[EA_CROUCH_SLIDE]
 		<< EffectActors[EA_WALL_CLIMB]
-		<< ClientX
-		<< ClientY
-		<< ClientZ
-		<< ClientVelX
-		<< ClientVelY
-		<< ClientVelZ
-		<< ClientAngle
-		<< ClientPitch
 		<< Predictable[0]
 		<< Predictable[1]
 		<< Predictable[2]

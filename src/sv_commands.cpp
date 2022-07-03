@@ -280,15 +280,15 @@ void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerComma
 	fullCommand.SetPlayer ( &players[ulPlayer] );
 	fullCommand.SetClientTicOnServerEnd ( SERVER_GetClient( ulPlayer )->ulClientGameTic );
 	fullCommand.SetFlags( ulPlayerFlags | PLAYER_VISIBLE );
-	fullCommand.SetX( players[ulPlayer].mo->ClientX );
-	fullCommand.SetY( players[ulPlayer].mo->ClientY );
-	fullCommand.SetZ( players[ulPlayer].mo->ClientZ );
+	fullCommand.SetX( players[ulPlayer].mo->x );
+	fullCommand.SetY( players[ulPlayer].mo->y );
+	fullCommand.SetZ( players[ulPlayer].mo->z );
 	fullCommand.SetWaterlevel( players[ulPlayer].mo->waterlevel );
-	fullCommand.SetAngle( players[ulPlayer].mo->ClientAngle );
-	fullCommand.SetPitch( players[ulPlayer].mo->ClientPitch );
-	fullCommand.SetVelx( players[ulPlayer].mo->ClientVelX );
-	fullCommand.SetVely( players[ulPlayer].mo->ClientVelY );
-	fullCommand.SetVelz( players[ulPlayer].mo->ClientVelZ );
+	fullCommand.SetAngle( players[ulPlayer].mo->angle );
+	fullCommand.SetPitch( players[ulPlayer].mo->pitch );
+	fullCommand.SetVelx( players[ulPlayer].mo->velx );
+	fullCommand.SetVely( players[ulPlayer].mo->vely );
+	fullCommand.SetVelz( players[ulPlayer].mo->velz );
 	fullCommand.SetUcmd_forwardmove( players[ulPlayer].cmd.ucmd.forwardmove );
 	fullCommand.SetUcmd_sidemove( players[ulPlayer].cmd.ucmd.sidemove );
 	fullCommand.SetUcmd_upmove( players[ulPlayer].cmd.ucmd.upmove );
@@ -307,15 +307,6 @@ void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerComma
 		else
 			stubCommand.sendCommandToClients( *it, SVCF_ONLYTHISCLIENT );
 	}
-
-	players[ulPlayer].mo->ClientX = players[ulPlayer].mo->x;
-	players[ulPlayer].mo->ClientY = players[ulPlayer].mo->y;
-	players[ulPlayer].mo->ClientZ = players[ulPlayer].mo->z;
-	players[ulPlayer].mo->ClientVelX = players[ulPlayer].mo->velx;
-	players[ulPlayer].mo->ClientVelY = players[ulPlayer].mo->vely;
-	players[ulPlayer].mo->ClientVelZ = players[ulPlayer].mo->velz;
-	players[ulPlayer].mo->ClientAngle = players[ulPlayer].mo->angle;
-	players[ulPlayer].mo->ClientPitch = players[ulPlayer].mo->pitch;
 }
 
 //*****************************************************************************
