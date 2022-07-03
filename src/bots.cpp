@@ -3808,12 +3808,6 @@ CCMD( reveal )
 //
 CCMD( addbot )
 {
-		// [TSPG]
-	#if defined( SERVER_ONLY ) && defined( SERVER_BLACKLIST )
-		if ( gamestate != GS_STARTUP )
-			return;
-	#endif
-
 	CSkullBot	*pBot;
 	ULONG		ulPlayerIdx;
 
@@ -3852,6 +3846,13 @@ CCMD( addbot )
 	if ( ulPlayerIdx == MAXPLAYERS )
 	{
 		Printf( "The maximum number of players/bots has been reached.\n" );
+		return;
+	}
+
+	// [TSPG] We only allow up to 16 bots on a single server.
+	if ( BOTS_CountBots( ) >= 16 )
+	{
+		Printf( "The maximum number of bots allowed is 16, you cannot add any more.\n" );
 		return;
 	}
 
