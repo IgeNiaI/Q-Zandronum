@@ -263,13 +263,6 @@ public:
 	// Movement effects
 	const PClass* EffectActors[EA_COUNT];
 
-	// [geNia] The server updates player data before sending it to clients, but the player input is still old.
-	// That results in player input being one tic behind position, so we need to remember last position to send it to other clients.
-	fixed_t		ClientX, ClientY, ClientZ;
-	fixed_t		ClientVelX, ClientVelY, ClientVelZ;
-	angle_t		ClientAngle;
-	fixed_t		ClientPitch;
-
 	// Values that can be set from ACS and then passed to assigned action scripts
 	int	Predictable[PREDICTABLES_SIZE];
 
