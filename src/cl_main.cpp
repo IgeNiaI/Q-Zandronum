@@ -162,6 +162,14 @@ CVAR( Bool, cl_emulatepacketloss, false, 0 )
 CVAR( Bool, cl_connectsound, true, CVAR_ARCHIVE )
 CVAR( Bool, cl_showwarnings, false, CVAR_ARCHIVE )
 
+CUSTOM_CVAR(Int, cl_packetdup, 0, CVAR_ARCHIVE)
+{
+	if (self < 0)
+		self = 0;
+	else if (self > 3)
+		self = 3;
+}
+
 CUSTOM_CVAR(Int, fov_change_cooldown_tics, 0, CVAR_SERVERINFO)
 {
 	if (self < 0)
@@ -1601,8 +1609,13 @@ void CLIENT_SendCmd( void )
 		return;
 	}
 
+	CLIENT_SendServerPacket();
 	// Send the move header and the gametic.
-	CLIENTCOMMANDS_ClientMove( );
+	for (int i = 0; i <= cl_packetdup; i++)
+	{
+		CLIENTCOMMANDS_ClientMove();
+		CLIENT_SendServerPacket();
+	}
 }
 
 //*****************************************************************************

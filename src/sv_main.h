@@ -242,6 +242,9 @@ struct CLIENT_s
 	// Which pair of eyes is this client spying through (spectator)?
 	ULONG			ulDisplayPlayer;
 
+	// [geNia] This is used to avoid parsing duplicate movement commands if cl_packetdup is used
+	ULONG			ulLastParsedTic;
+	
 	// This is the gametic that the client sent to us. We simply send this back to him
 	// so he can determine whether or not he's lagging.
 	ULONG			ulClientGameTic;

@@ -65,6 +65,8 @@
 #include "p_acs.h"
 #include "v_video.h"
 
+EXTERN_CVAR(Int, cl_packetdup)
+
 //*****************************************************************************
 //	VARIABLES
 
@@ -416,8 +418,13 @@ void CLIENTCOMMANDS_WeaponSelect( const PClass *pType )
 	if ( ( pType == NULL ) || g_bIgnoreWeaponSelect )
 		return;
 
-	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_WEAPONSELECT );
-	NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, pType->getActorNetworkIndex() );
+	CLIENT_SendServerPacket();
+	for (int i = 0; i <= cl_packetdup; i++)
+	{
+		NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_WEAPONSELECT );
+		NETWORK_WriteShort( &CLIENT_GetLocalBuffer( )->ByteStream, pType->getActorNetworkIndex() );
+		CLIENT_SendServerPacket();
+	}
 }
 
 //*****************************************************************************
