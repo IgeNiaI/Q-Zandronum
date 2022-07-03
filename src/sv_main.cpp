@@ -1996,6 +1996,7 @@ void SERVER_SetupNewConnection( BYTESTREAM_s *pByteStream, bool bNewPlayer )
 	g_aClients[lClient].ulLastChangeTeamTime = 0;
 	g_aClients[lClient].ulLastSuicideTime = 0;
 	g_aClients[lClient].lLastPacketLossTick = 0;
+	g_aClients[lClient].ulLastParsedTic = 0;
 	g_aClients[lClient].lLastMoveTick = 0;
 	g_aClients[lClient].lLastMoveTickProcess = 0;
 	g_aClients[lClient].lOverMovementLevel = 0;
@@ -4480,19 +4481,9 @@ bool SERVER_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 		// Client is talking.
 		return ( server_Say( pByteStream ));
 	case CLC_CLIENTMOVE:
-		{
-			bool	bPlayerKicked;
 
-			// Client is sending movement information.
-			bPlayerKicked = server_ClientMove( pByteStream );
-
-			if ( g_aClients[g_lCurrentClient].lLastMoveTick == gametic )
-				g_aClients[g_lCurrentClient].lOverMovementLevel++;
-
-			g_aClients[g_lCurrentClient].lLastMoveTick = gametic;
-			return ( bPlayerKicked );
-		}
-		break;
+		// Client is sending movement information.
+		return ( server_ClientMove( pByteStream ));
 	case CLC_MISSINGPACKET:
 
 		// Client is missing a packet; it's our job to resend it!
@@ -4957,24 +4948,6 @@ void SERVER_UpdateThingVelocity( AActor *pActor, bool updateZ, bool updateXY )
 
 //*****************************************************************************
 //
-template <typename CommandType>
-static bool server_ParseBufferedCommand ( BYTESTREAM_s *pByteStream )
-{
-	CommandType *cmd = new CommandType ( pByteStream );
-
-	if ( sv_useticbuffer )
-	{
-		g_aClients[g_lCurrentClient].MoveCMDs.Push ( cmd );
-		return false;
-	}
-
-	const bool retValue = cmd->process ( g_lCurrentClient );
-	delete cmd;
-	return retValue;
-}
-
-//*****************************************************************************
-//
 static bool server_Ignore( BYTESTREAM_s *pByteStream )
 {
 	ULONG	ulTargetIdx = NETWORK_ReadByte( pByteStream );
@@ -5216,8 +5189,8 @@ static void server_ProcessChatCommand(ULONG ulPlayer, const char *chatCommandStr
 //*****************************************************************************
 class ClientMoveCommand : public ClientCommand
 {
-	CLIENT_MOVE_COMMAND_s moveCmd;
 public:
+	CLIENT_MOVE_COMMAND_s moveCmd;
 	ClientMoveCommand ( BYTESTREAM_s *pByteStream );
 
 	bool process ( const ULONG ulClient ) const;
@@ -5232,14 +5205,36 @@ public:
 //
 static bool server_ClientMove( BYTESTREAM_s *pByteStream )
 {
-	// Don't timeout.
-	g_aClients[g_lCurrentClient].ulLastCommandTic = gametic;
-
 	// [BB] We don't process the movement command immediately, but store it
 	// in a buffer. This way we can limit the amount of movement commands
 	// we process for a player in a given tic to prevent the player from
 	// seemingly teleporting in case too many movement commands arrive at once.
-	return server_ParseBufferedCommand<ClientMoveCommand> ( pByteStream );
+	ClientMoveCommand *cmd = new ClientMoveCommand( pByteStream );
+	
+	// Ignore the command if we already parsed a client command for this tic
+	if ( g_aClients[g_lCurrentClient].ulLastParsedTic >= cmd->moveCmd.ulGametic )
+	{
+		delete cmd;
+		return false;
+	}
+
+	// Kick the client if it's sending too many different movement commands
+	if ( g_aClients[g_lCurrentClient].lLastMoveTick == gametic )
+		g_aClients[g_lCurrentClient].lOverMovementLevel++;
+
+	g_aClients[g_lCurrentClient].ulLastCommandTic = gametic;
+	g_aClients[g_lCurrentClient].ulLastParsedTic = cmd->moveCmd.ulGametic;
+	g_aClients[g_lCurrentClient].lLastMoveTick = gametic;
+
+	if ( sv_useticbuffer )
+	{
+		g_aClients[g_lCurrentClient].MoveCMDs.Push ( cmd );
+		return false;
+	}
+
+	const bool retValue = cmd->process ( g_lCurrentClient );
+	delete cmd;
+	return retValue;
 }
 
 ClientMoveCommand::ClientMoveCommand ( BYTESTREAM_s *pByteStream )
@@ -5567,7 +5562,17 @@ static bool server_WeaponSelect( BYTESTREAM_s *pByteStream )
 	// [BB] To keep weapon sync when buffering movement commands, the weapon 
 	// select commands also need to be stored in the same buffer the keep
 	// the proper order of the commands.
-	return server_ParseBufferedCommand<ClientWeaponSelectCommand> ( pByteStream );
+	ClientWeaponSelectCommand *cmd = new ClientWeaponSelectCommand( pByteStream );
+	
+	if ( sv_useticbuffer )
+	{
+		g_aClients[g_lCurrentClient].MoveCMDs.Push ( cmd );
+		return false;
+	}
+
+	const bool retValue = cmd->process ( g_lCurrentClient );
+	delete cmd;
+	return retValue;
 }
 
 ClientWeaponSelectCommand::ClientWeaponSelectCommand ( BYTESTREAM_s *pByteStream )

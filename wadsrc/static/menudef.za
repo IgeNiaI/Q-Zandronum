@@ -67,6 +67,14 @@ OptionValue ZA_UnlagType
 	1.0, "Ping"
 }
 
+OptionValue ZA_PacketDupRate
+{
+	0.0, "No duplicates"
+	1.0, "One per tick"
+	2.0, "Two per tick"
+	3.0, "Three per tick"
+}
+
 OptionMenu ZA_NetworkOptions
 {
 	Title "NETWORK OPTIONS"
@@ -75,6 +83,17 @@ OptionMenu ZA_NetworkOptions
 	Option		"Unlag Type",				"cl_ping_unlagged",			"ZA_UnlagType"
 	Option		"Hitscan decals",			"cl_hitscandecalhack",		"OnOff"
 	Option		"Clientside puffs",			"cl_clientsidepuffs",		"OnOff"
+
+	StaticText	" "
+	StaticText	"--- WARNING ---"
+	StaticText	"Sending duplicate commands helps mitigate packet loss", 1
+	StaticText	"but increases outbound net traffic!", 1
+	StaticText	" "
+	StaticText	"You should only enable them if you're actually", 1
+	StaticText	"suffering from severe packet loss!", 1
+	StaticText	" "
+
+	Option		"Send duplicate commands",		"cl_packetdup",		"ZA_PacketDupRate"
 }
 
 // =================================================================================================
