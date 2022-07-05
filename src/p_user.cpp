@@ -377,7 +377,6 @@ player_t::player_t()
   bIgnoreChat( 0 ),
   lIgnoreChatTicks( -1 ),
   ulPing( 0 ),
-  ulPingAverages( 0 ),
   bReadyToGoOn( 0 ),
   bSpawnOkay( 0 ),
   SpawnX( 0 ),
@@ -528,7 +527,6 @@ player_t::player_t()
 	  memcpy(ServerXYZ, &p.ServerXYZ, sizeof(ServerXYZ));
 	  memcpy(ServerXYZVel, &p.ServerXYZVel, sizeof(ServerXYZVel));
 	  ulPing = p.ulPing;
-	  ulPingAverages = p.ulPingAverages;
 	  bReadyToGoOn = p.bReadyToGoOn;
 	  bSpawnOkay = p.bSpawnOkay;
 	  SpawnX = p.SpawnX;
