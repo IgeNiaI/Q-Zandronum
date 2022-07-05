@@ -2191,7 +2191,6 @@ void G_PlayerReborn (int player, bool bGiveInventory)
 	bool		bIgnoreChat;
 	LONG		lIgnoreChatTicks;
 	ULONG		ulPing;
-	ULONG		ulPingAverages;
 	ULONG		ulWins;
 	ULONG		ulTime;
 	int			timefreezer;
@@ -2229,7 +2228,6 @@ void G_PlayerReborn (int player, bool bGiveInventory)
 	bIgnoreChat = p->bIgnoreChat;
 	lIgnoreChatTicks = p->lIgnoreChatTicks;
 	ulPing = p->ulPing;
-	ulPingAverages = p->ulPingAverages;
 	ulWins = p->ulWins;
 	ulTime = p->ulTime;
 	timefreezer = p->timefreezer;
@@ -2273,7 +2271,6 @@ void G_PlayerReborn (int player, bool bGiveInventory)
 	p->bIgnoreChat = bIgnoreChat;
 	p->lIgnoreChatTicks = lIgnoreChatTicks;
 	p->ulPing = ulPing;
-	p->ulPingAverages = ulPingAverages;
 	p->ulWins = ulWins;
 	p->ulTime = ulTime;
 	// [BB] Players who were able to move while a APowerTimeFreezer is active,
