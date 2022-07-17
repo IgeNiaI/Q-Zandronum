@@ -656,8 +656,6 @@ bool P_CheckSight (const AActor *t1, const AActor *t2, int flags)
 
 	bool res;
 
-	assert (t1 != NULL);
-	assert (t2 != NULL);
 	if (t1 == NULL || t2 == NULL)
 	{
 		return false;
