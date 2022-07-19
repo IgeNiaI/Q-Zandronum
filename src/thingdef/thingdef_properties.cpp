@@ -2996,7 +2996,7 @@ DEFINE_CLASS_PROPERTY_PREFIX( player, maxskinsizefactor, F_F, PlayerPawn )
 DEFINE_CLASS_PROPERTY_PREFIX(player, crouchscale, F, PlayerPawn)
 {
 	PROP_FIXED_PARM(crouchscale, 0);
-	crouchscale = clamp(crouchscale, 6553, 58982);
+	crouchscale = clamp(crouchscale, 0, 65536);
 	defaults->CrouchScale = crouchscale;
 	defaults->CrouchScaleHalfWay = (65536 - crouchscale) / 2 + crouchscale;
 }
