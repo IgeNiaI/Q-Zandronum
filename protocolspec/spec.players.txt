@@ -157,6 +157,7 @@ Command SetPlayerTeam
 EndCommand
 
 Command SetPlayerCamera
+	Player player
 	Actor camera with NullAllowed
 	Bool revertPlease
 EndCommand

@@ -3349,23 +3349,23 @@ void ServerCommands::SetPlayerTeam::Execute()
 //
 void ServerCommands::SetPlayerCamera::Execute()
 {
-	AActor *oldcamera = players[consoleplayer].camera;
+	AActor *oldcamera = player->camera;
 
 	if ( camera == NULL )
 	{
-		players[consoleplayer].camera = players[consoleplayer].mo;
-		players[consoleplayer].cheats &= ~CF_REVERTPLEASE;
+		player->camera = player->mo;
+		player->cheats &= ~CF_REVERTPLEASE;
 		if (oldcamera != players[consoleplayer].camera)
 			R_ClearPastViewer (players[consoleplayer].camera);
 		return;
 	}
 
 	// Finally, change the player's camera.
-	players[consoleplayer].camera = camera;
+	player->camera = camera;
 	if ( revertPlease == false )
-		players[consoleplayer].cheats &= ~CF_REVERTPLEASE;
+		player->cheats &= ~CF_REVERTPLEASE;
 	else
-		players[consoleplayer].cheats |= CF_REVERTPLEASE;
+		player->cheats |= CF_REVERTPLEASE;
 
 	if (oldcamera != players[consoleplayer].camera)
 		R_ClearPastViewer (players[consoleplayer].camera);

@@ -673,15 +673,16 @@ void SERVERCOMMANDS_SetPlayerTeam( ULONG ulPlayer, ULONG ulPlayerExtra, ServerCo
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_SetPlayerCamera( ULONG ulPlayer, AActor *camera, bool bRevertPlease )
+void SERVERCOMMANDS_SetPlayerCamera( ULONG ulPlayer, AActor *camera, bool bRevertPlease, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( SERVER_IsValidClient( ulPlayer ) == false )
 		return;
 
 	ServerCommands::SetPlayerCamera command;
+	command.SetPlayer( &players[ulPlayer] );
 	command.SetCamera( camera );
 	command.SetRevertPlease( bRevertPlease );
-	command.sendCommandToClients( ulPlayer, SVCF_ONLYTHISCLIENT );
+	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
