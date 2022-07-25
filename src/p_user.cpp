@@ -2997,7 +2997,7 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 	}
 
 	// Set the crouch sprite?
-	if (player->crouchfactor <= player->mo->CrouchScaleHalfWay)
+	if ( ( actor == player->mo ) && ( player->crouchfactor <= player->mo->CrouchScaleHalfWay ) )
 	{
 		if (spritenum == actor->SpawnState->sprite || spritenum == player->mo->crouchsprite) 
 		{
