@@ -1134,7 +1134,7 @@ void AInventory::Touch (AActor *toucher)
 	}
 
 	// If a voodoo doll touches something, pretend the real player touched it instead.
-	if (toucher->player != NULL)
+	if (toucher->player != NULL && toucher->player->mo != NULL)
 	{
 		toucher = toucher->player->mo;
 	}
