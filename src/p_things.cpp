@@ -88,7 +88,7 @@ bool P_Thing_Spawn (int tid, AActor *source, int type, angle_t angle, bool fog, 
 	}
 	while (spot != NULL)
 	{
-		mobj = Spawn (kind, spot->x, spot->y, spot->z, ALLOW_REPLACE);
+		mobj = Spawn (kind, spot->x, spot->y, spot->z, ALLOW_REPLACE, NETWORK_GetActorsOwnerPlayer( source ));
 
 		if (mobj != NULL)
 		{
