@@ -2922,9 +2922,8 @@ void ServerCommands::MovePlayer::Execute()
 
 	// Set the player's XYZ momentum.
 	player->mo->serverVelX = velx;
-	player->mo->serverVelXUpdated = true;
 	player->mo->serverVelY = vely;
-	player->mo->serverVelYUpdated = true;
+	player->mo->serverVelXYUpdated = true;
 	player->mo->serverVelZ = velz;
 	player->mo->serverVelZUpdated = true;
 
@@ -3983,34 +3982,37 @@ void ServerCommands::MoveThing::Execute()
 	if (( actor == NULL ) || gamestate != GS_LEVEL )
 		return;
 
-	fixed_t x = ContainsNewX() ? newX : actor->x;
-	fixed_t y = ContainsNewY() ? newY : actor->y;
-	fixed_t z = ContainsNewZ() ? newZ : actor->z;
+	fixed_t x = ( bits & CM_XY ) ? newX : actor->x;
+	fixed_t y = ( bits & CM_XY ) ? newY : actor->y;
+	fixed_t z = ( bits & CM_Z ) ? newZ : actor->z;
 
 	// Read in the last position data.
-	if ( ContainsLastX() )
+	if ( bits & CM_LAST_XY )
+	{
 		actor->lastX = lastX;
-	else
-		actor->lastX = x;
-	if ( ContainsLastY() )
 		actor->lastY = lastY;
+	}
 	else
+	{
+		actor->lastX = x;
 		actor->lastY = y;
-	if ( ContainsLastZ() )
+	}
+	if ( bits & CM_LAST_Z )
 		actor->lastZ = lastZ;
 	else
 		actor->lastZ = z;
 
 	// [WS] Clients will reuse their last updated position.
-	if ( bits & CM_REUSE_X )
+	if ( bits & CM_REUSE_XY )
+	{
 		x = actor->lastX;
-	if ( bits & CM_REUSE_Y )
 		y = actor->lastY;
+	}
 	if ( bits & CM_REUSE_Z )
 		z = actor->lastZ;
 
 	// Update the thing's position.
-	if ( bits & ( CM_X|CM_Y|CM_Z|CM_REUSE_X|CM_REUSE_Y|CM_REUSE_Z ))
+	if ( bits & ( CM_XY|CM_Z|CM_REUSE_XY|CM_REUSE_Z ))
 	{
 		if ( bits & CM_NOSMOOTH )
 		{
@@ -4046,31 +4048,21 @@ void ServerCommands::MoveThing::Execute()
 	}
 
 	// Read in the momentum data.
-	if ( ContainsVelX() )
+	if ( bits & CM_VELXY )
 	{
 		if ( bits & CM_NOSMOOTH )
 		{
 			actor->velx = velX;
-		}
-		else
-		{
-			actor->serverVelX = velX;
-			actor->serverVelXUpdated = true;
-		}
-	}
-	if ( ContainsVelY() )
-	{
-		if ( bits & CM_NOSMOOTH )
-		{
 			actor->vely = velY;
 		}
 		else
 		{
+			actor->serverVelX = velX;
 			actor->serverVelY = velY;
-			actor->serverVelYUpdated = true;
+			actor->serverVelXYUpdated = true;
 		}
 	}
-	if ( ContainsVelZ() )
+	if ( bits & CM_VELZ )
 	{
 		if ( bits & CM_NOSMOOTH )
 		{

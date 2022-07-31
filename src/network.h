@@ -64,22 +64,18 @@
 // Movement stuff.
 enum
 {
-	CM_X			= 1 << 0,
-	CM_Y			= 1 << 1,
-	CM_Z			= 1 << 2,
-	CM_ANGLE		= 1 << 3,
-	CM_VELX			= 1 << 4,
-	CM_VELY			= 1 << 5,
-	CM_VELZ			= 1 << 6,
-	CM_PITCH		= 1 << 7,
-	CM_MOVEDIR		= 1 << 8,
-	CM_REUSE_X		= 1 << 9,
-	CM_REUSE_Y		= 1 << 10,
-	CM_REUSE_Z		= 1 << 11,
-	CM_LAST_X		= 1 << 12,
-	CM_LAST_Y		= 1 << 13,
-	CM_LAST_Z		= 1 << 14,
-	CM_NOSMOOTH		= 1 << 15, // [WS] We do not have enough room for more flags here.
+	CM_XY			= 1 << 0,
+	CM_Z			= 1 << 1,
+	CM_ANGLE		= 1 << 2,
+	CM_PITCH		= 1 << 3,
+	CM_VELXY		= 1 << 4,
+	CM_VELZ			= 1 << 5,
+	CM_MOVEDIR		= 1 << 6,
+	CM_REUSE_XY		= 1 << 7,
+	CM_REUSE_Z		= 1 << 8,
+	CM_LAST_XY		= 1 << 9,
+	CM_LAST_Z		= 1 << 10,
+	CM_NOSMOOTH		= 1 << 11, // [WS] We do not have enough room for more flags here.
 };
 
 // [BB] Flags for client_MovePlayer/SERVERCOMMANDS_MovePlayer

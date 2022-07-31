@@ -76,7 +76,7 @@ void A_Fire(AActor *self, int height)
 
 	// [BC] Tell clients of the fire update.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z );
+		SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z );
 }
 
 
@@ -176,7 +176,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_VileAttack)
 		
 		// [BC] Tell clients of the fire update.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThing( fire, CM_X|CM_Y|CM_Z );
+			SERVERCOMMANDS_MoveThing( fire, CM_XY|CM_Z );
 
 		P_RadiusAttack (fire, self, blastdmg, blastrad, dmgtype, 0);
 	}

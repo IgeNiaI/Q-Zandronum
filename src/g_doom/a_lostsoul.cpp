@@ -58,7 +58,7 @@ void A_SkullAttack(AActor *self, fixed_t speed)
 
 	// [BC] Update the lost soul's velocity.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
 }
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SkullAttack)

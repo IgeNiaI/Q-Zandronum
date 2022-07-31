@@ -199,7 +199,7 @@ void P_DSparilTeleport (AActor *actor)
 
 		// [BB] Tell clients of the new position of "actor".
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThing( actor, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( actor, CM_XY|CM_Z|CM_ANGLE|CM_VELXY|CM_VELZ );
 
 	}
 }

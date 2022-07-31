@@ -757,7 +757,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Burnination)
 
 		// [Dusk] Update velocity to clients
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThing( self, CM_VELX | CM_VELY | CM_VELZ );
+			SERVERCOMMANDS_MoveThing( self, CM_VELXY|CM_VELZ );
 	}
 
 	S_Sound (self, CHAN_VOICE, "world/largefire", 1, ATTN_NORM);
@@ -812,7 +812,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Burnination)
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
 				SERVERCOMMANDS_SpawnThing( drop );
-				SERVERCOMMANDS_MoveThing( drop, CM_VELX | CM_VELY | CM_VELZ );
+				SERVERCOMMANDS_MoveThing( drop, CM_VELXY|CM_VELZ );
 				SERVERCOMMANDS_SetThingFlags( drop, FLAGSET_FLAGS );
 			}
 		}
@@ -883,7 +883,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FireGrenade)
 		grenade->y += FixedMul (finesine[an], 15*FRACUNIT);
 
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThing( grenade, CM_X|CM_Y|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( grenade, CM_XY|CM_VELZ );
 	}
 }
 

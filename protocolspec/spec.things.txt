@@ -34,11 +34,8 @@ Command MoveThing
 	Actor actor
 	Short bits
 
-	If (bits & CM_X)
+	If (bits & CM_XY)
 		Fixed newX
-	EndIf
-
-	If (bits & CM_Y)
 		Fixed newY
 	EndIf
 
@@ -46,27 +43,16 @@ Command MoveThing
 		Fixed newZ
 	EndIf
 
-	If (bits & CM_LAST_X)
-		Fixed lastX
-	EndIf
-
-	If (bits & CM_LAST_Y)
-		Fixed lastY
-	EndIf
-
-	If (bits & CM_LAST_Z)
-		Fixed lastZ
-	EndIf
-
 	If (bits & CM_ANGLE)
 		Angle angle
 	EndIf
 
-	If (bits & CM_VELX)
-		Fixed velX
+	If (bits & CM_PITCH)
+		Long pitch
 	EndIf
 
-	If (bits & CM_VELY)
+	If (bits & CM_VELXY)
+		Fixed velX
 		Fixed velY
 	EndIf
 
@@ -74,12 +60,17 @@ Command MoveThing
 		Fixed velZ
 	EndIf
 
-	If (bits & CM_PITCH)
-		Long pitch
-	EndIf
-
 	If (bits & CM_MOVEDIR)
 		Byte movedir
+	EndIf
+
+	If (bits & CM_LAST_XY)
+		Fixed lastX
+		Fixed lastY
+	EndIf
+
+	If (bits & CM_LAST_Z)
+		Fixed lastZ
 	EndIf
 EndCommand
 

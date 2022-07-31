@@ -1491,7 +1491,7 @@ bool AActor::Grind(bool items)
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
 				SERVERCOMMANDS_SetThingTics( this );
-				SERVERCOMMANDS_MoveThing( this, CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( this, CM_VELXY|CM_VELZ );
 			}
 		}
 		else if (player)
@@ -2076,7 +2076,7 @@ bool P_SeekerMissile (AActor *actor, angle_t thresh, angle_t turnMax, bool preci
 
 	// [BC] Update the thing's angle and velocity.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThing( actor, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( actor, CM_XY|CM_Z|CM_ANGLE|CM_VELXY|CM_VELZ );
 
 	return true;
 }
@@ -2194,7 +2194,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
 					SERVERCOMMANDS_SetThingState( mo, mo->SeeState != NULL ? STATE_SEE : STATE_IDLE );
-					SERVERCOMMANDS_MoveThing( mo, CM_VELX|CM_VELY|CM_VELZ );
+					SERVERCOMMANDS_MoveThing( mo, CM_VELXY|CM_VELZ );
 				}
 
 				if (mo->SeeState != NULL) mo->SetState (mo->SeeState);
@@ -2207,7 +2207,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
 					SERVERCOMMANDS_SetThingState( mo, STATE_IDLE );
-					SERVERCOMMANDS_MoveThing( mo, CM_VELX|CM_VELY|CM_VELZ );
+					SERVERCOMMANDS_MoveThing( mo, CM_VELXY|CM_VELZ );
 				}
 
 				mo->SetIdle();
@@ -3404,7 +3404,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 	// [TIHan/BB] If it's a missile that is bounceable and it bounced, send info to the client
 	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( mo->ulNetworkFlags & NETFL_BOUNCED_OFF_ACTOR ) )
 	{
-		SERVERCOMMANDS_MoveThing( mo, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ|CM_ANGLE );
+		SERVERCOMMANDS_MoveThing( mo, CM_XY|CM_Z|CM_VELXY|CM_VELZ|CM_ANGLE );
 		// [BB] Remove the mark, the syncing is done now.
 		mo->ulNetworkFlags &= ~NETFL_BOUNCED_OFF_ACTOR;
 	}
@@ -3908,7 +3908,7 @@ bool AActor::Slam (AActor *thing)
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
 		SERVERCOMMANDS_SetThingFlags( this, FLAGSET_FLAGS );
-		SERVERCOMMANDS_MoveThing( this, CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( this, CM_VELXY|CM_VELZ );
 	}
 
 	if (health > 0)
@@ -4163,15 +4163,11 @@ void AActor::Tick ()
 		pitch = serverPitch;
 		serverPitchUpdated = false;
 	}
-	if (serverVelXUpdated)
+	if (serverVelXYUpdated)
 	{
 		velx = serverVelX;
-		serverVelXUpdated = false;
-	}
-	if (serverVelYUpdated)
-	{
 		vely = serverVelY;
-		serverVelYUpdated = false;
+		serverVelXYUpdated = false;
 	}
 	if (serverVelZUpdated)
 	{
@@ -7157,7 +7153,7 @@ foundone:
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
 				SERVERCOMMANDS_SpawnThing( mo );
-				SERVERCOMMANDS_MoveThing( mo, CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( mo, CM_VELXY|CM_VELZ );
 			}
 		}
 		if (splash->SplashBase)

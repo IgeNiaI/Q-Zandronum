@@ -145,7 +145,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Tracer)
 
 	// [BC] Update the thing's position, angle and velocity.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_ANGLE|CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z|CM_ANGLE|CM_VELXY|CM_VELZ );
 }
 
 

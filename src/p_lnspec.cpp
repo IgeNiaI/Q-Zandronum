@@ -1637,7 +1637,7 @@ FUNC(LS_Thing_Stop)
 
 			// [Dusk] tell the clients about this
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( it, ( ( it->player == NULL ) ? (CM_X|CM_Y|CM_Z) : 0 )|CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( it, ( ( it->player == NULL ) ? (CM_XY|CM_Z) : 0 )|CM_VELXY|CM_VELZ );
 
 			ok = true;
 		}
@@ -1653,7 +1653,7 @@ FUNC(LS_Thing_Stop)
 
 			// [Dusk] tell the clients about this
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( target, ( ( target->player == NULL ) ? (CM_X|CM_Y|CM_Z) : 0 )|CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( target, ( ( target->player == NULL ) ? (CM_XY|CM_Z) : 0 )|CM_VELXY|CM_VELZ );
 
 			ok = true;
 		}
