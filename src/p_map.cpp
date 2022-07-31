@@ -1331,7 +1331,7 @@ bool PIT_CheckThing(AActor *thing, FCheckPosition &tm)
 		// [BC] If we're the server, tell clients to update the thing's position and
 		// velocity.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-			SERVERCOMMANDS_MoveThing( thing, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY|CM_VELZ );
+			SERVERCOMMANDS_MoveThing( thing, CM_XY|CM_Z|CM_VELXY|CM_VELZ );
 	}
 	solid = (thing->flags & MF_SOLID) &&
 		!(thing->flags & MF_NOCLIP) &&

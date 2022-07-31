@@ -114,16 +114,12 @@ bool EnsureActorHasNetID( const AActor *pActor )
 // [BB] Check if the actor already was updated during this tic, and alters ulBits accorindly.
 void RemoveUnnecessaryPositionUpdateFlags( AActor *pActor, ULONG &ulBits )
 {
-	if ( (pActor->lastNetXUpdateTic == gametic) && (pActor->lastX == pActor->x) )
-		ulBits  &= ~CM_X;
-	if ( (pActor->lastNetYUpdateTic == gametic) && (pActor->lastY == pActor->y) )
-		ulBits  &= ~CM_Y;
+	if ( (pActor->lastNetXYUpdateTic == gametic) && (pActor->lastX == pActor->x) && (pActor->lastY == pActor->y) )
+		ulBits  &= ~CM_XY;
 	if ( (pActor->lastNetZUpdateTic == gametic) && (pActor->lastZ == pActor->z) )
 		ulBits  &= ~CM_Z;
-	if ( (pActor->lastNetVelXUpdateTic == gametic) && (pActor->lastVelx == pActor->velx) )
-		ulBits  &= ~CM_VELX;
-	if ( (pActor->lastNetVelYUpdateTic == gametic) && (pActor->lastVely == pActor->vely) )
-		ulBits  &= ~CM_VELY;
+	if ( (pActor->lastNetVelXYUpdateTic == gametic) && (pActor->lastVelx == pActor->velx) && (pActor->lastVely == pActor->vely) )
+		ulBits  &= ~CM_VELXY;
 	if ( (pActor->lastNetVelZUpdateTic == gametic) && (pActor->lastVelz == pActor->velz) )
 		ulBits  &= ~CM_VELZ;
 	if ( (pActor->lastNetMovedirUpdateTic == gametic) && (pActor->lastMovedir == pActor->movedir) )
@@ -135,14 +131,10 @@ void RemoveUnnecessaryPositionUpdateFlags( AActor *pActor, ULONG &ulBits )
 // [BB] Mark the actor as updated according to ulBits.
 void ActorNetPositionUpdated( AActor *pActor, ULONG &ulBits )
 {
-	if ( ulBits & CM_X )
+	if ( ulBits & CM_XY )
 	{
-		pActor->lastNetXUpdateTic = gametic;
+		pActor->lastNetXYUpdateTic = gametic;
 		pActor->lastX = pActor->x;
-	}
-	if ( ulBits & CM_Y )
-	{
-		pActor->lastNetYUpdateTic = gametic;
 		pActor->lastY = pActor->y;
 	}
 	if ( ulBits & CM_Z )
@@ -150,14 +142,10 @@ void ActorNetPositionUpdated( AActor *pActor, ULONG &ulBits )
 		pActor->lastNetZUpdateTic = gametic;
 		pActor->lastZ = pActor->z;
 	}
-	if ( ulBits & CM_VELX )
+	if ( ulBits & CM_VELXY )
 	{
-		pActor->lastNetVelXUpdateTic = gametic;
+		pActor->lastNetVelXYUpdateTic = gametic;
 		pActor->lastVelx = pActor->velx;
-	}
-	if ( ulBits & CM_VELY )
-	{
-		pActor->lastNetVelYUpdateTic = gametic;
 		pActor->lastVely = pActor->vely;
 	}
 	if ( ulBits & CM_VELZ )
@@ -176,15 +164,10 @@ void ActorNetPositionUpdated( AActor *pActor, ULONG &ulBits )
 // [BB/WS] Tell clients to re-use their last updated position. This saves a lot of bandwidth.
 void CheckPositionReuse( AActor *pActor, ULONG &ulBits )
 {
-	if ( ulBits & CM_X && pActor->lastX == pActor->x )
+	if ( ulBits & CM_XY && pActor->lastX == pActor->x && pActor->lastY == pActor->y )
 	{
-		ulBits &= ~CM_X;
-		ulBits |= CM_REUSE_X;
-	}
-	if ( ulBits & CM_Y && pActor->lastY == pActor->y )
-	{
-		ulBits &= ~CM_Y;
-		ulBits |= CM_REUSE_Y;
+		ulBits &= ~CM_XY;
+		ulBits |= CM_REUSE_XY;
 	}
 	if ( ulBits & CM_Z && pActor->lastZ == pActor->z )
 	{
@@ -1190,20 +1173,14 @@ void SERVERCOMMANDS_MoveThingIfChanged( AActor *actor, const MoveThingData &oldD
 	{
 		ULONG bits = 0;
 
-		if ( actor->x != oldData.x )
-			bits |= CM_X;
-
-		if ( actor->y != oldData.y )
-			bits |= CM_Y;
+		if ( actor->x != oldData.x || actor->y != oldData.y )
+			bits |= CM_XY;
 
 		if ( actor->z != oldData.z )
 			bits |= CM_Z;
 
-		if ( actor->velx != oldData.velx )
-			bits |= CM_VELX;
-
-		if ( actor->vely != oldData.vely )
-			bits |= CM_VELY;
+		if ( actor->velx != oldData.velx || actor->vely != oldData.vely )
+			bits |= CM_VELXY;
 
 		if ( actor->velz != oldData.velz )
 			bits |= CM_VELZ;

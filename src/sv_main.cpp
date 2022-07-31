@@ -2620,13 +2620,10 @@ void SERVER_SendFullUpdate( ULONG ulClient )
 				}
 
 				// [WS/BB] Always inform client of the actor's lastX/Y/Z.
-				ULONG ulBits = CM_LAST_X|CM_LAST_Y|CM_LAST_Z;
+				ULONG ulBits = CM_LAST_XY|CM_LAST_Z;
 
-				if ( pActor->velx != 0 )
-					ulBits |= CM_VELX;
-
-				if ( pActor->vely != 0 )
-					ulBits |= CM_VELY;
+				if ( pActor->velx != 0 || pActor->vely != 0 )
+					ulBits |= CM_VELXY;
 
 				if ( pActor->velz != 0 )
 					ulBits |= CM_VELZ;
@@ -4919,10 +4916,8 @@ void SERVER_SetThingNonZeroAngleAndVelocity( AActor *pActor )
 		ulBits |= CM_ANGLE;
 	if ( pActor->pitch != 0 )
 		ulBits |= CM_PITCH;
-	if ( pActor->velx != 0 )
-		ulBits |= CM_VELX;
-	if ( pActor->vely != 0 )
-		ulBits |= CM_VELY;
+	if ( pActor->velx != 0 || pActor->vely != 0 )
+		ulBits |= CM_VELXY;
 	if ( pActor->velz != 0 )
 		ulBits |= CM_VELZ;
 
@@ -4946,13 +4941,13 @@ void SERVER_UpdateThingVelocity( AActor *pActor, bool updateZ, bool updateXY )
 	// is called regularly. Furthermore, changing the position of a client's local player
 	// messes up the player prediction and shouldn't be done.
 
-	ULONG ulBits = updateXY ? (CM_VELX|CM_VELY) : 0;
+	ULONG ulBits = updateXY ? (CM_VELXY) : 0;
 	if ( updateZ )
 		ulBits |= CM_VELZ;
 
 	if ( !pActor->player ) {
 		if ( updateXY )
-			ulBits |= CM_X|CM_Y;
+			ulBits |= CM_XY;
 		if ( updateZ )
 			ulBits |= CM_Z;
 	}

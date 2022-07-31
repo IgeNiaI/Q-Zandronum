@@ -669,7 +669,7 @@ static void DoJump(AActor * self, FState * CallingState, FState *jumpto, StateCa
 				SERVERCOMMANDS_SetThingFrame( self, jumpto );
 
 			if ( clientUpdateFlags & CLIENTUPDATE_POSITION )
-				SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z );
+				SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z );
 		}
 
 		self->SetState (jumpto);
@@ -2673,7 +2673,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_Recoil)
 
 	// [BB] Set the thing's velocity, also resync the position.
 	if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( self->player == NULL ) )
-		SERVERCOMMANDS_MoveThing( self, CM_X|CM_Y|CM_Z|CM_VELX|CM_VELY );
+		SERVERCOMMANDS_MoveThing( self, CM_XY|CM_Z|CM_VELXY );
 }
 
 
@@ -3128,7 +3128,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnDebris)
 
 			// [BB]
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-				SERVERCOMMANDS_MoveThing( self, CM_VELX|CM_VELY|CM_VELZ );
+				SERVERCOMMANDS_MoveThing( self, CM_VELXY|CM_VELZ );
 		}
 	}
 }
@@ -3606,7 +3606,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_Stop)
 
 	// [TP] Inform the clients about the velocity change.
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( self ) == false ))
-		SERVERCOMMANDS_MoveThing( self, CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( self, CM_VELXY|CM_VELZ );
 }
 
 static void CheckStopped(AActor *self)
@@ -4930,7 +4930,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ScaleVelocity)
 
 	// [TP] Inform the clients about the velocity change.
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( reference ) == false ))
-		SERVERCOMMANDS_MoveThing( self, CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( self, CM_VELXY|CM_VELZ );
 }
 
 //===========================================================================
@@ -4990,7 +4990,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 
 	// [TP] Inform the clients about the velocity change.
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( reference ) == false ))
-		SERVERCOMMANDS_MoveThing( reference, CM_VELX|CM_VELY|CM_VELZ );
+		SERVERCOMMANDS_MoveThing( reference, CM_VELXY|CM_VELZ );
 }
 
 //===========================================================================

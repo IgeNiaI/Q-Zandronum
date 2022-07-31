@@ -1007,7 +1007,7 @@ public:
 	fixed_t			projectilepassheight;	// height for clipping projectile movement against this actor
 	fixed_t			velx, vely, velz;	// velocity
 	fixed_t			serverVelX, serverVelY, serverVelZ;
-	bool			serverVelXUpdated, serverVelYUpdated, serverVelZUpdated;
+	bool			serverVelXYUpdated, serverVelZUpdated;
 	SDWORD			tics;				// state tic counter
 	FState			*state;
 	SDWORD			Damage;			// For missiles and monster railgun
@@ -1199,7 +1199,7 @@ public:
 	angle_t PrevAngle;
 
 	// [BB] Last tic in which the server sent a xyz-position / movedir update about this actor to the clients.
-	int	lastNetXUpdateTic, lastNetYUpdateTic, lastNetZUpdateTic, lastNetVelXUpdateTic, lastNetVelYUpdateTic, lastNetVelZUpdateTic, lastNetMovedirUpdateTic;
+	int	lastNetXYUpdateTic, lastNetZUpdateTic, lastNetVelXYUpdateTic, lastNetVelZUpdateTic, lastNetMovedirUpdateTic;
 
 	// [BB] Last xyz-position that was sent to the client.
 	fixed_t lastX, lastY, lastZ;

@@ -262,7 +262,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_MinotaurDecide)
 		// [BB] If we're the server, update the thing's velocity and set the MF_SKULLFLY flag.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
-			SERVERCOMMANDS_MoveThing( self, CM_VELX|CM_VELY );
+			SERVERCOMMANDS_MoveThing( self, CM_VELXY );
 			SERVERCOMMANDS_SetThingFlags( self, FLAGSET_FLAGS );
 		}
 	}
