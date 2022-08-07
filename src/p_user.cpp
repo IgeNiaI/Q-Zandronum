@@ -3437,7 +3437,7 @@ void APlayerPawn::QFriction(FVector3 &vel, const float groundspeedlimit, const f
 	{
 		drop = velocity * friction / TICRATE;
 	}
-	else if ( (player->onground || player->mo->isWallClimbing) && !player->mo->InState( FindState( NAME_Pain ) ) )
+	else if ( player->onground || player->mo->isWallClimbing )
 	{
 		control = velocity < groundspeedlimit ? friction : velocity;
 		drop = control * friction / TICRATE;
