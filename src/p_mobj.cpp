@@ -2553,6 +2553,10 @@ explode:
 		return oldfloorz;
 	}
 
+	// [geNia] Don't calculate friction for other players as it was precalculated by the server
+	// But still calculate weapon bobbing
+	bool applyFriction = !( NETWORK_InClientMode() && player && player->mo == mo && player - players != consoleplayer );
+
 	// [geNia] Calculate quake friction and exit
 	if (quakeMovement)
 	{
@@ -2574,9 +2578,12 @@ explode:
 				player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction * floorFriction);
 		}
 
-		player->mo->velx = FLOAT2FIXED(vel.X);
-		player->mo->vely = FLOAT2FIXED(vel.Y);
-		player->mo->velz = FLOAT2FIXED(vel.Z);
+		if ( applyFriction )
+		{
+			player->mo->velx = FLOAT2FIXED(vel.X);
+			player->mo->vely = FLOAT2FIXED(vel.Y);
+			player->mo->velz = FLOAT2FIXED(vel.Z);
+		}
 
 		return oldfloorz;
 	}
@@ -2590,16 +2597,22 @@ explode:
 		if (player && player->mo && player->mo->isWallClimbing)
 		{
 			fixed_t friction = FLOAT2FIXED(player->mo->WallClimbFriction);
-			player->mo->velx = FixedDiv(player->mo->velx, friction);
-			player->mo->vely = FixedDiv(player->mo->vely, friction);
+			if ( applyFriction )
+			{
+				player->mo->velx = FixedDiv(player->mo->velx, friction);
+				player->mo->vely = FixedDiv(player->mo->vely, friction);
+			}
 
 			player->velx = FixedDiv(player->velx, friction);
 			player->vely = FixedDiv(player->vely, friction);
 		}
 		else if (player != NULL && level.airfriction != FRACUNIT)
 		{
-			mo->velx = FixedMul (mo->velx, level.airfriction);
-			mo->vely = FixedMul (mo->vely, level.airfriction);
+			if ( applyFriction )
+			{
+				mo->velx = FixedMul (mo->velx, level.airfriction);
+				mo->vely = FixedMul (mo->vely, level.airfriction);
+			}
 
 			if (player->mo == mo)		//  Not voodoo dolls
 			{
@@ -2689,9 +2702,12 @@ explode:
 			if (((player->onground && !player->mo->wasJustThrustedZ) || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
 			{
 				fixed_t friction = P_GetFriction (mo, NULL);
-
-				mo->velx = FixedMul (mo->velx, friction);
-				mo->vely = FixedMul (mo->vely, friction);
+				
+				if ( applyFriction )
+				{
+					mo->velx = FixedMul (mo->velx, friction);
+					mo->vely = FixedMul (mo->vely, friction);
+				}
 
 				// killough 10/98: Always decrease player bobbing by ORIG_FRICTION.
 				// This prevents problems with bobbing on ice, where it was not being
@@ -2704,9 +2720,12 @@ explode:
 		else
 		{
 			fixed_t friction = P_GetFriction(mo, NULL);
-
-			mo->velx = FixedMul(mo->velx, friction);
-			mo->vely = FixedMul(mo->vely, friction);
+			
+			if ( applyFriction )
+			{
+				mo->velx = FixedMul(mo->velx, friction);
+				mo->vely = FixedMul(mo->vely, friction);
+			}
 		}
 	}
 
