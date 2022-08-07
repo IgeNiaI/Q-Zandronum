@@ -2553,6 +2553,10 @@ explode:
 		return oldfloorz;
 	}
 
+	// [geNia] Don't calculate friction for other players as it was precalculated by the server
+	if ( NETWORK_InClientMode() && player && player->mo == mo && player - players != consoleplayer )
+		return oldfloorz;
+
 	// [geNia] Calculate quake friction and exit
 	if (quakeMovement)
 	{
