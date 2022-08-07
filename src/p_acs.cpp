@@ -6070,7 +6070,7 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
         case ACSF_SetActorVelocity:
             if (args[0] == 0)
             {
-				P_Thing_SetVelocity(activator, args[1], args[2], args[3], !!args[4], !!args[5]);
+				P_Thing_SetVelocity(activator, args[1], args[2], args[3], !!args[4], !!args[5], !!(GetNetworkReplicationFlags() & NETREP_DELAYTHRUST));
             }
             else
             {
@@ -6078,7 +6078,7 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, const 
                 
                 while ( (actor = iterator.Next ()) )
                 {
-					P_Thing_SetVelocity(actor, args[1], args[2], args[3], !!args[4], !!args[5]);
+					P_Thing_SetVelocity(actor, args[1], args[2], args[3], !!args[4], !!args[5], !!(GetNetworkReplicationFlags() & NETREP_DELAYTHRUST));
                 }
             }
 			return 0;

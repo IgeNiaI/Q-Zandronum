@@ -689,27 +689,46 @@ bool P_Thing_CanRaise(AActor *thing)
 	return true;
 }
 
-void P_Thing_SetVelocity(AActor *actor, fixed_t vx, fixed_t vy, fixed_t vz, bool add, bool setbob)
+void P_Thing_SetVelocity(AActor *actor, fixed_t vx, fixed_t vy, fixed_t vz, bool add, bool setbob, bool delayThrust)
 {
 	if (actor != NULL)
 	{
-		if (!add)
+		if ( delayThrust && ( NETWORK_GetState( ) == NETSTATE_SERVER ) && actor->player && actor->player->mo == actor )
 		{
-			actor->velx = actor->vely = actor->velz = 0;
-			if (actor->player != NULL) actor->player->velx = actor->player->vely = 0;
+			sFUTURETHRUST *FutureThrust = (struct futurethrust*) malloc(sizeof(struct futurethrust));
+			FutureThrust->tic = gametic - UNLAGGED_Gametic( actor->player );
+			FutureThrust->next = NULL;
+			FutureThrust->thing = actor;
+			FutureThrust->velx = vx;
+			FutureThrust->vely = vy;
+			FutureThrust->velz = vz;
+			FutureThrust->overrideVelocity = !add;
+			FutureThrust->setBob = setbob;
+
+			actor->player->AddFutureThrust( FutureThrust );
+			SERVERCOMMANDS_FutureThrustLocalPlayer( actor->player - players, FutureThrust->tic,
+				vx, vy, vz, !add, setbob );
 		}
-		actor->velx += vx;
-		actor->vely += vy;
-		actor->velz += vz;
-		if (setbob && actor->player != NULL)
+		else
 		{
-			actor->player->velx += vx;
-			actor->player->vely += vy;
+			if (!add)
+			{
+				actor->velx = actor->vely = actor->velz = 0;
+				if (actor->player != NULL) actor->player->velx = actor->player->vely = 0;
+			}
+			actor->velx += vx;
+			actor->vely += vy;
+			actor->velz += vz;
+			if (setbob && actor->player != NULL)
+			{
+				actor->player->velx += vx;
+				actor->player->vely += vy;
+			}
+			// [Dusk] Update velocity
+			// [geNia] But don't send velocity change for players as they are updated every tic anyway
+			if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( !actor->player || actor->player->mo != actor ) )
+				SERVER_UpdateThingVelocity( actor, true );
 		}
-		// [Dusk] Update velocity
-		// [geNia] But don't send velocity change for players as they are updated every tic anyway
-		if ( ( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( !actor->player || actor->player->mo != actor ) )
-			SERVER_UpdateThingVelocity( actor, true );
 	}
 }
 
