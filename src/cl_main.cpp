@@ -7302,7 +7302,7 @@ void ServerCommands::SetCameraToTexture::Execute()
 	FTextureID picNum = TexMan.CheckForTexture( texture, FTexture::TEX_Wall, FTextureManager::TEXMAN_Overridable );
 	if ( !picNum.Exists() )
 	{
-		CLIENT_PrintWarning( "ServerCommands::SetCameraToTexture: %s is not a texture\n", texture );
+		CLIENT_PrintWarning( "ServerCommands::SetCameraToTexture: %s is not a texture\n", texture.GetChars() );
 		return;
 	}
 
@@ -7475,7 +7475,7 @@ void ServerCommands::SetCVar::Execute()
 	if ( cvar == NULL )
 	{
 		CLIENT_PrintWarning( "SVC2_SETCVAR: The server attempted to set the value of "
-			"%s to \"%s\"\n", name, value );
+			"%s to \"%s\"\n", name.GetChars(), value.GetChars() );
 		return;
 	}
 
