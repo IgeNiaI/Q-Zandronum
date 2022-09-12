@@ -6474,12 +6474,12 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 							if (!looping)
 							{
 								// [EP] Inform the clients.
-								S_Sound(spot, chan, sid, vol, atten, true, activator);
+								S_Sound(spot, chan, sid, vol, atten, true, activator, !!(GetNetworkReplicationFlags() & NETREP_SKIPOWNER), true);
 							}
 							else if (!S_IsActorPlayingSomething(spot, chan & 7, sid))
 							{
 								// [EP] Inform the clients.
-								S_Sound(spot, chan | CHAN_LOOP, sid, vol, atten, true, activator);
+								S_Sound(spot, chan | CHAN_LOOP, sid, vol, atten, true, activator, !!(GetNetworkReplicationFlags() & NETREP_SKIPOWNER), true);
 							}
 						}
 					}
@@ -6493,7 +6493,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 				if (args[0] == 0)
 				{
-					S_StopSound(activator, chan);
+					S_StopSound(activator, chan, activator, !!(GetNetworkReplicationFlags() & NETREP_SKIPOWNER), true);
 				}
 				else
 				{
@@ -6502,7 +6502,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 					while ((spot = it.Next()) != NULL)
 					{
-						S_StopSound(spot, chan);
+						S_StopSound(spot, chan, spot, !!(GetNetworkReplicationFlags() & NETREP_SKIPOWNER), true);
 					}
 				}
 			}
