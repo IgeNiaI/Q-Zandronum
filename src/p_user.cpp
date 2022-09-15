@@ -2584,7 +2584,7 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 			if (!(player->mo->mvFlags & MV_SILENT))
 			{
 				if ( ShouldPlaySound() )
-					S_Sound(player->mo, CHAN_SIX, "*footstep", player->mo->FootstepVolume, ATTN_NORM, true, player - players);
+					S_Sound(player->mo, CHAN_AUTO, "*footstep", player->mo->FootstepVolume, ATTN_NORM, true, player - players);
 			}
 
 			CreateEffectActor( EA_FOOTSTEP );

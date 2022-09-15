@@ -3563,7 +3563,7 @@ static void PlayerLandedOnThing (AActor *mo, AActor *onmobj)
 	else if (mo->waterlevel < 2 && mo->player->mo && !mo->player->mo->isCrouchSliding)
 	{
 		if (!(mo->mvFlags & MV_SILENT) && mo->player->mo->ShouldPlayFootsteps(&(mo->player->cmd), true))
-			S_Sound(mo, CHAN_SIX, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM, true, mo->player - players);
+			S_Sound(mo, CHAN_AUTO, "*footstep", mo->player->mo->FootstepVolume, ATTN_NORM, true, mo->player - players);
 
 		mo->player->mo->CreateEffectActor( EA_FOOTSTEP );
 	}
