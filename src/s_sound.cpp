@@ -2940,7 +2940,7 @@ CCMD (changemus)
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		{
 			int musicorder =  argv.argc() > 2 ? atoi (argv[2]) : 0;
-			SERVERCOMMANDS_SetMapMusic( argv[1], musicorder );
+			SERVERCOMMANDS_SetMapMusic( false, argv[1], musicorder );
 			SERVER_SetMapMusic( argv[1], musicorder );
 		}
 		}

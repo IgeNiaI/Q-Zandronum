@@ -49,8 +49,11 @@ Command SetMapNumTotalSecrets
 EndCommand
 
 Command SetMapMusic
-	String music
-	Byte order
+	Bool useDefault
+	If (useDefault)
+		String music
+		Byte order
+	EndIf
 EndCommand
 
 Command SetMapSky

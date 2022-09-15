@@ -1363,7 +1363,7 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 	SERVERCOMMANDS_MapLoad( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 */
 	// Send the map music.
-	SERVERCOMMANDS_SetMapMusic( SERVER_GetMapMusic( ), SERVER_GetMapMusicOrder( ), g_lCurrentClient, SVCF_ONLYTHISCLIENT );
+	SERVERCOMMANDS_SetMapMusic( false, SERVER_GetMapMusic( ), SERVER_GetMapMusicOrder( ), g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
 	// Send the message of the day.
 	FString motd = *sv_motd;
@@ -6268,7 +6268,7 @@ static bool server_AuthenticateLevel( BYTESTREAM_s *pByteStream )
 	SERVERCOMMANDS_MapLoad( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
 	// Send the map music.
-	SERVERCOMMANDS_SetMapMusic( SERVER_GetMapMusic( ), SERVER_GetMapMusicOrder( ), g_lCurrentClient, SVCF_ONLYTHISCLIENT );
+	SERVERCOMMANDS_SetMapMusic( false, SERVER_GetMapMusic( ), SERVER_GetMapMusicOrder( ), g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
 	// If we're in a duel or LMS mode, tell him the state of the game mode.
 	if ( duel || lastmanstanding || teamlms || possession || teampossession || survival || invasion )

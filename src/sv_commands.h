@@ -333,7 +333,7 @@ void	SERVERCOMMANDS_SetMapNumFoundSecrets( ULONG ulPlayerExtra = MAXPLAYERS, Ser
 void	SERVERCOMMANDS_SetMapNumTotalMonsters( ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetMapNumTotalItems( ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetMapNumTotalSecrets( ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
-void	SERVERCOMMANDS_SetMapMusic( const char *pszMusic, int track, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_SetMapMusic( bool useDefault, const char *pszMusic, int track, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetMapSky( ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 
 // Inventory commands. These give the player inventory items, takes them away, etc.

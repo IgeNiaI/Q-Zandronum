@@ -3867,7 +3867,9 @@ void GAME_ResetMap( bool bRunEnterScripts )
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
 		SERVER_SetMapMusic( level.Music, level.musicorder );
-		SERVERCOMMANDS_SetMapMusic( level.Music, level.musicorder );
+		// [geNia] Tell the clients to use default map music
+		// This is used in cases where clients set a different default music via SetMusic or LocalSetMusic ACS scripts
+		SERVERCOMMANDS_SetMapMusic( true, level.Music, level.musicorder );
 	}
 
 	// [BB] TThinkerIterator<AActor> doesn't seem to like if we create new actors while

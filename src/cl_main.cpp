@@ -6083,7 +6083,10 @@ void ServerCommands::SetMapNumTotalSecrets::Execute()
 //
 void ServerCommands::SetMapMusic::Execute()
 {
-	S_ChangeMusic( music, order );
+	if ( strcmp(music.GetChars(), "DEFAULT") )
+		S_ChangeMusic( level.Music, level.musicorder );
+	else
+		S_ChangeMusic( music, order );
 }
 
 //*****************************************************************************

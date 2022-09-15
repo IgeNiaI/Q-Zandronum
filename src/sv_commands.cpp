@@ -3246,9 +3246,10 @@ void SERVERCOMMANDS_SetMapNumTotalSecrets( ULONG ulPlayerExtra, ServerCommandFla
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_SetMapMusic( const char *pszMusic, int track, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_SetMapMusic( bool useDefault, const char *pszMusic, int track, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	ServerCommands::SetMapMusic command;
+	command.SetUseDefault( useDefault );
 	command.SetMusic( pszMusic );
 	command.SetOrder( track );
 	command.sendCommandToClients ( ulPlayerExtra, flags );

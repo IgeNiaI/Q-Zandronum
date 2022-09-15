@@ -9924,7 +9924,7 @@ scriptwait:
 				// save the current music setting for when new clients connect.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
-					SERVERCOMMANDS_SetMapMusic( lookup, STACK( 1 ));
+					SERVERCOMMANDS_SetMapMusic( false, lookup, STACK( 1 ));
 					SERVER_SetMapMusic( lookup, STACK( 1 ));
 				}
 			}
@@ -10497,11 +10497,18 @@ scriptwait:
 
 		case PCD_SETMUSIC:
 
+			if (STACK(1))
+			{
+				// [geNia] Set this music as default for the level
+				level.Music = FBehavior::StaticLookupString(STACK(3));
+				level.musicorder = STACK(2);
+			}
+			
 			// [BC] Tell clients about this music change, and save the music setting for when
 			// new clients connect.
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				SERVERCOMMANDS_SetMapMusic( FBehavior::StaticLookupString( STACK( 3 )), STACK( 2 ) );
+				SERVERCOMMANDS_SetMapMusic( false, FBehavior::StaticLookupString( STACK( 3 )), STACK( 2 ) );
 				SERVER_SetMapMusic( FBehavior::StaticLookupString( STACK( 3 )), STACK( 2 ) );
 			}
 
@@ -10517,7 +10524,7 @@ scriptwait:
 				const char* music =  FBehavior::StaticLookupString( TAGSTR(uallong(pc[0])) );
 				int order = uallong( pc[1] );
 
-				SERVERCOMMANDS_SetMapMusic( music, order );
+				SERVERCOMMANDS_SetMapMusic( false, music, order );
 				SERVER_SetMapMusic( music, order );
 			}
 
@@ -10532,7 +10539,13 @@ scriptwait:
 			{
 				if ( activator && activator->player )
 				{
-					SERVERCOMMANDS_SetMapMusic( FBehavior::StaticLookupString( STACK( 3 )), STACK( 2 ),
+					if (STACK(1))
+					{
+						// [geNia] Set this music as default for the level
+						level.Music = FBehavior::StaticLookupString(STACK(3));
+						level.musicorder = STACK(2);
+					}
+					SERVERCOMMANDS_SetMapMusic( false, FBehavior::StaticLookupString( STACK( 3 )), STACK( 2 ),
 						activator->player - players, SVCF_ONLYTHISCLIENT );
 				}
 			}
@@ -10540,6 +10553,12 @@ scriptwait:
 			if (activator == players[consoleplayer].mo)
 			{
 				S_ChangeMusic (FBehavior::StaticLookupString (STACK(3)), STACK(2));
+				if (STACK(1))
+				{
+					// [geNia] Set this music as default for the level
+					level.Music = FBehavior::StaticLookupString(STACK(3));
+					level.musicorder = STACK(2);
+				}
 			}
 			sp -= 3;
 			break;
@@ -10551,7 +10570,7 @@ scriptwait:
 			{
 				if ( activator && activator->player )
 				{
-					SERVERCOMMANDS_SetMapMusic( FBehavior::StaticLookupString(TAGSTR(uallong(pc[0]))),
+					SERVERCOMMANDS_SetMapMusic( false, FBehavior::StaticLookupString(TAGSTR(uallong(pc[0]))),
 						uallong( pc[1] ), activator->player - players, SVCF_ONLYTHISCLIENT );
 				}
 			}
