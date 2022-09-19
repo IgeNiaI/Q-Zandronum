@@ -3917,7 +3917,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			int fm, sm;
 
 			fixed_t LocalVelocityCap;
-			if (player->mo->VelocityCap)
+			if (player->mo->VelocityCap && !player->bSpectating)
 			{
 				LocalVelocityCap = MAX(player->mo->VelocityCap, (fixed_t)TVector2<fixed_t>(player->mo->velx, player->mo->vely).Length());
 			}
@@ -3964,7 +3964,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 			}
 
 			// Limit player velocity if enabled
-			if (player->mo->VelocityCap) {
+			if (player->mo->VelocityCap && !player->bSpectating) {
 				velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
 
 				if (velocity > LocalVelocityCap) {
