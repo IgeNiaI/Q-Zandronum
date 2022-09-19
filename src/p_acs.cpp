@@ -4484,6 +4484,10 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 	case APROP_Frightened:
 		if (value) actor->flags4 |= MF4_FRIGHTENED; else actor->flags4 &= ~MF4_FRIGHTENED;
 		break;
+		
+	case APROP_CpmAirControl:
+		if (value) actor->mvFlags |= MV_CPMAIRCONTROL; else actor->mvFlags &= ~MV_CPMAIRCONTROL;
+		break;
 
 	case APROP_CrouchSlide:
 		if (value) actor->mvFlags |= MV_CROUCHSLIDE; else actor->mvFlags &= ~MV_CROUCHSLIDE;

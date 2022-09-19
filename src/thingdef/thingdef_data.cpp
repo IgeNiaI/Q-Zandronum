@@ -261,6 +261,7 @@ static FFlagDef ActorFlags[]=
 	DEFINE_FLAG(MF8, DONTMEDAL, AActor, flags8),
 
 	// [Ivory] extra movement flags
+	DEFINE_FLAG(MV, CPMAIRCONTROL, AActor, mvFlags),
 	DEFINE_FLAG(MV, CROUCHSLIDE, AActor, mvFlags),
 	DEFINE_FLAG(MV, WALLJUMP, AActor, mvFlags),
 	DEFINE_FLAG(MV, WALLJUMPV2, AActor, mvFlags),

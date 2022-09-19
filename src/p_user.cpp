@@ -4144,7 +4144,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				velocity = float(FVector2(vel.X, vel.Y).Length());
 
 				// Acceleration
-				if (player->mo->MvType == MV_QUAKE_CPM)
+				if (player->mo->mvFlags & MV_CPMAIRCONTROL)
 				{
 					if (cmd->ucmd.sidemove && !cmd->ucmd.forwardmove && velocity >= maxGroundSpeed)
 					{

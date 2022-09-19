@@ -206,7 +206,7 @@ public:
 	fixed_t		CrouchScale;
 	fixed_t		CrouchScaleHalfWay;
 
-	short		MvType;					// movement type (0 == doom, 1 == quake, 2 == quake cpm)
+	short		MvType;					// movement type (0 == doom, 1 == quake)
 	int			FootstepInterval;
 	int			CrouchSlideEffectInterval;
 	int			WallClimbEffectInterval;
@@ -930,7 +930,6 @@ enum
 {
 	MV_DOOM = 0,
 	MV_QUAKE,
-	MV_QUAKE_CPM,
 	MV_TYPES_END
 };
 
