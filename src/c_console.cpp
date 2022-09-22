@@ -76,6 +76,7 @@
 #include "win32/g15/g15.h"
 #include "gi.h"
 #include "sv_rcon.h"
+#include "r_utility.h"
 
 #define CONSOLESIZE	16384	// Number of characters to store in console
 #define CONSOLELINES 256	// Max number of lines of console text
@@ -108,6 +109,10 @@ bool		cursoron = false;
 int			ConBottom, ConScroll, RowAdjust;
 int			CursorTicker;
 constate_e	ConsoleState = c_up;
+
+// [AK] In case we interpolate the console, we need to save an old copy of ConBottom
+// so that we can restore the old vale after drawing the console.
+static int	SavedConBottom;
 
 // [TP] Some functions print result directly to console.. when we need it to a string
 // instead. To keep as much ZDoom code unchanged, here's a hack to capture the result
@@ -1170,6 +1175,10 @@ void C_Ticker ()
 				ConBottom = SCREENHEIGHT / 2;
 				ConsoleState = c_down;
 			}
+
+			// [AK] Save a copy of the current value of ConBottom in case
+			// we want to interpolate the console.
+			SavedConBottom = ConBottom;
 		}
 		else if (ConsoleState == c_rising)
 		{
@@ -1179,6 +1188,10 @@ void C_Ticker ()
 				ConsoleState = c_up;
 				ConBottom = 0;
 			}
+
+			// [AK] Save a copy of the current value of ConBottom in case
+			// we want to interpolate the console.
+			SavedConBottom = ConBottom;
 		}
 	}
 
@@ -1331,6 +1344,16 @@ void C_DrawConsole (bool hw2d)
 	// [BC] No need to draw the console in server mode.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		return;
+	
+	// [AK] Check if we should interpolate the console.
+	const bool bInterpolate = (ConsoleState == c_falling || ConsoleState == c_rising);
+	
+	// [AK] Interpolate the console while it's moving.
+	if (bInterpolate)
+	{
+		int offset = static_cast<int>(FIXED2FLOAT(r_TicFrac) * static_cast<float>(SCREENHEIGHT * 2 / 25));
+		ConBottom = clamp<int>(SavedConBottom + offset * (ConsoleState == c_falling ? 1 : -1), 0, SCREENHEIGHT / 2);
+	}
 
 	left = LEFTMARGIN;
 	lines = (ConBottom-ConFont->GetHeight()*2)/ConFont->GetHeight();
@@ -1519,6 +1542,10 @@ void C_DrawConsole (bool hw2d)
 			}
 		}
 	}
+
+	// [AK] Restore the saved value of ConBottom in case we interpolated the console.
+	if (bInterpolate)
+		ConBottom = SavedConBottom;
 }
 
 void C_FullConsole ()
