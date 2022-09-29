@@ -268,6 +268,7 @@ public:
 	int GetScaledTopOffset () { int foo = (TopOffset << 17) / yScale; return (foo >> 1) + (foo & 1); }
 	double GetScaledLeftOffsetDouble() { return (LeftOffset * 65536.) / xScale; }
 	double GetScaledTopOffsetDouble() { return (TopOffset * 65536.) / yScale; }
+	virtual void ResolvePatches() {}
 
 	virtual void SetFrontSkyLayer();
 
