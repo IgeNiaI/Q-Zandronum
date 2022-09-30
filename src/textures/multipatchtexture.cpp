@@ -1332,6 +1332,7 @@ void FMultiPatchTexture::ResolvePatches()
 				{
 					if (Inits[i].HasLine) Inits[i].sc.Message(MSG_WARNING, "Texture '%s' references itself as patch\n", Inits[i].TexName.GetChars());
 					else Printf("Texture '%s' references itself as patch\n", Inits[i].TexName.GetChars());
+					continue;
 				}
 				else
 				{
