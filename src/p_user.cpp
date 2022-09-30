@@ -3626,7 +3626,9 @@ void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 	if (cmd->ucmd.buttons & BT_JUMP || player->mo->secondJumpState == SJ_READY || isClimbingLedge)
 	{
 		// [Leo] Spectators shouldn't be limited by the server settings.
-		if (player->onground && !player->mo->jumpTics && player->mo->secondJumpState != SJ_READY)
+		if (player->onground
+			&& (!player->mo->jumpTics || player->mo->flags2 & MF2_ONMOBJ) // you can jump on actors with no delay
+			&& player->mo->secondJumpState != SJ_READY)
 		{
 			bool isEdgeJumper = (mvFlags & MV_EDGEJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
