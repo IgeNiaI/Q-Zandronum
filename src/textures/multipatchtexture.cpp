@@ -299,8 +299,6 @@ FMultiPatchTexture::FMultiPatchTexture (const void *texdef, FPatchLookup *patchl
 		Printf ("Texture %s is left without any patches\n", Name);
 	}
 
-	CheckForHacks ();
-
 	DefinitionLump = deflumpnum;
 }
 
@@ -1367,6 +1365,8 @@ void FMultiPatchTexture::ResolvePatches()
 	}
 	delete[] Inits;
 	Inits = nullptr;
+
+	CheckForHacks();
 
 	// If this texture is just a wrapper around a single patch, we can simply
 	// forward GetPixels() and GetColumn() calls to that patch.
