@@ -213,7 +213,6 @@ void CLIENT_PREDICT_PlayerPredict( void )
 	pPlayer->mo->serverX = pPlayer->ServerXYZ[0];
 	pPlayer->mo->serverY = pPlayer->ServerXYZ[1];
 	pPlayer->mo->serverZ = pPlayer->ServerXYZ[2];
-	pPlayer->mo->serverPosUpdated = true;
 	pPlayer->mo->MoveToServerPosition();
 
 	// Set the player's velocity as told to him by the server.
@@ -379,7 +378,7 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 	DPusher *pusher = NULL;
 
 	LONG lTick = g_ulGameTick - ulTicks;
-
+	
 	// [BB] The server moved us to a postion above the floor and into a sector without a moving floor,
 	// so don't glue us to the floor for this tic.
 	if ( ( g_bSavedOnMobj[lTick % CLIENT_PREDICTION_TICS] == false ) && ( pPlayer->mo->z > pPlayer->mo->floorz )
@@ -414,7 +413,7 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 			polyAction->RestorePredict(lTick % CLIENT_PREDICTION_TICS);
 		
 		client_predict_AdjustZ( pPlayer->mo );
-
+		
 		// [BB] Restore the saved "on ground" status.
 		if ( g_bSavedOnMobj[lTick % CLIENT_PREDICTION_TICS] )
 			pPlayer->mo->flags2 |= MF2_ONMOBJ;
