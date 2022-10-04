@@ -303,11 +303,11 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 	// [BB] Standing on an actor (like a bridge) needs special treatment.
 	const AActor *pActor = (pPlayer->mo->flags2 & MF2_ONMOBJ) ? P_CheckOnmobj ( pPlayer->mo ) : NULL;
 	if ( pActor == NULL ) {
-		g_bSavedOnFloor[tickIndex] = pPlayer->mo->z <= pPlayer->mo->floorz;
+		g_bSavedOnFloor[tickIndex] = pPlayer->mo->z == pPlayer->mo->floorz;
 	}
 	else
 	{
-		g_bSavedOnFloor[tickIndex] = ( pPlayer->mo->z <= pActor->z + pActor->height );
+		g_bSavedOnFloor[tickIndex] = ( pPlayer->mo->z == pActor->z + pActor->height );
 		g_SavedFloorZ[tickIndex] = pActor->z + pActor->height;
 	}
 
