@@ -177,7 +177,7 @@ void CheckPositionReuse( AActor *pActor, ULONG &ulBits )
 }
 //*****************************************************************************
 //
-void SERVERCOMMANDS_Ping( ULONG ulTime )
+void SERVERCOMMANDS_Ping( unsigned int ulTime )
 {
 	ServerCommands::Ping command;
 	command.SetTime( ulTime );

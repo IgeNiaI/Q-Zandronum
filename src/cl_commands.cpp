@@ -391,7 +391,7 @@ void CLIENTCOMMANDS_MissingPacket( void )
 
 //*****************************************************************************
 //
-void CLIENTCOMMANDS_Pong( ULONG ulTime )
+void CLIENTCOMMANDS_Pong( unsigned int ulTime )
 {
 	// [BB] CLIENTCOMMANDS_Pong is the only client command function that
 	// immediately launches a network packet. This is something that

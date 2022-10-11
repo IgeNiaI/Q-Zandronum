@@ -773,7 +773,7 @@ public:
 	fixed_t		ServerXYZVel[3];
 
 	// Ping of the player to the server he's playing on.
-	ULONG		ulPing;
+	unsigned int		ulPing;
 
 	// Is this player ready for the next map? (intermission)
 	bool		bReadyToGoOn;

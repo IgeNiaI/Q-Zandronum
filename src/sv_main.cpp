@@ -5514,7 +5514,7 @@ static bool server_MissingPacket( BYTESTREAM_s *pByteStream )
 //
 static bool server_UpdateClientPing( BYTESTREAM_s *pByteStream )
 {
-	ULONG	ulPing;
+	unsigned int	ulPing;
 
 	ulPing = NETWORK_ReadLong( pByteStream );
 
@@ -5523,8 +5523,8 @@ static bool server_UpdateClientPing( BYTESTREAM_s *pByteStream )
 	if ( ulPing > nowTime )
 		return false;
 
-	ULONG currentPing = (nowTime - ulPing);
-	const ULONG ticLength = 1000 / TICRATE;
+	unsigned int currentPing = (nowTime - ulPing);
+	const unsigned int ticLength = 1000 / TICRATE;
 	player_t *p = &players[g_lCurrentClient];
 	p->ulPing = currentPing;
 
