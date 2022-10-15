@@ -384,7 +384,11 @@ void FListMenuItemPlayerDisplay::UpdateRandomClass()
 	{
 		if (++mRandomClass >= (int)PlayerClasses.Size ()) mRandomClass = 0;
 		mPlayerClass = &PlayerClasses[mRandomClass];
-		mPlayerState = GetDefaultByType (mPlayerClass->Type)->SeeState;
+		mPlayerState = GetDefaultByType (mPlayerClass->Type)->ClassMenuState;
+		if (mPlayerState == NULL)
+		{ // No menu state, so try see state.
+			mPlayerState = GetDefaultByType (mPlayerClass->Type)->SeeState;
+		}
 		if (mPlayerState == NULL)
 		{ // No see state, so try spawn state.
 			mPlayerState = GetDefaultByType (mPlayerClass->Type)->SpawnState;
@@ -439,7 +443,11 @@ void FListMenuItemPlayerDisplay::SetPlayerClass(int classnum, bool force)
 	else if (mPlayerClass != &PlayerClasses[classnum] || force)
 	{
 		mPlayerClass = &PlayerClasses[classnum];
-		mPlayerState = GetDefaultByType (mPlayerClass->Type)->SeeState;
+		mPlayerState = GetDefaultByType (mPlayerClass->Type)->ClassMenuState;
+		if (mPlayerState == NULL)
+		{ // No menu state, so try see state.
+			mPlayerState = GetDefaultByType (mPlayerClass->Type)->SeeState;
+		}
 		if (mPlayerState == NULL)
 		{ // No see state, so try spawn state.
 			mPlayerState = GetDefaultByType (mPlayerClass->Type)->SpawnState;

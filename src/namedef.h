@@ -192,6 +192,7 @@ xx(Greetings)
 xx(Idle)
 xx(GenericFreezeDeath)
 xx(GenericCrush)
+xx(ClassMenu)
 
 // Bounce state names
 xx(Bounce)

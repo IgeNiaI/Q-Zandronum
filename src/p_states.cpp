@@ -507,6 +507,7 @@ void FStateDefinitions::InstallStates(FActorInfo *info, AActor *defaults)
 	// have to be stored locally
 	defaults->MeleeState = info->FindState(NAME_Melee);
 	defaults->MissileState = info->FindState(NAME_Missile);
+	defaults->ClassMenuState = info->FindState(NAME_ClassMenu);
 }
 
 //===========================================================================

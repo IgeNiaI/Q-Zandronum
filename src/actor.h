@@ -1160,6 +1160,7 @@ public:
 	FState *SeeState;
 	FState *MeleeState;
 	FState *MissileState;
+	FState *ClassMenuState;
 
 	// [BC] This is the state that the actor is put into after being spawned on a map (this
 	// isn't necessarily the spawn state).
