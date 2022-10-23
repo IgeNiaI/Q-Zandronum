@@ -2484,18 +2484,18 @@ void APlayerPawn::DropImportantItems( bool bLeavingGame, AActor *pSource )
 //
 //===========================================================================
 
-int APlayerPawn::WalkCrouchState (ticcmd_t *cmd)
+int APlayerPawn::WalkCrouchState (ticcmd_t *cmd, bool ignoreCrouch)
 {
 	// [geNia] BT_SPEED is considered pressed when the player is walking, regardless of whether the button is actually pressed
 	if (cmd->ucmd.buttons & BT_SPEED)
 	{
 		// player is walking
-		return (cmd->ucmd.buttons & BT_CROUCH) ? 2 : 0;
+		return (cmd->ucmd.buttons & BT_CROUCH && !ignoreCrouch) ? 2 : 0;
 	}
 	else
 	{
 		// player is running
-		return (cmd->ucmd.buttons & BT_CROUCH) ? 3 : 1;
+		return (cmd->ucmd.buttons & BT_CROUCH && !ignoreCrouch) ? 3 : 1;
 	}
 }
 
@@ -2534,7 +2534,7 @@ bool APlayerPawn::ShouldPlayFootsteps(ticcmd_t *cmd, bool landing)
 		return false;
 	}
 
-	switch (WalkCrouchState(cmd))
+	switch (WalkCrouchState(cmd, false))
 	{
 	case 0: // player is walking
 		if ( !FootstepsEnabled1 )
@@ -2657,7 +2657,7 @@ void APlayerPawn::TweakSpeeds (ticcmd_t *cmd, int &forward, int &side)
 	}
 
 	// [GRB]
-	int speed = WalkCrouchState(cmd);
+	int speed = WalkCrouchState(cmd, false);
 	switch (speed) {
 		case 0: // walking
 			forward = FixedMul(forward, ForwardMove1);
@@ -3324,7 +3324,7 @@ float DotProduct(const FVector3 &v, const FVector3 &t)
 // Quake movement specifics
 //***************************************************
 
-float APlayerPawn::QCrouchWalkFactor( ticcmd_t *cmd )
+float APlayerPawn::QCrouchWalkFactor( ticcmd_t *cmd, bool ignoreCrouch )
 {
 	FVector3 acceleration = FVector3 (FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, .0f).Unit();
 	if (player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY))
@@ -3345,7 +3345,7 @@ float APlayerPawn::QCrouchWalkFactor( ticcmd_t *cmd )
 	}
 
 	// [GRB]
-	int speed = WalkCrouchState(cmd);
+	int speed = WalkCrouchState(cmd, ignoreCrouch);
 	if (player->mo->waterlevel >= 2 || (player->mo->flags & MF_NOGRAVITY))
 	{
 		switch (speed) {
@@ -4058,7 +4058,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	bool isAirWallRunner = player->mo->mvFlags & MV_AIRWALLRUN ? true : false;
 	float flAngle = player->mo->angle * (360.f / ANGLE_MAX);
 	float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
-	float moveFactor = player->mo->QCrouchWalkFactor( cmd );
+	float moveFactor;
 	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.0f };
@@ -4068,12 +4068,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	if (player->mo->waterlevel >= 2 || player->mo->flags & MF_NOGRAVITY)
 	{
+		moveFactor = player->mo->QCrouchWalkFactor( cmd, true );
+
 		// Calculate the vertical push according to the view pitch
 		float pitch = float(player->mo->pitch * (360.f / ANGLE_MAX)) * PI_F / 180;
 		acceleration.Z = acceleration.X * sin(-pitch);
 		acceleration.X *= cos(pitch);
 
-		if ((cmd->ucmd.buttons & BT_MOVEUP) || (cmd->ucmd.buttons & BT_MOVEDOWN))
+		if ( cmd->ucmd.upmove != 0 )
 		{
 			if ( !P_IsPlayerTotallyFrozen( player ) && !( player->cheats & CF_FROZEN ) )
 				acceleration.Z += FIXED2FLOAT(cmd->ucmd.upmove << 4);
@@ -4100,6 +4102,8 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	}
 	else
 	{
+		moveFactor = player->mo->QCrouchWalkFactor( cmd, false );
+
 		// Wall proximity check
 		if (isClimber && (cmd->ucmd.buttons & BT_JUMP) && player->mo->wallClimbTics > 0 && (cmd->ucmd.forwardmove | cmd->ucmd.sidemove) &&
 			(velocity = float(FVector2(vel.X, vel.Y).Length())) <= maxGroundSpeed + 2.f)

@@ -2555,7 +2555,7 @@ explode:
 	if (quakeMovement)
 	{
 		FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
-		float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed() * Q_MAX_GROUND_SPEED * player->mo->QCrouchWalkFactor( &player->cmd );
+		float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed() * Q_MAX_GROUND_SPEED * player->mo->QCrouchWalkFactor( &player->cmd, false );
 
 		if (player->mo->waterlevel >= 2)
 			player->mo->QFriction(vel, 0.f, 2.f);
@@ -2988,8 +2988,10 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 // apply gravity
 //
 	bool quakeMovement = mo->player && mo->player->mo == mo && mo->player->mo->MvType && !mo->player->bSpectating;
-
-	if (mo->z > mo->floorz && !(mo->flags & MF_NOGRAVITY))
+	if ( quakeMovement && ( mo->flags & MF_NOGRAVITY ) && mo->z > mo->floorz && (mo->velx|mo->vely) == 0 ) {
+		mo->velz -= FixedMul(mo->velz, FRACUNIT * 3) / TICRATE;
+	}
+	else if (mo->z > mo->floorz && !(mo->flags & MF_NOGRAVITY))
 	{
 		// [Ivory] Quake gravity but only for players.
 		// I want nothing to do with that thing below

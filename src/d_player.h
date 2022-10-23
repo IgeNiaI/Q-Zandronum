@@ -126,7 +126,7 @@ public:
 	// [BB] We also call this when a player dies. These special items also need to be dropped then.
 	virtual void DropImportantItems( bool bLeavingGame, AActor *pSource = NULL );
 
-	virtual int WalkCrouchState (ticcmd_t *cmd);
+	virtual int WalkCrouchState (ticcmd_t *cmd, bool ignoreCrouch);
 	virtual bool ShouldPlaySound();
 	virtual bool ShouldPlayFootsteps(ticcmd_t *cmd, bool landing);
 	virtual void PlayFootsteps (ticcmd_t *cmd);
@@ -143,7 +143,7 @@ public:
 	virtual void Destroy( );
 
 	// Quake movement
-	float QCrouchWalkFactor( ticcmd_t *cmd );
+	float QCrouchWalkFactor( ticcmd_t *cmd, bool ignoreCrouch );
 	float QTweakSpeed();
 	void  QFriction(FVector3 &vel, const float speedlimit, const float friction);
 	void  QAcceleration(FVector3 &vel, const FVector3 &wishdir, const float &wishspeed, const float accel);
