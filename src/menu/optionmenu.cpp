@@ -415,22 +415,7 @@ void DOptionMenu::Drawer ()
 	int fontheight = OptionSettings.mLinespacing * CleanYfac_1;
 	y *= CleanYfac_1;
 
-	int indent = mDesc->mIndent;
-	if (indent > 280)
-	{ // kludge for the compatibility options with their extremely long labels
-		if (indent + 40 <= CleanWidth_1)
-		{
-			indent = (screen->GetWidth() - ((indent + 40) * CleanXfac_1)) / 2 + indent * CleanXfac_1;
-		}
-		else
-		{
-			indent = screen->GetWidth() - 40 * CleanXfac_1;
-		}
-	}
-	else
-	{
-		indent = (indent - 160) * CleanXfac_1 + screen->GetWidth() / 2;
-	}
+	int indent = screen->GetWidth() / 2;
 
 	int ytop = y + mDesc->mScrollTop * 8 * CleanYfac_1;
 	int lastrow = screen->GetHeight() - SmallFont->GetHeight() * CleanYfac_1;
