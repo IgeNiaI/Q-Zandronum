@@ -429,7 +429,8 @@ public:
 		C_NameKeys (description, Key1, Key2);
 		if (description[0])
 		{
-			M_DrawConText(CR_WHITE, indent + CURSORSPACE, y + (OptionSettings.mLinespacing-8)*CleanYfac_1, description);
+			screen->DrawText(SmallFont, CR_WHITE, indent + CURSORSPACE, y + (OptionSettings.mLinespacing-8)*CleanYfac_1, description,
+				DTA_CleanNoMove_1, true, TAG_DONE);
 		}
 		else
 		{
