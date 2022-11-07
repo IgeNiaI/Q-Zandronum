@@ -294,6 +294,10 @@ static int ListActionCommands (const char *pattern)
 	return count;
 }
 
+static bool IsWhitespace (char c) {
+	return (c < -64 && c != -88 && c != -72) || ( c >= 0 && c <= 32 );
+}
+
 /* ======================================================================== */
 
 /* By Paul Hsieh (C) 2004, 2005.  Covered under the Paul Hsieh derivative 
@@ -559,7 +563,7 @@ void C_DoCommand (const char *cmd, int keynum)
 	const char *beg;
 
 	// Skip any beginning whitespace
-	while (*cmd && *cmd <= ' ')
+	while (*cmd && IsWhitespace(*cmd))
 		cmd++;
 
 	// Find end of the command name
@@ -571,7 +575,7 @@ void C_DoCommand (const char *cmd, int keynum)
 	else
 	{
 		beg = cmd;
-		for (end = cmd+1; *end > ' '; ++end)
+		for (end = cmd+1; !IsWhitespace(*end); ++end)
 			;
 	}
 
@@ -741,7 +745,7 @@ void AddCommandString (char *cmd, int keynum)
 				more = 0;
 			}
 			// Intercept wait commands here. Note: wait must be lowercase
-			while (*cmd && *cmd <= ' ')
+			while (*cmd && IsWhitespace(*cmd))
 				cmd++;
 			if (*cmd)
 			{
@@ -818,7 +822,7 @@ static long ParseCommandLine (const char *args, int *argc, char **argv, bool no_
 
 	for (;;)
 	{
-		while (*args <= ' ' && *args)
+		while (IsWhitespace(*args) && *args)
 		{ // skip white space
 			args++;
 		}
@@ -871,7 +875,7 @@ static long ParseCommandLine (const char *args, int *argc, char **argv, bool no_
 			FBaseCVar *var;
 			UCVarValue val;
 
-			while (*args && *args > ' ' && *args != '\"')
+			while (*args && !IsWhitespace(*args) && *args != '\"')
 				args++;
 			if (*start == '$' && (var = FindCVarSub (start+1, int(args-start-1))))
 			{

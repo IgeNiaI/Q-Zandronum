@@ -570,8 +570,8 @@ bool v_IsCharAcceptableInNames ( char c )
 // [RC] Returns whether this character is invisible.
 bool v_IsCharacterWhitespace ( char c )
 {
-	// System ascii < 32 is invisible.
-	if ( c <= 31 )
+	// System ascii between 0 and 32 and < -64 is invisible.
+	if ( ( c < -64 && c != -88 && c != -72 ) || ( c >= 0 && c <= 31 ) )
 		return true;
 
 	// Text colorization.
