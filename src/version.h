@@ -48,6 +48,7 @@ const char *GetVersionStringRev();
 #define GAMEVER_STRING "1.4.22"
 #define NETGAMEVER_STRING "1.4.22"
 #define DOTVERSIONSTR GAMEVER_STRING ""
+#define TSPGVERSIONSTR "-tspg26"
 #define VERSIONSTR DOTVERSIONSTR
 
 // [BB] The version string that includes revision / compatibility data.
