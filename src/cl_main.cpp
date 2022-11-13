@@ -3043,11 +3043,12 @@ void ServerCommands::KillPlayer::Execute()
 			(( ( ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSEARNWINS ) && !( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ) ) == false ) || (( winlimit == 0 ) || ( players[ulSourcePlayer].ulWins < static_cast<ULONG>(winlimit) ))) &&
 			(( ( ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSEARNWINS ) && ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ) ) == false ) || (( winlimit == 0 ) || ( TEAM_GetWinCount( players[ulSourcePlayer].ulTeam ) < winlimit ))))
 		{
+			int viewplayer = static_cast<int>( SCOREBOARD_GetViewPlayer() );
 			// Display a large "You were fragged by <name>." message in the middle of the screen.
-			if ( player == &players[consoleplayer] )
+			if ( player == &players[viewplayer] )
 				SCOREBOARD_DisplayFraggedMessage( &players[ulSourcePlayer] );
 			// Display a large "You fragged <name>!" message in the middle of the screen.
-			else if ( ulSourcePlayer == static_cast<ULONG>(consoleplayer) )
+			else if ( ulSourcePlayer == static_cast<ULONG>(viewplayer) )
 				SCOREBOARD_DisplayFragMessage( player );
 		}
 	}

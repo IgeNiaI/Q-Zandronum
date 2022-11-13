@@ -947,8 +947,9 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 				(( ( ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSEARNWINS ) && !( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ) ) == false ) || (( winlimit == 0 ) || ( source->player->ulWins < static_cast<ULONG>(winlimit) ))) &&
 				(( ( ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSEARNWINS ) && ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ) ) == false ) || (( winlimit == 0 ) || ( TEAM_GetWinCount( source->player->ulTeam ) < winlimit ))))
 			{
+				int viewplayer = static_cast<int>( SCOREBOARD_GetViewPlayer() );
 				// Display a large "You were fragged by <name>." message in the middle of the screen.
-				if (( player - players ) == consoleplayer )
+				if (( player - players ) == viewplayer )
 				{
 					if ( cl_showlargefragmessages )
 						SCOREBOARD_DisplayFraggedMessage( source->player );
@@ -958,7 +959,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 				}
 
 				// Display a large "You fragged <name>!" message in the middle of the screen.
-				else if (( source->player - players ) == consoleplayer )
+				else if (( source->player - players ) == viewplayer )
 				{
 					if ( cl_showlargefragmessages )
 						SCOREBOARD_DisplayFragMessage( player );
