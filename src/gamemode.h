@@ -89,6 +89,7 @@ typedef enum
 {
 	GAMESTATE_UNSPECIFIED = -1,
 	GAMESTATE_WAITFORPLAYERS = 0,
+	GAMESTATE_WARMUP,
 	GAMESTATE_COUNTDOWN,
 	GAMESTATE_INPROGRESS,
 	GAMESTATE_INRESULTSEQUENCE
@@ -178,6 +179,8 @@ char		*GAMEMODE_GetShortName( GAMEMODE_e GameMode );
 char		*GAMEMODE_GetName( GAMEMODE_e GameMode );
 char		*GAMEMODE_GetF1Texture( GAMEMODE_e GameMode );
 void		GAMEMODE_DetermineGameMode( void );
+bool		GAMEMODE_IsGameWaitingForPlayers( void );
+bool		GAMEMODE_IsGameInWarmup( void );
 bool		GAMEMODE_IsGameInCountdown( void );
 bool		GAMEMODE_IsGameInProgress( void );
 bool		GAMEMODE_IsGameInResultSequence( void );
@@ -222,4 +225,11 @@ void		GAMEMODE_SetLimit( GAMELIMIT_e GameLimit, int value );
 bool		GAMEMODE_IsCVarLocked( FBaseCVar *cvar );
 void		GAMEMODE_ReconfigureGameSettings( bool bLockedOnly = false, bool bResetToDefault = false );
 
+void		GAMEMODE_AddPlayerReady( ULONG ulPlayer );
+void		GAMEMODE_RemovePlayerReady( ULONG ulPlayer );
+void		GAMEMODE_TogglePlayerReady( ULONG ulPlayer );
+void		GAMEMODE_ResetReadyPlayers( void );
+bool		GAMEMODE_AreEnoughPlayersReady( void );
+void		GAMEMODE_UpdateWarmupHUDMessage( void );
+bool		GAMEMODE_StartMatch( void );
 #endif // __GAMEMODE_H__

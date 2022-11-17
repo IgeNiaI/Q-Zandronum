@@ -70,6 +70,34 @@ enum
 	RAILCOLOR_RAINBOW
 };
 
+typedef enum
+{
+	DEATHMATCHS_WAITINGFORPLAYERS,
+	DEATHMATCHS_WARMUP,
+	DEATHMATCHS_COUNTDOWN,
+	DEATHMATCHS_INPROGRESS,
+	DEATHMATCHS_WINSEQUENCE,
+
+} DEATHMATCHSTATE_e;
+
+//*****************************************************************************
+//	PROTOTYPES
+
+void	DEATHMATCH_Construct( void );
+void	DEATHMATCH_Tick( void );
+void	DEATHMATCH_StartCountdown( ULONG ulTicks );
+void	DEATHMATCH_DoFight( void );
+void	DEATHMATCH_DoWinSequence( player_t *player );
+void	DEATHMATCH_TimeExpired( void );
+void	DEATHMATCH_DetermineAndPrintWinner( void );
+
+// Access functions
+ULONG	DEATHMATCH_GetCountdownTicks( void );
+void	DEATHMATCH_SetCountdownTicks( ULONG ulTicks );
+
+DEATHMATCHSTATE_e	DEATHMATCH_GetState( void );
+void				DEATHMATCH_SetState( DEATHMATCHSTATE_e State );
+
 //*****************************************************************************
 //  EXTERNAL CONSOLE VARIABLES
 
@@ -94,5 +122,8 @@ EXTERN_CVAR( Bool, cl_showlargefragmessages )
 
 EXTERN_CVAR( Bool, sv_cheats )
 EXTERN_CVAR( Int, sv_fastweapons )
+
+EXTERN_CVAR( Int, sv_deathmatchcountdowntime )
+EXTERN_CVAR( Bool, sv_deathmatchwarmup )
 
 #endif	// __DEATHMATCH_H__

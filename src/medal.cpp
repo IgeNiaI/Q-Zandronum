@@ -345,7 +345,7 @@ void MEDAL_GiveMedal( ULONG ulPlayer, ULONG ulMedal )
 	ULONG		ulWhereToInsertMedal = UINT_MAX;
 
 	// [CK] Do not award if it's a countdown sequence
-	if ( GAMEMODE_IsGameInCountdown() )
+	if ( GAMEMODE_IsGameInWarmup() || GAMEMODE_IsGameInCountdown() )
 		return;
 
 	// Make sure all inputs are valid first.
@@ -1375,7 +1375,7 @@ void medal_SelectIcon( ULONG ulPlayer )
 void medal_GiveMedal( ULONG ulPlayer, ULONG ulMedal )
 {
 	// [CK] Clients do not need to know if they got a medal during countdown
-	if ( GAMEMODE_IsGameInCountdown() )
+	if ( GAMEMODE_IsGameInWarmup() || GAMEMODE_IsGameInCountdown() )
 		return;
 
 	// Give the player the medal, and if we're the server, tell clients.

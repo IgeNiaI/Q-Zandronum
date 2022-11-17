@@ -120,5 +120,6 @@ void	CLIENTCOMMANDS_SetWantHideAccount( bool wantHideCountry );
 void	CLIENTCOMMANDS_SetVideoResolution();
 void	CLIENTCOMMANDS_ReportLumps();
 void	CLIENTCOMMANDS_RequestMaplist();
+void	CLIENTCOMMANDS_Ready();
 
 #endif	// __CL_COMMANDS_H__

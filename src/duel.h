@@ -59,10 +59,10 @@
 typedef enum
 {
 	DS_WAITINGFORPLAYERS,
+	DS_WARMUP,
 	DS_COUNTDOWN,
 	DS_INDUEL,
 	DS_WINSEQUENCE,
-	DS_WARMUP,
 
 } DUELSTATE_e;
 
@@ -79,13 +79,6 @@ void	DUEL_DoWinSequence( ULONG ulPlayer );
 void	DUEL_SendLoserToSpectators( void );
 bool	DUEL_IsDueler( ULONG ulPlayer );
 void	DUEL_TimeExpired( void );
-void	DUEL_AddPlayerReady( ULONG ulPlayer );
-void	DUEL_RemovePlayerReady( ULONG ulPlayer );
-void	DUEL_TogglePlayerReady( ULONG ulPlayer );
-void	DUEL_ResetReadyPlayers( void );
-bool	DUEL_ArePlayersReady( void );
-void	DUEL_ClearWarmupHUDMessage( void );
-void	DUEL_UpdateWarmupHUDMessage( void );
 
 // Access functions
 ULONG	DUEL_GetCountdownTicks( void );

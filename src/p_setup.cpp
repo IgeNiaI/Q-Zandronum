@@ -4671,6 +4671,7 @@ void P_SetupLevel (char *lumpname, int position)
 		LASTMANSTANDING_SetState( LMSS_WAITINGFORPLAYERS );
 		POSSESSION_SetState( PSNS_WAITINGFORPLAYERS );
 		INVASION_SetState( IS_WAITINGFORPLAYERS );
+		DEATHMATCH_SetState( DEATHMATCHS_WAITINGFORPLAYERS );
 
 		// [BB] Unless the game is in survival's countdown, we can keep the state (survival allows to
 		// advance to the next map without an additional countdown after the map change).

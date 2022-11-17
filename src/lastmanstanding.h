@@ -59,6 +59,7 @@
 typedef enum
 {
 	LMSS_WAITINGFORPLAYERS,
+	LMSS_WARMUP,
 	LMSS_COUNTDOWN,
 	LMSS_INPROGRESS,
 	LMSS_WINSEQUENCE,
@@ -118,5 +119,6 @@ EXTERN_CVAR( Int, sv_lmscountdowntime )
 EXTERN_CVAR( Int, lmsallowedweapons );
 EXTERN_CVAR( Int, lmsspectatorsettings );
 EXTERN_CVAR( Int, winlimit )
+EXTERN_CVAR( Bool, sv_lmswarmup )
 
 #endif	// __LASTMANSTANDING_H__

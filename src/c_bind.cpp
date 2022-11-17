@@ -92,6 +92,7 @@ static const FBinding DefBindings[] =
 	{ "f1", "menu_help" },
 	{ "f2", "menu_save" },
 	{ "f3", "menu_load" },
+	{ "f4", "ready" },
 	{ "f6", "quicksave" },
 	{ "f7", "menu_endgame" },
 	{ "f8", "togglemessages" },

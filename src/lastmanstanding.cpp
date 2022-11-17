@@ -117,6 +117,13 @@ void LASTMANSTANDING_Tick( void )
 			// Two players are here now, being the countdown!
 			if ( GAME_CountActivePlayers( ) >= 2 )
 			{
+				// Warmup only in non lobby maps
+				if ( sv_lmswarmup )
+				{			
+					LASTMANSTANDING_SetState(LMSS_WARMUP);
+					break;
+				}
+
 				if ( sv_lmscountdowntime > 0 )
 					LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
 				else
@@ -128,6 +135,13 @@ void LASTMANSTANDING_Tick( void )
 		{
 			if ( TEAM_TeamsWithPlayersOn( ) > 1 )
 			{
+				// Warmup only in non lobby maps
+				if ( sv_lmswarmup )
+				{			
+					LASTMANSTANDING_SetState(LMSS_WARMUP);
+					break;
+				}
+
 				if ( sv_lmscountdowntime > 0 )
 					LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
 				else
@@ -817,3 +831,5 @@ CUSTOM_CVAR( Int, lmsspectatorsettings, LMS_SPF_VIEW, CVAR_SERVERINFO | CVAR_GAM
 }
 CVAR( Flag, lms_spectatorchat, lmsspectatorsettings, LMS_SPF_CHAT );
 CVAR( Flag, lms_spectatorview, lmsspectatorsettings, LMS_SPF_VIEW );
+
+CVAR( Bool, sv_lmswarmup, true, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );

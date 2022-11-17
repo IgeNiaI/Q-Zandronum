@@ -1769,6 +1769,9 @@ void G_Ticker ()
 
 			// Tick the domination module.
 			DOMINATION_Tick( );
+			
+			// Tick the deathmatch module.
+			DEATHMATCH_Tick( );
 
 			// [BB]
 			GAMEMODE_Tick( );

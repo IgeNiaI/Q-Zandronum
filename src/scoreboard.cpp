@@ -378,7 +378,7 @@ void SCOREBOARD_Render( ULONG ulDisplayPlayer )
 			int key1 = 0;
 			int key2 = 0;
 			Bindings.GetKeysForCommand( "menu_join", &key1, &key2 );
-			g_BottomString += "\\cdSPECTATING - PRESS \'";
+			g_BottomString += "\\cdSPECTATING - PRESS \\cj\'";
 
 			if ( key2 )
 				g_BottomString = g_BottomString + KeyNames[key1] + "\' OR \'" + KeyNames[key2];
@@ -387,7 +387,7 @@ void SCOREBOARD_Render( ULONG ulDisplayPlayer )
 			else
 				g_BottomString += G_DescribeJoinMenuKey();
 
-			g_BottomString += "\' TO JOIN";
+			g_BottomString += "\'\\cd TO JOIN";
 		}
 	}
 
@@ -521,6 +521,30 @@ void SCOREBOARD_Render( ULONG ulDisplayPlayer )
 		}
 	}
 	
+	if ( deathmatch && !duel && !lastmanstanding && !teamlms && !possession && !teampossession && !survival && !invasion)
+	{
+		// Determine what to draw based on the deathmatch state.
+		switch ( DEATHMATCH_GetState( ))
+		{
+		case DEATHMATCHS_COUNTDOWN:
+
+			// Render "x vs. x" text.
+			SCOREBOARD_RenderDeathmatchCountdown( DEATHMATCH_GetCountdownTicks( ) + TICRATE );
+			break;
+		case DEATHMATCHS_WAITINGFORPLAYERS:
+
+			if ( players[ulDisplayPlayer].bSpectating == false )
+			{
+				SCOREBOARD_DrawWaiting();
+				// Nothing more to do if we're just waiting for players.
+				return;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
 	if( SCOREBOARD_IsHudVisible() )
 	{
 		// Draw the item holders (hellstone, flags, skulls, etc).
@@ -1488,6 +1512,50 @@ void SCOREBOARD_RenderInvasionCountdown( ULONG ulTimeLeft )
 
 	ulCurYPos += 24;
 	sprintf( szString, "begins in: %d", static_cast<unsigned int> (ulTimeLeft / TICRATE) );
+	screen->DrawText( SmallFont, CR_UNTRANSLATED,
+		160 - ( SmallFont->StringWidth( szString ) / 2 ),
+		ulCurYPos,
+		szString,
+		DTA_Clean, true, TAG_DONE );
+}
+
+//*****************************************************************************
+//
+void SCOREBOARD_RenderDeathmatchCountdown( ULONG ulTimeLeft )
+{
+	char				szString[128];
+	ULONG				ulCurYPos = 0;
+	
+	if ( teamplay )
+	{
+		ulCurYPos = 32;
+		if ( gamestate == GS_LEVEL )
+		{
+			sprintf( szString, "TEAM DEATHMATCH" );
+			screen->DrawText( BigFont, gameinfo.gametype == GAME_Doom ? CR_RED : CR_UNTRANSLATED,
+				160 - ( BigFont->StringWidth( szString ) / 2 ),
+				ulCurYPos,
+				szString,
+				DTA_Clean, true, TAG_DONE );
+		}
+	}
+	else
+	{
+		// Start the "LAST MAN STANDING" title.
+		ulCurYPos = 32;
+		if ( gamestate == GS_LEVEL )
+		{
+			sprintf( szString, "DEATHMATCH" );
+			screen->DrawText( BigFont, gameinfo.gametype == GAME_Doom ? CR_RED : CR_UNTRANSLATED,
+				160 - ( BigFont->StringWidth( szString ) / 2 ),
+				ulCurYPos,
+				szString,
+				DTA_Clean, true, TAG_DONE );
+		}
+	}
+
+	ulCurYPos += 24;
+	sprintf( szString, "Match begins in: %d", static_cast<unsigned int> (ulTimeLeft / TICRATE) );
 	screen->DrawText( SmallFont, CR_UNTRANSLATED,
 		160 - ( SmallFont->StringWidth( szString ) / 2 ),
 		ulCurYPos,

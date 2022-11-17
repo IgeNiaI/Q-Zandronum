@@ -145,7 +145,6 @@ EXTERN_CVAR( Bool, sv_showwarnings );
 
 static	bool	server_Ignore( BYTESTREAM_s *pByteStream );
 static	bool	server_Say( BYTESTREAM_s *pByteStream );
-static	void	server_ProcessChatCommand(ULONG ulPlayer, const char *chatCommandString);
 static	bool	server_ClientMove( BYTESTREAM_s *pByteStream );
 static	bool	server_MissingPacket( BYTESTREAM_s *pByteStream );
 static	bool	server_UpdateClientPing( BYTESTREAM_s *pByteStream );
@@ -1380,7 +1379,7 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 		SERVERCOMMANDS_PrintMOTD( "Emergency!\n\nYou are joining from localhost even though the server is full.\nDo whatever is necessary to clean the situation and disconnect afterwards.\n", g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
 	// If we're in a duel or LMS mode, tell him the state of the game mode.
-	if ( duel || lastmanstanding || teamlms || possession || teampossession || survival || invasion )
+	if ( deathmatch || duel || lastmanstanding || teamlms || possession || teampossession || survival || invasion )
 	{
 		if ( duel )
 		{
@@ -1405,10 +1404,15 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 			else
 				ulCountdownTicks = POSSESSION_GetCountdownTicks( );
 		}
-		else
+		else if ( lastmanstanding || teamlms )
 		{
 			ulState = LASTMANSTANDING_GetState( );
 			ulCountdownTicks = LASTMANSTANDING_GetCountdownTicks( );
+		}
+		else if ( deathmatch )
+		{
+			ulState = DEATHMATCH_GetState( );
+			ulCountdownTicks = DEATHMATCH_GetCountdownTicks( );
 		}
 
 		SERVERCOMMANDS_SetGameModeState( ulState, ulCountdownTicks, g_lCurrentClient, SVCF_ONLYTHISCLIENT );
@@ -4809,6 +4813,14 @@ bool SERVER_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 			SERVERCOMMANDS_Print(mapsString.c_str(), PRINT_CHAT, g_lCurrentClient, SVCF_ONLYTHISCLIENT);
 		}
 		return false;
+
+	case CLC_READY:
+		// [geNia] Player is ready to start the match
+		{
+			if ( GAMEMODE_IsGameInWarmup() && playeringame[g_lCurrentClient] && !players[g_lCurrentClient].bSpectating )
+				GAMEMODE_TogglePlayerReady( g_lCurrentClient );
+		}
+		return false;
 		
 	default:
 
@@ -5085,15 +5097,6 @@ static bool server_Say( BYTESTREAM_s *pByteStream )
 	// Read in the chat string.
 	const char	*pszChatString = NETWORK_ReadString( pByteStream );
 
-	// [Proteh] Very very simple chat command handler, we don't need anything fancy
-	// Commands must start with the / character
-	// Skip /me command as it is handled somewhere else already
-	if ( pszChatString[0] == '/' && strnicmp("/me", pszChatString, 3) )
-	{
-		server_ProcessChatCommand(ulPlayer, pszChatString);
-		return false;
- 	}
-
 	// [BB] If the client is flooding the server with commands, the client is
 	// kicked and we don't need to handle the command.
 	// Note: Despite the auto muting, this is necessary. Otherwise the client
@@ -5171,18 +5174,6 @@ static bool server_Say( BYTESTREAM_s *pByteStream )
 
 		SERVER_SendChatMessage( ulPlayer, ulChatMode, pszChatString );
 		return ( false );
-	}
-}
-
-//*****************************************************************************
-//
-static void server_ProcessChatCommand(ULONG ulPlayer, const char *chatCommandString)
-{
-	// Duel warmup /ready command
-	if( !strnicmp( "/ready", chatCommandString, 6 ) && duel && DUEL_IsDueler( ulPlayer ) && DUEL_GetState() == DS_WARMUP )
-	{
-		DUEL_TogglePlayerReady( ulPlayer );
-		return;
 	}
 }
 
@@ -6271,7 +6262,7 @@ static bool server_AuthenticateLevel( BYTESTREAM_s *pByteStream )
 	SERVERCOMMANDS_SetMapMusic( false, SERVER_GetMapMusic( ), SERVER_GetMapMusicOrder( ), g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
 	// If we're in a duel or LMS mode, tell him the state of the game mode.
-	if ( duel || lastmanstanding || teamlms || possession || teampossession || survival || invasion )
+	if ( deathmatch || duel || lastmanstanding || teamlms || possession || teampossession || survival || invasion )
 	{
 		if ( duel )
 		{
@@ -6296,10 +6287,15 @@ static bool server_AuthenticateLevel( BYTESTREAM_s *pByteStream )
 			else
 				ulCountdownTicks = POSSESSION_GetCountdownTicks( );
 		}
-		else
+		else if ( lastmanstanding || teamlms )
 		{
 			ulState = LASTMANSTANDING_GetState( );
 			ulCountdownTicks = LASTMANSTANDING_GetCountdownTicks( );
+		}
+		else if ( deathmatch )
+		{
+			ulState = DEATHMATCH_GetState( );
+			ulCountdownTicks = DEATHMATCH_GetCountdownTicks( );
 		}
 
 		SERVERCOMMANDS_SetGameModeState( ulState, ulCountdownTicks, g_lCurrentClient, SVCF_ONLYTHISCLIENT );

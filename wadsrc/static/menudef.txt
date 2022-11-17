@@ -525,6 +525,7 @@ OptionMenu "CustomizeControls"
 	Control		"Taunt",				"taunt" // [TP]
 	Option		"Join the game",		"joinmenukey", "JoinMenuKeys" // [TP]
 	Control		"Join the game (custom)", "menu_join" // [TP]
+	Control  	"Ready to play",		"ready"
 	Control  	"Open console",			"toggleconsole"
 	StaticText 	""
 	StaticText 	"Strife Popup Screens", 1

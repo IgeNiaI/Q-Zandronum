@@ -940,49 +940,7 @@ void P_UpdateSpecials ()
 				// End the level after one second.
 				else
 				{
-					ULONG				ulIdx;
-					LONG				lWinner;
-					LONG				lHighestFrags;
-					bool				bTied;
-					char				szString[64];
-
-					NETWORK_Printf( "%s\n", GStrings( "TXT_TIMELIMIT" ));
-					GAME_SetEndLevelDelay( 1 * TICRATE );
-
-					// Determine the winner.
-					lWinner = -1;
-					lHighestFrags = INT_MIN;
-					bTied = false;
-					for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
-					{
-						// [BB] Spectators can't win.
-						if ( ( playeringame[ulIdx] == false ) || players[ulIdx].bSpectating )
-							continue;
-
-						if ( players[ulIdx].fragcount > lHighestFrags )
-						{
-							lWinner = ulIdx;
-							lHighestFrags = players[ulIdx].fragcount;
-							bTied = false;
-						}
-						else if ( players[ulIdx].fragcount == lHighestFrags )
-							bTied = true;
-					}
-
-					// [BB] In case there are no active players (only spectators), lWinner is -1.
-					if ( bTied || ( lWinner == -1 ) )
-						sprintf( szString, "\\cdDRAW GAME!" );
-					else
-					{
-						if (( NETWORK_GetState( ) == NETSTATE_SINGLE_MULTIPLAYER ) && ( players[consoleplayer].mo->CheckLocalView( lWinner )))
-							sprintf( szString, "YOU WIN!" );
-						else
-							sprintf( szString, "%s \\c-WINS!", players[lWinner].userinfo.GetName() );
-					}
-					V_ColorizeString( szString );
-
-					// Display "%s WINS!" HUD message.
-					GAMEMODE_DisplayStandardMessage ( szString, true );
+					DEATHMATCH_TimeExpired( );
 
 					GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 				}

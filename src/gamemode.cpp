@@ -67,6 +67,9 @@
 #include "possession.h"
 #include "p_lnspec.h"
 #include "p_acs.h"
+#include "c_dispatch.h"
+#include "cl_commands.h"
+#include "c_bind.h"	// [geNia] To tell user what key to press to ready.
 // [BB] The next includes are only needed for GAMEMODE_DisplayStandardMessage
 #include "sbar.h"
 #include "v_video.h"
@@ -96,6 +99,8 @@ static	GAMEMODE_e				g_CurrentGameMode;
 #define GENERATE_ENUM_STRINGS  // Start string generation
 #include "gamemode_enums.h"
 #undef GENERATE_ENUM_STRINGS   // Stop string generation
+
+static	bool		g_bReadyPlayers[MAXPLAYERS];
 
 //*****************************************************************************
 //	FUNCTIONS
@@ -133,6 +138,35 @@ void GAMEMODE_Tick( void )
 	static GAMESTATE_e oldState = GAMESTATE_UNSPECIFIED;
 	const GAMESTATE_e state = GAMEMODE_GetState();
 
+	if ( GAMEMODE_IsGameInWarmup() )
+	{
+		if ( !NETWORK_InClientMode() )
+		{
+			// If one of the players is a bot, skip the warmup
+			for (ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++)
+			{
+				if ( playeringame[ulIdx] && !players[ulIdx].bSpectating )
+				{
+					if ( players[ulIdx].pSkullBot && !g_bReadyPlayers[ulIdx] )
+					{
+						GAMEMODE_AddPlayerReady(ulIdx);
+					}
+				}
+				else
+				{
+					g_bReadyPlayers[ulIdx] = false;
+				}
+			}
+
+			if ( GAMEMODE_AreEnoughPlayersReady() )
+			{
+				GAMEMODE_StartMatch();
+			}
+		}
+		
+		GAMEMODE_UpdateWarmupHUDMessage();
+	}
+
 	// [BB] If the state change, potentially trigger an event and update the saved state.
 	if ( oldState != state )
 	{
@@ -144,7 +178,14 @@ void GAMEMODE_Tick( void )
 			GAMEMODE_HandleEvent ( GAMEEVENT_ROUND_ABORTED );
 		// [BB] Changing from anything to GAMESTATE_INPROGRESS means the round started.
 		else if ( state == GAMESTATE_INPROGRESS )
-			GAMEMODE_HandleEvent ( GAMEEVENT_ROUND_STARTS );			
+			GAMEMODE_HandleEvent ( GAMEEVENT_ROUND_STARTS );
+		
+		if ( oldState == GAMESTATE_WARMUP)
+		{
+			GAMEMODE_ResetReadyPlayers();
+			if (NETWORK_GetState() != NETSTATE_SERVER)
+				StatusBar->DetachAllMessages();
+		}
 
 		oldState = state;
 	}
@@ -613,11 +654,25 @@ bool GAMEMODE_IsGameWaitingForPlayers( void )
 	else if ( possession || teampossession )
 		return ( POSSESSION_GetState( ) == PSNS_WAITINGFORPLAYERS );
 	// [BB] Non-coop game modes need two or more players.
-	else if ( ( GAMEMODE_GetCurrentFlags() & GMF_COOPERATIVE ) == false )
-		return ( GAME_CountActivePlayers( ) < 2 );
+	else if ( deathmatch )
+		return ( DEATHMATCH_GetState( ) == DEATHMATCHS_WAITINGFORPLAYERS );
 	// [BB] For coop games one player is enough.
 	else
 		return ( GAME_CountActivePlayers( ) < 1 );
+}
+
+//*****************************************************************************
+//
+bool GAMEMODE_IsGameInWarmup( void )
+{
+	if ( duel )
+		return ( DUEL_GetState( ) == DS_WARMUP );
+	else if ( teamlms || lastmanstanding )
+		return ( LASTMANSTANDING_GetState( ) == LMSS_WARMUP );
+	else if ( deathmatch && !possession && !teampossession && !survival && !invasion )
+		return ( DEATHMATCH_GetState( ) == DEATHMATCHS_WARMUP );
+	else
+		return ( false );
 }
 
 //*****************************************************************************
@@ -636,6 +691,8 @@ bool GAMEMODE_IsGameInCountdown( void )
 	// [BB] What about PSNS_PRENEXTROUNDCOUNTDOWN?
 	else if ( possession || teampossession )
 		return ( ( POSSESSION_GetState( ) == PSNS_COUNTDOWN ) || ( POSSESSION_GetState( ) == PSNS_NEXTROUNDCOUNTDOWN ) );
+	else if ( deathmatch )
+		return ( DEATHMATCH_GetState() == DEATHMATCHS_COUNTDOWN );
 	// [BB] The other game modes don't have a countdown.
 	else
 		return ( false );
@@ -661,8 +718,8 @@ bool GAMEMODE_IsGameInProgress( void )
 	// [BB] In non-coop game modes without warmup phase, we just say the game is
 	// in progress when there are two or more players and the game is not frozen
 	// due to the end level delay.
-	else if ( ( GAMEMODE_GetCurrentFlags() & GMF_COOPERATIVE ) == false )
-		return ( ( GAME_CountActivePlayers( ) >= 2 ) && ( GAME_GetEndLevelDelay () == 0 ) );
+	else if ( deathmatch )
+		return ( DEATHMATCH_GetState() == DEATHMATCHS_INPROGRESS );
 	// [BB] For coop games one player is enough.
 	else
 		return ( ( GAME_CountActivePlayers( ) >= 1 ) && ( GAME_GetEndLevelDelay () == 0 ) );
@@ -680,6 +737,8 @@ bool GAMEMODE_IsGameInResultSequence( void )
 		return ( DUEL_GetState( ) == DS_WINSEQUENCE );
 	else if ( teamlms || lastmanstanding )
 		return ( LASTMANSTANDING_GetState( ) == LMSS_WINSEQUENCE );
+	else if ( deathmatch && !possession && !teampossession && !survival)
+		return ( DEATHMATCH_GetState() == DEATHMATCHS_WINSEQUENCE );
 	// [BB] The other game modes don't have such a sequnce. Arguably, possession
 	// with PSNS_HOLDERSCORED could also be considered for this.
 	// As substitute for such a sequence we consider whether the game is
@@ -1084,6 +1143,8 @@ GAMESTATE_e GAMEMODE_GetState( void )
 {
 	if ( GAMEMODE_IsGameWaitingForPlayers() )
 		return GAMESTATE_WAITFORPLAYERS;
+	else if ( GAMEMODE_IsGameInWarmup() )
+		return GAMESTATE_WARMUP;
 	else if ( GAMEMODE_IsGameInCountdown() )
 		return GAMESTATE_COUNTDOWN;
 	else if ( GAMEMODE_IsGameInProgress() )
@@ -1111,6 +1172,19 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			LASTMANSTANDING_SetState( LMSS_WAITINGFORPLAYERS );
 		else if ( possession || teampossession )
 			POSSESSION_SetState( PSNS_WAITINGFORPLAYERS );
+		else if ( deathmatch )
+			DEATHMATCH_SetState( DEATHMATCHS_WAITINGFORPLAYERS );
+	}
+	else if ( GameState == GAMESTATE_WARMUP )
+	{
+		if ( duel )
+			DUEL_SetState( DS_WARMUP );
+		else if ( teamlms || lastmanstanding )
+			LASTMANSTANDING_SetState( LMSS_WARMUP );
+		else if ( deathmatch )
+			DEATHMATCH_SetState( DEATHMATCHS_WARMUP );
+
+		GAMEMODE_ResetReadyPlayers();
 	}
 	else if( GameState == GAMESTATE_COUNTDOWN )
 	{
@@ -1124,6 +1198,8 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			LASTMANSTANDING_SetState( LMSS_COUNTDOWN );
 		else if ( possession || teampossession )
 			POSSESSION_SetState( PSNS_COUNTDOWN );
+		else if ( deathmatch )
+			DEATHMATCH_SetState( DEATHMATCHS_COUNTDOWN );
 	}
 	else if( GameState == GAMESTATE_INPROGRESS )
 	{
@@ -1137,6 +1213,8 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			LASTMANSTANDING_SetState( LMSS_INPROGRESS );
 		else if ( possession || teampossession )
 			POSSESSION_SetState( PSNS_INPROGRESS );
+		else if ( deathmatch )
+			DEATHMATCH_SetState( DEATHMATCHS_INPROGRESS );
 	}
 	else if( GameState == GAMESTATE_INRESULTSEQUENCE )
 	{
@@ -1148,6 +1226,8 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			DUEL_SetState( DS_WINSEQUENCE );
 		else if ( teamlms || lastmanstanding )
 			LASTMANSTANDING_SetState( LMSS_WINSEQUENCE );
+		else if ( deathmatch )
+			DEATHMATCH_SetState( DEATHMATCHS_WINSEQUENCE );
 	}
 }
 
@@ -1392,6 +1472,8 @@ ULONG GAMEMODE_GetCountdownTicks( void )
 		return ( LASTMANSTANDING_GetCountdownTicks() );
 	else if ( possession || teampossession )
 		return ( POSSESSION_GetCountdownTicks() );
+	else if ( deathmatch )
+		return ( DEATHMATCH_GetCountdownTicks() );
 
 	// [AK] The other gamemodes don't have a countdown, so just return zero.
 	return 0;
@@ -1411,6 +1493,8 @@ void GAMEMODE_SetCountdownTicks( const ULONG Ticks )
 		LASTMANSTANDING_SetCountdownTicks( Ticks );
 	else if ( possession || teampossession )
 		POSSESSION_SetCountdownTicks( Ticks );
+	else if ( deathmatch )
+		DEATHMATCH_SetCountdownTicks( Ticks );
 }
 
 //*****************************************************************************
@@ -1501,4 +1585,227 @@ void GAMEMODE_ReconfigureGameSettings( bool bLockedOnly, bool bResetToDefault )
 	}
 
 	FBaseCVar::DisableGameModeLock( false );
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_AddPlayerReady(ULONG ulPlayer)
+{
+	if (NETWORK_InClientMode())
+		return;
+
+	if (NETWORK_GetState() != NETSTATE_SERVER)
+		Printf("* %s \\cfis ready to fight!\n", players[ulPlayer].userinfo.GetName());
+	else
+		SERVER_Printf("* %s \\cfis ready to fight!\n", players[ulPlayer].userinfo.GetName());
+
+	g_bReadyPlayers[ulPlayer] = true;
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_RemovePlayerReady(ULONG ulPlayer)
+{
+	if (NETWORK_InClientMode())
+		return;
+
+	if (NETWORK_GetState() != NETSTATE_SERVER)
+		Printf("* %s \\cfis not ready to fight anymore.\n", players[ulPlayer].userinfo.GetName());
+	else
+		SERVER_Printf("* %s \\cfis not ready to fight anymore.\n", players[ulPlayer].userinfo.GetName());
+
+	g_bReadyPlayers[ulPlayer] = false;
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_TogglePlayerReady(ULONG ulPlayer)
+{
+	if (NETWORK_InClientMode())
+		return;
+
+	if (g_bReadyPlayers[ulPlayer])
+	{
+		GAMEMODE_RemovePlayerReady(ulPlayer);
+	}
+	else
+	{
+		GAMEMODE_AddPlayerReady(ulPlayer);
+	}
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_ResetReadyPlayers(void)
+{
+	if (NETWORK_InClientMode())
+		return;
+	
+	// If one of the players is a bot, skip the warmup
+	for (ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++)
+	{
+		g_bReadyPlayers[ulIdx] = false;
+	}
+}
+
+//*****************************************************************************
+//
+bool GAMEMODE_AreEnoughPlayersReady(void)
+{
+	if (NETWORK_InClientMode())
+		return true;
+
+	for (ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++)
+	{
+		if ( playeringame[ulIdx] && !players[ulIdx].bSpectating ) {
+			if ( !g_bReadyPlayers[ulIdx] )
+				return false;
+		}
+	}
+
+	return true;
+}
+
+//*****************************************************************************
+//
+void GAMEMODE_UpdateWarmupHUDMessage(void)
+{
+	if ( NETWORK_GetState() != NETSTATE_SERVER )
+	{
+		FString readyString = "\\cdWarmup mode is enabled.";
+		if ( !players[consoleplayer].bSpectating )
+		{
+			int key1 = 0;
+			int key2 = 0;
+			Bindings.GetKeysForCommand("ready", &key1, &key2);
+
+			if (key2)
+				readyString = readyString + " Press \\cj\'" + KeyNames[key1] + "\'\\cd or \\cj\'" + KeyNames[key2] + "\'\\cd";
+			else if (key1)
+				readyString = readyString + " Press \\cj\'" + KeyNames[key1] + "\'\\cd";
+			else
+				readyString = readyString + " Please bind the \\cj\'ready\'\\cd key in options";
+
+			readyString += " to ready up";
+		}
+
+		V_ColorizeString(readyString);
+
+		// Create the message.
+		DHUDMessage *hudMessage = new DHUDMessage(V_GetFont("SmallFont"), readyString,
+			1.5f, 0.3f,
+			0, 0,
+			CR_WHITE,
+			0.0f);
+
+		// Now attach the message.
+		StatusBar->AttachMessage(hudMessage, MAKE_ID('W', 'A', 'R', 'M'));
+	}
+
+	if (NETWORK_InClientMode())
+		return;
+
+	char warmupString[90];
+	int readyPlayers = 0, requiredPlayers = 0;
+
+	for (ULONG ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++)
+	{
+		if ( playeringame[ulIdx] && !players[ulIdx].bSpectating ) {
+			requiredPlayers++;
+			if ( g_bReadyPlayers[ulIdx] )
+				readyPlayers++;
+		}
+	}
+
+	sprintf(warmupString, "Players ready: %d / %d", readyPlayers, requiredPlayers);
+	if (NETWORK_GetState() != NETSTATE_SERVER)
+	{
+		// Create the message.
+		DHUDMessage *hudMessage = new DHUDMessage(V_GetFont("SmallFont"), warmupString,
+			1.5f, 0.33f,
+			0, 0,
+			CR_GREEN,
+			0.0f);
+
+		// Now attach the message.
+		StatusBar->AttachMessage(hudMessage, MAKE_ID('W', 'A', 'R', 'S'));
+	}
+	else
+		SERVERCOMMANDS_PrintHUDMessage(warmupString, 1.5f, 0.33f, 0, 0, CR_GREEN, 0.0f, "SmallFont", false, MAKE_ID('W', 'A', 'R', 'S'));
+}
+
+//*****************************************************************************
+//
+bool GAMEMODE_StartMatch()
+{
+	if ( !GAMEMODE_IsGameInWarmup() )
+	{
+		Printf("The game is not in warmup state\n");
+		return false;
+	}
+
+	if ( ( duel && DUEL_CountActiveDuelers() != 2 )
+		|| ( lastmanstanding && GAME_CountLivingAndRespawnablePlayers() < 2 )
+		|| ( teamlms && LASTMANSTANDING_TeamsWithAlivePlayersOn( ) < 2 ) )
+	{
+		Printf("Not enough players\n");
+		return false;
+	}
+	
+	if ( duel )
+	{
+		if (GAMEMODE_IsLobbyMap())
+			DUEL_SetState(DS_INDUEL);
+		else if (sv_duelcountdowntime > 0)
+			DUEL_StartCountdown((sv_duelcountdowntime * TICRATE) - 1);
+		else
+			DUEL_StartCountdown((10 * TICRATE) - 1);
+
+		return true;
+	}
+	else if ( teamlms || lastmanstanding )
+	{
+		if ( sv_lmscountdowntime > 0 )
+			LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
+		else
+			LASTMANSTANDING_StartCountdown(( 10 * TICRATE ) - 1 );
+
+		return true;
+	}
+	else if ( deathmatch && !possession && !teampossession && !survival && !invasion )
+	{
+		if ( sv_deathmatchcountdowntime > 0 )
+			DEATHMATCH_StartCountdown(( sv_deathmatchcountdowntime * TICRATE ) - 1 );
+		else
+			DEATHMATCH_StartCountdown(( 10 * TICRATE ) - 1 );
+
+		return true;
+	}
+
+	return false;
+}
+
+CCMD(start_match)
+{
+	if ( NETWORK_InClientMode() )
+	{
+		Printf("Only the server can start the duel.\n");
+		return;
+	}
+
+	if ( GAMEMODE_StartMatch() && NETWORK_GetState() == NETSTATE_SERVER )
+		SERVER_Printf("\\cf* Server administrator started the match!");
+}
+
+CCMD(ready)
+{
+	if (NETWORK_InClientMode())
+	{
+		CLIENTCOMMANDS_Ready();
+	}
+	else
+	{
+		if (GAMEMODE_IsGameInWarmup() && playeringame[consoleplayer] && !players[consoleplayer].bSpectating )
+			GAMEMODE_TogglePlayerReady(consoleplayer);
+	}
 }

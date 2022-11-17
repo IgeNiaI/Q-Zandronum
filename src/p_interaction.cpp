@@ -640,62 +640,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 					// End the level after five seconds.
 					else
 					{
-						char				szString[64];
-						DHUDMessageFadeOut	*pMsg;
-
-						// Just print "YOU WIN!" in single player.
-						if (( NETWORK_GetState( ) == NETSTATE_SINGLE_MULTIPLAYER ) && ( players[consoleplayer].mo->CheckLocalView( source->player - players )))
-							sprintf( szString, "\\cGYOU WIN!" );
-						else if (( teamplay ) && ( source->player->bOnTeam ))
-							sprintf( szString, "\\c%c%s wins!\n", V_GetColorChar( TEAM_GetTextColor( source->player->ulTeam )), TEAM_GetName( source->player->ulTeam ));
-						else
-							sprintf( szString, "%s \\cGWINS!", players[source->player - players].userinfo.GetName() );
-						V_ColorizeString( szString );
-
-						if ( NETWORK_GetState( ) != NETSTATE_SERVER )
-						{
-							// Display "%s WINS!" HUD message.
-							pMsg = new DHUDMessageFadeOut( BigFont, szString,
-								160.4f,
-								75.0f,
-								320,
-								200,
-								CR_WHITE,
-								3.0f,
-								2.0f );
-
-							StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
-
-							szString[0] = 0;
-							pMsg = new DHUDMessageFadeOut( SmallFont, szString,
-								0.0f,
-								0.0f,
-								0,
-								0,
-								CR_RED,
-								3.0f,
-								2.0f );
-
-							StatusBar->AttachMessage( pMsg, MAKE_ID('F','R','A','G') );
-
-							pMsg = new DHUDMessageFadeOut( SmallFont, szString,
-								0.0f,
-								0.0f,
-								0,
-								0,
-								CR_RED,
-								3.0f,
-								2.0f );
-
-							StatusBar->AttachMessage( pMsg, MAKE_ID('P','L','A','C') );
-						}
-						else
-						{
-							SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_WHITE, 3.0f, 2.0f, "BigFont", false, MAKE_ID('C','N','T','R') );
-							szString[0] = 0;
-							SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 0.0f, 0.0f, 0, 0, CR_WHITE, 3.0f, 2.0f, "BigFont", false, MAKE_ID('F','R','A','G') );
-							SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 0.0f, 0.0f, 0, 0, CR_WHITE, 3.0f, 2.0f, "BigFont", false, MAKE_ID('P','L','A','C') );
-						}
+						DEATHMATCH_DoWinSequence( source->player );
 
 						GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 					}
@@ -2175,9 +2120,7 @@ void P_PoisonDamage (player_t *player, AActor *source, int damage,
 void PLAYER_SetFragcount( player_t *pPlayer, LONG lFragCount, bool bAnnounce, bool bUpdateTeamFrags )
 {
 	// Don't bother with fragcount during warm-ups.
-	// [Proteh] added duel warmup state (/ready) check
-	if ((( duel ) && ( DUEL_GetState( ) == DS_COUNTDOWN || DUEL_GetState() == DS_WARMUP )) ||
-		(( lastmanstanding || teamlms ) && ( LASTMANSTANDING_GetState( ) == LMSS_COUNTDOWN )))
+	if ( GAMEMODE_IsGameWaitingForPlayers() || GAMEMODE_IsGameInWarmup() || GAMEMODE_IsGameInCountdown() )
 	{
 		return;
 	}

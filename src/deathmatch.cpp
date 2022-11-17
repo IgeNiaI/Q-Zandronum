@@ -67,11 +67,427 @@
 #include "team.h"
 #include "v_video.h"
 #include "g_level.h"
+#include "scoreboard.h"
 
 //*****************************************************************************
 //	MISC CRAP THAT SHOULDN'T BE HERE BUT HAS TO BE BECAUSE OF SLOPPY CODING
 
 void	SERVERCONSOLE_UpdateScoreboard( );
+
+EXTERN_CVAR( Int, sv_endleveldelay )
+
+//*****************************************************************************
+//	VARIABLES
+
+static	ULONG		g_ulDeathmatchCountdownTicks = 0;
+static	DEATHMATCHSTATE_e	g_DeathmatchState;
+
+//*****************************************************************************
+//	FUNCTIONS
+
+void DEATHMATCH_Construct( void )
+{
+	g_DeathmatchState = DEATHMATCHS_WAITINGFORPLAYERS;
+}
+
+//*****************************************************************************
+//
+void DEATHMATCH_Tick( void )
+{
+	// Not in any special mode
+	if ( !deathmatch || duel || lastmanstanding || teamlms || possession || teampossession 
+		|| survival || invasion || domination )
+		return;
+	
+	switch ( g_DeathmatchState )
+	{
+	case DEATHMATCHS_WAITINGFORPLAYERS:
+
+		if ( NETWORK_InClientMode() )
+		{
+			break;
+		}
+
+		if ( teamplay )
+		{
+			// Two players are here now, begin the countdown or warmup state
+			if ( TEAM_TeamsWithPlayersOn( ) > 1 )
+			{
+				// Warmup only in non lobby maps
+				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) )
+				{			
+					DEATHMATCH_SetState( DEATHMATCHS_WARMUP );
+					break;
+				}
+
+				// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
+				if ( sv_deathmatchcountdowntime > 0 )
+					DEATHMATCH_StartCountdown(( sv_deathmatchcountdowntime * TICRATE ) - 1 );
+				else
+					DEATHMATCH_StartCountdown(( 10 * TICRATE ) - 1 );
+			}
+		}
+		else
+		{
+			// Two players are here now, begin the countdown or warmup state
+			if ( GAME_CountActivePlayers( ) >= 2 )
+			{
+				// Warmup only in non lobby maps
+				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) )
+				{			
+					DEATHMATCH_SetState( DEATHMATCHS_WARMUP );
+					break;
+				}
+
+				if ( sv_deathmatchcountdowntime > 0 )
+					DEATHMATCH_StartCountdown(( sv_deathmatchcountdowntime * TICRATE ) - 1 );
+				else
+					DEATHMATCH_StartCountdown(( 10 * TICRATE ) - 1 );
+			}
+		}
+		break;
+	case DEATHMATCHS_WARMUP:
+		if ( NETWORK_InClientMode() )
+		{
+			break;
+		}
+		
+		if ( teamplay )
+		{
+			// Two players are here now, begin the countdown or warmup state
+			if ( TEAM_TeamsWithPlayersOn( ) <= 1 )
+			{
+				DEATHMATCH_SetState( DEATHMATCHS_WAITINGFORPLAYERS );
+				break;
+			}
+		}
+		else
+		{
+			// Two players are here now, begin the countdown or warmup state
+			if ( GAME_CountActivePlayers( ) < 2 )
+			{
+				DEATHMATCH_SetState( DEATHMATCHS_WAITINGFORPLAYERS );
+				break;
+			}
+		}
+
+		break;
+	case DEATHMATCHS_COUNTDOWN:
+
+		if ( g_ulDeathmatchCountdownTicks )
+		{
+			g_ulDeathmatchCountdownTicks--;
+
+			// FIGHT!
+			if (( g_ulDeathmatchCountdownTicks == 0 ) &&
+				( NETWORK_InClientMode() == false ))
+			{
+				DEATHMATCH_DoFight( );
+			}
+			// Play "3... 2... 1..." sounds.
+			else if ( g_ulDeathmatchCountdownTicks == ( 3 * TICRATE ))
+				ANNOUNCER_PlayEntry( cl_announcer, "Three" );
+			else if ( g_ulDeathmatchCountdownTicks == ( 2 * TICRATE ))
+				ANNOUNCER_PlayEntry( cl_announcer, "Two" );
+			else if ( g_ulDeathmatchCountdownTicks == ( 1 * TICRATE ))
+				ANNOUNCER_PlayEntry( cl_announcer, "One" );
+		}
+		break;
+	default: //Satisfy GCC
+		break;
+	}
+}
+
+//*****************************************************************************
+//
+LONG DEATHMATCH_GetLastManStanding( void )
+{
+	ULONG	ulIdx;
+
+	// Not in lastmanstanding mode.
+	if ( lastmanstanding == false )
+		return ( -1 );
+
+	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+	{
+		if ( playeringame[ulIdx] && ( players[ulIdx].bSpectating == false ) && PLAYER_IsAliveOrCanRespawn ( &players[ulIdx] ) )
+			return ( ulIdx );
+	}
+
+	return ( -1 );
+}
+
+//*****************************************************************************
+//
+void DEATHMATCH_StartCountdown( ULONG ulTicks )
+{
+	ULONG	ulIdx;
+
+	if ( NETWORK_InClientMode() == false )
+	{
+		// First, reset everyone's fragcount.
+		PLAYER_ResetAllPlayersFragcount( );
+
+		// If we're the server, tell clients to reset everyone's fragcount.
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			SERVERCOMMANDS_ResetAllPlayersFragcount( );
+
+		// Also, tell bots that a duel countdown is starting.
+		for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+		{
+			if ( playeringame[ulIdx] )
+			{
+				if ( players[ulIdx].pSkullBot )
+					players[ulIdx].pSkullBot->PostEvent( BOTEVENT_DEATHMATCH_STARTINGCOUNTDOWN );
+			}
+		}
+
+		// Put the game in a countdown state.
+		DEATHMATCH_SetState( DEATHMATCHS_COUNTDOWN );
+	}
+
+	// Set the game countdown ticks.
+	DEATHMATCH_SetCountdownTicks( ulTicks );
+
+	// Announce that the fight will soon start.
+	ANNOUNCER_PlayEntry( cl_announcer, "PrepareToFight" );
+
+	// Reset announcer "frags left" variables.
+	ANNOUNCER_AllowNumFragsAndPointsLeftSounds( );
+
+	// Reset the first frag awarded flag.
+	MEDAL_ResetFirstFragAwarded( );
+
+	// Tell clients to start the countdown.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_DoGameModeCountdown( ulTicks );
+}
+
+//*****************************************************************************
+//
+void DEATHMATCH_DoFight( void )
+{
+	DHUDMessageFadeOut	*pMsg;
+
+	// No longer waiting to play.
+	if ( NETWORK_InClientMode() == false )
+	{
+		DEATHMATCH_SetState( DEATHMATCHS_INPROGRESS );
+	}
+
+	// Make sure this is 0. Can be non-zero in network games if they're slightly out of sync.
+	g_ulDeathmatchCountdownTicks = 0;
+
+	// Since the level time is being reset, also reset the last frag/excellent time for
+	// each player.
+	PLAYER_ResetAllPlayersSpecialCounters();
+
+	// Tell clients to "fight!".
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_DoGameModeFight( 0 );
+
+	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
+	{
+		// Play fight sound.
+		ANNOUNCER_PlayEntry( cl_announcer, "Fight" );
+
+		// [EP] Clear all the HUD messages.
+		StatusBar->DetachAllMessages();
+
+		// Display "FIGHT!" HUD message.
+		pMsg = new DHUDMessageFadeOut( BigFont, "FIGHT!",
+			160.4f,
+			75.0f,
+			320,
+			200,
+			CR_RED,
+			2.0f,
+			1.0f );
+
+		StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
+	}
+	// Display a little thing in the server window so servers can know when matches begin.
+	else
+		Printf( "FIGHT!\n" );
+
+	// Reset the map.
+	GAME_ResetMap( );
+	GAMEMODE_RespawnAllPlayers( BOTEVENT_DEATHMATCH_FIGHT );
+
+	SCOREBOARD_RefreshHUD( );
+}
+
+//*****************************************************************************
+//
+void DEATHMATCH_DoWinSequence( player_t *player )
+{
+	DEATHMATCH_DetermineAndPrintWinner();
+
+	GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
+}
+
+//*****************************************************************************
+//
+void DEATHMATCH_TimeExpired( void )
+{
+	NETWORK_Printf( "%s\n", GStrings( "TXT_TIMELIMIT" ));
+
+	DEATHMATCH_DetermineAndPrintWinner();
+
+	GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
+}
+
+//*****************************************************************************
+//
+void DEATHMATCH_DetermineAndPrintWinner()
+{
+	ULONG				ulIdx;
+	LONG				lWinner;
+	LONG				lHighestFrags;
+	bool				bTied;
+	char				szString[64];
+	DHUDMessageFadeOut	*pMsg;
+
+	// Determine the winner.
+	lWinner = -1;
+	lHighestFrags = INT_MIN;
+	bTied = false;
+	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+	{
+		// [BB] Spectators can't win.
+		if ( ( playeringame[ulIdx] == false ) || players[ulIdx].bSpectating )
+			continue;
+
+		if ( players[ulIdx].fragcount > lHighestFrags )
+		{
+			lWinner = ulIdx;
+			lHighestFrags = players[ulIdx].fragcount;
+			bTied = false;
+		}
+		else if ( players[ulIdx].fragcount == lHighestFrags )
+			bTied = true;
+	}
+
+	// [BB] In case there are no active players (only spectators), lWinner is -1.
+	if ( bTied || ( lWinner == -1 ) )
+		sprintf( szString, "\\cdDRAW GAME!" );
+	else
+	{
+		if (( NETWORK_GetState( ) == NETSTATE_SINGLE_MULTIPLAYER ) && ( players[consoleplayer].mo->CheckLocalView( lWinner )))
+			sprintf( szString, "YOU WIN!" );
+		else if (( teamplay ) && ( players[lWinner].bOnTeam ))
+			sprintf( szString, "\\c%c%s wins!\n", V_GetColorChar( TEAM_GetTextColor( players[lWinner].ulTeam )), TEAM_GetName( players[lWinner].ulTeam ));
+		else
+			sprintf( szString, "%s \\c-WINS!", players[lWinner].userinfo.GetName() );
+	}
+	V_ColorizeString( szString );
+	
+	// Put the duel state in the win sequence state.
+	if ( NETWORK_InClientMode() == false )
+	{
+		DEATHMATCH_SetState( DEATHMATCHS_WINSEQUENCE );
+	}
+
+	// Tell clients to do the win sequence.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_DoGameModeWinSequence( lWinner );
+
+	// Display "%s WINS!" HUD message.
+	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
+	{
+		pMsg = new DHUDMessageFadeOut( BigFont, szString,
+			160.4f,
+			75.0f,
+			320,
+			200,
+			CR_WHITE,
+			3.0f,
+			2.0f );
+
+		StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
+
+		szString[0] = 0;
+		pMsg = new DHUDMessageFadeOut( SmallFont, szString,
+			0.0f,
+			0.0f,
+			0,
+			0,
+			CR_RED,
+			3.0f,
+			2.0f );
+
+		StatusBar->AttachMessage( pMsg, MAKE_ID('F','R','A','G') );
+
+		pMsg = new DHUDMessageFadeOut( SmallFont, szString,
+			0.0f,
+			0.0f,
+			0,
+			0,
+			CR_RED,
+			3.0f,
+			2.0f );
+
+		StatusBar->AttachMessage( pMsg, MAKE_ID('P','L','A','C') );
+	}
+	else
+	{
+		SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_WHITE, 3.0f, 2.0f, "BigFont", false, MAKE_ID('C','N','T','R') );
+		szString[0] = 0;
+		SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 0.0f, 0.0f, 0, 0, CR_WHITE, 3.0f, 2.0f, "BigFont", false, MAKE_ID('F','R','A','G') );
+		SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 0.0f, 0.0f, 0, 0, CR_WHITE, 3.0f, 2.0f, "BigFont", false, MAKE_ID('P','L','A','C') );
+	}
+
+	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+	{
+		if (( playeringame[ulIdx] ) && ( players[ulIdx].pSkullBot ))
+			players[ulIdx].pSkullBot->PostEvent( BOTEVENT_DEATHMATCH_WINSEQUENCE );
+	}
+}
+
+//*****************************************************************************
+//*****************************************************************************
+//
+ULONG DEATHMATCH_GetCountdownTicks( void )
+{
+	return ( g_ulDeathmatchCountdownTicks );
+}
+
+//*****************************************************************************
+//
+void DEATHMATCH_SetCountdownTicks( ULONG ulTicks )
+{
+	g_ulDeathmatchCountdownTicks = ulTicks;
+}
+
+//*****************************************************************************
+//
+DEATHMATCHSTATE_e DEATHMATCH_GetState( void )
+{
+	return ( g_DeathmatchState );
+}
+
+//*****************************************************************************
+//
+void DEATHMATCH_SetState( DEATHMATCHSTATE_e State )
+{
+	g_DeathmatchState = State;
+
+	// Tell clients about the state change.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_SetGameModeState( State, g_ulDeathmatchCountdownTicks );
+
+	switch ( State )
+	{
+	case DEATHMATCHS_WAITINGFORPLAYERS:
+
+		// Zero out the countdown ticker.
+		DEATHMATCH_SetCountdownTicks( 0 );
+
+		break;
+	default:
+		break;
+	}
+}
 
 //*****************************************************************************
 //	CONSOLE COMMANDS/VARIABLES
@@ -437,6 +853,8 @@ CVAR( Bool, cl_useoriginalweaponorder, false, CVAR_ARCHIVE );
 // Allow the display of large frag messages.
 CVAR( Bool, cl_showlargefragmessages, true, CVAR_ARCHIVE );
 
+CVAR( Int, sv_deathmatchcountdowntime, 10, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );
+CVAR( Bool, sv_deathmatchwarmup, false, CVAR_ARCHIVE | CVAR_GAMEMODESETTING );
 /*
 CCMD( showweaponstates )
 {

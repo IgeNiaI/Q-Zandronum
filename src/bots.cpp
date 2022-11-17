@@ -320,6 +320,9 @@ static	const char	*g_pszEventNames[NUM_BOTEVENTS] =
 	"BOTEVENT_PLAYER_BFGEXPLODE",
 	"BOTEVENT_BFGEXPLODE",
 	"BOTEVENT_RECEIVEDMEDAL",
+	"BOTEVENT_DEATHMATCH_STARTINGCOUNTDOWN",
+	"BOTEVENT_DEATHMATCH_FIGHT",
+	"BOTEVENT_DEATHMATCH_WINSEQUENCE",
 };
 
 //*****************************************************************************

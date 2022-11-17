@@ -803,3 +803,10 @@ void CLIENTCOMMANDS_RequestMaplist()
 {
 	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_REQUESTMAPLIST );
 }
+
+//*****************************************************************************
+// [geNia]
+void CLIENTCOMMANDS_Ready()
+{
+	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_READY );
+}

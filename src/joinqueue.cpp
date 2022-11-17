@@ -261,6 +261,34 @@ void JOINQUEUE_PlayerLeftGame( int player, bool pop )
 			SURVIVAL_SetState( SURVS_WAITINGFORPLAYERS );
 		}
 	}
+	
+	if ( deathmatch && !duel && !lastmanstanding && !teamlms && !possession && !teampossession && !survival && !invasion)
+	{
+		if ( teamplay && TEAM_TeamsWithPlayersOn( ) <= 1 )
+		{
+			// Someone just won by default!
+			if (( DEATHMATCH_GetState( ) == DEATHMATCHS_INPROGRESS ))
+			{
+				DEATHMATCH_DetermineAndPrintWinner();
+
+				GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
+			}
+			else
+				DEATHMATCH_SetState( DEATHMATCHS_WAITINGFORPLAYERS );
+		}
+		else if ( GAME_CountActivePlayers( ) < 2 )
+		{
+			// Someone just won by default!
+			if ( DEATHMATCH_GetState( ) == DEATHMATCHS_INPROGRESS )
+			{
+				DEATHMATCH_DetermineAndPrintWinner();
+
+				GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
+			}
+			else
+				DEATHMATCH_SetState(DEATHMATCHS_WAITINGFORPLAYERS );
+		}
+	}
 
 	// Potentially let one person join the game.
 	if ( pop )
@@ -311,50 +339,7 @@ void JOINQUEUE_PopQueue( int slotCount )
 					PLAYER_SetTeam( player, TEAM_ChooseBestTeamForPlayer( ), true );
 			}
 
-			// Begin the duel countdown.
-			if ( duel )
-			{
-				// [Proteh] Duel warmup /ready system
-				ULONG ulIdx;
-				bool skipWarmup = false;
-
-				// If one of the players is a bot, skip the warmup
-				for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
-				{
-					if ( DUEL_IsDueler(ulIdx) && players[ulIdx].pSkullBot )
-					{
-						skipWarmup = true;
-					}
-				}	
-
-				// Warmup only in non lobby maps
-				if ( sv_duelwarmup && !GAMEMODE_IsLobbyMap( ) && !skipWarmup )
-				{			
-					DUEL_SetState(DS_WARMUP);
-				}
-				else
-				{
-					// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
-					if ( GAMEMODE_IsLobbyMap( ) )
-						DUEL_SetState( DS_INDUEL );
-					else if ( sv_duelcountdowntime > 0 )
-						DUEL_StartCountdown(( sv_duelcountdowntime * TICRATE ) - 1 );
-					else
-						DUEL_StartCountdown(( 10 * TICRATE ) - 1 );
-				}
-			}
-			// Begin the LMS countdown.
-			else if ( lastmanstanding )
-			{
-				if ( sv_lmscountdowntime > 0 )
-					LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
-				else
-					LASTMANSTANDING_StartCountdown(( 10 * TICRATE ) - 1 );
-			}
-			else
-			{
-				NETWORK_Printf( "%s \\c-joined the game.\n", player->userinfo.GetName() );
-			}
+			NETWORK_Printf( "%s \\c-joined the game.\n", player->userinfo.GetName() );
 
 			JOINQUEUE_RemovePlayerAtPosition ( i );
 

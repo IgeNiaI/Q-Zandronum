@@ -2876,6 +2876,9 @@ void D_DoomMain (void)
 
 		// Initialize the invasion module.
 		INVASION_Construct( );
+		
+		// Initialize the deathmatch module.
+		DEATHMATCH_Construct( );
 
 		// Initialize the join queue module.
 		JOINQUEUE_Construct( );
