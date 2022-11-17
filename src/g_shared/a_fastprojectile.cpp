@@ -6,6 +6,7 @@
 #include "p_lnspec.h"
 // [BB] New #includes.
 #include "network.h"
+#include "cl_main.h"
 
 
 IMPLEMENT_CLASS(AFastProjectile)
@@ -112,7 +113,7 @@ void AFastProjectile::Tick ()
 			z += zfrac;
 			UpdateWaterLevel (oldz);
 			oldz = z;
-			if (z <= floorz)
+			if (z <= floorz && CLIENT_CanClipMovement(this))
 			{ // Hit the floor
 
 				if (floorpic == skyflatnum && !(flags3 & MF3_SKYEXPLODE))
@@ -137,7 +138,7 @@ void AFastProjectile::Tick ()
 				P_ExplodeMissile (this, NULL, NULL);
 				return;
 			}
-			if (z + height > ceilingz)
+			if (z + height > ceilingz && CLIENT_CanClipMovement(this))
 			{ // Hit the ceiling
 
 				if (ceilingpic == skyflatnum &&  !(flags3 & MF3_SKYEXPLODE))

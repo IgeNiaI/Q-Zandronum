@@ -5343,9 +5343,10 @@ void ServerCommands::MissileExplode::Execute()
 	else
 		line = NULL;
 
-	missile->x = x;
-	missile->y = y;
-	missile->z = z;
+	missile->SetOrigin(x, y, z);
+	missile->PrevX = x;
+	missile->PrevY = y;
+	missile->PrevZ = z;
 
 	// Blow it up!
 	// [BB] Only if it's not already in its death state.
