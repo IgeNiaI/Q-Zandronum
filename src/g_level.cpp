@@ -695,6 +695,16 @@ void G_ChangeLevel(const char *levelname, int position, int flags, int nextSkill
 			MAPROTATION_AdvanceMap();
 	}
 
+	if ( !NETWORK_InClientMode() )
+	{
+		// [BB] It's possible that the selected next map doesn't coincide with the next map
+		// in the rotation, e.g. exiting to a secret map allows to leave the rotation.
+		// In this case, we may not advance to the next map in the rotation.
+		if ( ( MAPROTATION_GetNextMap( ) != NULL )
+			&& ( stricmp ( MAPROTATION_GetNextMap( )->mapname, nextlevel.GetChars() ) == 0 ) )
+			MAPROTATION_AdvanceMap();
+	}
+
 	STAT_ChangeLevel(nextlevel);
 
 	if (thiscluster && (thiscluster->flags & CLUSTER_HUB))
@@ -777,7 +787,7 @@ const char *G_GetExitMap()
 	}
 	// Check to see if we're using map rotation.
 	else if (( sv_maprotation ) &&
-			 ( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
+			 !NETWORK_InClientMode() &&
 			 ( MAPROTATION_GetNumEntries( ) != 0 ))
 	{
 		// [BB] It's possible that G_GetExitMap() is called multiple times before a map change.
