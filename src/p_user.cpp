@@ -3483,6 +3483,13 @@ bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 	int tapValue = cmd->ucmd.forwardmove | cmd->ucmd.sidemove;
 	int secondTapValue = 0;
 
+	if (tapValue && (cmd->ucmd.buttons & BT_STRAFE))
+	{
+		player->mo->prepareTapValue = 0;
+		player->mo->lastTapValue = tapValue;
+		return true;
+	}
+
 	if (tapValue & ~player->mo->lastTapValue)
 	{
 		if (!player->mo->prepareTapValue)
