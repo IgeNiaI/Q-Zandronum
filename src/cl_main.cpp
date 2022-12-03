@@ -4785,7 +4785,7 @@ void ServerCommands::RespawnRavenThing::Execute()
 //
 void ServerCommands::SpawnBlood::Execute()
 {
-	P_SpawnBlood( x, y, z, dir, damage, originator, NULL );
+	P_SpawnBlood( x, y, z, dir, damage, originator );
 }
 
 //*****************************************************************************
