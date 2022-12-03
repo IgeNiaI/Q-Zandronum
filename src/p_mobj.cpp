@@ -6894,23 +6894,7 @@ statedone:
 
 	// [BC] If we're the server, tell clients to spawn the blood.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-	{
-		// [BB] If the bloodcolor is not the standard one, we have to inform the client
-		// about the correct color.
-		if ( ( bloodcolor == 0 ) && ( th != NULL ) )
-		{
-			// [BC] It's not translated, nor is it spawning in a state other than its
-			// spawn state. Therefore, there's no need to treat it as a special case.
-			// [BB] This saves bandwidth, but doesn't spawn the blood size based on the damage dealt,
-			// so only use this for players with a slow connection.
-			SERVERCOMMANDS_SpawnThing( th, MAXPLAYERS );
-			if ( th->target )
-				SERVERCOMMANDS_SetThingTarget( th );
-			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator, MAXPLAYERS );
-		}
-		else
-			SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator );
-	}
+		SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator );
 
 	if (!(bloodtype <= 1)) th->renderflags |= RF_INVISIBLE;
 	if (bloodtype >= 1)
