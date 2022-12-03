@@ -119,7 +119,7 @@ const char *GetVersionStringRev();
 #define CONFIGFILE "zandronum"
 #define DOMAIN_NAME "qzandronum.com"
 #define DISCORD_URL "https://discord.com/invite/RN9hhmA"
-#define BUGS_URL	"https://github.com/IgeNiaI/Zandronum-3.0-QCDE/issues"
+#define BUGS_URL	"https://github.com/IgeNiaI/Q-Zandronum/issues"
 
 // [BC] This is what's displayed as the title for server windows.
 #define	SERVERCONSOLE_TITLESTRING	GAMENAME " v" DOTVERSIONSTR " Server"
