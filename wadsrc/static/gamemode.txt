@@ -43,6 +43,7 @@ Deathmatch
 {
 	AddFlag DEATHMATCH
 	AddFlag PLAYERSEARNFRAGS
+	AddFlag MAPRESETS
 	AddFlag MAPRESET_RESETS_MAPTIME
 
 	Name "Deathmatch"
@@ -56,6 +57,7 @@ Teamplay
 	AddFlag DEATHMATCH
 	AddFlag PLAYERSEARNFRAGS
 	AddFlag PLAYERSONTEAMS
+	AddFlag MAPRESETS
 	AddFlag MAPRESET_RESETS_MAPTIME
 
 	Name "Team Deathmatch"
@@ -81,6 +83,7 @@ Terminator
 {
 	AddFlag DEATHMATCH
 	AddFlag PLAYERSEARNFRAGS
+	AddFlag MAPRESETS
 	AddFlag MAPRESET_RESETS_MAPTIME
 
 	Name "Terminator"
