@@ -746,6 +746,10 @@ void G_ChangeLevel(const char *levelname, int position, int flags, int nextSkill
 			}
 		}
 	}
+
+	// [geNia] If you "changemap" after a game ended, the end level delay will stay
+	// and cause another map change and sometimes even kick players. So reset it here
+	GAME_SetEndLevelDelay( 0 );
 }
 
 //=============================================================================
