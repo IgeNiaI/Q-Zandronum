@@ -1865,8 +1865,9 @@ void SCOREBOARD_BuildPlaceString ( char* pszString )
 	}
 	else if ( !( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ) && ( GAMEMODE_GetCurrentFlags() & (GMF_PLAYERSEARNFRAGS|GMF_PLAYERSEARNPOINTS) ) )
 	{
+		int viewplayer = static_cast<int>( SCOREBOARD_GetViewPlayer() );
 		// If the player is tied with someone else, add a "tied for" to their string.
-		if ( SCOREBOARD_IsTied( consoleplayer ) )
+		if ( SCOREBOARD_IsTied( viewplayer ) )
 			sprintf( pszString, "Tied for " );
 		else
 			pszString[0] = 0;
@@ -1875,9 +1876,9 @@ void SCOREBOARD_BuildPlaceString ( char* pszString )
 
 		// Tack on the rest of the string.
 		if ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSEARNPOINTS )
-			sprintf( pszString + strlen ( pszString ), "\\c- place with %d point%s", static_cast<int> (players[consoleplayer].lPointCount), players[consoleplayer].lPointCount == 1 ? "" : "s" );
+			sprintf( pszString + strlen ( pszString ), "\\c- place with %d point%s", static_cast<int> (players[viewplayer].lPointCount), players[viewplayer].lPointCount == 1 ? "" : "s" );
 		else
-			sprintf( pszString + strlen ( pszString ), "\\c- place with %d frag%s", players[consoleplayer].fragcount, players[consoleplayer].fragcount == 1 ? "" : "s" );
+			sprintf( pszString + strlen ( pszString ), "\\c- place with %d frag%s", players[viewplayer].fragcount, players[viewplayer].fragcount == 1 ? "" : "s" );
 	}
 }
 
