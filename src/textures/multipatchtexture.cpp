@@ -189,7 +189,6 @@ protected:
 	{
 		FString TexName;
 		int UseType = TEX_Null;
-		TexInit *Inits;
 		bool Silent = false;
 		bool HasLine = false;
 		bool UseOffsets = false;
