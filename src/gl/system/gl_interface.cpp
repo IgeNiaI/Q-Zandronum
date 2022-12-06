@@ -152,7 +152,7 @@ void gl_LoadExtensions()
 	const char *version = (const char*)glGetString(GL_VERSION);
 
 	// Don't even start if it's lower than 1.3
-	if (strcmp(version, "1.3") < 0) 
+	if (!version || strcmp(version, "1.3") < 0)
 	{
 		I_FatalError("Unsupported OpenGL version.\nAt least GL 1.3 is required to run " GAMENAME ".\n");
 	}
