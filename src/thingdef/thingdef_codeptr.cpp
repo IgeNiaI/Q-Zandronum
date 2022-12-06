@@ -2202,6 +2202,31 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GiveToTarget)
 	DoGiveInventory(self->target, PUSH_PARAMINFO);
 }	
 
+DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GiveToChildren)
+{
+	TThinkerIterator<AActor> it;
+	AActor * mo;
+
+	while ((mo = it.Next()))
+	{
+		if (mo->master == self) DoGiveInventory(mo, PUSH_PARAMINFO);
+	}
+}
+
+DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_GiveToSiblings)
+{
+	TThinkerIterator<AActor> it;
+	AActor * mo;
+
+	if (self->master != NULL)
+	{
+		while ((mo = it.Next()))
+		{
+			if (mo->master == self->master && mo != self) DoGiveInventory(mo, PUSH_PARAMINFO);
+		}
+	}
+}
+
 //===========================================================================
 //
 // A_TakeInventory
@@ -2314,6 +2339,31 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_TakeFromTarget)
 {
 	DoTakeInventory(self->target, PUSH_PARAMINFO);
 }	
+
+DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_TakeFromChildren)
+{
+	TThinkerIterator<AActor> it;
+	AActor * mo;
+
+	while ((mo = it.Next()))
+	{
+		if (mo->master == self) DoTakeInventory(mo, PUSH_PARAMINFO);
+	}
+}
+
+DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_TakeFromSiblings)
+{
+	TThinkerIterator<AActor> it;
+	AActor * mo;
+
+	if (self->master != NULL)
+	{
+		while ((mo = it.Next()))
+		{
+			if (mo->master == self->master && mo != self) DoTakeInventory(mo, PUSH_PARAMINFO);
+		}
+	}
+}
 
 //===========================================================================
 //
@@ -6022,19 +6072,21 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedTerminate)
 //==========================================================================
 enum RadiusGiveFlags
 {
-	RGF_GIVESELF	=   1,
-	RGF_PLAYERS		=   2,
-	RGF_MONSTERS	=   4,
-	RGF_OBJECTS		=   8,
-	RGF_VOODOO		=  16,
-	RGF_CORPSES		=  32,
-	RGF_MASK		=  63,
-	RGF_NOTARGET	=  64,
-	RGF_NOTRACER	= 128,
-	RGF_NOMASTER	= 256,
-	RGF_CUBE		= 512,
-	RGF_SKIPOWNER = 1024,
-	RGF_FORCESERVERSIDE = 2048,
+	RGF_GIVESELF	=   1 << 0,
+	RGF_PLAYERS		=   1 << 1,
+	RGF_MONSTERS	=   1 << 2,
+	RGF_OBJECTS		=   1 << 3,
+	RGF_VOODOO		=	1 << 4,
+	RGF_CORPSES		=	1 << 5,
+	RGF_MASK		=	63,
+	RGF_NOTARGET	=	1 << 6,
+	RGF_NOTRACER	=	1 << 7,
+	RGF_NOMASTER	=	1 << 8,
+	RGF_CUBE		=	1 << 9,
+	RGF_NOSIGHT		=	1 << 10,
+	RGF_MISSILES	=	1 << 11,
+	RGF_SKIPOWNER	=	1 << 12,
+	RGF_FORCESERVERSIDE	= 1 << 13,
 };
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
@@ -6123,6 +6175,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 				continue;
 			}
 		}
+		else if (thing->flags & MF_MISSILE)
+		{
+			if (!(flags & RGF_MISSILES))
+			{
+				continue;
+			}
+		}
 		else
 		{
 			continue;
@@ -6148,8 +6207,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 		}
 		fixed_t dz = abs ((thing->z + thing->height/2) - (self->z + self->height/2));
 
-		if (P_CheckSight (thing, self, SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY))
-		{ // OK to give; target is in direct path
+		if ((flags & RGF_NOSIGHT) || P_CheckSight (thing, self, SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY))
+		{ // OK to give; target is in direct path, or the monster doesn't care about it being in line of sight.
 			AInventory *gift = static_cast<AInventory *>(Spawn (item, 0, 0, 0, NO_REPLACE, thing->player));
 			if (gift->IsKindOf(RUNTIME_CLASS(AHealth)))
 			{
