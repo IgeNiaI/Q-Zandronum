@@ -778,7 +778,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 		if ( player == NULL )
 			SERVERCOMMANDS_KillThing( this, source, inflictor );
 		else
-			SERVERCOMMANDS_KillPlayer( ULONG( player - players ), source, inflictor, MeansOfDeath );
+			SERVERCOMMANDS_KillPlayer( ULONG( player - players ), source, inflictor, MeansOfDeath, dmgflags );
 	}
 
 	FState *diestate = NULL;

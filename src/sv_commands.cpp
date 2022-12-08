@@ -333,7 +333,7 @@ void SERVERCOMMANDS_DamagePlayer( ULONG ulPlayer )
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_KillPlayer( ULONG ulPlayer, AActor *pSource, AActor *pInflictor, FName MOD )
+void SERVERCOMMANDS_KillPlayer( ULONG ulPlayer, AActor *pSource, AActor *pInflictor, FName MOD, int dmgflags )
 {
 	if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
 		return;
@@ -365,6 +365,7 @@ void SERVERCOMMANDS_KillPlayer( ULONG ulPlayer, AActor *pSource, AActor *pInflic
 	command.SetHealth( clamp ( players[ulPlayer].mo->health, SHRT_MIN, SHRT_MAX ));
 	command.SetMOD( MOD.GetChars() );
 	command.SetDamageType( players[ulPlayer].mo->DamageType.GetChars() );
+	command.SetDmgflags( dmgflags );
 	command.SetWeaponType( weaponType );
 	command.sendCommandToClients();
 }

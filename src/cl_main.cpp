@@ -3132,7 +3132,7 @@ void ServerCommands::KillPlayer::Execute()
 	}
 
 	// Finally, print the obituary string.
-	ClientObituary( player->mo, inflictor, source, ( ulSourcePlayer < MAXPLAYERS ) ? DMG_PLAYERATTACK : 0, MOD );
+	ClientObituary( player->mo, inflictor, source, dmgflags, MOD );
 
 	// [BB] Restore the weapon the player actually is using now.
 	if ( ( ulSourcePlayer < MAXPLAYERS ) && ( players[ulSourcePlayer].ReadyWeapon != pSavedReadyWeapon ) )
