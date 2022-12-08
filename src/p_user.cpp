@@ -2651,7 +2651,15 @@ int APlayerPawn::WalkCrouchState (ticcmd_t *cmd, bool ignoreCrouch)
 
 bool APlayerPawn::ShouldPlaySound()
 {
-	return (NETWORK_GetState() == NETSTATE_SERVER) || ((CLIENT_PREDICT_IsPredicting() == false) && (player - players == consoleplayer));
+	if (NETWORK_GetState() == NETSTATE_SERVER)
+		return true;
+
+	if (NETWORK_InClientMode())
+	{
+		return (CLIENT_PREDICT_IsPredicting() == false) && (player - players == consoleplayer);
+	}
+
+	return true;
 }
 
 //===========================================================================
