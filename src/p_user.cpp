@@ -3616,20 +3616,9 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 
 bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 {
-	// dash cooler
-	if (player->mo->secondJumpTics > 0)
-		return false;
-
 	bool success = false;
 	int tapValue = cmd->ucmd.forwardmove | cmd->ucmd.sidemove;
 	int secondTapValue = 0;
-
-	if (tapValue && (cmd->ucmd.buttons & BT_STRAFE))
-	{
-		player->mo->prepareTapValue = 0;
-		player->mo->lastTapValue = tapValue;
-		return true;
-	}
 
 	if (tapValue & ~player->mo->lastTapValue)
 	{
@@ -3739,7 +3728,7 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	player->mo->isWallClimbing = isClimbing;
 }
 
-void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
+void APlayerPawn::CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 {
 	if (!player->bSpectating && !level.IsJumpingAllowed())
 		return;
@@ -3748,284 +3737,272 @@ void APlayerPawn::DoJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 	{
 		player->mo->secondJumpsRemaining = SecondJumpAmount;
 
-		if (!(mvFlags & MV_DOUBLETAPJUMP))
-		{
+		if ((mvFlags & MV_GROUNDSECONDJUMP) && player->mo->secondJumpTics <= 0)
 			player->mo->secondJumpState = SJ_AVAILABLE;
-		}
+		else
+			player->mo->secondJumpState = SJ_NOT_AVAILABLE;
 
 		if (player->mo->jumpTics < 0 || velz < -8 * FRACUNIT)
 			player->mo->jumpTics = JumpDelay;
 	}
-	else if (player->mo->secondJumpsRemaining != 0 && !((cmd->ucmd.buttons & BT_JUMP)))
+	else if (player->mo->secondJumpsRemaining != 0
+		&& player->mo->secondJumpTics <= 0 && !(cmd->ucmd.buttons & BT_JUMP))
 	{
-		if (!(mvFlags & MV_DOUBLETAPJUMP))
+		player->mo->secondJumpState = SJ_AVAILABLE;
+	}
+
+	if (player->mo->secondJumpState == SJ_AVAILABLE)
+	{
+		if (mvFlags & MV_DOUBLETAPJUMP)
 		{
-			player->mo->secondJumpState = SJ_AVAILABLE;
+			if (DoubleTapCheck(player, cmd) || ((mvFlags & MV_USER4JUMP) && (cmd->ucmd.buttons & BT_USER4)))
+				player->mo->secondJumpState = SJ_READY;
+		}
+		else
+		{
+			if ((mvFlags & MV_USER4JUMP) ? (cmd->ucmd.buttons & BT_USER4) : (cmd->ucmd.buttons & BT_JUMP))
+				player->mo->secondJumpState = SJ_READY;
 		}
 	}
 
-	if ((mvFlags & MV_DOUBLETAPJUMP) && player->mo->secondJumpsRemaining != 0 && DoubleTapCheck(player, cmd))
+	bool isClimbingLedge = player->onground && velz > 0 && (cmd->ucmd.buttons & BT_CROUCH);
+
+	// [geNia] Main jump logic
+	if (player->onground && player->mo->secondJumpState != SJ_READY
+		&& ((cmd->ucmd.buttons & BT_JUMP) || isClimbingLedge)
+		&& (player->mo->jumpTics == 0 || player->mo->flags2 & MF2_ONMOBJ)) // you can jump on actors with no delay
 	{
-		player->mo->secondJumpState = SJ_READY;
-		player->mo->secondJumpTics = 0;
-	}
+		bool isEdgeJumper = (mvFlags & MV_EDGEJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
-	bool isClimbingLedge = player->onground && velz > 0 && cmd->ucmd.buttons & BT_CROUCH;
-	if (cmd->ucmd.buttons & BT_JUMP || player->mo->secondJumpState == SJ_READY || isClimbingLedge)
-	{
-		// [Leo] Spectators shouldn't be limited by the server settings.
-		if (player->onground
-			&& (!player->mo->jumpTics || player->mo->flags2 & MF2_ONMOBJ) // you can jump on actors with no delay
-			&& player->mo->secondJumpState != SJ_READY)
+		if (!bWasJustThrustedZ || isEdgeJumper)
 		{
-			bool isEdgeJumper = (mvFlags & MV_EDGEJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
+			ULONG	ulJumpTicks;
 
-			if (!bWasJustThrustedZ || isEdgeJumper)
-			{
-				ULONG	ulJumpTicks;
+			// Set base jump velocity.
+			// [Dusk] Exported this into a function as I need it elsewhere as well.
+			fixed_t	JumpVelx, JumpVely, JumpVelz;
+			CalcJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
 
-				// Set base jump velocity.
-				// [Dusk] Exported this into a function as I need it elsewhere as well.
-				fixed_t	JumpVelx, JumpVely, JumpVelz;
-				CalcJumpVel(cmd, JumpVelx, JumpVely, JumpVelz);
-
-				// Set base jump ticks.
-				// [BB] In ZDoom revision 2970 changed the jumping behavior.
-				if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
-					ulJumpTicks = 18 * TICRATE / 35;
-				else
-					ulJumpTicks = -1;
-
-				if (!(mvFlags & MV_SILENT) && !isClimbingLedge)
-				{
-					// [BB] We may not play the sound while predicting, otherwise it'll stutter.
-					if ( ShouldPlaySound() )
-					{
-						if (isEdgeJumper && velz > 0)
-							S_Sound(this, CHAN_BODY, "*edgejump", 1, ATTN_NORM, true, NULL, true);
-						else if (!JumpSoundDelay)
-							S_Sound(this, CHAN_BODY, "*jump", 1, ATTN_NORM, true, NULL, true);
-
-						JumpSoundDelay = 3;
-					}
-				}
-				else
-				{
-					if ( JumpSoundDelay > 0 )
-						JumpSoundDelay--;
-				}
-
-				CreateEffectActor( EA_JUMP );
-
-				flags2 &= ~MF2_ONMOBJ;
-
-				// [BC] Increase jump delay if the player has the high jump power.
-				if (player->cheats & CF_HIGHJUMP)
-					ulJumpTicks *= 2;
-
-				// [BC] Remove jump delay if the player is on a spring pad.
-				if (floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
-					ulJumpTicks = 0;
-
-				velx += JumpVelx;
-				vely += JumpVely;
-
-				velz = (isEdgeJumper ? MAX(0, velz) : 0) + JumpVelz;
-				if ( mvFlags & MV_ELEVATORJUMP )
-				{
-					sector_t *sector = Sector;
-					bool is3dSector = false;
-
-				#ifdef _3DFLOORS
-					//Check 3D floors
-					if (Sector->e->XFloor.ffloors.Size())
-					{
-						F3DFloor*  rover;
-						int        thingtop = z + (height == 0 ? 1 : height);
-
-						for (unsigned i = 0; i<Sector->e->XFloor.ffloors.Size(); i++)
-						{
-							rover = Sector->e->XFloor.ffloors[i];
-							if ( ( rover->flags & FF_EXISTS ) && ( rover->flags & FF_SOLID ) )
-							{
-								fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
-
-								if (z >= ff_top)
-								{
-									sector = rover->top.model;
-									is3dSector = true;
-								}
-							}
-						}
-					}
-				#endif
-
-					fixed_t elevatorSpeed = 0;
-
-					if ( is3dSector )
-					{
-						if ( sector->ceilingdata )
-						{
-							if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)))
-							{
-								DDoor *door = barrier_cast<DDoor *>(sector->ceilingdata);
-								if ( door->GetDirection() == 1 )
-									elevatorSpeed = door->GetSpeed();
-							}
-							else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DCeiling)))
-							{
-								DCeiling *ceiling = barrier_cast<DCeiling *>(sector->ceilingdata);
-								if ( ceiling->GetDirection() == 1 )
-									elevatorSpeed = ceiling->GetSpeed();
-							}
-							else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DElevator)))
-							{
-								DElevator *elevator = barrier_cast<DElevator *>(sector->ceilingdata);
-								if ( elevator->GetDirection() == 1 )
-									elevatorSpeed = elevator->GetSpeed();
-							}
-							else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DPillar)))
-							{
-								DPillar *pillar = barrier_cast<DPillar *>(sector->ceilingdata);
-								if ( pillar->GetType() == DPillar::pillarOpen )
-									elevatorSpeed = pillar->GetCeilingSpeed();
-							}
-						}
-					}
-					else
-					{
-						if ( sector->floordata )
-						{
-							if ( sector->floordata->IsKindOf(RUNTIME_CLASS(DFloor) ) )
-							{
-								DFloor *floor = barrier_cast<DFloor *>(sector->floordata);
-								if ( floor->GetDirection() == 1 )
-									elevatorSpeed = floor->GetSpeed();
-							}
-							else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DPlat)))
-							{
-								DPlat *plat = barrier_cast<DPlat *>(sector->floordata);
-								if ( plat->GetStatus() == DPlat::EPlatState::up )
-									elevatorSpeed = plat->GetSpeed();
-							}
-							else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DElevator)))
-							{
-								DElevator *elevator = barrier_cast<DElevator *>(sector->floordata);
-								if ( elevator->GetDirection() == 1 )
-									elevatorSpeed = elevator->GetSpeed();
-							}
-							else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DPillar)))
-							{
-								DPillar *pillar = barrier_cast<DPillar *>(sector->floordata);
-								if ( pillar->GetType() == DPillar::pillarBuild )
-									elevatorSpeed = pillar->GetFloorSpeed();
-							}
-						}
-					}
-
-					if ( elevatorSpeed > 0 )
-						velz += elevatorSpeed;
-				}
-
-				player->mo->jumpTics = ulJumpTicks;
-			}
-		}
-		// [Ivory]: Double Jump and wall jump
-		else if (player->mo->secondJumpState == SJ_READY && player->mo->secondJumpTics == 0)
-		{
-			// Wall proximity check
-			bool doSecondJump = false;
-			FTraceResults secondJumpTrace;
-			if (((mvFlags & MV_WALLJUMP) || (mvFlags & MV_WALLJUMPV2)) && !player->onground)
-			{
-				// linetrace in 16 directions to see if there is a wall
-				for (int i = 0; i < 16; ++i)
-				{
-					// Start with int min (-2147483648) and go upward to int max
-					P_TraceForWall(this, FixedMul(2147483648, -65536 + 8192 * i), secondJumpTrace);
-					if (secondJumpTrace.HitType == TRACE_HitWall)
-					{
-						doSecondJump = true;
-						break;
-					}
-				}
-			}
+			// Set base jump ticks.
+			// [BB] In ZDoom revision 2970 changed the jumping behavior.
+			if (zacompatflags & ZACOMPATF_SKULLTAG_JUMPING)
+				ulJumpTicks = 18 * TICRATE / 35;
 			else
+				ulJumpTicks = -1;
+
+			if (!(mvFlags & MV_SILENT) && !isClimbingLedge)
 			{
-				doSecondJump = true;
+				// [BB] We may not play the sound while predicting, otherwise it'll stutter.
+				if ( ShouldPlaySound() )
+				{
+					if (isEdgeJumper && velz > 0)
+						S_Sound(this, CHAN_BODY, "*edgejump", 1, ATTN_NORM, true, NULL, true);
+					else if (!JumpSoundDelay)
+						S_Sound(this, CHAN_BODY, "*jump", 1, ATTN_NORM, true, NULL, true);
+
+					JumpSoundDelay = 3;
+				}
 			}
 
-			if (doSecondJump)
+			CreateEffectActor( EA_JUMP );
+
+			flags2 &= ~MF2_ONMOBJ;
+
+			// [BC] Increase jump delay if the player has the high jump power.
+			if (player->cheats & CF_HIGHJUMP)
+				ulJumpTicks *= 2;
+
+			// [BC] Remove jump delay if the player is on a spring pad.
+			if (floorsector->GetFlags(sector_t::floor) & PLANEF_SPRINGPAD)
+				ulJumpTicks = 0;
+
+			velx += JumpVelx;
+			vely += JumpVely;
+
+			velz = (isEdgeJumper ? MAX(0, velz) : 0) + JumpVelz;
+			if ( mvFlags & MV_ELEVATORJUMP )
 			{
-				if (mvFlags & MV_WALLJUMPV2)
+				sector_t *sector = Sector;
+				bool is3dSector = false;
+
+			#ifdef _3DFLOORS
+				//Check 3D floors
+				if (Sector->e->XFloor.ffloors.Size())
 				{
-					angle_t lineangle = R_PointToAngle2(0, 0, secondJumpTrace.Line->dx, secondJumpTrace.Line->dy) - ANG90;
-					velx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
-					vely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+					F3DFloor*  rover;
+					int        thingtop = z + (height == 0 ? 1 : height);
+
+					for (unsigned i = 0; i<Sector->e->XFloor.ffloors.Size(); i++)
+					{
+						rover = Sector->e->XFloor.ffloors[i];
+						if ( ( rover->flags & FF_EXISTS ) && ( rover->flags & FF_SOLID ) )
+						{
+							fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
+
+							if (z >= ff_top)
+							{
+								sector = rover->top.model;
+								is3dSector = true;
+							}
+						}
+					}
 				}
-				else if (cmd)
+			#endif
+
+				fixed_t elevatorSpeed = 0;
+
+				if ( is3dSector )
 				{
-					TVector2<fixed_t> dir = TVector2<fixed_t>(
-						FixedMul(cmd->ucmd.forwardmove, ForwardMove2),
-						FixedMul(-cmd->ucmd.sidemove, SideMove2)
-					).FixedUnit();
-					dir = TVector2<fixed_t>(
-						FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
-						FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
-						);
-
-					velx += FixedMul(dir.X, SecondJumpXY);
-					vely += FixedMul(dir.Y, SecondJumpXY);
-				}
-
-				fixed_t JumpVelz = SecondJumpZ;
-
-				// [BC] If the player has the high jump power, double his jump velocity.
-				if (player->cheats & CF_HIGHJUMP)
-					JumpVelz *= 2;
-
-				if (velz < 0)
-				{
-					velz = JumpVelz;
+					if ( sector->ceilingdata )
+					{
+						if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)))
+						{
+							DDoor *door = barrier_cast<DDoor *>(sector->ceilingdata);
+							if ( door->GetDirection() == 1 )
+								elevatorSpeed = door->GetSpeed();
+						}
+						else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DCeiling)))
+						{
+							DCeiling *ceiling = barrier_cast<DCeiling *>(sector->ceilingdata);
+							if ( ceiling->GetDirection() == 1 )
+								elevatorSpeed = ceiling->GetSpeed();
+						}
+						else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DElevator)))
+						{
+							DElevator *elevator = barrier_cast<DElevator *>(sector->ceilingdata);
+							if ( elevator->GetDirection() == 1 )
+								elevatorSpeed = elevator->GetSpeed();
+						}
+						else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DPillar)))
+						{
+							DPillar *pillar = barrier_cast<DPillar *>(sector->ceilingdata);
+							if ( pillar->GetType() == DPillar::pillarOpen )
+								elevatorSpeed = pillar->GetCeilingSpeed();
+						}
+					}
 				}
 				else
 				{
-					velz += JumpVelz;
+					if ( sector->floordata )
+					{
+						if ( sector->floordata->IsKindOf(RUNTIME_CLASS(DFloor) ) )
+						{
+							DFloor *floor = barrier_cast<DFloor *>(sector->floordata);
+							if ( floor->GetDirection() == 1 )
+								elevatorSpeed = floor->GetSpeed();
+						}
+						else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DPlat)))
+						{
+							DPlat *plat = barrier_cast<DPlat *>(sector->floordata);
+							if ( plat->GetStatus() == DPlat::EPlatState::up )
+								elevatorSpeed = plat->GetSpeed();
+						}
+						else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DElevator)))
+						{
+							DElevator *elevator = barrier_cast<DElevator *>(sector->floordata);
+							if ( elevator->GetDirection() == 1 )
+								elevatorSpeed = elevator->GetSpeed();
+						}
+						else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DPillar)))
+						{
+							DPillar *pillar = barrier_cast<DPillar *>(sector->floordata);
+							if ( pillar->GetType() == DPillar::pillarBuild )
+								elevatorSpeed = pillar->GetFloorSpeed();
+						}
+					}
 				}
 
-				if (!(mvFlags & MV_SILENT))
+				if ( elevatorSpeed > 0 )
+					velz += elevatorSpeed;
+			}
+
+			player->mo->jumpTics = ulJumpTicks;
+		}
+	}
+
+	// [geNia]: Second jump logic
+	else if ( player->mo->secondJumpState == SJ_READY )
+	{
+		// Wall proximity check
+		bool doSecondJump = false;
+		FTraceResults secondJumpTrace;
+		if (((mvFlags & MV_WALLJUMP) || (mvFlags & MV_WALLJUMPV2)) && !player->onground)
+		{
+			// linetrace in 16 directions to see if there is a wall
+			for (int i = 0; i < 16; ++i)
+			{
+				// Start with int min (-2147483648) and go upward to int max
+				P_TraceForWall(this, FixedMul(2147483648, -65536 + 8192 * i), secondJumpTrace);
+				if (secondJumpTrace.HitType == TRACE_HitWall)
 				{
-					if ( ShouldPlaySound() )
-						S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, NULL, true);
+					doSecondJump = true;
+					break;
 				}
-
-				CreateEffectActor( EA_SECOND_JUMP );
-
-				player->mo->jumpTics = JumpDelay;
-				player->mo->secondJumpTics = SecondJumpDelay;
-
-				if (player->mo->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
-					player->mo->secondJumpsRemaining--;
-
-				player->mo->secondJumpState = SJ_NOT_AVAILABLE;
 			}
 		}
 		else
 		{
-			if ( JumpSoundDelay > 0 )
-				JumpSoundDelay--;
+			doSecondJump = true;
 		}
-	}
-	else
-	{
-		if ( JumpSoundDelay > 0 )
-			JumpSoundDelay--;
 
-		if ( !player->onground && player->mo->secondJumpState == SJ_AVAILABLE && player->mo->secondJumpsRemaining != 0 )
+		if (doSecondJump)
 		{
-			player->mo->secondJumpState = SJ_READY;
+			if (mvFlags & MV_WALLJUMPV2)
+			{
+				angle_t lineangle = R_PointToAngle2(0, 0, secondJumpTrace.Line->dx, secondJumpTrace.Line->dy) - ANG90;
+				velx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+				vely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+			}
+			else if (cmd)
+			{
+				TVector2<fixed_t> dir = TVector2<fixed_t>(
+					FixedMul(cmd->ucmd.forwardmove, ForwardMove2),
+					FixedMul(-cmd->ucmd.sidemove, SideMove2)
+				).FixedUnit();
+				dir = TVector2<fixed_t>(
+					FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
+					FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
+					);
+
+				velx += FixedMul(dir.X, SecondJumpXY);
+				vely += FixedMul(dir.Y, SecondJumpXY);
+			}
+
+			fixed_t JumpVelz = SecondJumpZ;
+
+			// [BC] If the player has the high jump power, double his jump velocity.
+			if (player->cheats & CF_HIGHJUMP)
+				JumpVelz *= 2;
+
+			if (velz < 0)
+			{
+				velz = JumpVelz;
+			}
+			else
+			{
+				velz += JumpVelz;
+			}
+
+			if (!(mvFlags & MV_SILENT))
+			{
+				if ( ShouldPlaySound() )
+					S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, NULL, true);
+			}
+
+			CreateEffectActor( EA_SECOND_JUMP );
+
+			player->mo->jumpTics = JumpDelay;
+			player->mo->secondJumpTics = SecondJumpDelay;
+
+			if (player->mo->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
+				player->mo->secondJumpsRemaining--;
+
+			player->mo->secondJumpState = SJ_NOT_AVAILABLE;
 		}
 	}
+
+	if (JumpSoundDelay > 0)
+		JumpSoundDelay--;
 }
 
 //==========================================================================
@@ -4185,7 +4162,7 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// [RH] check for jump
 	else
 	{
-		player->mo->DoJump(cmd, wasJustThrustedZ);
+		player->mo->CheckJump(cmd, wasJustThrustedZ);
 	}
 }
 
@@ -4465,7 +4442,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 		return;
 
 	// Stop here if not in good condition to jump
-	player->mo->DoJump(cmd, wasJustThrustedZ);
+	player->mo->CheckJump(cmd, wasJustThrustedZ);
 }
 
 /*
@@ -5201,7 +5178,8 @@ void P_PlayerThink (player_t *player)
 	}
 	if (player->mo->secondJumpTics > 0)
 	{
-		player->mo->secondJumpTics--;
+		if (player->mo->secondJumpsRemaining != 0)
+			player->mo->secondJumpTics--;
 	}
 	else if (player->mo->secondJumpTics < 0)
 	{

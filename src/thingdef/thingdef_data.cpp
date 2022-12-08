@@ -271,6 +271,8 @@ static FFlagDef ActorFlags[]=
 	DEFINE_FLAG(MV, SILENT, AActor, mvFlags),
 	DEFINE_FLAG(MV, ELEVATORJUMP, AActor, mvFlags),
 	DEFINE_FLAG(MV, AIRWALLRUN, AActor, mvFlags),
+	DEFINE_FLAG(MV, USER4JUMP, AActor, mvFlags),
+	DEFINE_FLAG(MV, GROUNDSECONDJUMP, AActor, mvFlags),
 
 	// [BC] New DECORATE flag defines here.
 	DEFINE_FLAG(STFL, BLUETEAM, AActor, ulSTFlags),
