@@ -648,7 +648,9 @@ void CHAT_Render( void )
 		positionY = positionY - SmallFont->GetHeight() + 1;
 	}
 
-	int chatWidth = static_cast<int> ( SCREENWIDTH * scaleX );
+	positionY = (int) (positionY * 0.66);
+
+	int chatWidth = static_cast<int> ( (SCREENWIDTH / 3) * scaleX );
 	chatWidth -= static_cast<int> ( round( SmallFont->GetCharWidth( '_' ) * scaleX * 2 + SmallFont->StringWidth( prompt )) );
 
 	// Build the message that we will display to clients.
@@ -670,7 +672,7 @@ void CHAT_Render( void )
 		messageColor = CR_DARKGRAY;
 
 	// Render the chat string.
-	HUD_DrawText( SmallFont, promptColor, 0, positionY, prompt );
+	HUD_DrawText( SmallFont, promptColor, SmallFont->StringWidth( prompt ), positionY, prompt );
 
 	if ( SmallFont->StringWidth( displayString ) > chatWidth )
 	{
@@ -681,7 +683,7 @@ void CHAT_Render( void )
 
 		for ( int i = 0; lines[i].Width != -1; ++i )
 		{
-			HUD_DrawText( SmallFont, messageColor, SmallFont->StringWidth( prompt ), messageY, lines[i].Text );
+			HUD_DrawText( SmallFont, messageColor, SmallFont->StringWidth( prompt ) * 2, messageY, lines[i].Text );
 			messageY += SmallFont->GetHeight();
 		}
 
@@ -689,7 +691,7 @@ void CHAT_Render( void )
 	}
 	else
 	{
-		HUD_DrawText( SmallFont, messageColor, SmallFont->StringWidth( prompt ), positionY, displayString );
+		HUD_DrawText( SmallFont, messageColor, SmallFont->StringWidth( prompt ) * 2, positionY, displayString );
 	}
 
 	// [RC] Tell chatters about the iron curtain of LMS chat.
