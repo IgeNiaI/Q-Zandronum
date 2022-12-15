@@ -162,11 +162,11 @@ void P_SetPsprite (player_t *player, int position, FState *state, bool nofunctio
 		else
 			psp->tics = state->GetTics(); // could be 0
 
-		if (state->GetMisc1())
+		if (state->GetMisc1Updated())
 		{ // Set coordinates.
 			psp->sx = state->GetMisc1()<<FRACBITS;
 		}
-		if (state->GetMisc2())
+		if (state->GetMisc2Updated())
 		{
 			psp->sy = (state->GetMisc2()<<FRACBITS) + 0x6000;
 		}

@@ -298,9 +298,11 @@ do_stop:
 					sc.MustGetStringName("(");
 					sc.MustGetNumber();
 					state.Misc1 = sc.Number;
+					state.Misc1Updated = true;
 					sc.MustGetStringName (",");
 					sc.MustGetNumber();
 					state.Misc2 = sc.Number;
+					state.Misc2Updated = true;
 					sc.MustGetStringName(")");
 					continue;
 				}

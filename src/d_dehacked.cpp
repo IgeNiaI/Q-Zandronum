@@ -1369,6 +1369,7 @@ static int PatchFrame (int frameNum)
 		else if (keylen == 9 && stricmp (Line1, "Unknown 2") == 0)
 		{
 			info->Misc2 = val;
+			info->Misc2Updated = true;
 		}
 		else if (keylen == 13 && stricmp (Line1, "Sprite number") == 0)
 		{
@@ -1418,6 +1419,7 @@ static int PatchFrame (int frameNum)
 		}
 		info->Tics = tics;
 		info->Misc1 = misc1;
+		info->Misc1Updated = true;
 		info->Frame = frame & 0x3f;
 		info->Fullbright = frame & 0x8000 ? true : false;
 	}
