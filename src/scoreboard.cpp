@@ -1891,9 +1891,6 @@ void SCOREBOARD_DisplayFragMessage( player_t *pFraggedPlayer )
 
 	sprintf( szString, "You fragged %s\\c-!\n", pFraggedPlayer->userinfo.GetName() );
 
-	// Print the frag message out in the console.
-	Printf( "%s", szString );
-
 	V_ColorizeString( szString );
 
 	pMsg = new DHUDMessageFadeOut( BigFont, szString,
@@ -1960,9 +1957,6 @@ void SCOREBOARD_DisplayFraggedMessage( player_t *pFraggingPlayer )
 	DHUDMessageFadeOut	*pMsg;
 
 	sprintf( szString, "You were fragged by %s\\c-.\n", pFraggingPlayer->userinfo.GetName() );
-
-	// Print the frag message out in the console.
-	Printf( "%s", szString );
 
 	V_ColorizeString( szString );
 
