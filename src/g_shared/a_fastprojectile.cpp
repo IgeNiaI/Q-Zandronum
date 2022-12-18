@@ -7,6 +7,7 @@
 // [BB] New #includes.
 #include "network.h"
 #include "cl_main.h"
+#include "sv_commands.h"
 
 
 IMPLEMENT_CLASS(AFastProjectile)
@@ -94,12 +95,16 @@ void AFastProjectile::Tick ()
 						{
 							// Hack to prevent missiles exploding against the sky.
 							// Does not handle sky floors.
+							if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+								SERVERCOMMANDS_DestroyThing( this );
 							Destroy ();
 							return;
 						}
 						// [RH] Don't explode on horizon lines.
 						if (BlockingLine != NULL && BlockingLine->special == Line_Horizon)
 						{
+							if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+								SERVERCOMMANDS_DestroyThing( this );
 							Destroy ();
 							return;
 						}
@@ -127,6 +132,8 @@ void AFastProjectile::Tick ()
 				{
 					// [RH] Just remove the missile without exploding it
 					//		if this is a sky floor.
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+						SERVERCOMMANDS_DestroyThing( this );
 					Destroy ();
 					return;
 				}
@@ -150,6 +157,8 @@ void AFastProjectile::Tick ()
 
 				if (ceilingpic == skyflatnum &&  !(flags3 & MF3_SKYEXPLODE))
 				{
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+						SERVERCOMMANDS_DestroyThing( this );
 					Destroy ();
 					return;
 				}
