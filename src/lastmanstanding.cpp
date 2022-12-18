@@ -115,7 +115,7 @@ void LASTMANSTANDING_Tick( void )
 		if ( lastmanstanding )
 		{
 			// Two players are here now, being the countdown!
-			if ( GAME_CountActivePlayers( ) >= 2 )
+			if ( GAME_CountActivePlayers( ) >= 2 && level.time >= TICRATE * 5 )
 			{
 				// Warmup only in non lobby maps
 				if ( sv_lmswarmup )
@@ -133,7 +133,7 @@ void LASTMANSTANDING_Tick( void )
 
 		if ( teamlms )
 		{
-			if ( TEAM_TeamsWithPlayersOn( ) > 1 )
+			if ( TEAM_TeamsWithPlayersOn( ) > 1 && level.time >= TICRATE * 5 )
 			{
 				// Warmup only in non lobby maps
 				if ( sv_lmswarmup )
