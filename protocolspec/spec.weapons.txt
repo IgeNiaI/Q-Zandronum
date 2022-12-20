@@ -39,7 +39,8 @@ Command WeaponRailgun
 	ShortByte<7> flags
 	Bool extended
 	If (extended)
-		Long angleoffset
+		Long angle
+		Fixed pitch
 		Class spawnclass with NullAllowed
 		# Let's play safe and send this as a short
 		Short duration

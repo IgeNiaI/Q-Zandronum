@@ -2370,7 +2370,7 @@ void SERVERCOMMANDS_WeaponChange( ULONG ulPlayer, ULONG ulPlayerExtra, ServerCom
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_WeaponRailgun( AActor *source, const FVector3 &start, const FVector3 &end, LONG color1, LONG color2, float maxdiff, int railflags, angle_t angleoffset, const PClass* spawnclass, int duration, float sparsity, float drift, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_WeaponRailgun( AActor *source, const FVector3 &start, const FVector3 &end, LONG color1, LONG color2, float maxdiff, int railflags, angle_t angle, fixed_t pitch, const PClass* spawnclass, int duration, float sparsity, float drift, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	// Evidently, to draw a railgun trail, there must be a source actor.
 	if ( !EnsureActorHasNetID (source) )
@@ -2383,7 +2383,8 @@ void SERVERCOMMANDS_WeaponRailgun( AActor *source, const FVector3 &start, const 
 	command.SetColor1( color1 );
 	command.SetColor2( color2 );
 	command.SetMaxdiff( maxdiff );
-	command.SetAngleoffset( angleoffset );
+	command.SetAngle( angle );
+	command.SetPitch( pitch );
 	command.SetSpawnclass( spawnclass );
 	command.SetDuration( duration );
 	command.SetSparsity( sparsity );
@@ -2392,7 +2393,8 @@ void SERVERCOMMANDS_WeaponRailgun( AActor *source, const FVector3 &start, const 
 
 	// [TP] Recent ZDoom versions have added more railgun parameters. Add these parameters to the command
 	// only if they're not at defaults.
-	command.SetExtended( angleoffset != 0
+	command.SetExtended( angle != 0
+		|| pitch != 0
 		|| spawnclass != NULL
 		|| duration != 0
 		|| fabs( sparsity - 1.0f ) > 1e-8

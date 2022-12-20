@@ -5478,15 +5478,15 @@ void ServerCommands::WeaponRailgun::Execute()
 	// If this is not an extended railgun command, we'll need to assume some defaults.
 	if ( CheckExtended() == false )
 	{
-		angleoffset = 0;
+		angle = 0;
+		pitch = 0;
 		spawnclass = NULL;
 		duration = 0;
 		sparsity = 1.0f;
 		drift = 1.0f;
 	}
 
-	angle_t angle = source->angle + angleoffset;
-	P_DrawRailTrail( source, start, end, color1, color2, maxdiff, flags, spawnclass, angle, duration, sparsity, drift );
+	P_DrawRailTrail( source, start, end, color1, color2, maxdiff, flags, spawnclass, angle, pitch, duration, sparsity, drift );
 }
 
 //*****************************************************************************

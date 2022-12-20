@@ -702,7 +702,7 @@ static int P_RainbowParticleColor( )
 	return *( g_rainbowParticleColors[index] );
 }
 
-void P_DrawRailTrail (AActor *source, const FVector3 &start, const FVector3 &end, int color1, int color2, float maxdiff, int flags, const PClass *spawnclass, angle_t angle, int duration, float sparsity, float drift)
+void P_DrawRailTrail (AActor *source, const FVector3 &start, const FVector3 &end, int color1, int color2, float maxdiff, int flags, const PClass *spawnclass, angle_t angle, fixed_t pitch, int duration, float sparsity, float drift)
 {
 	// [BC] The server has no need to draw a railgun trail.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
@@ -967,6 +967,7 @@ void P_DrawRailTrail (AActor *source, const FVector3 &start, const FVector3 &end
 			AActor *thing = Spawn (spawnclass, FLOAT2FIXED(postmp.X), FLOAT2FIXED(postmp.Y), FLOAT2FIXED(postmp.Z), ALLOW_REPLACE);
 			if (thing) {
 				thing->angle = angle;
+				thing->pitch = pitch;
 				thing->target = source;
 				if (flags & RAF_TRANSFERTRANSLATION)
 				{

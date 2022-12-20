@@ -4826,6 +4826,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 {
 	fixed_t vx, vy, vz;
 	angle_t angle, pitch;
+	angle_t fineangle, finepitch;
 	fixed_t x1, y1;
 	FVector3 start, end;
 	FTraceResults trace;
@@ -4856,11 +4857,13 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 		}
 	}
 
-	pitch = ((angle_t)(-source->pitch) + pitchoffset) >> ANGLETOFINESHIFT;
-	angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
-	vx = FixedMul(finecosine[pitch], finecosine[angle]);
-	vy = FixedMul(finecosine[pitch], finesine[angle]);
-	vz = finesine[pitch];
+	pitch = ((angle_t)(-source->pitch) + pitchoffset);
+	finepitch = pitch >> ANGLETOFINESHIFT;
+	angle = (source->angle + angleoffset);
+	fineangle  = angle >> ANGLETOFINESHIFT;
+	vx = FixedMul(finecosine[finepitch], finecosine[fineangle]);
+	vy = FixedMul(finecosine[finepitch], finesine[fineangle]);
+	vz = finesine[finepitch];
 
 	if ((zadmflags & ZADF_ACCURATE_CROSSHAIR) && source->player)
 	{
@@ -4893,17 +4896,20 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			pitchoffset += angle_t((90.f - zOffs) * (ANGLE_MAX / 360));
 		}
 
-		pitch = (angle_t(-source->pitch + pitchoffset)) >> ANGLETOFINESHIFT;
-		angle = (source->angle + angleoffset) >> ANGLETOFINESHIFT;
+		pitch = (angle_t(-source->pitch + pitchoffset));
+		finepitch = pitch >> ANGLETOFINESHIFT;
+		angle = (source->angle + angleoffset);
+		fineangle = angle >> ANGLETOFINESHIFT;
 
-		vx = FixedMul(finecosine[pitch], finecosine[angle]);
-		vy = FixedMul(finecosine[pitch], finesine[angle]);
-		vz = finesine[pitch];
+		vx = FixedMul(finecosine[finepitch], finecosine[fineangle]);
+		vy = FixedMul(finecosine[finepitch], finesine[fineangle]);
+		vz = finesine[finepitch];
 	}
 
-	angle = ((source->angle + angleoffset) - ANG90) >> ANGLETOFINESHIFT;
-	x1 += offset_xy * finecosine[angle];
-	y1 += offset_xy * finesine[angle];
+	angle = ((source->angle + angleoffset) - ANG90);
+	fineangle = angle >> ANGLETOFINESHIFT;
+	x1 += offset_xy * finecosine[fineangle];
+	y1 += offset_xy * finesine[fineangle];
 
 	start.X = FIXED2FLOAT(x1);
 	start.Y = FIXED2FLOAT(y1);
@@ -4980,7 +4986,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 				if (bleed)
 				{
 					P_SpawnBlood(x, y, z, (source->angle + angleoffset) - ANG180, newdam > 0 ? newdam : damage, hitactor);
-					P_TraceBleed(newdam > 0 ? newdam : damage, x, y, z, hitactor, source->angle, pitch);
+					P_TraceBleed(newdam > 0 ? newdam : damage, x, y, z, hitactor, source->angle, finepitch);
 				}
 			}
 
@@ -5030,7 +5036,7 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 
 		if (puffclass != NULL && puffDefaults->flags3 & MF3_ALWAYSPUFF)
 		{
-			P_SpawnPuff(source, puffclass, trace.X, trace.Y, trace.Z, (source->angle + angleoffset) - ANG90, 1, 0);
+			P_SpawnPuff(source, puffclass, trace.X, trace.Y, trace.Z, angle, 1, 0);
 		}
 
 	}
@@ -5054,14 +5060,14 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	end.X = FIXED2FLOAT(trace.X);
 	end.Y = FIXED2FLOAT(trace.Y);
 	end.Z = FIXED2FLOAT(trace.Z);
-	P_DrawRailTrail(source, start, end, color1, color2, maxdiff, railflags, spawnclass, source->angle + angleoffset, duration, sparsity, drift);
+	P_DrawRailTrail(source, start, end, color1, color2, maxdiff, railflags, spawnclass, angle + ANG90, pitch, duration, sparsity, drift);
 
 	// [BC] If we're the server, tell clients to create a railgun trail.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
 		const ULONG ulPlayer = source->player ? static_cast<ULONG> ( source->player - players ) : MAXPLAYERS;
 		SERVERCOMMANDS_WeaponRailgun( source, start, end, color1, color2, maxdiff, railflags,
-			angleoffset, spawnclass, duration, sparsity, drift, ulPlayer,
+			angle + ANG90, pitch, spawnclass, duration, sparsity, drift, ulPlayer,
 			UNLAGGED_DrawRailClientside( source ) ? SVCF_SKIPTHISCLIENT : ServerCommandFlags( 0 ) );
 	}
 }
