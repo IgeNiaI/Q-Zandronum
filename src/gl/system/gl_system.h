@@ -72,7 +72,7 @@
 #include <OpenGL/OpenGL.h>
 #elif defined(__unix__)
 #include <GL/glew.h>
-#include "gl/api/glext.h"
+// #include "gl/api/glext.h" [AK] Commented this out to fix compile errors on Fedora.
 #else // !__APPLE__ && !__unix__
 #include <GL/gl.h>
 #include <GL/glu.h>
