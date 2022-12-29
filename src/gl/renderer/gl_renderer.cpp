@@ -76,6 +76,8 @@
 
 EXTERN_CVAR(Bool, gl_render_segs)
 
+EXTERN_CVAR(Int, screenblocks)
+
 //-----------------------------------------------------------------------------
 //
 // Initialize
@@ -305,6 +307,9 @@ void FGLRenderer::ClearBorders()
 
 void FGLRenderer::DrawTexture(FTexture *img, DCanvas::DrawParms &parms)
 {
+	if (screenblocks >= 13)
+		return;
+
 	double xscale = parms.destwidth / parms.texwidth;
 	double yscale = parms.destheight / parms.texheight;
 	double x = parms.x - parms.left * xscale;

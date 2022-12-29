@@ -189,6 +189,8 @@ CUSTOM_CVAR (Float, dimamount, 0.75f, CVAR_ARCHIVE)
 }
 CVAR (Color, dimcolor, 0x000000, CVAR_ARCHIVE)
 
+EXTERN_CVAR (Int, screenblocks)
+
 // [RH] Set true when vid_setmode command has been executed
 bool	setmodeneeded = false;
 // [RH] Resolution to change to when setmodeneeded is true
@@ -862,8 +864,11 @@ void DFrameBuffer::DrawRateStuff ()
 
 			chars = mysnprintf (fpsbuff, countof(fpsbuff), "%2u ms (%3u fps)", howlong, LastCount);
 			rate_x = Width - chars * ConFont->GetCharWidth('M');
-			Clear (rate_x, 0, Width, ConFont->GetHeight(), GPalette.BlackIndex, 0);
-			DrawText (ConFont, CR_WHITE, rate_x, 0, (char *)&fpsbuff[0], TAG_DONE);
+			if (screenblocks <= 12)
+			{
+				Clear (rate_x, 0, Width, ConFont->GetHeight(), GPalette.BlackIndex, 0);
+				DrawText (ConFont, CR_WHITE, rate_x, 0, (char *)&fpsbuff[0], TAG_DONE);
+			}
 
 			DWORD thisSec = ms/1000;
 			if (LastSec < thisSec)

@@ -83,6 +83,8 @@ CVAR (Bool, hud_scale, false, CVAR_ARCHIVE);
 // [BB]
 CVAR (Bool, con_scaletext_usescreenratio, false, CVAR_ARCHIVE)
 
+EXTERN_CVAR (Int, screenblocks)
+
 // For routines that take RGB colors, cache the previous lookup in case there
 // are several repetitions with the same color.
 static int LastPal = -1;
@@ -121,6 +123,9 @@ void STACK_ARGS DCanvas::DrawTexture (FTexture *img, double x, double y, int tag
 
 void STACK_ARGS DCanvas::DrawTextureV(FTexture *img, double x, double y, uint32 tag, va_list tags)
 {
+	if (screenblocks >= 13)
+		return;
+
 #ifndef NO_SWRENDER
 	FTexture::Span unmaskedSpan[2];
 	const FTexture::Span **spanptr, *spans;
