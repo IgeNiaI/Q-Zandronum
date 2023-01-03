@@ -6298,6 +6298,14 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetSpeed)
 {
 	ACTION_PARAM_START(1);
 	ACTION_PARAM_FIXED(speed, 0);
+	
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
+	{
+		return;
+	}
 
 	self->Speed = speed;
+
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_SetThingSpeed( self );
 }

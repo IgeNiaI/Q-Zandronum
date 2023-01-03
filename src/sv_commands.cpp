@@ -3547,6 +3547,19 @@ void SERVERCOMMANDS_SetThingScale( AActor* mobj, unsigned int scaleFlags, ULONG 
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetThingSpeed( AActor* mobj, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( !EnsureActorHasNetID (mobj) )
+		return;
+
+	ServerCommands::SetThingSpeed command;
+	command.SetActor( mobj );
+	command.SetNewspeed( mobj->Speed );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_UpdateThingScaleNotAtDefault( AActor* pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	// [BB] Sanity check.

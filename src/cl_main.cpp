@@ -4614,6 +4614,13 @@ void ServerCommands::SetThingScale::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetThingSpeed::Execute()
+{
+	actor->Speed = newspeed;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetThingFillColor::Execute()
 {
 	actor->fillcolor = fillcolor;

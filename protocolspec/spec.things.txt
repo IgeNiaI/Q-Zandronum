@@ -230,6 +230,12 @@ Command SetThingScale
 	EndIf
 EndCommand
 
+Command SetThingSpeed
+	ExtendedCommand
+	Actor actor
+	Fixed newspeed
+EndCommand
+
 Command SetThingFillColor
 	ExtendedCommand
 	Actor actor
