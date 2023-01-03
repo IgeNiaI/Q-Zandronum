@@ -236,6 +236,13 @@ Command SetThingSpeed
 	Fixed newspeed
 EndCommand
 
+Command SetThingSize
+	ExtendedCommand
+	Actor actor
+	Fixed newradius
+	Fixed newheight
+EndCommand
+
 Command SetThingFillColor
 	ExtendedCommand
 	Actor actor

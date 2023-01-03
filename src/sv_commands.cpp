@@ -3560,6 +3560,20 @@ void SERVERCOMMANDS_SetThingSpeed( AActor* mobj, ULONG ulPlayerExtra, ServerComm
 
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetThingSize( AActor* mobj, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( !EnsureActorHasNetID (mobj) )
+		return;
+
+	ServerCommands::SetThingSize command;
+	command.SetActor( mobj );
+	command.SetNewradius( mobj->radius );
+	command.SetNewheight( mobj->height );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_UpdateThingScaleNotAtDefault( AActor* pActor, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	// [BB] Sanity check.

@@ -6309,3 +6309,46 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetSpeed)
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		SERVERCOMMANDS_SetThingSpeed( self );
 }
+
+//==========================================================================
+//
+// A_SetSize
+//
+//==========================================================================
+
+DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetSize)
+{
+	ACTION_PARAM_START(3);
+	ACTION_PARAM_FIXED(newradius, 0);
+	ACTION_PARAM_FIXED(newheight, 1);
+	ACTION_PARAM_BOOL(testpos, false);
+	
+	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
+	{
+		return;
+	}
+
+	if (newradius < 0.)		newradius = self->radius;
+	if (newheight < 0.)		newheight = self->height;
+
+	fixed_t oldradius = self->radius;
+	fixed_t oldheight = self->height;
+
+	self->UnlinkFromWorld();
+	self->radius = newradius;
+	self->height = newheight;
+	self->LinkToWorld();
+
+	if (testpos && !P_TestMobjLocation(self))
+	{
+		self->UnlinkFromWorld();
+		self->radius = oldradius;
+		self->height = oldheight;
+		self->LinkToWorld();
+	}
+	else
+	{
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			SERVERCOMMANDS_SetThingSize( self );
+	}
+}

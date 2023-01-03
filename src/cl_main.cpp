@@ -4621,6 +4621,14 @@ void ServerCommands::SetThingSpeed::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetThingSize::Execute()
+{
+	actor->radius = newradius;
+	actor->height = newheight;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetThingFillColor::Execute()
 {
 	actor->fillcolor = fillcolor;
