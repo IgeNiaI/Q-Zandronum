@@ -3773,11 +3773,16 @@ void APlayerPawn::CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 		}
 	}
 
-	bool isClimbingLedge = player->onground && velz > 0 && (cmd->ucmd.buttons & BT_CROUCH);
+	bool isClimbingLedge = player->onground && velz > 0 && (cmd->ucmd.buttons & BT_CROUCH) && !bWasJustThrustedZ;
 
+	if (isClimbingLedge)
+	{
+		velz = MIN(velz, JumpZ);
+	}
+	else
 	// [geNia] Main jump logic
 	if (player->onground && player->mo->secondJumpState != SJ_READY
-		&& ((cmd->ucmd.buttons & BT_JUMP) || isClimbingLedge)
+		&& (cmd->ucmd.buttons & BT_JUMP)
 		&& (player->mo->jumpTics == 0 || player->mo->flags2 & MF2_ONMOBJ)) // you can jump on actors with no delay
 	{
 		bool isEdgeJumper = (mvFlags & MV_EDGEJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
@@ -3798,7 +3803,7 @@ void APlayerPawn::CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 			else
 				ulJumpTicks = -1;
 
-			if (!(mvFlags & MV_SILENT) && !isClimbingLedge)
+			if (!(mvFlags & MV_SILENT))
 			{
 				// [BB] We may not play the sound while predicting, otherwise it'll stutter.
 				if ( ShouldPlaySound() )
