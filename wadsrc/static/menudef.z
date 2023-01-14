@@ -139,6 +139,7 @@ OptionValue "FuzzStyle"
 
 OptionMenu "GLTextureGLOptions"
 {
+	Indent 153
 	Title "TEXTURE OPTIONS"
 	Option "Textures enabled",			gl_texture,						"YesNo"
 	Option "Texture Filter mode",		gl_texture_filter,				"FilterModes"
@@ -156,6 +157,7 @@ OptionMenu "GLTextureGLOptions"
 
 OptionMenu "GLLightOptions"
 {
+	Indent 153
 	Title "DYNAMIC LIGHTS"
 	Option "Dynamic Lights enabled",	gl_lights,						"YesNo"
 	Option "Enable light definitions",	gl_attachedlights,				"YesNo"
@@ -170,6 +172,7 @@ OptionMenu "GLLightOptions"
 
 OptionMenu "GLPrefOptions"
 {
+	Indent 153
 	Title "OPENGL PREFERENCES"
 	Option "Sector light mode",			gl_lightmode,					"LightingModes"
 	Option "Fog mode",					gl_fogmode,						"FogMode"
@@ -193,6 +196,7 @@ OptionMenu "GLPrefOptions"
 
 OptionMenu "GLShaderOptions"
 {
+	Indent 153
 	Title "SHADER OPTIONS"
 	Option "Enable brightness maps",	gl_brightmap_shader,			"OnOff"
 	Option "Shaders for texture warp",	gl_warp_shader,					"OnOff"
@@ -203,6 +207,7 @@ OptionMenu "GLShaderOptions"
 
 OptionMenu "OpenGLOptions"
 {
+	Indent 153
 	Title "OPENGL OPTIONS"
 	Submenu "Dynamic Light Options",	"GLLightOptions"
 	Submenu "Texture Options", 			"GLTextureGLOptions"
@@ -212,6 +217,7 @@ OptionMenu "OpenGLOptions"
 
 OptionMenu "VideoOptions"
 {
+	Indent 153
 	Title "DISPLAY OPTIONS"
 	
 	Submenu "OpenGL Options", 			"OpenGLOptions"

@@ -337,6 +337,7 @@ OptionValue ZA_Announcers {}
 
 OptionMenu "OptionsMenu"
 {
+	Indent 153
 	Title "OPTIONS"
 	Submenu "Multiplayer Options",		"ZA_MultiplayerOptions" // [TP]
 	StaticText " " // [TP]
@@ -447,6 +448,7 @@ OptionValue JoinMenuKeys
 
 OptionMenu "CustomizeControls"
 {
+	Indent 153
 	Title "CUSTOMIZE CONTROLS"
 	ScrollTop 2
 	StaticTextSwitchable 	"ENTER to change, BACKSPACE to clear", "Press new key for control, ESC to cancel", "ControlMessage"
@@ -578,6 +580,7 @@ OptionString "InMouse"
 
 OptionMenu "MouseOptions"
 {
+	Indent 153
 	Title "MOUSE OPTIONS"
 	Option "Enable mouse",				"use_mouse", "YesNo"
 	Option "Enable mouse in menus",		"m_use_mouse", "MenuMouse", "use_mouse"
@@ -614,6 +617,7 @@ OptionMenu "MouseOptions"
 
 OptionMenu "JoystickOptions"
 {
+	Indent 153
 	Title "CONTROLLER OPTIONS"
 	// Will be filled in by joystick code.
 }
@@ -636,6 +640,7 @@ OptionValue "Inversion"
 
 OptionMenu "JoystickConfigMenu"
 {
+	Indent 153
 	Title "CONFIGURE CONTROLLER"
 	Class "JoystickConfigMenu"
 	// Will be filled in by joystick code.
@@ -714,6 +719,7 @@ OptionValue ZA_RespawnInvulEffects
 
 OptionMenu "VideoOptions"
 {
+	Indent 153
 	Title "DISPLAY OPTIONS"
 	
 	Submenu "Scoreboard Options", 		"ScoreboardOptions"
@@ -823,6 +829,7 @@ OptionValue ZA_FullscreenHUD
 
 OptionMenu "HUDOptions"
 {
+	Indent 153
 	Title "HUD Options"
 	Submenu "Alternative HUD",			"AltHudOptions"
 	Submenu "Message Options", 			"MessageOptions"
@@ -887,6 +894,7 @@ OptionValue "AltHUDTime"
 
 OptionMenu "AltHUDOptions"
 {
+	Indent 153
 	Title "Alternative HUD"
 	//Indent 220
 	Option "Enable alternative HUD",				"hud_althud", "OnOff"
@@ -940,6 +948,7 @@ OptionValue dehopt
 
 OptionMenu "MiscOptions"
 {
+	Indent 153
 	Title "Miscellaneous Options"
 	//Indent 220
 	IfOption(Windows)
@@ -1018,6 +1027,7 @@ OptionValue MapBackTypes
 
 OptionMenu AutomapOptions
 {
+	Indent 153
 	Title "AUTOMAP OPTIONS"
 	Option "Map color set",				"am_colorset", "MapColorTypes"
 	Option "Allow map defined colors",	"am_customcolors", "YesNo"
@@ -1050,6 +1060,7 @@ OptionMenu AutomapOptions
 
 OptionMenu MapControlsMenu
 {
+	Indent 153
 	Title "CUSTOMIZE MAP CONTROLS"
 	ScrollTop 2
 	StaticTextSwitchable 	"ENTER to change, BACKSPACE to clear", "Press new key for control, ESC to cancel", "ControlMessage"
@@ -1077,6 +1088,7 @@ OptionMenu MapControlsMenu
 
 OptionMenu MapColorMenu
 {
+	Indent 153
 	Title "CUSTOMIZE MAP COLORS"
 	SafeCommand "Restore default custom colors", "am_restorecolors"
 	StaticText " "
@@ -1137,6 +1149,7 @@ OptionMenu MapColorMenu
 
 OptionMenu ColorPickerMenu
 {
+	Indent 153
 	Title "SELECT COLOR"
 	// This menu will be created by the calling code
 }
@@ -1181,6 +1194,7 @@ OptionValue ZA_ColorInMessages
 
 OptionMenu MessageOptions
 {
+	Indent 153
 	Title 	"MESSAGES"
 	SubMenu "Text scaling",				"ZA_TextScaling" // [TP]
 	Option "Show messages",				"show_messages", "OnOff"
@@ -1213,6 +1227,7 @@ OptionMenu MessageOptions
 
 OptionMenu ScoreboardOptions
 {
+	Indent 153
 	Title "SCOREBOARD OPTIONS"
 	StaticText "Cooperative Options", 1
 	StaticText " "
@@ -1268,6 +1283,7 @@ OptionValue  JumpCrouch
 
 OptionMenu GameplayOptions
 {
+	Indent 153
 	Title 	"GAMEPLAY OPTIONS"
 	//Indent 222
 	Option "Teamplay",				"teamplay",	"OnOff"
@@ -1396,6 +1412,7 @@ OptionValue CompatModes
 
 OptionMenu "CompatibilityOptions"
 {
+	Indent 153
 	Title "COMPATIBILITY OPTIONS"
 	Option "Compatibility mode",						"compatmode", "CompatModes", "", 1
 
@@ -1584,6 +1601,7 @@ OptionValue MidiDevices
 
 OptionMenu SoundOptions
 {
+	Indent 153
 	Title "SOUND OPTIONS"
 	Slider "Sounds volume",		"snd_sfxvolume", 0, 1, 0.05
 	Slider "Menu volume",		"snd_menuvolume", 0, 1, 0.05
@@ -1647,6 +1665,7 @@ OptionValue OplCores
 
 OptionMenu AdvSoundOptions
 {
+	Indent 153
 	Title "ADVANCED SOUND OPTIONS"
 	Option "Sample rate",			"snd_samplerate", "SampleRates"
 	Option "Buffer size",			"snd_buffersize", "BufferSizes"
@@ -1697,6 +1716,7 @@ OptionValue ModVolumeRamps
 
 OptionMenu ModReplayerOptions
 {
+	Indent 153
 	Title "MODULE REPLAYER OPTIONS"
 	Option "Replayer engine",		"mod_dumb", "ModReplayers"
 	StaticText " "
@@ -1755,6 +1775,7 @@ OptionValue Renderers
 
 OptionMenu VideoModeMenu
 {
+	Indent 153
 	Title "VIDEO MODE"
 	
 	Option "Fullscreen",			"fullscreen", "YesNo"

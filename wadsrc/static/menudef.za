@@ -21,6 +21,7 @@ OptionValue ZA_OverridePlayerColors
 
 OptionMenu ZA_MultiplayerOptions
 {
+	Indent 153
 	Title "MULTIPLAYER OPTIONS"
 
 	SubMenu		"Offline Skirmish",			"ZA_SkirmishMenu"
@@ -77,6 +78,7 @@ OptionValue ZA_PacketDupRate
 
 OptionMenu ZA_NetworkOptions
 {
+	Indent 153
 	Title "NETWORK OPTIONS"
 
 	Option		"Unlagged",					"cl_unlagged",				"OnOff"
@@ -140,6 +142,7 @@ OptionValue ZA_Skill
 
 OptionMenu ZA_SkirmishMenu
 {
+	Indent 153
 	Title		"SKIRMISH"
 	Option		"Level",				"menu_skirmishlevel",			"ZA_Levels"
 	Option		"Game Mode",			"menu_skirmishgamemode",		"ZA_Gamemode"
@@ -163,6 +166,7 @@ OptionMenu ZA_SkirmishMenu
 // Gets filled in by the engine
 OptionMenu ZA_BotSetup
 {
+	Indent 153
 	Title "BOT SETUP"
 	Class "BotSetupMenu"
 	Indent 80
@@ -205,6 +209,7 @@ OptionValue ZA_ServerGamemode
 
 OptionMenu ZA_ServerInfo
 {
+	Indent 153
 	Title "SERVER INFORMATION"
 	Class "ServerInfoMenu"
 	Indent 80
@@ -212,6 +217,7 @@ OptionMenu ZA_ServerInfo
 
 OptionMenu ZA_Browser
 {
+	Indent 153
 	Title "SERVER BROWSER"
 	Class "BrowserMenu"
 	Indent 80
@@ -246,6 +252,7 @@ OptionMenu ZA_Browser
 
 OptionMenu ZA_TextScaling
 {
+	Indent 153
 	Title "TEXT SCALING"
 	Class "TextScalingMenu"
 
@@ -276,6 +283,7 @@ OptionValue ZA_VoteLimitTypes
 
 OptionMenu ZA_CallVote
 {
+	Indent 153
 	Title "CALL VOTE"
 	NetGameOnly
 
@@ -286,6 +294,7 @@ OptionMenu ZA_CallVote
 
 OptionMenu ZA_CallKickVote
 {
+	Indent 153
 	Title		"KICK A PLAYER"
 
 	PlayerField	"Player",				"menu_callvoteplayer",			NoBots, NotSelf
@@ -297,6 +306,7 @@ OptionMenu ZA_CallKickVote
 
 OptionMenu ZA_CallMapVote
 {
+	Indent 153
 	Title		"CHANGE MAP"
 
 	Option		"Map",					"menu_callvotemap",				"ZA_Levels"
@@ -310,6 +320,7 @@ OptionMenu ZA_CallMapVote
 
 OptionMenu ZA_CallLimitVote
 {
+	Indent 153
 	Title		"CHANGE LIMIT"
 
 	Option		"Limit",				"menu_callvotelimit",			"ZA_VoteLimitTypes"
@@ -341,6 +352,7 @@ OptionValue ZA_IgnoreAction
 
 OptionMenu ZA_IgnoreMenu
 {
+	Indent 153
 	Title "IGNORE A PLAYER"
 	NetGameOnly
 
@@ -363,6 +375,7 @@ OptionMenu ZA_IgnoreMenu
 
 OptionMenu ZA_JoinMenu
 {
+	Indent 153
 	Title		"JOIN GAME"
 
 	StaticText	"You are spectating."
@@ -378,6 +391,7 @@ OptionMenu ZA_JoinMenu
 
 OptionMenu ZA_JoinTeamMenu
 {
+	Indent 153
 	Title		"JOIN TEAM"
 
 	StaticText	"Please select a team."
@@ -395,6 +409,7 @@ OptionMenu ZA_JoinTeamMenu
 
 OptionMenu ZA_SelectClassMenu
 {
+	Indent 153
 	Title		"PLAYER CLASS SELECTION"
 
 	StaticText	" "
@@ -439,6 +454,7 @@ OptionValue ZA_SwitchOnPickup
 
 OptionMenu ZA_WeaponSetup
 {
+	Indent 153
 	Title		"WEAPON SETUP"
 	Indent 170
 
@@ -459,6 +475,7 @@ OptionMenu ZA_WeaponSetup
 
 OptionMenu ZA_LoginMenu
 {
+	Indent 153
 	NetGameOnly
 	Title "LOG IN"
 
