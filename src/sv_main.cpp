@@ -2416,22 +2416,20 @@ void SERVER_SendFullUpdate( ULONG ulClient )
 					SERVERCOMMANDS_SetInventoryIcon( ulIdx, pInventory, ulClient, SVCF_ONLYTHISCLIENT );
 				}
 			}
-			// [WS] Inform clients of their PowerupGiver items.
-			else if ( pInventory->IsKindOf( RUNTIME_CLASS( AAmmo )) || pInventory->IsKindOf( RUNTIME_CLASS( AWeapon ))
-				|| pInventory->IsKindOf( RUNTIME_CLASS( ABackpackItem ))
-				|| pInventory->IsKindOf( RUNTIME_CLASS( APowerupGiver )) )
-			{
-				SERVERCOMMANDS_GiveInventory( ulIdx, pInventory, ulClient, SVCF_ONLYTHISCLIENT );
-				// [BB] Ammo max amount needs to be handled explicitly.
-				if ( pInventory->IsKindOf( RUNTIME_CLASS( AAmmo ) ) )
-					SERVERCOMMANDS_SetPlayerAmmoCapacity( ulIdx, pInventory, ulClient, SVCF_ONLYTHISCLIENT );
-			}
 			else if ( pInventory->IsKindOf( RUNTIME_CLASS( AKey )) )
 				keys.Push ( pInventory );
 			else if ( pInventory->IsA( RUNTIME_CLASS( AWeaponHolder )) )
 			{
 				// [Dusk] Inform the client of weapon holders
 				SERVERCOMMANDS_GiveWeaponHolder( ulIdx, static_cast<AWeaponHolder *>( pInventory ), ulClient, SVCF_ONLYTHISCLIENT );
+			}
+			// [WS] Inform clients of their PowerupGiver items.
+			else
+			{
+				SERVERCOMMANDS_GiveInventory( ulIdx, pInventory, ulClient, SVCF_ONLYTHISCLIENT );
+				// [BB] Ammo max amount needs to be handled explicitly.
+				if ( pInventory->IsKindOf( RUNTIME_CLASS( AAmmo ) ) )
+					SERVERCOMMANDS_SetPlayerAmmoCapacity( ulIdx, pInventory, ulClient, SVCF_ONLYTHISCLIENT );
 			}
 		}
 		// [BB] Now give the keys we just collected from the inventory in reverse order.
