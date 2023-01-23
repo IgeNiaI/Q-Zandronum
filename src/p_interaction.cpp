@@ -402,6 +402,17 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 	AActor *realthis = NULL;
 	int realstyle = 0;
 	int realhealth = 0;
+
+	if (!source && player
+		&& player->attackerPlayer != -1
+		&& playeringame[player->attackerPlayer]
+		&& player - players != player->attackerPlayer
+		&& gametic - player->damageTic <= sv_ringouttics)
+	{
+		source = players[player->attackerPlayer].mo;
+		player->attackerPlayer = -1;
+	}
+
 	if (P_MorphedDeath(this, &realthis, &realstyle, &realhealth))
 	{
 		if (!(realstyle & MORPH_UNDOBYDEATHSAVES))
@@ -718,18 +729,7 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 		// count environment kills against you
 		if (!source)
 		{
-			if ( player->attackerPlayer != -1
-				&& playeringame[player->attackerPlayer]
-				&& player - players != player->attackerPlayer
-				&& gametic - player->damageTic <= sv_ringouttics )
-			{
-				PLAYER_SetFragcount( &players[player->attackerPlayer], players[player->attackerPlayer].fragcount + (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );	// [RH] Cumulative frag count
-				player->attackerPlayer = -1;
-			}
-			else
-			{
-				PLAYER_SetFragcount( player, player->fragcount - (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );	// [RH] Cumulative frag count
-			}
+			PLAYER_SetFragcount( player, player->fragcount - (( bPossessedTerminatorArtifact ) ? sv_terminatorfragaward : 1 ), true, true );	// [RH] Cumulative frag count
 
 			// Spawning in nukage or getting crushed is NOT
 			// somewhere where you would want to be at when you respawn again
