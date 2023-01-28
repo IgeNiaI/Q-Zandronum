@@ -844,6 +844,7 @@ void P_CheckWeaponSwitch (player_t *player)
 	if ((player->WeaponState & WF_DISABLESWITCH) || // Weapon changing has been disabled.
 		( player->morphTics != 0 && !( player->mo && (player->mo->PlayerFlags & PPF_NOMORPHLIMITATIONS) ) ))					// Morphed classes cannot change weapons.
 	{ // ...so throw away any pending weapon requests.
+		// [geNia] unless +NOMORPHLIMITATIONS is used
 		player->PendingWeapon = WP_NOCHANGE;
 	}
 
