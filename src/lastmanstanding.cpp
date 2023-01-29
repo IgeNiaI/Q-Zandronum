@@ -117,8 +117,22 @@ void LASTMANSTANDING_Tick( void )
 			// Two players are here now, being the countdown!
 			if ( GAME_CountActivePlayers( ) >= 2 && level.time >= TICRATE * 5 )
 			{
+				ULONG	ulIdx;
+				bool nowarmup = false;
+				for (ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++)
+				{
+					if ((playeringame[ulIdx] == false) || (PLAYER_IsTrueSpectator(&players[ulIdx])))
+						continue;
+
+					if (static_cast<signed> (players[ulIdx].ulWins) > 0)
+					{
+						nowarmup = true;
+						break;
+					}
+				}
+
 				// Warmup only in non lobby maps
-				if ( sv_lmswarmup )
+				if ( sv_lmswarmup && !nowarmup )
 				{			
 					LASTMANSTANDING_SetState(LMSS_WARMUP);
 					break;
@@ -136,7 +150,7 @@ void LASTMANSTANDING_Tick( void )
 			if ( TEAM_TeamsWithPlayersOn( ) > 1 && level.time >= TICRATE * 5 )
 			{
 				// Warmup only in non lobby maps
-				if ( sv_lmswarmup )
+				if ( sv_lmswarmup && TEAM_GetHighestWinCount() <= 0 )
 				{			
 					LASTMANSTANDING_SetState(LMSS_WARMUP);
 					break;
