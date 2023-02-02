@@ -181,7 +181,7 @@ public:
 
 	// [Dusk]
 	void	CalcJumpVel(ticcmd_t *cmd, fixed_t &x, fixed_t &y, fixed_t &z);
-	void	CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ);
+	void	CheckJump(ticcmd_t *cmd);
 	fixed_t CalcJumpHeight( bool bAddStep = true );
 
 	enum EInvulState

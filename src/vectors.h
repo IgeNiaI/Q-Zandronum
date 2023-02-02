@@ -248,7 +248,7 @@ struct TVector2
 
 	TVector2 FixedUnit() const
 	{
-		int len = (int) Length();
+		double len = Length();
 		if (len != 0) len = 65536 / len;
 		return *this * len;
 	}

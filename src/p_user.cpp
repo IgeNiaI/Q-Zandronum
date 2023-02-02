@@ -3835,7 +3835,7 @@ void P_CheckForElevatorJump(APlayerPawn* mo)
 	}
 }
 
-void APlayerPawn::CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
+void APlayerPawn::CheckJump(ticcmd_t *cmd)
 {
 	if (!player->bSpectating && !level.IsJumpingAllowed())
 		return;
@@ -3857,8 +3857,9 @@ void APlayerPawn::CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 	{
 		player->mo->secondJumpState = SJ_AVAILABLE;
 	}
-
-	if (player->mo->secondJumpState == SJ_AVAILABLE)
+	
+	FTraceResults secondJumpTrace;
+	if (player->mo->secondJumpState == SJ_AVAILABLE && !wasJustThrustedZ)
 	{
 		if (mvFlags & MV_DOUBLETAPJUMP)
 		{
@@ -3870,9 +3871,28 @@ void APlayerPawn::CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 			if ((mvFlags & MV_USER4JUMP) ? (cmd->ucmd.buttons & BT_USER4) : (cmd->ucmd.buttons & BT_JUMP))
 				player->mo->secondJumpState = SJ_READY;
 		}
+
+		// Wall proximity check
+		if (player->mo->secondJumpState == SJ_READY
+			&& ((mvFlags & MV_WALLJUMP) || (mvFlags & MV_WALLJUMPV2))
+			&& !player->onground)
+		{
+			player->mo->secondJumpState = SJ_AVAILABLE;
+			// linetrace in 16 directions to see if there is a wall
+			for (int i = 0; i < 16; ++i)
+			{
+				// Start with int min (-2147483648) and go upward to int max
+				P_TraceForWall(this, FixedMul(2147483648, -65536 + 8192 * i), secondJumpTrace);
+				if (secondJumpTrace.HitType == TRACE_HitWall)
+				{
+					player->mo->secondJumpState = SJ_READY;
+					break;
+				}
+			}
+		}
 	}
 
-	bool isClimbingLedge = player->onground && velz > 0 && (cmd->ucmd.buttons & BT_CROUCH) && !bWasJustThrustedZ;
+	bool isClimbingLedge = player->onground && velz > 0 && (cmd->ucmd.buttons & BT_CROUCH) && !wasJustThrustedZ;
 
 	if (isClimbingLedge)
 	{
@@ -3886,7 +3906,7 @@ void APlayerPawn::CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 	{
 		bool isEdgeJumper = (mvFlags & MV_EDGEJUMP) && !(cmd->ucmd.buttons & BT_CROUCH) ? true : false;
 
-		if (!bWasJustThrustedZ || isEdgeJumper)
+		if (!wasJustThrustedZ || isEdgeJumper)
 		{
 			ULONG	ulJumpTicks;
 
@@ -3942,84 +3962,60 @@ void APlayerPawn::CheckJump(ticcmd_t *cmd, bool bWasJustThrustedZ)
 	// [geNia]: Second jump logic
 	else if ( player->mo->secondJumpState == SJ_READY )
 	{
-		// Wall proximity check
-		bool doSecondJump = false;
-		FTraceResults secondJumpTrace;
-		if (((mvFlags & MV_WALLJUMP) || (mvFlags & MV_WALLJUMPV2)) && !player->onground)
+		if (mvFlags & MV_WALLJUMPV2)
 		{
-			// linetrace in 16 directions to see if there is a wall
-			for (int i = 0; i < 16; ++i)
-			{
-				// Start with int min (-2147483648) and go upward to int max
-				P_TraceForWall(this, FixedMul(2147483648, -65536 + 8192 * i), secondJumpTrace);
-				if (secondJumpTrace.HitType == TRACE_HitWall)
-				{
-					doSecondJump = true;
-					break;
-				}
-			}
+			angle_t lineangle = R_PointToAngle2(0, 0, secondJumpTrace.Line->dx, secondJumpTrace.Line->dy) - ANG90;
+			velx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
+			vely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
 		}
-		else
+		else if (cmd)
 		{
-			doSecondJump = true;
-		}
+			TVector2<fixed_t> dir = TVector2<fixed_t>(
+				FixedMul(cmd->ucmd.forwardmove, ForwardMove2),
+				FixedMul(-cmd->ucmd.sidemove, SideMove2)
+			).FixedUnit();
+			dir = TVector2<fixed_t>(
+				FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
+				FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
+				);
 
-		if (doSecondJump)
-		{
-			if (mvFlags & MV_WALLJUMPV2)
+			if (mvFlags & MV_ABSOLUTESECONDJUMP)
 			{
-				angle_t lineangle = R_PointToAngle2(0, 0, secondJumpTrace.Line->dx, secondJumpTrace.Line->dy) - ANG90;
-				velx = FixedMul(finecosine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
-				vely = FixedMul(finesine[lineangle >> ANGLETOFINESHIFT], SecondJumpXY);
-			}
-			else if (cmd)
-			{
-				TVector2<fixed_t> dir = TVector2<fixed_t>(
-					FixedMul(cmd->ucmd.forwardmove, ForwardMove2),
-					FixedMul(-cmd->ucmd.sidemove, SideMove2)
-				).FixedUnit();
-				dir = TVector2<fixed_t>(
-					FixedMul(dir.X, finecosine[angle >> ANGLETOFINESHIFT]) - FixedMul(dir.Y, finesine[angle >> ANGLETOFINESHIFT]),
-					FixedMul(dir.X, finesine[angle >> ANGLETOFINESHIFT]) + FixedMul(dir.Y, finecosine[angle >> ANGLETOFINESHIFT])
-					);
-
-				velx += FixedMul(dir.X, SecondJumpXY);
-				vely += FixedMul(dir.Y, SecondJumpXY);
-			}
-
-			fixed_t JumpVelz = SecondJumpZ;
-
-			// [BC] If the player has the high jump power, double his jump velocity.
-			if (player->cheats & CF_HIGHJUMP)
-				JumpVelz *= 2;
-
-			if (velz < 0)
-			{
-				velz = JumpVelz;
+				velx = FixedMul(dir.X, SecondJumpXY);
+				vely = FixedMul(dir.Y, SecondJumpXY);
 			}
 			else
 			{
-				velz += JumpVelz;
+				velx += FixedMul(dir.X, SecondJumpXY);
+				vely += FixedMul(dir.Y, SecondJumpXY);
 			}
-			
-			P_CheckForElevatorJump( this );
-
-			if (!(mvFlags & MV_SILENT))
-			{
-				if ( ShouldPlaySound() )
-					S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, NULL, true);
-			}
-
-			CreateEffectActor( EA_SECOND_JUMP );
-
-			player->mo->jumpTics = JumpDelay;
-			player->mo->secondJumpTics = SecondJumpDelay;
-
-			if (player->mo->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
-				player->mo->secondJumpsRemaining--;
-
-			player->mo->secondJumpState = SJ_NOT_AVAILABLE;
 		}
+
+		fixed_t JumpVelz = SecondJumpZ;
+
+		// [BC] If the player has the high jump power, double his jump velocity.
+		if (player->cheats & CF_HIGHJUMP)
+			JumpVelz *= 2;
+
+		velz = MAX(velz, JumpVelz);
+		
+		P_CheckForElevatorJump( this );
+
+		if (!(mvFlags & MV_SILENT))
+		{
+			if ( ShouldPlaySound() )
+				S_Sound(this, CHAN_BODY, "*secondjump", 1, ATTN_NORM, true, NULL, true);
+		}
+
+		CreateEffectActor( EA_SECOND_JUMP );
+
+		player->mo->jumpTics = JumpDelay;
+		player->mo->secondJumpTics = SecondJumpDelay;
+
+		if (player->mo->secondJumpsRemaining > 0) // secondJumpdsRemaining can be below 0 for unlimited jumps
+			player->mo->secondJumpsRemaining--;
+
+		player->mo->secondJumpState = SJ_NOT_AVAILABLE;
 	}
 
 	if (JumpSoundDelay > 0)
@@ -4037,8 +4033,6 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	bool isClimbing = false;
 	bool anyMove = cmd->ucmd.forwardmove | cmd->ucmd.sidemove ? true : false;
 	bool isClimber = player->mo->mvFlags & MV_WALLCLIMB ? true : false;
-	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
-	player->mo->wasJustThrustedZ = false;
 
 	fixed_t velocity = FLOAT2FIXED(float(FVector2(FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely)).Length()));
 
@@ -4183,8 +4177,10 @@ void P_MovePlayer_Doom(player_t *player, ticcmd_t *cmd)
 	// [RH] check for jump
 	else
 	{
-		player->mo->CheckJump(cmd, wasJustThrustedZ);
+		player->mo->CheckJump(cmd);
 	}
+
+	player->mo->wasJustThrustedZ = false;
 }
 
 //******************************************************************************//
@@ -4213,8 +4209,6 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
 	FVector3 acceleration = { FIXED2FLOAT(cmd->ucmd.forwardmove), -FIXED2FLOAT(cmd->ucmd.sidemove) * 1.25f, 0.0f };
-	bool wasJustThrustedZ = player->mo->wasJustThrustedZ;
-	player->mo->wasJustThrustedZ = false;
 	float velocity = 0.f;
 
 	if (player->mo->waterlevel >= 2 || player->mo->flags & MF_NOGRAVITY)
@@ -4376,7 +4370,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					player->mo->crouchSlideTics = MIN(player->mo->CrouchSlideMaxTics, player->mo->crouchSlideTics + player->mo->CrouchSlideRegen);
 				}
 			}
-			else if (!wasJustThrustedZ)
+			else if (!player->mo->wasJustThrustedZ)
 			{
 				maxGroundSpeed *= Q_MAX_GROUND_SPEED;
 
@@ -4460,10 +4454,14 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 
 	// Water and flying have already executed jump press logic
 	if (noJump)
+	{
+		player->mo->wasJustThrustedZ = false;
 		return;
+	}
 
 	// Stop here if not in good condition to jump
-	player->mo->CheckJump(cmd, wasJustThrustedZ);
+	player->mo->CheckJump(cmd);
+	player->mo->wasJustThrustedZ = false;
 }
 
 /*
