@@ -1252,7 +1252,27 @@ static void ClearInventory (AActor *activator)
 	// unless the player was not already using a weapon.
 	if (savedPendingWeap != NULL && hadweap && actor->player != NULL)
 	{
-		actor->player->PendingWeapon = savedPendingWeap;
+		if (NETWORK_GetState() == NETSTATE_SERVER)
+		{
+			if (savedPendingWeap == WP_NOCHANGE)
+			{
+				if (actor->player->PendingWeapon != WP_NOCHANGE)
+				{
+					actor->player->PendingWeapon = actor->player->ReadyWeapon;
+					SERVERCOMMANDS_SetPlayerPendingWeapon(ULONG(actor->player - players));
+					actor->player->PendingWeapon = savedPendingWeap;
+				}
+			}
+			else
+			{
+				actor->player->PendingWeapon = savedPendingWeap;
+				SERVERCOMMANDS_SetPlayerPendingWeapon(ULONG(actor->player - players));
+			}
+		}
+		else
+		{
+			actor->player->PendingWeapon = savedPendingWeap;
+		}
 	}
 
 	// [BB] Since SERVERCOMMANDS_GiveInventory overwrites the item amount
