@@ -1115,6 +1115,20 @@ void gl_SetActorLights(AActor *actor)
 
 	All.Clock();
 	if (actor->state == NULL) return;
+
+	// [geNia] Sometimes the dynamiclights array technically has lights,
+	// but at least one of them is NULL. I couldn't find why that happens,
+	// so I made it remove NULL lights from the array before repopulating it.
+	// I don't like this, but it's the best I could do.
+	unsigned int i = 0;
+	while (i < actor->dynamiclights.Size())
+	{
+		if (actor->dynamiclights[i] == NULL)
+			actor->dynamiclights.Delete(i);
+		else
+			i++;
+	}
+
 	if (l)
 	{
 		TArray<FInternalLightAssociation *> & LightAssociations=*l;
