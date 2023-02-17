@@ -2144,7 +2144,7 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 	if ((mo->player && (i_compatflags & COMPATF_WALLRUN))
 		|| (mo->waterlevel >= 1)
 		|| (mo->player && mo->player->mo
-			&& mo->player->crouchfactor <= mo->player->mo->CrouchScaleHalfWay))
+			&& mo->player->crouchfactor < mo->player->mo->CrouchScaleHalfWay))
 	{
 		// preserve the direction instead of clamping x and y independently.
 		xmove = clamp (mo->velx, -maxmove, maxmove);

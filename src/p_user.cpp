@@ -3146,7 +3146,7 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 	}
 
 	// Set the crouch sprite?
-	if ( ( actor == player->mo ) && ( player->crouchfactor <= player->mo->CrouchScaleHalfWay ) )
+	if ( ( actor == player->mo ) && ( player->crouchfactor < player->mo->CrouchScaleHalfWay ) )
 	{
 		if (spritenum == actor->SpawnState->sprite || spritenum == player->mo->crouchsprite) 
 		{
@@ -3168,7 +3168,7 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 		{
 			spritenum = crouchspriteno;
 		}
-		else if (player->playerstate != PST_DEAD && player->crouchfactor <= player->mo->CrouchScaleHalfWay)
+		else if (player->playerstate != PST_DEAD && player->crouchfactor < player->mo->CrouchScaleHalfWay)
 		{
 			scaley = FixedMul(scaley, player->mo->CrouchScale);
 		}
@@ -4331,7 +4331,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					fixed_t fixedVelocity = FLOAT2FIXED(vel2D.Length());
 					bool isAirWallRunning = false;
 
-					if ( player->crouchfactor > player->mo->CrouchScaleHalfWay
+					if ( player->crouchfactor >= player->mo->CrouchScaleHalfWay
 						&& fixedVelocity >= player->mo->AirWallRunMinVelocity
 						&& acceleration.Length() > 0
 						&& player->mo->airWallRunTics > 0 )
@@ -4375,7 +4375,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 				maxGroundSpeed *= Q_MAX_GROUND_SPEED;
 
 				isSliding = isSlider &&									// player has the flag
-						   player->crouchfactor <= player->mo->CrouchScaleHalfWay &&	// player is crouching
+						   player->crouchfactor < player->mo->CrouchScaleHalfWay &&	// player is crouching
 						   player->mo->crouchSlideTics > 0;						// there is crouch slide charge to spend
 
 				// Friction & Acceleration
@@ -4390,7 +4390,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 					player->mo->QAcceleration(vel, acceleration, maxGroundSpeed, player->mo->GroundAcceleration / moveFactor * floorFriction);
 
 					// Regen crouch slide tics
-					if (isSlider && player->crouchfactor > player->mo->CrouchScaleHalfWay)
+					if (isSlider && player->crouchfactor >= player->mo->CrouchScaleHalfWay)
 					{
 						if (player->mo->crouchSlideTics > 0)
 							player->mo->crouchSlideTics = -player->mo->crouchSlideTics;
@@ -5163,7 +5163,7 @@ void P_PlayerThink (player_t *player)
 				{
 					P_CrouchMove(player, 1);
 				}
-				else if (crouchdir == -1 && player->crouchfactor > player->mo->CrouchScale)
+				else if (crouchdir == -1 && player->crouchfactor >= player->mo->CrouchScale)
 				{
 					P_CrouchMove(player, -1);
 				}
