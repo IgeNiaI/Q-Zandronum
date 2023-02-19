@@ -339,7 +339,10 @@ enum
 	APROP_WallClimbTics			= 97,
 	APROP_IsAirWallRunning		= 98,
 	APROP_AirWallRunTics		= 99,
-};	
+	APROP_AbsoluteSecondJump	= 110,
+	APROP_GroundSecondJump		= 111,
+	APROP_User4Jump				= 112,
+};
 
 // [Dusk] Enumeration for GetTeamProperty
 enum

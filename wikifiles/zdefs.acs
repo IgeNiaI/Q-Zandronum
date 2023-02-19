@@ -382,6 +382,11 @@
 #define APROP_Counter6      106
 #define APROP_Counter7      107
 
+// More Q-Zandronum stuff
+#define APROP_AbsoluteSecondJump	110
+#define APROP_GroundSecondJump		111
+#define APROP_User4Jump				112
+
 // Movement types
 #define MVTYPE_DOOM			0
 #define MVTYPE_VQ3			1

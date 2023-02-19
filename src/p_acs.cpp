@@ -4598,6 +4598,18 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 	case APROP_ElevatorJump:
 		if (value) actor->mvFlags |= MV_ELEVATORJUMP; else actor->mvFlags &= ~MV_ELEVATORJUMP;
 		break;
+		
+	case APROP_AbsoluteSecondJump:
+		if (value) actor->mvFlags |= MV_ABSOLUTESECONDJUMP; else actor->mvFlags &= ~MV_ABSOLUTESECONDJUMP;
+		break;
+
+	case APROP_GroundSecondJump:
+		if (value) actor->mvFlags |= MV_GROUNDSECONDJUMP; else actor->mvFlags &= ~MV_GROUNDSECONDJUMP;
+		break;
+
+	case APROP_User4Jump:
+		if (value) actor->mvFlags |= MV_USER4JUMP; else actor->mvFlags &= ~MV_USER4JUMP;
+		break;
 
 
 	// Player actor specific
@@ -4902,6 +4914,9 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_EdgeJump:				return !!(actor->mvFlags & MV_EDGEJUMP);
 	case APROP_Silent:					return !!(actor->mvFlags & MV_SILENT);
 	case APROP_ElevatorJump:			return !!(actor->mvFlags & MV_ELEVATORJUMP);
+	case APROP_AbsoluteSecondJump:		return !!(actor->mvFlags & MV_ABSOLUTESECONDJUMP);
+	case APROP_GroundSecondJump:		return !!(actor->mvFlags & MV_GROUNDSECONDJUMP);
+	case APROP_User4Jump:				return !!(actor->mvFlags & MV_USER4JUMP);
 
 	// Player actor specitic
 	case APROP_SpawnHealth:				return playerActor ? playerActor->MaxHealth								: actor->SpawnHealth();
@@ -5052,6 +5067,9 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_EdgeJump:
 		case APROP_Silent:
 		case APROP_ElevatorJump:
+		case APROP_AbsoluteSecondJump:
+		case APROP_GroundSecondJump:
+		case APROP_User4Jump:
 			return (GetActorProperty(tid, property, NULL, 0) == (!!value));
 
 		// Strings are covered by GetActorProperty, but they're fairly
