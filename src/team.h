@@ -60,15 +60,6 @@
 //*****************************************************************************
 //	DEFINES
 
-// [CW] Add to this when bumping 'MAX_TEAMS'.
-enum
-{
-	TEAM1_STARTMENUPOS = 2,
-	TEAM2_STARTMENUPOS = 10,
-	TEAM3_STARTMENUPOS = 18,
-	TEAM4_STARTMENUPOS = 26,
-};
-
 // [RC] Global constant for	team messages.
 #define TEAM_MESSAGE_Y_AXIS		0.135f
 #define TEAM_MESSAGE_Y_AXIS_SUB 0.195f

@@ -37,9 +37,7 @@
 
 #define TEAM_None 255
 
-#define MAX_TEAMS 4
-//	[CW] When bumping MAX_TEAMS don't forget to update other pieces of code.
-//	[CW] The code that needs to be changed is marked with: "[CW] Add to this when bumping 'MAX_TEAMS'."
+#define MAX_TEAMS 16
 
 #include "doomtype.h"
 // [BB] New #includes.
