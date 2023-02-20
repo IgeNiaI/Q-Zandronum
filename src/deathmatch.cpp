@@ -111,7 +111,7 @@ void DEATHMATCH_Tick( void )
 		if ( teamplay )
 		{
 			// Two players are here now, begin the countdown or warmup state
-			if ( TEAM_TeamsWithPlayersOn( ) > 1 && level.time >= TICRATE * 5 )
+			if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
 				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) )
@@ -130,7 +130,7 @@ void DEATHMATCH_Tick( void )
 		else
 		{
 			// Two players are here now, begin the countdown or warmup state
-			if ( GAME_CountActivePlayers( ) >= 2 && level.time >= TICRATE * 5 )
+			if ( GAME_CountActivePlayers( ) >= 2 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
 				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) )

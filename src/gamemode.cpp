@@ -574,6 +574,13 @@ ULONG GAMEMODE_GetCurrentFlags( void )
 
 //*****************************************************************************
 //
+bool GAMEMODE_IsNewMapStartMatchDelayOver( void )
+{
+	return ( NETWORK_GetState() != NETSTATE_SERVER ) || ( level.time >= TICRATE * 5 );
+}
+
+//*****************************************************************************
+//
 char *GAMEMODE_GetShortName( GAMEMODE_e GameMode )
 {
 	if ( GameMode >= NUM_GAMEMODES )

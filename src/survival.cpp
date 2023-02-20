@@ -118,7 +118,7 @@ void SURVIVAL_Tick( void )
 		}
 
 		// Someone is here! Begin the countdown.
-		if ( GAME_CountActivePlayers( ) > 0 && level.time >= TICRATE * 5 )
+		if ( GAME_CountActivePlayers( ) > 0 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 		{
 			if ( sv_survivalcountdowntime > 0 )
 				SURVIVAL_StartCountdown(( sv_survivalcountdowntime * TICRATE ) - 1 );

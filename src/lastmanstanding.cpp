@@ -115,7 +115,7 @@ void LASTMANSTANDING_Tick( void )
 		if ( lastmanstanding )
 		{
 			// Two players are here now, being the countdown!
-			if ( GAME_CountActivePlayers( ) >= 2 && level.time >= TICRATE * 5 )
+			if ( GAME_CountActivePlayers( ) >= 2 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				ULONG	ulIdx;
 				bool nowarmup = false;
@@ -147,7 +147,7 @@ void LASTMANSTANDING_Tick( void )
 
 		if ( teamlms )
 		{
-			if ( TEAM_TeamsWithPlayersOn( ) > 1 && level.time >= TICRATE * 5 )
+			if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
 				if ( sv_lmswarmup && TEAM_GetHighestWinCount() <= 0 )

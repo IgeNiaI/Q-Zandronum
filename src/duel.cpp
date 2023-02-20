@@ -110,7 +110,7 @@ void DUEL_Tick( void )
 		}
 
 		// Two players are here now, begin the countdown or warmup state
-		if ( DUEL_CountActiveDuelers( ) == 2 && level.time >= TICRATE * 5 )
+		if ( DUEL_CountActiveDuelers( ) == 2 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 		{
 			// Warmup only in non lobby maps
 			if ( sv_duelwarmup && !GAMEMODE_IsLobbyMap( ) )

@@ -683,7 +683,7 @@ void INVASION_Tick( void )
 		}
 
 		// A player is here! Begin the countdown!
-		if ( SERVER_CalcNumNonSpectatingPlayers( MAXPLAYERS ) >= 1 && level.time >= TICRATE * 5 )
+		if ( SERVER_CalcNumNonSpectatingPlayers( MAXPLAYERS ) >= 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 		{
 			if ( sv_invasioncountdowntime > 0 )
 				INVASION_StartFirstCountdown(( sv_invasioncountdowntime * TICRATE ) - 1 );
