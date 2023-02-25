@@ -4107,6 +4107,11 @@ void ServerCommands::MoveThing::Execute()
 			actor->PrevX = x;
 			actor->PrevY = y;
 			actor->PrevZ = z;
+
+			if ( actor == players[consoleplayer].camera )
+			{
+				R_ResetViewInterpolation();
+			}
 		}
 		else
 		{
@@ -4714,6 +4719,16 @@ void ServerCommands::TeleportThing::Execute()
 	actor->PrevY = y;
 	actor->PrevZ = z;
 
+	actor->serverX = x;
+	actor->serverY = y;
+	actor->serverZ = z;
+	actor->serverPosUpdated = true;
+	actor->MoveToServerPosition();
+
+	actor->serverVelX = momx;
+	actor->serverVelY = momy;
+	actor->serverVelZ = momz;
+
 	// Spawn a teleport fog at the destination.
 	if ( destfog )
 	{
@@ -4738,10 +4753,16 @@ void ServerCommands::TeleportThing::Execute()
 	{
 		actor->player->velx = momx;
 		actor->player->vely = momy;
+		actor->player->viewz = actor->z + actor->player->viewheight;
 
 		// [BB] If the server is teleporting us, don't let our prediction get messed up.
 		if ( actor == players[consoleplayer].mo )
 			CLIENT_AdjustPredictionToServerSideConsolePlayerMove( x, y, z );
+	}
+
+	if ( actor == players[consoleplayer].camera )
+	{
+		R_ResetViewInterpolation();
 	}
 
 	// Reset the thing's new reaction time.
