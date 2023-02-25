@@ -440,7 +440,7 @@ bool P_CheckKeys (AActor *owner, int keynum, bool remote)
 				int snd = S_FindSkinnedSound(owner, failsound[i]);
 				if (snd != 0)
 				{
-					S_Sound (owner, CHAN_VOICE, snd, 1, ATTN_NORM, true);	// [BB] Inform the clients.
+					S_Sound (owner, CHAN_VOICE, snd, 1, ATTN_NORM, true, NULL, true);	// [BB] Inform the clients.
 					break;
 				}
 			}
