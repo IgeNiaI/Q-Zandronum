@@ -1627,8 +1627,8 @@ void I_DoSelect (void)
 
     FD_ZERO(&fdset);
     FD_SET(g_NetworkSocket, &fdset);
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 1000000 / TICRATE;
     if (select (static_cast<int>(g_NetworkSocket)+1, &fdset, NULL, NULL, &timeout) == -1)
         return;
 */
@@ -1641,8 +1641,8 @@ void I_DoSelect (void)
     	FD_SET(0, &fdset);
 
     FD_SET(g_NetworkSocket, &fdset);
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 1000000 / TICRATE;
     if (select (static_cast<int>(g_NetworkSocket)+1, &fdset, NULL, NULL, &timeout) == -1)
         return;
 
