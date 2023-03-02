@@ -608,7 +608,8 @@ void R_InterpolateView (player_t *player, fixed_t frac, InterpolationViewer *ivi
 		( CLIENT_GetServerLagging( ) == false ) &&
 		( CLIENT_GetClientLagging( ) == false ) &&
 		( GAME_GetEndLevelDelay( ) == false ) &&
-		( ~level.flags2 & LEVEL2_FROZEN || player->timefreezer != 0 ))
+		( ~level.flags2 & LEVEL2_FROZEN || player->timefreezer != 0 ) &&
+		!cl_useskulltagmouse)
 	{
 		viewangle = iview->nviewangle + (LocalViewAngle & 0xFFFF0000);
 
