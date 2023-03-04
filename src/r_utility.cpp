@@ -59,6 +59,7 @@
 #include "sv_commands.h"
 #include "cl_main.h"
 #include "g_game.h"
+#include "cl_demo.h"
 
 
 // EXTERNAL DATA DECLARATIONS ----------------------------------------------
@@ -609,7 +610,8 @@ void R_InterpolateView (player_t *player, fixed_t frac, InterpolationViewer *ivi
 		( CLIENT_GetClientLagging( ) == false ) &&
 		( GAME_GetEndLevelDelay( ) == false ) &&
 		( ~level.flags2 & LEVEL2_FROZEN || player->timefreezer != 0 ) &&
-		!cl_useskulltagmouse)
+		!cl_useskulltagmouse
+		&& !CLIENTDEMO_IsPlaying())
 	{
 		viewangle = iview->nviewangle + (LocalViewAngle & 0xFFFF0000);
 
