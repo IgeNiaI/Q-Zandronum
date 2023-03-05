@@ -307,6 +307,7 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 	const AActor *pActor = (pPlayer->mo->flags2 & MF2_ONMOBJ) ? P_CheckOnmobj ( pPlayer->mo ) : NULL;
 	if ( pActor == NULL ) {
 		g_bSavedOnFloor[tickIndex] = pPlayer->mo->z == pPlayer->mo->floorz;
+		g_SavedFloorZ[tickIndex] = pPlayer->mo->floorz;
 	}
 	else
 	{
@@ -315,9 +316,9 @@ static void client_predict_SaveOnGroundStatus( const player_t *pPlayer, const UL
 	}
 
 	// [BB] Remember whether the player was standing on another actor.
-	g_bSavedOnMobj[Tick % CLIENT_PREDICTION_TICS] = !!(pPlayer->mo->flags2 & MF2_ONMOBJ);
+	g_bSavedOnMobj[tickIndex] = !!(pPlayer->mo->flags2 & MF2_ONMOBJ);
 	// The "onground" status is not necessarily the same as g_bSavedOnFloor.
-	g_bSavedOnGround[Tick % CLIENT_PREDICTION_TICS] = pPlayer->onground;
+	g_bSavedOnGround[tickIndex] = pPlayer->onground;
 }
 
 //*****************************************************************************
