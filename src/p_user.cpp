@@ -5476,7 +5476,7 @@ void P_PlayerThink (player_t *player)
 			tempFutureThrust->tic--;
 			if ( tempFutureThrust->tic <= 0 )
 			{
-				if ( player->FutureThrust->thing != NULL && !( player->FutureThrust->thing->ObjectFlags & OF_EuthanizeMe ) )
+				if ( player->FutureThrust != NULL && player->FutureThrust->thing != NULL && !( player->FutureThrust->thing->ObjectFlags & OF_EuthanizeMe ) )
 				{
 					if (player->FutureThrust->overrideVelocity)
 					{
