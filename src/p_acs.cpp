@@ -1259,14 +1259,20 @@ static void ClearInventory (AActor *activator)
 				if (actor->player->PendingWeapon != WP_NOCHANGE)
 				{
 					actor->player->PendingWeapon = actor->player->ReadyWeapon;
-					SERVERCOMMANDS_SetPlayerPendingWeapon(ULONG(actor->player - players));
+					if (GetNetworkReplicationFlags() & NETREP_SKIPOWNER)
+						SERVERCOMMANDS_SetPlayerPendingWeapon(ULONG(actor->player - players), actor->player - players, SVCF_SKIPTHISCLIENT);
+					else
+						SERVERCOMMANDS_SetPlayerPendingWeapon(ULONG(actor->player - players));
 					actor->player->PendingWeapon = savedPendingWeap;
 				}
 			}
 			else
 			{
 				actor->player->PendingWeapon = savedPendingWeap;
-				SERVERCOMMANDS_SetPlayerPendingWeapon(ULONG(actor->player - players));
+				if (GetNetworkReplicationFlags() & NETREP_SKIPOWNER)
+					SERVERCOMMANDS_SetPlayerPendingWeapon(ULONG(actor->player - players), actor->player - players, SVCF_SKIPTHISCLIENT);
+				else
+					SERVERCOMMANDS_SetPlayerPendingWeapon(ULONG(actor->player - players));
 			}
 		}
 		else
