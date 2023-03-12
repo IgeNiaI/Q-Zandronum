@@ -48,6 +48,7 @@
 #include "g_level.h"
 #include "r_state.h"
 #include "d_player.h"
+#include "cl_demo.h"
 //#include "resources/voxels.h"
 //#include "gl/gl_intern.h"
 
@@ -62,6 +63,8 @@
 
 // [BB] New #includes. 
 #include "r_main.h"
+
+float pauseTimeOffset = .0f;
 
 static inline float GetTimeFloat()
 {
@@ -807,7 +810,19 @@ void gl_RenderModel(GLSprite * spr, int cm)
 
 	if( smf->flags & MDL_ROTATING )
 	{
-		const float time = smf->rotationSpeed*GetTimeFloat()/200.f;
+		float timeFloat;
+		if (paused || CLIENTDEMO_IsPaused())
+		{
+			if (pauseTimeOffset == .0f)
+				pauseTimeOffset = GetTimeFloat();
+			timeFloat = pauseTimeOffset;
+		}
+		else
+		{
+			pauseTimeOffset = .0f;
+			timeFloat = GetTimeFloat();
+		}
+		const float time = smf->rotationSpeed* timeFloat /200.f;
 		rotateOffset = float((time - xs_FloorToInt(time)) *360.f );
 	}
 
