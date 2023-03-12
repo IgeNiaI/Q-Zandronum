@@ -1741,7 +1741,7 @@ void TryRunTics (void)
 
 	// If paused, do not eat more CPU time than we need, because it
 	// will all be wasted anyway.
-	bool doWait = cl_capfps || r_NoInterpolate /*|| netgame*/;
+	bool doWait = cl_capfps/* || r_NoInterpolate /*|| netgame*/;
 
 	// get real tics
 	if (doWait)

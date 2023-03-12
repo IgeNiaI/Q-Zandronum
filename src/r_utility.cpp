@@ -129,7 +129,8 @@ fixed_t 		viewsin, viewtansin;
 
 AActor			*camera;	// [RH] camera to draw from. doesn't have to be a player
 
-fixed_t			r_TicFrac;			// [RH] Fractional tic to render
+fixed_t			r_ViewTicFrac;		// [RH] Fractional tic to render view
+fixed_t			r_TicFrac;			// [RH] Fractional tic to render everything else
 DWORD			r_FrameTime;		// [RH] Time this frame started drawing (in ms)
 bool			r_NoInterpolate;
 bool			r_showviewer;
@@ -814,19 +815,20 @@ void R_SetupFrame (AActor *actor)
 	}
 
 	iview->nviewangle = camera->angle;
-	if (iview->otic == -1 || r_NoInterpolate)
+	if (iview->otic == -1/* || r_NoInterpolate*/)
 	{
 		R_ResetViewInterpolation ();
 		iview->otic = nowtic;
 	}
 
 	r_TicFrac = I_GetTimeFrac (&r_FrameTime);
+	r_ViewTicFrac = r_TicFrac;
 	if (cl_capfps || r_NoInterpolate)
 	{
 		r_TicFrac = FRACUNIT;
 	}
 
-	R_InterpolateView (player, r_TicFrac, iview);
+	R_InterpolateView (player, r_ViewTicFrac, iview);
 
 #ifdef TEST_X
 	viewx = TEST_X;

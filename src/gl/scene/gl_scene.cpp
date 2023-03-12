@@ -1037,7 +1037,7 @@ void FGLRenderer::RenderView (player_t* player)
 	ResetProfilingData();
 
 	// Get this before everything else
-	if (cl_capfps || r_NoInterpolate) r_TicFrac = FRACUNIT;
+	if (cl_capfps/* || r_NoInterpolate*/) r_TicFrac = FRACUNIT;
 	else r_TicFrac = I_GetTimeFrac (&r_FrameTime);
 	gl_frameMS = I_MSTime();
 
