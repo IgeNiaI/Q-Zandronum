@@ -44,6 +44,7 @@
 #include "w_wad.h"
 #include "g_level.h"
 #include "farchive.h"
+#include "cl_demo.h"
 
 // MACROS ------------------------------------------------------------------
 
@@ -871,6 +872,9 @@ void FTextureManager::SetTranslation (FTextureID fromtexnum, FTextureID totexnum
 
 void FTextureManager::UpdateAnimations (DWORD mstime)
 {
+	if (paused || CLIENTDEMO_IsPaused())
+		return;
+
 	for (unsigned int j = 0; j < mAnimations.Size(); ++j)
 	{
 		FAnimDef *anim = mAnimations[j];

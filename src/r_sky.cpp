@@ -34,6 +34,7 @@
 #include "r_utility.h"
 #include "v_text.h"
 #include "gi.h"
+#include "cl_demo.h"
 
 //
 // sky mapping
@@ -146,6 +147,9 @@ void R_InitSkyMap ()
 
 void R_UpdateSky (DWORD mstime)
 {
+	if (paused || CLIENTDEMO_IsPaused())
+		return;
+
 	// Scroll the sky
 	double ms = (double)mstime * FRACUNIT;
 	sky1pos = ms * level.skyspeed1;

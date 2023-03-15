@@ -38,6 +38,7 @@
 #include "templates.h"
 #include "r_utility.h"
 #include "textures/textures.h"
+#include "cl_demo.h"
 
 
 FWarpTexture::FWarpTexture (FTexture *source)
@@ -121,6 +122,9 @@ const BYTE *FWarpTexture::GetColumn (unsigned int column, const Span **spans_out
 
 void FWarpTexture::MakeTexture (DWORD time)
 {
+	if (paused || CLIENTDEMO_IsPaused())
+		return;
+
 	const BYTE *otherpix = SourcePic->GetPixels ();
 
 	if (Pixels == NULL)
@@ -178,6 +182,9 @@ FWarp2Texture::FWarp2Texture (FTexture *source)
 
 void FWarp2Texture::MakeTexture (DWORD time)
 {
+	if (paused || CLIENTDEMO_IsPaused())
+		return;
+
 	const BYTE *otherpix = SourcePic->GetPixels ();
 
 	if (Pixels == NULL)

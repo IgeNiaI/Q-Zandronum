@@ -47,6 +47,7 @@
 #include "templates.h"
 #include "sc_man.h"
 #include "colormatcher.h"
+#include "cl_demo.h"
 
 //#include "gl/gl_intern.h"
 
@@ -194,6 +195,9 @@ void FGLTexture::Clean(bool all)
 
 BYTE *FGLTexture::WarpBuffer(BYTE *buffer, int Width, int Height, int warp)
 {
+	if (paused || CLIENTDEMO_IsPaused())
+		return buffer;
+
 	if (Width > 256 || Height > 256) return buffer;
 
 	DWORD *in = (DWORD*)buffer;

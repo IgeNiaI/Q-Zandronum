@@ -55,6 +55,7 @@
 #include "r_utility.h"
 #include "a_hexenglobal.h"
 #include "p_local.h"
+#include "cl_demo.h"
 #include "gl/gl_functions.h"
 
 #include "gl/system/gl_interface.h"
@@ -895,9 +896,12 @@ sector_t * FGLRenderer::RenderViewpoint (AActor * camera, GL_IRECT * bounds, flo
 	SetViewArea (camera);
 	mAngles.Pitch = clamp<float>((float)((double)(int)(viewpitch))/ANGLE_1, -90, 90);
 
-	// Scroll the sky
-	mSky1Pos = (float)fmod(gl_frameMS * level.skyspeed1, 1024.f) * 90.f/256.f;
-	mSky2Pos = (float)fmod(gl_frameMS * level.skyspeed2, 1024.f) * 90.f/256.f;
+	if (!paused && !CLIENTDEMO_IsPaused())
+	{
+		// Scroll the sky
+		mSky1Pos = (float)fmod(gl_frameMS * level.skyspeed1, 1024.f) * 90.f/256.f;
+		mSky2Pos = (float)fmod(gl_frameMS * level.skyspeed2, 1024.f) * 90.f/256.f;
+	}
 
 
 
