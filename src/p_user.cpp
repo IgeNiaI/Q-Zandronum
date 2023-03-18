@@ -3769,65 +3769,19 @@ void P_CheckForElevatorJump(APlayerPawn* mo)
 
 		fixed_t elevatorSpeed = 0;
 
-		if ( is3dSector )
+		if ( CLIENT_PREDICT_IsPredicting() )
 		{
-			if ( sector->ceilingdata )
-			{
-				if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)))
-				{
-					DDoor *door = barrier_cast<DDoor *>(sector->ceilingdata);
-					if ( door->GetDirection() == 1 )
-						elevatorSpeed = door->GetSpeed();
-				}
-				else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DCeiling)))
-				{
-					DCeiling *ceiling = barrier_cast<DCeiling *>(sector->ceilingdata);
-					if ( ceiling->GetDirection() == 1 )
-						elevatorSpeed = ceiling->GetSpeed();
-				}
-				else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DElevator)))
-				{
-					DElevator *elevator = barrier_cast<DElevator *>(sector->ceilingdata);
-					if ( elevator->GetDirection() == 1 )
-						elevatorSpeed = elevator->GetSpeed();
-				}
-				else if (sector->ceilingdata->IsKindOf(RUNTIME_CLASS(DPillar)))
-				{
-					DPillar *pillar = barrier_cast<DPillar *>(sector->ceilingdata);
-					if ( pillar->GetType() == DPillar::pillarOpen )
-						elevatorSpeed = pillar->GetCeilingSpeed();
-				}
-			}
+			if (is3dSector)
+				elevatorSpeed = sector->ceilingplane.movingSpeed;
+			else
+				elevatorSpeed = sector->floorplane.movingSpeed;
 		}
 		else
 		{
-			if ( sector->floordata )
-			{
-				if ( sector->floordata->IsKindOf(RUNTIME_CLASS(DFloor) ) )
-				{
-					DFloor *floor = barrier_cast<DFloor *>(sector->floordata);
-					if ( floor->GetDirection() == 1 )
-						elevatorSpeed = floor->GetSpeed();
-				}
-				else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DPlat)))
-				{
-					DPlat *plat = barrier_cast<DPlat *>(sector->floordata);
-					if ( plat->GetStatus() == DPlat::EPlatState::up )
-						elevatorSpeed = plat->GetSpeed();
-				}
-				else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DElevator)))
-				{
-					DElevator *elevator = barrier_cast<DElevator *>(sector->floordata);
-					if ( elevator->GetDirection() == 1 )
-						elevatorSpeed = elevator->GetSpeed();
-				}
-				else if (sector->floordata->IsKindOf(RUNTIME_CLASS(DPillar)))
-				{
-					DPillar *pillar = barrier_cast<DPillar *>(sector->floordata);
-					if ( pillar->GetType() == DPillar::pillarBuild )
-						elevatorSpeed = pillar->GetFloorSpeed();
-				}
-			}
+			if (is3dSector)
+				elevatorSpeed = sector->GetCeilingMovingSpeed();
+			else
+				elevatorSpeed = sector->GetFloorMovingSpeed();
 		}
 
 		if ( elevatorSpeed > 0 )

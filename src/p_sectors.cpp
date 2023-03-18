@@ -867,6 +867,90 @@ sector_t *sector_t::GetHeightSec() const
 	return heightsec;
 }
 
+fixed_t sector_t::GetFloorMovingSpeed()
+{
+	if ( floordata )
+	{
+		if ( floordata->IsKindOf(RUNTIME_CLASS(DFloor) ) )
+		{
+			DFloor *floor = barrier_cast<DFloor *>(floordata);
+			switch ( floor->GetDirection() )
+			{
+			case 1: return floor->GetSpeed();
+			case -1: return -floor->GetSpeed();
+			}
+		}
+		else if ( floordata->IsKindOf(RUNTIME_CLASS(DPlat)) )
+		{
+			DPlat *plat = barrier_cast<DPlat *>(floordata);
+			switch (plat->GetStatus())
+			{
+			case DPlat::EPlatState::up: return plat->GetSpeed();
+			case DPlat::EPlatState::down: return -plat->GetSpeed();
+			}
+		}
+		else if ( floordata->IsKindOf(RUNTIME_CLASS(DElevator)) )
+		{
+			DElevator *elevator = barrier_cast<DElevator *>(floordata);
+			switch (elevator->GetDirection())
+			{
+			case 1: return elevator->GetSpeed();
+			case -1: return -elevator->GetSpeed();
+			}
+		}
+		else if ( floordata->IsKindOf(RUNTIME_CLASS(DPillar)) )
+		{
+			DPillar *pillar = barrier_cast<DPillar *>(floordata);
+			if ( pillar->GetType() == DPillar::pillarBuild )
+				return pillar->GetFloorSpeed();
+		}
+	}
+
+	return 0;
+}
+
+fixed_t sector_t::GetCeilingMovingSpeed()
+{
+	if ( ceilingdata )
+	{
+		if ( ceilingdata->IsKindOf(RUNTIME_CLASS(DDoor)) )
+		{
+			DDoor *door = barrier_cast<DDoor *>(ceilingdata);
+			switch (door->GetDirection())
+			{
+			case 1: return door->GetSpeed();
+			case -1: return -door->GetSpeed();
+			}
+		}
+		else if ( ceilingdata->IsKindOf(RUNTIME_CLASS(DCeiling)) )
+		{
+			DCeiling *ceiling = barrier_cast<DCeiling *>(ceilingdata);
+			switch (ceiling->GetDirection())
+			{
+			case 1: return ceiling->GetSpeed();
+			case -1: return -ceiling->GetSpeed();
+			}
+		}
+		else if ( ceilingdata->IsKindOf(RUNTIME_CLASS(DElevator)) )
+		{
+			DElevator *elevator = barrier_cast<DElevator *>(ceilingdata);
+			switch (elevator->GetDirection())
+			{
+			case 1: return elevator->GetSpeed();
+			case -1: return -elevator->GetSpeed();
+			}
+		}
+		else if ( ceilingdata->IsKindOf(RUNTIME_CLASS(DPillar)) )
+		{
+			DPillar *pillar = barrier_cast<DPillar *>(ceilingdata);
+			if ( pillar->GetType() == DPillar::pillarOpen )
+				return pillar->GetCeilingSpeed();
+		}
+	}
+
+	return 0;
+}
+
 
 bool secplane_t::CopyPlaneIfValid (secplane_t *dest, const secplane_t *opp) const
 {

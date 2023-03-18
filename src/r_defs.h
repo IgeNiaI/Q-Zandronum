@@ -251,6 +251,8 @@ struct secplane_t
 	fixed_t		unlaggedD[UNLAGGEDTICS];
 	fixed_t		predictD[CLIENT_PREDICTION_TICS];
 	fixed_t		restoreD;
+	fixed_t		predictMovingSpeed[CLIENT_PREDICTION_TICS]; // used to predict Elevator Jump properly
+	fixed_t		movingSpeed;
 
 	// Returns < 0 : behind; == 0 : on; > 0 : in front
 	int PointOnSide (fixed_t x, fixed_t y, fixed_t z) const
@@ -499,6 +501,8 @@ struct sector_t
 	int GetFloorLight () const;
 	int GetCeilingLight () const;
 	sector_t *GetHeightSec() const;
+	fixed_t GetFloorMovingSpeed ();
+	fixed_t GetCeilingMovingSpeed ();
 
 	DInterpolation *SetInterpolation(int position, bool attach);
 	void StopInterpolation(int position);

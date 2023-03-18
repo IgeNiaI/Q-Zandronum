@@ -393,6 +393,8 @@ static void client_predict_BeginPrediction( player_t *pPlayer )
 	{
 		sectors[i].floorplane.predictD[g_ulGameTick % CLIENT_PREDICTION_TICS] = sectors[i].floorplane.d;
 		sectors[i].ceilingplane.predictD[g_ulGameTick % CLIENT_PREDICTION_TICS] = sectors[i].ceilingplane.d;
+		sectors[i].floorplane.predictMovingSpeed[g_ulGameTick % CLIENT_PREDICTION_TICS] = sectors[i].GetFloorMovingSpeed();
+		sectors[i].ceilingplane.predictMovingSpeed[g_ulGameTick % CLIENT_PREDICTION_TICS] = sectors[i].GetCeilingMovingSpeed();
 	}
 
 	// Record the PolyActions
@@ -477,6 +479,8 @@ static void client_predict_DoPrediction( player_t *pPlayer, ULONG ulTicks )
 		{
 			sectors[i].floorplane.d = sectors[i].floorplane.predictD[lTick % CLIENT_PREDICTION_TICS];
 			sectors[i].ceilingplane.d = sectors[i].ceilingplane.predictD[lTick % CLIENT_PREDICTION_TICS];
+			sectors[i].floorplane.movingSpeed = sectors[i].floorplane.predictMovingSpeed[lTick % CLIENT_PREDICTION_TICS];
+			sectors[i].ceilingplane.movingSpeed = sectors[i].ceilingplane.predictMovingSpeed[lTick % CLIENT_PREDICTION_TICS];
 		}
 
 		//reconcile the PolyActions
@@ -593,6 +597,8 @@ static void client_predict_EndPrediction( player_t *pPlayer )
 	{
 		sectors[i].floorplane.d = sectors[i].floorplane.predictD[g_ulGameTick % CLIENT_PREDICTION_TICS];
 		sectors[i].ceilingplane.d = sectors[i].ceilingplane.predictD[g_ulGameTick % CLIENT_PREDICTION_TICS];
+		sectors[i].floorplane.movingSpeed = sectors[i].floorplane.predictMovingSpeed[g_ulGameTick % CLIENT_PREDICTION_TICS];
+		sectors[i].ceilingplane.movingSpeed = sectors[i].ceilingplane.predictMovingSpeed[g_ulGameTick % CLIENT_PREDICTION_TICS];
 	}
 
 	//reconcile the PolyActions
