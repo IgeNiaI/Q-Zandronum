@@ -1022,6 +1022,14 @@ CCMD (closemenu)
 	M_ClearMenus();
 }
 
+CCMD (upmenu)
+{
+	if (DMenu::CurrentMenu != NULL)
+	{
+		DMenu::CurrentMenu->Close();
+	}
+}
+
 //
 //		Toggle messages on/off
 //
