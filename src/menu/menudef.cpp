@@ -188,7 +188,7 @@ static bool CheckSkipOptionBlock(FScanner &sc)
 //
 //=============================================================================
 
-static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
+static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc, int insertIndex)
 {
 	sc.MustGetStringName("{");
 	while (!sc.CheckString("}"))
@@ -203,7 +203,7 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			if (!CheckSkipGameBlock(sc))
 			{
 				// recursively parse sub-block
-				ParseListMenuBody(sc, desc);
+				ParseListMenuBody(sc, desc, insertIndex);
 			}
 		}
 		else if (sc.Compare("ifoption"))
@@ -211,7 +211,7 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			if (!CheckSkipOptionBlock(sc))
 			{
 				// recursively parse sub-block
-				ParseListMenuBody(sc, desc);
+				ParseListMenuBody(sc, desc, insertIndex);
 			}
 		}
 		else if (sc.Compare("Class"))
@@ -273,7 +273,13 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
 
 			FListMenuItem *it = new FListMenuItemStaticPatch(x, y, tex, centered);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("StaticText") || sc.Compare("StaticTextCentered"))
 		{
@@ -286,7 +292,13 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FListMenuItem *it = new FListMenuItemStaticText(x, y, sc.String, desc->mFont, desc->mFontColor, centered);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("PatchItem"))
 		{
@@ -306,7 +318,13 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			}
 
 			FListMenuItem *it = new FListMenuItemPatch(desc->mXpos, desc->mYpos, desc->mLinespacing, hotkey, tex, action, param);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 			desc->mYpos += desc->mLinespacing;
 			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size()-1;
 		}
@@ -328,7 +346,13 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			}
 
 			FListMenuItem *it = new FListMenuItemText(desc->mXpos, desc->mYpos, desc->mLinespacing, hotkey, text, desc->mFont, desc->mFontColor, desc->mFontColor2, action, param);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 			desc->mYpos += desc->mLinespacing;
 			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size()-1;
 
@@ -385,7 +409,13 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 				}
 			}
 			FListMenuItemPlayerDisplay *it = new FListMenuItemPlayerDisplay(desc, x, y, c1, c2, noportrait, action);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("PlayerNameBox"))
 		{
@@ -397,7 +427,13 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FListMenuItem *it = new FPlayerNameBox(desc->mXpos, desc->mYpos, desc->mLinespacing, ofs, text, desc->mFont, desc->mFontColor, sc.String);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 			desc->mYpos += desc->mLinespacing;
 			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size()-1;
 		}
@@ -415,7 +451,13 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 				values = sc.String;
 			}
 			FListMenuItem *it = new FValueTextItem(desc->mXpos, desc->mYpos, desc->mLinespacing, text, desc->mFont, desc->mFontColor, desc->mFontColor2, action, values);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 			desc->mYpos += desc->mLinespacing;
 			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size()-1;
 		}
@@ -436,7 +478,13 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			sc.MustGetNumber();
 			int step = sc.Number;
 			FListMenuItem *it = new FSliderItem(desc->mXpos, desc->mYpos, desc->mLinespacing, text, desc->mFont, desc->mFontColor, action, min, max, step);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 			desc->mYpos += desc->mLinespacing;
 			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size()-1;
 		}
@@ -510,9 +558,69 @@ static void ParseListMenu(FScanner &sc)
 	desc->mWRight = 0;
 	desc->mCenter = false;
 
-	ParseListMenuBody(sc, desc);
+	ParseListMenuBody(sc, desc, -1);
 	bool scratch = ReplaceMenu(sc, desc);
 	if (scratch) delete desc;
+}
+
+//=============================================================================
+//
+// [Player701] Common function for figuring out where to insert items
+// for AddListMenu
+//
+//=============================================================================
+
+static int GetInsertListIndex(FScanner& sc, FListMenuDescriptor* desc)
+{
+	bool before = sc.CheckString("BEFORE");
+	bool after = sc.CheckString("AFTER");
+
+	int insertIndex = -1;
+
+	if (before || after)
+	{
+		// Find an existing menu item to use as insertion point
+		sc.MustGetString();
+
+		int n = desc->mItems.Size();
+		for (int i = 0; i < n; i++)
+		{
+			auto item = desc->mItems[i];
+
+			if (strcmp(item->GetAction(0).GetChars(), sc.String) == 0)
+			{
+				insertIndex = before ? i : i + 1;
+				break;
+			}
+		}
+
+		// Inserting after the last item is the same as inserting at the end
+		if (insertIndex == n) insertIndex = -1;
+
+		// Don't error out if we haven't found a suitable item
+		// to avoid backwards compatibility issues.
+	}
+
+	return insertIndex;
+}
+
+//=============================================================================
+//
+// [Player701] Allow extending list menus
+//
+//=============================================================================
+
+static void ParseAddListMenu(FScanner& sc)
+{
+	sc.MustGetString();
+
+	FMenuDescriptor** pOld = MenuDescriptors.CheckKey(sc.String);
+	if (pOld == nullptr || *pOld == nullptr || (*pOld)->mType != MDESC_ListMenu)
+	{
+		sc.ScriptError("%s is not a list menu that can be extended", sc.String);
+		return;
+	}
+	ParseListMenuBody(sc, (FListMenuDescriptor*)(*pOld), GetInsertListIndex(sc, (FListMenuDescriptor*)(*pOld)));
 }
 
 //=============================================================================
@@ -623,7 +731,7 @@ static void ParseOptionSettings(FScanner &sc)
 //
 //=============================================================================
 
-static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
+static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc, int insertIndex)
 {
 	sc.MustGetStringName("{");
 	while (!sc.CheckString("}"))
@@ -634,7 +742,7 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			if (!CheckSkipGameBlock(sc))
 			{
 				// recursively parse sub-block
-				ParseOptionMenuBody(sc, desc);
+				ParseOptionMenuBody(sc, desc, insertIndex);
 			}
 		}
 		else if (sc.Compare("ifoption"))
@@ -642,7 +750,7 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			if (!CheckSkipOptionBlock(sc))
 			{
 				// recursively parse sub-block
-				ParseOptionMenuBody(sc, desc);
+				ParseOptionMenuBody(sc, desc, insertIndex);
 			}
 		}
 		else if (sc.Compare("Class"))
@@ -687,7 +795,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FOptionMenuItem *it = new FOptionMenuItemSubmenu(label, sc.String);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("Option"))
 		{
@@ -712,7 +826,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 				}
 			}
 			FOptionMenuItem *it = new FOptionMenuItemOption(label, cvar, values, check, center);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("Command"))
 		{
@@ -721,7 +841,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FOptionMenuItem *it = new FOptionMenuItemCommand(label, sc.String);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("SafeCommand"))
 		{
@@ -730,7 +856,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FOptionMenuItem *it = new FOptionMenuItemSafeCommand(label, sc.String);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("Control") || sc.Compare("MapControl"))
 		{
@@ -740,7 +872,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FOptionMenuItem *it = new FOptionMenuItemControl(label, sc.String, map? &AutomapBindings : &Bindings);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("ColorPicker"))
 		{
@@ -749,7 +887,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FOptionMenuItem *it = new FOptionMenuItemColorPicker(label, sc.String);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("StaticText"))
 		{
@@ -762,7 +906,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 				cr = !!sc.Number;
 			}
 			FOptionMenuItem *it = new FOptionMenuItemStaticText(label, cr);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("StaticTextSwitchable"))
 		{
@@ -781,7 +931,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 				cr = !!sc.Number;
 			}
 			FOptionMenuItem *it = new FOptionMenuItemStaticTextSwitchable(label, label2, action, cr);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("Slider"))
 		{
@@ -806,13 +962,25 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 				showvalue = sc.Number;
 			}
 			FOptionMenuItem *it = new FOptionMenuSliderCVar(text, action, min, max, step, showvalue);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		else if (sc.Compare("screenresolution"))
 		{
 			sc.MustGetString();
 			FOptionMenuItem *it = new FOptionMenuScreenResolutionLine(sc.String);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		// [TP] -- Text input widget
 		else if ( sc.Compare( "TextField" ))
@@ -831,7 +999,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			}
 
 			FOptionMenuItem* it = new FOptionMenuTextField( label, cvar, check );
-			desc->mItems.Push( it );
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		// [TP] -- Number input widget
 		else if ( sc.Compare( "NumberField" ))
@@ -869,7 +1043,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 
 			FOptionMenuItem* it = new FOptionMenuNumberField( label, cvar,
 				minimum, maximum, step, check );
-			desc->mItems.Push( it );
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		// [TP] -- Player input widget
 		else if ( sc.Compare( "PlayerField" ))
@@ -897,19 +1077,37 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			}
 
 			FOptionMenuItem* it = new FOptionMenuPlayerField ( label, cvar, allowBots, allowSelf );
-			desc->mItems.Push( it );
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		// [TP] -- Team chooser for the join menu
 		else if ( sc.Compare( "JoinMenuTeamOption" ))
 		{
 			FOptionMenuItem *it = new FOptionMenuTeamField;
-			desc->mItems.Push( it );
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		// [TP] Player class chooser for the join menu
 		else if ( sc.Compare( "JoinMenuPlayerClassOption" ))
 		{
 			FOptionMenuItem *it = new FOptionMenuPlayerClassField;
-			desc->mItems.Push( it );
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		// [TP] Flags the menu as multiplayer-only
 		else if ( sc.Compare ( "NetgameOnly" ))
@@ -921,7 +1119,13 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 		{
 			sc.MustGetNumber();
 			FOptionMenuItem *it = new FOptionMenuServerBrowserLine(sc.Number);
-			desc->mItems.Push(it);
+			if (insertIndex == -1)
+				desc->mItems.Push(it);
+			else
+			{
+				desc->mItems.Insert(insertIndex, it);
+				insertIndex++;
+			}
 		}
 		// [TP] --
 		else
@@ -953,10 +1157,71 @@ static void ParseOptionMenu(FScanner &sc)
 	desc->mDontDim =  DefaultOptionMenuSettings.mDontDim;
 	desc->mNetgameOnly = false; // [TP]
 
-	ParseOptionMenuBody(sc, desc);
+	ParseOptionMenuBody(sc, desc, -1);
 	bool scratch = ReplaceMenu(sc, desc);
 	if (desc->mIndent == 0) desc->CalcIndent();
 	if (scratch) delete desc;
+}
+
+
+//=============================================================================
+//
+// [Player701] Common function for figuring out where to insert items
+// for AddOptionMenu
+//
+//=============================================================================
+
+static int GetInsertOptionIndex(FScanner& sc, FOptionMenuDescriptor* desc)
+{
+	bool before = sc.CheckString("BEFORE");
+	bool after = sc.CheckString("AFTER");
+
+	int insertIndex = -1;
+
+	if (before || after)
+	{
+		// Find an existing menu item to use as insertion point
+		sc.MustGetString();
+
+		int n = desc->mItems.Size();
+		for (int i = 0; i < n; i++)
+		{
+			auto item = desc->mItems[i];
+
+			if (strcmp(item->GetAction(0).GetChars(), sc.String) == 0)
+			{
+				insertIndex = before ? i : i + 1;
+				break;
+			}
+		}
+
+		// Inserting after the last item is the same as inserting at the end
+		if (insertIndex == n) insertIndex = -1;
+
+		// Don't error out if we haven't found a suitable item
+		// to avoid backwards compatibility issues.
+	}
+
+	return insertIndex;
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static void ParseAddOptionMenu(FScanner& sc)
+{
+	sc.MustGetString();
+
+	FMenuDescriptor** pOld = MenuDescriptors.CheckKey(sc.String);
+	if (pOld == nullptr || *pOld == nullptr || (*pOld)->mType != MDESC_OptionsMenu)
+	{
+		sc.ScriptError("%s is not an option menu that can be extended", sc.String);
+		return;
+	}
+	ParseOptionMenuBody(sc, (FOptionMenuDescriptor*)(*pOld), GetInsertOptionIndex(sc, (FOptionMenuDescriptor*)(*pOld)));
 }
 
 
@@ -995,11 +1260,15 @@ void M_ParseMenuDefs()
 			}
 			else if (sc.Compare("DEFAULTLISTMENU"))
 			{
-				ParseListMenuBody(sc, &DefaultListMenuSettings);
+				ParseListMenuBody(sc, &DefaultListMenuSettings, -1);
 				if (DefaultListMenuSettings.mItems.Size() > 0)
 				{
 					I_FatalError("You cannot add menu items to the menu default settings.");
 				}
+			}
+			else if (sc.Compare("ADDLISTMENU"))
+			{
+				ParseAddListMenu(sc);
 			}
 			else if (sc.Compare("OPTIONVALUE"))
 			{
@@ -1017,9 +1286,13 @@ void M_ParseMenuDefs()
 			{
 				ParseOptionMenu(sc);
 			}
+			else if (sc.Compare("ADDOPTIONMENU"))
+			{
+				ParseAddOptionMenu(sc);
+			}
 			else if (sc.Compare("DEFAULTOPTIONMENU"))
 			{
-				ParseOptionMenuBody(sc, &DefaultOptionMenuSettings);
+				ParseOptionMenuBody(sc, &DefaultOptionMenuSettings, -1);
 				if (DefaultOptionMenuSettings.mItems.Size() > 0)
 				{
 					I_FatalError("You cannot add menu items to the menu default settings.");
