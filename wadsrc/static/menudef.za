@@ -145,6 +145,7 @@ OptionMenu ZA_SkirmishMenu
 	Indent 153
 	Title		"SKIRMISH"
 	Option		"Level",				"menu_skirmishlevel",			"ZA_Levels"
+	Command		"Random Level",			"setskirmishlevel random"
 	Option		"Game Mode",			"menu_skirmishgamemode",		"ZA_Gamemode"
 	Option		"Modifier",				"menu_skirmishmodifier",		"ZA_Modifier"
 	StaticText	" "
@@ -310,6 +311,7 @@ OptionMenu ZA_CallMapVote
 	Title		"CHANGE MAP"
 
 	Option		"Map",					"menu_callvotemap",				"ZA_Levels"
+	Command		"Random Map",			"setcallvotemap random"
 	Option		"Intermission",			"menu_callvoteintermission",	"YesNo"
 	StaticText	" "
 	TextField	"Reason for change",	"menu_callvotereason"

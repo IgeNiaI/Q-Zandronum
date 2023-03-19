@@ -75,7 +75,10 @@
 #include "invasion.h"
 #include "lastmanstanding.h"
 #include "i_system.h"
+#include "doomerrors.h"
 #include <cl_commands.h>
+
+static FRandom pr_randommapoption("RNDMapOpt");
 
 static void M_StartSkirmishGame();
 static void M_ClearBotSlots();
@@ -214,6 +217,88 @@ CVAR ( Int, menu_skirmishwavelimit, 0, CVAR_ARCHIVE )
 CUSTOM_CVAR ( Int, menu_textsizescalar, 0, CVAR_NOINITCALL )
 {
 	M_TextSizeScalarChanged();
+}
+
+static int GetLevelNumFromName(char* mapname)
+{
+	if (stricmp(mapname, "random") == 0)
+	{
+		for (int i = 0; i < 100; i++)
+		{
+			// Cycle until we find a valid map or up to 100 times
+			int levelnum = pr_randommapoption() % wadlevelinfos.Size();
+			MapData* mdata = NULL;
+			try
+			{
+				if ((mdata = P_OpenMapData(wadlevelinfos[levelnum].mapname, false)) != NULL)
+				{
+					delete mdata;
+					return levelnum;
+				}
+			}
+			catch (CRecoverableError&) {}
+			delete mdata;
+		}
+	}
+	else
+	{
+		for (unsigned int i = 0; i < wadlevelinfos.Size(); i++)
+		{
+			if (stricmp(wadlevelinfos[i].mapname, mapname) == 0)
+			{
+				MapData* mdata = NULL;
+				try
+				{
+					if ((mdata = P_OpenMapData(wadlevelinfos[i].mapname, false)) != NULL)
+					{
+						delete mdata;
+						return i;
+					}
+				}
+				catch (CRecoverableError&) {}
+
+				delete mdata;
+				Printf("Level %s cannot be opened\n", mapname);
+				return -1;
+			}
+		}
+	}
+
+	return -1;
+}
+
+CCMD(setskirmishlevel)
+{
+	if (argv.argc() > 1)
+	{
+		int levelnum = GetLevelNumFromName(argv[1]);
+
+		if (levelnum >= 0)
+			menu_skirmishlevel = levelnum;
+		else
+			Printf("Can't find level %s\n", argv[1]);
+	}
+	else
+	{
+		Printf ("Usage: setskirmishlevel <map name>\n");
+	}
+}
+
+CCMD(setcallvotemap)
+{
+	if (argv.argc() > 1)
+	{
+		int levelnum = GetLevelNumFromName(argv[1]);
+
+		if (levelnum >= 0)
+			menu_callvotemap = levelnum;
+		else
+			Printf("Can't find level %s\n", argv[1]);
+	}
+	else
+	{
+		Printf("Usage: setcallvotemap <map name>\n");
+	}
 }
 
 EXTERN_CVAR ( String, playerclass )
