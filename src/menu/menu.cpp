@@ -130,7 +130,17 @@ bool DMenu::Responder (event_t *ev)
 			{
 				SetCapture();
 			}
-			
+		}
+		else if (ev->subtype == EV_GUI_RButtonDown)
+		{
+			res = MouseEventBack(MOUSE_Click2, ev->data1, ev->data2);
+			// make the menu's mouse handler believe that the current coordinate is outside the valid range
+			if (res) ev->data2 = -1;	
+			res |= MouseEvent(MOUSE_Click2, ev->data1, ev->data2);
+			if (res)
+			{
+				SetCapture();
+			}
 		}
 		else if (ev->subtype == EV_GUI_MouseMove)
 		{
@@ -150,6 +160,16 @@ bool DMenu::Responder (event_t *ev)
 				res = MouseEventBack(MOUSE_Release, ev->data1, ev->data2);
 				if (res) ev->data2 = -1;	
 				res |= MouseEvent(MOUSE_Release, ev->data1, ev->data2);
+			}
+		}
+		else if (ev->subtype == EV_GUI_RButtonUp)
+		{
+			if (mMouseCapture)
+			{
+				ReleaseCapture();
+				res = MouseEventBack(MOUSE_Release2, ev->data1, ev->data2);
+				if (res) ev->data2 = -1;	
+				res |= MouseEvent(MOUSE_Release2, ev->data1, ev->data2);
 			}
 		}
 	}
@@ -530,6 +550,30 @@ void M_SetMenu(FName menu, int param)
 				const PClass *cls = ld->mClass == NULL? RUNTIME_CLASS(DListMenu) : ld->mClass;
 
 				DListMenu *newmenu = (DListMenu *)cls->CreateNew();
+				newmenu->Init(DMenu::CurrentMenu, ld);
+				M_ActivateMenu(newmenu);
+			}
+		}
+		else if ((*desc)->mType == MDESC_FreeformMenu)
+		{
+			FFreeformMenuDescriptor *ld = static_cast<FFreeformMenuDescriptor*>(*desc);
+			const PClass *cls = ld->mClass == NULL? RUNTIME_CLASS(DFreeformMenu) : ld->mClass;
+
+			// [TP]
+			if ( ld->mNetgameOnly && ( NETWORK_GetState() != NETSTATE_CLIENT ) )
+			{
+				M_StartMessage( "You must be in a netgame to use this.\n\npress a key.", 1 );
+				return;
+			}
+
+			if (ld->mAutoselect >= 0 && ld->mAutoselect < (int)ld->mItems.Size())
+			{
+				// recursively activate the autoselected item without ever creating this menu.
+				ld->mItems[ld->mAutoselect]->Activate();
+			}
+			else
+			{
+				DFreeformMenu *newmenu = (DFreeformMenu*)cls->CreateNew();
 				newmenu->Init(DMenu::CurrentMenu, ld);
 				M_ActivateMenu(newmenu);
 			}

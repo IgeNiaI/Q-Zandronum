@@ -1938,6 +1938,18 @@ void S_ResumeSound (bool notsfx)
 
 //==========================================================================
 //
+// S_GetSoundPaused
+//
+// Tells if the sound is currently paused.
+//==========================================================================
+
+bool S_GetSoundPaused ()
+{
+	return paused < 0;
+}
+
+//==========================================================================
+//
 // S_SetSoundPaused
 //
 // Called with state non-zero when the app is active, zero when it isn't.
@@ -1956,7 +1968,7 @@ void S_SetSoundPaused (int state)
 				GSnd->SetInactive(SoundRenderer::INACTIVE_Active);
 			}
 			// [BB] !netgame -> (NETWORK_GetState( ) == NETSTATE_SINGLE)
-			if ((NETWORK_GetState( ) == NETSTATE_SINGLE)
+			if ((NETWORK_GetState( ) == NETSTATE_SINGLE || NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER)
 #ifdef _DEBUG
 				&& !demoplayback
 #endif
@@ -1978,7 +1990,7 @@ void S_SetSoundPaused (int state)
 					SoundRenderer::INACTIVE_Mute);
 			}
 			// [BB] !netgame -> (NETWORK_GetState( ) == NETSTATE_SINGLE)
-			if ((NETWORK_GetState( ) == NETSTATE_SINGLE)
+			if ((NETWORK_GetState( ) == NETSTATE_SINGLE || NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER)
 #ifdef _DEBUG
 				&& !demoplayback
 #endif

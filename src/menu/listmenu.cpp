@@ -42,6 +42,22 @@
 #include "d_event.h"
 #include "menu/menu.h"
 
+//=============================================================================
+//
+// Draws a string in the console font, scaled to the 8x8 cells
+// used by the default console font.
+//
+//=============================================================================
+
+void M_DrawConText(int color, int x, int y, const char* str)
+{
+	screen->DrawText(ConFont, color, x, y, str,
+		DTA_CellX, 8 * CleanXfac_1,
+		DTA_CellY, 8 * CleanYfac_1,
+		TAG_DONE);
+}
+
+
 IMPLEMENT_CLASS(DListMenu)
 
 //=============================================================================

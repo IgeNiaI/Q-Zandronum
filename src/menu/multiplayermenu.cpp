@@ -1033,23 +1033,31 @@ CCMD ( menu_joingamewithclass )
 static FRandom pr_randomclass ("RandomClass");
 static int lastRandomTic;
 
-CCMD ( randomclass )
+static void randomizeClass(bool silent)
 {
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		return;
 
-	if (gametic - lastRandomTic < 35)
-	{
-		Printf( "You can only random your class once per second\n" );
+	if ( gametic - lastRandomTic < 5 )
 		return;
-	}
 
 	pr_randomclass.Init(I_MakeRNGSeed());
 	int classNum = pr_randomclass( PlayerClasses.Size() );
 
 	playerclass = GetPrintableDisplayName( PlayerClasses[classNum].Type );
-	Printf( "Your respawn class is now \"%s\"\n", *playerclass );
+	if (!silent)
+		Printf( "Your respawn class is now \"%s\"\n", *playerclass );
 	lastRandomTic = gametic;
+}
+
+CCMD ( randomclass )
+{
+	randomizeClass( false );
+}
+
+CCMD ( randomclasssilent )
+{
+	randomizeClass( true );
 }
 
 CCMD ( menu_ignore )

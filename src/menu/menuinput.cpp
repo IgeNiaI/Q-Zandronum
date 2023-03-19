@@ -44,6 +44,7 @@
 #include "v_text.h"
 
 IMPLEMENT_ABSTRACT_CLASS(DTextEnterMenu)
+IMPLEMENT_ABSTRACT_CLASS(DEnterKey)
 
 #define INPUTGRID_WIDTH		13
 #define INPUTGRID_HEIGHT	5
@@ -371,4 +372,80 @@ void DTextEnterMenu::Drawer ()
 		}
 	}
 	Super::Drawer();
+}
+
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+DEnterKey::DEnterKey(DMenu *parent, int *keyptr)
+ : DMenu(parent)
+{
+	pKey = keyptr;
+	SetMenuMessage(1);
+	menuactive = MENU_WaitKey;	// There should be a better way to disable GUI capture...
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+bool DEnterKey::TranslateKeyboardEvents()
+{
+	return false; 
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+void DEnterKey::SetMenuMessage(int which)
+{
+	if (mParentMenu->IsKindOf(RUNTIME_CLASS(DOptionMenu)))
+	{
+		DOptionMenu *m = barrier_cast<DOptionMenu*>(mParentMenu);
+		FListMenuItem *it = m->GetItem(NAME_Controlmessage);
+		if (it != NULL)
+		{
+			it->SetValue(0, which);
+		}
+	}
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+bool DEnterKey::Responder(event_t *ev)
+{
+	if (ev->type == EV_KeyDown)
+	{
+		*pKey = ev->data1;
+		menuactive = MENU_On;
+		SetMenuMessage(0);
+		Close();
+		mParentMenu->MenuEvent((ev->data1 == KEY_ESCAPE)? MKEY_Abort : MKEY_Input, 0);
+		return true;
+	}
+	return false;
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+void DEnterKey::Drawer()
+{
+	mParentMenu->Drawer();
 }

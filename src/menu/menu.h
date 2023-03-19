@@ -45,6 +45,16 @@ enum EMenuKey
 	MKEY_MBNo,
 };
 
+enum EGravity
+{
+	GRAV_CENTER_HORIZONTAL = 1,
+	GRAV_CENTER_VERTICAL = 2,
+	GRAV_LEFT = 4,
+	GRAV_RIGHT = 8,
+	GRAV_TOP = 16,
+	GRAV_BOTTOM = 32,
+};
+
 
 struct FGameStartup
 {
@@ -67,6 +77,7 @@ struct FSaveGameNode
 };
 
 
+void M_DrawConText(int color, int x, int y, const char* str);
 
 //=============================================================================
 //
@@ -78,6 +89,7 @@ struct FSaveGameNode
 enum EMenuDescriptorType
 {
 	MDESC_ListMenu,
+	MDESC_FreeformMenu,
 	MDESC_OptionsMenu,
 };
 
@@ -92,6 +104,7 @@ struct FMenuDescriptor
 };
 
 class FListMenuItem;
+class FFreeformMenuItem;
 class FOptionMenuItem;
 
 struct FListMenuDescriptor : public FMenuDescriptor
@@ -127,6 +140,38 @@ struct FListMenuDescriptor : public FMenuDescriptor
 		mFontColor = CR_UNTRANSLATED;
 		mFontColor2 = CR_UNTRANSLATED;
 	}
+};
+
+struct FFreeformMenuDescriptor : public FMenuDescriptor
+{
+	TDeletingArray<FFreeformMenuItem*> mItems;
+	int mDefaultSelection;
+	int mSelectedItem;
+	int mScrollPos;
+	int mScrollSpeed;
+	int mTopPadding;
+	int mHeightOverride;
+	int mAutoselect;	// this can only be set by internal menu creation functions
+	bool mShowBackButton;
+	bool mCenter;
+	bool mDontDim;
+	bool mResetScroll;
+	bool mNetgameOnly; // [TP]
+
+	// [BB] The default constructor initializes our custom members.
+	FFreeformMenuDescriptor() : mNetgameOnly(false) {}
+
+	FFreeformMenuItem* GetItem(FName name);
+	bool DeleteItem(FName name);
+	void Reset()
+	{
+		// Reset the default settings (ignore all other values in the struct)
+		mTopPadding = 0;
+		mDontDim = false;
+		mResetScroll = false;
+		mNetgameOnly = false; // [TP]
+	}
+
 };
 
 struct FOptionMenuSettings
@@ -220,7 +265,9 @@ public:
 	{
 		MOUSE_Click,
 		MOUSE_Move,
-		MOUSE_Release
+		MOUSE_Release,
+		MOUSE_Click2,
+		MOUSE_Release2
 	};
 
 	enum
@@ -242,7 +289,7 @@ public:
 	virtual bool TranslateKeyboardEvents();
 	virtual void Close();
 	virtual bool MouseEvent(int type, int x, int y);
-	bool MouseEventBack(int type, int x, int y);
+	virtual bool MouseEventBack(int type, int x, int y);
 	void SetCapture();
 	void ReleaseCapture();
 	bool HasCapture()
@@ -298,6 +345,8 @@ public:
 	int GetY() { return mYpos; }
 	int GetX() { return mXpos; }
 	void SetX(int x) { mXpos = x; }
+	void SetY(int y) { mYpos = y; }
+	void SetAction(FName action) { mAction = action; }
 };	
 
 class FListMenuItemStaticPatch : public FListMenuItem
@@ -539,6 +588,142 @@ public:
 
 //=============================================================================
 //
+// Freeform menu class runs a menu described by a FFreeformMenuDescriptor
+//
+//=============================================================================
+
+class DFreeformMenu : public DMenu
+{
+	DECLARE_CLASS(DFreeformMenu, DMenu)
+
+	int CenteredOffset;
+	int LowestScroll;
+	bool CanScrollUp;
+	bool CanScrollDown;
+	FFreeformMenuItem* mFocusControl;
+
+protected:
+	FFreeformMenuDescriptor* mDesc;
+
+public:
+	FFreeformMenuItem* GetItem(FName name);
+	DFreeformMenu(DMenu* parent = NULL, FFreeformMenuDescriptor* desc = NULL);
+	virtual void Init(DMenu* parent = NULL, FFreeformMenuDescriptor* desc = NULL);
+	int FirstSelectable();
+	bool Responder(event_t* ev);
+	bool MenuEvent(int mkey, bool fromcontroller);
+	bool MouseEvent(int type, int x, int y);
+	bool MouseEventBack(int type, int x, int y);
+	void Ticker();
+	void Drawer();
+	const FFreeformMenuDescriptor* GetDescriptor() const { return mDesc; }
+	void SetFocus(FFreeformMenuItem* fc)
+	{
+		mFocusControl = fc;
+	}
+	bool CheckFocus(FFreeformMenuItem* fc)
+	{
+		return mFocusControl == fc;
+	}
+	void ReleaseFocus()
+	{
+		mFocusControl = NULL;
+	}
+	bool DimAllowed()
+	{
+		return !mDesc->mDontDim;
+	}
+};
+
+//=============================================================================
+//
+// base class for menu items
+//
+//=============================================================================
+
+class FFreeformMenuItem : public FListMenuItem
+{
+protected:
+	bool mIsStatic;
+	bool mIsVisibleOnTitlemap;
+	bool mIsVisibleInSingleplayer;
+	bool mIsVisibleInBotplay;
+	bool mIsVisibleInMultiplayer;
+	int mWidth, mHeight;
+	int mMouseAreaWidth, mMouseAreaHeight;
+	int mXPadding, mYPadding;
+	int mGravity;
+	int mAnchor;
+	FBaseCVar* mVisibilityCVar;
+	int mVisibilityCVarMin, mVisibilityCVarMax;
+	int mBelowItemsExtraOffset;
+public:
+
+	FFreeformMenuItem(FName action) : FListMenuItem(0, 0, action)
+	{
+		mIsStatic = false;
+		mIsVisibleOnTitlemap = true;
+		mIsVisibleInSingleplayer = true;
+		mIsVisibleInBotplay = true;
+		mIsVisibleInMultiplayer = true;
+		mWidth = 0;
+		mHeight = 0;
+		mMouseAreaWidth = -1;
+		mMouseAreaHeight = -1;
+		mXPadding = 0;
+		mYPadding = 0;
+		mGravity = GRAV_CENTER_HORIZONTAL | GRAV_TOP;
+		mAnchor = GRAV_CENTER_HORIZONTAL | GRAV_TOP;
+		mVisibilityCVar = NULL;
+		mVisibilityCVarMin = 1;
+		mVisibilityCVarMax = INT_MAX;
+		mBelowItemsExtraOffset = 0;
+	}
+
+	~FFreeformMenuItem() {};
+
+	virtual FFreeformMenuItem* Clone();
+	virtual bool CopyTo(FFreeformMenuItem* other);
+	virtual bool CheckCoordinate(int x, int y);
+	virtual void Draw(FFreeformMenuDescriptor* desc, int yoffset, bool selected);
+	virtual bool IsEnabled();
+	virtual bool Selectable();
+	
+	void SetWidth(int width)	 { mWidth = width;		}	int GetWidth()	{ return mWidth;	}
+	void SetHeight(int height)	 { mHeight = height;	}	int GetHeight()	{ return mHeight;	}
+	void SetGravity(int gravity) { mGravity = gravity;	}
+	void SetAnchor(int anchor)	 { mAnchor = anchor;	}	int GetAnchor()	{ return mAnchor;	}
+	void SetStatic(bool isStatic){ mIsStatic = isStatic;}	bool IsStatic()	{ return mIsStatic;	}
+
+	void SetVisibleOnTitlemap(bool visible)		{ mIsVisibleOnTitlemap = visible;		}	bool IsVisibleOnTitlemap()		{ return mIsVisibleOnTitlemap;		}
+	void SetVisibleInSingleplayer(bool visible)	{ mIsVisibleInSingleplayer = visible;	}	bool IsVisibleInSingleplayer()	{ return mIsVisibleInSingleplayer;	}
+	void SetVisibleInBotplay(bool visible)		{ mIsVisibleInBotplay = visible;		}	bool IsVisibleInBotplay()		{ return mIsVisibleInBotplay;		}
+	void SetVisibleInMultiplayer(bool visible)	{ mIsVisibleInMultiplayer = visible;	}	bool IsVisibleInMultiplayer()	{ return mIsVisibleInMultiplayer;	}
+
+	void SetMouseArea(int width, int height) { mMouseAreaWidth = width; mMouseAreaHeight = height; }
+	int GetMouseAreaHeight() { return mMouseAreaHeight >= 0 ? mMouseAreaHeight : GetHeight(); }
+	void SetPadding(int xPadding, int yPadding) { mXPadding = xPadding; mYPadding = yPadding; }
+	void SetVisibilityCVar(const char* visiblecheck, int min, int max)
+	{
+		mVisibilityCVar = FindCVar(visiblecheck, NULL);
+		mVisibilityCVarMin = min;
+		mVisibilityCVarMax = max;
+		if (mVisibilityCVarMax < mVisibilityCVarMin)
+			swapvalues(mVisibilityCVarMin, mVisibilityCVarMax);
+	}
+
+	void SetBelowItemsExtraOffset(int offset) { mBelowItemsExtraOffset = offset; }
+	int GetBelowItemsExtraOffset() { return mBelowItemsExtraOffset; }
+	void CalcDrawScreenPos(int &x, int &y, int width, int height, bool withPadding);
+	virtual bool MouseEvent(int type, int x, int y);
+
+	virtual bool IsServerInfo() const { return false; }
+	bool IsVisible() const;
+};
+
+
+//=============================================================================
+//
 // base class for menu items
 //
 //=============================================================================
@@ -674,6 +859,28 @@ public:
 
 };
 
+
+//=============================================================================
+//
+// This class is used to capture the key to be used as the new key binding
+// for a control item
+//
+//=============================================================================
+
+class DEnterKey : public DMenu
+{
+	DECLARE_ABSTRACT_CLASS(DEnterKey, DMenu)
+
+	int *pKey;
+
+public:
+	DEnterKey(DMenu *parent, int *keyptr);
+
+	bool TranslateKeyboardEvents();
+	void SetMenuMessage(int which);
+	bool Responder(event_t* ev);
+	void Drawer();
+};
 
 
 

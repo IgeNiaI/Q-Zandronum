@@ -4402,6 +4402,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\menu\freeformmenu.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\menu\freeformmenuitems.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\menu\loadsavemenu.cpp"
 				>
 			</File>

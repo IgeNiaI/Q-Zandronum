@@ -53,12 +53,14 @@
 #include "announcer.h"
 #include "doomerrors.h"
 
+#include "freeformmenuitems.h"
 #include "optionmenuitems.h"
 
 void ClearSaveGames();
 
 MenuDescriptorList MenuDescriptors;
 static FListMenuDescriptor DefaultListMenuSettings;	// contains common settings for all list menus
+static FFreeformMenuDescriptor DefaultFreeformMenuSettings; // contains common settings for all freeform menus
 static FOptionMenuDescriptor DefaultOptionMenuSettings;	// contains common settings for all Option menus
 FOptionMenuSettings OptionSettings;
 FOptionMap OptionValues;
@@ -622,6 +624,965 @@ static void ParseAddListMenu(FScanner& sc)
 	}
 	ParseListMenuBody(sc, (FListMenuDescriptor*)(*pOld), GetInsertListIndex(sc, (FListMenuDescriptor*)(*pOld)));
 }
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static int GetFreeformItemLowestPoint(FFreeformMenuItem *item)
+{
+	if (item->GetAnchor() & GRAV_TOP)
+		return item->GetY() + item->GetHeight();
+	else if (item->GetAnchor() & GRAV_CENTER_VERTICAL)
+		return item->GetY() + item->GetHeight() / 2;
+	else
+		return item->GetY();
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static bool ParseFreeformCommonParameters(FScanner& sc, FFreeformMenuItem* it)
+{
+	if (sc.Compare("Static"))
+	{
+		it->SetStatic(true);
+		return true;
+	}
+	else if (sc.Compare("NotOnTitlemap"))
+	{
+		it->SetVisibleOnTitlemap(false);
+		return true;
+	}
+	else if (sc.Compare("NotInSingleplayer"))
+	{
+		it->SetVisibleInSingleplayer(false);
+		return true;
+	}
+	else if (sc.Compare("NotInBotplay"))
+	{
+		it->SetVisibleInBotplay(false);
+		return true;
+	}
+	else if (sc.Compare("NotInMultiplayer"))
+	{
+		it->SetVisibleInMultiplayer(false);
+		return true;
+	}
+	else if (sc.Compare("Pos"))
+	{
+		sc.MustGetNumber();
+		it->SetX(sc.Number);
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		it->SetY(sc.Number);
+		return true;
+	}
+	else if (sc.Compare("Size"))
+	{
+		sc.MustGetNumber();
+		it->SetWidth(sc.Number);
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		it->SetHeight(sc.Number);
+		return true;
+	}
+	else if (sc.Compare("MouseArea"))
+	{
+		sc.MustGetNumber();
+		int width = sc.Number;
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		int height = sc.Number;
+		it->SetMouseArea(width, height);
+		return true;
+	}
+	else if (sc.Compare("Padding"))
+	{
+		sc.MustGetNumber();
+		int xPadding = sc.Number;
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		int yPadding = sc.Number;
+		it->SetPadding(xPadding, yPadding);
+		return true;
+	}
+	else if (sc.Compare("Gravity"))
+	{
+		int gravity;
+		sc.MustGetString();
+		FString hGravity = sc.String;
+		if (stricmp(hGravity, "left") == 0)
+			gravity = GRAV_LEFT;
+		else if (stricmp(hGravity, "right") == 0)
+			gravity = GRAV_RIGHT;
+		else
+			gravity = GRAV_CENTER_HORIZONTAL;
+
+		sc.MustGetStringName(",");
+		sc.MustGetString();
+		FString vGravity = sc.String;
+		if (stricmp(vGravity, "center") == 0)
+			gravity |= GRAV_CENTER_VERTICAL;
+		else if (stricmp(vGravity, "bottom") == 0)
+			gravity |= GRAV_BOTTOM;
+		else
+			gravity |= GRAV_TOP;
+
+		it->SetGravity(gravity);
+		return true;
+	}
+	else if (sc.Compare("Anchor"))
+	{
+		int anchor;
+		sc.MustGetString();
+		FString hAnchor = sc.String;
+		if (stricmp(hAnchor, "left") == 0)
+			anchor = GRAV_LEFT;
+		else if (stricmp(hAnchor, "right") == 0)
+			anchor = GRAV_RIGHT;
+		else
+			anchor = GRAV_CENTER_HORIZONTAL;
+
+		sc.MustGetStringName(",");
+		sc.MustGetString();
+		FString vAnchor = sc.String;
+		if (stricmp(vAnchor, "center") == 0)
+			anchor |= GRAV_CENTER_VERTICAL;
+		else if (stricmp(vAnchor, "bottom") == 0)
+			anchor |= GRAV_BOTTOM;
+		else
+			anchor |= GRAV_TOP;
+
+		it->SetAnchor(anchor);
+		return true;
+	}
+	else if (sc.Compare("VisibilityCVar"))
+	{
+		sc.MustGetString();
+		FString cvar = sc.String;
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		int min = sc.Number;
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		int max = sc.Number;
+		it->SetVisibilityCVar(cvar, min, max);
+		return true;
+	}
+
+	return false;
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static bool ParseFreeformLabelParameters(FScanner& sc, FFreeformMenuItemLabel* it)
+{
+	if (sc.Compare("Text"))
+	{
+		sc.MustGetString();
+		it->SetLabel(sc.String);
+		return true;
+	}
+	else if (sc.Compare("Font"))
+	{
+		sc.MustGetString();
+		it->SetFont(V_GetFont(sc.String));
+		return true;
+	}
+	else if (sc.Compare("FontColor"))
+	{
+		sc.MustGetString();
+		it->SetFontColor(V_FindFontColor((FName)sc.String));
+		return true;
+	}
+	else if (sc.Compare("MaxTextWidth"))
+	{
+		sc.MustGetNumber();
+		it->SetMaxLabelWidth(sc.Number);
+		return true;
+	}
+	else if (sc.Compare("Background"))
+	{
+		sc.MustGetString();
+		FString texName = sc.String;
+		it->SetBackground(TexMan.CheckForTexture(texName, FTexture::TEX_MiscPatch));
+		return true;
+	}
+
+	return false;
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static bool ParseFreeformActionableParameters(FScanner& sc, FFreeformMenuItemActionableBase* it)
+{
+	if (sc.Compare("NotSelectable"))
+	{
+		it->SetSelectable(false);
+		return true;
+	}
+	else if (sc.Compare("SelectedFontColor"))
+	{
+		sc.MustGetString();
+		it->SetSelectedFontColor(V_FindFontColor((FName)sc.String));
+		return true;
+	}
+	else if (sc.Compare("SelectedBackground"))
+	{
+		sc.MustGetString();
+		FString texName = sc.String;
+		it->SetSelectedBackground(TexMan.CheckForTexture(texName, FTexture::TEX_MiscPatch));
+		return true;
+	}
+	else if (sc.Compare("SelectedForeground"))
+	{
+		sc.MustGetString();
+		FString texName = sc.String;
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		int width = sc.Number;
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		int height = sc.Number;
+		it->SetSelectedForeground(TexMan.CheckForTexture(texName, FTexture::TEX_MiscPatch), width, height);
+		return true;
+	}
+	else if (sc.Compare("EnableCVar"))
+	{
+		sc.MustGetString();
+		FString cvar = sc.String;
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		int min = sc.Number;
+		sc.MustGetStringName(",");
+		sc.MustGetNumber();
+		int max = sc.Number;
+		it->SetGrayCheck(cvar, min, max);
+		return true;
+	}
+
+	return false;
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static void ParseFreeformMenuBody(FScanner &sc, FFreeformMenuDescriptor *desc, FFreeformMenuItem *aboveItem)
+{
+	int xOffset = 0;
+	int yOffset = 0;
+	int lowestBonusItemPoint = 0;
+	if (aboveItem != NULL)
+	{
+		xOffset = aboveItem->GetX();
+		yOffset = GetFreeformItemLowestPoint(aboveItem) + aboveItem->GetBelowItemsExtraOffset();
+	}
+
+	sc.MustGetStringName("{");
+	while (!sc.CheckString("}"))
+	{
+		FFreeformMenuItem *addedItem = NULL;
+		sc.MustGetString();
+		if (sc.Compare("ifgame"))
+		{
+			if (!CheckSkipGameBlock(sc))
+			{
+				// recursively parse sub-block
+				ParseFreeformMenuBody(sc, desc, aboveItem);
+			}
+		}
+		else if (sc.Compare("ifoption"))
+		{
+			if (!CheckSkipOptionBlock(sc))
+			{
+				// recursively parse sub-block
+				ParseFreeformMenuBody(sc, desc, aboveItem);
+			}
+		}
+		else if (sc.Compare("InsertFreeformMenu"))
+		{
+			// Copy other menu items into this menu
+			sc.MustGetString();
+
+			FMenuDescriptor** pOther = MenuDescriptors.CheckKey(sc.String);
+			if (pOther == nullptr || *pOther == nullptr || (*pOther)->mType != MDESC_FreeformMenu)
+			{
+				sc.ScriptError("%s is not a freeform menu", sc.String);
+			}
+
+			FFreeformMenuDescriptor* ld = static_cast<FFreeformMenuDescriptor*>(*pOther);
+			for (unsigned int i = 0; i < ld->mItems.Size(); i++) {
+				desc->mItems.Push(ld->mItems[i]->Clone());
+			}
+		}
+		else if (sc.Compare("TopPadding"))
+		{
+			sc.MustGetNumber();
+			desc->mTopPadding = sc.Number;
+		}
+		else if (sc.Compare("DontDim"))
+		{
+			desc->mDontDim = true;
+		}
+		else if (sc.Compare("ResetScroll"))
+		{
+			desc->mResetScroll = true;
+		}
+		else if (sc.Compare("Centermenu"))
+		{
+			desc->mCenter = true;
+		}
+		else if (sc.Compare("OverrideHeight"))
+		{
+			sc.MustGetNumber();
+			desc->mHeightOverride = sc.Number;
+		}
+		else if (sc.Compare("ScrollSpeed"))
+		{
+			sc.MustGetNumber();
+			desc->mScrollSpeed = sc.Number;
+		}
+		else if (sc.Compare("DefaultSelection"))
+		{
+			sc.MustGetNumber();
+			desc->mDefaultSelection = sc.Number;
+			desc->mSelectedItem = sc.Number;
+		}
+		else if (sc.Compare("NoBackButton"))
+		{
+			desc->mShowBackButton = false;
+		}
+		else if (sc.Compare("Label"))
+		{
+			sc.MustGetStringName("{");
+			
+			FFreeformMenuItemLabel *it = new FFreeformMenuItemLabel();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (sc.Compare("MouseArea"))
+				{
+					// Label doesn't interact with anything
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if (sc.Compare("SubMenu"))
+		{
+			sc.MustGetStringName("{");
+
+			FFreeformMenuItemSubmenu* it = new FFreeformMenuItemSubmenu();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("menu"))
+				{
+					sc.MustGetString();
+					it->SetAction(sc.String);
+				}
+				else if (sc.Compare("param"))
+				{
+					sc.MustGetNumber();
+					it->SetParam(sc.Number);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+			
+			addedItem = it;
+		}
+		else if (sc.Compare("Command"))
+		{
+			sc.MustGetStringName("{");
+			
+			FFreeformMenuItemCommand* it = new FFreeformMenuItemCommand();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("SafeCommand"))
+				{
+					it->SetSafe(true);
+				}
+				else if (sc.Compare("command"))
+				{
+					sc.MustGetString();
+					it->SetAction(sc.String);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if (sc.Compare("Option"))
+		{
+			sc.MustGetStringName("{");
+			
+			FFreeformMenuItemOption* it = new FFreeformMenuItemOption();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("Text") || sc.Compare("Background"))
+				{
+					// This item overrides above fields using values from another parameter
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("CVar"))
+				{
+					sc.MustGetString();
+					it->SetCVar(sc.String);
+				}
+				else if (sc.Compare("Values"))
+				{
+					sc.MustGetString();
+					it->SetValues(sc.String);
+				}
+				else if (sc.Compare("UnknownValueText"))
+				{
+					sc.MustGetString();
+					it->SetUnknownValueText(sc.String);
+				}
+				else if (sc.Compare("BackgroundValues"))
+				{
+					sc.MustGetString();
+					it->SetBackgroundValues(sc.String);
+				}
+				else if (sc.Compare("UnknownBackground"))
+				{
+					sc.MustGetString();
+					FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+					it->SetUnknownBackgroundTexture(tex);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if (sc.Compare("Control"))
+		{
+			bool isMapControl = false;
+			sc.MustGetStringName("{");
+
+			FFreeformMenuItemControl* it = new FFreeformMenuItemControl();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("Text"))
+				{
+					// This item overrides above fields using values from another parameter
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("MapControl"))
+				{
+					isMapControl = true;
+				}
+				else if (sc.Compare("Action"))
+				{
+					sc.MustGetString();
+					it->SetAction(sc.String);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			if (isMapControl)
+				it->SetBindings(&AutomapBindings);
+			else
+				it->SetBindings(&Bindings);
+			
+			addedItem = it;
+		}
+		else if (sc.Compare("ColorPicker"))
+		{
+			sc.MustGetStringName("{");
+
+			FFreeformMenuItemColorPicker* it = new FFreeformMenuItemColorPicker();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("Text") || sc.Compare("Padding") || sc.Compare("Background") || sc.Compare("SelectedBackground"))
+				{
+					// This item doesn't use above fields
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("CVar"))
+				{
+					sc.MustGetString();
+					it->SetCVar(sc.String);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if (sc.Compare("TextField"))
+		{
+			sc.MustGetStringName("{");
+
+			FFreeformMenuTextField* it = new FFreeformMenuTextField();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("Text"))
+				{
+					// This item overrides above fields using values from another parameter
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("CVar"))
+				{
+					sc.MustGetString();
+					it->SetCVar(sc.String);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if (sc.Compare("NumberField"))
+		{
+			sc.MustGetStringName("{");
+
+			FFreeformMenuNumberField* it = new FFreeformMenuNumberField();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("Text") || sc.Compare("Padding"))
+				{
+					// This item overrides above fields using values from another parameter
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("CVar"))
+				{
+					sc.MustGetString();
+					it->SetCVar(sc.String);
+				}
+				else if (sc.Compare("Range"))
+				{
+					sc.MustGetFloat();
+					float min = (float)sc.Float;
+					sc.MustGetStringName(",");
+					sc.MustGetFloat();
+					float max = (float)sc.Float;
+					sc.MustGetStringName(",");
+					sc.MustGetFloat();
+					float step = (float)sc.Float;
+					it->SetRange(min, max, step);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if ( sc.Compare( "PlayerField" ))
+		{
+			sc.MustGetStringName("{");
+
+			FFreeformMenuPlayerField* it = new FFreeformMenuPlayerField();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("Text") || sc.Compare("Padding"))
+				{
+					// This item overrides above fields using values from another parameter
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("CVar"))
+				{
+					sc.MustGetString();
+					it->SetCVar(sc.String);
+				}
+				else if (sc.Compare("AllowBots"))
+				{
+					it->SetAllowBots(true);
+				}
+				else if (sc.Compare("AllowSelf"))
+				{
+					it->SetAllowSelf(true);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if ( sc.Compare( "JoinMenuTeamOption" ))
+		{
+			sc.MustGetStringName("{");
+
+			FFreeformMenuTeamField* it = new FFreeformMenuTeamField();
+			it->SetCVar("menu_jointeamidx");
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("Text") || sc.Compare("Padding"))
+				{
+					// This item overrides above fields using values from another parameter
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if ( sc.Compare( "JoinMenuPlayerClassOption" ))
+		{
+			sc.MustGetStringName("{");
+
+			FFreeformMenuPlayerClassField* it = new FFreeformMenuPlayerClassField();
+			it->SetCVar("menu_joinclassidx");
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("Text") || sc.Compare("Padding"))
+				{
+					// This item overrides above fields using values from another parameter
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+				else if (ParseFreeformLabelParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (ParseFreeformActionableParameters(sc, it))
+				{
+					// do nothing
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		else if ( sc.Compare( "Slider" ))
+		{
+			sc.MustGetStringName("{");
+
+			FFreeformMenuSliderCVar* it = new FFreeformMenuSliderCVar();
+			while (!sc.CheckString("}"))
+			{
+				sc.MustGetString();
+				if (ParseFreeformCommonParameters(sc, it))
+				{
+					// do nothing
+				}
+				else if (sc.Compare("NotSelectable"))
+				{
+					it->SetSelectable(false);
+				}
+				else if (sc.Compare("CVar"))
+				{
+					sc.MustGetString();
+					it->SetCVar(sc.String);
+				}
+				else if (sc.Compare("EnableCVar"))
+				{
+					sc.MustGetString();
+					FString cvar = sc.String;
+					sc.MustGetStringName(",");
+					sc.MustGetNumber();
+					int min = sc.Number;
+					sc.MustGetStringName(",");
+					sc.MustGetNumber();
+					int max = sc.Number;
+					it->SetGrayCheck(cvar, min, max);
+				}
+				else if (sc.Compare("Range"))
+				{
+					sc.MustGetFloat();
+					float min = (float)sc.Float;
+					sc.MustGetStringName(",");
+					sc.MustGetFloat();
+					float max = (float)sc.Float;
+					sc.MustGetStringName(",");
+					sc.MustGetFloat();
+					float step = (float)sc.Float;
+					it->SetRange(min, max, step);
+				}
+				else if (sc.Compare("Textures"))
+				{
+					sc.MustGetString();
+					FString backgroundName = sc.String;
+					sc.MustGetStringName(",");
+					sc.MustGetString();
+					FString sliderName = sc.String;
+					sc.MustGetStringName(",");
+					sc.MustGetString();
+					FString sliderSelectedName = sc.String;
+					sc.MustGetStringName(",");
+					sc.MustGetNumber();
+					int width = sc.Number;
+					sc.MustGetStringName(",");
+					sc.MustGetNumber();
+					int height = sc.Number;
+					it->SetTextures(TexMan.CheckForTexture(backgroundName, FTexture::TEX_MiscPatch),
+						TexMan.CheckForTexture(sliderName, FTexture::TEX_MiscPatch),
+						TexMan.CheckForTexture(sliderSelectedName, FTexture::TEX_MiscPatch), width, height);
+				}
+				else
+				{
+					sc.ScriptError("Unknown keyword '%s'", sc.String);
+				}
+			}
+
+			addedItem = it;
+		}
+		// [TP] Flags the menu as multiplayer-only
+		else if ( sc.Compare ( "NetgameOnly" ))
+		{
+			desc->mNetgameOnly = true;
+		}
+		else
+		{
+			sc.ScriptError("Unknown keyword '%s'", sc.String);
+		}
+
+		if (addedItem != NULL)
+		{
+			// Bonus offsets from AddFreeformMenu
+			addedItem->SetX(addedItem->GetX() + xOffset);
+			addedItem->SetY(addedItem->GetY() + yOffset);
+
+			desc->mItems.Push(addedItem);
+			if (GetFreeformItemLowestPoint(addedItem) > lowestBonusItemPoint)
+				lowestBonusItemPoint = GetFreeformItemLowestPoint(addedItem);
+		}
+	}
+
+	if (aboveItem != NULL)
+	{
+		aboveItem->SetBelowItemsExtraOffset(aboveItem->GetBelowItemsExtraOffset() + lowestBonusItemPoint - yOffset);
+	}
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static void ParseFreeformMenu(FScanner &sc)
+{
+	sc.MustGetString();
+
+	FFreeformMenuDescriptor *desc = new FFreeformMenuDescriptor;
+	desc->mType = MDESC_FreeformMenu;
+	desc->mMenuName = sc.String;
+	desc->mDefaultSelection = -1;
+	desc->mSelectedItem = -1;
+	desc->mAutoselect = -1;
+	desc->mScrollPos = 0;
+	desc->mClass = NULL;
+	desc->mScrollSpeed = DefaultFreeformMenuSettings.mScrollSpeed;
+	desc->mTopPadding = DefaultFreeformMenuSettings.mTopPadding;
+	desc->mDontDim = DefaultFreeformMenuSettings.mDontDim;
+	desc->mShowBackButton = true;
+	desc->mHeightOverride = 0;
+	desc->mCenter = false;
+	desc->mNetgameOnly = false; // [TP]
+
+	ParseFreeformMenuBody(sc, desc, NULL);
+	bool scratch = ReplaceMenu(sc, desc);
+	if (scratch) delete desc;
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static void ParseAddFreeformMenu(FScanner& sc)
+{
+	sc.MustGetString();
+
+	FMenuDescriptor** pOld = MenuDescriptors.CheckKey(sc.String);
+	if (pOld == nullptr || *pOld == nullptr || (*pOld)->mType != MDESC_FreeformMenu)
+	{
+		sc.ScriptError("%s is not a freeform menu that can be extended", sc.String);
+		return;
+	}
+
+	FFreeformMenuItem* aboveItem = NULL;
+	bool below = sc.CheckString("BELOW");
+	if (below)
+	{
+		// Find an existing menu item to use as insertion point
+		FFreeformMenuDescriptor* ld = static_cast<FFreeformMenuDescriptor*>(*pOld);
+		sc.MustGetString();
+		aboveItem = ld->GetItem(sc.String);
+	}
+
+	ParseFreeformMenuBody(sc, (FFreeformMenuDescriptor*)(*pOld), aboveItem);
+}
+
+
 
 //=============================================================================
 //
@@ -1252,6 +2213,7 @@ void M_ParseMenuDefs()
 	OptionSettings.mFontColorHighlight = V_FindFontColor(gameinfo.mFontColorHighlight);
 	OptionSettings.mFontColorSelection = V_FindFontColor(gameinfo.mFontColorSelection);
 	DefaultListMenuSettings.Reset();
+	DefaultFreeformMenuSettings.Reset();
 	DefaultOptionMenuSettings.Reset();
 
 	atterm(	DeinitMenus);
@@ -1278,6 +2240,22 @@ void M_ParseMenuDefs()
 			else if (sc.Compare("ADDLISTMENU"))
 			{
 				ParseAddListMenu(sc);
+			}
+			else if (sc.Compare("FREEFORMMENU"))
+			{
+				ParseFreeformMenu(sc);
+			}
+			else if (sc.Compare("ADDFREEFORMMENU"))
+			{
+				ParseAddFreeformMenu(sc);
+			}
+			else if (sc.Compare("DEFAULTFREEFORMMENU"))
+			{
+				ParseFreeformMenuBody(sc, &DefaultFreeformMenuSettings, NULL);
+				if (DefaultFreeformMenuSettings.mItems.Size() > 0)
+				{
+					I_FatalError("You cannot add menu items to the menu default settings.");
+				}
 			}
 			else if (sc.Compare("OPTIONVALUE"))
 			{
@@ -1383,6 +2361,37 @@ static void BuildEpisodeMenu()
 				}
 				success = true;
 			}
+		}
+		else if ((*desc)->mType == MDESC_FreeformMenu)
+		{
+			// Mod creator decided to make their own episode menu, let's hope they know what they are doing
+			// But we can still add items dynamically if mod developer specified the "EpisodesTop" correctly
+			FFreeformMenuDescriptor* ld = static_cast<FFreeformMenuDescriptor*>(*desc);
+			FFreeformMenuItemSubmenu *listTopItem = static_cast<FFreeformMenuItemSubmenu*>(ld->GetItem("EpisodesTop"));
+			if (listTopItem != NULL)
+			{
+				int yOffset = 0;
+				ld->mSelectedItem = ld->mItems.Size() - 1;
+				for (unsigned i = 0; i < AllEpisodes.Size(); i++)
+				{
+					FFreeformMenuItemSubmenu* it = new FFreeformMenuItemSubmenu();
+					listTopItem->CopyTo(it);
+					it->SetY(it->GetY() + yOffset);
+					it->SetLabel(AllEpisodes[i].mEpisodeName);
+					it->SetAction(NAME_Skillmenu);
+					it->SetParam(i);
+					ld->mItems.Push(it);
+
+					yOffset += it->GetHeight();
+				}
+				if (AllEpisodes.Size() == 1)
+				{
+					ld->mAutoselect = ld->mSelectedItem;
+				}
+
+				ld->DeleteItem("EpisodesTop");
+			}
+			success = true;
 		}
 	}
 	if (!success)
@@ -1512,6 +2521,11 @@ static void BuildPlayerclassMenu()
 				}
 				success = true;
 			}
+		}
+		else if ((*desc)->mType == MDESC_FreeformMenu)
+		{
+			// Mod creator decided to make their own class menu, let's hope they know what they are doing
+			success = true;
 		}
 	}
 	if (!success)
@@ -1902,6 +2916,11 @@ void M_StartupSkillMenu(FGameStartup *gs)
 			{
 				ld->mAutoselect = -1;
 			}
+			success = true;
+		}
+		else if ((*desc)->mType == MDESC_FreeformMenu)
+		{
+			// Mod creator decided to make their own difficuly menu, let's hope they know what they are doing
 			success = true;
 		}
 	}

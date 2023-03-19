@@ -1308,6 +1308,7 @@ add_executable( zdoom WIN32
 	menu/colorpickermenu.cpp
 	menu/joystickmenu.cpp
 	menu/listmenu.cpp
+	menu/freeformmenu.cpp #QZA
 	menu/loadsavemenu.cpp
 	menu/menu.cpp
 	menu/menudef.cpp

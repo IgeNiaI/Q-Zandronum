@@ -320,6 +320,12 @@ OptionMenuSettings
 	}
 }
 
+DefaultFreeformMenu
+{
+	ScrollSpeed 4
+	TopPadding 0
+}
+
 DefaultOptionMenu
 {
 	Position -15
