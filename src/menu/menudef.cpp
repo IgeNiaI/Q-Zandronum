@@ -788,13 +788,14 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc, int i
 			sc.MustGetNumber();
 			desc->mIndent = sc.Number;
 		}
-		else if (sc.Compare("Submenu"))
+		else if (sc.Compare("Submenu") || sc.Compare("SubmenuCentered"))
 		{
+			bool centered = sc.Compare("SubmenuCentered");
 			sc.MustGetString();
 			FString label = sc.String;
 			sc.MustGetStringName(",");
 			sc.MustGetString();
-			FOptionMenuItem *it = new FOptionMenuItemSubmenu(label, sc.String);
+			FOptionMenuItem *it = new FOptionMenuItemSubmenu(label, sc.String, 0, centered);
 			if (insertIndex == -1)
 				desc->mItems.Push(it);
 			else
@@ -834,13 +835,14 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc, int i
 				insertIndex++;
 			}
 		}
-		else if (sc.Compare("Command"))
+		else if (sc.Compare("Command") || sc.Compare("CommandCentered"))
 		{
+			bool centered = sc.Compare("CommandCentered");
 			sc.MustGetString();
 			FString label = sc.String;
 			sc.MustGetStringName(",");
 			sc.MustGetString();
-			FOptionMenuItem *it = new FOptionMenuItemCommand(label, sc.String);
+			FOptionMenuItem *it = new FOptionMenuItemCommand(label, sc.String, centered);
 			if (insertIndex == -1)
 				desc->mItems.Push(it);
 			else

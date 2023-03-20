@@ -48,10 +48,11 @@ class FOptionMenuItemSubmenu : public FOptionMenuItem
 {
 	int mParam;
 public:
-	FOptionMenuItemSubmenu(const char *label, const char *menu, int param = 0)
+	FOptionMenuItemSubmenu(const char *label, const char *menu, int param = 0, bool centered = false)
 		: FOptionMenuItem(label, menu)
 	{
 		mParam = param;
+		mCentered = centered;
 	}
 
 	int Draw(FOptionMenuDescriptor *desc, int y, int indent, bool selected)
@@ -78,9 +79,10 @@ public:
 class FOptionMenuItemCommand : public FOptionMenuItemSubmenu
 {
 public:
-	FOptionMenuItemCommand(const char *label, const char *menu)
+	FOptionMenuItemCommand(const char *label, const char *menu, bool centered = false)
 		: FOptionMenuItemSubmenu(label, menu)
 	{
+		mCentered = centered;
 	}
 
 	bool Activate()
