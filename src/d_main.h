@@ -43,6 +43,7 @@ struct CRestartException
 };
 
 void D_DoomMain (void);
+void D_PrintStartup (void);
 
 
 void D_Display ();

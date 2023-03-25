@@ -2737,13 +2737,35 @@ static void FinalGC()
 
 //==========================================================================
 //
+// D_PrintStartup
+//
+//==========================================================================
+
+void D_PrintStartup (void)
+{
+	// [RH] User-configurable startup strings. Because BOOM does.
+	static const char* startupString[5] = {
+		"STARTUP1", "STARTUP2", "STARTUP3", "STARTUP4", "STARTUP5"
+	};
+	for (int p = 0; p < 5; ++p)
+	{
+		const char *str = GStrings[startupString[p]];
+		if (str != NULL && str[0] != '\0')
+		{
+			Printf ("%s\n", str);
+		}
+	}
+	C_FlushDisplay();
+}
+
+//==========================================================================
+//
 // D_DoomMain
 //
 //==========================================================================
 
 void D_DoomMain (void)
 {
-	int p;
 	const char *v;
 	const char *wad;
 	DArgs *execFiles;
@@ -3068,19 +3090,6 @@ void D_DoomMain (void)
 		SBarInfo::Load();
 		HUD_InitHud();
 
-		// [RH] User-configurable startup strings. Because BOOM does.
-		static const char *startupString[5] = {
-			"STARTUP1", "STARTUP2", "STARTUP3", "STARTUP4", "STARTUP5"
-		};
-		for (p = 0; p < 5; ++p)
-		{
-			const char *str = GStrings[startupString[p]];
-			if (str != NULL && str[0] != '\0')
-			{
-				Printf ("%s\n", str);
-			}
-		}
-
 		if (!restart)
 		{
 			Printf ("D_CheckNetGame: Checking network game status.\n");
@@ -3181,6 +3190,8 @@ void D_DoomMain (void)
 			}
 			if (gameaction != ga_loadgame && gameaction != ga_loadgamehidecon)
 			{
+				D_PrintStartup();
+
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
 					G_NewInit( );
@@ -3241,12 +3252,14 @@ void D_DoomMain (void)
 			// These calls from inside V_Init2 are still necessary
 			C_NewModeAdjust();
 			M_InitVideoModesMenu();
+			D_PrintStartup();
 			D_StartTitle ();				// start up intro loop
 			setmodeneeded = false;			// This may be set to true here, but isn't needed for a restart
 		}
 		// [BB] .. but the server needs to load the new startmap.
 		else
 		{
+			D_PrintStartup();
 			G_InitNew( startmap, false );
 		}
 
