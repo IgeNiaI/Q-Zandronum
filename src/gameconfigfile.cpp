@@ -562,16 +562,17 @@ void FGameConfigFile::ArchiveGameData (const char *gamename)
 
 	// Do not overwrite the serverinfo section if playing a netgame, and
 	// this machine was not the initial host.
-	if (( NETWORK_GetState( ) == NETSTATE_SINGLE ) || consoleplayer == 0)
+	bool isSinglePlayer = ( NETWORK_GetState( ) == NETSTATE_SINGLE ) || ( NETWORK_GetState( ) == NETSTATE_SINGLE_MULTIPLAYER );
+	if ( isSinglePlayer || consoleplayer == 0)
 	{
-		strncpy (subsection, ( NETWORK_GetState( ) != NETSTATE_SINGLE ) ? "NetServerInfo" : "LocalServerInfo", sublen);
+		strncpy (subsection, isSinglePlayer ? "LocalServerInfo" : "NetServerInfo", sublen);
 		SetSection (section, true);
 		ClearCurrentSection ();
 		C_ArchiveCVars (this, CVAR_ARCHIVE|CVAR_SERVERINFO);
 
 		if (bModSetup)
 		{
-			strncpy (subsection, ( NETWORK_GetState( ) != NETSTATE_SINGLE ) ? "NetServerInfo.Mod" : "LocalServerInfo.Mod", sublen);
+			strncpy (subsection, isSinglePlayer ? "LocalServerInfo.Mod" : "NetServerInfo.Mod", sublen);
 			SetSection (section, true);
 			ClearCurrentSection ();
 			C_ArchiveCVars (this, CVAR_MOD|CVAR_ARCHIVE|CVAR_AUTO|CVAR_SERVERINFO);
