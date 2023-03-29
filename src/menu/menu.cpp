@@ -78,6 +78,8 @@ CVAR (Float, snd_menuvolume, 0.3f, CVAR_ARCHIVE)
 CVAR(Int, m_use_mouse, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR(Int, m_show_backbutton, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
+EXTERN_CVAR(String, playerclass)
+
 DMenu *DMenu::CurrentMenu;
 int DMenu::MenuTime;
 
@@ -383,6 +385,7 @@ void M_SetMenu(FName menu, int param)
 		GameStartupInfo.Episode = -1;
 		GameStartupInfo.PlayerClass = 
 			param == -1000? NULL :
+			param == -2? playerclass :
 			param == -1? "Random" : GetPrintableDisplayName(PlayerClasses[param].Type);
 		break;
 
