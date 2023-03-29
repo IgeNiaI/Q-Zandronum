@@ -101,6 +101,15 @@ typedef struct CAMPAIGNINFO_s
 	// The compatflags that are to be used on this map.
 	LONG			lCompatFlags;
 
+	// [AK] The compatflags2 that are to be used on this map.
+	LONG			lCompatFlags2;
+
+	// [AK] The zadmflags that are to be used on this map.
+	LONG			lZaDMFlags;
+
+	// [AK] The zacompatflags that are to be used on this map.
+	LONG			lZaCompatFlags;
+
 	// The map for which this campaign data applies.
 	char			szMapName[9];
 

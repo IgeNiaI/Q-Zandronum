@@ -315,6 +315,9 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 		pInfo->lDMFlags				= -1;
 		pInfo->lDMFlags2			= -1;
 		pInfo->lCompatFlags			= -1;
+		pInfo->lCompatFlags2		= -1;
+		pInfo->lZaDMFlags			= -1;
+		pInfo->lZaCompatFlags		= -1;
 		pInfo->szMapName[0]			= 0;
 		pInfo->PlayerTeamName		= "";
 		pInfo->bMustWinAllDuels		= true;
@@ -430,6 +433,18 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 			else if ( stricmp( szKey, "compatflags" ) == 0 )
 			{
 				pInfo->lCompatFlags = atoi( szValue );
+			}
+			else if ( stricmp( szKey, "compatflags2" ) == 0 )
+			{
+				pInfo->lCompatFlags2 = atoi( szValue );
+			}
+			else if ( stricmp( szKey, "zadmflags" ) == 0 )
+			{
+				pInfo->lZaDMFlags = atoi( szValue );
+			}
+			else if ( stricmp( szKey, "zacompatflags" ) == 0 )
+			{
+				pInfo->lZaCompatFlags = atoi( szValue );
 			}
 			else if ( stricmp( szKey, "playerteam" ) == 0 )
 			{

@@ -1189,6 +1189,21 @@ void G_DoLoadLevel (int position, bool autosave)
 				Val.Int = pInfo->lCompatFlags;
 				compatflags.ForceSet( Val, CVAR_Int );
 			}
+			if ( pInfo->lCompatFlags2 != -1 )
+			{
+				Val.Int = pInfo->lCompatFlags2;
+				compatflags2.ForceSet( Val, CVAR_Int );
+			}
+			if ( pInfo->lZaDMFlags != -1 )
+			{
+				Val.Int = pInfo->lZaDMFlags;
+				zadmflags.ForceSet( Val, CVAR_Int );
+			}
+			if ( pInfo->lZaCompatFlags != -1 )
+			{
+				Val.Int = pInfo->lZaCompatFlags;
+				zacompatflags.ForceSet( Val, CVAR_Int );
+			}
 
 			Val.Bool = false;
 			deathmatch.ForceSet( Val, CVAR_Bool );
