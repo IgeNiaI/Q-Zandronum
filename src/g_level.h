@@ -325,6 +325,7 @@ struct level_info_t
 	FName		RedirectType;
 	char		RedirectMap[9];
 
+	FString		PreviewPic;
 	FString		EnterPic;
 	FString		ExitPic;
 	FString 	InterMusic;

@@ -1642,9 +1642,12 @@ static void InitKeySections()
 static void InitLevelsList()
 {
 	FOptionValues** opt = OptionValues.CheckKey( "ZA_Levels" );
+	FOptionValues** optNames = OptionValues.CheckKey("ZA_LevelNames");
+	FOptionValues** optTitles = OptionValues.CheckKey("ZA_LevelTitles");
+	FOptionValues** optPreviews = OptionValues.CheckKey("ZA_LevelPreviews");
 	FOptionValues::Pair pair;
 
-	if ( opt == NULL )
+	if ( opt == NULL && optNames == NULL && optTitles == NULL && optPreviews == NULL )
 		return;
 
 	for ( unsigned int i = 0; i < wadlevelinfos.Size(); ++i )
@@ -1662,8 +1665,26 @@ static void InitLevelsList()
 			{
 				level_info_t& info = wadlevelinfos[i];
 				pair.Value = i;
-				pair.Text.Format( "%s - %s", info.mapname, info.LookupLevelName().GetChars() );
-				( *opt )->mValues.Push( pair );
+				if ( opt != NULL )
+				{
+					pair.Text.Format( "%s - %s", info.mapname, info.LookupLevelName().GetChars() );
+					( *opt )->mValues.Push( pair );
+				}
+				if ( optNames != NULL )
+				{
+					pair.Text.Format( "%s", info.mapname );
+					( *optNames )->mValues.Push( pair );
+				}
+				if ( optTitles != NULL )
+				{
+					pair.Text.Format( "%s", info.LookupLevelName().GetChars() );
+					( *optTitles )->mValues.Push( pair );
+				}
+				if ( optPreviews != NULL )
+				{
+					pair.Text.Format( "%s", info.PreviewPic.GetChars() );
+					( *optPreviews )->mValues.Push( pair );
+				}
 			}
 		}
 		catch ( CRecoverableError& ) {}

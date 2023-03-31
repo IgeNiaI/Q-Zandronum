@@ -331,6 +331,9 @@ DefaultOptionMenu
 
 // [TP] Zandronum additions, these get filled in by the engine
 OptionValue ZA_Levels {}
+OptionValue ZA_LevelNames {}
+OptionValue ZA_LevelTitles {}
+OptionValue ZA_LevelPreviews {}
 OptionValue ZA_Bots {}
 OptionValue ZA_Announcers {}
 // [TP] --

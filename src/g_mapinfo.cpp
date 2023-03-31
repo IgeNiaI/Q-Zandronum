@@ -282,6 +282,7 @@ void level_info_t::Reset()
 	Translator = "";
 	RedirectType = 0;
 	RedirectMap[0] = 0;
+	PreviewPic = "NOMAPPIC";
 	EnterPic = "";
 	ExitPic = "";
 	InterMusic = "";
@@ -1045,6 +1046,13 @@ DEFINE_MAP_OPTION(airsupply, true)
 	parse.ParseAssign();
 	parse.sc.MustGetNumber();
 	info->airsupply = parse.sc.Number;
+}
+
+DEFINE_MAP_OPTION(previewpic, true)
+{
+	parse.ParseAssign();
+	parse.sc.MustGetString();
+	info->PreviewPic = parse.sc.String;
 }
 
 DEFINE_MAP_OPTION(interpic, true)
