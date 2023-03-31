@@ -895,7 +895,6 @@ OptionMenu "AltHUDOptions"
 {
 	Indent 153
 	Title "Alternative HUD"
-	//Indent 220
 	Option "Enable alternative HUD",				"hud_althud", "OnOff"
 	Option "Stretch alternative HUD",				"hud_althudscale", "AltHUDScale"
 	Option "Show secret count",						"hud_showsecrets", "OnOff"
@@ -949,7 +948,6 @@ OptionMenu "MiscOptions"
 {
 	Indent 153
 	Title "Miscellaneous Options"
-	//Indent 220
 	IfOption(Windows)
 	{
 		Option "Merge left+right Alt/Ctrl/Shift", 		"k_mergekeys", "OnOff"
@@ -1284,7 +1282,6 @@ OptionMenu GameplayOptions
 {
 	Indent 153
 	Title 	"GAMEPLAY OPTIONS"
-	//Indent 222
 	Option "Teamplay",				"teamplay",	"OnOff"
 	Slider	"Team damage scalar",	"teamdamage", 0, 1, 0.05
 	StaticText " "

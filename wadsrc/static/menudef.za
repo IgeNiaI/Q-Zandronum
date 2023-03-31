@@ -170,7 +170,6 @@ OptionMenu ZA_BotSetup
 	Indent 153
 	Title "BOT SETUP"
 	Class "BotSetupMenu"
-	Indent 80
 }
 
 OptionValue ZA_ServerType
@@ -213,7 +212,6 @@ OptionMenu ZA_ServerInfo
 	Indent 153
 	Title "SERVER INFORMATION"
 	Class "ServerInfoMenu"
-	Indent 80
 }
 
 OptionMenu ZA_Browser
@@ -221,7 +219,6 @@ OptionMenu ZA_Browser
 	Indent 153
 	Title "SERVER BROWSER"
 	Class "BrowserMenu"
-	Indent 80
 
 	Option		"Servers",		"menu_browser_servers",		"ZA_ServerType"
 	Option		"Gametype",		"menu_browser_gametype",		"ZA_ServerGamemode"
@@ -458,7 +455,6 @@ OptionMenu ZA_WeaponSetup
 {
 	Indent 153
 	Title		"WEAPON SETUP"
-	Indent 170
 
 	Option		"Switch on pickup",		"switchonpickup",				"ZA_SwitchOnPickup"
 	Option		"Switch without ammo",	"cl_noammoswitch",				"YesNo"
