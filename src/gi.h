@@ -134,6 +134,7 @@ struct gameinfo_t
 	FName mFontColorHighlight;
 	FName mFontColorSelection;
 	char mBackButton[9];
+	char mBackButtonSelection[9];
 	fixed_t gibfactor;
 	int TextScreenX;
 	int TextScreenY;

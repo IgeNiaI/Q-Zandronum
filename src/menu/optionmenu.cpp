@@ -461,6 +461,10 @@ void DOptionMenu::Drawer ()
 
 	if (CanScrollUp)
 	{
+		FTexture* tex = TexMan(gameinfo.mBackButton);
+		if (ytop < tex->GetScaledHeight() * CleanYfac_1)
+			ytop = tex->GetScaledHeight() * CleanYfac_1;
+		ytop += 4 * CleanYfac_1;
 		M_DrawConText(CR_ORANGE, 3 * CleanXfac_1, ytop, "\x1a");
 	}
 	if (CanScrollDown)

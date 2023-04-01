@@ -289,13 +289,17 @@ void DMenu::Drawer ()
 	if (this == DMenu::CurrentMenu && BackbuttonAlpha > 0 && m_show_backbutton >= 0 && m_use_mouse)
 	{
 		FTexture *tex = TexMan(gameinfo.mBackButton);
+		FTexture *texselected = TexMan(gameinfo.mBackButtonSelection);
 		int w = tex->GetScaledWidth() * CleanXfac;
 		int h = tex->GetScaledHeight() * CleanYfac;
 		int x = (!(m_show_backbutton&1))? 0:screen->GetWidth() - w;
 		int y = (!(m_show_backbutton&2))? 0:screen->GetHeight() - h;
 		if (mBackbuttonSelected && (mMouseCapture || m_use_mouse == 1))
 		{
-			screen->DrawTexture(tex, x, y, DTA_CleanNoMove, true, DTA_ColorOverlay, MAKEARGB(40, 255,255,255), TAG_DONE);
+			if (texselected != NULL)
+				screen->DrawTexture(texselected, x, y, DTA_CleanNoMove, true, DTA_Alpha, BackbuttonAlpha, TAG_DONE);
+			else
+				screen->DrawTexture(tex, x, y, DTA_CleanNoMove, true, DTA_ColorOverlay, MAKEARGB(40, 255,255,255), TAG_DONE);
 		}
 		else
 		{
