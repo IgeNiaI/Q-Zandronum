@@ -6470,6 +6470,11 @@ static bool server_CallVote( BYTESTREAM_s *pByteStream )
 	switch ( ulVoteCmd )
 	{
 	case VOTECMD_KICK:
+		
+		if (stricmp(Reason, "") == 0) {
+			SERVER_PrintfPlayer( g_lCurrentClient, "You cannot vote kick a player without a reason!\n");
+			return ( false );
+		}
 
 		bVoteAllowed = !sv_nokickvote;
 		sprintf( szCommand, "kick" );
