@@ -176,7 +176,7 @@ CUSTOM_CVAR (Int, vid_refreshrate, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 	}
 }
 
-CUSTOM_CVAR (Float, dimamount, 0.75f, CVAR_ARCHIVE)
+CUSTOM_CVAR (Float, dimamount, -1.f, CVAR_ARCHIVE)
 {
 	if (self < 0.f && self != -1.f)
 	{
@@ -187,7 +187,7 @@ CUSTOM_CVAR (Float, dimamount, 0.75f, CVAR_ARCHIVE)
 		self = 1.f;
 	}
 }
-CVAR (Color, dimcolor, 0x000000, CVAR_ARCHIVE)
+CVAR (Color, dimcolor, 0xffd700, CVAR_ARCHIVE)
 
 EXTERN_CVAR (Int, screenblocks)
 
