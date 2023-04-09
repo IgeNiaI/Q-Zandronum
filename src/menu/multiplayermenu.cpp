@@ -80,7 +80,7 @@
 
 static FRandom pr_randommapoption("RNDMapOpt");
 
-static void M_StartSkirmishGame();
+static void M_StartSkirmishGame(bool custom);
 static void M_ClearBotSlots();
 static void M_TextSizeScalarChanged();
 static void M_CallKickVote();
@@ -416,7 +416,7 @@ IMPLEMENT_CLASS( DBotSetupMenu )
 //
 // =================================================================================================
 
-static void M_StartSkirmishGame()
+static void M_StartSkirmishGame(bool custom)
 {
 	// [TP] Improved this sanity check
 	if (( menu_skirmishlevel < 0 ) || ( (unsigned) menu_skirmishlevel >= wadlevelinfos.Size() ))
@@ -455,7 +455,8 @@ static void M_StartSkirmishGame()
 
 	// [TP] Set default dmflags so that the gameplay is okay. ZDoom changed the gameplay settings
 	// to set dmflags directly, so we cannot rely on that anymore.
-	GAME_SetDefaultDMFlags();
+	if (!custom)
+		GAME_SetDefaultDMFlags();
 
 	// [BB] In non-cooperative game modes we need to enable multiplayer emulation,
 	// otherwise respawning and player class selection won't work properly.
@@ -1003,7 +1004,7 @@ static void M_AutoSelect()
 
 CCMD ( menu_startskirmish )
 {
-	M_StartSkirmishGame();
+	M_StartSkirmishGame(argv.argc() > 1 && stricmp(argv[1], "customgamemode") == 0);
 }
 
 CCMD ( menu_clearbotslots )
