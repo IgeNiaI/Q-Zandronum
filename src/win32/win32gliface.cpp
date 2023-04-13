@@ -160,7 +160,7 @@ void Win32GLVideo::GetDisplayDeviceName()
 
 void Win32GLVideo::MakeModesList()
 {
-	ModeInfo *pMode, *nextmode;
+	//ModeInfo *pMode, *nextmode;
 	DEVMODE dm;
 	int mode = 0;
 
@@ -173,7 +173,7 @@ void Win32GLVideo::MakeModesList()
 		++mode;
 	}
 
-	for (pMode = m_Modes; pMode != NULL; pMode = nextmode)
+	/*for (pMode = m_Modes; pMode != NULL; pMode = nextmode)
 	{
 		nextmode = pMode->next;
 		if (pMode->realheight == pMode->height && pMode->height * 4/3 == pMode->width)
@@ -187,7 +187,7 @@ void Win32GLVideo::MakeModesList()
 				AddMode (pMode->width, pMode->width * 10/16, pMode->bits, pMode->height, pMode->refreshHz);
 			}
 		}
-	}
+	}*/
 }
 
 //==========================================================================
@@ -254,12 +254,12 @@ void Win32GLVideo::AddMode(int x, int y, int bits, int baseHeight, int refreshHz
 		if (probe->width != x)		continue;
 		// Width is equal
 		if (probe->height != y)		continue;
-		// Width is equal
-		if (probe->realheight != baseHeight)	continue;
 		// Height is equal
+		if (probe->realheight != baseHeight)	continue;
+		// Real Height is equal
 		if (probe->bits != bits)	continue;
 		// Bits is equal
-		if (probe->refreshHz > refreshHz) continue;
+		if (probe->refreshHz > refreshHz) return;
 		probe->refreshHz = refreshHz;
 		return;
 	}
