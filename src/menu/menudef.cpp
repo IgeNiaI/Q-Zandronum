@@ -975,7 +975,14 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc, int i
 		else if (sc.Compare("screenresolution"))
 		{
 			sc.MustGetString();
-			FOptionMenuItem *it = new FOptionMenuScreenResolutionLine(sc.String);
+			FString action = sc.String;
+			int maxwidth = INT_MAX;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				maxwidth = sc.Number;
+			}
+			FOptionMenuItem *it = new FOptionMenuScreenResolutionLine(action, maxwidth);
 			if (insertIndex == -1)
 				desc->mItems.Push(it);
 			else

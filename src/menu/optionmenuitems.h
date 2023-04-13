@@ -870,6 +870,7 @@ class FOptionMenuScreenResolutionLine : public FOptionMenuItem
 	int mSelection;
 	int mHighlight;
 	int mMaxValid;
+	int mMaxWidth;
 public:
 
 	enum
@@ -879,11 +880,12 @@ public:
 		SRL_HIGHLIGHT = 0x30004,
 	};
 
-	FOptionMenuScreenResolutionLine(const char *action)
+	FOptionMenuScreenResolutionLine(const char *action, int maxWidth)
 		: FOptionMenuItem("", action)
 	{
 		mSelection = 0;
 		mHighlight = -1;
+		mMaxWidth = maxWidth;
 	}
 
 	bool SetValue(int i, int v)
@@ -959,8 +961,14 @@ public:
 
 	bool MouseEvent(int type, int x, int y)
 	{
-		int colwidth = screen->GetWidth() / 3;
-		mSelection = x / colwidth;
+		int colwidth = (mMaxWidth * CleanXfac_1 > 0 ? MIN(mMaxWidth * CleanXfac_1, screen->GetWidth()) : screen->GetWidth()) / 3;
+		x -= screen->GetWidth() / 2;
+		if (x < -colwidth / 2)
+			mSelection = 0;
+		else if (x > colwidth / 2)
+			mSelection = 2;
+		else
+			mSelection = 1;
 		return FOptionMenuItem::MouseEvent(type, x, y);
 	}
 
@@ -973,7 +981,7 @@ public:
 
 	int Draw(FOptionMenuDescriptor *desc, int y, int indent, bool selected)
 	{
-		int colwidth = screen->GetWidth() / 3;
+		int colwidth = (mMaxWidth * CleanXfac_1 > 0 ? MIN(mMaxWidth * CleanXfac_1, screen->GetWidth()) : screen->GetWidth()) / 3;
 		EColorRange color;
 
 		for (int x = 0; x < 3; x++)
@@ -985,7 +993,9 @@ public:
 			else
 				color = OptionSettings.mFontColorValue;
 
-			screen->DrawText (SmallFont, color, colwidth * x + 20 * CleanXfac_1, y, mResTexts[x], DTA_CleanNoMove_1, true, TAG_DONE);
+			int textWidth = SmallFont->StringWidth(mResTexts[x]) * CleanXfac_1;
+
+			screen->DrawText (SmallFont, color, colwidth * (x - 1) + screen->GetWidth() / 2 - textWidth / 2, y, mResTexts[x], DTA_CleanNoMove_1, true, TAG_DONE);
 		}
 		return colwidth * mSelection + 20 * CleanXfac_1 - CURSORSPACE;
 	}
