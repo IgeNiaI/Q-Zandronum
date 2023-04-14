@@ -528,6 +528,8 @@ OptionMenu "CustomizeControls"
 	StaticText 	"Other", 1
 	Control 	"Screenshot",			"screenshot"
 	Control		"Taunt",				"taunt" // [TP]
+	Control		"Quick Save",			"quicksave"
+	Control		"Quick Load",			"quickload"
 	Option		"Join the game",		"joinmenukey", "JoinMenuKeys" // [TP]
 	Control		"Join the game (custom)", "menu_join" // [TP]
 	Control  	"Ready to play",		"ready"
