@@ -65,6 +65,8 @@ void M_DrawConText (int color, int x, int y, const char *str)
 }
 
 
+EXTERN_CVAR(Int, m_show_backbutton)
+
 IMPLEMENT_CLASS(DOptionMenu)
 
 //=============================================================================
@@ -461,15 +463,43 @@ void DOptionMenu::Drawer ()
 
 	if (CanScrollUp)
 	{
-		FTexture* tex = TexMan(gameinfo.mBackButton);
-		if (ytop < tex->GetScaledHeight() * CleanYfac_1)
-			ytop = tex->GetScaledHeight() * CleanYfac_1;
+		if (m_show_backbutton == 0 && TexMan.CheckForTexture(gameinfo.mBackButton, FTexture::TEX_MiscPatch).isValid())
+		{
+			FTexture* texBack = TexMan(gameinfo.mBackButton);
+			if (ytop < texBack->GetScaledHeight() * CleanYfac_1)
+				ytop = texBack->GetScaledHeight() * CleanYfac_1;
+		}
 		ytop += 4 * CleanYfac_1;
-		M_DrawConText(CR_ORANGE, 3 * CleanXfac_1, ytop, "\x1a");
+		if (TexMan.CheckForTexture(gameinfo.mUpArrow, FTexture::TEX_MiscPatch).isValid())
+		{
+			FTexture* texArrow = TexMan(gameinfo.mUpArrow);
+			screen->DrawTexture(texArrow, 3 * CleanXfac_1, ytop, DTA_CleanNoMove_1, true, TAG_DONE);
+		}
+		else
+		{
+			M_DrawConText(CR_ORANGE, 3 * CleanXfac_1, ytop, "\x1a");
+		}
 	}
 	if (CanScrollDown)
 	{
-		M_DrawConText(CR_ORANGE, 3 * CleanXfac_1, y - 8*CleanYfac_1, "\x1b");
+		int ybot = 8 * CleanYfac_1;
+		if (m_show_backbutton == 2 && TexMan.CheckForTexture(gameinfo.mBackButton, FTexture::TEX_MiscPatch).isValid())
+		{
+			FTexture* texBack = TexMan(gameinfo.mBackButton);
+			if (ybot < texBack->GetScaledHeight() * CleanYfac_1)
+				ybot = texBack->GetScaledHeight() * CleanYfac_1;
+		}
+		if (TexMan.CheckForTexture(gameinfo.mDownArrow, FTexture::TEX_MiscPatch).isValid())
+		{
+			FTexture* texArrow = TexMan(gameinfo.mDownArrow);
+			ybot += texArrow->GetScaledHeight() * CleanYfac_1;
+			screen->DrawTexture(texArrow, 3 * CleanXfac_1, screen->GetHeight() - ybot, DTA_CleanNoMove_1, true, TAG_DONE);
+		}
+		else
+		{
+			ybot += 4 * CleanYfac_1;
+			M_DrawConText(CR_ORANGE, 3 * CleanXfac_1, screen->GetHeight() - ybot, "\x1b");
+		}
 	}
 	Super::Drawer();
 }
