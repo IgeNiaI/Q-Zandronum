@@ -5036,7 +5036,10 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 
 		if (puffclass != NULL && puffDefaults->flags3 & MF3_ALWAYSPUFF)
 		{
-			P_SpawnPuff(source, puffclass, trace.X, trace.Y, trace.Z, angle, 1, 0);
+			int puffflags = PF_HITTHING;
+			if (railflags & RAF_NORANDOMPUFFZ)
+				puffflags |= PF_NORANDOMZ;
+			P_SpawnPuff(source, puffclass, trace.X, trace.Y, trace.Z, angle, puffflags, 0);
 		}
 
 	}
