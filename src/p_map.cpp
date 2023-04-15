@@ -5039,7 +5039,8 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			int puffflags = PF_HITTHING;
 			if (railflags & RAF_NORANDOMPUFFZ)
 				puffflags |= PF_NORANDOMZ;
-			P_SpawnPuff(source, puffclass, trace.X, trace.Y, trace.Z, angle, puffflags, 0);
+			fixed_t closer = 4 * FRACUNIT;
+			P_SpawnPuff(source, puffclass, trace.X - FixedMul(vx, closer), trace.Y - FixedMul(vy, closer), trace.Z - FixedMul(vz, closer), angle, puffflags, 0);
 		}
 
 	}
