@@ -1094,7 +1094,7 @@ void FGLRenderer::RenderView (player_t* player)
 			// from scaling with the FOV scale.
 			desiredFOV *= fabsf(cameraPlayer->ReadyWeapon->FOVScale);
 		}
-		if (cameraPlayer->FOV != desiredFOV)
+		if (cameraPlayer->FOV != desiredFOV && !paused && !CLIENTDEMO_IsPaused() && (NETWORK_GetState() == NETSTATE_CLIENT || menuactive != MENU_On))
 		{
 			float fovChangeSpeed = cl_fovchangespeed;
 			if (fabsf(cameraPlayer->FOV - desiredFOV) < fovChangeSpeed)
