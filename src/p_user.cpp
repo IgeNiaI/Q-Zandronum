@@ -4466,32 +4466,32 @@ void P_MovePlayer(player_t *player)
 	}
 
 	// Execute ACS scripts assigned to action buttons
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_ATTACK);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USE);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_JUMP);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_CROUCH);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_TURN180);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_ALTATTACK);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_RELOAD);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_ZOOM);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_SPEED);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_STRAFE);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_MOVERIGHT);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_MOVELEFT);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_BACK);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_FORWARD);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_RIGHT);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_LEFT);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_LOOKUP);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_LOOKDOWN);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_MOVEUP);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_MOVEDOWN);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_SHOWSCORES);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USER1);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USER2);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USER3);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, BT_USER4);
-	player->mo->ExecuteActionScript(cmd->ucmd.buttons, player->oldbuttons, 0);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_ATTACK);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_USE);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_JUMP);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_CROUCH);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_TURN180);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_ALTATTACK);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_RELOAD);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_ZOOM);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_SPEED);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_STRAFE);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_MOVERIGHT);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_MOVELEFT);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_BACK);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_FORWARD);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_RIGHT);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_LEFT);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_LOOKUP);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_LOOKDOWN);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_MOVEUP);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_MOVEDOWN);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_SHOWSCORES);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_USER1);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_USER2);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_USER3);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, BT_USER4);
+	player->mo->ExecuteActionScript(player->original_cmd.buttons, player->original_oldbuttons, 0);
 }
 
 //==========================================================================
