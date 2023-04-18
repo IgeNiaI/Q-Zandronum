@@ -165,8 +165,8 @@ const char *KeyNames[NUM_KEYS] =
 	"Q",		"W",		"E",		"R",		"T",		"Y",		"U",		"I",		//10
 	"O",		"P",		"[",		"]",		"Enter",	"Ctrl",		"A",		"S",		//18
 	"D",		"F",		"G",		"H",		"J",		"K",		"L",		";",		//20
-	"'",		"`",		"Shift",	"\\",		"z",		"x",		"c",		"v",		//28
-	"b",		"n",		"m",		",",		".",		"/",		"rShift",	"kp*",		//30
+	"'",		"`",		"Shift",	"\\",		"Z",		"X",		"C",		"V",		//28
+	"B",		"N",		"M",		",",		".",		"/",		"rShift",	"kp*",		//30
 	"Alt",		"Space",	"CapsLock",	"F1",		"F2",		"F3",		"F4",		"F5",		//38
 	"F6",		"F7",		"F8",		"F9",		"F10",		"NumLock",	"Scroll",	"kp7",		//40
 	"kp8",		"kp9",		"kp-",		"kp4",		"kp5",		"kp6",		"kp+",		"kp1",		//48
