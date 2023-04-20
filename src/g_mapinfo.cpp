@@ -1227,6 +1227,75 @@ DEFINE_MAP_OPTION(defaultenvironment, false)
 }
 
 
+#ifdef NO_GL
+// Define these options so that Linux servers don't complain about unknown map definitions
+DEFINE_MAP_OPTION(fogdensity, false)
+{
+	parse.ParseAssign();
+	parse.sc.MustGetNumber();
+}
+
+DEFINE_MAP_OPTION(brightfog, false)
+{
+	parse.ParseAssign();
+	parse.sc.MustGetNumber();
+}
+
+DEFINE_MAP_OPTION(outsidefogdensity, false)
+{
+	parse.ParseAssign();
+	parse.sc.MustGetNumber();
+}
+
+DEFINE_MAP_OPTION(skyfog, false)
+{
+	parse.ParseAssign();
+	parse.sc.MustGetNumber();
+}
+
+DEFINE_MAP_OPTION(lightmode, false)
+{
+	parse.ParseAssign();
+	parse.sc.MustGetNumber();
+}
+
+DEFINE_MAP_OPTION(nocoloredspritelighting, false)
+{
+	if (parse.CheckAssign())
+	{
+		parse.sc.MustGetNumber();
+	}
+}
+
+DEFINE_MAP_OPTION(notexturefill, false)
+{
+	if (parse.CheckAssign())
+	{
+		parse.sc.MustGetNumber();
+	}
+}
+
+DEFINE_MAP_OPTION(skyrotate, false)
+{
+	parse.ParseAssign();
+	parse.sc.MustGetFloat();
+	if (parse.format_type == FMapInfoParser::FMT_New) parse.sc.MustGetStringName(",");
+	parse.sc.MustGetFloat();
+	if (parse.format_type == FMapInfoParser::FMT_New) parse.sc.MustGetStringName(",");
+	parse.sc.MustGetFloat();
+}
+
+DEFINE_MAP_OPTION(skyrotate2, false)
+{
+	parse.ParseAssign();
+	parse.sc.MustGetFloat();
+	if (parse.format_type == FMapInfoParser::FMT_New) parse.sc.MustGetStringName(",");
+	parse.sc.MustGetFloat();
+	if (parse.format_type == FMapInfoParser::FMT_New) parse.sc.MustGetStringName(",");
+	parse.sc.MustGetFloat();
+}
+#endif
+
 //==========================================================================
 //
 // All flag based map options 
