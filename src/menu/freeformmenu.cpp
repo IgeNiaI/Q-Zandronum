@@ -1118,13 +1118,9 @@ void FFreeformMenuItemOptionBase::Draw(FFreeformMenuDescriptor *desc, int yoffse
 	int Selection = GetSelection();
 	FOptionValues **opt = OptionValues.CheckKey(mValues);
 	if (Selection < 0 || opt == NULL || *opt == NULL)
-	{
-		mLabel = mUnknownValueText;
-	}
+		ReplaceString(&mLabel, mUnknownValueText);
 	else
-	{
-		mLabel = (*opt)->mValues[Selection].Text;
-	}
+		ReplaceString(&mLabel, (*opt)->mValues[Selection].Text);
 
 	FOptionValues** optback = OptionValues.CheckKey(mBackgroundValues);
 	if (Selection < 0 || optback == NULL || *optback == NULL)
@@ -1307,13 +1303,9 @@ void FFreeformMenuItemControl::Draw(FFreeformMenuDescriptor *desc, int yoffset, 
 	mBindings->GetKeysForCommand(mAction, &Key1, &Key2);
 	C_NameKeys (description, Key1, Key2);
 	if (description[0])
-	{
-		mLabel = description;
-	}
+		ReplaceString(&mLabel, description);
 	else
-	{
-		mLabel = "---";
-	}
+		ReplaceString(&mLabel, "---");
 
 	FFreeformMenuItemActionableBase::Draw(desc, yoffset, selected);
 }
@@ -1408,7 +1400,7 @@ bool FFreeformMenuItemColorPicker::Activate()
 	if (mCVar != NULL)
 	{
 		S_Sound (CHAN_VOICE | CHAN_UI, "menu/choose", snd_menuvolume, ATTN_NONE);
-		DMenu *picker = StartPickerMenu(DMenu::CurrentMenu, mLabel, mCVar);
+		DMenu *picker = StartPickerMenu(DMenu::CurrentMenu, NULL, mCVar);
 		if (picker != NULL)
 		{
 			M_ActivateMenu(picker);
@@ -1457,7 +1449,7 @@ FString FFreeformMenuFieldBase::Represent()
 
 void FFreeformMenuFieldBase::Draw(FFreeformMenuDescriptor *desc, int yoffset, bool selected)
 {
-	mLabel = Represent().GetChars();
+	ReplaceString(&mLabel, Represent().GetChars());
 	FFreeformMenuItemActionableBase::Draw(desc, yoffset, selected);
 }
 

@@ -46,7 +46,7 @@ void M_DrawConText (int color, int x, int y, const char *str);
 class FFreeformMenuItemLabel : public FFreeformMenuItem
 {
 protected:
-	const char *mLabel;
+	char *mLabel;
 	FFont* mFont;
 	int mMaxLabelWidth;
 	EColorRange mFontColor;
