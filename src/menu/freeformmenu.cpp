@@ -265,7 +265,7 @@ bool DFreeformMenu::MenuEvent(int mkey, bool fromcontroller)
 		selectedX += mDesc->mItems[mDesc->mSelectedItem]->GetWidth() * CleanXfac_1 / 2;
 		selectedY += mDesc->mItems[mDesc->mSelectedItem]->GetHeight() * CleanYfac_1 / 2;
 
-		selectedY += (mDesc->mItems[mDesc->mSelectedItem]->IsStatic() ? 0 : yOffset - mDesc->mScrollPos) * CleanYfac_1;
+		selectedY += (mDesc->mItems[mDesc->mSelectedItem]->IsStatic() ? 0 : yOffset) * CleanYfac_1;
 
 		int nearestDist = INT_MAX;
 		for (unsigned int i = 0; i < mDesc->mItems.Size(); i++)
@@ -277,7 +277,7 @@ bool DFreeformMenu::MenuEvent(int mkey, bool fromcontroller)
 				x += mDesc->mItems[i]->GetWidth() * CleanXfac_1 / 2;
 				y += mDesc->mItems[i]->GetHeight() * CleanYfac_1 / 2;
 
-				y += (mDesc->mItems[i]->IsStatic() ? 0 : yOffset - mDesc->mScrollPos) * CleanYfac_1;
+				y += (mDesc->mItems[i]->IsStatic() ? 0 : yOffset) * CleanYfac_1;
 
 				int xDiff = x - selectedX;
 				int yDiff = y - selectedY;
