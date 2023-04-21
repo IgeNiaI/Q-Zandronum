@@ -2746,12 +2746,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SpawnItemEx)
 				SERVER_SetThingNonZeroAngleAndVelocity( mo );
 			}
 
+			SERVERCOMMANDS_SetThingTarget ( mo );
+
 			if ( mo->Translation )
 				SERVERCOMMANDS_SetThingTranslation( mo );
-
-			// [BB] To properly handle actor-actor bouncing, the client must know the target.
-			if ( mo->BounceFlags != BOUNCE_None )
-				SERVERCOMMANDS_SetThingTarget ( mo );
 
 			// [BB] Set scale if necessary.
 			SERVERCOMMANDS_UpdateThingScaleNotAtDefault ( mo );
