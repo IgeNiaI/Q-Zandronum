@@ -38,6 +38,8 @@
 #include "i_video.h"
 #include "wi_stuff.h"
 #include "c_console.h"
+#include "c_dispatch.h"
+#include "d_event.h"
 #include "hu_stuff.h"
 #include "v_palette.h"
 #include "s_sndseq.h"
@@ -2525,6 +2527,11 @@ void WI_checkForAccelerate(void)
 	{
 		if (playeringame[i])
 		{
+			// [geNia] need to check for BT_SPEED specifically, because it's considered always pressed if cl_run is enabled
+			if (i == consoleplayer && Button_Speed.bDown)
+				player->cmd.ucmd.buttons |= BT_SPEED;
+			else
+				player->cmd.ucmd.buttons &= ~BT_SPEED;
 			if ((player->cmd.ucmd.buttons ^ player->oldbuttons) &&
 				((players[i].cmd.ucmd.buttons & players[i].oldbuttons)
 					== players[i].oldbuttons) && !player->bIsBot)
