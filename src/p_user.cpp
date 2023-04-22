@@ -3672,11 +3672,11 @@ void P_SetSlideStatus(player_t *player, const bool& isSliding)
 	if (isSliding && !player->mo->isCrouchSliding && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*crouchslide", 1, ATTN_NORM, true, NULL, true);
+			S_Sound(player->mo, CHAN_BODY | CHAN_LOOP, "*crouchslide", 1, ATTN_NORM, true, NULL, true);
 	}
 	else if (!isSliding && player->mo->isCrouchSliding)
 	{
-		S_StopSound(player->mo, CHAN_SEVEN, NULL, true);
+		S_StopSound(player->mo, CHAN_BODY, NULL, true);
 	}
 
 	if ( isSliding )
@@ -3713,11 +3713,11 @@ void P_SetClimbStatus(player_t *player, const bool& isClimbing)
 	if (isClimbing && !player->mo->isWallClimbing && !(player->mo->mvFlags & MV_SILENT))
 	{
 		if ( player->mo->ShouldPlaySound() )
-			S_Sound(player->mo, CHAN_SEVEN | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, true, NULL, true);
+			S_Sound(player->mo, CHAN_BODY | CHAN_LOOP, "*wallclimb", 1, ATTN_NORM, true, NULL, true);
 	}
 	else if (!isClimbing && player->mo->isWallClimbing)
 	{
-		S_StopSound(player->mo, CHAN_SEVEN, NULL, true);
+		S_StopSound(player->mo, CHAN_BODY, NULL, true);
 	}
 
 	if (isClimbing)
@@ -4698,7 +4698,7 @@ void P_DeathThink (player_t *player)
 
 	if ( player->mo->isCrouchSliding || player->mo->isWallClimbing )
 	{
-		S_StopSound( player->mo, CHAN_SEVEN );
+		S_StopSound( player->mo, CHAN_BODY );
 		player->mo->isCrouchSliding = false;
 		player->mo->isWallClimbing = false;
 	}
