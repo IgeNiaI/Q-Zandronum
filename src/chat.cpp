@@ -663,8 +663,7 @@ void CHAT_Render( void )
 	// Use different colors in team chat.
 	if ( g_ulChatMode == CHATMODE_TEAM )
 	{
-		promptColor = CR_GREY;
-		messageColor = static_cast<EColorRange>( TEAM_GetTextColor( players[consoleplayer].ulTeam ));
+		promptColor = static_cast<EColorRange>( TEAM_GetTextColor( players[consoleplayer].ulTeam ));
 	}
 
 	// [TP] If we're currently viewing the archive, use a different color

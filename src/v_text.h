@@ -72,8 +72,8 @@ struct FBrokenLines
 #define TEXTCOLOR_NORMAL		"\034-"
 #define TEXTCOLOR_BOLD			"\034+"
 
-#define TEXTCOLOR_CHAT			"\034*"
-#define TEXTCOLOR_TEAMCHAT		"\034!"
+#define TEXTCOLOR_CHAT			"\034C"
+#define TEXTCOLOR_TEAMCHAT		"\034C"
 
 // [BC] New text functions.
 void	V_ApplyCharArrayFunctionToFString ( FString &String, void (*CharArrayFunction) ( char *pszString ) );
