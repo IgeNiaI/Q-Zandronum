@@ -4719,6 +4719,27 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 			playerActor->WallClimbRegen = FIXED2FLOAT(value);
 		}
 		break;
+		
+	case APROP_AirWallRunMaxTics:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->AirWallRunMaxTics = FIXED2FLOAT(value);
+		}
+		break;
+
+	case APROP_AirWallRunRegen:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->AirWallRunRegen = FIXED2FLOAT(value);
+		}
+		break;
+		
+	case APROP_AirWallRunMinVelocity:
+		if (playerActor) {
+			if (value < 0) value = 0;
+			playerActor->AirWallRunMinVelocity = value;
+		}
+		break;
 
 	case APROP_AirAcceleration:
 		if (playerActor) {
@@ -4943,6 +4964,9 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_WallClimbSpeed:			return playerActor ? playerActor->WallClimbSpeed						: 0;
 	case APROP_WallClimbMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->WallClimbMaxTics )		: 0;
 	case APROP_WallClimbRegen:			return playerActor ? FLOAT2FIXED( playerActor->WallClimbRegen )			: 0;
+	case APROP_AirWallRunMaxTics:		return playerActor ? FLOAT2FIXED( playerActor->AirWallRunMaxTics )		: 0;
+	case APROP_AirWallRunRegen:			return playerActor ? FLOAT2FIXED( playerActor->AirWallRunRegen )		: 0;
+	case APROP_AirWallRunMinVelocity:	return playerActor ? playerActor->AirWallRunMinVelocity					: 0;
 	case APROP_AirAcceleration:			return playerActor ? playerActor->AirAcceleration						: 0;
 	case APROP_VelocityCap:				return playerActor ? playerActor->VelocityCap							: 0;
 	case APROP_GroundAcceleration:		return playerActor ? FLOAT2FIXED( playerActor->GroundAcceleration)		: 0;
@@ -5041,6 +5065,9 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_WallClimbSpeed:
 		case APROP_WallClimbMaxTics:
 		case APROP_WallClimbRegen:
+		case APROP_AirWallRunMaxTics:
+		case APROP_AirWallRunRegen:
+		case APROP_AirWallRunMinVelocity:
 		case APROP_AirAcceleration:
 		case APROP_VelocityCap:
 		case APROP_GroundAcceleration:
