@@ -105,11 +105,16 @@ EXTERN_CVAR( Int, sv_endleveldelay )
 
 CVAR( Bool, sv_forcerandomclass, false, 0 )
 
+CVAR(Int, sv_teamgamecountdowntime, 10, CVAR_ARCHIVE | CVAR_GAMEMODESETTING);
+CVAR(Bool, sv_teamgamewarmup, false, CVAR_ARCHIVE | CVAR_GAMEMODESETTING);
+
 //*****************************************************************************
 //	FUNCTIONS
 
 void TEAM_Construct( void )
 {
+	g_TeamState = TEAMS_WAITINGFORPLAYERS;
+
 	for ( ULONG i = 0; i < teams.Size( ); i++ )
 	{
 		TEAM_SetScore( i, 0, false );
@@ -152,21 +157,136 @@ void TEAM_Tick( void )
 {
 	ULONG	ulIdx;
 
-	for ( ulIdx = 0; ulIdx < teams.Size( ); ulIdx++ )
+	switch ( g_TeamState )
 	{
-		if ( teams[ulIdx].ulReturnTicks )
-		{
-			teams[ulIdx].ulReturnTicks--;
-			if ( teams[ulIdx].ulReturnTicks == 0 )
-				TEAM_ExecuteReturnRoutine( ulIdx, NULL );
-		}
-	}
+	case TEAMS_WAITINGFORPLAYERS:
 
-	if ( g_ulWhiteFlagReturnTicks )
+		if ( NETWORK_InClientMode() )
+		{
+			break;
+		}
+
+		// Two players are here now, begin the countdown or warmup state
+		if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
+		{
+			// Warmup only in non lobby maps
+			if ( sv_teamgamewarmup && !GAMEMODE_IsLobbyMap( ) )
+			{			
+				TEAM_SetState( TEAMS_WARMUP );
+				break;
+			}
+
+			// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
+			if ( sv_teamgamecountdowntime > 0 )
+				TEAM_StartCountdown(( sv_teamgamecountdowntime * TICRATE ) - 1 );
+			else
+				TEAM_StartCountdown(( 10 * TICRATE ) - 1 );
+		}
+		break;
+	case TEAMS_WARMUP:
+		if ( NETWORK_InClientMode() )
+		{
+			break;
+		}
+		
+		// Two players are here now, begin the countdown or warmup state
+		if ( TEAM_TeamsWithPlayersOn( ) <= 1 )
+		{
+			TEAM_SetState( TEAMS_WAITINGFORPLAYERS );
+			break;
+		}
+
+		break;
+	case TEAMS_COUNTDOWN:
+
+		if ( g_ulTeamCountdownTicks )
+		{
+			g_ulTeamCountdownTicks--;
+
+			// FIGHT!
+			if (( g_ulTeamCountdownTicks == 0 ) &&
+				( NETWORK_InClientMode() == false ))
+			{
+				TEAM_DoFight( );
+			}
+			// Play "3... 2... 1..." sounds.
+			else if ( g_ulTeamCountdownTicks == ( 3 * TICRATE ))
+				ANNOUNCER_PlayEntry( cl_announcer, "Three" );
+			else if ( g_ulTeamCountdownTicks == ( 2 * TICRATE ))
+				ANNOUNCER_PlayEntry( cl_announcer, "Two" );
+			else if ( g_ulTeamCountdownTicks == ( 1 * TICRATE ))
+				ANNOUNCER_PlayEntry( cl_announcer, "One" );
+		}
+		break;
+	case TEAMS_INPROGRESS:
+		
+		if ( NETWORK_InClientMode() == false )
+		{
+			for ( ulIdx = 0; ulIdx < teams.Size( ); ulIdx++ )
+			{
+				if ( teams[ulIdx].ulReturnTicks )
+				{
+					teams[ulIdx].ulReturnTicks--;
+					if ( teams[ulIdx].ulReturnTicks == 0 )
+						TEAM_ExecuteReturnRoutine( ulIdx, NULL );
+				}
+			}
+
+			if ( g_ulWhiteFlagReturnTicks )
+			{
+				g_ulWhiteFlagReturnTicks--;
+				if ( g_ulWhiteFlagReturnTicks == 0 )
+					TEAM_ExecuteReturnRoutine( ulIdx, NULL );
+			}
+		}
+		break;
+	default: //Satisfy GCC
+		break;
+	}
+}
+
+//*****************************************************************************
+//*****************************************************************************
+//
+ULONG TEAM_GetCountdownTicks( void )
+{
+	return ( g_ulTeamCountdownTicks );
+}
+
+//*****************************************************************************
+//
+void TEAM_SetCountdownTicks( ULONG ulTicks )
+{
+	g_ulTeamCountdownTicks = ulTicks;
+}
+
+//*****************************************************************************
+//
+TEAMSTATE_e TEAM_GetState( void )
+{
+	return ( g_TeamState );
+}
+
+//*****************************************************************************
+//
+void TEAM_SetState( TEAMSTATE_e State )
+{
+	g_TeamState = State;
+
+	// Tell clients about the state change.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_SetGameModeState( State, g_ulTeamCountdownTicks );
+
+	switch ( State )
 	{
-		g_ulWhiteFlagReturnTicks--;
-		if ( g_ulWhiteFlagReturnTicks == 0 )
-			TEAM_ExecuteReturnRoutine( ulIdx, NULL );
+	case TEAMS_WAITINGFORPLAYERS:
+
+		// Zero out the countdown ticker.
+		TEAM_SetCountdownTicks( 0 );
+
+		break;
+	default:
+		break;
 	}
 }
 
@@ -186,10 +306,6 @@ void TEAM_Reset( void )
 		TEAM_SetAnnouncedLeadState( i, false );
 		TEAM_SetAssistPlayer( i, MAXPLAYERS );
 
-		teams[i].g_Origin.x = 0;
-		teams[i].g_Origin.y = 0;
-		teams[i].g_Origin.z = 0;
-
 		switch ( i )
 		{
 		case 0:
@@ -205,6 +321,127 @@ void TEAM_Reset( void )
 
 	TEAM_SetWhiteFlagTaken( false );
 	g_ulWhiteFlagReturnTicks = 0;
+}
+
+//*****************************************************************************
+//
+bool TEAM_UpdateSpecialItemOrigin( ULONG teamId )
+{
+	AActor						*pItem;
+	AActor						*pNewSkull;
+	TThinkerIterator<AActor>	iterator;
+
+	if ( ( GAMEMODE_GetCurrentFlags() & GMF_USETEAMITEM ) &&
+		(( FBehavior::StaticCountTypedScripts( SCRIPT_Pickup ) == 0 ) ||
+		( FBehavior::StaticCountTypedScripts( TEAM_GetReturnScriptOffset( teamId ) ) == 0 )) )
+	{
+		if ( GAMEMODE_GetCurrentFlags() & GMF_USEFLAGASTEAMITEM )
+		{
+			TEAM_SetSimpleCTFSTMode( true );
+
+			while ( (pItem = iterator.Next( )))
+			{
+				for ( ULONG i = 0; i < TEAM_GetNumAvailableTeams( ); i++ )
+				{
+					if ( pItem->GetClass( ) == TEAM_GetItem( i ))
+					{
+						POS_t	Origin;
+
+						Origin.x = pItem->x;
+						Origin.y = pItem->y;
+						Origin.z = pItem->z;
+
+						TEAM_SetTeamItemOrigin( i, Origin );
+					}
+				}
+
+				if ( pItem->IsKindOf( PClass::FindClass( "WhiteFlag" )))
+				{
+					POS_t	Origin;
+
+					Origin.x = pItem->x;
+					Origin.y = pItem->y;
+					Origin.z = pItem->z;
+
+					TEAM_SetWhiteFlagOrigin( Origin );
+				}
+			}
+		}
+		// We found skulls but no flags. Set Skulltag mode.
+		else
+		{
+			TEAM_SetSimpleCTFSTMode( true );
+
+			while ( (pItem = iterator.Next( )))
+			{
+				for ( ULONG i = 0; i < TEAM_GetNumAvailableTeams( ); i++ )
+				{
+					if ( pItem->GetClass( ) == TEAM_GetItem( i ))
+					{
+						POS_t	Origin;
+
+						Origin.x = pItem->x;
+						Origin.y = pItem->y;
+						Origin.z = pItem->z;
+
+						TEAM_SetTeamItemOrigin( i, Origin );
+					}
+				}
+
+				if ( pItem->IsKindOf( PClass::FindClass( "BlueSkull" )))
+				{
+					POS_t	Origin;
+
+					// Replace this skull with skulltag mode's version of the skull.
+					pNewSkull = Spawn( PClass::FindClass( "BlueSkullST" ), pItem->x, pItem->y, pItem->z, NO_REPLACE );
+					if ( pNewSkull )
+					{
+						pNewSkull->flags &= ~MF_DROPPED;
+
+						// [BB] If we replace a map spawned item, the new item still needs to
+						// be considered map spawned. Otherwise it vanishes in a map reset.
+						if ( pItem->ulSTFlags & STFL_LEVELSPAWNED )
+							pNewSkull->ulSTFlags |= STFL_LEVELSPAWNED ;
+					}
+
+					Origin.x = pItem->x;
+					Origin.y = pItem->y;
+					Origin.z = pItem->z;
+
+					TEAM_SetTeamItemOrigin( 0, Origin );
+					pItem->Destroy( );
+				}
+
+				if ( pItem->IsKindOf( PClass::FindClass( "RedSkull" )))
+				{
+					POS_t	Origin;
+
+					// Replace this skull with skulltag mode's version of the skull.
+					pNewSkull = Spawn( PClass::FindClass( "RedSkullST" ), pItem->x, pItem->y, pItem->z, NO_REPLACE );
+					if ( pNewSkull )
+					{
+						pNewSkull->flags &= ~MF_DROPPED;
+
+						// [BB] If we replace a map spawned item, the new item still needs to
+						// be considered map spawned. Otherwise it vanishes in a map reset.
+						if ( pItem->ulSTFlags & STFL_LEVELSPAWNED )
+							pNewSkull->ulSTFlags |= STFL_LEVELSPAWNED ;
+					}
+
+					Origin.x = pItem->x;
+					Origin.y = pItem->y;
+					Origin.z = pItem->z;
+
+					TEAM_SetTeamItemOrigin( 1, Origin );
+					pItem->Destroy( );
+				}
+			}
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 //*****************************************************************************
@@ -764,8 +1001,104 @@ WORD TEAM_GetReturnScriptOffset( ULONG ulTeamIdx )
 
 //*****************************************************************************
 //
+void TEAM_StartCountdown( ULONG ulTicks )
+{
+	ULONG	ulIdx;
+
+	if ( NETWORK_InClientMode() == false )
+	{
+		// First, reset everything
+		TEAM_Reset( );
+
+		// Also, tell bots that a duel countdown is starting.
+		for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+		{
+			if ( playeringame[ulIdx] )
+			{
+				if ( players[ulIdx].pSkullBot )
+					players[ulIdx].pSkullBot->PostEvent( BOTEVENT_TEAM_STARTINGCOUNTDOWN );
+			}
+		}
+
+		// Put the game in a countdown state.
+		TEAM_SetState( TEAMS_COUNTDOWN );
+	}
+
+	// Set the game countdown ticks.
+	TEAM_SetCountdownTicks( ulTicks );
+
+	// Announce that the fight will soon start.
+	ANNOUNCER_PlayEntry( cl_announcer, "PrepareToFight" );
+
+	// Reset the first frag awarded flag.
+	MEDAL_ResetFirstFragAwarded( );
+
+	// Tell clients to start the countdown.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_DoGameModeCountdown( ulTicks );
+}
+
+//*****************************************************************************
+//
+void TEAM_DoFight( void )
+{
+	DHUDMessageFadeOut	*pMsg;
+
+	// No longer waiting to play.
+	if ( NETWORK_InClientMode() == false )
+	{
+		TEAM_SetState( TEAMS_INPROGRESS );
+	}
+
+	// Make sure this is 0. Can be non-zero in network games if they're slightly out of sync.
+	g_ulTeamCountdownTicks = 0;
+
+	// Since the level time is being reset, also reset the last frag/excellent time for
+	// each player.
+	PLAYER_ResetAllPlayersSpecialCounters();
+	
+	// Tell clients to "fight!".
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_DoGameModeFight( 0 );
+
+	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
+	{
+		// Play fight sound.
+		ANNOUNCER_PlayEntry( cl_announcer, "Fight" );
+
+		// [EP] Clear all the HUD messages.
+		StatusBar->DetachAllMessages();
+
+		// Display "FIGHT!" HUD message.
+		pMsg = new DHUDMessageFadeOut( BigFont, "FIGHT!",
+			160.4f,
+			75.0f,
+			320,
+			200,
+			CR_RED,
+			2.0f,
+			1.0f );
+
+		StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
+	}
+	// Display a little thing in the server window so servers can know when matches begin.
+	else
+		Printf( "FIGHT!\n" );
+
+	// Reset the map.
+	GAME_ResetMap( );
+	for (ULONG i = 0; i < teams.Size(); i++)
+		TEAM_UpdateSpecialItemOrigin( i );
+	GAMEMODE_RespawnAllPlayers( BOTEVENT_TEAM_FIGHT );
+
+	SCOREBOARD_RefreshHUD( );
+}
+
+//*****************************************************************************
+//
 void TEAM_DoWinSequence( ULONG ulTeamIdx )
 {
+	ULONG				ulIdx;
 	char				szString[32];
 	DHUDMessageFadeOut	*pMsg;
 
@@ -776,6 +1109,12 @@ void TEAM_DoWinSequence( ULONG ulTeamIdx )
 		sprintf( szString, "DRAW GAME!\n" );
 
 	V_ColorizeString( szString );
+	
+	// Put the duel state in the win sequence state.
+	if ( NETWORK_InClientMode() == false )
+	{
+		TEAM_SetState( TEAMS_WINSEQUENCE );
+	}
 
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
 	{
@@ -793,6 +1132,12 @@ void TEAM_DoWinSequence( ULONG ulTeamIdx )
 	else
 	{
 		SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_RED, 3.0f, 0.25f, "BigFont", false, MAKE_ID('C','N','T','R') );
+	}
+
+	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+	{
+		if (( playeringame[ulIdx] ) && ( players[ulIdx].pSkullBot ))
+			players[ulIdx].pSkullBot->PostEvent( BOTEVENT_TEAM_WINSEQUENCE );
 	}
 }
 
@@ -911,6 +1256,19 @@ const char *TEAM_GetName( ULONG ulTeamIdx )
 void TEAM_SetName( ULONG ulTeamIdx, const char *pszName )
 {
 	teams[ulTeamIdx].Name = pszName;
+}
+
+//*****************************************************************************
+//
+ULONG TEAM_GetLastTeamWithPlayers( void )
+{
+	for ( ULONG i = 0; i < teams.Size( ); i++ )
+	{
+		if ( TEAM_CountPlayers (i) > 0 )
+			return ( i );
+	}
+	
+	return teams.Size( );
 }
 
 //*****************************************************************************

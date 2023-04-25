@@ -1409,6 +1409,11 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 			ulState = LASTMANSTANDING_GetState( );
 			ulCountdownTicks = LASTMANSTANDING_GetCountdownTicks( );
 		}
+		else if ( teamgame )
+		{
+			ulState = TEAM_GetState( );
+			ulCountdownTicks = TEAM_GetCountdownTicks( );
+		}
 		else if ( deathmatch )
 		{
 			ulState = DEATHMATCH_GetState( );

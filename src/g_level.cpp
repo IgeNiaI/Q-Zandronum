@@ -219,6 +219,8 @@ CCMD (map)
 					POSSESSION_SetState( PSNS_WAITINGFORPLAYERS );
 				if ( invasion )
 					INVASION_SetState( IS_WAITINGFORPLAYERS );
+				if ( teamgame )
+					TEAM_SetState( TEAMS_WAITINGFORPLAYERS );
 
 				G_DeferedInitNew (argv[1]);
 			}

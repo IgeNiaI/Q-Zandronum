@@ -262,6 +262,21 @@ void JOINQUEUE_PlayerLeftGame( int player, bool pop )
 		}
 	}
 	
+	if ( teamgame && ( TEAM_TeamsWithPlayersOn( ) <= 1 ) )
+	{
+		// Someone just won by default!
+		if (( TEAM_GetState( ) == TEAMS_INPROGRESS ))
+		{
+			ULONG lastTeamWithPlayers = TEAM_GetLastTeamWithPlayers();
+
+			TEAM_DoWinSequence( lastTeamWithPlayers );
+
+			GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
+		}
+		else
+			TEAM_SetState( TEAMS_WAITINGFORPLAYERS );
+	}
+
 	if ( deathmatch && !duel && !lastmanstanding && !teamlms && !possession && !teampossession && !survival && !invasion)
 	{
 		if ( teamplay && TEAM_TeamsWithPlayersOn( ) <= 1 )
@@ -286,7 +301,7 @@ void JOINQUEUE_PlayerLeftGame( int player, bool pop )
 				GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 			}
 			else
-				DEATHMATCH_SetState(DEATHMATCHS_WAITINGFORPLAYERS );
+				DEATHMATCH_SetState( DEATHMATCHS_WAITINGFORPLAYERS );
 		}
 	}
 

@@ -64,12 +64,29 @@
 #define TEAM_MESSAGE_Y_AXIS		0.135f
 #define TEAM_MESSAGE_Y_AXIS_SUB 0.195f
 
+typedef enum
+{
+	TEAMS_WAITINGFORPLAYERS,
+	TEAMS_WARMUP,
+	TEAMS_COUNTDOWN,
+	TEAMS_INPROGRESS,
+	TEAMS_WINSEQUENCE,
+
+} TEAMSTATE_e;
+
+//*****************************************************************************
+//	VARIABLES
+
+static	ULONG		g_ulTeamCountdownTicks = 0;
+static	TEAMSTATE_e	g_TeamState;
+
 //*****************************************************************************
 //	PROTOTYPES
 
 void		TEAM_Construct( void );
 void		TEAM_Tick( void );
 void		TEAM_Reset( void );
+bool		TEAM_UpdateSpecialItemOrigin( ULONG teamId );
 ULONG		TEAM_CountPlayers( ULONG ulTeamIdx );
 ULONG		TEAM_CountLivingAndRespawnablePlayers( ULONG ulTeamIdx );
 ULONG		TEAM_TeamsWithPlayersOn( void );
@@ -79,16 +96,26 @@ void		TEAM_ScoreSkulltagPoint( player_t *pPlayer, ULONG ulNumPoints, AActor *pPi
 void		TEAM_DisplayNeedToReturnSkullMessage( player_t *pPlayer );
 void		TEAM_FlagDropped( player_t *pPlayer, ULONG ulTeamIdx );
 WORD		TEAM_GetReturnScriptOffset( ULONG ulTeamIdx );
+void		TEAM_StartCountdown( ULONG ulTicks );
+void		TEAM_DoFight( void );
 void		TEAM_DoWinSequence( ULONG ulTeamIdx );
 void		TEAM_TimeExpired( void );
 bool		TEAM_SpawningTemporaryFlag( void );
 
 // Access functions.
+
+ULONG		TEAM_GetCountdownTicks( void );
+void		TEAM_SetCountdownTicks( ULONG ulTicks );
+
+TEAMSTATE_e	TEAM_GetState(void);
+void		TEAM_SetState(TEAMSTATE_e State);
+
 bool		TEAM_CheckIfValid( ULONG ulTeamIdx );
 
 const char	*TEAM_GetName( ULONG ulTeamIdx );
 void		TEAM_SetName( ULONG ulTeamIdx, const char *pszName );
 
+ULONG		TEAM_GetLastTeamWithPlayers( void );
 ULONG		TEAM_GetTeamNumberByName( const char *pszName );
 
 int			TEAM_GetColor( ULONG ulTeamIdx );
@@ -189,13 +216,14 @@ ULONG		TEAM_FindValidClassForPlayer( player_t *pPlayer );
 void		TEAM_EnsurePlayerHasValidClass( player_t *pPlayer );
 LONG		TEAM_SelectRandomValidPlayerClass( ULONG ulTeam );
 bool		TEAM_IsActorVisibleToPlayer( const AActor *pActor, player_t *pPlayer );
-int		TEAM_GetPlayerStartThingNum( ULONG ulTeam );
+int			TEAM_GetPlayerStartThingNum( ULONG ulTeam );
 const char*	TEAM_GetTeamItemName( ULONG ulTeam );
 const char*	TEAM_GetIntermissionTheme( ULONG ulTeam, bool bWin );
 
 //*****************************************************************************
 //  EXTERNAL CONSOLE VARIABLES
 
+EXTERN_CVAR( Int, sv_teamgamecountdowntime )
 EXTERN_CVAR( Bool, teamgame )
 EXTERN_CVAR( Bool, ctf )
 EXTERN_CVAR( Bool, oneflagctf )

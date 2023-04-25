@@ -5222,6 +5222,11 @@ void ServerCommands::SetGameModeState::Execute()
 		INVASION_SetState( (INVASIONSTATE_e)theState);
 		INVASION_SetCountdownTicks( theCountdownTicks );
 	}
+	else if ( teamgame )
+	{
+		TEAM_SetState( (TEAMSTATE_e)theState);
+		TEAM_SetCountdownTicks( theCountdownTicks );
+	}
 	else if ( deathmatch )
 	{
 		DEATHMATCH_SetState( (DEATHMATCHSTATE_e)theState);
@@ -5315,6 +5320,8 @@ void ServerCommands::DoGameModeFight::Execute()
 		SURVIVAL_DoFight( );
 	else if ( invasion )
 		INVASION_BeginWave( currentWave );
+	else if ( teamgame )
+		TEAM_DoFight( );
 	else
 		DEATHMATCH_DoFight( );
 }
@@ -5334,6 +5341,8 @@ void ServerCommands::DoGameModeCountdown::Execute()
 		SURVIVAL_StartCountdown( ticks );
 	else if ( invasion )
 		INVASION_StartCountdown( ticks );
+	else if ( teamgame )
+		TEAM_StartCountdown( ticks );
 	else
 		DEATHMATCH_StartCountdown( ticks );
 }
@@ -5362,6 +5371,8 @@ void ServerCommands::DoGameModeWinSequence::Execute()
 //		POSSESSION_DoWinSequence( ulWinner );
 	else if ( invasion )
 		INVASION_DoWaveComplete( );
+	else if ( teamgame )
+		TEAM_SetState( TEAMS_WINSEQUENCE );
 	else if ( deathmatch )
 		DEATHMATCH_SetState( DEATHMATCHS_WINSEQUENCE );
 }

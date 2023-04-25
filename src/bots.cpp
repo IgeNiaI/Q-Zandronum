@@ -323,6 +323,9 @@ static	const char	*g_pszEventNames[NUM_BOTEVENTS] =
 	"BOTEVENT_DEATHMATCH_STARTINGCOUNTDOWN",
 	"BOTEVENT_DEATHMATCH_FIGHT",
 	"BOTEVENT_DEATHMATCH_WINSEQUENCE",
+	"BOTEVENT_TEAM_STARTINGCOUNTDOWN",
+	"BOTEVENT_TEAM_FIGHT",
+	"BOTEVENT_TEAM_WINSEQUENCE",
 };
 
 //*****************************************************************************

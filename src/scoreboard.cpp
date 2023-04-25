@@ -521,6 +521,36 @@ void SCOREBOARD_Render( ULONG ulDisplayPlayer )
 		}
 	}
 	
+	if ( teamgame )
+	{
+		// Determine what to draw based on the deathmatch state.
+		switch ( TEAM_GetState( ))
+		{
+		case TEAMS_COUNTDOWN:
+
+			if ( ctf || oneflagctf )
+				SCOREBOARD_RenderTeamgameCountdown( "CAPTURE THE FLAG", TEAM_GetCountdownTicks() + TICRATE);
+			else if ( skulltag )
+				SCOREBOARD_RenderTeamgameCountdown( "SKULLTAG", TEAM_GetCountdownTicks() + TICRATE);
+			else if ( domination )
+				SCOREBOARD_RenderTeamgameCountdown( "DOMINATION", TEAM_GetCountdownTicks() + TICRATE);
+			else
+				SCOREBOARD_RenderTeamgameCountdown( "TEAM GAME", TEAM_GetCountdownTicks() + TICRATE);
+			break;
+		case TEAMS_WAITINGFORPLAYERS:
+
+			if ( players[ulDisplayPlayer].bSpectating == false )
+			{
+				SCOREBOARD_DrawWaiting();
+				// Nothing more to do if we're just waiting for players.
+				return;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	
 	if ( deathmatch && !duel && !lastmanstanding && !teamlms && !possession && !teampossession && !survival && !invasion)
 	{
 		// Determine what to draw based on the deathmatch state.
@@ -1512,6 +1542,33 @@ void SCOREBOARD_RenderInvasionCountdown( ULONG ulTimeLeft )
 
 	ulCurYPos += 24;
 	sprintf( szString, "begins in: %d", static_cast<unsigned int> (ulTimeLeft / TICRATE) );
+	screen->DrawText( SmallFont, CR_UNTRANSLATED,
+		160 - ( SmallFont->StringWidth( szString ) / 2 ),
+		ulCurYPos,
+		szString,
+		DTA_Clean, true, TAG_DONE );
+}
+
+//*****************************************************************************
+//
+void SCOREBOARD_RenderTeamgameCountdown( const char *pszTitleString, ULONG ulTimeLeft )
+{
+	char				szString[128];
+	ULONG				ulCurYPos = 0;
+	
+	ulCurYPos = 32;
+	if ( gamestate == GS_LEVEL )
+	{
+		sprintf( szString, "%s", pszTitleString );
+		screen->DrawText( BigFont, gameinfo.gametype == GAME_Doom ? CR_RED : CR_UNTRANSLATED,
+			160 - ( BigFont->StringWidth( szString ) / 2 ),
+			ulCurYPos,
+			szString,
+			DTA_Clean, true, TAG_DONE );
+	}
+
+	ulCurYPos += 24;
+	sprintf( szString, "Match begins in: %d", static_cast<unsigned int> (ulTimeLeft / TICRATE) );
 	screen->DrawText( SmallFont, CR_UNTRANSLATED,
 		160 - ( SmallFont->StringWidth( szString ) / 2 ),
 		ulCurYPos,

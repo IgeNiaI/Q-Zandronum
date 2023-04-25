@@ -114,6 +114,7 @@ void	SCOREBOARD_RenderPossessionCountdown( const char *pszTitleString, ULONG ulT
 void	SCOREBOARD_RenderSurvivalCountdown( ULONG ulTimeLeft );
 void	SCOREBOARD_RenderInvasionFirstCountdown( ULONG ulTimeLeft );
 void	SCOREBOARD_RenderInvasionCountdown( ULONG ulTimeLeft );
+void	SCOREBOARD_RenderTeamgameCountdown( const char *pszTitleString, ULONG ulTimeLeft );
 void	SCOREBOARD_RenderDeathmatchCountdown( ULONG ulTimeLeft );
 bool	SCOREBOARD_ShouldDrawBoard( ULONG ulDisplayPlayer );
 bool	SCOREBOARD_ShouldDrawRank( ULONG player );

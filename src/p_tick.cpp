@@ -428,9 +428,6 @@ void P_Ticker (void)
 	// Tick the team module. The handles returning dropped flags/skulls.
 	if ( teamgame )
 	{
-		if ( NETWORK_InClientMode() == false )
-		{
-			TEAM_Tick( );
-		}
+		TEAM_Tick( );
 	}
 }

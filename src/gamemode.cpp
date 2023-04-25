@@ -660,6 +660,8 @@ bool GAMEMODE_IsGameWaitingForPlayers( void )
 		return ( LASTMANSTANDING_GetState( ) == LMSS_WAITINGFORPLAYERS );
 	else if ( possession || teampossession )
 		return ( POSSESSION_GetState( ) == PSNS_WAITINGFORPLAYERS );
+	else if ( teamgame )
+		return ( TEAM_GetState() == TEAMS_WAITINGFORPLAYERS );
 	// [BB] Non-coop game modes need two or more players.
 	else if ( deathmatch )
 		return ( DEATHMATCH_GetState( ) == DEATHMATCHS_WAITINGFORPLAYERS );
@@ -676,6 +678,8 @@ bool GAMEMODE_IsGameInWarmup( void )
 		return ( DUEL_GetState( ) == DS_WARMUP );
 	else if ( teamlms || lastmanstanding )
 		return ( LASTMANSTANDING_GetState( ) == LMSS_WARMUP );
+	else if ( teamgame )
+		return ( TEAM_GetState() == TEAMS_WARMUP );
 	else if ( deathmatch && !possession && !teampossession && !survival && !invasion )
 		return ( DEATHMATCH_GetState( ) == DEATHMATCHS_WARMUP );
 	else
@@ -698,6 +702,8 @@ bool GAMEMODE_IsGameInCountdown( void )
 	// [BB] What about PSNS_PRENEXTROUNDCOUNTDOWN?
 	else if ( possession || teampossession )
 		return ( ( POSSESSION_GetState( ) == PSNS_COUNTDOWN ) || ( POSSESSION_GetState( ) == PSNS_NEXTROUNDCOUNTDOWN ) );
+	else if ( teamgame )
+		return ( TEAM_GetState() == TEAMS_COUNTDOWN );
 	else if ( deathmatch )
 		return ( DEATHMATCH_GetState() == DEATHMATCHS_COUNTDOWN );
 	// [BB] The other game modes don't have a countdown.
@@ -722,6 +728,8 @@ bool GAMEMODE_IsGameInProgress( void )
 		return ( LASTMANSTANDING_GetState( ) == LMSS_INPROGRESS );
 	else if ( possession || teampossession )
 		return ( ( POSSESSION_GetState( ) == PSNS_INPROGRESS ) || ( POSSESSION_GetState( ) == PSNS_ARTIFACTHELD ) );
+	else if ( teamgame )
+		return ( TEAM_GetState() == TEAMS_INPROGRESS );
 	// [BB] In non-coop game modes without warmup phase, we just say the game is
 	// in progress when there are two or more players and the game is not frozen
 	// due to the end level delay.
@@ -744,6 +752,8 @@ bool GAMEMODE_IsGameInResultSequence( void )
 		return ( DUEL_GetState( ) == DS_WINSEQUENCE );
 	else if ( teamlms || lastmanstanding )
 		return ( LASTMANSTANDING_GetState( ) == LMSS_WINSEQUENCE );
+	else if ( teamgame )
+		return ( TEAM_GetState() == TEAMS_WINSEQUENCE );
 	else if ( deathmatch && !possession && !teampossession && !survival)
 		return ( DEATHMATCH_GetState() == DEATHMATCHS_WINSEQUENCE );
 	// [BB] The other game modes don't have such a sequnce. Arguably, possession
@@ -1179,6 +1189,8 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			LASTMANSTANDING_SetState( LMSS_WAITINGFORPLAYERS );
 		else if ( possession || teampossession )
 			POSSESSION_SetState( PSNS_WAITINGFORPLAYERS );
+		else if ( teamgame )
+			TEAM_SetState( TEAMS_WAITINGFORPLAYERS );
 		else if ( deathmatch )
 			DEATHMATCH_SetState( DEATHMATCHS_WAITINGFORPLAYERS );
 	}
@@ -1188,6 +1200,8 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			DUEL_SetState( DS_WARMUP );
 		else if ( teamlms || lastmanstanding )
 			LASTMANSTANDING_SetState( LMSS_WARMUP );
+		else if ( teamgame )
+			TEAM_SetState( TEAMS_WARMUP );
 		else if ( deathmatch )
 			DEATHMATCH_SetState( DEATHMATCHS_WARMUP );
 
@@ -1205,6 +1219,8 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			LASTMANSTANDING_SetState( LMSS_COUNTDOWN );
 		else if ( possession || teampossession )
 			POSSESSION_SetState( PSNS_COUNTDOWN );
+		else if ( teamgame )
+			TEAM_SetState( TEAMS_COUNTDOWN );
 		else if ( deathmatch )
 			DEATHMATCH_SetState( DEATHMATCHS_COUNTDOWN );
 	}
@@ -1220,6 +1236,8 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			LASTMANSTANDING_SetState( LMSS_INPROGRESS );
 		else if ( possession || teampossession )
 			POSSESSION_SetState( PSNS_INPROGRESS );
+		else if ( teamgame )
+			TEAM_SetState( TEAMS_INPROGRESS );
 		else if ( deathmatch )
 			DEATHMATCH_SetState( DEATHMATCHS_INPROGRESS );
 	}
@@ -1233,6 +1251,8 @@ void GAMEMODE_SetState( GAMESTATE_e GameState )
 			DUEL_SetState( DS_WINSEQUENCE );
 		else if ( teamlms || lastmanstanding )
 			LASTMANSTANDING_SetState( LMSS_WINSEQUENCE );
+		else if ( teamgame )
+			TEAM_SetState( TEAMS_WINSEQUENCE );
 		else if ( deathmatch )
 			DEATHMATCH_SetState( DEATHMATCHS_WINSEQUENCE );
 	}
@@ -1479,6 +1499,8 @@ ULONG GAMEMODE_GetCountdownTicks( void )
 		return ( LASTMANSTANDING_GetCountdownTicks() );
 	else if ( possession || teampossession )
 		return ( POSSESSION_GetCountdownTicks() );
+	else if ( teamgame )
+		return ( TEAM_GetCountdownTicks() );
 	else if ( deathmatch )
 		return ( DEATHMATCH_GetCountdownTicks() );
 
@@ -1500,6 +1522,8 @@ void GAMEMODE_SetCountdownTicks( const ULONG Ticks )
 		LASTMANSTANDING_SetCountdownTicks( Ticks );
 	else if ( possession || teampossession )
 		POSSESSION_SetCountdownTicks( Ticks );
+	else if ( teamgame )
+		TEAM_SetCountdownTicks( Ticks );
 	else if ( deathmatch )
 		DEATHMATCH_SetCountdownTicks( Ticks );
 }
@@ -1776,6 +1800,15 @@ bool GAMEMODE_StartMatch()
 			LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
 		else
 			LASTMANSTANDING_StartCountdown(( 10 * TICRATE ) - 1 );
+
+		return true;
+	}
+	else if ( teamgame )
+	{
+		if ( sv_teamgamecountdowntime > 0 )
+			TEAM_StartCountdown(( sv_teamgamecountdowntime * TICRATE ) - 1 );
+		else
+			TEAM_StartCountdown(( 10 * TICRATE ) - 1 );
 
 		return true;
 	}
