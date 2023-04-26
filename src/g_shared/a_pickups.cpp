@@ -768,7 +768,7 @@ AInventory *AInventory::CreateCopy (AActor *other)
 
 	if (GoAway ())
 	{
-		copy = static_cast<AInventory *>(Spawn (GetClass(), 0, 0, 0, NO_REPLACE));
+		copy = static_cast<AInventory *>(Spawn (GetClass(), x, y, z, NO_REPLACE));
 		copy->Amount = Amount;
 		copy->MaxAmount = MaxAmount;
 	}
