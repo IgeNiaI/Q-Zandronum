@@ -2070,7 +2070,7 @@ void APlayerPawn::GiveDefaultInventory ()
 	}
 
 	// [BB] If we're a client, tell the server the weapon we selected from the default inventory.
-	if (( NETWORK_GetState( ) == NETSTATE_CLIENT ) && (( player - players ) == consoleplayer ) && player->PendingWeapon )
+	if (( NETWORK_GetState( ) == NETSTATE_CLIENT ) && player && (( player - players ) == consoleplayer ) && player->PendingWeapon )
 	{
 		CLIENTCOMMANDS_WeaponSelect( player->PendingWeapon->GetClass( ));
 
