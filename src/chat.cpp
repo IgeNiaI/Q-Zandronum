@@ -626,12 +626,17 @@ bool CHAT_Input( event_t *pEvent )
 //
 void CHAT_Render( void )
 {
-	static const char *prompt = "SAY: ";
+	static const char* prompt;
+	if (g_ulChatMode == CHATMODE_TEAM)
+		prompt = "TEAM SAY: ";
+	else
+		prompt = "SAY: ";
 	static const char *cursor = gameinfo.gametype == GAME_Doom ? "_" : "[";
 	bool scale = ( con_scaletext ) && ( con_virtualwidth > 0 ) && ( con_virtualheight > 0 );
 	float scaleX = 1.0f;
 	float scaleY = 1.0f;
 	int positionY = ( gamestate == GS_INTERMISSION ) ? SCREENHEIGHT : ST_Y;
+	int leftOffset = 21;
 
 	if ( g_ulChatMode == CHATMODE_NONE )
 		return;
@@ -671,7 +676,7 @@ void CHAT_Render( void )
 		messageColor = CR_DARKGRAY;
 
 	// Render the chat string.
-	HUD_DrawText( SmallFont, promptColor, SmallFont->StringWidth( prompt ), positionY, prompt );
+	HUD_DrawText( SmallFont, promptColor, leftOffset, positionY, prompt );
 
 	if ( SmallFont->StringWidth( displayString ) > chatWidth )
 	{
@@ -682,7 +687,7 @@ void CHAT_Render( void )
 
 		for ( int i = 0; lines[i].Width != -1; ++i )
 		{
-			HUD_DrawText( SmallFont, messageColor, SmallFont->StringWidth( prompt ) * 2, messageY, lines[i].Text );
+			HUD_DrawText( SmallFont, messageColor, leftOffset + SmallFont->StringWidth( prompt ), messageY, lines[i].Text );
 			messageY += SmallFont->GetHeight();
 		}
 
@@ -690,7 +695,7 @@ void CHAT_Render( void )
 	}
 	else
 	{
-		HUD_DrawText( SmallFont, messageColor, SmallFont->StringWidth( prompt ) * 2, positionY, displayString );
+		HUD_DrawText( SmallFont, messageColor, leftOffset + SmallFont->StringWidth( prompt ), positionY, displayString );
 	}
 
 	// [RC] Tell chatters about the iron curtain of LMS chat.
