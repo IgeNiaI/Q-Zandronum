@@ -52,6 +52,12 @@
 #include "gi.h"
 #include "stats.h"
 
+CUSTOM_CVAR(Bool, sv_fulltranslatesaturation, false, CVAR_ARCHIVE | CVAR_GAMEMODESETTING) // [geNia]
+{
+	D_UpdatePlayerColors();
+}
+
+
 TAutoGrowArray<FRemapTablePtr, FRemapTable *> translationtables[NUM_TRANSLATION_TABLES];
 
 
@@ -987,8 +993,11 @@ static void R_CreatePlayerTranslation (float h, float s, float v, const FPlayerC
 	else if (gameinfo.gametype & GAME_DoomStrifeChex)
 	{
 		// Build player sprite translation
-		s -= 0.23f;
-		v += 0.1f;
+		if (!sv_fulltranslatesaturation)
+		{
+			s -= 0.23f;
+			v += 0.1f;
+		}
 		sdelta = 0.23f / range;
 		vdelta = -0.94112f / range;
 
