@@ -72,7 +72,7 @@ struct FDirectoryLump : public FResourceLump
 	virtual FileReader *NewReader();
 	virtual int FillCache();
 
-private:
+	FString mFullPath;
 };
 
 
@@ -314,6 +314,9 @@ void FDirectory::AddEntry(const char *fullpath, int size)
 {
 	FDirectoryLump *lump_p = &Lumps[Lumps.Reserve(1)];
 
+	// Store the full path here so that we can access the file later, even if it is from a filter directory.
+	lump_p->mFullPath = fullpath;
+
 	// The lump's name is only the part relative to the main directory
 	lump_p->LumpNameSetup(fullpath + strlen(Filename));
 	lump_p->LumpSize = size;
@@ -333,9 +336,7 @@ FileReader *FDirectoryLump::NewReader()
 {
 	try
 	{
-		FString fullpath = Owner->Filename;
-		fullpath += FullName;
-		return new FileReader(fullpath);
+		return new FileReader(mFullPath);
 	}
 	catch (CRecoverableError &)
 	{
@@ -353,6 +354,11 @@ int FDirectoryLump::FillCache()
 {
 	Cache = new char[LumpSize];
 	FileReader *reader = NewReader();
+	if (reader == NULL)
+	{
+		memset(Cache, 0, LumpSize);
+		return 0;
+	}
 	reader->Read(Cache, LumpSize);
 	delete reader;
 	RefCount = 1;
