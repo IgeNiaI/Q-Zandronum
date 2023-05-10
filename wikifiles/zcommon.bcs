@@ -309,7 +309,12 @@ enum {
    APROP_COUNTER4,
    APROP_COUNTER5,
    APROP_COUNTER6,
-   APROP_COUNTER7
+   APROP_COUNTER7,
+
+   APROP_AbsoluteSecondJump	= 110,
+   APROP_GroundSecondJump,
+   APROP_User4Jump,
+   APROP_Translation
 };
 
 enum {

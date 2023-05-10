@@ -342,6 +342,7 @@ enum
 	APROP_AbsoluteSecondJump	= 110,
 	APROP_GroundSecondJump		= 111,
 	APROP_User4Jump				= 112,
+	APROP_Translation			= 113,
 };
 
 // [Dusk] Enumeration for GetTeamProperty

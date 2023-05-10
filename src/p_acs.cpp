@@ -4534,6 +4534,10 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		actor->SetShade(value);
 		break;
 
+	case APROP_Translation:
+		actor->Translation = value;
+		break;
+
 
 	// Flags
 		
@@ -4912,6 +4916,7 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_ReactionTime:			return actor->reactiontime;
 	case APROP_MeleeRange:				return actor->meleerange;
 	case APROP_StencilColor:			return actor->fillcolor;
+	case APROP_Translation:				return actor->Translation;
 
 	// Strings
 	case APROP_SeeSound:				return GlobalACSStrings.AddString(actor->SeeSound, stack, stackdepth);
