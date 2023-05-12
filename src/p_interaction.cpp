@@ -636,8 +636,13 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 						ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
 					}
 
-					// Pause for five seconds for the win sequence.
-					if ( duel )
+					if ( teamplay && ( source->player->bOnTeam ) )
+					{
+						TEAM_DoWinSequence( source->player->ulTeam );
+
+						GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
+					}
+					else if ( duel )
 					{
 						// Also, do the win sequence for the player.
 						DUEL_SetLoser( player - players );
@@ -648,7 +653,6 @@ void AActor::Die (AActor *source, AActor *inflictor, int dmgflags)
 
 						GAME_SetEndLevelDelay( sv_endleveldelay * TICRATE );
 					}
-					// End the level after five seconds.
 					else
 					{
 						DEATHMATCH_DoWinSequence( source->player );
