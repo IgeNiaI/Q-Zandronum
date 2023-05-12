@@ -395,7 +395,9 @@ player_t::player_t()
   restoreY( 0 ),
   restoreZ( 0 ),
   restoreFloorZ( 0 ),
-  restoreCeilingZ( 0 )
+  restoreCeilingZ( 0 ),
+  FutureRadiusAttack( 0 ),
+  FutureThrust( 0 )
 {
 	memset (&cmd, 0, sizeof(cmd));
 	// [BB] Check if this is still necessary.
@@ -551,6 +553,8 @@ player_t::player_t()
 	  restoreZ = p.restoreZ;
 	  restoreFloorZ = p.restoreFloorZ;
 	  restoreCeilingZ = p.restoreCeilingZ;
+	  FutureRadiusAttack = p.FutureRadiusAttack;
+	  FutureThrust = p.FutureThrust;
 
 	  return *this;
   }
