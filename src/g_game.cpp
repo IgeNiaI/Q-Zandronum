@@ -3021,8 +3021,6 @@ void GAME_CheckMode( void )
 	ULONG						ulNumSkulls;
 	bool						bPlayerStarts = false;
 	bool						bTeamStarts = false;
-	AActor						*pItem;
-	AActor						*pNewSkull;
 	cluster_info_t				*pCluster;
 	TThinkerIterator<AActor>	iterator;
 
