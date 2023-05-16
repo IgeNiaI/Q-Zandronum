@@ -60,6 +60,7 @@ Actor PlayerPawn : Actor native
 	Player.AirWallRunMinVelocity 10.0
 	Player.AirAcceleration 0.25
 	Player.VelocityCap 0
+	Player.DoubleTapMaxTics 10
 	
 	// MvType 1 or 2 only
 	Player.GroundAcceleration 10.0

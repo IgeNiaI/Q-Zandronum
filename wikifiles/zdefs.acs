@@ -387,6 +387,7 @@
 #define APROP_GroundSecondJump		111
 #define APROP_User4Jump				112
 #define APROP_Translation			113
+#define APROP_DoubleTapMaxTics		114
 
 // Movement types
 #define MVTYPE_DOOM			0

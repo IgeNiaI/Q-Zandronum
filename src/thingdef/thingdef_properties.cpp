@@ -3288,3 +3288,13 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, wallclimbeffectinterval, I, PlayerPawn)
 	if (i < 0) i = 0;
 	defaults->WallClimbEffectInterval = i;
 }
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, doubletapmaxtics, I, PlayerPawn)
+{
+	PROP_INT_PARM(i, 0);
+	if (i < 0) i = 0;
+	defaults->DoubleTapMaxTics = i;
+}

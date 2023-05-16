@@ -877,6 +877,7 @@ void APlayerPawn::Serialize (FArchive &arc)
 		<< FootstepInterval
 		<< CrouchSlideEffectInterval
 		<< WallClimbEffectInterval
+		<< DoubleTapMaxTics
 		<< FootstepVolume
 		<< WallClimbMaxTics
 		<< WallClimbRegen
@@ -3636,7 +3637,7 @@ bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 	{
 		if (!player->mo->prepareTapValue)
 		{
-			player->mo->secondJumpTics = -10;
+			player->mo->secondJumpTics = -player->mo->DoubleTapMaxTics;
 			player->mo->prepareTapValue = tapValue;
 		}
 		else

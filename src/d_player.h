@@ -235,6 +235,7 @@ public:
 	int			FootstepInterval;
 	int			CrouchSlideEffectInterval;
 	int			WallClimbEffectInterval;
+	int			DoubleTapMaxTics;
 	float		FootstepVolume;
 	float		WallClimbMaxTics;
 	float		WallClimbRegen;

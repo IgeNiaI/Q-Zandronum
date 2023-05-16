@@ -314,7 +314,8 @@ enum {
    APROP_AbsoluteSecondJump	= 110,
    APROP_GroundSecondJump,
    APROP_User4Jump,
-   APROP_Translation
+   APROP_Translation,
+   APROP_DoubleTapMaxTics
 };
 
 enum {

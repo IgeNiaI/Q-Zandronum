@@ -4825,6 +4825,12 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		}
 		break;
 
+	case APROP_DoubleTapMaxTics:
+		if (playerActor) {
+			playerActor->DoubleTapMaxTics = value;
+		}
+		break;
+
 	case APROP_JumpTics:
 		if (playerActor) {
 			playerActor->jumpTics = value;
@@ -4985,6 +4991,7 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_CpmMaxForwardAngleRad:	return playerActor ? FLOAT2FIXED( playerActor->CpmMaxForwardAngleRad )	: 0;
 	case APROP_CrouchSlideEffectInterval:return playerActor? playerActor->CrouchSlideEffectInterval				: 0;
 	case APROP_WallClimbEffectInterval:	return playerActor ? playerActor->WallClimbEffectInterval				: 0;
+	case APROP_DoubleTapMaxTics:		return playerActor ? playerActor->DoubleTapMaxTics						: 0;
 	case APROP_JumpTics:				return playerActor ? playerActor->jumpTics								: 0;
 	case APROP_SecondJumpTics:			return playerActor ? playerActor->secondJumpTics						: 0;
 	case APROP_SecondJumpsRemaining:	return playerActor ? playerActor->secondJumpsRemaining					: 0;
