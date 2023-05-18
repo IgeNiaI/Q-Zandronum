@@ -274,8 +274,8 @@ public:
 	bool		isWallClimbing;
 	float		airWallRunTics;
 	bool		isAirWallRunning;
-	int			prepareTapValue;
 	int			lastTapValue;
+	int			lastMoveButtonsBefore;
 
 	// Scripts to execute when the player presses the action buttons
 	FNameNoInit

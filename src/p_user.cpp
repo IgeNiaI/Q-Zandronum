@@ -3627,42 +3627,33 @@ void APlayerPawn::QAcceleration(FVector3 &vel, const FVector3 &wishdir, const fl
 //
 //==========================================================================
 
+const int MOVE_BUTTONS = BT_FORWARD + BT_BACK + BT_MOVELEFT + BT_MOVERIGHT;
+
 bool DoubleTapCheck(player_t *player, const ticcmd_t * const cmd)
 {
-	bool success = false;
-	int tapValue = cmd->ucmd.forwardmove | cmd->ucmd.sidemove;
-	int secondTapValue = 0;
+	int tapValue = abs(cmd->ucmd.forwardmove) + abs(cmd->ucmd.sidemove);
 
-	if (tapValue & ~player->mo->lastTapValue)
+	if (tapValue > player->mo->lastTapValue)
 	{
-		if (!player->mo->prepareTapValue)
+		player->mo->lastTapValue = tapValue;
+
+		if (player->mo->secondJumpTics < 0 && (cmd->ucmd.buttons & MOVE_BUTTONS) == player->mo->lastMoveButtonsBefore)
 		{
-			player->mo->secondJumpTics = -player->mo->DoubleTapMaxTics;
-			player->mo->prepareTapValue = tapValue;
+			player->mo->lastMoveButtonsBefore = 0;
+			return true;
 		}
 		else
 		{
-			if (tapValue != player->mo->prepareTapValue)
-				player->mo->prepareTapValue = 0;
-			else
-				secondTapValue = tapValue;
+			player->mo->secondJumpTics = -player->mo->DoubleTapMaxTics;
 		}
 	}
-
-	if (secondTapValue && player->mo->secondJumpTics < 0)
+	else if (tapValue < player->mo->lastTapValue)
 	{
-		player->mo->prepareTapValue = 0;
-
-		success = true;
-	}
-	else if (player->mo->secondJumpTics >= 0)
-	{
-		player->mo->prepareTapValue = 0;
+		player->mo->lastMoveButtonsBefore = player->oldbuttons & MOVE_BUTTONS;
+		player->mo->lastTapValue = tapValue;
 	}
 
-	player->mo->lastTapValue = tapValue;
-
-	return success;
+	return false;
 }
 
 //==========================================================================
@@ -5156,6 +5147,7 @@ void P_PlayerThink (player_t *player)
 	}
 	if (player->mo->secondJumpTics > 0)
 	{
+		player->mo->lastTapValue = abs(cmd->ucmd.forwardmove) + abs(cmd->ucmd.sidemove);
 		if (player->mo->secondJumpsRemaining != 0)
 			player->mo->secondJumpTics--;
 	}
