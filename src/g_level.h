@@ -319,6 +319,7 @@ struct level_info_t
 	FName		Intermission;
 	FName		deathsequence;
 	FName		slideshow;
+	int			categoryflags;
 
 	// Redirection: If any player is carrying the specified item, then
 	// you go to the RedirectMap instead of this one.

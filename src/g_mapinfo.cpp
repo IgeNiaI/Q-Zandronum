@@ -294,6 +294,7 @@ void level_info_t::Reset()
 	specialactions.Clear();
 	DefaultEnvironment = 0;
 	PrecacheSounds.Clear();
+	categoryflags = 0;
 }
 
 
@@ -1314,6 +1315,7 @@ enum EMIType
 	MITYPE_SCFLAGS2,
 	MITYPE_COMPATFLAG,
 	MITYPE_SETFLAGZA, // [BB]
+	MITYPE_CATEGORYFLAGS, // [geNia]
 };
 
 struct MapInfoFlagHandler
@@ -1438,6 +1440,15 @@ MapFlagHandlers[] =
 	{ "cd_end3_track",					MITYPE_EATNEXT,	0, 0 },
 	{ "cd_intermission_track",			MITYPE_EATNEXT,	0, 0 },
 	{ "cd_title_track",					MITYPE_EATNEXT,	0, 0 },
+	{ "category1",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_1, 0 },
+	{ "category2",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_2, 0 },
+	{ "category3",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_3, 0 },
+	{ "category4",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_4, 0 },
+	{ "category5",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_5, 0 },
+	{ "category6",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_6, 0 },
+	{ "category7",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_7, 0 },
+	{ "category8",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_8, 0 },
+	{ "category9",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_9, 0 },
 	{ NULL, MITYPE_IGNORE, 0, 0}
 };
 
@@ -1532,6 +1543,11 @@ void FMapInfoParser::ParseMapDefinition(level_info_t &info)
 			case MITYPE_SETFLAGZA:
 				info.flagsZA |= handler->data1;
 				info.flagsZA |= handler->data2;
+				break;
+				
+			// [geNia]
+			case MITYPE_CATEGORYFLAGS:
+				info.categoryflags |= handler->data1;
 				break;
 
 			default:

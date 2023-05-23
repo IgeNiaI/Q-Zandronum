@@ -336,10 +336,16 @@ DefaultOptionMenu
 }
 
 // [TP] Zandronum additions, these get filled in by the engine
-OptionValue ZA_Levels {}
-OptionValue ZA_LevelNames {}
-OptionValue ZA_LevelTitles {}
-OptionValue ZA_LevelPreviews {}
+OptionValue ZA_Levels {}	OptionValue ZA_LevelNames {}	OptionValue ZA_LevelTitles {}	OptionValue ZA_LevelPreviews {}
+OptionValue ZA_Levels1 {}	OptionValue ZA_LevelNames1 {}	OptionValue ZA_LevelTitles1 {}	OptionValue ZA_LevelPreviews1 {}
+OptionValue ZA_Levels2 {}	OptionValue ZA_LevelNames2 {}	OptionValue ZA_LevelTitles2 {}	OptionValue ZA_LevelPreviews2 {}
+OptionValue ZA_Levels3 {}	OptionValue ZA_LevelNames3 {}	OptionValue ZA_LevelTitles3 {}	OptionValue ZA_LevelPreviews3 {}
+OptionValue ZA_Levels4 {}	OptionValue ZA_LevelNames4 {}	OptionValue ZA_LevelTitles4 {}	OptionValue ZA_LevelPreviews4 {}
+OptionValue ZA_Levels5 {}	OptionValue ZA_LevelNames5 {}	OptionValue ZA_LevelTitles5 {}	OptionValue ZA_LevelPreviews5 {}
+OptionValue ZA_Levels6 {}	OptionValue ZA_LevelNames6 {}	OptionValue ZA_LevelTitles6 {}	OptionValue ZA_LevelPreviews6 {}
+OptionValue ZA_Levels7 {}	OptionValue ZA_LevelNames7 {}	OptionValue ZA_LevelTitles7 {}	OptionValue ZA_LevelPreviews7 {}
+OptionValue ZA_Levels8 {}	OptionValue ZA_LevelNames8 {}	OptionValue ZA_LevelTitles8 {}	OptionValue ZA_LevelPreviews8 {}
+OptionValue ZA_Levels9 {}	OptionValue ZA_LevelNames9 {}	OptionValue ZA_LevelTitles9 {}	OptionValue ZA_LevelPreviews9 {}
 OptionValue ZA_Bots {}
 OptionValue ZA_Announcers {}
 // [TP] --
