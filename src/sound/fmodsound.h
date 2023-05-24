@@ -1,8 +1,10 @@
 #ifndef FMODSOUND_H
 #define FMODSOUND_H
 
-#ifndef NO_SOUND
+
+#ifndef NO_FMOD
 #include "i_sound.h"
+
 #include "fmod_wrap.h"
 
 class FMODSoundRenderer : public SoundRenderer

@@ -60,9 +60,11 @@ extern HINSTANCE g_hInst;
 #include "doomtype.h"
 #include <math.h>
 
-#ifndef NO_SOUND
 #include "fmodsound.h"
-#endif
+#include "oalsound.h"
+
+#include "mpg123_decoder.h"
+#include "sndfile_decoder.h"
 
 #include "m_swap.h"
 #include "stats.h"
@@ -86,6 +88,14 @@ EXTERN_CVAR (Float, snd_sfxvolume)
 CVAR (Int, snd_samplerate, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Int, snd_buffersize, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (String, snd_output, "default", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+
+#ifndef NO_FMOD
+CVAR (String, snd_backend, "fmod", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+#elif !defined(NO_OPENAL)
+CVAR (String, snd_backend, "openal", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+#else
+CVAR (String, snd_backend, "null", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+#endif
 
 // killough 2/21/98: optionally use varying pitched sounds
 CVAR (Bool, snd_pitched, false, CVAR_ARCHIVE)
@@ -248,10 +258,6 @@ public:
 
 void I_InitSound ()
 {
-#ifdef NO_SOUND
-	GSnd = new NullSoundRenderer;
-	I_InitMusic ();
-#else
 	/* Get command line options: */
 	nosound = !!Args->CheckParm ("-nosound") || !!Args->CheckParm("-host"); // [BB] No sound for the server
 	nosfx = !!Args->CheckParm ("-nosfx") || !!Args->CheckParm("-host"); // [BB]
@@ -263,17 +269,25 @@ void I_InitSound ()
 		return;
 	}
 
-	GSnd = new FMODSoundRenderer;
+    if(stricmp(snd_backend, "null") == 0)
+        GSnd = new NullSoundRenderer;
+    #ifndef NO_FMOD
+    else if(stricmp(snd_backend, "fmod") == 0)
+        GSnd = new FMODSoundRenderer;
+    #endif
+    #ifndef NO_OPENAL
+    else if(stricmp(snd_backend, "openal") == 0)
+        GSnd = new OpenALSoundRenderer;
+    #endif
 
 	if (!GSnd->IsValid ())
 	{
 		I_CloseSound();
 		GSnd = new NullSoundRenderer;
-		Printf (TEXTCOLOR_RED"Sound init failed. Using nosound.\n");
+		Printf ( TEXTCOLOR_RED "Sound init failed. Using nosound.\n");
 	}
 	I_InitMusic ();
 	snd_sfxvolume.Callback ();
-#endif
 }
 
 
@@ -336,9 +350,28 @@ FString SoundRenderer::GatherStats ()
 	return "No stats for this sound renderer.";
 }
 
-short *SoundRenderer::DecodeSample(int outlen, const void *coded, int sizebytes, ECodecType type)
+short *SoundRenderer::DecodeSample(int outlen, const void *coded, int sizebytes, ECodecType ctype)
 {
-	return NULL;
+    MemoryReader reader((const char*)coded, sizebytes);
+    short *samples = (short*)calloc(1, outlen);
+    ChannelConfig chans;
+    SampleType type;
+    int srate;
+
+    SoundDecoder *decoder = CreateDecoder(&reader);
+    if(!decoder) return samples;
+
+    decoder->getInfo(&srate, &chans, &type);
+    if(chans != ChannelConfig_Mono || type != SampleType_Int16)
+    {
+        DPrintf("Sample is not 16-bit mono\n");
+        delete decoder;
+        return samples;
+    }
+
+    decoder->read((char*)samples, outlen);
+    delete decoder;
+    return samples;
 }
 
 void SoundRenderer::DrawWaveDebug(int mode)
@@ -518,3 +551,46 @@ SoundHandle SoundRenderer::LoadSoundVoc(BYTE *sfxdata, int length)
 	return retval;
 }
 
+SoundDecoder *SoundRenderer::CreateDecoder(FileReader *reader)
+{
+    SoundDecoder *decoder = NULL;
+    int pos = reader->Tell();
+
+#ifdef HAVE_MPG123
+        decoder = new MPG123Decoder;
+        if (decoder->open(reader))
+            return decoder;
+        reader->Seek(pos, SEEK_SET);
+
+        delete decoder;
+        decoder = NULL;
+#endif
+#ifdef HAVE_SNDFILE
+        decoder = new SndFileDecoder;
+        if (decoder->open(reader))
+            return decoder;
+        reader->Seek(pos, SEEK_SET);
+
+        delete decoder;
+        decoder = NULL;
+#endif
+    return decoder;
+}
+
+
+// Default readAll implementation, for decoders that can't do anything better
+TArray<char> SoundDecoder::readAll()
+{
+    TArray<char> output;
+    size_t total = 0;
+    size_t got;
+
+    output.Resize(total+32768);
+    while((got=read(&output[total], output.Size()-total)) > 0)
+    {
+        total += got;
+        output.Resize(total*2);
+    }
+    output.Resize(total);
+    return output;
+}

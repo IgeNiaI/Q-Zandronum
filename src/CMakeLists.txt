@@ -186,9 +186,11 @@ else( WIN32 )
 
 		# [BB] The server doesn't need sound, GTK or OpenGL.
 		if( SERVERONLY )
-			set( NO_SOUND ON )
 			set( NO_GTK ON )
 			set( NO_GL ON )
+			set( NO_SOUND ON )
+			set( NO_OPENAL ON )
+			set( NO_FMOD ON )
 			add_definitions ( -DSERVER_ONLY=1 )
 			set( ZDOOM_EXE_NAME ${ZDOOM_EXE_NAME}-server )
 		endif( SERVERONLY )
@@ -264,6 +266,24 @@ else( WIN32 )
 	endif( NO_GL )
 endif( WIN32 )
 
+if( NOT NO_SOUND )
+if( NOT NO_OPENAL )
+	find_package( OpenAL )
+	mark_as_advanced(CLEAR OPENAL_INCLUDE_DIR)
+	if( OPENAL_INCLUDE_DIR )
+		include_directories( ${OPENAL_INCLUDE_DIR} )
+		mark_as_advanced(CLEAR OPENAL_LIBRARY)
+		if( OPENAL_LIBRARY )
+			set( ZDOOM_LIBS ${OPENAL_LIBRARY} ${ZDOOM_LIBS} )
+		else( OPENAL_LIBRARY )
+			set( NO_OPENAL ON )
+		endif( OPENAL_LIBRARY )
+	endif( OPENAL_INCLUDE_DIR )
+	else( NOT NO_OPENAL )
+		set( NO_OPENAL ON )
+endif( NOT NO_OPENAL )
+endif( NOT NO_SOUND )
+
 if( X64 )
 	set( NO_ASM ON )
 endif( X64 )
@@ -281,6 +301,20 @@ if( NOT NO_GL )
 	set( ZDOOM_LIBS ${ZDOOM_LIBS} ${OPENGL_LIBRARIES} )
 	include_directories( ${OPENGL_INCLUDE_DIR} )
 endif( NOT NO_GL )
+
+if( NO_OPENAL )
+	add_definitions( -DNO_OPENAL=1 )
+
+	set(MPG123_FOUND NO)
+	set(SNDFILE_FOUND NO)
+else()
+	# Search for libSndFile
+
+	find_package( SndFile )
+
+	# Search for libmpg123
+	find_package( MPG123 )
+endif()
 
 # Decide on the name of the FMOD library we want to use.
 
@@ -315,7 +349,9 @@ if( FMOD_INCLUDE_DIR )
 else( FMOD_INCLUDE_DIR )
 	# [BB] Without sound, we don't need FMOD.
 	if ( NOT NO_SOUND )
+	if	( NOT NO_FMOD )
 		message( SEND_ERROR "Could not find FMOD include files" )
+	endif ( NOT NO_FMOD )
 	endif ( NOT NO_SOUND )
 endif( FMOD_INCLUDE_DIR )
 
@@ -337,7 +373,9 @@ if( FMOD_LIBRARY )
 else( FMOD_LIBRARY )
 	# [BB] Without sound, we don't need FMOD.
 	if ( NOT NO_SOUND )
-		message( SEND_ERROR "Could not find FMOD library" )
+	if ( NOT NO_FMOD )
+	message( SEND_ERROR "Could not find FMOD library" )
+	endif ( NOT NO_FMOD )
 	endif ( NOT NO_SOUND )
 endif( FMOD_LIBRARY )
 
@@ -1341,6 +1379,7 @@ add_executable( zdoom WIN32
 	resourcefiles/resourcefile.cpp
 	sfmt/SFMT.cpp
 	sound/fmodsound.cpp
+	sound/oalsound.cpp
 	sound/i_music.cpp
 	sound/i_sound.cpp
 	sound/music_cd.cpp

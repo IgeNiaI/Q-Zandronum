@@ -5,6 +5,9 @@ list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} )
 include( CreateLaunchers )
 include( FindPackageHandleStandardArgs )
 
+option( NO_FMOD "Disable FMODEx sound support" )
+option( NO_OPENAL "Disable OpenAL sound support" )
+
 # Generator expression are available some time in CMake 2.8. Due to
 # cmake_minimum_required, we can assume a minor version of > 7 implies major >= 2
 if(${CMAKE_MAJOR_VERSION} GREATER 2 OR ${CMAKE_MINOR_VERSION} GREATER 7)

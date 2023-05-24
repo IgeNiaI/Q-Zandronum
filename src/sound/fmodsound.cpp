@@ -54,7 +54,7 @@ extern HWND Window;
 #endif
 
 #include "templates.h"
-#ifndef NO_SOUND
+#ifndef NO_FMOD
 #include "fmodsound.h"
 #endif
 #include "c_cvars.h"
@@ -145,7 +145,7 @@ CUSTOM_CVAR (Float, snd_waterlp, 250, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 	}
 }
 
-#ifndef NO_SOUND
+#ifndef NO_FMOD
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 

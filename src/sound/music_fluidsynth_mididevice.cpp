@@ -296,8 +296,8 @@ FluidSynthMIDIDevice::FluidSynthMIDIDevice()
 	if (0 == LoadPatchSets(fluid_patchset))
 	{
 #ifdef __unix__
-		// This is the standard location on Ubuntu.
-		if (0 == LoadPatchSets("/usr/share/sounds/sf2/FluidR3_GS.sf2:/usr/share/sounds/sf2/FluidR3_GM.sf2"))
+		// This is the standard location on ZDoom for Pandora :).
+		if (0 == LoadPatchSets("/mnt/utmp/zdoom/share/FluidR3_GS.sf2:/mnt/utmp/zdoom/share/TimGM6mb.sf2"))
 		{
 #endif
 #ifdef _WIN32
