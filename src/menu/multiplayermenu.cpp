@@ -189,6 +189,15 @@ CVAR ( Int, menu_teambotspawn77, -1, CVAR_ARCHIVE )
 CVAR ( Int, menu_teambotspawn78, -1, CVAR_ARCHIVE )
 CVAR ( Int, menu_teambotspawn79, -1, CVAR_ARCHIVE )
 CVAR ( Int, menu_skirmishlevel, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel1, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel2, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel3, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel4, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel5, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel6, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel7, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel8, 0, CVAR_ARCHIVE )
+CVAR ( Int, menu_skirmishlevel9, 0, CVAR_ARCHIVE )
 CVAR ( Int, menu_skirmishgamemode, 0, CVAR_ARCHIVE )
 CVAR ( Int, menu_skirmishmodifier, 0, CVAR_ARCHIVE )
 CVAR ( Int, menu_callvotemap, 0, CVAR_ARCHIVE )
@@ -219,25 +228,50 @@ CUSTOM_CVAR ( Int, menu_textsizescalar, 0, CVAR_NOINITCALL )
 	M_TextSizeScalarChanged();
 }
 
-static int GetLevelNumFromName(char* mapname)
+static int GetLevelNumFromName(const char* mapname, int category)
 {
 	if (stricmp(mapname, "random") == 0)
 	{
 		for (int i = 0; i < 100; i++)
 		{
 			// Cycle until we find a valid map or up to 100 times
-			int levelnum = pr_randommapoption() % wadlevelinfos.Size();
-			MapData* mdata = NULL;
-			try
+			if (category > 0)
 			{
-				if ((mdata = P_OpenMapData(wadlevelinfos[levelnum].mapname, false)) != NULL)
+				FString categoryOptions = "ZA_LevelNames";
+				switch (category)
 				{
-					delete mdata;
-					return levelnum;
+				case 1: categoryOptions = "ZA_LevelNames1"; break;
+				case 2: categoryOptions = "ZA_LevelNames2"; break;
+				case 3: categoryOptions = "ZA_LevelNames3"; break;
+				case 4: categoryOptions = "ZA_LevelNames4"; break;
+				case 5: categoryOptions = "ZA_LevelNames5"; break;
+				case 6: categoryOptions = "ZA_LevelNames6"; break;
+				case 7: categoryOptions = "ZA_LevelNames7"; break;
+				case 8: categoryOptions = "ZA_LevelNames8"; break;
+				case 9: categoryOptions = "ZA_LevelNames9"; break;
+				}
+				FOptionValues** optNames = OptionValues.CheckKey(categoryOptions);
+				if (optNames != NULL)
+				{
+					int levelnum = pr_randommapoption() % (*optNames)->mValues.Size();
+					return GetLevelNumFromName((*optNames)->mValues[levelnum].Text.GetChars(), 0);
 				}
 			}
-			catch (CRecoverableError&) {}
-			delete mdata;
+			else
+			{
+				int levelnum = pr_randommapoption() % wadlevelinfos.Size();
+				MapData* mdata = NULL;
+				try
+				{
+					if ((mdata = P_OpenMapData(wadlevelinfos[levelnum].mapname, false)) != NULL)
+					{
+						delete mdata;
+						return levelnum;
+					}
+				}
+				catch (CRecoverableError&) {}
+				delete mdata;
+			}
 		}
 	}
 	else
@@ -271,16 +305,58 @@ CCMD(setskirmishlevel)
 {
 	if (argv.argc() > 1)
 	{
-		int levelnum = GetLevelNumFromName(argv[1]);
+		int category = argv.argc() > 2 ? atoi(argv[2]) : 0;
+		int currentlevelnum;
+		switch (category)
+		{
+		case 1: currentlevelnum = menu_skirmishlevel1; break;
+		case 2: currentlevelnum = menu_skirmishlevel2; break;
+		case 3: currentlevelnum = menu_skirmishlevel3; break;
+		case 4: currentlevelnum = menu_skirmishlevel4; break;
+		case 5: currentlevelnum = menu_skirmishlevel5; break;
+		case 6: currentlevelnum = menu_skirmishlevel6; break;
+		case 7: currentlevelnum = menu_skirmishlevel7; break;
+		case 8: currentlevelnum = menu_skirmishlevel8; break;
+		case 9: currentlevelnum = menu_skirmishlevel9; break;
+		default: currentlevelnum = menu_skirmishlevel;
+		}
+
+		int levelnum;
+		if (stricmp(argv[1], "random") == 0)
+		{
+			// Try to random up to 100 times to avoid selecting the same map again
+			for (int i = 0; i < 100; i++)
+			{
+				levelnum = GetLevelNumFromName(argv[1], category);
+				if (levelnum != currentlevelnum)
+					break;
+			}
+		}
+		else
+		{
+			levelnum = GetLevelNumFromName(argv[1], 0);
+		}
 
 		if (levelnum >= 0)
-			menu_skirmishlevel = levelnum;
+			switch (category)
+			{
+			case 1: menu_skirmishlevel1 = levelnum; break;
+			case 2: menu_skirmishlevel2 = levelnum; break;
+			case 3: menu_skirmishlevel3 = levelnum; break;
+			case 4: menu_skirmishlevel4 = levelnum; break;
+			case 5: menu_skirmishlevel5 = levelnum; break;
+			case 6: menu_skirmishlevel6 = levelnum; break;
+			case 7: menu_skirmishlevel7 = levelnum; break;
+			case 8: menu_skirmishlevel8 = levelnum; break;
+			case 9: menu_skirmishlevel9 = levelnum; break;
+			default: menu_skirmishlevel = levelnum;
+			}
 		else
 			Printf("Can't find level %s\n", argv[1]);
 	}
 	else
 	{
-		Printf ("Usage: setskirmishlevel <map name>\n");
+		Printf ("Usage: setskirmishlevel <map name> [category]\n");
 	}
 }
 
@@ -288,7 +364,22 @@ CCMD(setcallvotemap)
 {
 	if (argv.argc() > 1)
 	{
-		int levelnum = GetLevelNumFromName(argv[1]);
+		int currentlevelnum = menu_callvotemap;
+		int levelnum;
+		if (stricmp(argv[1], "random") == 0)
+		{
+			// Try to random up to 100 times to avoid selecting the same map again
+			for (int i = 0; i < 100; i++)
+			{
+				levelnum = GetLevelNumFromName(argv[1], 0);
+				if (levelnum != currentlevelnum)
+					break;
+			}
+		}
+		else
+		{
+			levelnum = GetLevelNumFromName(argv[1], 0);
+		}
 
 		if (levelnum >= 0)
 			menu_callvotemap = levelnum;
@@ -416,10 +507,24 @@ IMPLEMENT_CLASS( DBotSetupMenu )
 //
 // =================================================================================================
 
-static void M_StartSkirmishGame(bool custom)
+static void M_StartSkirmishGame(bool custom, int category)
 {
+	int levelnum = menu_skirmishlevel;
+	switch (category)
+	{
+	case 1: levelnum = menu_skirmishlevel1; break;
+	case 2: levelnum = menu_skirmishlevel2; break;
+	case 3: levelnum = menu_skirmishlevel3; break;
+	case 4: levelnum = menu_skirmishlevel4; break;
+	case 5: levelnum = menu_skirmishlevel5; break;
+	case 6: levelnum = menu_skirmishlevel6; break;
+	case 7: levelnum = menu_skirmishlevel7; break;
+	case 8: levelnum = menu_skirmishlevel8; break;
+	case 9: levelnum = menu_skirmishlevel9; break;
+	}
+
 	// [TP] Improved this sanity check
-	if (( menu_skirmishlevel < 0 ) || ( (unsigned) menu_skirmishlevel >= wadlevelinfos.Size() ))
+	if (( levelnum < 0 ) || ( (unsigned) levelnum >= wadlevelinfos.Size() ))
 	{
 		// Invalid level selected.
 		return;
@@ -484,7 +589,7 @@ static void M_StartSkirmishGame(bool custom)
 	// for example when going from D2IG03 to D2IG04 (both started from the skirmish menu).
 	// Since G_InitNew calls BOTSPAWN_ClearTable() we have to call BOTSPAWN_BlockClearTable()
 	// to protect the table. Not very elegant, but seems to work.
-	G_DeferedInitNew( wadlevelinfos[menu_skirmishlevel].mapname );
+	G_DeferedInitNew( wadlevelinfos[levelnum].mapname );
 	BOTSPAWN_ClearTable();
 	BOTSPAWN_BlockClearTable();
 	gamestate = gamestate == GS_FULLCONSOLE ? GS_HIDECONSOLE : gamestate;
@@ -1004,7 +1109,8 @@ static void M_AutoSelect()
 
 CCMD ( menu_startskirmish )
 {
-	M_StartSkirmishGame(argv.argc() > 1 && stricmp(argv[1], "customgamemode") == 0);
+	M_StartSkirmishGame(argv.argc() > 1 && stricmp(argv[1], "customgamemode") == 0,
+		argv.argc() > 2 ? atoi(argv[2]) : 0);
 }
 
 CCMD ( menu_clearbotslots )
