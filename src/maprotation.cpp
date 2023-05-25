@@ -55,8 +55,6 @@
 #include "m_random.h"
 #include "maprotation.h"
 #include "p_setup.h"
-#include "cl_commands.h"
-#include "network.h"
 #include "sv_commands.h"
 #include "network.h"
 
@@ -307,9 +305,7 @@ CCMD( addmapsilent ) // Backwards API needed for server console, RCON.
 //
 CCMD( maplist )
 {
-	if ( NETWORK_GetState( ) == NETSTATE_CLIENT )
-		CLIENTCOMMANDS_RequestMaplist();
-	else if ( g_MapRotationEntries.size( ) == 0 )
+	if ( g_MapRotationEntries.size( ) == 0 )
 		Printf( "The map rotation list is empty.\n" );
 	else
 	{
