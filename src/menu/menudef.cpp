@@ -2693,62 +2693,54 @@ static void InitLevelsList()
 			{
 				level_info_t& info = wadlevelinfos[i];
 				pair.Value = i;
-				if ( opt[0] != NULL )
-				{
-					pair.Text.Format( "%s - %s", info.mapname, info.LookupLevelName().GetChars() );
-					( *opt[0] )->mValues.Push( pair );
-					if ( opt[1] != NULL && info.categoryflags & MAPCATEGORYF_1 ) ( *opt[1] )->mValues.Push( pair );
-					if ( opt[2] != NULL && info.categoryflags & MAPCATEGORYF_2 ) ( *opt[2] )->mValues.Push( pair );
-					if ( opt[3] != NULL && info.categoryflags & MAPCATEGORYF_3 ) ( *opt[3] )->mValues.Push( pair );
-					if ( opt[4] != NULL && info.categoryflags & MAPCATEGORYF_4 ) ( *opt[4] )->mValues.Push( pair );
-					if ( opt[5] != NULL && info.categoryflags & MAPCATEGORYF_5 ) ( *opt[5] )->mValues.Push( pair );
-					if ( opt[6] != NULL && info.categoryflags & MAPCATEGORYF_6 ) ( *opt[6] )->mValues.Push( pair );
-					if ( opt[7] != NULL && info.categoryflags & MAPCATEGORYF_7 ) ( *opt[7] )->mValues.Push( pair );
-					if ( opt[8] != NULL && info.categoryflags & MAPCATEGORYF_8 ) ( *opt[8] )->mValues.Push( pair );
-					if ( opt[9] != NULL && info.categoryflags & MAPCATEGORYF_9 ) ( *opt[9] )->mValues.Push( pair );
-				}
-				if ( optNames[0] != NULL )
-				{
-					pair.Text.Format( "%s", info.mapname );
-					( *optNames[0] )->mValues.Push( pair );
-					if ( optNames[1] != NULL && info.categoryflags & MAPCATEGORYF_1 ) ( *optNames[1] )->mValues.Push( pair );
-					if ( optNames[2] != NULL && info.categoryflags & MAPCATEGORYF_2 ) ( *optNames[2] )->mValues.Push( pair );
-					if ( optNames[3] != NULL && info.categoryflags & MAPCATEGORYF_3 ) ( *optNames[3] )->mValues.Push( pair );
-					if ( optNames[4] != NULL && info.categoryflags & MAPCATEGORYF_4 ) ( *optNames[4] )->mValues.Push( pair );
-					if ( optNames[5] != NULL && info.categoryflags & MAPCATEGORYF_5 ) ( *optNames[5] )->mValues.Push( pair );
-					if ( optNames[6] != NULL && info.categoryflags & MAPCATEGORYF_6 ) ( *optNames[6] )->mValues.Push( pair );
-					if ( optNames[7] != NULL && info.categoryflags & MAPCATEGORYF_7 ) ( *optNames[7] )->mValues.Push( pair );
-					if ( optNames[8] != NULL && info.categoryflags & MAPCATEGORYF_8 ) ( *optNames[8] )->mValues.Push( pair );
-					if ( optNames[9] != NULL && info.categoryflags & MAPCATEGORYF_9 ) ( *optNames[9] )->mValues.Push( pair );
-				}
-				if ( optTitles[0] != NULL )
-				{
-					pair.Text.Format( "%s", info.LookupLevelName().GetChars() );
-					( *optTitles[0] )->mValues.Push( pair );
-					if ( optTitles[1] != NULL && info.categoryflags & MAPCATEGORYF_1 ) ( *optTitles[1] )->mValues.Push( pair );
-					if ( optTitles[2] != NULL && info.categoryflags & MAPCATEGORYF_2 ) ( *optTitles[2] )->mValues.Push( pair );
-					if ( optTitles[3] != NULL && info.categoryflags & MAPCATEGORYF_3 ) ( *optTitles[3] )->mValues.Push( pair );
-					if ( optTitles[4] != NULL && info.categoryflags & MAPCATEGORYF_4 ) ( *optTitles[4] )->mValues.Push( pair );
-					if ( optTitles[5] != NULL && info.categoryflags & MAPCATEGORYF_5 ) ( *optTitles[5] )->mValues.Push( pair );
-					if ( optTitles[6] != NULL && info.categoryflags & MAPCATEGORYF_6 ) ( *optTitles[6] )->mValues.Push( pair );
-					if ( optTitles[7] != NULL && info.categoryflags & MAPCATEGORYF_7 ) ( *optTitles[7] )->mValues.Push( pair );
-					if ( optTitles[8] != NULL && info.categoryflags & MAPCATEGORYF_8 ) ( *optTitles[8] )->mValues.Push( pair );
-					if ( optTitles[9] != NULL && info.categoryflags & MAPCATEGORYF_9 ) ( *optTitles[9] )->mValues.Push( pair );
-				}
-				if ( optPreviews[0] != NULL )
-				{
-					pair.Text.Format( "%s", info.PreviewPic.GetChars() );
-					( *optPreviews[0] )->mValues.Push( pair );
-					if ( optPreviews[1] != NULL && info.categoryflags & MAPCATEGORYF_1 ) ( *optPreviews[1] )->mValues.Push( pair );
-					if ( optPreviews[2] != NULL && info.categoryflags & MAPCATEGORYF_2 ) ( *optPreviews[2] )->mValues.Push( pair );
-					if ( optPreviews[3] != NULL && info.categoryflags & MAPCATEGORYF_3 ) ( *optPreviews[3] )->mValues.Push( pair );
-					if ( optPreviews[4] != NULL && info.categoryflags & MAPCATEGORYF_4 ) ( *optPreviews[4] )->mValues.Push( pair );
-					if ( optPreviews[5] != NULL && info.categoryflags & MAPCATEGORYF_5 ) ( *optPreviews[5] )->mValues.Push( pair );
-					if ( optPreviews[6] != NULL && info.categoryflags & MAPCATEGORYF_6 ) ( *optPreviews[6] )->mValues.Push( pair );
-					if ( optPreviews[7] != NULL && info.categoryflags & MAPCATEGORYF_7 ) ( *optPreviews[7] )->mValues.Push( pair );
-					if ( optPreviews[8] != NULL && info.categoryflags & MAPCATEGORYF_8 ) ( *optPreviews[8] )->mValues.Push( pair );
-					if ( optPreviews[9] != NULL && info.categoryflags & MAPCATEGORYF_9 ) ( *optPreviews[9] )->mValues.Push( pair );
-				}
+
+				pair.Text.Format( "%s - %s", info.mapname, info.LookupLevelName().GetChars() );
+				if ( opt[0] != NULL && info.categoryflags & MAPCATEGORYF_0 ) ( *opt[0] )->mValues.Push( pair );
+				if ( opt[1] != NULL && info.categoryflags & MAPCATEGORYF_1 ) ( *opt[1] )->mValues.Push( pair );
+				if ( opt[2] != NULL && info.categoryflags & MAPCATEGORYF_2 ) ( *opt[2] )->mValues.Push( pair );
+				if ( opt[3] != NULL && info.categoryflags & MAPCATEGORYF_3 ) ( *opt[3] )->mValues.Push( pair );
+				if ( opt[4] != NULL && info.categoryflags & MAPCATEGORYF_4 ) ( *opt[4] )->mValues.Push( pair );
+				if ( opt[5] != NULL && info.categoryflags & MAPCATEGORYF_5 ) ( *opt[5] )->mValues.Push( pair );
+				if ( opt[6] != NULL && info.categoryflags & MAPCATEGORYF_6 ) ( *opt[6] )->mValues.Push( pair );
+				if ( opt[7] != NULL && info.categoryflags & MAPCATEGORYF_7 ) ( *opt[7] )->mValues.Push( pair );
+				if ( opt[8] != NULL && info.categoryflags & MAPCATEGORYF_8 ) ( *opt[8] )->mValues.Push( pair );
+				if ( opt[9] != NULL && info.categoryflags & MAPCATEGORYF_9 ) ( *opt[9] )->mValues.Push( pair );
+
+				pair.Text.Format( "%s", info.mapname );
+				if ( optNames[0] != NULL && info.categoryflags & MAPCATEGORYF_0 ) ( *optNames[0] )->mValues.Push( pair );
+				if ( optNames[1] != NULL && info.categoryflags & MAPCATEGORYF_1 ) ( *optNames[1] )->mValues.Push( pair );
+				if ( optNames[2] != NULL && info.categoryflags & MAPCATEGORYF_2 ) ( *optNames[2] )->mValues.Push( pair );
+				if ( optNames[3] != NULL && info.categoryflags & MAPCATEGORYF_3 ) ( *optNames[3] )->mValues.Push( pair );
+				if ( optNames[4] != NULL && info.categoryflags & MAPCATEGORYF_4 ) ( *optNames[4] )->mValues.Push( pair );
+				if ( optNames[5] != NULL && info.categoryflags & MAPCATEGORYF_5 ) ( *optNames[5] )->mValues.Push( pair );
+				if ( optNames[6] != NULL && info.categoryflags & MAPCATEGORYF_6 ) ( *optNames[6] )->mValues.Push( pair );
+				if ( optNames[7] != NULL && info.categoryflags & MAPCATEGORYF_7 ) ( *optNames[7] )->mValues.Push( pair );
+				if ( optNames[8] != NULL && info.categoryflags & MAPCATEGORYF_8 ) ( *optNames[8] )->mValues.Push( pair );
+				if ( optNames[9] != NULL && info.categoryflags & MAPCATEGORYF_9 ) ( *optNames[9] )->mValues.Push( pair );
+
+				pair.Text.Format( "%s", info.LookupLevelName().GetChars() );
+				if ( optTitles[0] != NULL && info.categoryflags & MAPCATEGORYF_0 ) ( *optTitles[0] )->mValues.Push( pair );
+				if ( optTitles[1] != NULL && info.categoryflags & MAPCATEGORYF_1 ) ( *optTitles[1] )->mValues.Push( pair );
+				if ( optTitles[2] != NULL && info.categoryflags & MAPCATEGORYF_2 ) ( *optTitles[2] )->mValues.Push( pair );
+				if ( optTitles[3] != NULL && info.categoryflags & MAPCATEGORYF_3 ) ( *optTitles[3] )->mValues.Push( pair );
+				if ( optTitles[4] != NULL && info.categoryflags & MAPCATEGORYF_4 ) ( *optTitles[4] )->mValues.Push( pair );
+				if ( optTitles[5] != NULL && info.categoryflags & MAPCATEGORYF_5 ) ( *optTitles[5] )->mValues.Push( pair );
+				if ( optTitles[6] != NULL && info.categoryflags & MAPCATEGORYF_6 ) ( *optTitles[6] )->mValues.Push( pair );
+				if ( optTitles[7] != NULL && info.categoryflags & MAPCATEGORYF_7 ) ( *optTitles[7] )->mValues.Push( pair );
+				if ( optTitles[8] != NULL && info.categoryflags & MAPCATEGORYF_8 ) ( *optTitles[8] )->mValues.Push( pair );
+				if ( optTitles[9] != NULL && info.categoryflags & MAPCATEGORYF_9 ) ( *optTitles[9] )->mValues.Push( pair );
+
+				pair.Text.Format( "%s", info.PreviewPic.GetChars() );
+				if ( optPreviews[0] != NULL && info.categoryflags & MAPCATEGORYF_0 ) ( *optPreviews[0] )->mValues.Push( pair );
+				if ( optPreviews[1] != NULL && info.categoryflags & MAPCATEGORYF_1 ) ( *optPreviews[1] )->mValues.Push( pair );
+				if ( optPreviews[2] != NULL && info.categoryflags & MAPCATEGORYF_2 ) ( *optPreviews[2] )->mValues.Push( pair );
+				if ( optPreviews[3] != NULL && info.categoryflags & MAPCATEGORYF_3 ) ( *optPreviews[3] )->mValues.Push( pair );
+				if ( optPreviews[4] != NULL && info.categoryflags & MAPCATEGORYF_4 ) ( *optPreviews[4] )->mValues.Push( pair );
+				if ( optPreviews[5] != NULL && info.categoryflags & MAPCATEGORYF_5 ) ( *optPreviews[5] )->mValues.Push( pair );
+				if ( optPreviews[6] != NULL && info.categoryflags & MAPCATEGORYF_6 ) ( *optPreviews[6] )->mValues.Push( pair );
+				if ( optPreviews[7] != NULL && info.categoryflags & MAPCATEGORYF_7 ) ( *optPreviews[7] )->mValues.Push( pair );
+				if ( optPreviews[8] != NULL && info.categoryflags & MAPCATEGORYF_8 ) ( *optPreviews[8] )->mValues.Push( pair );
+				if ( optPreviews[9] != NULL && info.categoryflags & MAPCATEGORYF_9 ) ( *optPreviews[9] )->mValues.Push( pair );
 			}
 		}
 		catch ( CRecoverableError& ) {}

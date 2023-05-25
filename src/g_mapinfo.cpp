@@ -294,7 +294,7 @@ void level_info_t::Reset()
 	specialactions.Clear();
 	DefaultEnvironment = 0;
 	PrecacheSounds.Clear();
-	categoryflags = 0;
+	categoryflags = MAPCATEGORYF_0;
 }
 
 
@@ -1440,6 +1440,7 @@ MapFlagHandlers[] =
 	{ "cd_end3_track",					MITYPE_EATNEXT,	0, 0 },
 	{ "cd_intermission_track",			MITYPE_EATNEXT,	0, 0 },
 	{ "cd_title_track",					MITYPE_EATNEXT,	0, 0 },
+	{ "notcategory0",					MITYPE_CATEGORYFLAGS,	0, MAPCATEGORYF_0 },
 	{ "category1",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_1, 0 },
 	{ "category2",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_2, 0 },
 	{ "category3",						MITYPE_CATEGORYFLAGS,	MAPCATEGORYF_3, 0 },
@@ -1548,6 +1549,7 @@ void FMapInfoParser::ParseMapDefinition(level_info_t &info)
 			// [geNia]
 			case MITYPE_CATEGORYFLAGS:
 				info.categoryflags |= handler->data1;
+				info.categoryflags &= ~handler->data2;
 				break;
 
 			default:

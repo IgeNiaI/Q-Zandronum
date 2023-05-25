@@ -232,11 +232,12 @@ static int GetLevelNumFromName(const char* mapname, int category)
 {
 	if (stricmp(mapname, "random") == 0)
 	{
+		// Cycle until we find a valid map or up to 100 times
 		for (int i = 0; i < 100; i++)
 		{
-			// Cycle until we find a valid map or up to 100 times
-			if (category > 0)
+			if (category >= 0)
 			{
+				// Look for maps in OptionValue lists
 				FString categoryOptions = "ZA_LevelNames";
 				switch (category)
 				{
@@ -259,6 +260,7 @@ static int GetLevelNumFromName(const char* mapname, int category)
 			}
 			else
 			{
+				// Look for maps in all maps list
 				int levelnum = pr_randommapoption() % wadlevelinfos.Size();
 				MapData* mdata = NULL;
 				try

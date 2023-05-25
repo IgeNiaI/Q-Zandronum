@@ -523,15 +523,16 @@ enum
 // based on gamemode, like DM vs CTF
 enum
 {
-	MAPCATEGORYF_1	= 1 << 0,
-	MAPCATEGORYF_2	= 1 << 1,
-	MAPCATEGORYF_3	= 1 << 2,
-	MAPCATEGORYF_4	= 1 << 3,
-	MAPCATEGORYF_5	= 1 << 4,
-	MAPCATEGORYF_6	= 1 << 5,
-	MAPCATEGORYF_7	= 1 << 6,
-	MAPCATEGORYF_8	= 1 << 7,
-	MAPCATEGORYF_9	= 1 << 8,
+	MAPCATEGORYF_0	= 1 << 0,
+	MAPCATEGORYF_1	= 1 << 1,
+	MAPCATEGORYF_2	= 1 << 2,
+	MAPCATEGORYF_3	= 1 << 3,
+	MAPCATEGORYF_4	= 1 << 4,
+	MAPCATEGORYF_5	= 1 << 5,
+	MAPCATEGORYF_6	= 1 << 6,
+	MAPCATEGORYF_7	= 1 << 7,
+	MAPCATEGORYF_8	= 1 << 8,
+	MAPCATEGORYF_9	= 1 << 9,
 };
 
 // phares 3/20/98:
