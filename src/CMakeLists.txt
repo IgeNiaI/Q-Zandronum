@@ -302,83 +302,79 @@ if( NOT NO_GL )
 	include_directories( ${OPENGL_INCLUDE_DIR} )
 endif( NOT NO_GL )
 
+if( NOT NO_FMOD )
+ 	# Search for FMOD include files
+ 	if( NOT WIN32 )
+		find_path( FMOD_INCLUDE_DIR fmod.hpp
+ 			PATHS ${FMOD_LOCAL_INC_DIRS} )
+ 	endif( NOT WIN32 )
+  
+ 	if( NOT FMOD_INCLUDE_DIR )
+ 		find_path( FMOD_INCLUDE_DIR fmod.hpp
+ 			PATHS ${FMOD_SEARCH_PATHS}
+ 			${FMOD_INC_PATH_SUFFIXES} )
+ 	endif( NOT FMOD_INCLUDE_DIR )
+  
+ 	if( FMOD_INCLUDE_DIR )
+ 		message( STATUS "FMOD include files found at ${FMOD_INCLUDE_DIR}" )
+ 		include_directories( "${FMOD_INCLUDE_DIR}" )
+ 	else( FMOD_INCLUDE_DIR )
+ 		message( STATUS "Could not find FMOD include files" )
+ 		set( NO_FMOD ON )
+ 	endif( FMOD_INCLUDE_DIR )
+endif( NOT NO_FMOD )
+ 
+if( NOT NO_FMOD )
+ 	# Decide on the name of the FMOD library we want to use.
+ 	if( NOT FMOD_LIB_NAME AND MSVC )
+ 		set( FMOD_LIB_NAME fmodex${X64}_vc )
+ 	endif( NOT FMOD_LIB_NAME AND MSVC )
+  
+ 	if( NOT FMOD_LIB_NAME AND BORLAND )
+ 		set( FMOD_LIB_NAME fmodex${X64}_bc )
+ 	endif( NOT FMOD_LIB_NAME AND BORLAND )
+  
+ 	if( NOT FMOD_LIB_NAME )
+ 		set( FMOD_LIB_NAME fmodex${X64} )
+ 	endif( NOT FMOD_LIB_NAME )
+  
+ 	# Search for FMOD library
+ 	if( WIN32 OR APPLE )
+ 		find_library( FMOD_LIBRARY ${FMOD_LIB_NAME}
+ 			PATHS ${FMOD_SEARCH_PATHS}
+ 			${FMOD_LIB_PATH_SUFFIXES} )
+ 	else( WIN32 OR APPLE )
+ 		find_library( FMOD_LIBRARY
+ 			NAMES ${FMOD_VERSIONS}
+ 			PATHS ${FMOD_LOCAL_LIB_DIRS} )
+ 	endif( WIN32 OR APPLE )
+ 	
+ 	if( FMOD_LIBRARY )
+ 		message( STATUS "FMOD library found at ${FMOD_LIBRARY}" )
+ 		set( ZDOOM_LIBS ${ZDOOM_LIBS} "${FMOD_LIBRARY}" )
+ 	else( FMOD_LIBRARY )
+ 		message( STATUS "Could not find FMOD library" )
+ 		set( NO_FMOD ON )
+ 	endif( FMOD_LIBRARY )
+endif( NOT NO_FMOD )
+ 
+if( NO_FMOD )
+ 	add_definitions( -DNO_FMOD=1 )
+endif( NO_FMOD )
+
 if( NO_OPENAL )
-	add_definitions( -DNO_OPENAL=1 )
+ 	add_definitions( -DNO_OPENAL=1 )
+elseif( WITH_GSTREAMER )
+ 	add_definitions( -DWITH_GSTREAMER=1 )
+endif( NO_OPENAL )
 
-	set(MPG123_FOUND NO)
-	set(SNDFILE_FOUND NO)
-else()
-	# Search for libSndFile
+# Search for libSndFile
 
-	find_package( SndFile )
+find_package( SndFile )
 
-	# Search for libmpg123
-	find_package( MPG123 )
-endif()
+# Search for libmpg123
 
-# Decide on the name of the FMOD library we want to use.
-
-if( NOT FMOD_LIB_NAME AND MSVC )
-	set( FMOD_LIB_NAME fmodex${X64}_vc )
-endif( NOT FMOD_LIB_NAME AND MSVC )
-
-if( NOT FMOD_LIB_NAME AND BORLAND )
-	set( FMOD_LIB_NAME fmodex${X64}_bc )
-endif( NOT FMOD_LIB_NAME AND BORLAND )
-
-if( NOT FMOD_LIB_NAME )
-	set( FMOD_LIB_NAME fmodex${X64} )
-endif( NOT FMOD_LIB_NAME )
-
-
-# Search for FMOD include files
-
-if( NOT WIN32 )
-	find_path( FMOD_INCLUDE_DIR fmod.hpp
-		PATHS ${FMOD_LOCAL_INC_DIRS} )
-endif( NOT WIN32 )
-
-if( NOT FMOD_INCLUDE_DIR )
-	find_path( FMOD_INCLUDE_DIR fmod.hpp
-		PATHS ${FMOD_SEARCH_PATHS}
-		${FMOD_INC_PATH_SUFFIXES} )
-endif( NOT FMOD_INCLUDE_DIR )
-
-if( FMOD_INCLUDE_DIR )
-	message( STATUS "FMOD include files found at ${FMOD_INCLUDE_DIR}" )
-else( FMOD_INCLUDE_DIR )
-	# [BB] Without sound, we don't need FMOD.
-	if ( NOT NO_SOUND )
-	if	( NOT NO_FMOD )
-		message( SEND_ERROR "Could not find FMOD include files" )
-	endif ( NOT NO_FMOD )
-	endif ( NOT NO_SOUND )
-endif( FMOD_INCLUDE_DIR )
-
-
-# Search for FMOD library
-
-if( WIN32 OR APPLE )
-	find_library( FMOD_LIBRARY ${FMOD_LIB_NAME}
-		PATHS ${FMOD_SEARCH_PATHS}
-		${FMOD_LIB_PATH_SUFFIXES} )
-else( WIN32 OR APPLE )
-	find_library( FMOD_LIBRARY
-		NAMES ${FMOD_VERSIONS}
-		PATHS ${FMOD_LOCAL_LIB_DIRS} )
-endif( WIN32 OR APPLE )
-
-if( FMOD_LIBRARY )
-	message( STATUS "FMOD library found at ${FMOD_LIBRARY}" )
-else( FMOD_LIBRARY )
-	# [BB] Without sound, we don't need FMOD.
-	if ( NOT NO_SOUND )
-	if ( NOT NO_FMOD )
-	message( SEND_ERROR "Could not find FMOD library" )
-	endif ( NOT NO_FMOD )
-	endif ( NOT NO_SOUND )
-endif( FMOD_LIBRARY )
-
+find_package( MPG123 )
 
 # Search for FluidSynth
 
@@ -691,8 +687,11 @@ message( STATUS "Fluid synth libs: ${FLUIDSYNTH_LIBRARIES}" )
 set( ZDOOM_LIBS ${ZDOOM_LIBS} "${ZLIB_LIBRARIES}" "${JPEG_LIBRARIES}" "${BZIP2_LIBRARIES}" "${GME_LIBRARIES}" )
 # [BB] Without sound, we don't need FMOD.
 if ( NOT NO_SOUND )
-	set( ZDOOM_LIBS ${ZDOOM_LIBS} "${FMOD_LIBRARY}" )
-	include_directories( "${ZLIB_INCLUDE_DIR}" "${FMOD_INCLUDE_DIR}" "${BZIP2_INCLUDE_DIR}" "${LZMA_INCLUDE_DIR}" "${JPEG_INCLUDE_DIR}" "${GME_INCLUDE_DIR}" )
+ 	set( ZDOOM_LIBS ${ZDOOM_LIBS} )
+ 	if( NOT NO_FMOD )
+ 		set( ZDOOM_LIBS ${ZDOOM_LIBS} "${FMOD_LIBRARY}" )
+ 	endif( NOT NO_FMOD )
+ 	include_directories( "${ZLIB_INCLUDE_DIR}" "${BZIP2_INCLUDE_DIR}" "${LZMA_INCLUDE_DIR}" "${JPEG_INCLUDE_DIR}" "${GME_INCLUDE_DIR}" )
 else ( NOT NO_SOUND )
 	include_directories( "${ZLIB_INCLUDE_DIR}" "${BZIP2_INCLUDE_DIR}" "${LZMA_INCLUDE_DIR}" "${JPEG_INCLUDE_DIR}" "${GME_INCLUDE_DIR}" )
 endif ( NOT NO_SOUND )
@@ -705,6 +704,14 @@ if( WIN32 )
 	set ( ZDOOM_LIBS ${ZDOOM_LIBS} crypt32 )
 endif ( NOT WIN32 )
 
+if( SNDFILE_FOUND )
+    set( ZDOOM_LIBS ${ZDOOM_LIBS} "${SNDFILE_LIBRARIES}" )
+    include_directories( "${SNDFILE_INCLUDE_DIRS}" )
+endif()
+if( MPG123_FOUND )
+    set( ZDOOM_LIBS ${ZDOOM_LIBS} "${MPG123_LIBRARIES}" )
+    include_directories( "${MPG123_INCLUDE_DIR}" )
+endif()
 if( NOT DYN_FLUIDSYNTH)
 	if( FLUIDSYNTH_FOUND )
 		set( ZDOOM_LIBS ${ZDOOM_LIBS} "${FLUIDSYNTH_LIBRARIES}" )
@@ -851,6 +858,19 @@ else( SSE_MATTERS )
 	add_definitions( -DDISABLE_SSE )
 	set( X86_SOURCES )
 endif( SSE_MATTERS )
+
+if( SNDFILE_FOUND )
+    add_definitions( -DHAVE_SNDFILE )
+endif( SNDFILE_FOUND )
+if( MPG123_FOUND )
+    add_definitions( -DHAVE_MPG123 )
+endif( MPG123_FOUND )
+if( DYN_FLUIDSYNTH )
+	add_definitions( -DHAVE_FLUIDSYNTH -DDYN_FLUIDSYNTH )
+elseif( FLUIDSYNTH_FOUND )
+	add_definitions( -DHAVE_FLUIDSYNTH )
+endif( DYN_FLUIDSYNTH )
+
 
 if( DYN_FLUIDSYNTH )
 	add_definitions( -DHAVE_FLUIDSYNTH -DDYN_FLUIDSYNTH )
@@ -1380,6 +1400,8 @@ add_executable( zdoom WIN32
 	sfmt/SFMT.cpp
 	sound/fmodsound.cpp
 	sound/oalsound.cpp
+	sound/mpg123_decoder.cpp
+	sound/sndfile_decoder.cpp
 	sound/i_music.cpp
 	sound/i_sound.cpp
 	sound/music_cd.cpp

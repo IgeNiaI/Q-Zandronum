@@ -7,13 +7,9 @@
 
 #ifndef NO_OPENAL
 
-#if defined (__APPLE__) && (_WIN32)
 #include <AL/al.h>
 #include <AL/alc.h>
-#else
-#include <al.h>
-#include <alc.h>
-#endif
+
 
 #ifndef ALC_ENUMERATE_ALL_EXT
 #define ALC_ENUMERATE_ALL_EXT 1
@@ -61,11 +57,7 @@
 #define AL_FORMAT_71CHN32                        0x1212
 #endif
 
-#if defined (__APPLE__) && (_WIN32)
 #include <AL/efx.h>
-#else
-#include "efx.h"
-#endif
 
 class OpenALSoundStream;
 

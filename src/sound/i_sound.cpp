@@ -60,6 +60,7 @@ extern HINSTANCE g_hInst;
 #include "doomtype.h"
 #include <math.h>
 
+#include "except.h"
 #include "fmodsound.h"
 #include "oalsound.h"
 

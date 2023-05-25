@@ -687,7 +687,7 @@ bool FluidSynthMIDIDevice::LoadFluidSynth()
 		FluidSynthDLL = LoadLibrary((libname = FLUIDSYNTHLIB2));
 		if (FluidSynthDLL == NULL)
 		{
-			Printf(TEXTCOLOR_RED"Could not load " FLUIDSYNTHLIB1 " or " FLUIDSYNTHLIB2 "\n");
+			Printf( TEXTCOLOR_RED "Could not load " FLUIDSYNTHLIB1 " or " FLUIDSYNTHLIB2 "\n");
 			return false;
 		}
 	}
