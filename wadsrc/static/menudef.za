@@ -307,7 +307,7 @@ OptionMenu ZA_CallMapVote
 	Indent 153
 	Title		"CHANGE MAP"
 
-	Option		"Map",					"menu_callvotemap",				"ZA_Levels"
+	Option		"Map",					"menu_callvotemap",				"ZA_LevelsLoaded"
 	Command		"Random Map",			"setcallvotemap random"
 	Option		"Intermission",			"menu_callvoteintermission",	"YesNo"
 	StaticText	" "

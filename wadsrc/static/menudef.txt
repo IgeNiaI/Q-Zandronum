@@ -346,6 +346,7 @@ OptionValue ZA_Levels6 {}	OptionValue ZA_LevelNames6 {}	OptionValue ZA_LevelTitl
 OptionValue ZA_Levels7 {}	OptionValue ZA_LevelNames7 {}	OptionValue ZA_LevelTitles7 {}	OptionValue ZA_LevelPreviews7 {}
 OptionValue ZA_Levels8 {}	OptionValue ZA_LevelNames8 {}	OptionValue ZA_LevelTitles8 {}	OptionValue ZA_LevelPreviews8 {}
 OptionValue ZA_Levels9 {}	OptionValue ZA_LevelNames9 {}	OptionValue ZA_LevelTitles9 {}	OptionValue ZA_LevelPreviews9 {}
+OptionValue ZA_LevelsLoaded {}	OptionValue ZA_LevelNamesLoaded {}	OptionValue ZA_LevelTitlesLoaded {}	OptionValue ZA_LevelPreviewsLoaded {}
 OptionValue ZA_Bots {}
 OptionValue ZA_Announcers {}
 // [TP] --

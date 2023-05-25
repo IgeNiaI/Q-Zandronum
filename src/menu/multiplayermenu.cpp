@@ -235,12 +235,13 @@ static int GetLevelNumFromName(const char* mapname, int category)
 		// Cycle until we find a valid map or up to 100 times
 		for (int i = 0; i < 100; i++)
 		{
-			if (category >= 0)
+			if (category >= -1)
 			{
 				// Look for maps in OptionValue lists
 				FString categoryOptions = "ZA_LevelNames";
 				switch (category)
 				{
+				case -1: categoryOptions = "ZA_LevelNamesLoaded"; break;
 				case 1: categoryOptions = "ZA_LevelNames1"; break;
 				case 2: categoryOptions = "ZA_LevelNames2"; break;
 				case 3: categoryOptions = "ZA_LevelNames3"; break;
@@ -373,14 +374,14 @@ CCMD(setcallvotemap)
 			// Try to random up to 100 times to avoid selecting the same map again
 			for (int i = 0; i < 100; i++)
 			{
-				levelnum = GetLevelNumFromName(argv[1], 0);
+				levelnum = GetLevelNumFromName(argv[1], -1);
 				if (levelnum != currentlevelnum)
 					break;
 			}
 		}
 		else
 		{
-			levelnum = GetLevelNumFromName(argv[1], 0);
+			levelnum = GetLevelNumFromName(argv[1], -1);
 		}
 
 		if (levelnum >= 0)

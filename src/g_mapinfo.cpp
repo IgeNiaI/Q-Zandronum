@@ -68,7 +68,7 @@ extern TMap<int, FString> HexenMusic;
 //
 //==========================================================================
 
-static int FindWadLevelInfo (const char *name)
+int FindWadLevelInfo (const char *name)
 {
 	for (unsigned int i = 0; i < wadlevelinfos.Size(); i++)
 		if (!strnicmp (name, wadlevelinfos[i].mapname, 8))

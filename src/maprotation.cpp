@@ -57,6 +57,7 @@
 #include "p_setup.h"
 #include "sv_commands.h"
 #include "network.h"
+#include "menu/menu.h"
 
 //*****************************************************************************
 //	VARIABLES
@@ -239,6 +240,37 @@ void MAPROTATION_AddMap( const char *pszMapName, bool bSilent, int iPosition )
 	// [AK] If we're the server, tell the clients to add the map on their end.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		SERVERCOMMANDS_AddToMapRotation( pMap->mapname, iOriginalPosition );
+	else
+	{
+		FOptionValues** opt = OptionValues.CheckKey("ZA_LevelsLoaded");
+		FOptionValues** optNames = OptionValues.CheckKey("ZA_LevelNamesLoaded");
+		FOptionValues** optTitles = OptionValues.CheckKey("ZA_LevelTitlesLoaded");
+		FOptionValues** optPreviews = OptionValues.CheckKey("ZA_LevelPreviewsLoaded");
+		
+		FOptionValues::Pair pair;
+		pair.Value = FindWadLevelInfo( pszMapName );
+
+		if ( opt != NULL )
+		{
+			pair.Text.Format( "%s - %s", pMap->mapname, pMap->LookupLevelName().GetChars() );
+			( *opt )->mValues.Push( pair );
+		}
+		if ( optNames != NULL )
+		{
+			pair.Text.Format( "%s", pMap->mapname );
+			( *optNames )->mValues.Push( pair );
+		}
+		if ( optTitles != NULL )
+		{
+			pair.Text.Format( "%s", pMap->LookupLevelName().GetChars() );
+			( *optTitles )->mValues.Push( pair );
+		}
+		if ( optPreviews != NULL )
+		{
+			pair.Text.Format( "%s", pMap->PreviewPic.GetChars() );
+			( *optPreviews )->mValues.Push( pair );
+		}
+	}
 }
 
 //*****************************************************************************
@@ -275,6 +307,36 @@ void MAPROTATION_DelMap (const char *pszMapName, bool bSilent)
 		// [AK] If we're the server, tell the clients to remove the map on their end.
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			SERVERCOMMANDS_DelFromMapRotation( pszMapName );
+		else
+		{
+			FOptionValues** opt = OptionValues.CheckKey("ZA_LevelsLoaded");
+			FOptionValues** optNames = OptionValues.CheckKey("ZA_LevelNamesLoaded");
+			FOptionValues** optTitles = OptionValues.CheckKey("ZA_LevelTitlesLoaded");
+			FOptionValues** optPreviews = OptionValues.CheckKey("ZA_LevelPreviewsLoaded");
+
+			int index = -1;
+			if ( optNames != NULL )
+			{
+				for ( unsigned int i = 0; i < ( *optNames )->mValues.Size(); i++ )
+					if ( stricmp(( *optNames )->mValues[i].Text, pszMapName) == 0)
+					{
+						index = i;
+						break;
+					}
+			}
+		
+			if ( index >= 0 )
+			{
+				if ( opt != NULL )
+					( *opt )->mValues.Delete( index );
+				if ( optNames != NULL )
+					( *optNames )->mValues.Delete( index );
+				if ( optTitles != NULL )
+					( *optTitles )->mValues.Delete( index );
+				if ( optPreviews != NULL )
+					( *optPreviews )->mValues.Delete( index );
+			}
+		}
 	}
 	else
 	{
