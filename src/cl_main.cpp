@@ -118,6 +118,7 @@
 #include "decallib.h"
 #include "network/servercommands.h"
 #include "am_map.h"
+#include "maprotation.h"
 
 //*****************************************************************************
 //	MISC CRAP THAT SHOULDN'T BE HERE BUT HAS TO BE BECAUSE OF SLOPPY CODING
@@ -1458,6 +1459,29 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 					CLIENTCOMMANDS_ReportLumps( );
 				}
 				break;
+				
+			case SVC2_ADDTOMAPROTATION:
+				{
+					const char *pszMapName = NETWORK_ReadString( pByteStream );
+					int position = NETWORK_ReadByte( pByteStream );
+
+					// [AK] Add this map to the rotation.
+					MAPROTATION_AddMap( pszMapName, true, position );
+				}
+				break;
+
+			case SVC2_DELFROMMAPROTATION:
+				if ( NETWORK_ReadByte( pByteStream ) )
+				{
+					// [AK] Clear all maps from the rotation.
+					MAPROTATION_Construct();
+				}
+				else
+				{
+					// [AK] Remove the map with the given name from the rotation.
+					MAPROTATION_DelMap( NETWORK_ReadString( pByteStream ), true );
+				}
+				break;
 
 			default:
 				sprintf( szString, "CLIENT_ParsePacket: Illegible server message: %d\nLast command: %d\n", static_cast<int> (lExtCommand), static_cast<int> (g_lLastCmd) );
@@ -1574,6 +1598,9 @@ void CLIENT_QuitNetworkGame( const char *pszString )
 	g_lHighestReceivedSequence = -1;
 
 	g_lMissingPacketTicks = 0;
+	
+	// [AK] Clear the map rotation when we leave the server.
+	MAPROTATION_Construct( );
 
 	// Set the network state back to single player.
 	NETWORK_SetState( NETSTATE_SINGLE );
@@ -6105,6 +6132,9 @@ void ServerCommands::MapNew::Execute()
 		CLIENT_ClearAllPlayers();
 		CLIENTDEMO_SetSkippingToNextMap ( false );
 	}
+	
+	// [AK] Reset the map rotation before reconnecting to the server.
+	MAPROTATION_Construct( );
 
 	// Clear out our local buffer.
 	g_LocalBuffer.Clear();
@@ -7691,6 +7721,14 @@ void ServerCommands::SyncJoinQueue::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SyncMapRotation::Execute()
+{
+	for ( unsigned int i = 0; i < entries.Size(); i++ )
+		MAPROTATION_AddMap( entries[i].name, true, 0 );
+}
+
+//*****************************************************************************
+//
 void ServerCommands::PushToJoinQueue::Execute()
 {
 	JOINQUEUE_AddPlayer( playerNum, team );
@@ -7742,6 +7780,9 @@ CCMD( connect )
 
 	// Put the game in client mode.
 	NETWORK_SetState( NETSTATE_CLIENT );
+	
+	// [AK] Reset the map rotation before we connect to the server.
+	MAPROTATION_Construct( );
 
 	// Make sure cheats are off.
 	Val.Bool = false;

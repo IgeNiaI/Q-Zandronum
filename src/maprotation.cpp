@@ -57,6 +57,8 @@
 #include "p_setup.h"
 #include "cl_commands.h"
 #include "network.h"
+#include "sv_commands.h"
+#include "network.h"
 
 //*****************************************************************************
 //	VARIABLES
@@ -73,6 +75,10 @@ void MAPROTATION_Construct( void )
 {
 	g_MapRotationEntries.clear( );
 	g_ulCurMapInList = g_ulNextMapInList = 0;
+	
+	// [AK] If we're the server, tell the clients to clear their map lists too.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_DelFromMapRotation( NULL, true );
 }
 
 //*****************************************************************************
@@ -191,7 +197,7 @@ bool MAPROTATION_IsMapInRotation( const char *pszMapName )
 
 //*****************************************************************************
 //
-void MAPROTATION_AddMap( char *pszMapName, bool bSilent, int iPosition )
+void MAPROTATION_AddMap( const char *pszMapName, bool bSilent, int iPosition )
 {
 	// Find the map.
 	level_info_t *pMap = FindLevelByName( pszMapName );
@@ -200,6 +206,9 @@ void MAPROTATION_AddMap( char *pszMapName, bool bSilent, int iPosition )
 		Printf( "map %s doesn't exist.\n", pszMapName );
 		return;
 	}
+	
+	// [AK] Save the position we originally passed into this function.
+	int iOriginalPosition = iPosition;
 
 	MAPROTATIONENTRY_t newEntry;
 	newEntry.pMap = pMap;
@@ -228,11 +237,15 @@ void MAPROTATION_AddMap( char *pszMapName, bool bSilent, int iPosition )
 	MAPROTATION_SetPositionToMap( level.mapname );
 	if ( !bSilent )
 		Printf( "%s (%s) added to map rotation list at position %d.\n", pMap->mapname, pMap->LookupLevelName( ).GetChars( ), iPosition);
+	
+	// [AK] If we're the server, tell the clients to add the map on their end.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_AddToMapRotation( pMap->mapname, iOriginalPosition );
 }
 
 //*****************************************************************************
 // [Dusk] Removes a map from map rotation
-void MAPROTATION_DelMap (char *pszMapName, bool bSilent)
+void MAPROTATION_DelMap (const char *pszMapName, bool bSilent)
 {
 	// look up the map
 	level_info_t *pMap = FindLevelByName (pszMapName);
@@ -256,13 +269,19 @@ void MAPROTATION_DelMap (char *pszMapName, bool bSilent)
 		}
 	}
 
-	if (gotcha && !bSilent)
+	if (gotcha)
 	{
-		Printf ("%s (%s) has been removed from map rotation list.\n",
-			pMap->mapname, pMap->LookupLevelName().GetChars());
+		if ( !bSilent )
+			Printf ( "%s (%s) has been removed from map rotation list.\n", pMap->mapname, pMap->LookupLevelName( ).GetChars( ));
+
+		// [AK] If we're the server, tell the clients to remove the map on their end.
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			SERVERCOMMANDS_DelFromMapRotation( pszMapName );
 	}
-	else if (!gotcha)
+	else
+	{
 		Printf ("Map %s is not in rotation.\n", pszMapName);
+	}
 }
 
 //*****************************************************************************
@@ -304,6 +323,10 @@ CCMD( maplist )
 //
 CCMD( clearmaplist )
 {
+	// [AK] Don't let clients clear the map rotation list for themselves.
+	if ( NETWORK_InClientMode() )
+		return;
+
 	// Reset the map list.
 	MAPROTATION_Construct( );
 

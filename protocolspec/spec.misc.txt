@@ -92,3 +92,12 @@ Command SetCVar
 	String name
 	String value
 EndCommand
+
+Struct MapRotationEntry
+	String name
+EndStruct
+
+Command SyncMapRotation
+	ExtendedCommand
+	Struct<MapRotationEntry>[] entries
+EndCommand

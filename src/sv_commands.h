@@ -416,5 +416,8 @@ void	SERVERCOMMANDS_SRPUserProcessChallenge ( const ULONG ulClient );
 void	SERVERCOMMANDS_SRPUserVerifySession ( const ULONG ulClient );
 void	SERVERCOMMANDS_ShootDecal ( const FDecalTemplate* tpl, AActor* actor, fixed_t z, angle_t angle, fixed_t tracedist, bool permanent, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_ReportLumps ( ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_SyncMapRotation( ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_AddToMapRotation( const char *pszMapName, int position, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
+void	SERVERCOMMANDS_DelFromMapRotation( const char *pszMapName, bool bClear = false, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 
 #endif	// __SV_COMMANDS_H__

@@ -1481,6 +1481,9 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 
 	// [TP] Tell the client his account name.
 	SERVERCOMMANDS_SetPlayerAccountName( g_lCurrentClient, g_lCurrentClient, SVCF_ONLYTHISCLIENT );
+	
+	// [AK] Inform the client of the map rotation list.
+	SERVERCOMMANDS_SyncMapRotation( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
 	// Send a snapshot of the level.
 	SERVER_SendFullUpdate( g_lCurrentClient );
@@ -2762,7 +2765,7 @@ void SERVER_SendFullUpdate( ULONG ulClient )
 
 	// [TP] Inform the client of the state of the join queue
 	SERVERCOMMANDS_SyncJoinQueue( ulClient, SVCF_ONLYTHISCLIENT );
-
+	
 	// [BB] Let the client know that the full update is completed.
 	SERVERCOMMANDS_FullUpdateCompleted( ulClient );
 	// [BB] The client will let us know that it received the update.

@@ -83,6 +83,7 @@
 #include "network/netcommand.h"
 #include "network/servercommands.h"
 #include "unlagged.h"
+#include "maprotation.h"
 
 CVAR (Bool, sv_showwarnings, false, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
 
@@ -4466,6 +4467,71 @@ void SERVERCOMMANDS_ShootDecal ( const FDecalTemplate* tpl, AActor* actor, fixed
 	command.addLong( tracedist );
 	command.addByte( permanent );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+// [AK]
+void SERVERCOMMANDS_SyncMapRotation( ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	ULONG numEntries = MAPROTATION_GetNumEntries();
+
+	// [AK] Don't bother sending the command if there's no map list.
+	if ( numEntries == 0 )
+		return;
+
+	ServerCommands::SyncMapRotation command;
+
+	for ( unsigned int i = 0; i < numEntries; i++ )
+	{
+		ServerCommands::MapRotationEntry entry;
+		entry.name = MAPROTATION_GetMap( i )->mapname;
+
+		command.PushToEntries( entry );
+
+		// [AK] If the latest entry won't fit into a single packet, remove it from the list and send out
+		// what we already have. We'll then send another packet containing this entry and more.
+		if ( static_cast<ULONG>( command.BuildNetCommand().calcSize() ) + PACKET_HEADER_SIZE >= SERVER_GetMaxPacketSize() )
+		{
+			command.PopFromEntries( entry );
+			command.sendCommandToClients( ulPlayerExtra, flags );
+			command.ClearEntries();
+			command.PushToEntries( entry );
+		}
+	}
+
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+// [AK]
+void SERVERCOMMANDS_AddToMapRotation( const char *pszMapName, int position, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if (( pszMapName == NULL ) || ( FindLevelByName( pszMapName ) == NULL ))
+		return;
+
+	NetCommand command ( SVC2_ADDTOMAPROTATION );
+	command.addString( pszMapName );
+	command.addByte( position );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+// [AK]
+void SERVERCOMMANDS_DelFromMapRotation( const char *pszMapName, bool bClear, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	NetCommand command ( SVC2_DELFROMMAPROTATION );
+	command.addByte( bClear );
+
+	// [AK] We should only send a map name if we're not clearing the map list.
+	if ( bClear == false )
+	{
+		if (( pszMapName == NULL ) || ( FindLevelByName( pszMapName ) == NULL ))
+			return;
+
+		command.addString( pszMapName );
+	}
+
+	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
