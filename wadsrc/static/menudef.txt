@@ -1630,6 +1630,7 @@ OptionMenu SoundOptions
 	Option "Announcer",			"cl_announcer", "ZA_Announcers" // [TP]
 	Option "MIDI device",		"snd_mididevice", "MidiDevices"
 	Option "Sound Backend",		"snd_backend", "SoundBackends"
+	TextField "Soundfont",		"fluid_patchset"
 	StaticText " "
 	Option "Underwater reverb",	"snd_waterreverb", "OnOff"
 	Slider "Underwater cutoff",	"snd_waterlp", 0, 2000, 50, 0

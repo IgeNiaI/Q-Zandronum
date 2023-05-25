@@ -92,7 +92,7 @@
 
 // PUBLIC DATA DEFINITIONS -------------------------------------------------
 
-CVAR(String, fluid_patchset, "", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CVAR(String, fluid_patchset, "./soundfonts/gm.sf2", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
 CUSTOM_CVAR(Float, fluid_gain, 0.5, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
