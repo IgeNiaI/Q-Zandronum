@@ -1006,11 +1006,11 @@ void APlayerPawn::Tick()
 		if ( player->bSpectating )
 			height = 0;
 		else
-			height = FixedMul(GetDefault()->height, player->crouchfactor);
+			height = FixedMul(defaultheight, player->crouchfactor);
 	}
 	else
 	{
-		if (health > 0) height = GetDefault()->height;
+		if (health > 0) height = defaultheight;
 	}
 	Super::Tick();
 

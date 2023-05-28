@@ -604,6 +604,7 @@ DEFINE_PROPERTY(height, F, Actor)
 {
 	PROP_FIXED_PARM(id, 0);
 	defaults->height=id;
+	defaults->defaultheight=id;
 }
 
 //==========================================================================

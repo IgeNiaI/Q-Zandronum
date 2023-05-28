@@ -6319,7 +6319,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetSize)
 	ACTION_PARAM_START(3);
 	ACTION_PARAM_FIXED(newradius, 0);
 	ACTION_PARAM_FIXED(newheight, 1);
-	ACTION_PARAM_BOOL(testpos, false);
+	ACTION_PARAM_BOOL(testpos, 2);
 	
 	if ( !NETWORK_ClientsideFunctionsAllowedOrIsServer( self ) )
 	{
@@ -6331,17 +6331,36 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetSize)
 
 	fixed_t oldradius = self->radius;
 	fixed_t oldheight = self->height;
+	player_t* player = self->player;
 
 	self->UnlinkFromWorld();
 	self->radius = newradius;
-	self->height = newheight;
+	self->defaultheight = newheight;
+	if (player != NULL && player->mo == self && player->CanCrouch() && player->playerstate != PST_DEAD)
+	{
+		if (!player->bSpectating)
+			self->height = FixedMul(newheight, player->crouchfactor);
+	}
+	else
+	{
+		if (self->health > 0) self->height = newheight;
+	}
 	self->LinkToWorld();
 
 	if (testpos && !P_TestMobjLocation(self))
 	{
 		self->UnlinkFromWorld();
 		self->radius = oldradius;
-		self->height = oldheight;
+		self->defaultheight = oldheight;
+		if (player != NULL && player->mo == self && player->CanCrouch() && player->playerstate != PST_DEAD)
+		{
+			if (!player->bSpectating)
+				self->height = FixedMul(newheight, player->crouchfactor);
+		}
+		else
+		{
+			if (self->health > 0) self->height = newheight;
+		}
 		self->LinkToWorld();
 	}
 	else

@@ -1015,6 +1015,7 @@ public:
 	struct sector_t	*ceilingsector;
 	FTextureID		ceilingpic;			// contacted sec ceilingpic
 	fixed_t			radius, height;		// for movement checking
+	fixed_t			defaultheight;		// work around the GetDefaults()->height when changing player height
 	fixed_t			projectilepassheight;	// height for clipping projectile movement against this actor
 	fixed_t			velx, vely, velz;	// velocity
 	fixed_t			serverVelX, serverVelY, serverVelZ;
