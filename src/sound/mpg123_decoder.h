@@ -1,7 +1,6 @@
 #ifndef MPG123_DECODER_H
 #define MPG123_DECODER_H
 
-#include "vectors.h"
 #include "i_soundinternal.h"
 
 #ifdef HAVE_MPG123
@@ -10,14 +9,13 @@
 #include <stddef.h>
 typedef ptrdiff_t ssize_t;
 #endif
-
 #include "mpg123.h"
 
 struct MPG123Decoder : public SoundDecoder
 {
-    virtual void getInfo(int* samplerate, ChannelConfig* chans, SampleType* type);
+    virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
 
-    virtual size_t read(char* buffer, size_t bytes);
+    virtual size_t read(char *buffer, size_t bytes);
     virtual bool seek(size_t ms_offset);
     virtual size_t getSampleOffset();
     virtual size_t getSampleLength();
@@ -26,20 +24,19 @@ struct MPG123Decoder : public SoundDecoder
     virtual ~MPG123Decoder();
 
 protected:
-    virtual bool open(FileReader* reader);
+    virtual bool open(FileReader *reader);
 
 private:
-    mpg123_handle* MPG123;
+    mpg123_handle *MPG123;
     bool Done;
 
-    FileReader* Reader;
-    int StartOffset;
-    static off_t file_lseek(void* handle, off_t offset, int whence);
-    static ssize_t file_read(void* handle, void* buffer, size_t bytes);
+    FileReader *Reader;
+    static off_t file_lseek(void *handle, off_t offset, int whence);
+    static ssize_t file_read(void *handle, void *buffer, size_t bytes);
 
     // Make non-copyable
-    MPG123Decoder(const MPG123Decoder& rhs);
-    MPG123Decoder& operator=(const MPG123Decoder& rhs);
+    MPG123Decoder(const MPG123Decoder &rhs);
+    MPG123Decoder& operator=(const MPG123Decoder &rhs);
 };
 
 #endif
