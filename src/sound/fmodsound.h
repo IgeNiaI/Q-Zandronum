@@ -70,6 +70,8 @@ public:
 	short *DecodeSample(int outlen, const void *coded, int sizebytes, ECodecType type);
 
 	void DrawWaveDebug(int mode);
+	
+	virtual MIDIDevice* CreateMIDIDevice() const override;
 
 private:
 	DWORD ActiveFMODVersion;

@@ -223,7 +223,12 @@ void MusInfo::Start(bool loop, float rel_vol, int subsong)
 {
 	if (nomusic) return;
 
-	if (rel_vol > 0.f) saved_relative_volume = relative_volume = rel_vol;
+	if (rel_vol > 0.f)
+	{
+		float factor = relative_volume / saved_relative_volume;
+		saved_relative_volume = rel_vol;
+		relative_volume = saved_relative_volume * factor;
+	}
 	Stop ();
 	Play (loop, subsong);
 	m_NotStartedYet = false;
@@ -436,9 +441,9 @@ MusInfo *I_RegisterSong (const char *filename, BYTE *musiccache, int offset, int
 	}
 
 #ifndef _WIN32
-	// non-Windows platforms don't support MDEV_MMAPI so map to MDEV_FMOD
+	// non-Windows platforms don't support MDEV_MMAPI so map to MDEV_SNDSYS
 	if (device == MDEV_MMAPI)
-		device = MDEV_FMOD;
+		device = MDEV_SNDSYS;
 #endif
 
 	// Check for gzip compression. Some formats are expected to have players
@@ -487,9 +492,9 @@ retry_as_fmod:
 			delete info;
 			info = NULL;
 		}
-		if (info == NULL && devtype != MDEV_FMOD && snd_mididevice < 0)
+		if (info == NULL && devtype != MDEV_SNDSYS && snd_mididevice < 0)
 		{
-			devtype = MDEV_FMOD;
+			devtype = MDEV_SNDSYS;
 			goto retry_as_fmod;
 		}
 #ifdef _WIN32

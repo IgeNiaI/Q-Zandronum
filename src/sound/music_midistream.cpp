@@ -232,7 +232,7 @@ EMidiDevice MIDIStreamer::SelectMIDIDevice(EMidiDevice device)
 	}
 	switch (snd_mididevice)
 	{
-	case -1:		return MDEV_FMOD;
+	case -1:		return MDEV_SNDSYS;
 	case -2:		return MDEV_TIMIDITY;
 	case -3:		return MDEV_OPL;
 	case -4:		return MDEV_GUS;
@@ -243,7 +243,7 @@ EMidiDevice MIDIStreamer::SelectMIDIDevice(EMidiDevice device)
 		#ifdef _WIN32
 					return MDEV_MMAPI;
 		#else
-					return MDEV_FMOD;
+					return MDEV_SNDSYS;
 		#endif
 	}
 }
@@ -270,8 +270,8 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype) const
 		return new FluidSynthMIDIDevice;
 #endif
 
-	case MDEV_FMOD:
-		return new FMODMIDIDevice;
+	case MDEV_SNDSYS:
+		return GSnd->CreateMIDIDevice();
 
 	case MDEV_GUS:
 		return new TimidityMIDIDevice;

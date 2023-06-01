@@ -60,9 +60,9 @@
 #include <dlfcn.h>
 
 #ifdef __APPLE__
-#define FLUIDSYNTHLIB1    "libfluidsynth.1.dylib"
+#define FLUIDSYNTHLIB1	"libfluidsynth.1.dylib"
 #else // !__APPLE__
-#define FLUIDSYNTHLIB1    "libfluidsynth.so.1"
+#define FLUIDSYNTHLIB1	"libfluidsynth.so.1"
 #endif // __APPLE__
 #endif
 
@@ -103,54 +103,54 @@ CVAR(String, fluid_patchset, "", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
 CUSTOM_CVAR(Float, fluid_gain, 0.5, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0)
-        self = 0;
-    else if (self > 10)
-        self = 10;
-    else if (currSong != NULL)
-        currSong->FluidSettingNum("synth.gain", self);
+	if (self < 0)
+		self = 0;
+	else if (self > 10)
+		self = 10;
+	else if (currSong != NULL)
+		currSong->FluidSettingNum("synth.gain", self);
 }
 
 CUSTOM_CVAR(Bool, fluid_reverb, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (currSong != NULL)
-        currSong->FluidSettingInt("synth.reverb.active", self);
+	if (currSong != NULL)
+		currSong->FluidSettingInt("synth.reverb.active", self);
 }
 
 CUSTOM_CVAR(Bool, fluid_chorus, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (currSong != NULL)
-        currSong->FluidSettingInt("synth.chorus.active", self);
+	if (currSong != NULL)
+		currSong->FluidSettingInt("synth.chorus.active", self);
 }
 
 CUSTOM_CVAR(Int, fluid_voices, 128, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 16)
-        self = 16;
-    else if (self > 4096)
-        self = 4096;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("synth.polyphony", self);
+	if (self < 16)
+		self = 16;
+	else if (self > 4096)
+		self = 4096;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("synth.polyphony", self);
 }
 
 CUSTOM_CVAR(Int, fluid_interp, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    // Values are: 0 = FLUID_INTERP_NONE
-    //             1 = FLUID_INTERP_LINEAR
-    //             4 = FLUID_INTERP_4THORDER (the FluidSynth default)
-    //             7 = FLUID_INTERP_7THORDER
-    // (And here I thought it was just a linear list.)
-    // Round undefined values to the nearest valid one.
-    if (self < 0)
-        self = 0;
-    else if (self == 2)
-        self = 1;
-    else if (self == 3 || self == 5)
-        self = 4;
-    else if (self == 6 || self > 7)
-        self = 7;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("synth.interpolation", self);
+	// Values are: 0 = FLUID_INTERP_NONE
+	//             1 = FLUID_INTERP_LINEAR
+	//             4 = FLUID_INTERP_4THORDER (the FluidSynth default)
+	//             7 = FLUID_INTERP_7THORDER
+	// (And here I thought it was just a linear list.)
+	// Round undefined values to the nearest valid one.
+	if (self < 0)
+		self = 0;
+	else if (self == 2)
+		self = 1;
+	else if (self == 3 || self == 5)
+		self = 4;
+	else if (self == 6 || self > 7)
+		self = 7;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("synth.interpolation", self);
 }
 
 CVAR(Int, fluid_samplerate, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
@@ -159,99 +159,99 @@ CVAR(Int, fluid_samplerate, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 // FluidSynth drives its own output.
 CUSTOM_CVAR(Int, fluid_threads, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 1)
-        self = 1;
-    else if (self > 256)
-        self = 256;
+	if (self < 1)
+		self = 1;
+	else if (self > 256)
+		self = 256;
 }
 
 CUSTOM_CVAR(Float, fluid_reverb_roomsize, 0.61f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0)
-        self = 0;
-    else if (self > 1.2f)
-        self = 1.2f;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.reverb-changed", 0);
+	if (self < 0)
+		self = 0;
+	else if (self > 1.2f)
+		self = 1.2f;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.reverb-changed", 0);
 }
 
 CUSTOM_CVAR(Float, fluid_reverb_damping, 0.23f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0)
-        self = 0;
-    else if (self > 1)
-        self = 1;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.reverb-changed", 0);
+	if (self < 0)
+		self = 0;
+	else if (self > 1)
+		self = 1;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.reverb-changed", 0);
 }
 
 CUSTOM_CVAR(Float, fluid_reverb_width, 0.76f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0)
-        self = 0;
-    else if (self > 100)
-        self = 100;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.reverb-changed", 0);
+	if (self < 0)
+		self = 0;
+	else if (self > 100)
+		self = 100;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.reverb-changed", 0);
 }
 
 CUSTOM_CVAR(Float, fluid_reverb_level, 0.57f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0)
-        self = 0;
-    else if (self > 1)
-        self = 1;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.reverb-changed", 0);
+	if (self < 0)
+		self = 0;
+	else if (self > 1)
+		self = 1;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.reverb-changed", 0);
 }
 
 CUSTOM_CVAR(Int, fluid_chorus_voices, 3, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0)
-        self = 0;
-    else if (self > 99)
-        self = 99;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.chorus-changed", 0);
+	if (self < 0)
+		self = 0;
+	else if (self > 99)
+		self = 99;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.chorus-changed", 0);
 }
 
 CUSTOM_CVAR(Float, fluid_chorus_level, 1.2f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0)
-        self = 0;
-    else if (self > 1)
-        self = 1;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.chorus-changed", 0);
+	if (self < 0)
+		self = 0;
+	else if (self > 1)
+		self = 1;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.chorus-changed", 0);
 }
 
 CUSTOM_CVAR(Float, fluid_chorus_speed, 0.3f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0.29f)
-        self = 0.29f;
-    else if (self > 5)
-        self = 5;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.chorus-changed", 0);
+	if (self < 0.29f)
+		self = 0.29f;
+	else if (self > 5)
+		self = 5;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.chorus-changed", 0);
 }
 
 // depth is in ms and actual maximum depends on the sample rate
 CUSTOM_CVAR(Float, fluid_chorus_depth, 8, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self < 0)
-        self = 0;
-    else if (self > 21)
-        self = 21;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.chorus-changed", 0);
+	if (self < 0)
+		self = 0;
+	else if (self > 21)
+		self = 21;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.chorus-changed", 0);
 }
 
 CUSTOM_CVAR(Int, fluid_chorus_type, FLUID_CHORUS_DEFAULT_TYPE, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
-    if (self != FLUID_CHORUS_MOD_SINE && self != FLUID_CHORUS_MOD_TRIANGLE)
-        self = FLUID_CHORUS_DEFAULT_TYPE;
-    else if (currSong != NULL)
-        currSong->FluidSettingInt("z.chorus-changed", 0);
+	if (self != FLUID_CHORUS_MOD_SINE && self != FLUID_CHORUS_MOD_TRIANGLE)
+		self = FLUID_CHORUS_DEFAULT_TYPE;
+	else if (currSong != NULL)
+		currSong->FluidSettingInt("z.chorus-changed", 0);
 }
 
 // CODE --------------------------------------------------------------------

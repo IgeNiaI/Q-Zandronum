@@ -238,7 +238,7 @@ FString PseudoMIDIDevice::GetStats()
 //
 //==========================================================================
 
-int FMODMIDIDevice::Open(void (*callback)(unsigned int, void *, DWORD, DWORD), void *userdata)
+int SndSysMIDIDevice::Open(void (*callback)(unsigned int, void *, DWORD, DWORD), void *userdata)
 {
 	return 0;
 }
@@ -251,7 +251,7 @@ int FMODMIDIDevice::Open(void (*callback)(unsigned int, void *, DWORD, DWORD), v
 //
 //==========================================================================
 
-bool FMODMIDIDevice::Preprocess(MIDIStreamer *song, bool looping)
+bool SndSysMIDIDevice::Preprocess(MIDIStreamer *song, bool looping)
 {
 	TArray<BYTE> midi;
 

@@ -82,6 +82,9 @@ public:
 
 typedef bool (*SoundStreamCallback)(SoundStream *stream, void *buff, int len, void *userdata);
 
+struct SoundDecoder;
+class MIDIDevice;
+
 class SoundRenderer
 {
 public:
@@ -150,6 +153,10 @@ public:
     virtual short *DecodeSample(int outlen, const void *coded, int sizebytes, ECodecType type);
 
     virtual void DrawWaveDebug(int mode);
+
+    
+	virtual MIDIDevice* CreateMIDIDevice() const = 0;
+
 protected:
     virtual SoundDecoder *CreateDecoder(FileReader *reader);
 };

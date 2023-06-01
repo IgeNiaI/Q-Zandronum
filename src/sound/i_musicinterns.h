@@ -13,13 +13,12 @@
 #include <windows.h>
 #include <mmsystem.h>
 #else
-#include <SDL.h>
 #define FALSE 0
 #define TRUE 1
 #endif
 #ifdef __APPLE__
 #include <AudioToolbox/AudioToolbox.h>
-#endif // __APPLE
+#endif // __APPLE__
 #include "tempfiles.h"
 #include "oplsynth/opl_mus_player.h"
 #include "c_cvars.h"
@@ -153,33 +152,33 @@ protected:
 class AudioToolboxMIDIDevice : public MIDIDevice
 {
 public:
-    virtual int Open(void (*callback)(unsigned int, void *, DWORD, DWORD), void *userData) override;
-    virtual void Close() override;
-    virtual bool IsOpen() const override;
-    virtual int GetTechnology() const override;
-    virtual int SetTempo(int tempo) override;
-    virtual int SetTimeDiv(int timediv) override;
-    virtual int StreamOut(MIDIHDR *data) override;
-    virtual int StreamOutSync(MIDIHDR *data) override;
-    virtual int Resume() override;
-    virtual void Stop() override;
-    virtual int PrepareHeader(MIDIHDR* data) override;
-    virtual bool FakeVolume() override { return true; }
-    virtual bool Pause(bool paused) override;
-    virtual bool Preprocess(MIDIStreamer *song, bool looping) override;
+	virtual int Open(void (*callback)(unsigned int, void *, DWORD, DWORD), void *userData) override;
+	virtual void Close() override;
+	virtual bool IsOpen() const override;
+	virtual int GetTechnology() const override;
+	virtual int SetTempo(int tempo) override;
+	virtual int SetTimeDiv(int timediv) override;
+	virtual int StreamOut(MIDIHDR *data) override;
+	virtual int StreamOutSync(MIDIHDR *data) override;
+	virtual int Resume() override;
+	virtual void Stop() override;
+	virtual int PrepareHeader(MIDIHDR* data) override;
+	virtual bool FakeVolume() override { return true; }
+	virtual bool Pause(bool paused) override;
+	virtual bool Preprocess(MIDIStreamer *song, bool looping) override;
 
 private:
-    MusicPlayer m_player = nullptr;
-    MusicSequence m_sequence = nullptr;
-    AudioUnit m_audioUnit = nullptr;
-    CFRunLoopTimerRef m_timer = nullptr;
-    MusicTimeStamp m_length = 0;
+	MusicPlayer m_player = nullptr;
+	MusicSequence m_sequence = nullptr;
+	AudioUnit m_audioUnit = nullptr;
+	CFRunLoopTimerRef m_timer = nullptr;
+	MusicTimeStamp m_length = 0;
 
-    typedef void (*Callback)(unsigned int, void *, DWORD, DWORD);
-    Callback m_callback = nullptr;
-    void* m_userData = nullptr;
+	typedef void (*Callback)(unsigned int, void *, DWORD, DWORD);
+	Callback m_callback = nullptr;
+	void* m_userData = nullptr;
 
-    static void TimerCallback(CFRunLoopTimerRef timer, void* info);
+	static void TimerCallback(CFRunLoopTimerRef timer, void* info);
 };
 
 #endif // __APPLE__
@@ -210,16 +209,16 @@ protected:
 	bool bLooping;
 };
 
-// FMOD pseudo-MIDI device --------------------------------------------------
+// Sound System pseudo-MIDI device ------------------------------------------
 
-class FMODMIDIDevice : public PseudoMIDIDevice
+class SndSysMIDIDevice : public PseudoMIDIDevice
 {
 public:
 	int Open(void (*callback)(unsigned int, void *, DWORD, DWORD), void *userdata);
 	bool Preprocess(MIDIStreamer *song, bool looping);
 };
 
-// MIDI file played with TiMidity++ and possibly streamed through FMOD ------
+// MIDI file played with TiMidity++ and possibly streamed through the Sound System
 
 class TimidityPPMIDIDevice : public PseudoMIDIDevice
 {
@@ -702,7 +701,7 @@ protected:
 	EventSource EventDue;
 };
 
-// Anything supported by FMOD out of the box --------------------------------
+// Anything supported by the sound system out of the box --------------------
 
 class StreamSong : public MusInfo
 {

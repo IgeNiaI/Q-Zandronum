@@ -255,6 +255,11 @@ public:
 	{
 		return "Null sound module has no stats.";
 	}
+
+	virtual MIDIDevice* CreateMIDIDevice() const override
+	{
+		return NULL;
+	}
 };
 
 void I_InitSound ()
