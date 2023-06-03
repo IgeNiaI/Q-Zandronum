@@ -49,6 +49,7 @@
 #include "i_music.h"
 #include "m_joy.h"
 #include "gi.h"
+#include "i_sound.h"
 // [TP] New #includes
 #include "announcer.h"
 #include "doomerrors.h"
@@ -64,6 +65,8 @@ static FFreeformMenuDescriptor DefaultFreeformMenuSettings; // contains common s
 static FOptionMenuDescriptor DefaultOptionMenuSettings;	// contains common settings for all Option menus
 FOptionMenuSettings OptionSettings;
 FOptionMap OptionValues;
+
+void I_BuildALDeviceList(FOptionValues* opt);
 
 static void DeinitMenus()
 {
@@ -157,21 +160,29 @@ static bool CheckSkipOptionBlock(FScanner &sc)
 		else if (sc.Compare("Swapmenu")) filter |= gameinfo.swapmenu;
 		else if (sc.Compare("Windows"))
 		{
-			#ifdef _WIN32
-				filter = true;
-			#endif
+		#ifdef _WIN32
+			filter = true;
+		#endif
 		}
 		else if (sc.Compare("unix"))
 		{
-			#ifdef __unix__
-				filter = true;
-			#endif
+		#ifdef __unix__
+			filter = true;
+		#endif
 		}
 		else if (sc.Compare("Mac"))
 		{
-			#ifdef __APPLE__
-				filter = true;
-			#endif
+		#ifdef __APPLE__
+			filter = true;
+		#endif
+		}
+		else if (sc.Compare("OpenAL"))
+		{
+			filter |= IsOpenALPresent();
+		}
+		else if (sc.Compare("FModEx"))
+		{
+			filter |= IsFModExPresent();
 		}
 	}
 	while (sc.CheckString(","));
@@ -2838,6 +2849,11 @@ void M_CreateMenus()
 	if (opt != NULL) 
 	{
 		I_BuildMIDIMenuList(*opt);
+	}
+	opt = OptionValues.CheckKey(NAME_Aldevices);
+	if (opt != NULL)
+	{
+		I_BuildALDeviceList(*opt);
 	}
 }
 

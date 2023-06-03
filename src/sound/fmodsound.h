@@ -1,8 +1,6 @@
 #ifndef FMODSOUND_H
 #define FMODSOUND_H
 
-
-
 #include "i_sound.h"
 
 #ifndef NO_FMOD

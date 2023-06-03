@@ -53,10 +53,9 @@ extern HWND Window;
 #include <malloc.h>
 #endif
 
+#include "except.h"
 #include "templates.h"
-#ifndef NO_FMOD
 #include "fmodsound.h"
-#endif
 #include "c_cvars.h"
 #include "i_system.h"
 #include "i_music.h"
@@ -98,6 +97,7 @@ struct FEnumList
 // EXTERNAL FUNCTION PROTOTYPES --------------------------------------------
 
 #ifndef NO_SOUND
+
 // PUBLIC FUNCTION PROTOTYPES ----------------------------------------------
 
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
@@ -633,30 +633,6 @@ bool FMODSoundRenderer::IsValid()
 	return InitSuccess;
 }
 
-#ifdef _MSC_VER
-//==========================================================================
-//
-// CheckException
-//
-//==========================================================================
-
-#ifndef FACILITY_VISUALCPP
-#define FACILITY_VISUALCPP  ((LONG)0x6d)
-#endif
-#define VcppException(sev,err)  ((sev) | (FACILITY_VISUALCPP<<16) | err)
-
-static int CheckException(DWORD code)
-{
-	if (code == VcppException(ERROR_SEVERITY_ERROR,ERROR_MOD_NOT_FOUND) ||
-		code == VcppException(ERROR_SEVERITY_ERROR,ERROR_PROC_NOT_FOUND))
-	{
-		return EXCEPTION_EXECUTE_HANDLER;
-	}
-	return EXCEPTION_CONTINUE_SEARCH;
-}
-
-#endif
-
 //==========================================================================
 //
 // FMODSoundRenderer :: Init
@@ -694,24 +670,20 @@ bool FMODSoundRenderer::Init()
 
 	Printf("I_InitSound: Initializing FMOD\n");
 
-	// Create a System object and initialize.
-#ifdef _MSC_VER
-	__try {
-#endif
-	result = FMOD::System_Create(&Sys);
-#ifdef _MSC_VER
-	}
-	__except(CheckException(GetExceptionCode()))
+	// This is just for safety. Normally this should never be called if FMod Ex cannot be found.
+	if (!IsFModExPresent())
 	{
 		Sys = NULL;
-		Printf(TEXTCOLOR_ORANGE"Failed to load fmodex"
+		Printf(TEXTCOLOR_ORANGE "Failed to load fmodex"
 #ifdef _WIN64
 			"64"
 #endif
 			".dll\n");
 		return false;
 	}
-#endif
+
+	// Create a System object and initialize.
+	result = FMOD::System_Create(&Sys);
 	if (result != FMOD_OK)
 	{
 		Sys = NULL;
@@ -3115,4 +3087,44 @@ MIDIDevice* FMODSoundRenderer::CreateMIDIDevice() const
 	return new SndSysMIDIDevice;
 }
 
-#endif //NO_SOUND
+#endif //NO_FMOD
+
+//==========================================================================
+//
+// IsFModExPresent
+//
+// Check if FMod can be used
+//
+//==========================================================================
+
+bool IsFModExPresent()
+{
+#ifdef NO_FMOD
+	return false;
+#elif !defined _MSC_VER
+	return true;	// on non-MSVC we cannot delay load the library so it has to be present.
+#else
+	static bool cached_result;
+	static bool done = false;
+
+	if (!done)
+	{
+		done = true;
+
+		FMOD::System* Sys;
+		FMOD_RESULT result;
+		__try
+		{
+			result = FMOD::System_Create(&Sys);
+		}
+		__except (CheckException(GetExceptionCode()))
+		{
+			// FMod could not be delay loaded
+			return false;
+		}
+		if (result == FMOD_OK) Sys->release();
+		cached_result = true;
+	}
+	return cached_result;
+#endif
+}

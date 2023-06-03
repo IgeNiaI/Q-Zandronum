@@ -524,6 +524,7 @@ struct TVector3
 		*this *= len;
 	}
 
+
 	// Resizes this vector to be the specified length (if it is not 0)
 	TVector3 &Resize(double len)
 	{

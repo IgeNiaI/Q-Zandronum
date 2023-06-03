@@ -1,6 +1,8 @@
 #ifndef __SNDINT_H
 #define __SNDINT_H
 
+#include <stdio.h>
+
 #include "basictypes.h"
 #include "vectors.h"
 #include "tarray.h"
@@ -89,6 +91,7 @@ struct SoundHandle
 
     bool isValid() const { return data != NULL; }
     void Clear() { data = NULL; }
+
 };
 
 struct FISoundChannel
@@ -138,7 +141,7 @@ protected:
 private:
     // Make non-copyable
     SoundDecoder(const SoundDecoder &rhs);
-    SoundDecoder& operator=(const SoundDecoder &rhs);
+    SoundDecoder &operator=(const SoundDecoder &rhs);
 };
 
 

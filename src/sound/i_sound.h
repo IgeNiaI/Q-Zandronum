@@ -38,6 +38,8 @@
 #include "doomtype.h"
 #include "i_soundinternal.h"
 
+class FileReader;
+
 enum ECodecType
 {
     CODEC_Unknown,
@@ -174,5 +176,8 @@ float S_GetRolloff(FRolloffInfo *rolloff, float distance, bool logarithmic);
 FISoundChannel *S_GetChannel(void *syschan);
 
 extern ReverbContainer *DefaultEnvironments[26];
+
+bool IsFModExPresent();
+bool IsOpenALPresent();
 
 #endif

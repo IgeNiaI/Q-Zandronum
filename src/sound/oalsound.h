@@ -7,13 +7,9 @@
 
 #ifndef NO_OPENAL
 
-#ifdef __APPLE__
 #include <al.h>
 #include <alc.h>
-#else
-#include <AL/al.h>
-#include <AL/alc.h>
-#endif
+#include <alext.h>
 
 #ifndef ALC_ENUMERATE_ALL_EXT
 #define ALC_ENUMERATE_ALL_EXT 1
@@ -61,11 +57,13 @@
 #define AL_FORMAT_71CHN32                        0x1212
 #endif
 
-#ifdef __APPLE__
-#include <efx.h>
-#else
-#include <AL/efx.h>
+#ifndef AL_EXT_SOURCE_RADIUS
+#define AL_EXT_SOURCE_RADIUS 1
+#define AL_SOURCE_RADIUS                         0x1031
 #endif
+
+#include <efx.h>
+
 
 class OpenALSoundStream;
 
@@ -130,10 +128,12 @@ private:
     struct {
         bool EXT_EFX;
         bool EXT_disconnect;
+		bool SOFT_pause_device;
     } ALC;
     struct {
         bool EXT_source_distance_model;
         bool SOFT_deferred_updates;
+		bool EXT_SOURCE_RADIUS;
         bool SOFT_loop_points;
     } AL;
 
@@ -179,6 +179,10 @@ private:
 
     ALvoid (AL_APIENTRY*alDeferUpdatesSOFT)(void);
     ALvoid (AL_APIENTRY*alProcessUpdatesSOFT)(void);
+
+	void (ALC_APIENTRY* alcDevicePauseSOFT)(ALCdevice* device);
+	void (ALC_APIENTRY* alcDeviceResumeSOFT)(ALCdevice* device);
+
 
 	void LoadReverb(const ReverbContainer *env);
 	void PurgeStoppedSources();

@@ -1548,11 +1548,22 @@ OptionValue BufferCounts
 
 OptionString SoundBackends
 {
-	"fmod",		"FMOD"
-	"openal",		"OpenAL"
+	"fmod",		"FMODEX"
+	"openal",	"OpenAL"
 	"null",		"No sound"
 }
 
+OptionString SoundBackendsOpenAL
+{
+	"openal",	"OpenAL"
+	"null",		"No sound"
+}
+
+OptionString SoundBackendsFMODEX
+{
+	"fmod",		"FMODEX"
+	"null",		"No sound"
+}
 
 OptionString SoundOutputsWindows
 {
@@ -1578,9 +1589,13 @@ OptionString SoundOutputsUnix
 
 OptionString SoundOutputsMac
 {
-	"Sound Manager",	"Sound Manager"
 	"Core Audio",		"Core Audio"
 	"No sound",			"No sound"
+}
+
+OptionString ALDevices
+{
+	// filled in by the sound code
 }
 
 OptionString OutputFormats
@@ -1619,6 +1634,17 @@ OptionValue MidiDevices
 	// filled in by the sound code
 }
 
+
+OptionMenu OpenALSoundOptions
+{
+	Title "OpenAL options"
+	Option "OpenAL Device",		"snd_aldevice",	"ALDevices"
+	Option "Enable EFX",		"snd_efx",	"OnOff"
+	StaticText " "
+	Command "Restart sound",	"snd_reset"
+}
+
+
 OptionMenu SoundOptions
 {
 	Indent 153
@@ -1629,7 +1655,24 @@ OptionMenu SoundOptions
 	Slider "Announcer volume",	"snd_announcervolume", 0, 1, 0.05 // [TP]
 	Option "Announcer",			"cl_announcer", "ZA_Announcers" // [TP]
 	Option "MIDI device",		"snd_mididevice", "MidiDevices"
-	Option "Sound Backend",		"snd_backend", "SoundBackends"
+	IfOption(fmod)
+	{
+		IfOption(openal)
+		{
+			Option "Sound Backend",			"snd_backend", "SoundBackends"
+		}
+		else
+		{
+			Option  "Sound Backend",		"snd_backend", "SoundBackendsFMODEX"
+		}
+	}
+	else
+	{
+		IfOption(openal)
+		{
+			Option  "Sound Backend",		"snd_backend", "SoundBackendsOpenAL"
+		}
+	}
 	TextField "Soundfont",		"fluid_patchset"
 	StaticText " "
 	Option "Underwater reverb",	"snd_waterreverb", "OnOff"
@@ -1657,11 +1700,12 @@ OptionMenu SoundOptions
 	Option "Speaker mode",		"snd_speakermode", "SpeakerModes"
 	Option "Resampler",			"snd_resampler", "Resamplers"
 	Option "HRTF filter",		"snd_hrtf", "OnOff"
-
 	StaticText " "
+	Submenu "OpenAL options",			"OpenALSoundOptions"
 	Submenu "Advanced options",			"AdvSoundOptions"
 	Submenu "Module replayer options",	"ModReplayerOptions"
 }
+
 
 /*=======================================
  *
