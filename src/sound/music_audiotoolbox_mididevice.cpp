@@ -263,7 +263,7 @@ bool AudioToolboxMIDIDevice::Preprocess(MIDIStreamer* song, bool looping)
 	CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, &midi[0], midi.Size(), kCFAllocatorNull);
 	if (nullptr == data)
 	{
-		DPrintf(DMSG_ERROR, "Failed with create CFDataRef for MIDI song");
+		DPrintf("Failed with create CFDataRef for MIDI song");
 		return false;
 	}
 
