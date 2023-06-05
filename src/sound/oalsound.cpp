@@ -227,6 +227,7 @@ class OpenALSoundStream : public SoundStream
         }
         Renderer->FreeSfx.Pop(Source);
 
+
         /* Set the default properties for localized playback */
         alSource3f(Source, AL_DIRECTION, 0.f, 0.f, 0.f);
         alSource3f(Source, AL_VELOCITY, 0.f, 0.f, 0.f);
@@ -238,13 +239,15 @@ class OpenALSoundStream : public SoundStream
         alSourcef(Source, AL_SEC_OFFSET, 0.f);
         alSourcei(Source, AL_SOURCE_RELATIVE, AL_TRUE);
         alSourcei(Source, AL_LOOPING, AL_FALSE);
-        if(Renderer->EnvSlot)
+        if (Renderer->EnvSlot)
         {
             alSourcef(Source, AL_ROOM_ROLLOFF_FACTOR, 0.f);
             alSourcef(Source, AL_AIR_ABSORPTION_FACTOR, 0.f);
             alSourcei(Source, AL_DIRECT_FILTER, AL_FILTER_NULL);
             alSource3i(Source, AL_AUXILIARY_SEND_FILTER, 0, 0, AL_FILTER_NULL);
         }
+        if (Renderer->AL.EXT_SOURCE_RADIUS)
+            alSourcef(Source, AL_SOURCE_RADIUS, 0.f);
 
         alGenBuffers(BufferCount, Buffers);
         return (getALError() == AL_NO_ERROR);
@@ -258,7 +261,7 @@ public:
         memset(Buffers, 0, sizeof(Buffers));
     }
 
-    virtual ~OpenALSoundStream()
+    ~OpenALSoundStream()
     {
         if(Source)
         {
@@ -284,7 +287,7 @@ public:
     }
 
 
-    virtual bool Play(bool loop, float vol)
+    bool Play(bool loop, float vol)
     {
         SetVolume(vol);
 
@@ -314,7 +317,7 @@ public:
         return Playing;
     }
 
-    virtual void Stop()
+    void Stop()
     {
         if(!Playing)
             return;
@@ -326,7 +329,7 @@ public:
         Playing = false;
     }
 
-    virtual void SetVolume(float vol)
+    void SetVolume(float vol)
     {
         Volume = vol;
         UpdateVolume();
@@ -338,7 +341,7 @@ public:
         getALError();
     }
 
-    virtual bool SetPaused(bool pause)
+    bool SetPaused(bool pause)
     {
         if(pause)
             alSourcePause(Source);
@@ -347,7 +350,7 @@ public:
         return (getALError()==AL_NO_ERROR);
     }
 
-    virtual bool SetPosition(unsigned int ms_pos)
+    bool SetPosition(unsigned int ms_pos)
     {
         if(!Decoder->seek(ms_pos))
             return false;
@@ -362,7 +365,7 @@ public:
         return !IsEnded();
     }
 
-    virtual unsigned int GetPosition()
+    unsigned int GetPosition()
     {
         ALint offset, queued, state;
         alGetSourcei(Source, AL_SAMPLE_OFFSET, &offset);
@@ -381,7 +384,7 @@ public:
         return (unsigned int)(pos * 1000.0 / SampleRate);
     }
 
-    virtual bool IsEnded()
+    bool IsEnded()
     {
         if(!Playing)
             return true;
@@ -596,7 +599,7 @@ public:
         SampleRate = srate;
         Looping = loop;
 
-        Data.Resize((size_t)(0.2 * SampleRate) * FrameSize);
+        Data.Resize((SampleRate / 5) * FrameSize);
 
         return true;
     }
@@ -649,7 +652,7 @@ public:
         SampleRate = srate;
         Looping = loop;
 
-        Data.Resize((size_t)(0.2 * SampleRate) * FrameSize);
+        Data.Resize((SampleRate / 5) * FrameSize);
 
         return true;
     }
@@ -990,7 +993,7 @@ OpenALSoundRenderer::~OpenALSoundRenderer()
     }
     EnvEffects.Clear();
 
-    if(EnvSlot)
+    if (EnvSlot)
     {
         alDeleteAuxiliaryEffectSlots(1, &EnvSlot);
         alDeleteFilters(2, EnvFilters);
@@ -1946,7 +1949,7 @@ FString OpenALSoundRenderer::GatherStats()
 
 void OpenALSoundRenderer::PrintDriversList()
 {
-    const ALCchar* drivers = (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") ?
+    const ALCchar *drivers = (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") ?
         alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER) :
         alcGetString(NULL, ALC_DEVICE_SPECIFIER));
     if (drivers == NULL)
@@ -1980,10 +1983,12 @@ void OpenALSoundRenderer::PrintDriversList()
 MIDIDevice* OpenALSoundRenderer::CreateMIDIDevice() const
 {
 #ifdef _WIN32
-	extern UINT mididevice;
-	return new WinMIDIDevice(mididevice);
+    extern UINT mididevice;
+    return new WinMIDIDevice(mididevice);
+#elif defined __APPLE__
+    return new AudioToolboxMIDIDevice;
 #else
-	return new OPLMIDIDevice(NULL);
+    return new OPLMIDIDevice(nullptr);
 #endif
 }
 
