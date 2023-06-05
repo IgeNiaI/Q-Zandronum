@@ -33,7 +33,7 @@
 	const OSStatus result = CALL;                                  \
 	if (noErr != result)                                           \
 	{                                                              \
-		DPrintf(DMSG_ERROR,                                        \
+		DPrintf(                                                   \
 			"Failed with error 0x%08X at " __FILE__ ":%d:\n> %s",  \
 			int(result), __LINE__, #CALL);                         \
 		return __VA_ARGS__;                                        \
@@ -51,7 +51,7 @@ int AudioToolboxMIDIDevice::Open(void (*callback)(unsigned int, void *, DWORD, D
 
 	if (nullptr == m_timer)
 	{
-		DPrintf(DMSG_ERROR, "Failed with create timer for MIDI playback");
+		DPrintf("Failed with create timer for MIDI playback");
 		return 1;
 	}
 
