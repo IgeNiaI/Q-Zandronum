@@ -2259,7 +2259,7 @@ MIDIDevice* OpenALSoundRenderer::CreateMIDIDevice() const
 #elif defined __APPLE__
     return new AudioToolboxMIDIDevice;
 #else
-    return new OPLMIDIDevice(nullptr);
+    return new OPLMIDIDevice;
 #endif
 }
 
