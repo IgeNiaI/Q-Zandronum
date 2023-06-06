@@ -248,6 +248,8 @@ class OpenALSoundStream : public SoundStream
         }
         if (Renderer->AL.EXT_SOURCE_RADIUS)
             alSourcef(Source, AL_SOURCE_RADIUS, 0.f);
+		if (Renderer->AL.SOFT_source_spatialize)
+			alSourcei(Source, AL_SOURCE_SPATIALIZE_SOFT, AL_AUTO_SOFT);
 
         alGenBuffers(BufferCount, Buffers);
         return (getALError() == AL_NO_ERROR);
@@ -803,6 +805,7 @@ OpenALSoundRenderer::OpenALSoundRenderer()
         AL.EXT_SOURCE_RADIUS = !!alIsExtensionPresent("AL_EXT_SOURCE_RADIUS");
         AL.SOFT_deferred_updates = !!alIsExtensionPresent("AL_SOFT_deferred_updates");
         AL.SOFT_loop_points = !!alIsExtensionPresent("AL_SOFT_loop_points");
+	    AL.SOFT_source_spatialize = !!alIsExtensionPresent("AL_SOFT_source_spatialize");
 
         alDopplerFactor(0.5f);
         alSpeedOfSound(343.3f * 96.0f);
@@ -1287,6 +1290,8 @@ FISoundChannel *OpenALSoundRenderer::StartSound(SoundHandle sfx, float vol, int 
     alSourcef(source, AL_GAIN, SfxVolume * vol);
     if (AL.EXT_SOURCE_RADIUS)
         alSourcef(source, AL_SOURCE_RADIUS, 0.f);
+	if (AL.SOFT_source_spatialize)
+		alSourcei(source, AL_SOURCE_SPATIALIZE_SOFT, AL_AUTO_SOFT);
 
     if (EnvSlot)
     {
@@ -1490,6 +1495,8 @@ FISoundChannel *OpenALSoundRenderer::StartSound3D(SoundHandle sfx, SoundListener
 
     alSourcef(source, AL_MAX_GAIN, SfxVolume);
     alSourcef(source, AL_GAIN, SfxVolume * vol);
+	if (AL.SOFT_source_spatialize)
+		alSourcei(source, AL_SOURCE_SPATIALIZE_SOFT, AL_TRUE);
 
     if (EnvSlot)
     {

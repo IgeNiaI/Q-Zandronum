@@ -135,6 +135,7 @@ private:
         bool SOFT_deferred_updates;
 		bool EXT_SOURCE_RADIUS;
         bool SOFT_loop_points;
+		bool SOFT_source_spatialize;
     } AL;
 
 	// EFX Extension function pointer variables. Loaded after context creation
