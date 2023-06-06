@@ -900,7 +900,11 @@ static void ParseFreeformMenuBody(FScanner &sc, FFreeformMenuDescriptor *desc, F
 	{
 		FFreeformMenuItem *addedItem = NULL;
 		sc.MustGetString();
-		if (sc.Compare("ifgame"))
+		if (sc.Compare("else"))
+		{
+			SkipSubBlock(sc);
+		}
+		else if (sc.Compare("ifgame"))
 		{
 			if (!CheckSkipGameBlock(sc))
 			{
@@ -1698,7 +1702,11 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc, int i
 	while (!sc.CheckString("}"))
 	{
 		sc.MustGetString();
-		if (sc.Compare("ifgame"))
+		if (sc.Compare("else"))
+		{
+			SkipSubBlock(sc);
+		}
+		else if (sc.Compare("ifgame"))
 		{
 			if (!CheckSkipGameBlock(sc))
 			{
