@@ -63,10 +63,16 @@ static void MIDIDeviceChanged(int newdev)
 	oldmididev = newdev;
 }
 
+#ifdef HAVE_FLUIDSYNTH
+#define DEF_MIDIDEVICE -5
+#else
+#define DEF_MIDIDEVICE -1
+#endif
+
 #ifdef _WIN32
 UINT mididevice;
 
-CUSTOM_CVAR (Int, snd_mididevice, -1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CUSTOM_CVAR (Int, snd_mididevice, DEF_MIDIDEVICE, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
 	if (!nummididevicesset)
 		return;
@@ -195,7 +201,7 @@ CCMD (snd_listmididevices)
 
 // Everything but Windows uses this code.
 
-CUSTOM_CVAR(Int, snd_mididevice, -1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CUSTOM_CVAR (Int, snd_mididevice, DEF_MIDIDEVICE, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
 	if (self < -5)
 		self = -5;

@@ -91,10 +91,10 @@ CVAR (Int, snd_buffersize, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (String, snd_output, "default", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool, snd_hrtf, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
-#ifndef NO_FMOD
-#define DEF_BACKEND "fmod"
-#elif !defined(NO_OPENAL)
+#ifndef NO_OPENAL
 #define DEF_BACKEND "openal"
+#elif !defined(NO_FMOD)
+#define DEF_BACKEND "fmod"
 #else
 #define DEF_BACKEND "null"
 #endif

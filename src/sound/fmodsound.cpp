@@ -145,9 +145,9 @@ CUSTOM_CVAR (Float, snd_waterlp, 250, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 	}
 }
 
-EXTERN_CVAR(Bool, snd_hrtf)
-
 #ifndef NO_FMOD
+
+EXTERN_CVAR(Bool, snd_hrtf)
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
