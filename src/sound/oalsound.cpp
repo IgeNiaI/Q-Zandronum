@@ -1009,12 +1009,10 @@ OpenALSoundRenderer::OpenALSoundRenderer()
 	    if(ALC.SOFT_HRTF)
 	    {
 		    attribs.Push(ALC_HRTF_SOFT);
-		    if(*snd_hrtf == 0)
+		    if(snd_hrtf == 0)
+                attribs.Push(ALC_TRUE);
+            else
 			    attribs.Push(ALC_FALSE);
-		    else if(*snd_hrtf > 0)
-			    attribs.Push(ALC_TRUE);
-		    else
-			    attribs.Push(ALC_DONT_CARE_SOFT);
 	    }
         attribs.Push(0);
 
@@ -2022,9 +2020,9 @@ void OpenALSoundRenderer::UpdateListener(SoundListener *listener)
     float angle = listener->angle;
     ALfloat orient[6];
     // forward
-    orient[0] = cos(angle);
+    orient[0] = (float) cos(angle);
     orient[1] = 0.f;
-    orient[2] = -sin(angle);
+    orient[2] = (float) -sin(angle);
     // up
     orient[3] = 0.f;
     orient[4] = 1.f;
@@ -2160,7 +2158,7 @@ float OpenALSoundRenderer::GetAudibility(FISoundChannel *chan)
     alGetSourcef(source, AL_GAIN, &volume);
     getALError();
 
-    volume *= GetRolloff(&chan->Rolloff, sqrt(chan->DistanceSqr) * chan->DistanceScale);
+    volume *= GetRolloff(&chan->Rolloff, (float) sqrt(chan->DistanceSqr) * chan->DistanceScale);
     return volume;
 }
 

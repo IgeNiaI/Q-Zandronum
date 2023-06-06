@@ -1441,12 +1441,12 @@ sfxinfo_t *S_LoadSound(sfxinfo_t *sfx)
 					}
 					sfxstart = sfxdata + 8;
 				}
-				sfx->data = GSnd->LoadSoundRaw(sfxstart, len, frequency, 1, 8, sfx->LoopStart);
+				sfx->data = GSnd->LoadSoundRaw(sfxstart, len, frequency, 1, 8, sfx->LoopStart, sfx->LoopEnd);
 			}
 			else
 			{
 				len = Wads.LumpLength (sfx->lumpnum);
-				sfx->data = GSnd->LoadSound(sfxstart, len, sfx->LoopStart);
+				sfx->data = GSnd->LoadSound(sfxstart, len, sfx->LoopStart, sfx->LoopEnd);
 			}
 			
 			if (sfxdata != NULL)
