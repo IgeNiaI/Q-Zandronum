@@ -1550,19 +1550,16 @@ OptionString SoundBackends
 {
 	"fmod",		"FMODEX"
 	"openal",	"OpenAL"
-	"null",		"No sound"
 }
 
 OptionString SoundBackendsOpenAL
 {
 	"openal",	"OpenAL"
-	"null",		"No sound"
 }
 
 OptionString SoundBackendsFMODEX
 {
 	"fmod",		"FMODEX"
-	"null",		"No sound"
 }
 
 OptionString SoundOutputsWindows

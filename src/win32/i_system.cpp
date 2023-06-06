@@ -862,7 +862,7 @@ void I_Init()
 	I_WaitForTic = I_WaitForTicSelect;
 
 	atterm (I_ShutdownSound);
-	I_InitSound ();
+	// I_InitSound (); // sound is initialized when the "snd_backend" cvar is set
 }
 
 //==========================================================================

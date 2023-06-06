@@ -99,7 +99,17 @@ CVAR (Bool, snd_hrtf, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 #define DEF_BACKEND "null"
 #endif
 
-CVAR(String, snd_backend, DEF_BACKEND, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+void I_CloseSound();
+
+CUSTOM_CVAR(String, snd_backend, DEF_BACKEND, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+{
+	I_ShutdownMusic();
+	S_EvictAllChannels();
+	I_CloseSound();
+	I_InitSound();
+	S_RestartMusic();
+	S_RestoreEvictedChannels();
+}
 
 // killough 2/21/98: optionally use varying pitched sounds
 CVAR (Bool, snd_pitched, false, CVAR_ARCHIVE)
@@ -107,8 +117,6 @@ CVAR (Bool, snd_pitched, false, CVAR_ARCHIVE)
 SoundRenderer *GSnd;
 bool nosound;
 bool nosfx;
-
-void I_CloseSound ();
 
 
 //
