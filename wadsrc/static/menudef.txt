@@ -1655,7 +1655,7 @@ OptionMenu SoundOptions
 	Slider "Announcer volume",	"snd_announcervolume", 0, 1, 0.05 // [TP]
 	Option "Announcer",			"cl_announcer", "ZA_Announcers" // [TP]
 	Option "MIDI device",		"snd_mididevice", "MidiDevices"
-	IfOption(fmod)
+	IfOption(fmodex)
 	{
 		IfOption(openal)
 		{
