@@ -122,6 +122,7 @@ EXTERN_CVAR (Int, snd_channels)
 EXTERN_CVAR (Int, snd_samplerate)
 EXTERN_CVAR (Bool, snd_waterreverb)
 EXTERN_CVAR (Bool, snd_pitched)
+EXTERN_CVAR (Bool, snd_hrtf)
 
 
 #define MAKE_PTRID(x)  ((void*)(uintptr_t)(x))
@@ -977,6 +978,8 @@ OpenALSoundRenderer::OpenALSoundRenderer()
 
         Device = InitDevice();
         if (Device == NULL) return;
+        
+	    ALC.SOFT_HRTF = !!alcIsExtensionPresent(Device, "ALC_SOFT_HRTF");
 
         const ALCchar* current = NULL;
         if (alcIsExtensionPresent(Device, "ALC_ENUMERATE_ALL_EXT"))
@@ -1003,7 +1006,16 @@ OpenALSoundRenderer::OpenALSoundRenderer()
         attribs.Push(MAX<ALCint>(*snd_channels, 2) - 1);
         attribs.Push(ALC_STEREO_SOURCES);
         attribs.Push(1);
-        // Other attribs..?
+	    if(ALC.SOFT_HRTF)
+	    {
+		    attribs.Push(ALC_HRTF_SOFT);
+		    if(*snd_hrtf == 0)
+			    attribs.Push(ALC_FALSE);
+		    else if(*snd_hrtf > 0)
+			    attribs.Push(ALC_TRUE);
+		    else
+			    attribs.Push(ALC_DONT_CARE_SOFT);
+	    }
         attribs.Push(0);
 
         Context = alcCreateContext(Device, &attribs[0]);

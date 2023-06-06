@@ -128,6 +128,7 @@ private:
     struct {
         bool EXT_EFX;
         bool EXT_disconnect;
+        bool SOFT_HRTF;
 		bool SOFT_pause_device;
     } ALC;
     struct {

@@ -124,7 +124,6 @@ ReverbContainer *ForcedEnvironment;
 
 CVAR (Int, snd_driver, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Int, snd_buffercount, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-CVAR (Bool, snd_hrtf, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Bool, snd_waterreverb, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (String, snd_resampler, "Linear", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (String, snd_speakermode, "Auto", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
@@ -145,6 +144,8 @@ CUSTOM_CVAR (Float, snd_waterlp, 250, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 		self = 22000;
 	}
 }
+
+EXTERN_CVAR(Bool, snd_hrtf)
 
 #ifndef NO_FMOD
 
