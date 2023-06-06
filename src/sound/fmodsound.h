@@ -15,7 +15,7 @@ public:
 
 	void SetSfxVolume (float volume);
 	void SetMusicVolume (float volume);
-	SoundHandle LoadSound(BYTE *sfxdata, int length);
+	SoundHandle LoadSound(BYTE *sfxdata, int length, int def_loop_start, int def_loop_end = -1);
 	SoundHandle LoadSoundRaw(BYTE *sfxdata, int length, int frequency, int channels, int bits, int loopstart, int loopend = -1);
 	void UnloadSound (SoundHandle sfx);
 	unsigned int GetMSLength(SoundHandle sfx);

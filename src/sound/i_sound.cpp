@@ -143,7 +143,7 @@ public:
 	void SetMusicVolume (float volume)
 	{
 	}
-	SoundHandle LoadSound(BYTE *sfxdata, int length)
+	SoundHandle LoadSound(BYTE *sfxdata, int length, int def_loop_start, int def_loop_end)
 	{
 		SoundHandle retval = { NULL };
 		return retval;

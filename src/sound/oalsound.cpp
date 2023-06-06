@@ -172,6 +172,232 @@ static ALvoid AL_APIENTRY _wrap_ProcessUpdatesSOFT(void)
     alcProcessContext(alcGetCurrentContext());
 }
 
+//==========================================================================
+//
+// Try to find the LOOP_START/LOOP_END tags in a Vorbis Comment block
+//
+// We have to parse through the FLAC or Ogg headers manually, since sndfile
+// doesn't provide proper access to the comments and we'd rather not require
+// using libFLAC and libvorbisfile directly.
+//
+//==========================================================================
+
+static void ParseVorbisComments(MemoryReader *mr, unsigned int *start, bool *startass, unsigned int *end, bool *endass)
+{
+	BYTE vc_data[4];
+
+	// The VC block starts with a 32LE integer for the vendor string length,
+	// followed by the vendor string
+	if(mr->Read(vc_data, 4) != 4)
+		return;
+    unsigned int vndr_len = vc_data[0] | (vc_data[1]<<8) | (vc_data[2]<<16) | (vc_data[3]<<24);
+
+	// Skip vendor string
+	if(mr->Seek(vndr_len, SEEK_CUR) == -1)
+		return;
+
+	// Following the vendor string is a 32LE integer for the number of
+	// comments, followed by each comment.
+	if(mr->Read(vc_data, 4) != 4)
+		return;
+	size_t count = vc_data[0] | (vc_data[1]<<8) | (vc_data[2]<<16) | (vc_data[3]<<24);
+
+	bool loopass = false;
+    unsigned int looplen = 0;
+	bool endfound = false;
+
+	for(size_t i = 0; i < count; i++)
+	{
+		// Each comment is a 32LE integer for the comment length, followed by
+		// the comment text (not null terminated!)
+		if(mr->Read(vc_data, 4) != 4)
+			return;
+        unsigned int length = vc_data[0] | (vc_data[1]<<8) | (vc_data[2]<<16) | (vc_data[3]<<24);
+
+		if(length >= 128)
+		{
+			// If the comment is "big", skip it
+			if(mr->Seek(length, SEEK_CUR) == -1)
+				return;
+			continue;
+		}
+
+		char strdat[128];
+		if(mr->Read(strdat, length) != (long)length)
+			return;
+		strdat[length] = 0;
+
+		static const char* loopStartTags[] = { "LOOP_START=", "LOOPSTART=", "LOOP=" };
+		static const char* loopEndTags[] = { "LOOP_END=", "LOOPEND=" };
+		static const char* loopLengthTags[] = { "LOOP_LENGTH=", "LOOPLENGTH=" };
+
+		for (auto tag : loopStartTags)
+		{
+			const size_t tagLength = strlen(tag);
+
+			if (!strnicmp(strdat, tag, tagLength))
+			{
+				S_ParseTimeTag(strdat + tagLength, startass, start);
+				break;
+			}
+		}
+		for (auto tag : loopEndTags)
+		{
+			const size_t tagLength = strlen(tag);
+
+			if (!strnicmp(strdat, tag, tagLength))
+			{
+				S_ParseTimeTag(strdat + tagLength, endass, end);
+				endfound = true;
+				break;
+			}
+		}
+		for (auto tag : loopLengthTags)
+		{
+			const size_t tagLength = strlen(tag);
+
+			if (!strnicmp(strdat, tag, tagLength))
+			{
+				S_ParseTimeTag(strdat + tagLength, &loopass, &looplen);
+				*end += *start;
+				break;
+			}
+		}
+	}
+	// Use loop length only if no end defined.
+	if (!endfound && looplen && loopass == *startass)
+	{
+		*endass = loopass;
+		*end = *start + looplen;
+	}
+}
+
+static void FindFlacComments(MemoryReader *mr, unsigned int *loop_start, bool *startass, unsigned int *loop_end, bool *endass)
+{
+	// Already verified the fLaC marker, so we're 4 bytes into the file
+	bool lastblock = false;
+	BYTE header[4];
+
+	while(!lastblock && mr->Read(header, 4) == 4)
+	{
+		// The first byte of the block header contains the type and a flag
+		// indicating the last metadata block
+		char blocktype = header[0]&0x7f;
+		lastblock = !!(header[0]&0x80);
+		// Following the type is a 24BE integer for the size of the block
+        unsigned int blocksize = (header[1]<<16) | (header[2]<<8) | header[3];
+
+		// FLAC__METADATA_TYPE_VORBIS_COMMENT is 4
+		if(blocktype == 4)
+		{
+			ParseVorbisComments(mr, loop_start, startass, loop_end, endass);
+			return;
+		}
+
+		if(mr->Seek(blocksize, SEEK_CUR) == -1)
+			break;
+	}
+}
+
+static void FindOggComments(MemoryReader *mr, unsigned int *loop_start, bool *startass, unsigned int *loop_end, bool *endass)
+{
+	BYTE ogghead[27];
+
+	// We already read and verified the OggS marker, so skip the first 4 bytes
+	// of the Ogg page header.
+	while(mr->Read(ogghead+4, 23) == 23)
+	{
+		// The 19th byte of the Ogg header is a 32LE integer for the page
+		// number, and the 27th is a uint8 for the number of segments in the
+		// page.
+        unsigned int ogg_pagenum = ogghead[18] | (ogghead[19]<<8) | (ogghead[20]<<16) |
+		                       (ogghead[21]<<24);
+		BYTE ogg_segments = ogghead[26];
+
+		// Following the Ogg page header is a series of uint8s for the length of
+		// each segment in the page. The page segment data follows contiguously
+		// after.
+		BYTE segsizes[256];
+		if(mr->Read(segsizes, ogg_segments) != ogg_segments)
+			break;
+
+		// Find the segment with the Vorbis Comment packet (type 3) or Opus tags.
+		bool vorbis_comments = false;
+		for(int i = 0; i < ogg_segments; ++i)
+		{
+			BYTE segsize = segsizes[i];
+
+			if(segsize > 16)
+			{
+				BYTE vorbhead[8];
+				if(mr->Read(vorbhead, 8) != 8)
+					return;
+
+				if(vorbhead[0] == 3 && memcmp(vorbhead + 1, "vorbis", 6) == 0)
+				{
+					// Seek back because the vorbis tag is only 7 bytes long.
+					if(mr->Seek(-1, SEEK_CUR) == -1)
+						return;
+					segsize++;
+
+					vorbis_comments = true;
+				}
+				else if(memcmp(vorbhead, "OpusTags", 8) == 0)
+					vorbis_comments = true;
+
+				if(vorbis_comments)
+				{
+					// If the packet is 'laced', it spans multiple segments (a
+					// segment size of 255 indicates the next segment continues
+					// the packet, ending with a size less than 255). Vorbis
+					// packets always start and end on segment boundaries. A
+					// packet that's an exact multiple of 255 ends with a
+					// segment of 0 size.
+					while(segsize == 255 && ++i < ogg_segments)
+						segsize = segsizes[i];
+
+					// TODO: A Vorbis packet can theoretically span multiple
+					// Ogg pages (e.g. start in the last segment of one page
+					// and end in the first segment of a following page). That
+					// will require extra logic to decode as the VC block will
+					// be broken up with non-Vorbis data in-between. For now,
+					// just handle the common case where it's all in one page.
+					if(i < ogg_segments)
+						ParseVorbisComments(mr, loop_start, startass, loop_end, endass);
+					return;
+				}
+
+				segsize -= 8;
+			}
+			if(mr->Seek(segsize, SEEK_CUR) == -1)
+				return;
+		}
+
+		// Don't keep looking after the third page
+		if(ogg_pagenum >= 2)
+			break;
+
+		if(mr->Read(ogghead, 4) != 4 || memcmp(ogghead, "OggS", 4) != 0)
+			break;
+	}
+}
+
+static void FindLoopTags(MemoryReader *mr, unsigned int *start, bool *startass, unsigned int *end, bool *endass)
+{
+	BYTE signature[4];
+
+	mr->Read(signature, 4);
+	if(memcmp(signature, "fLaC", 4) == 0)
+		FindFlacComments(mr, start, startass, end, endass);
+	else if(memcmp(signature, "OggS", 4) == 0)
+		FindOggComments(mr, start, startass, end, endass);
+}
+
+static void FindLoopTags(const BYTE *data, size_t size, unsigned int *start, bool *startass, unsigned int *end, bool *endass)
+{
+	MemoryReader *reader = new MemoryReader((const char*)data, (long)size);
+	FindLoopTags(reader, start, startass, end, endass);
+}
 
 class OpenALSoundStream : public SoundStream
 {
@@ -1155,7 +1381,7 @@ SoundHandle OpenALSoundRenderer::LoadSoundRaw(BYTE *sfxdata, int length, int fre
     return retval;
 }
 
-SoundHandle OpenALSoundRenderer::LoadSound(BYTE* sfxdata, int length)
+SoundHandle OpenALSoundRenderer::LoadSound(BYTE* sfxdata, int length, int def_loop_start, int def_loop_end)
 {
     SoundHandle retval = { NULL };
     MemoryReader reader((const char*)sfxdata, length);
@@ -1163,20 +1389,34 @@ SoundHandle OpenALSoundRenderer::LoadSound(BYTE* sfxdata, int length)
     ChannelConfig chans;
     SampleType type;
     int srate;
+    unsigned int loop_start = 0, loop_end = ~0u;
+    bool startass = false, endass = false;
+    
+	if (def_loop_start < 0)
+	{
+		FindLoopTags(sfxdata, length, &loop_start, &startass, &loop_end, &endass);
+	}
+	else
+	{
+		loop_start = def_loop_start;
+		loop_end = def_loop_end;
+		startass = endass = true;
+	}
 
     SoundDecoder* decoder = CreateDecoder(&reader);
     if (!decoder) return retval;
 
     decoder->getInfo(&srate, &chans, &type);
+    int samplesize = 1;
     if (chans == ChannelConfig_Mono)
     {
-        if (type == SampleType_UInt8) format = AL_FORMAT_MONO8;
-        if (type == SampleType_Int16) format = AL_FORMAT_MONO16;
+        if (type == SampleType_UInt8) { format = AL_FORMAT_MONO8; samplesize = 1; }
+        if (type == SampleType_Int16) { format = AL_FORMAT_MONO16; samplesize = 2; }
     }
     if (chans == ChannelConfig_Stereo)
     {
-        if (type == SampleType_UInt8) format = AL_FORMAT_STEREO8;
-        if (type == SampleType_Int16) format = AL_FORMAT_STEREO16;
+        if (type == SampleType_UInt8) { format = AL_FORMAT_STEREO8; samplesize = 2; }
+        if (type == SampleType_Int16) { format = AL_FORMAT_STEREO16; samplesize = 4; }
     }
 
     if (format == AL_NONE)
@@ -1204,6 +1444,20 @@ SoundHandle OpenALSoundRenderer::LoadSound(BYTE* sfxdata, int length)
         delete decoder;
         return retval;
     }
+    
+	if (!startass) loop_start = Scale(loop_start, srate, 1000);
+	if (!endass && loop_end != ~0u) loop_end = Scale(loop_end, srate, 1000);
+	const unsigned int samples = data.Size() / samplesize;
+	if (loop_start > samples) loop_start = 0;
+	if (loop_end > samples) loop_end = samples;
+
+	if ((loop_start > 0 || loop_end > 0) && loop_end > loop_start && AL.SOFT_loop_points)
+	{
+		ALint loops[2] = { static_cast<ALint>(loop_start), static_cast<ALint>(loop_end) };
+		DPrintf("Setting loop points %d -> %d\n", loops[0], loops[1]);
+		alBufferiv(buffer, AL_LOOP_POINTS_SOFT, loops);
+		// no console messages here, please!
+	}
 
     retval.data = MAKE_PTRID(buffer);
     delete decoder;

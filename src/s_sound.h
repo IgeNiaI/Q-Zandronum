@@ -59,7 +59,8 @@ struct sfxinfo_t
 	WORD		bTentative:1;
 	WORD		bPlayerSilent:1;		// This player sound is intentionally silent.
 
-	int			LoopStart;				// -1 means no specific loop defined
+	int			LoopStart = -1;			// -1 means no specific loop defined
+	int			LoopEnd = -1;			// -1 means no specific loop defined
 
 	unsigned int link;
 	enum { NO_LINK = 0xffffffff };

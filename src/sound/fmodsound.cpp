@@ -2482,7 +2482,7 @@ SoundHandle FMODSoundRenderer::LoadSoundRaw(BYTE *sfxdata, int length, int frequ
 //
 //==========================================================================
 
-SoundHandle FMODSoundRenderer::LoadSound(BYTE *sfxdata, int length)
+SoundHandle FMODSoundRenderer::LoadSound(BYTE *sfxdata, int length, int def_loop_start, int def_loop_end)
 {
 	FMOD_CREATESOUNDEXINFO exinfo;
 	SoundHandle retval = { NULL };
