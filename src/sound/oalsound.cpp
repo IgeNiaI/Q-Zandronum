@@ -979,7 +979,11 @@ OpenALSoundRenderer::OpenALSoundRenderer()
         Device = InitDevice();
         if (Device == NULL) return;
         
-	    ALC.SOFT_HRTF = !!alcIsExtensionPresent(Device, "ALC_SOFT_HRTF");
+        ALC.EXT_EFX = !!alcIsExtensionPresent(Device, "ALC_EXT_EFX");
+        ALC.EXT_disconnect = !!alcIsExtensionPresent(Device, "ALC_EXT_disconnect");
+        ALC.SOFT_HRTF = !!alcIsExtensionPresent(Device, "ALC_SOFT_HRTF");
+        ALC.SOFT_pause_device = !!alcIsExtensionPresent(Device, "ALC_SOFT_pause_device");
+
 
         const ALCchar* current = NULL;
         if (alcIsExtensionPresent(Device, "ALC_ENUMERATE_ALL_EXT"))
@@ -1034,17 +1038,17 @@ OpenALSoundRenderer::OpenALSoundRenderer()
         DPrintf("	Version: " TEXTCOLOR_ORANGE"%s\n", alGetString(AL_VERSION));
         DPrintf("	Extensions: " TEXTCOLOR_ORANGE"%s\n", alGetString(AL_EXTENSIONS));
 
-        ALC.EXT_EFX = !!alcIsExtensionPresent(Device, "ALC_EXT_EFX");
-        ALC.EXT_disconnect = !!alcIsExtensionPresent(Device, "ALC_EXT_disconnect");
-        ALC.SOFT_pause_device = !!alcIsExtensionPresent(Device, "ALC_SOFT_pause_device");
         AL.EXT_source_distance_model = !!alIsExtensionPresent("AL_EXT_source_distance_model");
         AL.EXT_SOURCE_RADIUS = !!alIsExtensionPresent("AL_EXT_SOURCE_RADIUS");
         AL.SOFT_deferred_updates = !!alIsExtensionPresent("AL_SOFT_deferred_updates");
         AL.SOFT_loop_points = !!alIsExtensionPresent("AL_SOFT_loop_points");
-	    AL.SOFT_source_spatialize = !!alIsExtensionPresent("AL_SOFT_source_spatialize");
+        AL.SOFT_source_spatialize = !!alIsExtensionPresent("AL_SOFT_source_spatialize");
 
         alDopplerFactor(0.5f);
         alSpeedOfSound(343.3f * 96.0f);
+        if (ALC.EXT_EFX)
+            alListenerf(AL_METERS_PER_UNIT, 1.0f / 32.0f);
+
         alDistanceModel(AL_INVERSE_DISTANCE);
         if (AL.EXT_source_distance_model)
             alEnable(AL_SOURCE_DISTANCE_MODEL);
@@ -1289,7 +1293,7 @@ unsigned int OpenALSoundRenderer::GetMSLength(SoundHandle sfx)
             alGetBufferi(buffer, AL_FREQUENCY, &freq);
             alGetBufferi(buffer, AL_SIZE, &size);
             if(getALError() == AL_NO_ERROR)
-                return (unsigned int)(size / (channels*bits/8) * 1000. / freq);
+                return (unsigned int)(size / (static_cast<double>(channels) * bits / 8) * 1000. / freq);
         }
     }
     return 0;
@@ -1581,7 +1585,7 @@ FISoundChannel *OpenALSoundRenderer::StartSound(SoundHandle sfx, float vol, int 
     else
     {
         if ((chanflags & SNDF_ABSTIME))
-            alSourcef(source, AL_SEC_OFFSET, reuse_chan->StartTime.Lo / 1000.f);
+            alSourcei(source, AL_SAMPLE_OFFSET, reuse_chan->StartTime.Lo);
         else
             alSourcef(source, AL_SEC_OFFSET, 0.f);
     }
@@ -1786,11 +1790,11 @@ FISoundChannel *OpenALSoundRenderer::StartSound3D(SoundHandle sfx, SoundListener
     else
     {
         if((chanflags&SNDF_ABSTIME))
-            alSourcef(source, AL_SEC_OFFSET, reuse_chan->StartTime.Lo/1000.f);
+            alSourcei(source, AL_SAMPLE_OFFSET, reuse_chan->StartTime.Lo);
         else
         {
             // FIXME: set offset based on the current time and the StartTime
-            alSourcef(source, AL_SAMPLE_OFFSET, 0.f);
+            alSourcef(source, AL_SEC_OFFSET, 0.f);
         }
     }
     if(getALError() != AL_NO_ERROR)
