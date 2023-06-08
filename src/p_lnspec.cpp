@@ -889,7 +889,15 @@ FUNC(LS_Teleport_NewMap)
 {
 	if (backSide == 0 || gameinfo.gametype == GAME_Strife)
 	{
-		level_info_t *info = FindLevelByNum (arg0);
+		level_info_t *info;
+		if (arg0 < 0)
+		{
+			info = FindLevelByName( FBehavior::StaticLookupString(-arg0) );
+		}
+		else
+		{
+			info = FindLevelByNum ( arg0 );
+		}
 
 		if (info && CheckIfExitIsGood (it, info))
 		{
@@ -1804,6 +1812,10 @@ FUNC(LS_ACS_Execute)
 	{
 		mapname = level.mapname;
 	}
+	else if (arg1 < 0)
+	{
+		mapname = FBehavior::StaticLookupString (-arg1);
+	}
 	else if ((info = FindLevelByNum(arg1)) != NULL)
 	{
 		mapname = info->mapname;
@@ -1834,6 +1846,10 @@ FUNC(LS_ACS_ExecuteAlways)
 	if (arg1 == 0)
 	{
 		mapname = level.mapname;
+	}
+	else if (arg1 < 0)
+	{
+		mapname = FBehavior::StaticLookupString (-arg1);
 	}
 	else if ((info = FindLevelByNum(arg1)) != NULL)
 	{
