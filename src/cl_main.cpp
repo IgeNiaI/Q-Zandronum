@@ -5567,8 +5567,9 @@ void ServerCommands::WeaponRailgun::Execute()
 //
 void ServerCommands::SetWeaponFovScale::Execute()
 {
-	if (player->ReadyWeapon)
-		player->ReadyWeapon->FOVScale = fovScale;
+	AWeapon* weapon = static_cast<AWeapon*>(player->mo->FindInventory(weaponType));
+	if (weapon)
+		weapon->FOVScale = fovScale;
 }
 
 //*****************************************************************************

@@ -2413,6 +2413,7 @@ void SERVERCOMMANDS_SetWeaponFovScale( const ULONG ulPlayer, ULONG ulPlayerExtra
 
 	ServerCommands::SetWeaponFovScale command;
 	command.SetPlayer( &players[ulPlayer] );
+	command.SetWeaponType( players[ulPlayer].ReadyWeapon->GetClass() );
 	command.SetFovScale( players[ulPlayer].ReadyWeapon->FOVScale );
 	command.sendCommandToClients ( ulPlayerExtra, flags );
 }

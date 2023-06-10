@@ -51,5 +51,6 @@ EndCommand
 
 Command SetWeaponFovScale
 	Player player with MoTest
+	Class<AWeapon> weaponType
 	Float fovScale
 EndCommand
