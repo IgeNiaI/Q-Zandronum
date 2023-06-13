@@ -262,10 +262,6 @@ int main (int argc, char **argv)
 	// clear the setlocale call at least this will be correct.
 	// Note that the LANG environment variable is overridden by LC_*
 	setenv ("LC_NUMERIC", "C", 1);
-
-#ifndef NO_GTK
-	GtkAvailable = gtk_init_check (&argc, &argv);
-#endif
 	
 	setlocale (LC_ALL, "C");
 
@@ -301,6 +297,13 @@ int main (int argc, char **argv)
 	}
 
 	atterm (SDL_Quit);
+
+#ifndef NO_GTK
+    // Make sure gtk_init_check happens _after_ SDL_Init, so SDL will call
+    // XInitThreads() on X11, then GTK+ will talk to Xlib without leaving
+    // mutexes uncreated that the system is going to expect to be initialized.
+    GtkAvailable = gtk_init_check (&argc, &argv);
+#endif
 
 	{
 		char viddriver[80];
