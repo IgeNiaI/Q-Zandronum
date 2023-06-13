@@ -368,17 +368,11 @@ elseif( WITH_GSTREAMER )
  	add_definitions( -DWITH_GSTREAMER=1 )
 endif( NO_OPENAL )
 
-# Search for libSndFile
-
-find_package( SndFile )
-
-# Search for libmpg123
-
-find_package( MPG123 )
-
-# Search for FluidSynth
-
-find_package( FluidSynth )
+if( NOT NO_SOUND )
+	find_package( SndFile )
+	find_package( MPG123 )
+	find_package( FluidSynth )
+endif( NOT NO_SOUND )
 
 # Search for NASM
 
@@ -704,22 +698,24 @@ if( WIN32 )
 	set ( ZDOOM_LIBS ${ZDOOM_LIBS} crypt32 )
 endif ( NOT WIN32 )
 
-if( SNDFILE_FOUND )
-    set( ZDOOM_LIBS ${ZDOOM_LIBS} "${SNDFILE_LIBRARIES}" )
-    include_directories( "${SNDFILE_INCLUDE_DIRS}" )
-endif()
-if( MPG123_FOUND )
-    set( ZDOOM_LIBS ${ZDOOM_LIBS} "${MPG123_LIBRARIES}" )
-    include_directories( "${MPG123_INCLUDE_DIR}" )
-endif()
-if( NOT DYN_FLUIDSYNTH)
-	if( FLUIDSYNTH_FOUND )
-		set( ZDOOM_LIBS ${ZDOOM_LIBS} "${FLUIDSYNTH_LIBRARIES}" )
-		include_directories( "${FLUIDSYNTH_INCLUDE_DIR}" )
-	endif( FLUIDSYNTH_FOUND )
-else( NOT DYN_FLUIDSYNTH )
-	set( ZDOOM_LIBS ${ZDOOM_LIBS} ${CMAKE_DL_LIBS} )
-endif( NOT DYN_FLUIDSYNTH )
+if( NOT NO_SOUND )
+	if( SNDFILE_FOUND )
+		set( ZDOOM_LIBS ${ZDOOM_LIBS} "${SNDFILE_LIBRARIES}" )
+		include_directories( "${SNDFILE_INCLUDE_DIRS}" )
+	endif()
+	if( MPG123_FOUND )
+		set( ZDOOM_LIBS ${ZDOOM_LIBS} "${MPG123_LIBRARIES}" )
+		include_directories( "${MPG123_INCLUDE_DIR}" )
+	endif()
+	if( NOT DYN_FLUIDSYNTH)
+		if( FLUIDSYNTH_FOUND )
+			set( ZDOOM_LIBS ${ZDOOM_LIBS} "${FLUIDSYNTH_LIBRARIES}" )
+			include_directories( "${FLUIDSYNTH_INCLUDE_DIR}" )
+		endif( FLUIDSYNTH_FOUND )
+	else( NOT DYN_FLUIDSYNTH )
+		set( ZDOOM_LIBS ${ZDOOM_LIBS} ${CMAKE_DL_LIBS} )
+	endif( NOT DYN_FLUIDSYNTH )
+endif( NOT NO_SOUND )
 
 # OpenGL on OS X: GLEW include directory
 
@@ -859,17 +855,19 @@ else( SSE_MATTERS )
 	set( X86_SOURCES )
 endif( SSE_MATTERS )
 
-if( SNDFILE_FOUND )
-    add_definitions( -DHAVE_SNDFILE )
-endif( SNDFILE_FOUND )
-if( MPG123_FOUND )
-    add_definitions( -DHAVE_MPG123 )
-endif( MPG123_FOUND )
-if( DYN_FLUIDSYNTH )
-	add_definitions( -DHAVE_FLUIDSYNTH -DDYN_FLUIDSYNTH )
-elseif( FLUIDSYNTH_FOUND )
-	add_definitions( -DHAVE_FLUIDSYNTH )
-endif( DYN_FLUIDSYNTH )
+if ( NOT NO_SOUND )
+	if( SNDFILE_FOUND )
+		add_definitions( -DHAVE_SNDFILE )
+	endif( SNDFILE_FOUND )
+	if( MPG123_FOUND )
+		add_definitions( -DHAVE_MPG123 )
+	endif( MPG123_FOUND )
+	if( DYN_FLUIDSYNTH )
+		add_definitions( -DHAVE_FLUIDSYNTH -DDYN_FLUIDSYNTH )
+	elseif( FLUIDSYNTH_FOUND )
+		add_definitions( -DHAVE_FLUIDSYNTH )
+	endif( DYN_FLUIDSYNTH )
+endif( NOT NO_SOUND )
 
 
 if( DYN_FLUIDSYNTH )
