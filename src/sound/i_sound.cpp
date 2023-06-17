@@ -89,7 +89,7 @@ EXTERN_CVAR (Float, snd_sfxvolume)
 CVAR (Int, snd_samplerate, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (Int, snd_buffersize, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR (String, snd_output, "default", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-CVAR (Bool, snd_hrtf, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CVAR (Bool, snd_hrtf, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
 #ifndef NO_OPENAL
 #define DEF_BACKEND "openal"
