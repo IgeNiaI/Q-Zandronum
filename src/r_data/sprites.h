@@ -4,6 +4,9 @@
 // [BC] This is the maximum length a skin name can be.
 #define	MAX_SKIN_NAME					24
 
+// [BC] This is the maximum length a palette name can be.
+#define	MAX_PALETTE_NAME				8
+
 #define MAX_SPRITE_FRAMES	29		// [RH] Macro-ized as in BOOM.
 
 //
@@ -54,6 +57,7 @@ public:
 	BYTE		gender;		// This skin's gender (not really used)
 	BYTE		range0start;
 	BYTE		range0end;
+	char		palettename[MAX_PALETTE_NAME +1];	// MAX_PALETTE_NAME chars + NULL
 	bool		othergame;	// [GRB]
 	fixed_t		ScaleX;
 	fixed_t		ScaleY;

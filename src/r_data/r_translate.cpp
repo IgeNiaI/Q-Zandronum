@@ -118,6 +118,7 @@ void FRemapTable::Alloc(int count)
 	Palette = (PalEntry *)(Remap + count*(sizeof(*Remap)));
 	Native = NULL;
 	NumEntries = count;
+	IsCustomPalette = false;
 }
 
 //----------------------------------------------------------------------------
@@ -135,6 +136,7 @@ void FRemapTable::Free()
 		Remap = NULL;
 		Palette = NULL;
 		NumEntries = 0;
+		IsCustomPalette = false;
 	}
 }
 
@@ -149,6 +151,7 @@ FRemapTable::FRemapTable(const FRemapTable &o)
 	Remap = NULL;
 	Native = NULL;
 	NumEntries = 0;
+	IsCustomPalette = false;
 	operator= (o);
 }
 
@@ -173,6 +176,7 @@ FRemapTable &FRemapTable::operator=(const FRemapTable &o)
 		Alloc(o.NumEntries);
 	}
 	Inactive = o.Inactive;
+	IsCustomPalette = o.IsCustomPalette;
 	memcpy(Remap, o.Remap, NumEntries*sizeof(*Remap) + NumEntries*sizeof(*Palette));
 	return *this;
 }
@@ -189,6 +193,7 @@ bool FRemapTable::operator==(const FRemapTable &o)
 	// and the palette values for both are identical.
 	if (&o == this) return true;
 	if (o.NumEntries != NumEntries) return false;
+	if (o.IsCustomPalette != IsCustomPalette) return false;
 	return !memcmp(o.Palette, Palette, NumEntries * sizeof(*Palette));
 }
 
@@ -220,6 +225,7 @@ void FRemapTable::Serialize(FArchive &arc)
 	{
 		arc << Palette[j];
 	}
+	arc << IsCustomPalette;
 }
 
 //----------------------------------------------------------------------------
@@ -924,10 +930,30 @@ static void R_CreatePlayerTranslation (float h, float s, float v, const FPlayerC
 	// for the current game, then this is just an identity translation.
 	// Otherwise, it remaps the colors from the skin's original palette to
 	// the current one.
-	if (skin->othergame)
+	int lumpNum = Wads.CheckNumForName(skin->palettename, ns_palettes);
+	if (lumpNum >= 0)
+	{
+		FMemLump lump = Wads.ReadLump(lumpNum);
+		const BYTE* otherPal = (BYTE*)lump.GetMem();
+
+		BYTE			SkinRemap[256];
+		PalEntry		SkinPalette[256];
+		for (int i = 0; i < 256; ++i)
+		{
+			SkinRemap[i] = ColorMatcher.Pick(otherPal[0], otherPal[1], otherPal[2]);
+			SkinPalette[i] = PalEntry(otherPal[0], otherPal[1], otherPal[2]);
+			otherPal += 3;
+		}
+
+		memcpy (table->Remap, SkinRemap, table->NumEntries);
+		memcpy (table->Palette, SkinPalette, sizeof(*table->Palette) * table->NumEntries);
+		table->IsCustomPalette = true;
+	}
+	else if (skin->othergame)
 	{
 		memcpy (table->Remap, OtherGameSkinRemap, table->NumEntries);
 		memcpy (table->Palette, OtherGameSkinPalette, sizeof(*table->Palette) * table->NumEntries);
+		table->IsCustomPalette = false;
 	}
 	else
 	{
@@ -936,6 +962,7 @@ static void R_CreatePlayerTranslation (float h, float s, float v, const FPlayerC
 			table->Remap[i] = i;
 		}
 		memcpy(table->Palette, GPalette.BaseColors, sizeof(*table->Palette) * table->NumEntries);
+		table->IsCustomPalette = false;
 	}
 	for (i = 1; i < table->NumEntries; ++i)
 	{

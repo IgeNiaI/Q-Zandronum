@@ -113,6 +113,7 @@ void FResourceLump::LumpNameSetup(const char *iname)
 				!strncmp(iname, "sprites/", 8)		? ns_sprites :
 				!strncmp(iname, "voxels/", 7)		? ns_voxels :
 				!strncmp(iname, "colormaps/", 10)	? ns_colormaps :
+				!strncmp(iname, "palettes/", 9)		? ns_palettes :
 				!strncmp(iname, "acs/", 4)			? ns_acslibrary :
 				!strncmp(iname, "voices/", 7)		? ns_strifevoices :
 				!strncmp(iname, "patches/", 8)		? ns_patches :

@@ -47,6 +47,7 @@ struct FRemapTable
 	FNativePalette *Native;		// The Palette stored in a HW texture
 	int NumEntries;				// # of elements in this table (usually 256)
 	bool Inactive;				// This table is inactive and should be treated as if it was passed as NULL
+	bool IsCustomPalette;		// Is this table using custom palette? If yes, the GL renderer will copy pixels as is instead of converting them to default palette
 
 private:
 	void Free();

@@ -56,6 +56,7 @@ typedef enum {
 	ns_sprites,
 	ns_flats,
 	ns_colormaps,
+	ns_palettes,
 	ns_acslibrary,
 	ns_newtextures,
 	ns_bloodraw,

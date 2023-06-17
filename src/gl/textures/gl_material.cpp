@@ -317,7 +317,7 @@ unsigned char * FGLTexture::CreateTexBuffer(int cm, int translation, int & w, in
 			bIsTransparent = tex->gl_info.mIsTransparent;
 		}
 	}
-	else if (translation<=0)
+	else if (translation<=0 || GLTranslationPalette::IsCustomPalette(translation))
 	{
 		int trans = tex->CopyTrueColorPixels(&bmp, expand, expand);
 		tex->CheckTrans(buffer, W*H, trans);

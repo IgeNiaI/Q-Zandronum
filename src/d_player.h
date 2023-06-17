@@ -76,6 +76,7 @@ enum
 	// [TP] Zandronum additions follow
 	APMETA_MaxSkinWidthFactor,
 	APMETA_MaxSkinHeightFactor,
+	APMETA_PaletteName,		// Sprite palette override
 };
 
 // [geNia] effect actor indexes

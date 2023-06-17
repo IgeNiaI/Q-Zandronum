@@ -623,6 +623,10 @@ void R_InitSkins (void)
 						}
 					}
 				}
+				else if (0 == stricmp (key, "palette"))
+				{
+					strncpy (skins[i].palettename, sc.String, MAX_PALETTE_NAME);
+				}
 				else if (0 == stricmp (key, "sprite"))
 				{
 					for (j = 3; j >= 0; j--)
@@ -1128,6 +1132,10 @@ void R_InitSprites ()
 		skins[i].ScaleY = GetDefaultByType (basetype)->scaleY;
 		skins[i].sprite = GetDefaultByType (basetype)->SpawnState->sprite;
 		skins[i].namespc = ns_global;
+
+		const char* palettename = basetype->Meta.GetMetaString(APMETA_PaletteName);
+		if (palettename != NULL)
+			strcpy(skins[i].palettename, palettename);
 
 		PlayerClasses[i].Skins.Push (i);
 

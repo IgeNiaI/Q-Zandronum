@@ -3299,3 +3299,12 @@ DEFINE_CLASS_PROPERTY_PREFIX(player, doubletapmaxtics, I, PlayerPawn)
 	if (i < 0) i = 0;
 	defaults->DoubleTapMaxTics = i;
 }
+
+//==========================================================================
+// [geNia]
+//==========================================================================
+DEFINE_CLASS_PROPERTY_PREFIX(player, palette, S, PlayerPawn)
+{
+	PROP_STRING_PARM(str, 0);
+	info->Class->Meta.SetMetaString (APMETA_PaletteName, str);
+}

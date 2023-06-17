@@ -18,6 +18,7 @@ class GLTranslationPalette : public FNativePalette
 	{
 		int crc32;
 		PalEntry pe[256];
+		bool iscustom;
 	};
 	static TArray<PalData> AllPalettes;
 
@@ -33,6 +34,10 @@ public:
 	static PalEntry *GetPalette(unsigned int index)
 	{
 		return index > 0 && index <= AllPalettes.Size()? AllPalettes[index-1].pe : NULL;
+	}
+	static bool IsCustomPalette(unsigned int index)
+	{
+		return index > 0 && index <= AllPalettes.Size()? AllPalettes[index-1].iscustom : false;
 	}
 	bool Update();
 	int GetIndex() const { return Index; }
