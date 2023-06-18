@@ -339,29 +339,14 @@ void D_GetPlayerColor (int player, float *h, float *s, float *v, FPlayerColorSet
 	RGBtoHSV (RPART(color)/255.f, GPART(color)/255.f, BPART(color)/255.f,
 		h, s, v);
 
-/* [BB] New team code by Karate Chris. Currently not used in ST.
-	if (teamplay && TeamLibrary.IsValidTeam((team = info->GetTeam())) && !Teams[team].GetAllowCustomPlayerColor())
-	{
-		// In team play, force the player to use the team's hue
-		// and adjust the saturation and value so that the team
-		// hue is visible in the final color.
-		float ts, tv;
-		int tcolor = Teams[team].GetPlayerColor ();
-
-		RGBtoHSV (RPART(tcolor)/255.f, GPART(tcolor)/255.f, BPART(tcolor)/255.f,
-			h, &ts, &tv);
-
-		*s = clamp(ts + *s * 0.15f - 0.075f, 0.f, 1.f);
-		*v = clamp(tv + *v * 0.5f - 0.25f, 0.f, 1.f);
-
-		// Make sure not to pass back any colorset in teamplay.
-		colorset = NULL;
-	}
-*/
 	if (set != NULL)
 	{
 		*set = colorset;
 	}
+	
+	// Keep selected player color for himself, no matter the team and settings
+	if ( player == consoleplayer )
+		return;
 
 	if ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS )
 	{
