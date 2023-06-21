@@ -79,6 +79,9 @@ CVAR(Int, m_use_mouse, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 CVAR(Int, m_show_backbutton, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
 EXTERN_CVAR(String, playerclass)
+EXTERN_CVAR(Int, duellimit)
+EXTERN_CVAR(Int, winlimit)
+EXTERN_CVAR(Int, wavelimit)
 
 DMenu *DMenu::CurrentMenu;
 int DMenu::MenuTime;
@@ -493,6 +496,14 @@ void M_SetMenu(FName menu, int param)
 			Val.Int = 0;
 			dmflags.ForceSet( Val, CVAR_Int );
 			dmflags2.ForceSet( Val, CVAR_Int );
+
+			Val.Float = .0f;
+			timelimit.ForceSet( Val, CVAR_Float );
+			fraglimit.ForceSet( Val, CVAR_Int );
+			pointlimit.ForceSet( Val, CVAR_Int );
+			duellimit.ForceSet( Val, CVAR_Int );
+			winlimit.ForceSet( Val, CVAR_Int );
+			wavelimit.ForceSet( Val, CVAR_Int );
 
 			// Assume normal mode for going through the menu.
 			Val.Bool = false;
