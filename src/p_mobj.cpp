@@ -6828,6 +6828,7 @@ void P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, angle_t dir, int damage, AAc
 		th->angle = dir;
 		// [NG] Applying PUFFGETSOWNER to the blood will make it target the owner
 		if (th->flags5 & MF5_PUFFGETSOWNER) th->target = originator;
+		if (!(bloodtype <= 1)) th->renderflags |= RF_INVISIBLE;
 		if (gameinfo.gametype & GAME_DoomChex)
 		{
 			th->tics -= pr_spawnblood() & 3;
@@ -6896,7 +6897,6 @@ statedone:
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 		SERVERCOMMANDS_SpawnBlood( x, y, z, dir, damage, originator );
 
-	if (!(bloodtype <= 1)) th->renderflags |= RF_INVISIBLE;
 	if (bloodtype >= 1)
 		P_DrawSplash2 (40, x, y, z, dir, 2, bloodcolor);
 }
