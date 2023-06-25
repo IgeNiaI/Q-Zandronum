@@ -163,6 +163,8 @@ extern player_t *Player;
 
 // EXTERNAL FUNCTION PROTOTYPES --------------------------------------------
 
+extern bool g_bCalledFromConsoleCommand;
+
 extern void ReadStatistics();
 extern void M_RestoreMode ();
 extern void M_SetDefaultMode ();
@@ -3325,6 +3327,7 @@ void D_DoomMain (void)
 
 			GC::FullGC();					// perform one final garbage collection before deleting the class data
 			PClass::ClearRuntimeData();		// clear all runtime generated class data
+			g_bCalledFromConsoleCommand = false;
 			restart++;
 		}
 	}

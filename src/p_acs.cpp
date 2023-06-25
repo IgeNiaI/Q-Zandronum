@@ -319,7 +319,7 @@ inline int uallong(const int &foo)
 #endif
 
 // [BC] When true, any console commands/line specials were executed via the ConsoleCommand p-code.
-static	bool	g_bCalledFromConsoleCommand = false;
+bool	g_bCalledFromConsoleCommand = false;
 
 
 //============================================================================
