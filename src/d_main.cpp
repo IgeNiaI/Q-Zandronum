@@ -3318,6 +3318,7 @@ void D_DoomMain (void)
 			new (&gameinfo) gameinfo_t;		// Reset gameinfo
 			S_Shutdown();					// free all channels and delete playlist
 			C_ClearAliases();				// CCMDs won't be reinitialized so these need to be deleted here
+			C_ClearModCVars();				// CVars defined by mods need to be deleted
 
 			// [BB]
 			NETWORK_Destruct();

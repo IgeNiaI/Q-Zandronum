@@ -1531,6 +1531,27 @@ void C_ForgetCVars (void)
 	CVarBackups.Clear();
 }
 
+void C_ClearModCVars (void)
+{
+	FBaseCVar *var = CVars;
+	FBaseCVar *next = NULL;
+
+	while (var)
+	{
+		next = var->m_Next;
+
+		if (var->Flags & CVAR_MOD)
+		{
+			if (var->Flags & CVAR_AUTO)
+				delete var;
+			else
+				var->~FBaseCVar();
+		}
+
+		var = next;
+	}
+}
+
 FBaseCVar *FindCVar (const char *var_name, FBaseCVar **prev)
 {
 	FBaseCVar *var;

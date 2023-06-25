@@ -184,6 +184,7 @@ private:
 	friend FString C_GetMassCVarString (uint32 filter, bool compact);
 	friend void C_ReadCVars (BYTE **demo_p);
 	friend void C_BackupCVars (void);
+	friend void C_ClearModCVars (void);
 	friend FBaseCVar *FindCVar (const char *var_name, FBaseCVar **prev);
 	friend FBaseCVar *FindCVarSub (const char *var_name, int namelen);
 	friend void UnlatchCVars (void);
@@ -207,6 +208,9 @@ void C_ReadCVars (BYTE **demo_p);
 // Backup demo cvars. Called before a demo starts playing to save all
 // cvars the demo might change.
 void C_BackupCVars (void);
+
+// [geNia] Remove existing cvars
+void C_ClearModCVars (void);
 
 // Finds a named cvar
 FBaseCVar *FindCVar (const char *var_name, FBaseCVar **prev);
