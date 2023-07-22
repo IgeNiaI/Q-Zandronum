@@ -126,7 +126,14 @@ void DOMINATION_Reset(void)
 		for(unsigned int j = 0;j < level.info->SectorInfo.Points[i]->Size();j++)
 		{
 			if(j < static_cast<unsigned> (numsectors))
+			{
 				sectors[(*level.info->SectorInfo.Points[i])[0]].SetFade(POINT_DEFAULT_R, POINT_DEFAULT_G, POINT_DEFAULT_B);
+				
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				{
+					SERVERCOMMANDS_SetSectorFade( (*level.info->SectorInfo.Points[i])[0] );
+				}
+			}
 		}
 	}
 }

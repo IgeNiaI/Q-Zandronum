@@ -3370,9 +3370,6 @@ void GAME_ResetMap( bool bRunEnterScripts )
 	if ( !(level.flags & LEVEL_STARTLIGHTNING) )
 		P_ForceLightning( 2 );
 
-	// [BB] Reset special stuff for the current gamemode, like control point ownership in Domination.
-	GAMEMODE_ResetSpecalGamemodeStates();
-
 	// [BB] If a PowerTimeFreezer was in effect, the sound could be paused. Make sure that it is resumed.
 	S_ResumeSound( false );
 
@@ -3741,6 +3738,9 @@ void GAME_ResetMap( bool bRunEnterScripts )
 			SERVERCOMMANDS_SetMapSky( );
 	}
 
+	// [BB] Reset special stuff for the current gamemode, like control point ownership in Domination.
+	GAMEMODE_ResetSpecalGamemodeStates();
+
 	// Reset the number of monsters killed,  items picked up, and found secrets on the level.
 	level.killed_monsters = 0;
 	level.found_items = 0;
@@ -3757,6 +3757,9 @@ void GAME_ResetMap( bool bRunEnterScripts )
 	// by the map and removed during the game, e.g. killed lost souls spawned by a pain
 	// elemental.
 	level.total_monsters = 0;
+	
+	// [BB] Reset special stuff for the current gamemode, like control point ownership in Domination.
+	GAMEMODE_ResetSpecalGamemodeStates();
 
 	// Restart the map music.
 	S_ChangeMusic( level.Music.GetChars(), level.musicorder );
