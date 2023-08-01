@@ -706,15 +706,15 @@ bool FFreeformMenuItem::IsVisible() const
 		return false;
 
 	// Singleplayer check
-	if (!mIsVisibleInSingleplayer && (gamestate == GS_LEVEL || gamestate == GS_FINALE) && NETWORK_GetState() == NETSTATE_SINGLE)
+	if (!mIsVisibleInSingleplayer && (gamestate != GS_TITLELEVEL) && NETWORK_GetState() == NETSTATE_SINGLE)
 		return false;
 	
 	// Botplay check
-	if (!mIsVisibleInBotplay && (gamestate == GS_LEVEL || gamestate == GS_FINALE) && NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER)
+	if (!mIsVisibleInBotplay && (gamestate != GS_TITLELEVEL) && NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER)
 		return false;
 
 	// Multiplayer check
-	if (!mIsVisibleInMultiplayer && (gamestate == GS_LEVEL || gamestate == GS_FINALE) && NETWORK_GetState( ) == NETSTATE_CLIENT)
+	if (!mIsVisibleInMultiplayer && (gamestate != GS_TITLELEVEL) && NETWORK_GetState( ) == NETSTATE_CLIENT)
 		return false;
 
 	// CVar check
