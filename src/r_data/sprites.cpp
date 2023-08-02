@@ -1135,7 +1135,12 @@ void R_InitSprites ()
 
 		const char* palettename = basetype->Meta.GetMetaString(APMETA_PaletteName);
 		if (palettename != NULL)
-			strcpy(skins[i].palettename, palettename);
+		{
+			if (strlen(palettename) <= 8)
+				strcpy(skins[i].palettename, palettename);
+			else
+				I_FatalError ( "The palette name \"%s\" for class \"%s\" is longer than 8 characters!\n", palettename, basetype->TypeName.GetChars() );
+		}
 
 		PlayerClasses[i].Skins.Push (i);
 
