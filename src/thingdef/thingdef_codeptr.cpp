@@ -1748,6 +1748,9 @@ void A_FireCustomMissileHelper ( AActor *self,
 		{
 			// [geNia] Compensate player ping when shooting missiles
 			UNLAGGED_UnlagAndReplicateMissile( self, misl, !!(flags & FPF_SKIPOWNER), !!(flags & FPF_NOUNLAGGED), !!(flags & FPF_UNLAGDEATH) );
+
+			if ( misl->Translation )
+				SERVERCOMMANDS_SetThingTranslation( misl );
 		}
 	}
 }
