@@ -45,8 +45,8 @@ const char *GetVersionStringRev();
 
 #define GAME_MAJOR_VERSION 1
 #define GAME_MINOR_VERSION 4
-#define GAMEVER_STRING "1.4.5"
-#define NETGAMEVER_STRING "1.4.4"
+#define GAMEVER_STRING "1.4.6"
+#define NETGAMEVER_STRING "1.4.6"
 #define DOTVERSIONSTR GAMEVER_STRING ""
 #define VERSIONSTR DOTVERSIONSTR
 
