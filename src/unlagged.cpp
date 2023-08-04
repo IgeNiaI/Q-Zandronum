@@ -778,6 +778,8 @@ void UNLAGGED_SendMissileUpdate( AActor *source, AActor *missile, int lNetID, bo
 				SERVERCOMMANDS_MoveThing( missile, CM_XY|CM_Z|CM_VELXY|CM_VELZ|CM_NOSMOOTH, player - players, SVCF_SKIPTHISCLIENT );
 			else
 				SERVERCOMMANDS_MissileExplode( missile, missile->BlockingLine, player - players, SVCF_SKIPTHISCLIENT );
+			if ( missile->Translation )
+				SERVERCOMMANDS_SetThingTranslation( missile, player - players, SVCF_SKIPTHISCLIENT );
 			SERVERCOMMANDS_SetThingFrame( missile, missile->state, player - players, SVCF_SKIPTHISCLIENT );
 			SERVERCOMMANDS_SetThingTics( missile, player - players, SVCF_SKIPTHISCLIENT );
 			SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( missile, player - players, SVCF_SKIPTHISCLIENT );
@@ -788,6 +790,8 @@ void UNLAGGED_SendMissileUpdate( AActor *source, AActor *missile, int lNetID, bo
 			{
 				SERVERCOMMANDS_SpawnMissile( missile, player - players, SVCF_ONLYTHISCLIENT );
 				SERVERCOMMANDS_MoveThing( missile, CM_XY|CM_Z|CM_VELXY|CM_VELZ|CM_NOSMOOTH, player - players, SVCF_SKIPTHISCLIENT );
+				if ( missile->Translation )
+					SERVERCOMMANDS_SetThingTranslation( missile );
 				SERVERCOMMANDS_SetThingFrame( missile, missile->state );
 				SERVERCOMMANDS_SetThingTics( missile );
 				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( missile );
@@ -795,6 +799,8 @@ void UNLAGGED_SendMissileUpdate( AActor *source, AActor *missile, int lNetID, bo
 			else
 			{
 				SERVERCOMMANDS_MissileExplode( missile, missile->BlockingLine, player - players, SVCF_SKIPTHISCLIENT );
+				if ( missile->Translation )
+					SERVERCOMMANDS_SetThingTranslation( missile, player - players, SVCF_SKIPTHISCLIENT );
 				SERVERCOMMANDS_SetThingFrame( missile, missile->state, player - players, SVCF_SKIPTHISCLIENT );
 				SERVERCOMMANDS_SetThingTics( missile, player - players, SVCF_SKIPTHISCLIENT );
 				SERVERCOMMANDS_UpdateThingFlagsNotAtDefaults( missile, player - players, SVCF_SKIPTHISCLIENT );
@@ -974,13 +980,21 @@ void UNLAGGED_UnlagAndReplicateMissile( AActor *source, AActor *missile, bool bS
 	// We have to spawn the missile on clients every time even if it stops during unlagged
 	// Otherwise some Decorate functions will be replicated before the client spawns the missile and not work as intended
 	SERVERCOMMANDS_SpawnMissile( missile, player - players, SVCF_SKIPTHISCLIENT );
+	if ( missile->Translation )
+		SERVERCOMMANDS_SetThingTranslation( missile, player - players, SVCF_SKIPTHISCLIENT );
 
 	if ( !source || !NETWORK_ClientsideFunctionsAllowed( player ) || bNoUnlagged || UNLAGGED_Gametic( source->player ) >= gametic || player->bIsBot ) {
 		// Unlagged is disabled, so exit here
 		if ( bSkipOwner )
+		{
 			SERVERCOMMANDS_UpdateClientNetID( player - players );
+		}
 		else
+		{
 			SERVERCOMMANDS_SpawnMissile( missile, player - players, SVCF_ONLYTHISCLIENT );
+			if ( missile->Translation )
+				SERVERCOMMANDS_SetThingTranslation( missile, player - players, SVCF_ONLYTHISCLIENT );
+		}
 		return;
 	}
 
