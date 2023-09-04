@@ -331,6 +331,8 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 	if (!repeat && buttonSuccess)
 	{ // clear the special on non-retriggerable lines
 		line->special = 0;
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			SERVERCOMMANDS_SetLineSpecial( ULONG( line - lines ));
 	}
 
 	if (buttonSuccess)
@@ -362,6 +364,8 @@ bool P_ActivateLine (line_t *line, AActor *mo, int side, int activationType)
 			playerNum = mo->player - players;
 		P_ChangeSwitchTexture (line->sidedef[0], repeat, special, NULL, playerNum);
 		line->special = 0;
+		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+			SERVERCOMMANDS_SetLineSpecial( ULONG( line - lines ));
 
 		// [BC] Tell the clients of the switch texture change.
 //		if ( NETWORK_GetState( ) == NETSTATE_SERVER )

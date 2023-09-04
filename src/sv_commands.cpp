@@ -2810,6 +2810,19 @@ void SERVERCOMMANDS_DoSectorLightPhased( ULONG ulSector, LONG lBaseLevel, LONG l
 //*****************************************************************************
 //*****************************************************************************
 //
+void SERVERCOMMANDS_SetLineSpecial( ULONG ulLine, ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	if ( ulLine >= (ULONG)numlines )
+		return;
+
+	ServerCommands::SetLineSpecial command;
+	command.SetLine( &lines[ulLine] );
+	command.SetSpecial( lines[ulLine].special );
+	command.sendCommandToClients ( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
 void SERVERCOMMANDS_SetLineAlpha( ULONG ulLine, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	if ( ulLine >= (ULONG)numlines )

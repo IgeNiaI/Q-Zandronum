@@ -194,6 +194,11 @@ Command DoSectorLightPhased
 	Byte phase
 EndCommand
 
+Command SetLineSpecial
+	Line line
+	Short special
+EndCommand
+
 Command SetLineAlpha
 	Line line
 	Fixed alpha

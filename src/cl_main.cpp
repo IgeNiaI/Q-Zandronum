@@ -5853,6 +5853,13 @@ void ServerCommands::DoSectorLightPhased::Execute()
 
 //*****************************************************************************
 //
+void ServerCommands::SetLineSpecial::Execute()
+{
+	line->special = special;
+}
+
+//*****************************************************************************
+//
 void ServerCommands::SetLineAlpha::Execute()
 {
 	line->Alpha = alpha;

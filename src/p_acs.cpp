@@ -9505,6 +9505,8 @@ scriptwait:
 			{
 				activationline->special = 0;
 				DPrintf("Cleared line special on line %d\n", (int)(activationline - lines));
+				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					SERVERCOMMANDS_SetLineSpecial( ULONG( activationline - lines ));
 			}
 			break;
 

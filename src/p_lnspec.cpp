@@ -3430,6 +3430,7 @@ FUNC(LS_ClearForceField)
 				// blocking status have been altered.
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 				{
+					SERVERCOMMANDS_SetLineSpecial( ULONG( line - lines ));
 					SERVERCOMMANDS_SetLineTexture( ULONG( line - lines ));
 					SERVERCOMMANDS_SetSomeLineFlags( ULONG( line - lines ));
 				}
@@ -3454,6 +3455,8 @@ FUNC(LS_GlassBreak)
 	int playerNum = GetInstigator( it, isFromAcs ) - players;
 	switched = P_ChangeSwitchTexture (ln->sidedef[0], false, 0, &quest1, playerNum);
 	ln->special = 0;
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+		SERVERCOMMANDS_SetLineSpecial( ULONG( ln - lines ));
 	if (ln->sidedef[1] != NULL)
 	{
 		switched |= P_ChangeSwitchTexture (ln->sidedef[1], false, 0, &quest2, playerNum);

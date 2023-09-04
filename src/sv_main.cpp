@@ -3358,6 +3358,10 @@ void SERVER_UpdateLines( ULONG ulClient )
 
 	for ( ulLine = 0; ulLine < (ULONG)numlines; ulLine++ )
 	{
+		// Has the line's special changed?
+		if ( lines[ulLine].special != lines[ulLine].SavedSpecial )
+			SERVERCOMMANDS_SetLineSpecial( ulLine, ulClient, SVCF_ONLYTHISCLIENT );
+
 		// Have any of the textures changed?
 		if ( lines[ulLine].ulTexChangeFlags )
 			SERVERCOMMANDS_SetLineTexture( ulLine, ulClient, SVCF_ONLYTHISCLIENT );

@@ -5614,6 +5614,8 @@ bool P_UsePuzzleItem(AActor *PuzzleItemUser, int PuzzleItemType)
 			int args[3] = { in->d.line->args[2], in->d.line->args[3], in->d.line->args[4] };
 			P_StartScript(PuzzleItemUser, in->d.line, in->d.line->args[1], NULL, args, 3, ACS_ALWAYS);
 			in->d.line->special = 0;
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				SERVERCOMMANDS_SetLineSpecial( ULONG( in->d.line - lines ));
 			return true;
 		}
 		// Check thing

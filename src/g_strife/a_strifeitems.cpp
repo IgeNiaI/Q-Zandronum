@@ -34,6 +34,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_RemoveForceField)
 			line->special = 0;
 			line->sidedef[0]->SetTexture(side_t::mid, FNullTextureID());
 			line->sidedef[1]->SetTexture(side_t::mid, FNullTextureID());
+
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				SERVERCOMMANDS_SetLineSpecial( ULONG( line - lines ));
 		}
 	}
 }

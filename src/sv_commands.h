@@ -293,6 +293,7 @@ void	SERVERCOMMANDS_DoSectorLightGlow2( ULONG ulSector, LONG lStart, LONG lEnd, 
 void	SERVERCOMMANDS_DoSectorLightPhased( ULONG ulSector, LONG lBaseLevel, LONG lPhase, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 
 // Line commands. These have something to do with lines.
+void	SERVERCOMMANDS_SetLineSpecial( ULONG ulLine, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetLineAlpha( ULONG ulLine, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetLineTexture( ULONG ulLine, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
 void	SERVERCOMMANDS_SetLineTextureByID( ULONG ulLineID, ULONG ulSide, ULONG ulPosition, const char *pszTexName, ULONG ulPlayerExtra = MAXPLAYERS, ServerCommandFlags flags = 0 );
