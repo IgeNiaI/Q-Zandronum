@@ -668,6 +668,11 @@ bool AWeapon::CheckAmmo (int fireMode, bool autoSwitch, bool requireAmmo, int am
 	int enough, enoughmask;
 	int lAmmoUse1;
 
+	// [geNia] A server might crash sometimes due to below pointers being null.
+	// I couldn't figure out why that happens so adding a check here.
+	if (Owner == NULL || Owner->player == NULL)
+		return true;
+
 	if ((dmflags & DF_INFINITE_AMMO) || (Owner->player->cheats & CF_INFINITEAMMO))
 	{
 		return true;
