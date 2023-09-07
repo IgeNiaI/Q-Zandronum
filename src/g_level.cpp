@@ -208,6 +208,7 @@ CCMD (map)
 					CLIENT_QuitNetworkGame( NULL );
 
 				// Turn campaign mode back on.
+				CAMPAIGN_SetInCampaign( false );
 				CAMPAIGN_EnableCampaign( );
 
 				// Reset the duel and LMS modules.
@@ -1744,6 +1745,14 @@ void G_WorldDone (void)
 void G_DoWorldDone (void) 
 {
 	ULONG	ulIdx;
+	FString oldmap;
+	CAMPAIGNINFO_s		*pInfo;
+	bool playerBeatMap = false;
+
+	if (CAMPAIGN_InCampaign())
+		oldmap.Format( "%s", level.mapname );
+	else
+		oldmap = NULL;
 
 	gamestate = GS_LEVEL;
 	if (wminfo.next[0] == 0)
@@ -1758,12 +1767,27 @@ void G_DoWorldDone (void)
 
 	// [Zandronum] Respawn dead spectators now so their inventory can travel.
 	GAMEMODE_RespawnDeadSpectators( zadmflags & ZADF_DEAD_PLAYERS_CAN_KEEP_INVENTORY ? PST_REBORN : PST_REBORNNOINVENTORY );
+	
+	// If a campaign is allowed, check if player beat last map
+	if ( CAMPAIGN_InCampaign( ) && ( savegamerestore == false ))
+	{
+		pInfo = CAMPAIGN_GetCampaignInfo( level.mapname );
+		if ( pInfo && CAMPAIGN_DidPlayerBeatMap() )
+		{
+			playerBeatMap = true;
+		}
+	}
 
 	G_StartTravel ();
 	G_DoLoadLevel (startpos, true);
 	startpos = 0;
 	gameaction = ga_nothing;
 	viewactive = true;
+	
+	if ( CAMPAIGN_InCampaign( ) && ( savegamerestore == false ) && oldmap != NULL && oldmap[0] != 0 && pInfo)
+	{
+		GAMEMODE_HandleEvent( GAMEEVENT_MAP_COMPLETE, NULL, GlobalACSStrings.AddString(oldmap), playerBeatMap );
+	}
 
 	// Tell the bots that we're now on the new map.
 	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )

@@ -544,6 +544,7 @@ static void M_StartSkirmishGame(bool custom, int category)
 		CLIENT_QuitNetworkGame( NULL );
 
 	NETWORK_SetState( NETSTATE_SINGLE );
+	CAMPAIGN_SetInCampaign( false );
 	CAMPAIGN_DisableCampaign( );
 	GAMEMODE_SetCurrentMode( mode );
 	GAMEMODE_SetModifier( modifier );
