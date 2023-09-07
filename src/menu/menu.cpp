@@ -515,6 +515,7 @@ void M_SetMenu(FName menu, int param)
 			invasion.ForceSet( Val, CVAR_Bool );
 
 			// Turn campaign mode back on.
+			CAMPAIGN_SetInCampaign( false );
 			CAMPAIGN_EnableCampaign( );
 		}
 
