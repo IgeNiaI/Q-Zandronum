@@ -203,6 +203,9 @@ void CAMPAIGN_SetInCampaign( bool bInCampaign )
 //
 bool CAMPAIGN_DidPlayerBeatMap( void )
 {
+	if ( players[consoleplayer].bSpectating )
+		return false;
+
 	// Preliminary check.
 	if ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS )
 	{
@@ -244,7 +247,7 @@ bool CAMPAIGN_DidPlayerBeatMap( void )
 	// If it's a deathmatch, check the player's spread.
 	else if ( deathmatch )
 	{
-		if ( SCOREBOARD_CalcSpread( consoleplayer ) < 0 )
+		if ( SCOREBOARD_CalcSpread( consoleplayer ) <= 0 )
 			return ( false );
 	}
 
