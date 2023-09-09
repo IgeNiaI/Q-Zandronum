@@ -773,6 +773,13 @@ static bool ParseFreeformCommonParameters(FScanner& sc, FFreeformMenuItem* it)
 		it->SetAnchor(anchor);
 		return true;
 	}
+	else if (sc.Compare("Alpha"))
+	{
+		sc.MustGetFloat();
+		double alpha = clamp(sc.Float, 0.0, 1.0);
+		it->SetAlpha(FLOAT2FIXED(alpha));
+		return true;
+	}
 	else if (sc.Compare("VisibilityCVar"))
 	{
 		sc.MustGetString();

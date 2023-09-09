@@ -654,6 +654,7 @@ protected:
 	int mXPadding, mYPadding;
 	int mGravity;
 	int mAnchor;
+	fixed_t mAlpha;
 	FBaseCVar* mVisibilityCVar;
 	int mVisibilityCVarMin, mVisibilityCVarMax;
 	int mBelowItemsExtraOffset;
@@ -674,6 +675,7 @@ public:
 		mYPadding = 0;
 		mGravity = GRAV_CENTER_HORIZONTAL | GRAV_TOP;
 		mAnchor = GRAV_CENTER_HORIZONTAL | GRAV_TOP;
+		mAlpha = FRACUNIT;
 		mVisibilityCVar = NULL;
 		mVisibilityCVarMin = 1;
 		mVisibilityCVarMax = INT_MAX;
@@ -693,6 +695,7 @@ public:
 	void SetHeight(int height)	 { mHeight = height;	}	int GetHeight()	{ return mHeight;	}
 	void SetGravity(int gravity) { mGravity = gravity;	}
 	void SetAnchor(int anchor)	 { mAnchor = anchor;	}	int GetAnchor()	{ return mAnchor;	}
+	void SetAlpha(fixed_t alpha) { mAlpha = alpha;		}
 	void SetStatic(bool isStatic){ mIsStatic = isStatic;}	bool IsStatic()	{ return mIsStatic;	}
 
 	void SetVisibleOnTitlemap(bool visible)		{ mIsVisibleOnTitlemap = visible;		}	bool IsVisibleOnTitlemap()		{ return mIsVisibleOnTitlemap;		}

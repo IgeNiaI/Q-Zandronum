@@ -605,6 +605,7 @@ bool FFreeformMenuItem::CopyTo(FFreeformMenuItem* other)
 		theOther->SetPadding(mXPadding, mYPadding);
 		theOther->SetGravity(mGravity);
 		theOther->SetAnchor(mAnchor);
+		theOther->SetAlpha(mAlpha);
 		theOther->SetAction(mAction);
 		theOther->SetVisibilityCVar(mVisibilityCVar != NULL ? mVisibilityCVar->GetName() : NULL, mVisibilityCVarMin, mVisibilityCVarMax);
 		return true;
@@ -775,6 +776,7 @@ void FFreeformMenuItemLabel::Draw(FFreeformMenuDescriptor* desc, int yoffset, bo
 			DTA_CleanNoMove_1, true,
 			DTA_DestWidth, width * CleanXfac_1,
 			DTA_DestHeight, height * CleanYfac_1,
+			DTA_Alpha, mAlpha,
 			TAG_DONE);
 	}
 
@@ -800,6 +802,7 @@ void FFreeformMenuItemLabel::Draw(FFreeformMenuDescriptor* desc, int yoffset, bo
 					y += yoffset;
 				screen->DrawText(mFont, mFontColor, x, y + messageY, lines[i].Text,
 					DTA_CleanNoMove_1, true,
+					DTA_Alpha, mAlpha,
 					TAG_DONE);
 				messageY += mFont->GetHeight() * CleanYfac_1;
 			}
@@ -823,6 +826,7 @@ void FFreeformMenuItemLabel::Draw(FFreeformMenuDescriptor* desc, int yoffset, bo
 				DTA_ClipRight, clipright,
 				DTA_ClipTop, cliptop,
 				DTA_ClipBottom, clipbottom,
+				DTA_Alpha, mAlpha,
 				TAG_DONE);
 		}
 	}
@@ -906,6 +910,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 			DTA_DestWidth, width * CleanXfac_1,
 			DTA_DestHeight, height * CleanYfac_1,
 			DTA_ColorOverlay, overlay,
+			DTA_Alpha, mAlpha,
 			TAG_DONE);
 	}
 
@@ -939,6 +944,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 			DTA_DestWidth, foregroundWidth * CleanXfac_1,
 			DTA_DestHeight, foregroundHeight * CleanYfac_1,
 			DTA_ColorOverlay, overlay,
+			DTA_Alpha, mAlpha,
 			TAG_DONE);
 	}
 
@@ -969,6 +975,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 					DTA_ClipRight, clipright,
 					DTA_ClipTop, cliptop,
 					DTA_ClipBottom, clipbottom,
+					DTA_Alpha, mAlpha,
 					TAG_DONE);
 				messageY += mFont->GetHeight() * CleanYfac_1;
 			}
@@ -989,6 +996,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 				DTA_ClipRight, clipright,
 				DTA_ClipTop, cliptop,
 				DTA_ClipBottom, clipbottom,
+				DTA_Alpha, mAlpha,
 				TAG_DONE);
 		}
 	}
@@ -1912,6 +1920,7 @@ void FFreeformMenuSliderBase::Draw(FFreeformMenuDescriptor* desc, int yoffset, b
 			DTA_DestWidth, width * CleanXfac_1,
 			DTA_DestHeight, height * CleanYfac_1,
 			DTA_ColorOverlay, overlay,
+			DTA_Alpha, mAlpha,
 			TAG_DONE);
 
 		x += (int) ((width - mSliderWidth) * CleanXfac_1 * ccur / range);
@@ -1921,6 +1930,7 @@ void FFreeformMenuSliderBase::Draw(FFreeformMenuDescriptor* desc, int yoffset, b
 			DTA_DestWidth, mSliderWidth * CleanXfac_1,
 			DTA_DestHeight, mSliderHeight * CleanYfac_1,
 			DTA_ColorOverlay, overlay,
+			DTA_Alpha, mAlpha,
 			TAG_DONE);
 	}
 	else
@@ -1935,11 +1945,13 @@ void FFreeformMenuSliderBase::Draw(FFreeformMenuDescriptor* desc, int yoffset, b
 			DTA_CellX, 8 * CleanXfac_1,
 			DTA_CellY, 8 * CleanYfac_1,
 			DTA_ColorOverlay, overlay,
+			DTA_Alpha, mAlpha,
 			TAG_DONE);
 		screen->DrawText(ConFont, CR_ORANGE, x + int((5 + ((ccur * 78) / range)) * CleanXfac_1), y, "\x13",
 			DTA_CellX, 8 * CleanXfac_1,
 			DTA_CellY, 8 * CleanYfac_1,
 			DTA_ColorOverlay, overlay,
+			DTA_Alpha, mAlpha,
 			TAG_DONE);
 	}
 }
