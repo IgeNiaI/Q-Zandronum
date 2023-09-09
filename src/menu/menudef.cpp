@@ -1644,6 +1644,37 @@ static void ParseOptionValue(FScanner &sc)
 //
 //=============================================================================
 
+static void ParseAddOptionValue(FScanner &sc)
+{
+	sc.MustGetString();
+	FName optname = sc.String;
+
+	FOptionValues** pOld = OptionValues.CheckKey(optname);
+	if (pOld == nullptr || *pOld == nullptr)
+	{
+		sc.ScriptError("%s is not an option value that can be extended", sc.String);
+		return;
+	}
+	FOptionValues* val = (FOptionValues*)(*pOld);
+	sc.MustGetStringName("{");
+	while (!sc.CheckString("}"))
+	{
+		FOptionValues::Pair &pair = val->mValues[val->mValues.Reserve(1)];
+		sc.MustGetFloat();
+		pair.Value = sc.Float;
+		sc.MustGetStringName(",");
+		sc.MustGetString();
+		pair.Text = strbin1(sc.String);
+	}
+}
+
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
 static void ParseOptionString(FScanner &sc)
 {
 	FName optname;
@@ -1668,6 +1699,38 @@ static void ParseOptionString(FScanner &sc)
 		delete *pOld;
 	}
 	OptionValues[optname] = val;
+}
+
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static void ParseAddOptionString(FScanner &sc)
+{
+	sc.MustGetString();
+	FName optname = sc.String;
+
+	FOptionValues** pOld = OptionValues.CheckKey(optname);
+	if (pOld == nullptr || *pOld == nullptr)
+	{
+		sc.ScriptError("%s is not an option string that can be extended", sc.String);
+		return;
+	}
+	FOptionValues* val = (FOptionValues*)(*pOld);
+	sc.MustGetStringName("{");
+	while (!sc.CheckString("}"))
+	{
+		FOptionValues::Pair &pair = val->mValues[val->mValues.Reserve(1)];
+		sc.MustGetString();
+		pair.Value = DBL_MAX;
+		pair.TextValue = sc.String;
+		sc.MustGetStringName(",");
+		sc.MustGetString();
+		pair.Text = strbin1(sc.String);
+	}
 }
 
 
@@ -2287,9 +2350,17 @@ void M_ParseMenuDefs()
 			{
 				ParseOptionValue(sc);
 			}
+			else if (sc.Compare("ADDOPTIONVALUE"))
+			{
+				ParseAddOptionValue(sc);
+			}
 			else if (sc.Compare("OPTIONSTRING"))
 			{
 				ParseOptionString(sc);
+			}
+			else if (sc.Compare("ADDOPTIONSTRING"))
+			{
+				ParseAddOptionString(sc);
 			}
 			else if (sc.Compare("OPTIONMENUSETTINGS"))
 			{
