@@ -2583,31 +2583,25 @@ static void botcmd_ACS_Execute( CSkullBot *pBot )
 {
 	LONG			lScript;
 	LONG			lMap;
-	int				lArg1;
-	int				lArg2;
-	int				lArg3;
+	int				lArgs[3];
 	level_info_t	*pLevelInfo;
 
-	lArg3 = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
-	pBot->PopStack( );
+	for ( int i = 2; i >= 0; i-- )
+	{
+		lArgs[i] = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
+		pBot->PopStack( );
+	}
 
-	lArg2 = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
-	pBot->PopStack( );
-	
-	lArg1 = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
-	pBot->PopStack( );
-	
 	lMap = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
 	pBot->PopStack( );
-	
+
 	lScript = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
 	pBot->PopStack( );
 
-	int arg[3] = { lArg1, lArg2, lArg3 };
 	if (( lMap == 0 ) || (( pLevelInfo = FindLevelByNum( lMap )) == NULL ))
-		P_StartScript( pBot->GetPlayer( )->mo, NULL, lScript, level.mapname, arg, 3, 0 );
+		P_StartScript( pBot->GetPlayer( )->mo, NULL, lScript, level.mapname, lArgs, 3, 0 );
 	else
-		P_StartScript( pBot->GetPlayer( )->mo, NULL, lScript, pLevelInfo->mapname, arg, 3, 0 );
+		P_StartScript( pBot->GetPlayer( )->mo, NULL, lScript, pLevelInfo->mapname, lArgs, 3, 0 );
 }
 
 //*****************************************************************************
