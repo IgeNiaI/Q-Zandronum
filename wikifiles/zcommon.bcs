@@ -1172,6 +1172,26 @@ enum {
    TM_WEEKDAY
 };
 
+enum
+{
+    LUMP_OPEN_FULLPATH = 1
+};
+
+enum
+{
+    LUMP_READ_BYTE,
+    LUMP_READ_UBYTE,
+    LUMP_READ_SHORT,
+    LUMP_READ_USHORT,
+    LUMP_READ_INT,
+    LUMP_READ_FLOAT
+};
+
+enum
+{
+    LUMP_INFO_SIZE,
+    LUMP_INFO_NAME
+};
 enum { INT_MIN = -INT_MAX - 1 };
 enum { INT_MAX = 2147483647 };
 
@@ -1596,6 +1616,14 @@ special
 -154:UnlaggedReconcile(int):int,
 -155:UnlaggedRestore(int):void,
 -156:SyncPlayerNetwork(int):void,
+
+-159:LumpOpen(str; int, int):int;
+-160:LumpRead(int, int; int):raw;
+-161:LumpReadString(int, int; int):str;
+// LumpReadArray is a set of 4 functions, whose definition is
+// built-in to ACC. So 162-165 are used up function indices.
+-166:LumpGetInfo(int, int):int;
+-167:LumpClose(int):int;
 
 // ZDoom/GZDoom.
 -200:CheckClass(str):bool,
