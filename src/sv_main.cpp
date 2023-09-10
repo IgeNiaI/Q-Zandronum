@@ -6724,7 +6724,7 @@ static bool server_ReceiveACSString( BYTESTREAM_s *pByteStream )
 		return ( false );
 	}
 
-	int arg[4] = { GlobalACSStrings.AddString ( string, NULL, 0 ), 0, 0, 0 };
+	int arg[4] = { GlobalACSStrings.AddString ( string ), 0, 0, 0 };
 	P_StartScript( players[g_lCurrentClient].mo, NULL, scriptNum, NULL, arg, 4, ACS_ALWAYS | ACS_NET );
 
 	return ( false );

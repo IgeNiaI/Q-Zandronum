@@ -362,7 +362,7 @@ void MEDAL_GiveMedal( ULONG ulPlayer, ULONG ulMedal )
 	pPlayer = &players[ulPlayer];
 
 	// [CK] Trigger events if a medal is received
-	GAMEMODE_HandleEvent ( GAMEEVENT_MEDALS, pPlayer->mo, ACS_PushAndReturnDynamicString ( g_Medals[ulMedal].szAnnouncerEntry, NULL, 0 ) );
+	GAMEMODE_HandleEvent ( GAMEEVENT_MEDALS, pPlayer->mo, ACS_PushAndReturnDynamicString ( g_Medals[ulMedal].szAnnouncerEntry ) );
 
 	// Increase the player's count of this type of medal.
 	pPlayer->ulMedalCount[ulMedal]++;

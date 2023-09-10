@@ -6001,7 +6001,7 @@ void ServerCommands::ACSSendString::Execute()
 	int scriptNum = NETWORK_ACSScriptFromNetID( netid );
 
 	// [AK] Add the string to the ACS string table.
-	int args[4] = { GlobalACSStrings.AddString( string, NULL, 0 ), 0, 0, 0 };
+	int args[4] = { GlobalACSStrings.AddString( string ), 0, 0, 0 };
 
 	P_StartScript( activator, NULL, scriptNum, NULL, args, 4, ACS_ALWAYS );
 }

@@ -1183,7 +1183,7 @@ void P_SuspendScript (int script, char *map);
 void P_TerminateScript (int script, char *map);
 void P_DoDeferedScripts (void);
 void P_DoSetActorProperty (AActor *actor, int property, int value);
-int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int stackdepth);
+int P_DoGetActorProperty (AActor *actor, int property);
 
 //
 // [RH] p_quake.c
