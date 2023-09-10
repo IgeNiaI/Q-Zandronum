@@ -74,6 +74,7 @@
 #include "sv_commands.h"
 #include "sv_main.h"
 #include "team.h"
+#include "p_acs.h"
 
 //*****************************************************************************
 //	PROTOTYPES
@@ -181,6 +182,22 @@ static	void	botcmd_SayFromLump( CSkullBot *pBot );
 static	void	botcmd_SayFromChatLump( CSkullBot *pBot );
 static	void	botcmd_ChatSectionExistsInLump( CSkullBot *pBot );
 static	void	botcmd_ChatSectionExistsInChatLump( CSkullBot *pBot );
+static	void 	botcmd_ACS_ExecuteWithResult( CSkullBot *pBot );
+static  void	botcmd_BeginAltFiringWeapon( CSkullBot *pBot );
+static  void 	botcmd_StopAltFiringWeapon( CSkullBot *pBot );
+static  void	botcmd_BeginCrouching( CSkullBot *pBot );
+static  void 	botcmd_StopCrouching( CSkullBot *pBot );
+static  void	botcmd_BeginReloading( CSkullBot *pBot );
+static  void 	botcmd_StopReloading( CSkullBot *pBot );
+//100
+static  void	botcmd_BeginZooming( CSkullBot *pBot );
+static  void 	botcmd_StopZooming( CSkullBot *pBot );
+static  void	botcmd_BeginUser( CSkullBot *pBot );
+static  void	botcmd_StopUser( CSkullBot *pBot );
+static  void	botcmd_BeginSpeed( CSkullBot *pBot );
+static  void	botcmd_StopSpeed( CSkullBot *pBot );
+static  void	botcmd_PressUse( CSkullBot *pBot );
+static	void	botcmd_ACS_NamedExecuteWithResult( CSkullBot *pBot );
 
 //*****************************************************************************
 //	VARIABLES
@@ -289,6 +306,22 @@ static	BOTCMD_s	g_BotCommands[NUM_BOTCMDS] =
 	{ "SayFromChatLump", botcmd_SayFromChatLump, 0, 1, RETURNVAL_VOID },
 	{ "ChatSectionExistsInLump", botcmd_ChatSectionExistsInLump, 0, 2, RETURNVAL_BOOLEAN },
 	{ "ChatSectionExistsInChatLump", botcmd_ChatSectionExistsInChatLump, 0, 1, RETURNVAL_BOOLEAN },
+	{ "ACS_ExecuteWithResult", botcmd_ACS_ExecuteWithResult, 5, 0, RETURNVAL_INT },
+	{ "BeginAltFiringWeapon", botcmd_BeginAltFiringWeapon, 0, 0, RETURNVAL_VOID },
+	{ "StopAltFiringWeapon", botcmd_StopAltFiringWeapon, 0, 0, RETURNVAL_VOID },
+	{ "BeginCrouching", botcmd_BeginCrouching, 0, 0, RETURNVAL_VOID },
+	{ "StopCrouching", botcmd_StopCrouching, 0, 0, RETURNVAL_VOID },
+	{ "BeginReloading", botcmd_BeginReloading, 0, 0, RETURNVAL_VOID },
+	{ "StopReloading", botcmd_StopReloading, 0, 0, RETURNVAL_VOID },
+	//100
+	{ "BeginZooming", botcmd_BeginZooming, 0, 0, RETURNVAL_VOID },
+	{ "StopZooming", botcmd_StopZooming, 0, 0, RETURNVAL_VOID },
+	{ "BeginUser", botcmd_BeginUser, 1, 0, RETURNVAL_VOID },
+	{ "StopUser", botcmd_StopUser, 1, 0, RETURNVAL_VOID },
+	{ "BeginSpeed", botcmd_BeginSpeed, 0, 0, RETURNVAL_VOID },
+	{ "StopSpeed", botcmd_StopSpeed, 0, 0, RETURNVAL_VOID },
+	{ "PressUse", botcmd_PressUse, 0, 0, RETURNVAL_VOID },
+	{ "ACS_NamedExecuteWithResult", botcmd_ACS_NamedExecuteWithResult, 4, 1, RETURNVAL_INT },
 };
 
 static	int			g_iReturnInt = -1;
@@ -2818,4 +2851,146 @@ static void botcmd_ChatSectionExistsInChatLump( CSkullBot *pBot )
 
 	// Free the file before leaving.
 	delete pFile;
+}
+
+//*****************************************************************************
+//
+static void botcmd_ACS_ExecuteWithResult( CSkullBot *pBot )
+{
+	LONG			lScript;
+	int 			lArgs[4];
+
+	for ( int i = 3; i >= 0; i-- )
+	{
+		lArgs[i] = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
+		pBot->PopStack( );
+	}
+
+	lScript = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
+	pBot->PopStack( );
+
+	g_iReturnInt = P_StartScript( pBot->GetPlayer( )->mo, NULL, lScript, level.mapname, lArgs, 4, ACS_ALWAYS|ACS_WANTRESULT );
+}
+
+//*****************************************************************************
+//
+static void botcmd_BeginAltFiringWeapon( CSkullBot *pBot )
+{
+	pBot->m_lButtons |= BT_ALTATTACK;
+}
+
+//*****************************************************************************
+//
+static void botcmd_StopAltFiringWeapon( CSkullBot *pBot )
+{
+	pBot->m_lButtons &= ~BT_ALTATTACK;
+}
+
+//*****************************************************************************
+//
+static void botcmd_BeginCrouching( CSkullBot *pBot )
+{
+	pBot->m_lButtons |= BT_CROUCH;
+}
+
+//*****************************************************************************
+//
+static void botcmd_StopCrouching( CSkullBot *pBot )
+{
+	pBot->m_lButtons &= ~BT_CROUCH;
+}
+
+//*****************************************************************************
+//
+static void botcmd_BeginReloading( CSkullBot *pBot )
+{
+	pBot->m_lButtons |= BT_RELOAD;
+}
+
+//*****************************************************************************
+//
+static void botcmd_StopReloading( CSkullBot *pBot )
+{
+	pBot->m_lButtons &= ~BT_RELOAD;
+}
+
+//*****************************************************************************
+//
+static void botcmd_BeginZooming( CSkullBot *pBot )
+{
+	pBot->m_lButtons |= BT_ZOOM;
+}
+
+//*****************************************************************************
+//
+static void botcmd_StopZooming( CSkullBot *pBot )
+{
+	pBot->m_lButtons &= ~BT_ZOOM;
+}
+
+//*****************************************************************************
+//
+static void botcmd_BeginUser( CSkullBot *pBot )
+{
+	int user = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
+	pBot->PopStack( );
+
+	user = clamp(user-1, 0, 3);
+
+	pBot->m_lButtons |= (BT_USER1 << user);
+}
+
+//*****************************************************************************
+//
+static void botcmd_StopUser( CSkullBot *pBot )
+{
+	int user = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
+	pBot->PopStack( );
+
+	user = clamp(user-1, 0, 3);
+
+	pBot->m_lButtons &= ~(BT_USER1 << user);
+}
+
+//*****************************************************************************
+//
+static void botcmd_BeginSpeed( CSkullBot *pBot )
+{
+	pBot->m_lButtons |= BT_SPEED;
+}
+
+//*****************************************************************************
+//
+static void botcmd_StopSpeed( CSkullBot *pBot )
+{
+	pBot->m_lButtons &= ~BT_SPEED;
+}
+
+//*****************************************************************************
+//
+static void botcmd_PressUse( CSkullBot *pBot )
+{
+	pBot->GetPlayer( )->cmd.ucmd.buttons |= BT_USE;
+	pBot->GetPlayer( )->oldbuttons &= ~BT_USE; // Allow spamming use at 35hz! :D
+}
+
+//*****************************************************************************
+//
+static void botcmd_ACS_NamedExecuteWithResult( CSkullBot *pBot )
+{
+	char			lScript[512];
+	int 			lArgs[4];
+
+	for ( int i = 3; i >= 0; i-- )
+	{
+		lArgs[i] = pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
+		pBot->PopStack( );
+	}
+
+	sprintf( lScript, "%s", pBot->m_ScriptData.aszStringStack[pBot->m_ScriptData.lStringStackPosition - 1] );
+	pBot->PopStringStack( );
+
+	LONG scriptNum = -FName( lScript );
+
+	g_iReturnInt = P_StartScript( pBot->GetPlayer( )->mo, NULL, scriptNum, level.mapname, lArgs, 4, ACS_ALWAYS|ACS_WANTRESULT );
 }
