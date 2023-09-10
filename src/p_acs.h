@@ -40,6 +40,7 @@
 #include "doomtype.h"
 // [BB] New #includes.
 #include "r_data/r_translate.h"
+#include "i_system.h"
 
 #define LOCAL_SIZE				20
 #define NUM_MAPVARS				128
@@ -160,6 +161,44 @@ struct ProfileCollector
 	int Index;
 };
 
+class ACSLocalVariables
+{
+public:
+	ACSLocalVariables(SDWORD *Memory, size_t Count)
+	: memory(Memory)
+	, count(Count)
+	{
+	}
+
+	void Reset(SDWORD *const memory, const size_t count)
+	{
+		// TODO: pointer sanity check?
+		// TODO: constraints on count?
+
+		this->memory = memory;
+		this->count = count;
+	}
+
+	SDWORD& operator[](const size_t index)
+	{
+		if (index >= count)
+		{
+			I_Error("Out of bounds access to local variables in ACS VM");
+		}
+
+		return memory[index];
+	}
+
+	const SDWORD *GetPointer() const
+	{
+		return memory;
+	}
+
+private:
+	SDWORD *memory;
+	size_t count;
+};
+
 struct ACSLocalArrayInfo
 {
 	unsigned int Size;
@@ -186,7 +225,7 @@ struct ACSLocalArrays
 	}
 
 	// Bounds-checking Set and Get for local arrays
-	void Set(int *locals, int arraynum, int arrayentry, int value)
+	void Set(ACSLocalVariables &locals, int arraynum, int arrayentry, int value)
 	{
 		if ((unsigned int)arraynum < Count &&
 			(unsigned int)arrayentry < Info[arraynum].Size)
@@ -194,7 +233,7 @@ struct ACSLocalArrays
 			locals[Info[arraynum].Offset + arrayentry] = value;
 		}
 	}
-	int Get(int *locals, int arraynum, int arrayentry)
+	int Get(ACSLocalVariables &locals, int arraynum, int arrayentry)
 	{
 		if ((unsigned int)arraynum < Count &&
 			(unsigned int)arrayentry < Info[arraynum].Size)
