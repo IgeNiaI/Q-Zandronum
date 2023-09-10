@@ -3246,6 +3246,15 @@ void FBehavior::SetArrayVal (int arraynum, int index, int value)
 	array->Elements[index] = value;
 }
 
+// [TDRR]
+int FBehavior::GetArraySize (unsigned int arraynum) const
+{
+	if (arraynum >= static_cast<unsigned>(NumTotalArrays))
+		return 0;
+
+	return Arrays[arraynum]->ArraySize;
+}
+
 inline bool FBehavior::CopyStringToArray(int arraynum, int index, int maxLength, const char *string)
 {
 	 // false if the operation was incomplete or unsuccessful
@@ -5543,6 +5552,16 @@ enum
 	CSF_SOLIDACTORS,
 };
 
+// [TDRR] Speeds up lump reading significantly (avoids having to reopen
+// for every single read).
+struct ACSRefCountedLumpHandle
+{
+	size_t refCount;
+	FWadLump lump;
+};
+
+TMap<int, struct ACSRefCountedLumpHandle> ACSLumpHandles;
+
 enum EACSFunctions
 {
 	ACSF_GetLineUDMFInt=1,
@@ -5705,6 +5724,17 @@ enum EACSFunctions
 	ACSF_UnlaggedReconcile,
 	ACSF_UnlaggedRestore,
 	ACSF_SyncPlayerNetwork,
+
+	ACSF_LumpOpen = 159, // [TDRR] Added the LumpOpen to LumpClose set of functions.
+	ACSF_LumpRead,
+	ACSF_LumpReadString,
+	ACSF_LumpReadLocal,
+	ACSF_LumpReadModule,
+	ACSF_LumpReadHub,
+	ACSF_LumpReadGlobal,
+	ACSF_LumpGetInfo,
+	ACSF_LumpClose,
+	// 166 and 167 are LumpGetInfo and LumpClose
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -6086,7 +6116,8 @@ static void SetActorPitch(AActor *activator, int tid, int angle, bool interpolat
 
 
 
-int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args)
+// [TDRR] Added "locals" parameter to allow accessing local arrays.
+int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, struct ACSLocals *locals)
 {
 	AActor *actor;
 	switch(funcIndex)
@@ -8206,6 +8237,272 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			}
 			break;
 
+		case ACSF_LumpOpen:
+			{
+				enum
+				{
+					LUMP_OPEN_FULLPATH = 1
+				};
+
+				const char *name = FBehavior::StaticLookupString( args[0] );
+
+				SDWORD lumpNum;
+
+				if ( (argCount > 2) && ( args[2] & LUMP_OPEN_FULLPATH ) )
+				{
+					lumpNum = Wads.CheckNumForFullName(name);
+				}
+				else if ( ( argCount > 1 ) && ( args[1] >= 0 ) )
+				{
+					int startLump = args[1] + 1;
+					lumpNum = Wads.FindLump( name, &startLump );
+				}
+				else
+				{
+					lumpNum = Wads.CheckNumForName( name );
+				}
+
+				if(ACSLumpHandles.CheckKey( args[0] ) != NULL)
+					return lumpNum;
+
+				ACSLumpHandles[lumpNum].lump = Wads.OpenLumpNum(lumpNum);
+				return lumpNum;
+			}
+
+		case ACSF_LumpRead:
+			{
+				enum
+				{
+					LUMP_READ_BYTE,
+					LUMP_READ_UBYTE,
+					LUMP_READ_SHORT,
+					LUMP_READ_USHORT,
+					LUMP_READ_INT,
+					LUMP_READ_FLOAT
+				};
+
+				if(ACSLumpHandles.CheckKey( args[0] ) == NULL)
+				{
+					Printf("LumpRead: Attempted read on non-existent lump handle!\n");
+					return 0;
+				}
+
+				SDWORD size;
+				bool isUnsigned = false;
+				int32_t buf = 0;
+				FWadLump &lump = ACSLumpHandles[args[0]].lump;
+				lump.Seek( args[1], SEEK_SET );
+
+				SDWORD readType;
+
+				if( argCount > 2 )
+					readType = args[2];
+				else
+					readType = LUMP_READ_UBYTE;
+
+				switch ( readType )
+				{
+					case LUMP_READ_UBYTE:
+						isUnsigned = true;
+					// fall through
+					case LUMP_READ_BYTE:
+						size = sizeof( int8_t );
+						break;
+
+					case LUMP_READ_USHORT:
+						isUnsigned = true;
+					// fall through
+					case LUMP_READ_SHORT:
+						size = sizeof( int16_t );
+						break;
+
+					case LUMP_READ_INT:
+						size = sizeof( int32_t );
+						break;
+
+					case LUMP_READ_FLOAT:
+						size = sizeof( float );
+						break;
+
+					default:
+						Printf( "Invalid lump read type in LumpRead.\n" );
+						return 0;
+				}
+
+				lump.Read( &buf, size );
+
+				if ( !isUnsigned )
+				{
+					if ( size == sizeof( int8_t ) )
+						return static_cast<int8_t>( buf );
+
+					if ( size == sizeof( int16_t ) )
+						return static_cast<int16_t>( buf );
+				}
+
+				if(readType == LUMP_READ_FLOAT)
+					return FLOAT2FIXED((float)buf);
+
+				return buf;
+			}
+
+		case ACSF_LumpReadString:
+			{
+				if(ACSLumpHandles.CheckKey( args[0] ) == NULL)
+				{
+					Printf("LumpReadString: Attempted read on non-existent lump handle!\n");
+					return GlobalACSStrings.AddString( "" );
+				}
+
+				auto len = Wads.LumpLength( args[0] ) - args[1];
+				if ( len <= 0 )
+					return GlobalACSStrings.AddString( "" );
+
+				if( argCount > 2 )
+				{
+					if( (args[2] > 0) && (args[2] < len) )
+						len = args[2];
+				}
+
+				// [TDRR] Null terminate just in case.
+				char *buf = new char[len + 1];
+				FWadLump &lump = ACSLumpHandles[args[0]].lump;
+				lump.Seek( args[1], SEEK_SET );
+
+				lump.Read( buf, len );
+				buf[len] = '\0';
+
+				// [TDRR] Don't trim the string to the first null terminator here,
+				// since that happens after it's converted to an FString in AddString.
+				int strIndex = GlobalACSStrings.AddString( buf );
+				delete[] buf;
+
+				return strIndex;
+			}
+
+		case ACSF_LumpReadLocal: //LumpReadArray(int lump, int pos, int array, int arrayIdx, int arrayMax);
+		case ACSF_LumpReadModule:
+		case ACSF_LumpReadHub:
+		case ACSF_LumpReadGlobal:
+			{
+				if(ACSLumpHandles.CheckKey( args[0] ) == NULL)
+				{
+					Printf("LumpReadArray: Attempted read on non-existent lump handle!\n");
+					return 0;
+				}
+
+				auto pos = args[1];
+				auto len = Wads.LumpLength( args[0] ) - pos;
+				if ( len <= 0 )
+					return 0;
+
+				if( argCount > 4 )
+				{
+					if( (args[4] > 0) && (args[4] < len) )
+						len = args[4];
+				}
+
+				// [TDRR] Null terminate just in case.
+				char *buf = new char[len];
+				FWadLump &lump = ACSLumpHandles[args[0]].lump;
+				lump.Seek( args[1], SEEK_SET );
+
+				lump.Read( buf, len );
+				buf[len] = '\0';
+
+				auto array = args[2];
+				SDWORD arrIdx = 0;
+
+				if( argCount > 3 )
+				{
+					arrIdx = (args[3] > 0) ? args[3] : 0;
+				}
+
+				switch(funcIndex)
+				{
+					case ACSF_LumpReadLocal:
+					{
+						if( len > (SDWORD)(locals->Arrays->Info[array].Size - arrIdx) )
+							len = locals->Arrays->Info[array].Size - arrIdx;
+
+						for(int i = 0; i < len; i++)
+							locals->Arrays->Set(*locals->Vars, array, i + arrIdx, buf[i]);
+					}
+					break;
+
+					case ACSF_LumpReadModule:
+					{
+						if( len > (SDWORD)(activeBehavior->GetArraySize(array) - arrIdx) )
+							len = activeBehavior->GetArraySize(array) - arrIdx;
+
+						for(int i = 0; i < len; i++)
+							activeBehavior->SetArrayVal(array, i + arrIdx, buf[i]);
+					}
+					break;
+
+					case ACSF_LumpReadHub:
+					{
+						for(int i = 0; i < len; i++)
+							ACS_WorldArrays[array][i + arrIdx] = buf[i];
+					}
+					break;
+
+					case ACSF_LumpReadGlobal:
+					{
+						for(int i = 0; i < len; i++)
+							ACS_GlobalArrays[array][i + arrIdx] = buf[i];
+					}
+					break;
+
+					default:
+						I_Error( "Invalid lump read function in LumpReadArray." );
+					goto failure;
+				}
+
+				delete[] buf;
+				return len;
+
+				failure:
+
+				delete[] buf;
+				return 0;
+			}
+
+		case ACSF_LumpGetInfo:
+			{
+				enum
+				{
+					LUMP_INFO_SIZE,
+					LUMP_INFO_NAME
+				};
+
+				switch(args[1])
+				{
+					case LUMP_INFO_SIZE:
+						return Wads.LumpLength(args[0]);
+
+					case LUMP_INFO_NAME:
+						return GlobalACSStrings.AddString(Wads.GetLumpFullName(args[0]));
+
+					default:
+						Printf("LumpGetInfo: unknown info type %i\n", args[1]);
+					return 0;
+				}
+			}
+
+		case ACSF_LumpClose:
+			{
+				if(ACSLumpHandles.CheckKey( args[0] ) == NULL)
+					return 0;
+
+				ACSLumpHandles[args[0]].refCount--;
+
+				if(ACSLumpHandles[args[0]].refCount <= 0)
+					ACSLumpHandles.Remove( args[0] );
+
+				return 0;
+			}
+
 		default:
 			break;
 	}
@@ -8601,7 +8898,10 @@ int DLevelScript::RunScript ()
 				int argCount = NEXTBYTE;
 				int funcIndex = NEXTSHORT;
 
-				int retval = CallFunction(argCount, funcIndex, &STACK(argCount));
+				// [TDRR] Context to allow local array access in ACSF functions.
+				struct ACSLocals callFuncLocals = { &locals, localarrays };
+
+				int retval = CallFunction(argCount, funcIndex, &STACK(argCount), &callFuncLocals);
 				sp -= argCount-1;
 				STACK(1) = retval;
 			}

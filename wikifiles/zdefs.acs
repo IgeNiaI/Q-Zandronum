@@ -1272,3 +1272,16 @@
 #define GAMESTATE_COUNTDOWN           2
 #define GAMESTATE_INPROGRESS          3
 #define GAMESTATE_INRESULTSEQUENCE    4
+
+// Lump reading stuff.
+#define LUMP_OPEN_FULLPATH 1
+
+#define LUMP_READ_BYTE 0
+#define LUMP_READ_UBYTE 1
+#define LUMP_READ_SHORT 2
+#define LUMP_READ_USHORT 3
+#define LUMP_READ_INT 4
+#define LUMP_READ_FLOAT 5
+
+#define LUMP_INFO_SIZE 0
+#define LUMP_INFO_NAME 1

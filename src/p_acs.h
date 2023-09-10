@@ -244,6 +244,14 @@ struct ACSLocalArrays
 	}
 };
 
+// [TDRR] Required context to allow native functions to access local
+// variables (but most importantly arrays).
+struct ACSLocals
+{
+	ACSLocalVariables *Vars;
+	ACSLocalArrays *Arrays;
+};
+
 // The in-memory version
 struct ScriptPtr
 {
@@ -486,6 +494,7 @@ public:
 	ScriptFunction *GetFunction (int funcnum, FBehavior *&module) const;
 	int GetArrayVal (int arraynum, int index) const;
 	void SetArrayVal (int arraynum, int index, int value);
+	int GetArraySize (unsigned int arraynum) const; // [TDRR]
 	inline bool CopyStringToArray(int arraynum, int index, int maxLength, const char * string);
 
 	int FindFunctionName (const char *funcname) const;
@@ -1108,7 +1117,7 @@ protected:
 	int DoSpawnSpot (int type, int spot, int tid, int angle, bool forced, player_t* ownerPlayer);
 	int DoSpawnSpotFacing (int type, int spot, int tid, bool forced, player_t* ownerPlayer);
 	int DoClassifyActor (int tid);
-	int CallFunction(int argCount, int funcIndex, SDWORD *args);
+	int CallFunction(int argCount, int funcIndex, SDWORD *args, struct ACSLocals *locals); // [TDRR] Added "locals" parameter to allow accessing local arrays.
 
 	void DoFadeTo (int r, int g, int b, int a, fixed_t time);
 	void DoFadeRange (int r1, int g1, int b1, int a1,
