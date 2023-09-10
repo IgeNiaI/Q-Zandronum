@@ -1804,6 +1804,10 @@ static void botcmd_StopAimingAtEnemy( CSkullBot *pBot )
 	pBot->m_AngleDelta = 0;
 	pBot->m_AngleOffBy = 0;
 	pBot->m_AngleDesired = 0;
+
+	// [TDRR] Move pitch resetting to here, so custom bots can have
+	// their pitch changed with ACS (and because it makes more sense).
+	pBot->GetPlayer()->mo->pitch = 0;
 }
 
 //*****************************************************************************
