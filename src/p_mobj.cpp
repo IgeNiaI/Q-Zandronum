@@ -5715,9 +5715,9 @@ APlayerPawn *P_SpawnPlayer (FPlayerStart *mthing, int playernum, int flags)
 		{
 			int type;
 
-			// [BC] Cooperative is !deathmatch && !teamgame.
+			// [BC] Cooperative is !deathmatch && !teamgame && !invasion.
 			// [BB] The server host always picks the multiplayer class choice.
-			if ( ((!deathmatch && !teamgame) || ( NETWORK_GetState( ) == NETSTATE_SINGLE )) && !( NETWORK_GetState( ) == NETSTATE_SERVER ) )
+			if ( ((!deathmatch && !teamgame && !invasion) || ( NETWORK_GetState( ) == NETSTATE_SINGLE )) && !( NETWORK_GetState( ) == NETSTATE_SERVER ) )
 			{
 				type = SinglePlayerClass[playernum];
 			}
