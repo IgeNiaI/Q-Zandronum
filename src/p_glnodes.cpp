@@ -1017,7 +1017,7 @@ bool P_CheckNodes(MapData * map, bool rebuilt, int buildtime)
 		buildtime = 0;
 #endif
 		// [BB] Reportedly, the server can crash in case "gl_cachenodes true".
-		if ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) && gl_cachenodes && buildtime/1000.f >= gl_cachetime)
+		if ( ( NETWORK_GetState( ) != NETSTATE_SERVER ) && level.maptype != MAPTYPE_BUILD && gl_cachenodes && buildtime/1000.f >= gl_cachetime)
 		{
 			DPrintf("Caching nodes\n");
 			CreateCachedNodes(map);
