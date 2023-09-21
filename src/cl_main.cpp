@@ -1290,11 +1290,11 @@ void CLIENT_ProcessCommand( LONG lCommand, BYTESTREAM_s *pByteStream )
 				break;
 			case NETWORK_ERRORCODE_WRONGVERSION:
 
-				szErrorString.Format( "Failed connect. Your version is different.\nThis server is using version: %s\nPlease check http://www." DOMAIN_NAME "/ for updates.", NETWORK_ReadString( pByteStream ) );
+				szErrorString.Format( "Failed to connect. Your client version is different.\nThis server uses version: %s\nPlease check http://www." DOMAIN_NAME "/ for a matching version.", NETWORK_ReadString( pByteStream ) );
 				break;
 			case NETWORK_ERRORCODE_WRONGPROTOCOLVERSION:
 
-				szErrorString.Format( "Failed connect. Your protocol version is different.\nServer uses: %s\nYou use:     %s\nPlease check http://www." DOMAIN_NAME "/ for a matching version.", NETWORK_ReadString( pByteStream ), GetVersionStringRev() );
+				szErrorString.Format( "Failed to connect. Your protocol version is different.\nThis server uses: %s\nYou use:     %s\nPlease check http://www." DOMAIN_NAME "/ for a matching version.", NETWORK_ReadString( pByteStream ), GetVersionStringRev() );
 				break;
 			case NETWORK_ERRORCODE_BANNED:
 
