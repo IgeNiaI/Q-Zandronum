@@ -1951,6 +1951,13 @@ void G_FinishTravel ()
 			{
 				FBehavior::StaticStartTypedScripts (SCRIPT_Return, pawn, true);
 			}
+			// [geNia] Dead players respawn right before map change
+			// but the "Respawn" scripts won't run because they are tied to old map.
+			// So run them here if just spawned
+			if (pawn->ObjectFlags & OF_JustSpawned)
+			{
+				FBehavior::StaticStartTypedScripts (SCRIPT_Respawn, pawn, true);
+			}
 		}
 	}
 }
