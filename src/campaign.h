@@ -114,7 +114,7 @@ typedef struct CAMPAIGNINFO_s
 	char			szMapName[9];
 
 	// If this is a teamgame, which team should the player be on?
-	FString		PlayerTeamName;
+	FString			PlayerTeamName;
 
 	// If this is a duel, does the player have to win every single duel to beat the level?
 	bool			bMustWinAllDuels;
