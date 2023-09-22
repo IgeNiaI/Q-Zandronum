@@ -439,6 +439,7 @@ special
 	-154:UnlaggedReconcile(1),
 	-155:UnlaggedRestore(1),
 	-156:SyncPlayerNetwork(1),
+    -157:InCampaign(0),
 
     -159:LumpOpen(1,3),
     -160:LumpRead(2,3),
