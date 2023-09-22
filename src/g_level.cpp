@@ -129,7 +129,8 @@ EXTERN_CVAR (String, playerclass)
 void G_VerifySkill();
 
 
-static FRandom pr_classchoice ("RandomPlayerClassChoice");
+// [AK] Changed pr_classchoice into a non-static variable.
+FRandom pr_classchoice ("RandomPlayerClassChoice");
 static	FRandom		g_RandomMapSeed( "MapSeed" );
 
 extern level_info_t TheDefaultLevelInfo;
