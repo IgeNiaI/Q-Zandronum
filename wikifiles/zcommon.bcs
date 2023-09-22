@@ -1617,6 +1617,7 @@ special
 -154:UnlaggedReconcile(int):int,
 -155:UnlaggedRestore(int):void,
 -156:SyncPlayerNetwork(int):void,
+-157:InCampaign():bool,
 
 -159:LumpOpen(str; int, int):int;
 -160:LumpRead(int, int; int):raw;
