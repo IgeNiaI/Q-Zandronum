@@ -1594,6 +1594,10 @@ void G_DoLoadLevel (int position, bool autosave)
 
 	C_FlushDisplay ();
 
+	if ( CAMPAIGN_InCampaign() && (deathmatch || teamgame) ) {
+		GAME_ResetMap( );
+		GAMEMODE_RespawnAllPlayers( BOTEVENT_NEWMAP );
+	}
 	// [BC/BB] Spawn various necessary game objects at the start of the map.
 	GAMEMODE_SpawnSpecialGamemodeThings();
 
