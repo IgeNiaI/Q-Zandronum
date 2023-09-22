@@ -1972,7 +1972,7 @@ void G_FinishTravel ()
 
 bool G_AllowTravel( void )
 {
-	if ( deathmatch || teamgame || invasion || NETWORK_InClientMode() )
+	if ( !CAMPAIGN_InCampaign() && (deathmatch || teamgame || invasion || NETWORK_InClientMode()) )
 		return ( false );
 
 	return ( true );
