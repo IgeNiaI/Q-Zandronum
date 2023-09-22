@@ -90,6 +90,7 @@
 #include "cl_commands.h"
 #include "cl_main.h"
 #include "unlagged.h"
+#include "campaign.h"
 
 #include "g_shared/a_pickups.h"
 
@@ -5732,6 +5733,7 @@ enum EACSFunctions
 	ACSF_UnlaggedRestore,
 	ACSF_SyncPlayerNetwork,
 	ACSF_TagActive,
+	ACSF_InCampaign,
 
 	ACSF_LumpOpen = 159, // [TDRR] Added the LumpOpen to LumpClose set of functions.
 	ACSF_LumpRead,
@@ -8616,6 +8618,11 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 					ACSLumpHandles.Remove( args[0] );
 
 				return 0;
+			}
+
+		case ACSF_InCampaign:
+			{
+				return CAMPAIGN_InCampaign();
 			}
 
 		case ACSF_TagActive:
