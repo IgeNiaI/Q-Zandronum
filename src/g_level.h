@@ -280,6 +280,7 @@ struct level_info_t
 	char		pname[9];
 	char		nextmap[11];
 	char		secretmap[11];
+	char		campaignhubmap[11];
 	char		skypic1[9];
 	char		skypic2[9];
 	char		fadetable[9];
@@ -409,6 +410,7 @@ struct FLevelLocals
 	char		mapname[256];			// the lump name (E1M1, MAP01, etc)
 	char		nextmap[11];			// go here when using the regular exit
 	char		secretmap[11];			// map to go to when used secret exit
+	char		campaignhubmap[11];		// go here when exiting a map in campaign mode in a hub
 	EMapType	maptype;
 
 	DWORD		flags;

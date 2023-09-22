@@ -246,6 +246,7 @@ void level_info_t::Reset()
 	pname[0] = 0;
 	nextmap[0] = 0;
 	secretmap[0] = 0;
+	campaignhubmap[0] = 0;
 	strcpy (skypic1, "-NOFLAT-");
 	strcpy (skypic2, "-NOFLAT-");
 	cluster = 0;
@@ -868,6 +869,12 @@ DEFINE_MAP_OPTION(secret, true) // Just an alias for secretnext, for Vavoom comp
 {
 	parse.ParseAssign();
 	parse.ParseNextMap(info->secretmap);
+}
+
+DEFINE_MAP_OPTION(campaignhub, true)
+{
+	parse.ParseAssign();
+	parse.ParseNextMap(info->campaignhubmap);
 }
 
 DEFINE_MAP_OPTION(cluster, true)
