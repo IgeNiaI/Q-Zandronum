@@ -286,8 +286,10 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 {
 	char			szKey[32];
 	char			szValue[32];
+	char			szCVar[64];
 	ULONG			ulIdx;
 	CAMPAIGNINFO_s	*pInfo;
+	LONG			lCVarIndex;
 
 	pInfo = g_pCampaignInfoRoot;
 	while ( pInfo != NULL )
@@ -307,6 +309,8 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 			pInfo->pNextInfo = new CAMPAIGNINFO_s;
 			pInfo = pInfo->pNextInfo;
 		}
+
+		lCVarIndex = 0;
 
 		pInfo->lFragLimit			= 0;
 		pInfo->fTimeLimit			= 0.0f;
@@ -333,6 +337,11 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 			pInfo->BotSpawn[ulIdx].szBotName[0] = 0;
 			pInfo->BotSpawn[ulIdx].BotTeamName = "";
 		}
+		for ( ulIdx = 0; ulIdx < MAXCUSTOMCVARS; ulIdx++ )
+		{
+			pInfo->CustomCVar[ulIdx].szCVarName[0] = 0;
+			pInfo->CustomCVar[ulIdx].szCVarValue[0] = 0;
+		}
 
 		while ( sc.String[0] != '{' )
 			sc.GetString( );
@@ -346,6 +355,18 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 			szKey[31] = 0;
 			if ( sc.String[0] == '}' )
 				break;
+			
+			// Parse custom cvar before the = sign
+			if ( strnicmp( szKey, "cvar", strlen( "cvar" )) == 0 )
+			{
+				sc.GetString( );
+				strncpy( szCVar, sc.String, 31 );
+				szCVar[61] = 0;
+			}
+			else
+			{
+				szCVar[0] = 0;
+			}
 
 			// The following key must be an = sign. If not, the user made an error!
 			sc.GetString( );
@@ -504,6 +525,25 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 
 				strncpy( pInfo->BotSpawn[lBotIndex].szBotName, szValue, 31 );
 				pInfo->BotSpawn[lBotIndex].szBotName[31] = 0;
+			}
+			else if ( strnicmp( szKey, "cvar", strlen( "cvar" )) == 0 )
+			{
+				if (lCVarIndex < MAXCUSTOMCVARS)
+				{
+					FBaseCVar *cvar = FindCVar(szCVar, NULL);
+					if (cvar != NULL)
+					{
+						strncpy( pInfo->CustomCVar[lCVarIndex].szCVarName, szCVar, 61 );
+						pInfo->CustomCVar[lCVarIndex].szCVarName[61] = 0;
+						strncpy( pInfo->CustomCVar[lCVarIndex].szCVarValue, szValue, 61 );
+						pInfo->CustomCVar[lCVarIndex].szCVarValue[61] = 0;
+						lCVarIndex++;
+					}
+					else
+						I_Error( "CAMPAIGN_ParseCampaignInfo: Unknown CVar, \"%s\"!", szCVar );
+				}
+				else
+					I_Error( "CAMPAIGN_ParseCampaignInfo: Can't have more than \"%d\" custom CVars per map!", MAXCUSTOMCVARS );
 			}
 			else
 				I_Error( "CAMPAIGN_ParseCampaignInfo: Unknown CMPGNINF property, \"%s\"!", szKey );
