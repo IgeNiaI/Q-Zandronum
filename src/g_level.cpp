@@ -1313,6 +1313,40 @@ void G_DoLoadLevel (int position, bool autosave)
 
 			// Also, clear out existing bots.
 			BOTS_RemoveAllBots( false );
+			
+			for ( i = 0; i < MAXCUSTOMCVARS; i++ )
+			{
+				FBaseCVar *cvar = FindCVar(pInfo->CustomCVar[i].szCVarName, NULL);
+				if (cvar != NULL)
+				{
+					UCVarValue val;
+					switch (cvar->GetRealType()) {
+					case CVAR_Bool:
+						if ( stricmp( pInfo->CustomCVar[i].szCVarValue, "true" ) == 0 )
+							val.Bool = true;
+						else if ( stricmp( pInfo->CustomCVar[i].szCVarValue, "false" ) == 0 )
+							val.Bool = false;
+						else
+							val.Bool = !!atoi( pInfo->CustomCVar[i].szCVarValue );
+						cvar->ForceSet(val, CVAR_Bool);
+						break;
+					case CVAR_Int:
+						val.Int = atoi( pInfo->CustomCVar[i].szCVarValue );
+						cvar->ForceSet(val, CVAR_Int);
+						break;
+					case CVAR_Float:
+						val.Float = (float) atof( pInfo->CustomCVar[i].szCVarValue );
+						cvar->ForceSet(val, CVAR_Float);
+						break;
+					case CVAR_String:
+						val.String = pInfo->CustomCVar[i].szCVarValue;
+						cvar->ForceSet(val, CVAR_String);
+						break;
+					default:
+						I_Error( "G_DoLoadLevel: Can't configure cvar, \"%s\"!", pInfo->CustomCVar[i].szCVarName );
+					}
+				}
+			}
 
 			// We're now in a campaign.
 			CAMPAIGN_SetInCampaign( true );
