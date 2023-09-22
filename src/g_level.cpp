@@ -774,24 +774,33 @@ const char *G_GetExitMap()
 
 	// If we failed a campaign, just stay on the current map.
 	if (( CAMPAIGN_InCampaign( )) &&
-		( invasion == false ) &&
-		( CAMPAIGN_DidPlayerBeatMap( ) == false ))
+		( invasion == false ))
 	{
-		return ( level.mapname );
+		if ( level.campaignhubmap[0] )
+		{
+			return ( level.campaignhubmap );
+		}
+		else if ( CAMPAIGN_DidPlayerBeatMap() == false )
+		{
+			return ( level.mapname );
+		}
 	}
+
 	// If using the same level dmflag, just stay on the current map.
-	else if (( dmflags & DF_SAME_LEVEL ) &&
+	if (( dmflags & DF_SAME_LEVEL ) &&
 		( deathmatch || teamgame ))
 	{
 		return ( level.mapname );
 	}
+
 	// If we're using the lobby cvar and we're not in the lobby already, the lobby is the next map.
-	else if ( GAMEMODE_IsNextMapCvarLobby( ) )
+	if ( GAMEMODE_IsNextMapCvarLobby( ) )
 	{
 		return lobby;
 	}
+
 	// Check to see if we're using map rotation.
-	else if (( sv_maprotation ) &&
+	if (( sv_maprotation ) &&
 			 !NETWORK_InClientMode() &&
 			 ( MAPROTATION_GetNumEntries( ) != 0 ))
 	{
@@ -942,8 +951,7 @@ void G_DoCompleted (void)
 	cluster_info_t *nextcluster = FindClusterInfo (wminfo.next_ep+1);	// next_ep is cluster-1
 	EFinishLevelType mode;
 
-	if (thiscluster != nextcluster || deathmatch ||
-		!(thiscluster->flags & CLUSTER_HUB))
+	if (thiscluster != nextcluster || !(thiscluster->flags & CLUSTER_HUB))
 	{
 		if (nextcluster->flags & CLUSTER_HUB)
 		{
@@ -998,7 +1006,7 @@ void G_DoCompleted (void)
 
 	// [BB] LEVEL_NOINTERMISSION is also respected in deathmatch games
 	if ( ((level.flags & LEVEL_NOINTERMISSION) ||
-		 ( !deathmatch && (nextcluster == thiscluster) && (thiscluster->flags & CLUSTER_HUB))))
+		 ((nextcluster == thiscluster) && (thiscluster->flags & CLUSTER_HUB))))
 	{
 		G_WorldDone ();
 		return;
@@ -2044,6 +2052,8 @@ void G_InitLevelLocals ()
 	level.nextmap[10] = 0;
 	strncpy (level.secretmap, info->secretmap, 10);
 	level.secretmap[10] = 0;
+	strncpy (level.campaignhubmap, info->campaignhubmap, 10);
+	level.campaignhubmap[10] = 0;
 	strncpy (level.skypic1, info->skypic1, 8);
 	level.skypic1[8] = 0;
 	if (!level.skypic2[0])
