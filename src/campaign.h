@@ -55,6 +55,8 @@
 #include "doomtype.h"
 #include "gamemode.h"
 
+#define MAXCUSTOMCVARS		20
+
 //*****************************************************************************
 //	STRUCTURES
 
@@ -67,6 +69,16 @@ typedef struct
 	FString	BotTeamName;
 
 } BOTSPAWNINFO_t;
+
+typedef struct
+{
+	// The name of this custom cvar that will be set.
+	char	szCVarName[64];
+
+	// The value to set for cvar.
+	char	szCVarValue[64];
+
+} CUSTOMCVARINFO_t;
 
 //*****************************************************************************
 typedef struct CAMPAIGNINFO_s
@@ -128,6 +140,9 @@ typedef struct CAMPAIGNINFO_s
 
 	// Table of bots and their teams that spawn in this round.
 	BOTSPAWNINFO_t	BotSpawn[MAXPLAYERS];
+	
+	// Table of custom cvars to set when loading the map.
+	CUSTOMCVARINFO_t	CustomCVar[MAXCUSTOMCVARS];
 
 	struct CAMPAIGNINFO_s	*pNextInfo;
 
