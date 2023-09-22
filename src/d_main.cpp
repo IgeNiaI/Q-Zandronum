@@ -2922,6 +2922,12 @@ void D_DoomMain (void)
 		// Initialize the announcer info.
 		ANNOUNCER_Construct( );
 		ANNOUNCER_ParseAnnouncerInfo( );
+		
+		// [CW] Parse any TEAMINFO lumps.
+		Printf ("ParseTeamInfo: Load team definitions.\n");
+		//TeamLibrary.ParseTeamInfo ();
+		// [BB] At the moment Skulltag still doesn't use the new ZDoom TeamLibrary class.
+		TEAMINFO_Init ();
 
 		// Initialize the campaign module.
 		CAMPAIGN_Construct( );
@@ -3010,12 +3016,6 @@ void D_DoomMain (void)
 		Printf ("Texman.Init: Init texture manager.\n");
 		TexMan.Init();
 		C_InitConback();
-
-		// [CW] Parse any TEAMINFO lumps.
-		Printf ("ParseTeamInfo: Load team definitions.\n");
-		//TeamLibrary.ParseTeamInfo ();
-		// [BB] At the moment Skulltag still doesn't use the new ZDoom TeamLibrary class.
-		TEAMINFO_Init ();
 
 		FActorInfo::StaticInit ();
 
