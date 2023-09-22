@@ -479,6 +479,7 @@ void M_SetMenu(FName menu, int param)
 	case NAME_ChooseBotSkill:
 		if ( menu == NAME_ChooseBotSkill )
 		{
+			GameStartupInfo.Skill = M_GetDefaultSkill();
 			botskill = param;
 			if ( param == 4 )
 			{								  
