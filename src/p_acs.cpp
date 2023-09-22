@@ -167,6 +167,9 @@ CCMD ( acstime )
 
 extern FILE *Logfile;
 
+// [AK] We need this for SetPlayerClass.
+extern FRandom pr_classchoice;
+
 FRandom pr_acs ("ACS");
 
 // I imagine this much stack space is probably overkill, but it could
@@ -7871,50 +7874,86 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 		case ACSF_SetPlayerClass:
 			{
-				player_t *player = &players[args[0]];
+				const ULONG ulPlayer = static_cast<ULONG>( args[0] );
+				const char *classname = FBehavior::StaticLookupString( args[1] );
 				const bool bRespawn = !!args[2];
 
 				// [AK] Don't allow the clients to change the player's class.
 				if ( NETWORK_InClientMode() )
 					return 0;
 
+				// [AK] Ignore invalid players.
+				if ( PLAYER_IsValidPlayer( ulPlayer ) == false )
+					return 0;
+
+				player_t *player = &players[ulPlayer];
+
 				// [AK] Don't bother changing the player's class if they're actually spectating.
 				if ( PLAYER_IsTrueSpectator( player ) )
 					return 0;
 
-				const char *classname = FBehavior::StaticLookupString( args[1] );
-				const PClass *playerclass = PClass::FindClass( classname );
-
-				// [AK] Stop if the class provided doesn't exist or isn't a descendant of PlayerPawn.
-				// Also check if the player isn't already playing as the same class.
-				if ( playerclass == NULL || !playerclass->IsDescendantOf( RUNTIME_CLASS( APlayerPawn )) || player->cls == playerclass )
-					return 0;
-
-				// [AK] Don't change the player's class if it's not allowed.
-				if ( !TEAM_IsActorAllowedForPlayer( GetDefaultByType( playerclass ), player ) )
-					return 0;
-
-				player->userinfo.PlayerClassChanged( playerclass->Meta.GetMetaString( APMETA_DisplayName ));
-				// [AK] In a singleplayer game, we must also change the class the player would start as.
-				if ( NETWORK_GetState() != NETSTATE_SERVER )
-					SinglePlayerClass[args[0]] = player->userinfo.GetPlayerClassNum();
-
-				if ( bRespawn && PLAYER_IsValidPlayerWithMo( args[0] ) )
+				if ( stricmp( classname, "random" ) == 0 )
 				{
-					APlayerPawn *pmo = player->mo;
-					player->playerstate = PST_REBORNNOINVENTORY;
+					// [AK] Stop if choosing random player classes is forbidden.
+					if ( gameinfo.norandomplayerclass )
+						return 0;
 
-					// [AK] Unmorph the player before respawning them with a new class.
-					if ( player->morphTics )
-						P_UndoPlayerMorph( player, player );
+					player->userinfo.PlayerClassNumChanged( -1 );
 
-					// [AK] If we're the server, tell the clients to destroy the body.
-					if ( NETWORK_GetState() == NETSTATE_SERVER )
-						SERVERCOMMANDS_DestroyThing( pmo );
+					// [AK] In a singleplayer game, we must also change the class the player would start as.
+					if ( NETWORK_GetState() != NETSTATE_SERVER )
+						SinglePlayerClass[ulPlayer] = ( pr_classchoice() ) % PlayerClasses.Size();
+				}
+				else
+				{
+					const PClass *playerclass = PClass::FindClass( classname );
 
-					pmo->Destroy();
-					pmo = NULL;
-					GAMEMODE_SpawnPlayer( player - players );
+					// [AK] Stop if the class provided doesn't exist or isn't a descendant of PlayerPawn.
+					// Also check if the player isn't already playing as the same class.
+					if ( playerclass == NULL || !playerclass->IsDescendantOf( RUNTIME_CLASS( APlayerPawn )) || player->cls == playerclass )
+						return 0;
+
+					// [AK] Don't change the player's class if it's not allowed.
+					if ( !TEAM_IsActorAllowedForPlayer( GetDefaultByType( playerclass ), player ) )
+						return 0;
+
+					player->userinfo.PlayerClassChanged( playerclass->Meta.GetMetaString( APMETA_DisplayName ));
+
+					// [AK] In a singleplayer game, we must also change the class the player would start as.
+					if ( NETWORK_GetState() != NETSTATE_SERVER )
+						SinglePlayerClass[ulPlayer] = player->userinfo.GetPlayerClassNum();
+				}
+
+				// [AK] If we're the server, tell the clients about the player's new class.
+				if ( NETWORK_GetState() == NETSTATE_SERVER )
+				{
+					std::set<FName> names;
+					names.insert( NAME_PlayerClass );
+					SERVERCOMMANDS_SetPlayerUserInfo( ulPlayer, names );
+				}
+
+				if ( bRespawn && PLAYER_IsValidPlayerWithMo( ulPlayer ) )
+				{
+					// [AK] Only respawn the player if they still have enough lives left.
+					if ( !GAMEMODE_AreLivesLimited() || GAMEMODE_GetState() < GAMESTATE_INPROGRESS || player->ulLivesLeft > 0 )
+					{
+						APlayerPawn *pmo = player->mo;
+						player->playerstate = PST_REBORNNOINVENTORY;
+
+						// [AK] Unmorph the player before respawning them with a new class.
+						if ( player->morphTics )
+							P_UndoPlayerMorph( player, player );
+
+						// [AK] Drop any important items this player might be carrying like flags, skulls, etc.
+						pmo->DropImportantItems( false );
+
+						// [AK] If we're the server, tell the clients to destroy the body.
+						if ( NETWORK_GetState() == NETSTATE_SERVER )
+							SERVERCOMMANDS_DestroyThing( pmo );
+
+						pmo->Destroy();
+						GAMEMODE_SpawnPlayer( ulPlayer );
+					}
 				}
 
 				return 1;
