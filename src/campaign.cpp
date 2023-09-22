@@ -485,9 +485,13 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 			{
 				LONG lBotIndex = campaign_ParseBracketIndex( "botteam", szKey );
 				if (( lBotIndex < 0 ) || ( lBotIndex >= MAXPLAYERS ))
-					I_Error( "CAMPAIGN_ParseCampaignInfo: Invalid \"botteam\" index, %d!", static_cast<int> (lBotIndex) );
+					I_Error( "CAMPAIGN_ParseCampaignInfo: Invalid \"botteam\" bot index, %d!", static_cast<int> (lBotIndex) );
 
-				pInfo->BotSpawn[lBotIndex].BotTeamName = szValue;
+				ULONG ulTeamId = atoi( szValue );
+				if (ulTeamId < 0 || ulTeamId >= teams.Size())
+					I_Error( "CAMPAIGN_ParseCampaignInfo: Invalid \"botteam\" team index, %d!", static_cast<int> (lBotIndex) );
+
+				pInfo->BotSpawn[lBotIndex].BotTeamName = teams[atoi(szValue)].Name.GetChars();
 			}
 			else if ( strnicmp( szKey, "bot", strlen( "bot" )) == 0 )
 			{
