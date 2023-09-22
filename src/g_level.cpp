@@ -94,7 +94,6 @@
 #include "duel.h"
 #include "lastmanstanding.h"
 #include "scoreboard.h"
-#include "campaign.h"
 #include "joinqueue.h"
 #include "sv_save.h"
 #include "cooperative.h"
@@ -1342,8 +1341,8 @@ void G_DoLoadLevel (int position, bool autosave)
 	}
 	else
 	{
-			// We're now NOT in a campaign.
-			CAMPAIGN_SetInCampaign( false );
+		// We're now NOT in a campaign.
+		CAMPAIGN_SetInCampaign( false );
 	}
 
 	if (NextSkill >= 0)
