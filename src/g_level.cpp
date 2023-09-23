@@ -208,9 +208,9 @@ CCMD (map)
 				if ( NETWORK_GetState( ) == NETSTATE_CLIENT )
 					CLIENT_QuitNetworkGame( NULL );
 
-				// Turn campaign mode back on.
+				// Don't start campaigns via this ccmd.
 				CAMPAIGN_SetInCampaign( false );
-				CAMPAIGN_EnableCampaign( );
+				CAMPAIGN_DisableCampaign( );
 
 				// Reset the duel and LMS modules.
 				if ( duel )
