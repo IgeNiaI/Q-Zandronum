@@ -1253,7 +1253,7 @@ void FFlagCVar::DoSet (UCVarValue value, ECVarType type)
 		val.Int |= BitVal;
 	else
 		val.Int &= ~BitVal;
-	ValueVar = val.Int;
+	ValueVar.ForceSet( val, CVAR_Int );
 }
 
 //
@@ -1357,10 +1357,11 @@ void FMaskCVar::DoSet (UCVarValue value, ECVarType type)
 	}
 	else
 	{
-		int vval = *ValueVar;
-		vval &= ~BitVal;
-		vval |= val;
-		ValueVar = vval;
+		UCVarValue Val;
+		Val.Int = *ValueVar;
+		Val.Int &= ~BitVal;
+		Val.Int |= val;
+		ValueVar.ForceSet( Val, CVAR_Int );
 	}
 }
 
