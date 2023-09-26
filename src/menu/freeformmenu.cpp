@@ -42,6 +42,7 @@
 #include "c_dispatch.h"
 #include "c_bind.h"
 #include "gi.h"
+#include "deathmatch.h"
 #include "team.h"
 #include "menu/menu.h"
 #include "menu/freeformmenuitems.h"
@@ -707,11 +708,11 @@ bool FFreeformMenuItem::IsVisible() const
 		return false;
 
 	// Singleplayer check
-	if (!mIsVisibleInSingleplayer && (gamestate != GS_TITLELEVEL) && NETWORK_GetState() == NETSTATE_SINGLE)
+	if (!mIsVisibleInSingleplayer && (gamestate != GS_TITLELEVEL) && (NETWORK_GetState() == NETSTATE_SINGLE || NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER))
 		return false;
 	
 	// Botplay check
-	if (!mIsVisibleInBotplay && (gamestate != GS_TITLELEVEL) && NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER)
+	if (!mIsVisibleInBotplay && (gamestate != GS_TITLELEVEL) && NETWORK_GetState() == NETSTATE_SINGLE_MULTIPLAYER && (deathmatch || teamgame))
 		return false;
 
 	// Multiplayer check
