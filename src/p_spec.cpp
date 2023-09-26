@@ -247,7 +247,8 @@ bool CheckIfExitIsGood (AActor *self, level_info_t *info)
 	{
 		// [BB] It's possible, that a monster exits the level, so self->player can be 0.
 		// [TP] A voodoo doll may also exit.
-		if (( self->player != NULL ) && ( self->player->mo == self ))
+		// [geNia] Don't print this message in SINGLE_MULTIPLAYER, unless it was a bot
+		if (( self->player != NULL ) && ( self->player->mo == self ) && ( NETWORK_GetState() != NETSTATE_SINGLE_MULTIPLAYER || self->player->bIsBot ))
 		{
 			// [K6/BB] The server should let the clients know who exited the level.
 			NETWORK_Printf ("%s \\c-exited the level.\n", self->player->userinfo.GetName());
