@@ -1783,7 +1783,7 @@ int APlayerPawn::EffectNameToIndex(const char* effectName)
 
 void APlayerPawn::SetEffectActor(int index, const PClass *pClass)
 {
-	if (index < 0 || index >= EA_COUNT)
+	if (index < 0 || index >= EA_COUNT || pClass == NULL)
 		return;
 
 	EffectActors[index] = pClass;
@@ -2762,7 +2762,8 @@ void APlayerPawn::PlayFootsteps (ticcmd_t *cmd)
 
 void APlayerPawn::CreateEffectActor (int index)
 {
-	if ( CLIENT_PREDICT_IsPredicting( ))
+	if ( CLIENT_PREDICT_IsPredicting( )
+		|| ( NETWORK_GetState() == NETSTATE_CLIENT && ( player - players != consoleplayer || player->mo != this ) ) )
 		return;
 
 	const PClass *classToSpawn = EffectActors[index];
@@ -2770,8 +2771,7 @@ void APlayerPawn::CreateEffectActor (int index)
 	if ( classToSpawn )
 	{
 		bool isClientside = !!( GetDefaultByType( classToSpawn )->ulNetworkFlags & NETFL_CLIENTSIDEONLY );
-		bool shouldSpawn =
-			( ( NETWORK_GetState() == NETSTATE_SERVER ) == !isClientside )
+		bool shouldSpawn = ( NETWORK_GetState() == NETSTATE_SERVER )
 			|| ( !isClientside && NETWORK_ClientsideFunctionsAllowed( this ) );
 
 		if ( shouldSpawn )
@@ -2783,7 +2783,7 @@ void APlayerPawn::CreateEffectActor (int index)
 
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				UNLAGGED_UnlagAndReplicateThing( this, EffectActor, false, true, false );
+				UNLAGGED_UnlagAndReplicateThing( this, EffectActor, !isClientside, true, false );
 			}
 		}
 	}
