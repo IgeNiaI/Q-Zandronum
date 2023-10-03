@@ -1922,6 +1922,9 @@ static void botcmd_GetEnemyInvulnerabilityTicks( CSkullBot *pBot )
 //
 static void botcmd_FireWeapon( CSkullBot *pBot )
 {
+	if ( GAMEMODE_IsGameWaitingForPlayers() || GAMEMODE_IsGameInWarmup() || GAMEMODE_IsGameInCountdown() )
+		return;
+
 	pBot->GetPlayer( )->cmd.ucmd.buttons |= BT_ATTACK;
 }
 
@@ -1929,6 +1932,9 @@ static void botcmd_FireWeapon( CSkullBot *pBot )
 //
 static void botcmd_BeginFiringWeapon( CSkullBot *pBot )
 {
+	if ( GAMEMODE_IsGameWaitingForPlayers() || GAMEMODE_IsGameInWarmup() || GAMEMODE_IsGameInCountdown() )
+		return;
+
 	pBot->m_lButtons |= BT_ATTACK;
 }
 
