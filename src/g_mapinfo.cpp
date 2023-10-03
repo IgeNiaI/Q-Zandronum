@@ -59,6 +59,7 @@ TArray<level_info_t> wadlevelinfos;
 level_info_t TheDefaultLevelInfo;
 static cluster_info_t TheDefaultClusterInfo;
 
+int botepisodei = 0;
 TArray<FEpisode> AllEpisodes;
 
 extern TMap<int, FString> HexenMusic;
@@ -1863,13 +1864,13 @@ void FMapInfoParser::ParseEpisodeInfo ()
 	}
 	else
 	{
+		FEpisode *epi;
+		
 		// Only allocate a new entry if this doesn't replace an existing episode.
 		if (i >= AllEpisodes.Size())
-		{
-			i = AllEpisodes.Reserve(1);
-		}
-
-		FEpisode *epi = &AllEpisodes[i];
+			epi = new FEpisode();
+		else
+			epi = &AllEpisodes[i];
 
 		epi->mEpisodeMap = map;
 		epi->mEpisodeName = name;
@@ -1882,6 +1883,22 @@ void FMapInfoParser::ParseEpisodeInfo ()
 		epi->bBotEpisode = bBotEpisode;
 		epi->bBotSkillFullText = !bBotSkillPicIsGFX;
 		epi->BotSkillTitle = botskilltitle;
+		
+		// Only allocate a new entry if this doesn't replace an existing episode.
+		if (i >= AllEpisodes.Size())
+		{
+			// [geNia] Add bot episodes on top of normal episodes
+			if (bBotEpisode)
+			{
+				AllEpisodes.Insert(botepisodei, *epi);
+				botepisodei++;
+			}
+			else
+			{
+				AllEpisodes.Push(*epi);
+			}
+		}
+
 	}
 }
 
@@ -1894,6 +1911,7 @@ void FMapInfoParser::ParseEpisodeInfo ()
 
 void ClearEpisodes()
 {
+	botepisodei = 0;
 	AllEpisodes.Clear();
 }
 
