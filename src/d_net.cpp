@@ -2385,7 +2385,7 @@ void Net_DoCommand (int type, BYTE **stream, int player)
 		// For demo playback, DEM_DOAUTOSAVE already exists in the demo if the
 		// autosave happened. And if it doesn't, we must not generate it.
 		// [BC] Support for client-side demos.
-		if (( NETWORK_GetState( ) != NETSTATE_SINGLE ) ||
+		if (( NETWORK_GetState( ) >= NETSTATE_CLIENT ) ||
 			demoplayback ||
 			CLIENTDEMO_IsPlaying( ) ||
 			players[consoleplayer].playerstate != PST_LIVE ||
