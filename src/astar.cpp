@@ -255,7 +255,8 @@ ASTARRETURNSTRUCT_t ASTAR_Path( ULONG ulPathIdx, POS_t GoalPoint, float fMaxSear
 	pPath->pGoalNode = astar_GetNodeFromPoint( GoalPoint );
 	if ( pPath->pGoalNode == NULL )
 	{
-		Printf( "WARNING! Cannot path to location: (%d, %d)\n", GoalPoint.x / FRACUNIT, GoalPoint.y / FRACUNIT );
+		// [geNia] Made this a debug print instead of regular
+		DPrintf( "WARNING! Cannot path to location: (%d, %d)\n", GoalPoint.x / FRACUNIT, GoalPoint.y / FRACUNIT );
 		ReturnVal.bIsGoal = false;
 		ReturnVal.pNode = NULL;
 		ReturnVal.ulFlags = 0;
