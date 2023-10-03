@@ -4475,6 +4475,7 @@ void G_DoLoadGame ()
 
 	// load a base level
 	savegamerestore = true;		// Use the player actors in the savegame
+	CAMPAIGN_EnableCampaign();
 	bool demoplaybacksave = demoplayback;
 	G_InitNew (map, false);
 	demoplayback = demoplaybacksave;
