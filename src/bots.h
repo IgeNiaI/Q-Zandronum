@@ -682,6 +682,8 @@ void		BOTSPAWN_SetTeam( ULONG ulIdx, char *pszTeam );
 ULONG		BOTSPAWN_GetTicks( ULONG ulIdx );
 void		BOTSPAWN_SetTicks( ULONG ulIdx, ULONG usTicks );
 
+bool		BOTSPAWN_AllBotsSpawned( void );
+
 FArchive &operator<< ( FArchive &arc, POS_t *pPos );
 FArchive &operator>> ( FArchive &arc, POS_t *pPos );
 
