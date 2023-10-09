@@ -114,17 +114,20 @@ void DEATHMATCH_Tick( void )
 			if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
-				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) )
+				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned( ) )
 				{			
 					DEATHMATCH_SetState( DEATHMATCHS_WARMUP );
 					break;
 				}
 
-				// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
-				if ( sv_deathmatchcountdowntime > 0 )
-					DEATHMATCH_StartCountdown(( sv_deathmatchcountdowntime * TICRATE ) - 1 );
-				else
-					DEATHMATCH_StartCountdown(( 10 * TICRATE ) - 1 );
+				if ( BOTSPAWN_AllBotsSpawned() )
+				{
+					// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
+					if ( sv_deathmatchcountdowntime > 0 )
+						DEATHMATCH_StartCountdown(( sv_deathmatchcountdowntime * TICRATE ) - 1 );
+					else
+						DEATHMATCH_StartCountdown(( 10 * TICRATE ) - 1 );
+				}
 			}
 		}
 		else
@@ -133,16 +136,19 @@ void DEATHMATCH_Tick( void )
 			if ( GAME_CountActivePlayers( ) >= 2 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
-				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) )
+				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned( ) )
 				{			
 					DEATHMATCH_SetState( DEATHMATCHS_WARMUP );
 					break;
 				}
-
-				if ( sv_deathmatchcountdowntime > 0 )
-					DEATHMATCH_StartCountdown(( sv_deathmatchcountdowntime * TICRATE ) - 1 );
-				else
-					DEATHMATCH_StartCountdown(( 10 * TICRATE ) - 1 );
+				
+				if ( BOTSPAWN_AllBotsSpawned() )
+				{
+					if ( sv_deathmatchcountdowntime > 0 )
+						DEATHMATCH_StartCountdown(( sv_deathmatchcountdowntime * TICRATE ) - 1 );
+					else
+						DEATHMATCH_StartCountdown(( 10 * TICRATE ) - 1 );
+				}
 			}
 		}
 		break;
