@@ -112,10 +112,13 @@ void POSSESSION_Tick( void )
 			// Two players are here now, being the initial countdown!
 			if ( SERVER_CalcNumNonSpectatingPlayers( MAXPLAYERS ) >= 2 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
-				if ( sv_possessioncountdowntime > 0 )
-					POSSESSION_StartCountdown(( sv_possessioncountdowntime * TICRATE ) - 1 );
-				else
-					POSSESSION_StartCountdown(( 10 * TICRATE ) - 1 );
+				if ( BOTSPAWN_AllBotsSpawned() )
+				{
+					if ( sv_possessioncountdowntime > 0 )
+						POSSESSION_StartCountdown(( sv_possessioncountdowntime * TICRATE ) - 1 );
+					else
+						POSSESSION_StartCountdown(( 10 * TICRATE ) - 1 );
+				}
 			}
 		}
 
@@ -123,10 +126,13 @@ void POSSESSION_Tick( void )
 		{
 			if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
-				if ( sv_possessioncountdowntime > 0 )
-					POSSESSION_StartCountdown(( sv_possessioncountdowntime * TICRATE ) - 1 );
-				else
-					POSSESSION_StartCountdown(( 10 * TICRATE ) - 1 );
+				if ( BOTSPAWN_AllBotsSpawned() )
+				{
+					if ( sv_possessioncountdowntime > 0 )
+						POSSESSION_StartCountdown(( sv_possessioncountdowntime * TICRATE ) - 1 );
+					else
+						POSSESSION_StartCountdown(( 10 * TICRATE ) - 1 );
+				}
 			}
 		}
 		break;
