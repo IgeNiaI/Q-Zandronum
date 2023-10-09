@@ -170,17 +170,20 @@ void TEAM_Tick( void )
 		if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 		{
 			// Warmup only in non lobby maps
-			if ( sv_teamgamewarmup && !GAMEMODE_IsLobbyMap( ) )
+			if ( sv_teamgamewarmup && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned() )
 			{			
 				TEAM_SetState( TEAMS_WARMUP );
 				break;
 			}
-
-			// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
-			if ( sv_teamgamecountdowntime > 0 )
-				TEAM_StartCountdown(( sv_teamgamecountdowntime * TICRATE ) - 1 );
-			else
-				TEAM_StartCountdown(( 10 * TICRATE ) - 1 );
+			
+			if ( BOTSPAWN_AllBotsSpawned() )
+			{
+				// [BB] Skip countdown and map reset if the map is supposed to be a lobby.
+				if ( sv_teamgamecountdowntime > 0 )
+					TEAM_StartCountdown(( sv_teamgamecountdowntime * TICRATE ) - 1 );
+				else
+					TEAM_StartCountdown(( 10 * TICRATE ) - 1 );
+			}
 		}
 		break;
 	case TEAMS_WARMUP:

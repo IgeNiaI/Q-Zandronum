@@ -1578,6 +1578,21 @@ void BOTSPAWN_SetTicks( ULONG ulIdx, ULONG ulTicks )
 }
 
 //*****************************************************************************
+//
+bool BOTSPAWN_AllBotsSpawned( void )
+{
+	ULONG	ulIdx;
+
+	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
+	{
+		if ( g_BotSpawn[ulIdx].ulTick )
+			return false;
+	}
+
+	return true;
+}
+
+//*****************************************************************************
 //*****************************************************************************
 //
 CSkullBot::CSkullBot( char *pszName, char *pszTeamName, ULONG ulPlayerNum )

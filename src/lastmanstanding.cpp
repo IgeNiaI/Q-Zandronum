@@ -132,16 +132,19 @@ void LASTMANSTANDING_Tick( void )
 				}
 
 				// Warmup only in non lobby maps
-				if ( sv_lmswarmup && !nowarmup )
+				if ( sv_lmswarmup && !nowarmup && BOTSPAWN_AllBotsSpawned() )
 				{			
 					LASTMANSTANDING_SetState(LMSS_WARMUP);
 					break;
 				}
-
-				if ( sv_lmscountdowntime > 0 )
-					LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
-				else
-					LASTMANSTANDING_StartCountdown(( 10 * TICRATE ) - 1 );
+				
+				if ( BOTSPAWN_AllBotsSpawned() )
+				{
+					if ( sv_lmscountdowntime > 0 )
+						LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
+					else
+						LASTMANSTANDING_StartCountdown(( 10 * TICRATE ) - 1 );
+				}
 			}
 		}
 
@@ -150,16 +153,19 @@ void LASTMANSTANDING_Tick( void )
 			if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
-				if ( sv_lmswarmup && TEAM_GetHighestWinCount() <= 0 )
+				if ( sv_lmswarmup && TEAM_GetHighestWinCount() <= 0 && BOTSPAWN_AllBotsSpawned() )
 				{			
 					LASTMANSTANDING_SetState(LMSS_WARMUP);
 					break;
 				}
-
-				if ( sv_lmscountdowntime > 0 )
-					LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
-				else
-					LASTMANSTANDING_StartCountdown(( 10 * TICRATE ) - 1 );
+				
+				if ( BOTSPAWN_AllBotsSpawned() )
+				{
+					if ( sv_lmscountdowntime > 0 )
+						LASTMANSTANDING_StartCountdown(( sv_lmscountdowntime * TICRATE ) - 1 );
+					else
+						LASTMANSTANDING_StartCountdown(( 10 * TICRATE ) - 1 );
+				}
 			}
 		}
 		break;

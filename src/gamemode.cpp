@@ -158,7 +158,7 @@ void GAMEMODE_Tick( void )
 				}
 			}
 
-			if ( GAMEMODE_AreEnoughPlayersReady() )
+			if ( GAMEMODE_AreEnoughPlayersReady() && BOTSPAWN_AllBotsSpawned() )
 			{
 				GAMEMODE_StartMatch();
 			}
@@ -1831,7 +1831,7 @@ CCMD(start_match)
 {
 	if ( NETWORK_InClientMode() )
 	{
-		Printf("Only the server can start the duel.\n");
+		Printf("Only the server can start the match.\n");
 		return;
 	}
 
