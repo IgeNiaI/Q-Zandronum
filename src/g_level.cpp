@@ -1007,7 +1007,7 @@ void G_DoCompleted (void)
 
 	// [BB] LEVEL_NOINTERMISSION is also respected in deathmatch games
 	if ( ((level.flags & LEVEL_NOINTERMISSION) ||
-		 ((nextcluster == thiscluster) && (thiscluster->flags & CLUSTER_HUB))))
+		 ((nextcluster == thiscluster) && (thiscluster->flags & CLUSTER_HUB) && !deathmatch && !teamgame)))
 	{
 		G_WorldDone ();
 		return;
