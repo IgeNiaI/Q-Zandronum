@@ -184,6 +184,14 @@ static bool CheckSkipOptionBlock(FScanner &sc)
 		{
 			filter |= IsFModExPresent();
 		}
+		else if (sc.Compare("OpenGL"))
+		{
+			filter |= ( currentrenderer == 1 );
+		}
+		else if (sc.Compare("Software"))
+		{
+			filter |= ( currentrenderer == 0 );
+		}
 	}
 	while (sc.CheckString(","));
 	sc.MustGetStringName(")");
