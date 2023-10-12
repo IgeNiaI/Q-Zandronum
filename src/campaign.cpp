@@ -330,6 +330,7 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 		pInfo->bMustWinAllDuels		= true;
 		pInfo->pNextInfo			= NULL;
 		pInfo->lPossessionHoldTime	= 0;
+		pInfo->lBotsSkillOffset		= 0;
 		pInfo->bInstagib			= false;
 		pInfo->bBuckshot			= false;
 		for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
@@ -486,6 +487,10 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 			else if ( stricmp( szKey, "possessionholdtime" ) == 0 )
 			{
 				pInfo->lPossessionHoldTime = atoi( szValue );
+			}
+			else if ( stricmp( szKey, "botsSkillOffset" ) == 0 )
+			{
+				pInfo->lBotsSkillOffset = atoi( szValue );
 			}
 			else if ( stricmp( szKey, "instagib" ) == 0 )
 			{
