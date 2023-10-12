@@ -134,6 +134,9 @@ typedef struct CAMPAIGNINFO_s
 	// How lost must the possession artifact be held?
 	LONG			lPossessionHoldTime;
 
+	// How much to offset bots skill for this level?
+	LONG			lBotsSkillOffset;
+
 	// Does the game mode use instagib/buckshot?
 	bool			bInstagib;
 	bool			bBuckshot;
