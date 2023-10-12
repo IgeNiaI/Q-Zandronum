@@ -643,6 +643,7 @@ bool		BOTS_IsVisible( AActor *pActor1, AActor *pActor2 );
 void		BOTS_ArchiveRevealedBotsAndSkins( FConfigFile *f );
 void		BOTS_RestoreRevealedBotsAndSkins( FConfigFile &config );
 bool		BOTS_IsBotInitialized( ULONG ulBot );
+void		BOTS_SetCampaignSkillOffset( LONG offset );
 BOTSKILL_e	BOTS_AdjustSkill( CSkullBot *pBot, BOTSKILL_e Skill );
 void		BOTS_PostWeaponFiredEvent( ULONG ulPlayer, BOTEVENT_e EventIfSelf, BOTEVENT_e EventIfEnemy, BOTEVENT_e EventIfPlayer );
 void		BOTS_RemoveGoal( AActor* pGoal );
