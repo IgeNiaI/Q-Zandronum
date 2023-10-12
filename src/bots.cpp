@@ -101,6 +101,7 @@ static	cycle_t		g_BotCycles;
 static	bool		g_bBotIsInitialized[MAXPLAYERS];
 static	LONG		g_lLastHeader;
 static	bool		g_bBlockClearTable = false;
+static  LONG		g_lSkillOffset = 0;
 static	const char	*g_pszDataHeaders[NUM_DATAHEADERS] =
 {
 	"DH_COMMAND",
@@ -883,6 +884,13 @@ bool BOTS_IsBotInitialized( ULONG ulBot )
 
 //*****************************************************************************
 //
+void BOTS_SetCampaignSkillOffset( LONG offset )
+{
+	g_lSkillOffset = offset;
+}
+
+//*****************************************************************************
+//
 BOTSKILL_e BOTS_AdjustSkill( CSkullBot *pBot, BOTSKILL_e Skill )
 {
 	LONG	lSkill;
@@ -911,6 +919,8 @@ BOTSKILL_e BOTS_AdjustSkill( CSkullBot *pBot, BOTSKILL_e Skill )
 		lSkill += 2;
 		break;
 	}
+
+	lSkill += g_lSkillOffset;
 
 	if ( pBot->m_bSkillIncrease )
 		lSkill++;
