@@ -903,14 +903,14 @@ void P_UpdateSpecials ()
 	if ( GAMEMODE_IsTimelimitActive() )
 	{
 		// [RC] Play the five minute warning.
-		if ( level.time == (int)( ( timelimit - 5 ) * TICRATE * 60 ) ) // I'm amazed this works so well without a flag.
+		if ( level.time == (int)( ( timelimit - 5 ) * TICRATE * 60 ) && timelimit != 5 ) // I'm amazed this works so well without a flag.
 		{
 			Printf("Five minutes remain!\n");
 			ANNOUNCER_PlayEntry( cl_announcer, "FiveMinuteWarning" );
 		}
 
 		// [RC] Play the one minute warning.
-		else if ( level.time == (int)( ( timelimit - 1 ) * TICRATE * 60 ) )
+		else if ( level.time == (int)( ( timelimit - 1 ) * TICRATE * 60 ) && timelimit != 1  )
 		{
 			Printf("One minute remains!\n");
 			ANNOUNCER_PlayEntry( cl_announcer, "OneMinuteWarning" );
