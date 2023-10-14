@@ -91,7 +91,10 @@ Command DoGameModeCountdown
 EndCommand
 
 Command DoGameModeWinSequence
-	Player winner with IndexTestOnly
+	UShort winner
+EndCommand
+
+Command DoGameModeSuddenDeath
 EndCommand
 
 Command SetDominationState

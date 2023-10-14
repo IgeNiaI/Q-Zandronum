@@ -1110,6 +1110,21 @@ void TEAM_DoWinSequence( ULONG ulTeamIdx )
 
 	V_ColorizeString( szString );
 	
+	// Tell clients to do the win sequence.
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
+		SERVERCOMMANDS_DoGameModeWinSequence( ulTeamIdx );
+	}
+	else if ( playeringame[consoleplayer] )
+	{
+		if ( ulTeamIdx >= teams.Size( ) )
+			ANNOUNCER_PlayEntry( cl_announcer, "DrawGame" );
+		else if ( ulTeamIdx == players[consoleplayer].ulTeam )
+			ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
+		else
+			ANNOUNCER_PlayEntry( cl_announcer, "YouLose" );
+	}
+
 	// Put the duel state in the win sequence state.
 	if ( NETWORK_InClientMode() == false )
 	{
@@ -1205,10 +1220,12 @@ void TEAM_TimeExpired( void )
 						1.0f );
 
 					StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
+					ANNOUNCER_PlayEntry( cl_announcer, "SuddenDeath" );
 				}
 				else
 				{
 					SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_RED, 2.0f, 1.0f, "BigFont", false, MAKE_ID('C','N','T','R') );
+					SERVERCOMMANDS_DoGameModeSuddenDeath();
 				}
 			}
 

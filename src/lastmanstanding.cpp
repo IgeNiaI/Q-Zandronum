@@ -204,9 +204,6 @@ void LASTMANSTANDING_Tick( void )
 				{
 					NETWORK_Printf( "%s \\c-wins!\n", players[lWinner].userinfo.GetName() );
 
-					if (( NETWORK_GetState() != NETSTATE_SERVER ) && ( lWinner == consoleplayer ))
-						ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
-
 					// Give the winner a win.
 					PLAYER_SetWins( &players[lWinner], players[lWinner].ulWins + 1 );
 
@@ -248,13 +245,6 @@ void LASTMANSTANDING_Tick( void )
 				if ( lWinner != -1 )
 				{
 					NETWORK_Printf( "%s \\c-wins!\n", TEAM_GetName( lWinner ));
-
-					if ( NETWORK_GetState() != NETSTATE_SERVER
-						&& players[consoleplayer].bOnTeam
-						&& lWinner == (LONG)players[consoleplayer].ulTeam )
-					{
-						ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
-					}
 
 					// Give the team a win.
 					TEAM_SetWinCount( lWinner, TEAM_GetWinCount( lWinner ) + 1, false );
@@ -461,7 +451,30 @@ void LASTMANSTANDING_DoWinSequence( ULONG ulWinner )
 
 	// Tell clients to do the win sequence.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
 		SERVERCOMMANDS_DoGameModeWinSequence( ulWinner );
+	}
+	else if ( playeringame[consoleplayer] )
+	{
+		if ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS )
+		{
+			if ( ulWinner == teams.Size( ) )
+				ANNOUNCER_PlayEntry( cl_announcer, "DrawGame" );
+			else if ( ulWinner == players[consoleplayer].ulTeam )
+				ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
+			else
+				ANNOUNCER_PlayEntry( cl_announcer, "YouLose" );
+		}
+		else
+		{
+			if ( ulWinner == MAXPLAYERS )
+				ANNOUNCER_PlayEntry( cl_announcer, "DrawGame" );
+			else if ( ulWinner == static_cast<LONG>(consoleplayer) )
+				ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
+			else
+				ANNOUNCER_PlayEntry( cl_announcer, "YouLose" );
+		}
+	}
 
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
 	{
@@ -475,7 +488,7 @@ void LASTMANSTANDING_DoWinSequence( ULONG ulWinner )
 			else
 				sprintf( szString, "\\c%c%s Wins!", V_GetColorChar( TEAM_GetTextColor( ulWinner ) ), TEAM_GetName( ulWinner ));
 		}
-		else if ( ulWinner == MAXPLAYERS )
+		else if ( ulWinner >= MAXPLAYERS )
 			sprintf( szString, "\\cdDRAW GAME!" );
 		else
 			sprintf( szString, "%s \\c-WINS!", players[ulWinner].userinfo.GetName() );
@@ -626,10 +639,12 @@ void LASTMANSTANDING_TimeExpired( void )
 					1.0f );
 
 				StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
+				ANNOUNCER_PlayEntry( cl_announcer, "SuddenDeath" );
 			}
 			else
 			{
 				SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_RED, 2.0f, 1.0f, "BigFont", false, MAKE_ID('C','N','T','R') );
+				SERVERCOMMANDS_DoGameModeSuddenDeath();
 			}
 		}
 

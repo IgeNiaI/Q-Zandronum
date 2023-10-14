@@ -2172,7 +2172,15 @@ void SERVERCOMMANDS_DoGameModeCountdown( ULONG ulTicks, ULONG ulPlayerExtra, Ser
 void SERVERCOMMANDS_DoGameModeWinSequence( ULONG ulWinner, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	ServerCommands::DoGameModeWinSequence command;
-	command.SetWinner( &players[ulWinner] );
+	command.SetWinner( ulWinner );
+	command.sendCommandToClients( ulPlayerExtra, flags );
+}
+
+//*****************************************************************************
+//
+void SERVERCOMMANDS_DoGameModeSuddenDeath( ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	ServerCommands::DoGameModeSuddenDeath command;
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 

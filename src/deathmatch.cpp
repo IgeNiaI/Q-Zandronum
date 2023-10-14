@@ -342,14 +342,14 @@ void DEATHMATCH_TimeExpired( void )
 void DEATHMATCH_DetermineAndPrintWinner()
 {
 	ULONG				ulIdx;
-	LONG				lWinner;
+	ULONG				ulWinner;
 	LONG				lHighestFrags;
 	bool				bTied;
 	char				szString[64];
 	DHUDMessageFadeOut	*pMsg;
 
 	// Determine the winner.
-	lWinner = -1;
+	ulWinner = MAXPLAYERS;
 	lHighestFrags = INT_MIN;
 	bTied = false;
 	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
@@ -360,7 +360,7 @@ void DEATHMATCH_DetermineAndPrintWinner()
 
 		if ( players[ulIdx].fragcount > lHighestFrags )
 		{
-			lWinner = ulIdx;
+			ulWinner = ulIdx;
 			lHighestFrags = players[ulIdx].fragcount;
 			bTied = false;
 		}
@@ -369,17 +369,10 @@ void DEATHMATCH_DetermineAndPrintWinner()
 	}
 
 	// [BB] In case there are no active players (only spectators), lWinner is -1.
-	if ( bTied || ( lWinner == -1 ) )
+	if ( ulWinner >= MAXPLAYERS )
 		sprintf( szString, "\\cdDRAW GAME!" );
 	else
-	{
-		if (( NETWORK_GetState( ) == NETSTATE_SINGLE_MULTIPLAYER ) && ( players[consoleplayer].mo->CheckLocalView( lWinner )))
-			sprintf( szString, "YOU WIN!" );
-		else if (( teamplay ) && ( players[lWinner].bOnTeam ))
-			sprintf( szString, "\\c%c%s wins!\n", V_GetColorChar( TEAM_GetTextColor( players[lWinner].ulTeam )), TEAM_GetName( players[lWinner].ulTeam ));
-		else
-			sprintf( szString, "%s \\c-WINS!", players[lWinner].userinfo.GetName() );
-	}
+		sprintf( szString, "%s \\c-WINS!", players[ulWinner].userinfo.GetName() );
 	V_ColorizeString( szString );
 	
 	// Put the duel state in the win sequence state.
@@ -390,7 +383,18 @@ void DEATHMATCH_DetermineAndPrintWinner()
 
 	// Tell clients to do the win sequence.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
-		SERVERCOMMANDS_DoGameModeWinSequence( lWinner );
+	{
+		SERVERCOMMANDS_DoGameModeWinSequence( ulWinner );
+	}
+	else if ( playeringame[consoleplayer] )
+	{
+		if ( ulWinner >= MAXPLAYERS )
+			ANNOUNCER_PlayEntry( cl_announcer, "DrawGame" );
+		else if ( ulWinner == static_cast<LONG>(consoleplayer) )
+			ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
+		else
+			ANNOUNCER_PlayEntry( cl_announcer, "YouLose" );
+	}
 
 	// Display "%s WINS!" HUD message.
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )

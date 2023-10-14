@@ -298,7 +298,16 @@ void DUEL_DoWinSequence( ULONG ulPlayer )
 
 	// Tell clients to do the win sequence.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	{
 		SERVERCOMMANDS_DoGameModeWinSequence( ulPlayer );
+	}
+	else if ( playeringame[consoleplayer] )
+	{
+		if ( ulPlayer == static_cast<ULONG>(consoleplayer) )
+			ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
+		else
+			ANNOUNCER_PlayEntry( cl_announcer, "YouLose" );
+	}
 
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
 	{
@@ -429,10 +438,12 @@ void DUEL_TimeExpired( void )
 					1.0f );
 
 				StatusBar->AttachMessage( pMsg, MAKE_ID('C','N','T','R') );
+				ANNOUNCER_PlayEntry( cl_announcer, "SuddenDeath" );
 			}
 			else
 			{
 				SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 160.4f, 75.0f, 320, 200, CR_RED, 2.0f, 1.0f, "BigFont", false, MAKE_ID('C','N','T','R') );
+				SERVERCOMMANDS_DoGameModeSuddenDeath();
 			}
 		}
 

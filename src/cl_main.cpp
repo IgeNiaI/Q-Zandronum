@@ -5378,22 +5378,13 @@ void ServerCommands::DoGameModeCountdown::Execute()
 //
 void ServerCommands::DoGameModeWinSequence::Execute()
 {
-	ULONG	ulWinner;
-
-	ulWinner = winner - players;
+	ULONG ulWinner = (ULONG) winner;
 
 	// Begin the win sequence.
 	if ( duel )
 		DUEL_DoWinSequence( ulWinner );
 	else if ( lastmanstanding || teamlms )
-	{
-		if ( lastmanstanding && ( ulWinner == static_cast<ULONG>(consoleplayer) ))
-			ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
-		else if ( teamlms && players[consoleplayer].bOnTeam && ( ulWinner == players[consoleplayer].ulTeam ))
-			ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
-
 		LASTMANSTANDING_DoWinSequence( ulWinner );
-	}
 //	else if ( possession || teampossession )
 //		POSSESSION_DoWinSequence( ulWinner );
 	else if ( invasion )
@@ -5402,6 +5393,35 @@ void ServerCommands::DoGameModeWinSequence::Execute()
 		TEAM_SetState( TEAMS_WINSEQUENCE );
 	else if ( deathmatch )
 		DEATHMATCH_SetState( DEATHMATCHS_WINSEQUENCE );
+
+	if ( ( deathmatch || teamgame ) && !players[consoleplayer].bSpectating )
+	{
+		if ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS )
+		{
+			if ( ulWinner >= teams.Size( ) )
+				ANNOUNCER_PlayEntry( cl_announcer, "DrawGame" );
+			else if ( ulWinner == players[consoleplayer].ulTeam )
+				ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
+			else
+				ANNOUNCER_PlayEntry( cl_announcer, "YouLose" );
+		}
+		else
+		{
+			if ( ulWinner >= MAXPLAYERS )
+				ANNOUNCER_PlayEntry( cl_announcer, "DrawGame" );
+			else if ( ulWinner == static_cast<ULONG>(consoleplayer) )
+				ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
+			else
+				ANNOUNCER_PlayEntry( cl_announcer, "YouLose" );
+		}
+	}
+}
+
+//*****************************************************************************
+//
+void ServerCommands::DoGameModeSuddenDeath::Execute()
+{
+	ANNOUNCER_PlayEntry( cl_announcer, "SuddenDeath" );
 }
 
 //*****************************************************************************
