@@ -253,7 +253,7 @@ static int GetLevelNumFromName(const char* mapname, int category)
 				case 9: categoryOptions = "ZA_LevelNames9"; break;
 				}
 				FOptionValues** optNames = OptionValues.CheckKey(categoryOptions);
-				if (optNames != NULL)
+				if (optNames != NULL && (*optNames)->mValues.Size() > 0)
 				{
 					int levelnum = pr_randommapoption() % (*optNames)->mValues.Size();
 					return GetLevelNumFromName((*optNames)->mValues[levelnum].Text.GetChars(), 0);
@@ -261,19 +261,22 @@ static int GetLevelNumFromName(const char* mapname, int category)
 			}
 			else
 			{
-				// Look for maps in all maps list
-				int levelnum = pr_randommapoption() % wadlevelinfos.Size();
-				MapData* mdata = NULL;
-				try
+				if (wadlevelinfos.Size() > 0)
 				{
-					if ((mdata = P_OpenMapData(wadlevelinfos[levelnum].mapname, false)) != NULL)
+					// Look for maps in all maps list
+					int levelnum = pr_randommapoption() % wadlevelinfos.Size();
+					MapData* mdata = NULL;
+					try
 					{
-						delete mdata;
-						return levelnum;
+						if ((mdata = P_OpenMapData(wadlevelinfos[levelnum].mapname, false)) != NULL)
+						{
+							delete mdata;
+							return levelnum;
+						}
 					}
+					catch (CRecoverableError&) {}
+					delete mdata;
 				}
-				catch (CRecoverableError&) {}
-				delete mdata;
 			}
 		}
 	}
