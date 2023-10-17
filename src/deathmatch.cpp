@@ -375,7 +375,7 @@ void DEATHMATCH_DetermineAndPrintWinner()
 		sprintf( szString, "%s \\c-WINS!", players[ulWinner].userinfo.GetName() );
 	V_ColorizeString( szString );
 	
-	// Put the duel state in the win sequence state.
+	// Put the deathmatch state in the win sequence state.
 	if ( NETWORK_InClientMode() == false )
 	{
 		DEATHMATCH_SetState( DEATHMATCHS_WINSEQUENCE );

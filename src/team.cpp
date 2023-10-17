@@ -1110,6 +1110,12 @@ void TEAM_DoWinSequence( ULONG ulTeamIdx )
 
 	V_ColorizeString( szString );
 	
+	// Put the deathmatch state in the win sequence state.
+	if ( NETWORK_InClientMode() == false )
+	{
+		DEATHMATCH_SetState( DEATHMATCHS_WINSEQUENCE );
+	}
+
 	// Tell clients to do the win sequence.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 	{
