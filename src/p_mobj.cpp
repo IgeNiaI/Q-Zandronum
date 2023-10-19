@@ -2561,6 +2561,13 @@ explode:
 		return oldfloorz;
 	}
 
+	if ( NETWORK_GetState() == NETSTATE_SERVER )
+	{
+		player->ServerXYZVel[0] = player->mo->velx;		// The server first moves the player, then calculates his friction, and then sends it to clients
+		player->ServerXYZVel[1] = player->mo->vely;		// As a result, clients calculate further movement with velocity value lower than what the server had
+		player->ServerXYZVel[2] = player->mo->velz;		// So save pre-friction velocity and send that instead
+	}
+
 	// [geNia] Don't calculate friction for other players as it was precalculated by the server
 	// But still calculate weapon bobbing
 	bool applyFriction = !( NETWORK_InClientMode() && player && player->mo == mo && player - players != consoleplayer );
@@ -2709,10 +2716,10 @@ explode:
 		{
 			if (((player->onground && !player->mo->wasJustThrustedZ) || (player->mo->waterlevel >= 2) || (player->mo->flags & MF_NOGRAVITY)))
 			{
-				fixed_t friction = P_GetFriction (mo, NULL);
-				
 				if ( applyFriction )
 				{
+					fixed_t friction = P_GetFriction (mo, NULL);
+				
 					mo->velx = FixedMul (mo->velx, friction);
 					mo->vely = FixedMul (mo->vely, friction);
 				}
@@ -2727,10 +2734,10 @@ explode:
 		}
 		else
 		{
-			fixed_t friction = P_GetFriction(mo, NULL);
-			
 			if ( applyFriction )
 			{
+				fixed_t friction = P_GetFriction(mo, NULL);
+			
 				mo->velx = FixedMul(mo->velx, friction);
 				mo->vely = FixedMul(mo->vely, friction);
 			}
@@ -4185,7 +4192,6 @@ void AActor::Tick ()
 	if (serverPosUpdated)
 	{
 		MoveToServerPosition();
-		serverPosUpdated = false;
 	}
 	if (serverAngleUpdated)
 	{
@@ -4847,6 +4853,8 @@ void AActor::MoveToServerPosition()
 				ceilingz = oldceilingz;
 		}
 	}
+
+	serverPosUpdated = false;
 }
 
 //==========================================================================

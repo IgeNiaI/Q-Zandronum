@@ -272,9 +272,9 @@ void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerComma
 	fullCommand.SetWaterlevel( players[ulPlayer].mo->waterlevel );
 	fullCommand.SetAngle( players[ulPlayer].mo->angle );
 	fullCommand.SetPitch( players[ulPlayer].mo->pitch );
-	fullCommand.SetVelx( players[ulPlayer].mo->velx );
-	fullCommand.SetVely( players[ulPlayer].mo->vely );
-	fullCommand.SetVelz( players[ulPlayer].mo->velz );
+	fullCommand.SetVelx( players[ulPlayer].ServerXYZVel[0] );	// The server first moves the player, then calculates his friction, and then sends it to clients
+	fullCommand.SetVely( players[ulPlayer].ServerXYZVel[1] );	// As a result, clients calculate further movement with velocity value lower than what the server had
+	fullCommand.SetVelz( players[ulPlayer].ServerXYZVel[2] );	// So save pre-friction velocity and send that instead
 	fullCommand.SetUcmd_forwardmove( players[ulPlayer].cmd.ucmd.forwardmove );
 	fullCommand.SetUcmd_sidemove( players[ulPlayer].cmd.ucmd.sidemove );
 	fullCommand.SetUcmd_upmove( players[ulPlayer].cmd.ucmd.upmove );
