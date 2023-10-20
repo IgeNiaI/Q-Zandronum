@@ -2561,7 +2561,7 @@ explode:
 		return oldfloorz;
 	}
 
-	if ( NETWORK_GetState() == NETSTATE_SERVER )
+	if ( NETWORK_GetState() == NETSTATE_SERVER && player && player->mo )
 	{
 		player->ServerXYZVel[0] = player->mo->velx;		// The server first moves the player, then calculates his friction, and then sends it to clients
 		player->ServerXYZVel[1] = player->mo->vely;		// As a result, clients calculate further movement with velocity value lower than what the server had
