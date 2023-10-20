@@ -1210,6 +1210,12 @@ static void ClearInventory (AActor *activator)
 // [BB] I need this outside p_acs.cpp. Furthermore it now returns whether CallTryPickup was successful.
 /*static*/ bool DoGiveInv (AActor *actor, const PClass *info, int amount, player_t* ownerPlayer)
 {
+	if (!actor) // [geNia] I couldn't figure out why this is null sometimes
+	{
+		Printf("Tried to give item to null actor, item is %s\n", info ? info->TypeName.GetChars() : "null");
+		return false;
+	}
+
 	// [BB]
 	bool bSuccess = true;
 
@@ -1369,6 +1375,12 @@ static void GiveInventory (AActor *activator, const char *type, int amount, play
 
 static void DoTakeInv (AActor *actor, const PClass *info, int amount)
 {
+	if (!actor) // [geNia] I couldn't figure out why this is null sometimes
+	{
+		Printf("Tried to take item from null actor, item is %s\n", info ? info->TypeName.GetChars() : "null");
+		return;
+	}
+
 	AInventory *item = actor->FindInventory (info);
 	if (item != NULL)
 	{
