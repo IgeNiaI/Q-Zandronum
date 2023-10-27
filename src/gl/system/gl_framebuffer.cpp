@@ -124,9 +124,7 @@ void OpenGLFrameBuffer::InitializeState()
 	{
 		first=false;
 		// [BB] For some reason this crashes, if compiled with MinGW and optimization. Has to be investigated.
-#ifdef _MSC_VER
 		gl_PrintStartupLog();
-#endif
 
 		if (gl.flags&RFL_NPOT_TEXTURE)
 		{
