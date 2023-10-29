@@ -3140,42 +3140,45 @@ void P_CheckPlayerSprite(AActor *actor, int &spritenum, fixed_t &scalex, fixed_t
 		spritenum = skins[lSkin].sprite;
 	}
 
-	// [BB] PreferredSkin overrides NOSKIN.
-	if (lSkin != 0 && ( !(player->mo->flags4 & MF4_NOSKIN) || ( player->ReadyWeapon && ( player->ReadyWeapon->PreferredSkin != NAME_None ) ) ) )
+	if ( player->mo )
 	{
-		// Convert from default scale to skin scale.
-		fixed_t defscaleY = actor->GetDefault()->scaleY;
-		fixed_t defscaleX = actor->GetDefault()->scaleX;
-		scaley = Scale(scaley, skins[lSkin].ScaleY, defscaleY);
-		scalex = Scale(scalex, skins[lSkin].ScaleX, defscaleX);
-	}
-
-	// Set the crouch sprite?
-	if ( ( actor == player->mo ) && ( player->crouchfactor < player->mo->CrouchScaleHalfWay ) )
-	{
-		if (spritenum == actor->SpawnState->sprite || spritenum == player->mo->crouchsprite) 
-		{
-			crouchspriteno = player->mo->crouchsprite;
-		}
 		// [BB] PreferredSkin overrides NOSKIN.
-		else if ( ( !(actor->flags4 & MF4_NOSKIN) || ( player->ReadyWeapon && ( player->ReadyWeapon->PreferredSkin != NAME_None ) ) ) &&
-				(spritenum == skins[lSkin].sprite ||
-				 spritenum == skins[lSkin].crouchsprite))
+		if (lSkin != 0 && ( !(player->mo->flags4 & MF4_NOSKIN) || ( player->ReadyWeapon && ( player->ReadyWeapon->PreferredSkin != NAME_None ) ) ) )
 		{
-			crouchspriteno = skins[lSkin].crouchsprite;
-		}
-		else
-		{ // no sprite -> squash the existing one
-			crouchspriteno = -1;
+			// Convert from default scale to skin scale.
+			fixed_t defscaleY = actor->GetDefault()->scaleY;
+			fixed_t defscaleX = actor->GetDefault()->scaleX;
+			scaley = Scale(scaley, skins[lSkin].ScaleY, defscaleY);
+			scalex = Scale(scalex, skins[lSkin].ScaleX, defscaleX);
 		}
 
-		if (crouchspriteno > 0) 
+		// Set the crouch sprite?
+		if ( ( actor == player->mo ) && ( player->crouchfactor < player->mo->CrouchScaleHalfWay ) )
 		{
-			spritenum = crouchspriteno;
-		}
-		else if (player->playerstate != PST_DEAD && player->crouchfactor < player->mo->CrouchScaleHalfWay)
-		{
-			scaley = FixedMul(scaley, player->mo->CrouchScale);
+			if (spritenum == actor->SpawnState->sprite || spritenum == player->mo->crouchsprite) 
+			{
+				crouchspriteno = player->mo->crouchsprite;
+			}
+			// [BB] PreferredSkin overrides NOSKIN.
+			else if ( ( !(actor->flags4 & MF4_NOSKIN) || ( player->ReadyWeapon && ( player->ReadyWeapon->PreferredSkin != NAME_None ) ) ) &&
+					(spritenum == skins[lSkin].sprite ||
+					 spritenum == skins[lSkin].crouchsprite))
+			{
+				crouchspriteno = skins[lSkin].crouchsprite;
+			}
+			else
+			{ // no sprite -> squash the existing one
+				crouchspriteno = -1;
+			}
+
+			if (crouchspriteno > 0) 
+			{
+				spritenum = crouchspriteno;
+			}
+			else if (player->playerstate != PST_DEAD && player->crouchfactor < player->mo->CrouchScaleHalfWay)
+			{
+				scaley = FixedMul(scaley, player->mo->CrouchScale);
+			}
 		}
 	}
 }
