@@ -64,6 +64,7 @@ struct FRenderer
 	virtual void PreprocessLevel() {}
 	virtual void CleanLevelData() {}
 	virtual bool RequireGLNodes() { return false; }
+	virtual void RecompileShaders() {}
 
 
 };

@@ -1180,6 +1180,7 @@ struct FGLInterface : public FRenderer
 	void PreprocessLevel();
 	void CleanLevelData();
 	bool RequireGLNodes();
+	void RecompileShaders();
 
 	int GetMaxViewPitch(bool down);
 	void ClearBuffer(int color);
@@ -1426,6 +1427,11 @@ void FGLInterface::CleanLevelData()
 bool FGLInterface::RequireGLNodes() 
 { 
 	return true; 
+}
+
+void FGLInterface::RecompileShaders()
+{
+	GLRenderer->RecompileShaders();
 }
 
 //===========================================================================

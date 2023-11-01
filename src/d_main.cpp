@@ -2938,6 +2938,10 @@ void D_DoomMain (void)
 			I_Init ();
 			I_CreateRenderer();
 		}
+		else
+		{
+			Renderer->RecompileShaders();
+		}
 
 		// Server doesn't need video.
 		if ( NETWORK_GetState( ) != NETSTATE_SERVER )

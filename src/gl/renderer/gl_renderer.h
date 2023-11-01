@@ -111,6 +111,7 @@ public:
 	void FlushTextures();
 	unsigned char *GetTextureBuffer(FTexture *tex, int &w, int &h);
 	void SetupLevel();
+	void RecompileShaders();
 
 	void SetFixedColormap (player_t *player);
 	void WriteSavePic (player_t *player, FILE *file, int width, int height);

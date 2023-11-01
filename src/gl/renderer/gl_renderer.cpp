@@ -140,6 +140,12 @@ void FGLRenderer::SetupLevel()
 	mVBO->CreateVBO();
 }
 
+void FGLRenderer::RecompileShaders()
+{
+	if (mShaderManager != NULL) delete mShaderManager;
+	mShaderManager = new FShaderManager;
+}
+
 void FGLRenderer::Begin2D()
 {
 	gl_RenderState.EnableFog(false);
