@@ -369,7 +369,7 @@ void DEATHMATCH_DetermineAndPrintWinner()
 	}
 
 	// [BB] In case there are no active players (only spectators), lWinner is -1.
-	if ( bTied || ulWinner >= MAXPLAYERS )
+	if ( bTied || ulWinner >= MAXPLAYERS || ulWinner < 0 )
 		sprintf( szString, "\\cdDRAW GAME!" );
 	else
 		sprintf( szString, "%s \\c-WINS!", players[ulWinner].userinfo.GetName() );
@@ -388,7 +388,7 @@ void DEATHMATCH_DetermineAndPrintWinner()
 	}
 	else if ( playeringame[consoleplayer] )
 	{
-		if ( ulWinner >= MAXPLAYERS )
+		if ( bTied || ulWinner >= MAXPLAYERS || ulWinner < 0 )
 			ANNOUNCER_PlayEntry( cl_announcer, "DrawGame" );
 		else if ( ulWinner == static_cast<LONG>(consoleplayer) )
 			ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );
