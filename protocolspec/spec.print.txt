@@ -23,6 +23,7 @@ Command PrintHUDMessage
 	String fontName
 	Bool log
 	Long id
+	Byte layer
 EndCommand
 
 Command PrintHUDMessageFadeOut
@@ -37,6 +38,7 @@ Command PrintHUDMessageFadeOut
 	String fontName
 	Bool log
 	Long id
+	Byte layer
 EndCommand
 
 Command PrintHUDMessageFadeInOut
@@ -52,6 +54,7 @@ Command PrintHUDMessageFadeInOut
 	String fontName
 	Bool log
 	Long id
+	Byte layer
 EndCommand
 
 Command PrintHUDMessageTypeOnFadeOut
@@ -67,4 +70,5 @@ Command PrintHUDMessageTypeOnFadeOut
 	String fontName
 	Bool log
 	Long id
+	Byte layer
 EndCommand

@@ -4956,7 +4956,7 @@ void ServerCommands::PrintHUDMessage::Execute()
 		holdTime );
 
 	// Now attach the message.
-	StatusBar->AttachMessage( hudMessage, id );
+	StatusBar->AttachMessage( hudMessage, id, layer );
 
 	// Log the message if desired.
 	if ( log )
@@ -4987,7 +4987,7 @@ void ServerCommands::PrintHUDMessageFadeOut::Execute()
 		fadeOutTime );
 
 	// Now attach the message.
-	StatusBar->AttachMessage( hudMessage, id );
+	StatusBar->AttachMessage( hudMessage, id, layer );
 
 	// Log the message if desired.
 	if ( log )
@@ -5019,7 +5019,7 @@ void ServerCommands::PrintHUDMessageFadeInOut::Execute()
 		fadeOutTime );
 
 	// Now attach the message.
-	StatusBar->AttachMessage( hudMessage, id );
+	StatusBar->AttachMessage( hudMessage, id, layer );
 
 	// Log the message if desired.
 	if ( log )
@@ -5051,7 +5051,7 @@ void ServerCommands::PrintHUDMessageTypeOnFadeOut::Execute()
 		fadeOutTime );
 
 	// Now attach the message.
-	StatusBar->AttachMessage( hudMessage, id );
+	StatusBar->AttachMessage( hudMessage, id, layer );
 
 	// Log the message if desired.
 	if ( log )

@@ -1905,7 +1905,7 @@ void SERVERCOMMANDS_PrintMOTD( const char *pszString, ULONG ulPlayerExtra, Serve
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_PrintHUDMessage( const char *pszString, float fX, float fY, LONG lHUDWidth, LONG lHUDHeight, LONG lColor, float fHoldTime, const char *pszFont, bool bLog, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_PrintHUDMessage( const char *pszString, float fX, float fY, LONG lHUDWidth, LONG lHUDHeight, LONG lColor, float fHoldTime, const char *pszFont, bool bLog, LONG lID, LONG lLayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	ServerCommands::PrintHUDMessage command;
 	command.SetMessage( pszString );
@@ -1918,12 +1918,13 @@ void SERVERCOMMANDS_PrintHUDMessage( const char *pszString, float fX, float fY, 
 	command.SetFontName( pszFont );
 	command.SetLog( bLog );
 	command.SetId( lID );
+	command.SetLayer( lLayer );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_PrintHUDMessageFadeOut( const char *pszString, float fX, float fY, LONG lHUDWidth, LONG lHUDHeight, LONG lColor, float fHoldTime, float fFadeOutTime, const char *pszFont, bool bLog, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_PrintHUDMessageFadeOut( const char *pszString, float fX, float fY, LONG lHUDWidth, LONG lHUDHeight, LONG lColor, float fHoldTime, float fFadeOutTime, const char *pszFont, bool bLog, LONG lID, LONG lLayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	ServerCommands::PrintHUDMessageFadeOut command;
 	command.SetMessage( pszString );
@@ -1937,12 +1938,13 @@ void SERVERCOMMANDS_PrintHUDMessageFadeOut( const char *pszString, float fX, flo
 	command.SetFontName( pszFont );
 	command.SetLog( bLog );
 	command.SetId( lID );
+	command.SetLayer( lLayer );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_PrintHUDMessageFadeInOut( const char *pszString, float fX, float fY, LONG lHUDWidth, LONG lHUDHeight, LONG lColor, float fHoldTime, float fFadeInTime, float fFadeOutTime, const char *pszFont, bool bLog, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_PrintHUDMessageFadeInOut( const char *pszString, float fX, float fY, LONG lHUDWidth, LONG lHUDHeight, LONG lColor, float fHoldTime, float fFadeInTime, float fFadeOutTime, const char *pszFont, bool bLog, LONG lID, LONG lLayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	ServerCommands::PrintHUDMessageFadeInOut command;
 	command.SetMessage( pszString );
@@ -1957,12 +1959,13 @@ void SERVERCOMMANDS_PrintHUDMessageFadeInOut( const char *pszString, float fX, f
 	command.SetFontName( pszFont );
 	command.SetLog( bLog );
 	command.SetId( lID );
+	command.SetLayer( lLayer );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 
 //*****************************************************************************
 //
-void SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( const char *pszString, float fX, float fY, LONG lHUDWidth, LONG lHUDHeight, LONG lColor, float fTypeTime, float fHoldTime, float fFadeOutTime, const char *pszFont, bool bLog, LONG lID, ULONG ulPlayerExtra, ServerCommandFlags flags )
+void SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( const char *pszString, float fX, float fY, LONG lHUDWidth, LONG lHUDHeight, LONG lColor, float fTypeTime, float fHoldTime, float fFadeOutTime, const char *pszFont, bool bLog, LONG lID, LONG lLayer, ULONG ulPlayerExtra, ServerCommandFlags flags )
 {
 	ServerCommands::PrintHUDMessageTypeOnFadeOut command;
 	command.SetMessage( pszString );
@@ -1977,6 +1980,7 @@ void SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( const char *pszString, float f
 	command.SetFontName( pszFont );
 	command.SetLog( bLog );
 	command.SetId( lID );
+	command.SetLayer( lLayer );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
 

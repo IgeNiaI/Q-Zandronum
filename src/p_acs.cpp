@@ -9902,9 +9902,9 @@ scriptwait:
 						if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 						{
 							if (( pcd == PCD_ENDHUDMESSAGEBOLD ) || ( screen == NULL ))
-								SERVERCOMMANDS_PrintHUDMessage( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id );
+								SERVERCOMMANDS_PrintHUDMessage( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, (type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT );
 							else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
-								SERVERCOMMANDS_PrintHUDMessage( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, screen->player - players, SVCF_ONLYTHISCLIENT );
+								SERVERCOMMANDS_PrintHUDMessage( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, (type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT, screen->player - players, SVCF_ONLYTHISCLIENT );
 						}
 						else
 							msg = new DHUDMessage (activefont, work, x, y, hudwidth, hudheight, color, holdTime);
@@ -9918,9 +9918,9 @@ scriptwait:
 							if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 							{
 								if (( pcd == PCD_ENDHUDMESSAGEBOLD ) || ( screen == NULL ))
-									SERVERCOMMANDS_PrintHUDMessageFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id );
+									SERVERCOMMANDS_PrintHUDMessageFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, (type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT );
 								else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
-									SERVERCOMMANDS_PrintHUDMessageFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, screen->player - players, SVCF_ONLYTHISCLIENT );
+									SERVERCOMMANDS_PrintHUDMessageFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, (type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT, screen->player - players, SVCF_ONLYTHISCLIENT );
 							}
 							else
 								msg = new DHUDMessageFadeOut (activefont, work, x, y, hudwidth, hudheight, color, holdTime, fadeTime);
@@ -9936,9 +9936,9 @@ scriptwait:
 							if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 							{
 								if (( pcd == PCD_ENDHUDMESSAGEBOLD ) || ( screen == NULL ))
-									SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, typeTime, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id );
+									SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, typeTime, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, (type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT );
 								else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
-									SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, typeTime, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, screen->player - players, SVCF_ONLYTHISCLIENT );
+									SERVERCOMMANDS_PrintHUDMessageTypeOnFadeOut( work.GetChars( ), x, y, hudwidth, hudheight, color, typeTime, holdTime, fadeTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, (type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT, screen->player - players, SVCF_ONLYTHISCLIENT );
 							}
 							else
 								msg = new DHUDMessageTypeOnFadeOut (activefont, work, x, y, hudwidth, hudheight, color, typeTime, holdTime, fadeTime);
@@ -9954,9 +9954,9 @@ scriptwait:
 							if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 							{
 								if (( pcd == PCD_ENDHUDMESSAGEBOLD ) || ( screen == NULL ))
-									SERVERCOMMANDS_PrintHUDMessageFadeInOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, inTime, outTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id );
+									SERVERCOMMANDS_PrintHUDMessageFadeInOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, inTime, outTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, (type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT );
 								else if ( screen->player && !( GetNetworkReplicationFlags() & NETREP_SKIPOWNER ) )
-									SERVERCOMMANDS_PrintHUDMessageFadeInOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, inTime, outTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, screen->player - players, SVCF_ONLYTHISCLIENT );
+									SERVERCOMMANDS_PrintHUDMessageFadeInOut( work.GetChars( ), x, y, hudwidth, hudheight, color, holdTime, inTime, outTime, SERVER_GetCurrentFont( ), !!( type & HUDMSG_LOG ), id, (type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT, screen->player - players, SVCF_ONLYTHISCLIENT );
 							}
 							else
 								msg = new DHUDMessageFadeInOut (activefont, work, x, y, hudwidth, hudheight, color, holdTime, inTime, outTime);
@@ -9985,8 +9985,7 @@ scriptwait:
 						{
 							msg->SetRenderStyle(STYLE_Add);
 						}
-						StatusBar->AttachMessage (msg, id ? 0xff000000|id : 0,
-							(type & HUDMSG_LAYER_MASK) >> HUDMSG_LAYER_SHIFT);
+						StatusBar->AttachMessage (msg, id ? 0xff000000|id : 0);
 					}
 					if (type & HUDMSG_LOG)
 					{

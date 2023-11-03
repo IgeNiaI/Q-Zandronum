@@ -935,7 +935,7 @@ void TEAM_DisplayNeedToReturnSkullMessage( player_t *pPlayer )
 	// If necessary, send it to clients.
 	else
 	{
-		SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 1.5f, TEAM_MESSAGE_Y_AXIS, 0, 0, CR_RED, 1.0f, 0.25f, "SmallFont", false, MAKE_ID('C','N','T','R'), ULONG( pPlayer - players ), SVCF_ONLYTHISCLIENT );
+		SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 1.5f, TEAM_MESSAGE_Y_AXIS, 0, 0, CR_RED, 1.0f, 0.25f, "SmallFont", false, MAKE_ID('C','N','T','R'), 0, ULONG( pPlayer - players ), SVCF_ONLYTHISCLIENT );
 	}
 }
 
