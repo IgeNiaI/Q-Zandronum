@@ -1800,6 +1800,7 @@ void G_StartTravel ()
 					players[i].StartingWeaponName = players[i].ReadyWeapon->GetClass()->TypeName;
 
 				pawn->UnlinkFromWorld ();
+				pawn->Sector3D = NULL;
 				P_DelSector_List ();
 				int tid = pawn->tid;	// Save TID
 				pawn->RemoveFromHash ();
@@ -1810,6 +1811,7 @@ void G_StartTravel ()
 				{
 					inv->ChangeStatNum (STAT_TRAVELLING);
 					inv->UnlinkFromWorld ();
+					inv->Sector3D = NULL;
 					P_DelSector_List ();
 				}
 			}
