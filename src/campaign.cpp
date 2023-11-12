@@ -336,7 +336,7 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 		for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
 		{
 			pInfo->BotSpawn[ulIdx].szBotName[0] = 0;
-			pInfo->BotSpawn[ulIdx].BotTeamName = "";
+			pInfo->BotSpawn[ulIdx].ulBotTeam = teams.Size();
 		}
 		for ( ulIdx = 0; ulIdx < MAXCUSTOMCVARS; ulIdx++ )
 		{
@@ -520,7 +520,7 @@ static void campaign_ParseCampaignInfoLump( FScanner &sc )
 				if (ulTeamId < 0 || ulTeamId >= teams.Size())
 					I_Error( "CAMPAIGN_ParseCampaignInfo: Invalid \"botteam\" team index, %d!", static_cast<int> (lBotIndex) );
 
-				pInfo->BotSpawn[lBotIndex].BotTeamName = teams[atoi(szValue)].Name.GetChars();
+				pInfo->BotSpawn[lBotIndex].ulBotTeam = ulTeamId;
 			}
 			else if ( strnicmp( szKey, "bot", strlen( "bot" )) == 0 )
 			{
