@@ -1307,7 +1307,7 @@ void G_DoLoadLevel (int position, bool autosave)
 				// [BB] If this is not a team game, there is no need to check or pass ulBotTeam.
 				if ( !( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ) )
 					BOTSPAWN_AddToTable( pInfo->BotSpawn[i].szBotName, NULL );
-				else if ( pInfo->BotSpawn[i].ulBotTeam >= 0 && TEAM_ShouldUseTeam ( pInfo->BotSpawn[i].ulBotTeam ) )
+				else if ( pInfo->BotSpawn[i].ulBotTeam >= 0 && TEAM_CheckIfValid( pInfo->BotSpawn[i].ulBotTeam ) )
 					BOTSPAWN_AddToTable( pInfo->BotSpawn[i].szBotName, TEAM_GetName( pInfo->BotSpawn[i].ulBotTeam ) );
 			}
 
