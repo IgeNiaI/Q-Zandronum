@@ -1304,11 +1304,11 @@ void G_DoLoadLevel (int position, bool autosave)
 
 			for ( i = 0; i < MAXPLAYERS; i++ )
 			{
-				// [BB] If this is not a team game, there is no need to check or pass BotTeamName.
+				// [BB] If this is not a team game, there is no need to check or pass ulBotTeam.
 				if ( !( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS ) )
 					BOTSPAWN_AddToTable( pInfo->BotSpawn[i].szBotName, NULL );
-				else if ( pInfo->BotSpawn[i].BotTeamName.IsNotEmpty() && TEAM_ShouldUseTeam ( TEAM_GetTeamNumberByName (  pInfo->BotSpawn[i].BotTeamName.GetChars() ) ) )
-					BOTSPAWN_AddToTable( pInfo->BotSpawn[i].szBotName, pInfo->BotSpawn[i].BotTeamName.GetChars() );
+				else if ( pInfo->BotSpawn[i].ulBotTeam >= 0 && TEAM_ShouldUseTeam ( pInfo->BotSpawn[i].ulBotTeam ) )
+					BOTSPAWN_AddToTable( pInfo->BotSpawn[i].szBotName, TEAM_GetName( pInfo->BotSpawn[i].ulBotTeam ) );
 			}
 
 			// Also, clear out existing bots.
