@@ -66,7 +66,7 @@ typedef struct
 	char	szBotName[32];
 
 	// The team this bot's on when he spawns in.
-	FString	BotTeamName;
+	ULONG	ulBotTeam;
 
 } BOTSPAWNINFO_t;
 
