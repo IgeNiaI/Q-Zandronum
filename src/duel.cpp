@@ -301,7 +301,7 @@ void DUEL_DoWinSequence( ULONG ulPlayer )
 	{
 		SERVERCOMMANDS_DoGameModeWinSequence( ulPlayer );
 	}
-	else if ( playeringame[consoleplayer] )
+	else if ( playeringame[consoleplayer] && NETWORK_InClientMode() == false )
 	{
 		if ( ulPlayer == static_cast<ULONG>(consoleplayer) )
 			ANNOUNCER_PlayEntry( cl_announcer, "YouWin" );

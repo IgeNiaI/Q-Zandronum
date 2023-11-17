@@ -454,7 +454,7 @@ void LASTMANSTANDING_DoWinSequence( ULONG ulWinner )
 	{
 		SERVERCOMMANDS_DoGameModeWinSequence( ulWinner );
 	}
-	else if ( playeringame[consoleplayer] )
+	else if ( playeringame[consoleplayer] && NETWORK_InClientMode() == false )
 	{
 		if ( GAMEMODE_GetCurrentFlags() & GMF_PLAYERSONTEAMS )
 		{
