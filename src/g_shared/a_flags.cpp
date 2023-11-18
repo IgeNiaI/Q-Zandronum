@@ -456,30 +456,34 @@ bool AFlag::HandlePickup( AInventory *pItem )
 			else
 				SERVERCOMMANDS_PrintHUDMessageFadeOut( "", 1.5f, TEAM_MESSAGE_Y_AXIS_SUB, 0, 0, CR_UNTRANSLATED, 3.0f, 0.5f, "SmallFont", false, MAKE_ID( 'S','U','B','S' ));
 
-			// Create the "captured" message.
-			sprintf( szString, "\\c%c%s team scores!", V_GetColorChar( TEAM_GetTextColor( Owner->player->ulTeam )), TEAM_GetName( Owner->player->ulTeam ));
-			V_ColorizeString( szString );
+			if ( pointlimit > 0 && TEAM_GetScore( Owner->player->ulTeam ) < (LONG)pointlimit )
+			{
+				// Create the "captured" message.
+				sprintf( szString, "\\c%c%s team scores!", V_GetColorChar( TEAM_GetTextColor( Owner->player->ulTeam )), TEAM_GetName( Owner->player->ulTeam ));
+				V_ColorizeString( szString );
 
-			// Now, print it.
-			if ( NETWORK_GetState( ) != NETSTATE_SERVER )
-			{
-				pMsg = new DHUDMessageFadeOut( BigFont, szString,
-					1.5f,
-					TEAM_MESSAGE_Y_AXIS,
-					0,
-					0,
-					CR_UNTRANSLATED,
-					3.0f,
-					0.5f );
-				StatusBar->AttachMessage( pMsg, MAKE_ID( 'C','N','T','R' ));
-			}
-			// If necessary, send it to clients.
-			else
-			{
-				SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 1.5f, TEAM_MESSAGE_Y_AXIS, 0, 0, CR_UNTRANSLATED, 3.0f, 0.5f, "BigFont", false, MAKE_ID( 'C','N','T','R' ));
+				// Now, print it.
+				if ( NETWORK_GetState( ) != NETSTATE_SERVER )
+				{
+					pMsg = new DHUDMessageFadeOut( BigFont, szString,
+						1.5f,
+						TEAM_MESSAGE_Y_AXIS,
+						0,
+						0,
+						CR_UNTRANSLATED,
+						3.0f,
+						0.5f );
+					StatusBar->AttachMessage( pMsg, MAKE_ID( 'C','N','T','R' ));
+				}
+				// If necessary, send it to clients.
+				else
+				{
+					SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 1.5f, TEAM_MESSAGE_Y_AXIS, 0, 0, CR_UNTRANSLATED, 3.0f, 0.5f, "BigFont", false, MAKE_ID( 'C','N','T','R' ));
+				}
 			}
 
 			// [RC] Create the "scored by" and "assisted by" message.
+			Printf("Scored by\n");
 			sprintf( szString, "\\c%cScored by: %s", V_GetColorChar( TEAM_GetTextColor( Owner->player->ulTeam )), Owner->player->userinfo.GetName() );
 			const bool bAssisted = (TEAM_GetAssistPlayer(Owner->player->ulTeam) != MAXPLAYERS);
 			if ( bAssisted )
