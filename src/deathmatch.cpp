@@ -68,6 +68,7 @@
 #include "v_video.h"
 #include "g_level.h"
 #include "scoreboard.h"
+#include "campaign.h"
 
 //*****************************************************************************
 //	MISC CRAP THAT SHOULDN'T BE HERE BUT HAS TO BE BECAUSE OF SLOPPY CODING
@@ -728,6 +729,12 @@ CUSTOM_CVAR( Bool, teampossession, false, CVAR_SERVERINFO | CVAR_LATCH | CVAR_CA
 //
 CCMD( spectate )
 {
+	if ( CAMPAIGN_InCampaign() && !sv_cheats )
+	{
+		Printf ( "You can't spectate during a campaign!\n" );
+		return;
+	}
+
 	// [BB] When playing a demo enter free spectate mode.
 	if ( CLIENTDEMO_IsPlaying( ) == true )
 	{
