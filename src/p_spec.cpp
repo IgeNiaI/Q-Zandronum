@@ -536,8 +536,7 @@ void P_PlayerInSpecialSector (player_t *player, sector_t * sector)
 	if ( bSectorWasNull )
 	{
 		// Falling, not all the way down yet?
-		if (player->mo->z != sector->floorplane.ZatPoint (player->mo->x, player->mo->y)
-			&& !player->mo->waterlevel)
+		if (player->mo->z != sector->floorplane.ZatPoint(player->mo->x, player->mo->y))
 		{
 			return;
 		}
