@@ -677,6 +677,11 @@ ULONG BOTPATH_TryWalk( AActor *pActor, fixed_t StartX, fixed_t StartY, fixed_t S
 				case dDamage_LavaWimpy:
 				case dScroll_EastLavaDamage:
 				case dDamage_LavaHefty:
+				case sLight_Strobe_Hurt:
+				case sDamage_Hellslime:
+				case Damage_InstantDeath:
+				case sDamage_SuperHellslime:
+				case Scroll_StrifeCurrent:
 
 					ulFlags |= BOTPATH_DAMAGINGSECTOR;
 					break;
