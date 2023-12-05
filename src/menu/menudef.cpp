@@ -68,6 +68,17 @@ FOptionMap OptionValues;
 
 void I_BuildALDeviceList(FOptionValues* opt);
 
+EXTERN_CVAR(Int, menu_skirmishlevel)
+EXTERN_CVAR(Int, menu_skirmishlevel1)
+EXTERN_CVAR(Int, menu_skirmishlevel2)
+EXTERN_CVAR(Int, menu_skirmishlevel3)
+EXTERN_CVAR(Int, menu_skirmishlevel4)
+EXTERN_CVAR(Int, menu_skirmishlevel5)
+EXTERN_CVAR(Int, menu_skirmishlevel6)
+EXTERN_CVAR(Int, menu_skirmishlevel7)
+EXTERN_CVAR(Int, menu_skirmishlevel8)
+EXTERN_CVAR(Int, menu_skirmishlevel9)
+
 static void DeinitMenus()
 {
 	{
@@ -2761,6 +2772,24 @@ static void InitKeySections()
 
 //=============================================================================
 //
+// [geNia] Finds the cvar value for menu_skirmishlevel# cvars, in case current value is not in the array
+//
+//==============================================================================
+
+static int GetSkirmishLevelIndex(TArray<FOptionValues::Pair>* values, int currentValue)
+{
+	if (values->Size() <= 0)
+		return currentValue;
+
+	for (unsigned int i = 0; i < values->Size(); i++)
+		if (currentValue == (*values)[i].Value)
+			return currentValue;
+
+	return (*values)[0].Value;
+}
+
+//=============================================================================
+//
 // [BB/TP] Initializes a list of levels for use in the offline skirmish menu.
 //
 //==============================================================================
@@ -2852,6 +2881,17 @@ static void InitLevelsList()
 
 		delete mdata;
 	}
+
+	menu_skirmishlevel = GetSkirmishLevelIndex(&(*opt[0])->mValues, menu_skirmishlevel);
+	menu_skirmishlevel1 = GetSkirmishLevelIndex(&(*opt[1])->mValues, menu_skirmishlevel1);
+	menu_skirmishlevel2 = GetSkirmishLevelIndex(&(*opt[2])->mValues, menu_skirmishlevel2);
+	menu_skirmishlevel3 = GetSkirmishLevelIndex(&(*opt[3])->mValues, menu_skirmishlevel3);
+	menu_skirmishlevel4 = GetSkirmishLevelIndex(&(*opt[4])->mValues, menu_skirmishlevel4);
+	menu_skirmishlevel5 = GetSkirmishLevelIndex(&(*opt[5])->mValues, menu_skirmishlevel5);
+	menu_skirmishlevel6 = GetSkirmishLevelIndex(&(*opt[6])->mValues, menu_skirmishlevel6);
+	menu_skirmishlevel7 = GetSkirmishLevelIndex(&(*opt[7])->mValues, menu_skirmishlevel7);
+	menu_skirmishlevel8 = GetSkirmishLevelIndex(&(*opt[8])->mValues, menu_skirmishlevel8);
+	menu_skirmishlevel9 = GetSkirmishLevelIndex(&(*opt[9])->mValues, menu_skirmishlevel9);
 }
 
 //=============================================================================
