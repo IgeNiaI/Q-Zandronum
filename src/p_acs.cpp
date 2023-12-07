@@ -7836,7 +7836,10 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			{
 				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 				{
-					static_cast<APlayerPawn *>(&*activator)->SetActionScript(args[1], FBehavior::StaticLookupString(args[2]));
+					if (args[2])
+						static_cast<APlayerPawn *>(&*activator)->SetActionScript(args[1], FBehavior::StaticLookupString(args[2]));
+					else
+						static_cast<APlayerPawn *>(&*activator)->SetActionScript(args[1], nullptr);
 				}
 			}
 			else
@@ -7849,7 +7852,10 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				{
 					if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 					{
-						static_cast<APlayerPawn *>(actor)->SetActionScript(args[1], actionName);
+						if (args[2])
+							static_cast<APlayerPawn *>(actor)->SetActionScript(args[1], actionName);
+						else
+							static_cast<APlayerPawn *>(actor)->SetActionScript(args[1], nullptr);
 					}
 				}
 			}
