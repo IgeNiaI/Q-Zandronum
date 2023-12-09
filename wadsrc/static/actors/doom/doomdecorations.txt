@@ -10,6 +10,7 @@ ACTOR TechLamp 85
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -28,6 +29,7 @@ ACTOR TechLamp2 86
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -46,6 +48,7 @@ ACTOR Column 2028
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -64,6 +67,7 @@ ACTOR TallGreenColumn 30
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -82,6 +86,7 @@ ACTOR ShortGreenColumn 31
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -100,6 +105,7 @@ ACTOR TallRedColumn 32
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -118,6 +124,7 @@ ACTOR ShortRedColumn 33
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -136,6 +143,7 @@ ACTOR SkullColumn 37
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -154,6 +162,7 @@ ACTOR HeartColumn 36
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -172,6 +181,7 @@ ACTOR EvilEye 41
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -190,6 +200,7 @@ ACTOR FloatingSkull 42
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -208,6 +219,7 @@ ACTOR TorchTree 43
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -226,6 +238,7 @@ ACTOR BlueTorch 44
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -244,6 +257,7 @@ ACTOR GreenTorch 45
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -262,6 +276,7 @@ ACTOR RedTorch 46
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -280,6 +295,7 @@ ACTOR ShortBlueTorch 55
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -298,6 +314,7 @@ ACTOR ShortGreenTorch 56
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -316,6 +333,7 @@ ACTOR ShortRedTorch 57
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -334,6 +352,7 @@ ACTOR Stalagtite 47
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -352,6 +371,7 @@ ACTOR TechPillar 48
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -368,6 +388,7 @@ ACTOR Candlestick 34
 	Radius 20
 	Height 14
 	ProjectilePassHeight -16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -386,6 +407,7 @@ ACTOR Candelabra 35
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -404,6 +426,7 @@ ACTOR BloodyTwitch 49
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -425,6 +448,7 @@ ACTOR Meat2 50
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -443,6 +467,7 @@ ACTOR Meat3 51
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -461,6 +486,7 @@ ACTOR Meat4 52
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -479,6 +505,7 @@ ACTOR Meat5 53
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -536,6 +563,7 @@ ACTOR HeadOnAStick 27
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -554,6 +582,7 @@ ACTOR HeadsOnAStick 28
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -572,6 +601,7 @@ ACTOR HeadCandles 29
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -590,6 +620,7 @@ ACTOR DeadStick 25
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -608,6 +639,7 @@ ACTOR LiveStick 26
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -627,6 +659,7 @@ ACTOR BigTree 54
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -646,6 +679,7 @@ ACTOR BurningBarrel 70
 	ProjectilePassHeight -16
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -664,6 +698,7 @@ ACTOR HangNoGuts 73
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -682,6 +717,7 @@ ACTOR HangBNoBrain 74
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -700,6 +736,7 @@ ACTOR HangTLookingDown 75
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -718,6 +755,7 @@ ACTOR HangTLookingUp 77
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -736,6 +774,7 @@ ACTOR HangTSkull 76
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -754,6 +793,7 @@ ACTOR HangTNoBrain 78
 	+SOLID
 	+NOGRAVITY
 	+SPAWNCEILING
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -829,6 +869,7 @@ ACTOR Stalagmite 5050
 	Height 48
 	+SOLID
 	+USESPECIAL
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:

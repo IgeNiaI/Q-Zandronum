@@ -6,6 +6,7 @@ ACTOR Tank1 209
 	Radius 16
 	Height 192
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 31, -1, -1
 	States
 	{
@@ -25,6 +26,7 @@ ACTOR Tank2 210
 	Radius 16
 	Height 192
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 32, -1, -1
 	States
 	{
@@ -44,6 +46,7 @@ ACTOR Tank3 211
 	Radius 16
 	Height 192
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 33, -1, -1
 	States
 	{
@@ -63,6 +66,7 @@ ACTOR Tank4 213
 	Radius 16
 	Height 56
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 34, -1, -1
 	States
 	{
@@ -82,6 +86,7 @@ ACTOR Tank5 214
 	Radius 16
 	Height 56
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 35, -1, -1
 	States
 	{
@@ -101,6 +106,7 @@ ACTOR Tank6 229
 	Radius 16
 	Height 56
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 36, -1, -1
 	States
 	{
@@ -150,6 +156,7 @@ ACTOR WoodenBarrel 82
 	Height 32
 	+SOLID +SHOOTABLE +NOBLOOD
 	+INCOMBAT
+	+FORCEYBILLBOARD
 	ConversationID 203, -1, -1
 	DeathSound "woodenbarrel/death"
 	States
@@ -177,6 +184,7 @@ ACTOR ExplosiveBarrel2 94
 	Height 32
 	ConversationID 204, -1, -1
 	+SOLID +SHOOTABLE +NOBLOOD +OLDRADIUSDMG
+	+FORCEYBILLBOARD
 	DeathSound "world/barrelx"
 	+INCOMBAT
 	States
@@ -205,6 +213,7 @@ ACTOR LightSilverFluorescent 95
 	Height 16
 	+NOBLOCKMAP
 	+FIXMAPTHINGPOS
+	+FORCEYBILLBOARD
 	ConversationID 206, -1, -1
 	States
 	{
@@ -223,6 +232,7 @@ ACTOR LightBrownFluorescent 96
 	Height 16
 	+NOBLOCKMAP
 	+FIXMAPTHINGPOS
+	+FORCEYBILLBOARD
 	ConversationID 207, -1, -1
 	States
 	{
@@ -241,6 +251,7 @@ ACTOR LightGoldFluorescent 97
 	Height 16
 	+NOBLOCKMAP
 	+FIXMAPTHINGPOS
+	+FORCEYBILLBOARD
 	ConversationID 208, -1, -1
 	States
 	{
@@ -258,6 +269,7 @@ ACTOR LightGlobe 2028
 	Radius 16
 	Height 16
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 209, -1, -1
 	States
 	{
@@ -275,6 +287,7 @@ ACTOR PillarTechno 48
 	Radius 20
 	Height 128
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 210, -1, -1
 	States
 	{
@@ -292,6 +305,7 @@ ACTOR PillarAztec 54
 	Radius 16
 	Height 128
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 211, -1, -1
 	States
 	{
@@ -309,6 +323,7 @@ ACTOR PillarAztecDamaged 55
 	Radius 16
 	Height 80
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 212, -1, -1
 	States
 	{
@@ -326,6 +341,7 @@ ACTOR PillarAztecRuined 56
 	Radius 16
 	Height 40
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 213, -1, -1
 	States
 	{
@@ -343,6 +359,7 @@ ACTOR PillarHugeTech 57
 	Radius 24
 	Height 192
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 214, -1, -1
 	States
 	{
@@ -360,6 +377,7 @@ ACTOR PillarAlienPower 227
 	Radius 24
 	Height 192
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 215, -1, -1
 	ActiveSound "ambient/alien2"
 	States
@@ -377,6 +395,7 @@ ACTOR SStalactiteBig 98
 	Game Strife
 	Radius 16
 	Height 54
+	+FORCEYBILLBOARD
 	+SOLID +SPAWNCEILING +NOGRAVITY
 	ConversationID 216, -1, -1
 	States
@@ -394,6 +413,7 @@ ACTOR SStalactiteSmall 161
 	Game Strife
 	Radius 16
 	Height 40
+	+FORCEYBILLBOARD
 	+SOLID +SPAWNCEILING +NOGRAVITY
 	ConversationID 217, -1, -1
 	States
@@ -412,6 +432,7 @@ ACTOR SStalagmiteBig 160
 	Radius 16
 	Height 40
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 218, -1, -1
 	States
 	{
@@ -429,6 +450,7 @@ ACTOR CavePillarTop 159
 	Radius 16
 	Height 128
 	+SOLID +SPAWNCEILING +NOGRAVITY
+	+FORCEYBILLBOARD
 	ConversationID 219, -1, -1
 	States
 	{
@@ -446,6 +468,7 @@ ACTOR CavePillarBottom 162
 	Radius 16
 	Height 128
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 220, -1, -1
 	States
 	{
@@ -463,6 +486,7 @@ ACTOR SStalagmiteSmall 163
 	Radius 16
 	Height 25
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 221, -1, -1
 	States
 	{
@@ -477,6 +501,7 @@ ACTOR SStalagmiteSmall 163
 ACTOR Candle 34
 {
 	Game Strife
+	+FORCEYBILLBOARD
 	ConversationID 222, -1, -1
 	States
 	{
@@ -494,6 +519,7 @@ ACTOR StrifeCandelabra 35
 	Radius 16
 	Height 40
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 223, -1, -1
 	States
 	{
@@ -548,6 +574,7 @@ ACTOR WaterDrip 53
 	Game Strife
 	Height 1
 	+NOBLOCKMAP +SPAWNCEILING +NOGRAVITY
+	+FORCEYBILLBOARD
 	ConversationID 226, -1, -1
 	States
 	{
@@ -564,6 +591,7 @@ ACTOR WaterFountain 112
 {
 	Game Strife
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	ConversationID 227, -1, -1
 	ActiveSound "world/watersplash"
 	States
@@ -583,6 +611,7 @@ ACTOR HeartsInTank 113
 	Radius 16
 	Height 56
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 228, -1, -1
 	States
 	{
@@ -598,6 +627,7 @@ ACTOR TeleportSwirl 23
 {
 	Game Strife
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	RenderStyle Add
 	Alpha 0.25
 	ConversationID 229, -1, -1
@@ -722,6 +752,7 @@ ACTOR StrifeBurningBarrel 70
 	Radius 16
 	Height 48
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 238, -1, -1
 	States
 	{
@@ -739,6 +770,7 @@ ACTOR BurningBowl 105
 	Radius 16
 	Height 16
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 239, -1, -1
 	ActiveSound "world/smallfire"
 	States
@@ -757,6 +789,7 @@ ACTOR BurningBrazier 106
 	Radius 10
 	Height 32
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 240, -1, -1
 	ActiveSound "world/smallfire"
 	States
@@ -776,6 +809,7 @@ ACTOR SmallTorchLit 107
 	Height 16
 	+NOBLOCKMAP
 	+FIXMAPTHINGPOS
+	+FORCEYBILLBOARD
 	ConversationID 241, -1, -1
 
 	// It doesn't have any action functions, so how does it use this sound?
@@ -797,6 +831,7 @@ ACTOR SmallTorchUnlit 108
 	Height 16
 	+NOBLOCKMAP
 	+FIXMAPTHINGPOS
+	+FORCEYBILLBOARD
 	ConversationID 242, -1, -1
 	States
 	{
@@ -814,6 +849,7 @@ ACTOR CeilingChain 109
 	Radius 20
 	Height 93
 	+NOBLOCKMAP +SPAWNCEILING +NOGRAVITY
+	+FORCEYBILLBOARD
 	ConversationID 243, -1, -1
 	States
 	{
@@ -831,6 +867,7 @@ ACTOR CageLight 28
 	Game Strife
 	Height 3
 	+NOBLOCKMAP +SPAWNCEILING +NOGRAVITY
+	+FORCEYBILLBOARD
 	ConversationID 244, -1, -1
 	States
 	{
@@ -848,6 +885,7 @@ ACTOR Statue 110
 	Radius 20
 	Height 64
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 245, -1, -1
 	States
 	{
@@ -865,6 +903,7 @@ ACTOR StatueRuined 44
 	Radius 20
 	Height 56
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 246, -1, -1
 	States
 	{
@@ -882,6 +921,7 @@ ACTOR MediumTorch 111
 	Radius 4
 	Height 72
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 247, -1, -1
 	States
 	{
@@ -900,6 +940,7 @@ ACTOR OutsideLamp 43
 	Radius 3
 	Height 80
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 248, -1, -1
 	States
 	{
@@ -918,6 +959,7 @@ ACTOR PoleLantern 46
 	Radius 3
 	Height 80
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 249, -1, -1
 	States
 	{
@@ -1130,6 +1172,7 @@ ACTOR SurgeryCrab 117
 {
 	Game Strife
 	+SOLID +SPAWNCEILING +NOGRAVITY
+	+FORCEYBILLBOARD
 	Radius 20
 	Height 16
 	ConversationID 263, -1, -1
@@ -1149,6 +1192,7 @@ ACTOR LargeTorch 47
 	Radius 10
 	Height 72
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 264, -1, -1
 	ActiveSound "world/smallfire"
 	States
@@ -1167,6 +1211,7 @@ ACTOR HugeTorch 50
 	Radius 10
 	Height 80
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 265, -1, -1
 	ActiveSound "world/smallfire"
 	States
@@ -1185,6 +1230,7 @@ ACTOR PalmTree 51
 	Radius 15
 	Height 109
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 266, -1, -1
 	States
 	{
@@ -1202,6 +1248,7 @@ ACTOR BigTree2 202
 	Radius 15
 	Height 109
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 267, -1, -1
 	States
 	{
@@ -1219,6 +1266,7 @@ ACTOR PottedTree 203
 	Radius 15
 	Height 64
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 268, -1, -1
 	States
 	{
@@ -1236,6 +1284,7 @@ ACTOR TreeStub 33
 	Radius 15
 	Height 80
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 269, -1, -1
 	States
 	{
@@ -1253,6 +1302,7 @@ ACTOR ShortBush 60
 	Radius 15
 	Height 40
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 270, -1, -1
 	States
 	{
@@ -1270,6 +1320,7 @@ ACTOR TallBush 62
 	Radius 20
 	Height 64
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 271, -1, -1
 	States
 	{
@@ -1287,6 +1338,7 @@ ACTOR ChimneyStack 63
 	Radius 20
 	Height 64	// This height does not fit the sprite
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 272, -1, -1
 	States
 	{
@@ -1304,6 +1356,7 @@ ACTOR BarricadeColumn 69
 	Radius 16
 	Height 128
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 273, -1, -1
 	States
 	{
@@ -1321,6 +1374,7 @@ ACTOR Pot 165
 	Radius 12
 	Height 24
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 274, -1, -1
 	States
 	{
@@ -1338,6 +1392,7 @@ ACTOR Pitcher 188
 	Radius 12
 	Height 32
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 275, -1, -1
 	States
 	{
@@ -1355,6 +1410,7 @@ ACTOR Stool 189
 	Radius 6
 	Height 24
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 276, -1, -1
 	States
 	{
@@ -1370,6 +1426,7 @@ ACTOR MetalPot 190
 {
 	Game Strife
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	ConversationID 277, -1, -1
 	States
 	{
@@ -1385,6 +1442,7 @@ ACTOR Tub 191
 {
 	Game Strife
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	ConversationID 278, -1, -1
 	States
 	{
@@ -1402,6 +1460,7 @@ ACTOR Anvil 194
 	Radius 16
 	Height 32
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 279, -1, -1
 	States
 	{
@@ -1419,6 +1478,7 @@ ACTOR TechLampSilver 196
 	Radius 11
 	Height 64
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 280, -1, -1
 	States
 	{
@@ -1436,6 +1496,7 @@ ACTOR TechLampBrass 197
 	Radius 8
 	Height 64
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 281, -1, -1
 	States
 	{
@@ -1453,6 +1514,7 @@ ACTOR Tray 68
 	Radius 24
 	Height 40
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 282, -1, -1
 	States
 	{
@@ -1487,6 +1549,7 @@ ACTOR SigilBanner 216
 	Radius 24
 	Height 96
 	+NOBLOCKMAP	// I take it this was once solid, yes?
+	+FORCEYBILLBOARD
 	ConversationID 284, -1, -1
 	States
 	{
@@ -1549,6 +1612,7 @@ ACTOR AlienBubbleColumn 221
 	Radius 16
 	Height 128
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 290, -1, -1
 	ActiveSound "ambient/alien5"
 	States
@@ -1567,6 +1631,7 @@ ACTOR AlienFloorBubble 222
 	Radius 16
 	Height 72
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 291, -1, -1
 	ActiveSound "ambient/alien6"
 	States
@@ -1585,6 +1650,7 @@ ACTOR AlienCeilingBubble 223
 	Radius 16
 	Height 72
 	+SOLID +SPAWNCEILING +NOGRAVITY
+	+FORCEYBILLBOARD
 	ConversationID 292, -1, -1
 	ActiveSound "ambient/alien4"
 	States
@@ -1603,6 +1669,7 @@ ACTOR AlienAspClimber 224
 	Radius 16
 	Height 128
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 293, -1, -1
 	ActiveSound "ambient/alien3"
 	States
@@ -1621,6 +1688,7 @@ ACTOR AlienSpiderLight 225
 	Radius 32
 	Height 56
 	+SOLID
+	+FORCEYBILLBOARD
 	ConversationID 294, -1, -1
 	ActiveSound "ambient/alien1"
 	States
@@ -1643,6 +1711,7 @@ ACTOR TargetPractice 208
 	Mass 9999999
 	+SOLID +SHOOTABLE +NOBLOOD
 	+INCOMBAT +NODAMAGE
+	+FORCEYBILLBOARD
 	ConversationID 205, -1, -1
 	PainSound "misc/metalhit"
 	States

@@ -4,6 +4,7 @@ ACTOR ZWingedStatue 5
 	Radius 10
 	Height 62
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -71,6 +72,7 @@ ACTOR ZChandelier 17
 	Height 60
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -86,6 +88,7 @@ ACTOR ZChandelierUnlit 8063
 	Height 60
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -100,6 +103,7 @@ ACTOR ZTreeDead 24
 	Radius 10
 	Height 96
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -114,6 +118,7 @@ ACTOR ZTree 25
 	Radius 15
 	Height 128
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -128,6 +133,7 @@ ACTOR ZTreeSwamp150 26
 	Radius 10
 	Height 150
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -142,6 +148,7 @@ ACTOR ZTreeSwamp120 27
 	Radius 10
 	Height 120
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -156,6 +163,7 @@ ACTOR ZStumpBurned 28
 	Radius 12
 	Height 20
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -170,6 +178,7 @@ ACTOR ZStumpBare 29
 	Radius 12
 	Height 20
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -183,6 +192,7 @@ ACTOR ZStumpSwamp1 37
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -196,6 +206,7 @@ ACTOR ZStumpSwamp2 38
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -209,6 +220,7 @@ ACTOR ZShroomLarge1 39
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -222,6 +234,7 @@ ACTOR ZShroomLarge2 40
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -235,6 +248,7 @@ ACTOR ZShroomLarge3 41
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -248,6 +262,7 @@ ACTOR ZShroomSmall1 42
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -261,6 +276,7 @@ ACTOR ZShroomSmall2 44
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -274,6 +290,7 @@ ACTOR ZShroomSmall3 45
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -287,6 +304,7 @@ ACTOR ZShroomSmall4 46
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -300,6 +318,7 @@ ACTOR ZShroomSmall5 47
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -314,6 +333,7 @@ ACTOR ZStalagmitePillar 48
 	Radius 8
 	Height 138
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -328,6 +348,7 @@ ACTOR ZStalagmiteLarge 49
 	Radius 8
 	Height 48
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -342,6 +363,7 @@ ACTOR ZStalagmiteMedium 50
 	Radius 6
 	Height 40
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -356,6 +378,7 @@ ACTOR ZStalagmiteSmall 51
 	Radius 8
 	Height 36
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -372,6 +395,7 @@ ACTOR ZStalactiteLarge 52
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -388,6 +412,7 @@ ACTOR ZStalactiteMedium 56
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -404,6 +429,7 @@ ACTOR ZStalactiteSmall 57
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -419,6 +445,7 @@ ACTOR ZMossCeiling1 58
 	Height 20
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -434,6 +461,7 @@ ACTOR ZMossCeiling2 59
 	Height 24
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -448,6 +476,7 @@ ACTOR ZSwampVine 60
 	Radius 8
 	Height 52
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -462,6 +491,7 @@ ACTOR ZCorpseKabob 61
 	Radius 10
 	Height 92
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -475,6 +505,7 @@ ACTOR ZCorpseSleeping 62
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -489,6 +520,7 @@ ACTOR ZTombstoneRIP 63
 	Radius 10
 	Height 46
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -503,6 +535,7 @@ ACTOR ZTombstoneShane 64
 	Radius 10
 	Height 46
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -517,6 +550,7 @@ ACTOR ZTombstoneBigCross 65
 	Radius 10
 	Height 46
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -531,6 +565,7 @@ ACTOR ZTombstoneBrianR 66
 	Radius 10
 	Height 52
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -545,6 +580,7 @@ ACTOR ZTombstoneCrossCircle 67
 	Radius 10
 	Height 52
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -559,6 +595,7 @@ ACTOR ZTombstoneSmallCross 68
 	Radius 8
 	Height 46
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -573,6 +610,7 @@ ACTOR ZTombstoneBrianP 69
 	Radius 8
 	Height 46
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -589,6 +627,7 @@ ACTOR ZCorpseHanging 71
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -603,6 +642,7 @@ ACTOR ZStatueGargoyleGreenTall 72
 	Radius 14
 	Height 108
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -617,6 +657,7 @@ ACTOR ZStatueGargoyleBlueTall 73
 	Radius 14
 	Height 108
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -631,6 +672,7 @@ ACTOR ZStatueGargoyleGreenShort 74
 	Radius 14
 	Height 62
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -645,6 +687,7 @@ ACTOR ZStatueGargoyleBlueShort 76
 	Radius 14
 	Height 62
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -659,6 +702,7 @@ ACTOR ZStatueGargoyleStripeTall 8044
 	Radius 14
 	Height 108
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -673,6 +717,7 @@ ACTOR ZStatueGargoyleDarkRedTall 8045
 	Radius 14
 	Height 108
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -687,6 +732,7 @@ ACTOR ZStatueGargoyleRedTall 8046
 	Radius 14
 	Height 108
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -701,6 +747,7 @@ ACTOR ZStatueGargoyleTanTall 8047
 	Radius 14
 	Height 108
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -715,6 +762,7 @@ ACTOR ZStatueGargoyleRustTall 8048
 	Radius 14
 	Height 108
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -729,6 +777,7 @@ ACTOR ZStatueGargoyleDarkRedShort 8049
 	Radius 14
 	Height 62
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -743,6 +792,7 @@ ACTOR ZStatueGargoyleRedShort 8050
 	Radius 14
 	Height 62
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -757,6 +807,7 @@ ACTOR ZStatueGargoyleTanShort 8051
 	Radius 14
 	Height 62
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -771,6 +822,7 @@ ACTOR ZStatueGargoyleRustShort 8052
 	Radius 14
 	Height 62
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -785,6 +837,7 @@ ACTOR ZBannerTattered 77
 	Radius 8
 	Height 120
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -799,6 +852,7 @@ ACTOR ZTreeLarge1 78
 	Radius 15
 	Height 180
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -813,6 +867,7 @@ ACTOR ZTreeLarge2 79
 	Radius 15
 	Height 180
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -827,6 +882,7 @@ ACTOR ZTreeGnarled1 80
 	Radius 22
 	Height 100
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -841,6 +897,7 @@ ACTOR ZTreeGnarled2 87
 	Radius 22
 	Height 100
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -855,6 +912,7 @@ ACTOR ZLog 88
 	Radius 20
 	Height 25
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -871,6 +929,7 @@ ACTOR ZStalactiteIceLarge 89
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -887,6 +946,7 @@ ACTOR ZStalactiteIceMedium 90
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -903,6 +963,7 @@ ACTOR ZStalactiteIceSmall 91
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -919,6 +980,7 @@ ACTOR ZStalactiteIceTiny 92
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -933,6 +995,7 @@ ACTOR ZStalagmiteIceLarge 93
 	Radius 8
 	Height 66
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -947,6 +1010,7 @@ ACTOR ZStalagmiteIceMedium 94
 	Radius 5
 	Height 50
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -961,6 +1025,7 @@ ACTOR ZStalagmiteIceSmall 95
 	Radius 4
 	Height 32
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -975,6 +1040,7 @@ ACTOR ZStalagmiteIceTiny 96
 	Radius 4
 	Height 8
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -989,6 +1055,7 @@ ACTOR ZRockBrown1 97
 	Radius 17
 	Height 72
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1003,6 +1070,7 @@ ACTOR ZRockBrown2 98
 	Radius 15
 	Height 50
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1017,6 +1085,7 @@ ACTOR ZRockBlack 99
 	Radius 20
 	Height 40
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1030,6 +1099,7 @@ ACTOR ZRubble1 100
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1043,6 +1113,7 @@ ACTOR ZRubble2 101
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1056,6 +1127,7 @@ ACTOR ZRubble3 102
 	Game Hexen
 	Radius 20
 	Height 16
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1070,6 +1142,7 @@ ACTOR ZVasePillar 103
 	Radius 12
 	Height 54
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1086,6 +1159,7 @@ ACTOR ZCorpseLynched 108
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1101,6 +1175,7 @@ ACTOR ZCandle 119
 	Height 16
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1115,6 +1190,7 @@ ACTOR ZBarrel 8100
 	Radius 15
 	Height 32
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1131,6 +1207,7 @@ ACTOR ZBucket 8103
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1145,6 +1222,7 @@ ACTOR FireThing 8060
 	Radius 5
 	Height 10
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1167,6 +1245,7 @@ ACTOR BrassTorch 8061
 	Radius 6
 	Height 35
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1181,6 +1260,7 @@ ACTOR ZBlueCandle 8066
 	Radius 20
 	Height 16
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1195,6 +1275,7 @@ ACTOR ZIronMaiden 8067
 	Radius 12
 	Height 60
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1211,6 +1292,7 @@ ACTOR ZChainBit32 8071
 	+SPAWNCEILING
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1227,6 +1309,7 @@ ACTOR ZChainBit64 8072
 	+SPAWNCEILING
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1243,6 +1326,7 @@ ACTOR ZChainEndHeart 8073
 	+SPAWNCEILING
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1259,6 +1343,7 @@ ACTOR ZChainEndHook1 8074
 	+SPAWNCEILING
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1275,6 +1360,7 @@ ACTOR ZChainEndHook2 8075
 	+SPAWNCEILING
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1291,6 +1377,7 @@ ACTOR ZChainEndSpike 8076
 	+SPAWNCEILING
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1307,6 +1394,7 @@ ACTOR ZChainEndSkull 8077
 	+SPAWNCEILING
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -1462,6 +1550,7 @@ ACTOR TeleSmoke 140
 	Height 16
 	+NOGRAVITY
 	+NOBLOCKMAP
+	+FORCEYBILLBOARD
 	RenderStyle Translucent
 	Alpha 0.6
 	States

@@ -63,6 +63,7 @@ ACTOR KeyGizmoBlue 94
 	Radius 16
 	Height 50
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -79,6 +80,7 @@ ACTOR KeyGizmoFloatBlue
 	Height 16
 	+SOLID
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -95,6 +97,7 @@ ACTOR KeyGizmoGreen 95
 	Radius 16
 	Height 50
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -111,6 +114,7 @@ ACTOR KeyGizmoFloatGreen
 	Height 16
 	+SOLID
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -127,6 +131,7 @@ ACTOR KeyGizmoYellow 96
 	Radius 16
 	Height 50
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -143,6 +148,7 @@ ACTOR KeyGizmoFloatYellow
 	Height 16
 	+SOLID
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:

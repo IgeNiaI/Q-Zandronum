@@ -5,6 +5,7 @@ ACTOR SkullHang70 17
 	Height 70
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -20,6 +21,7 @@ ACTOR SkullHang60 24
 	Height 60
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -35,6 +37,7 @@ ACTOR SkullHang45 25
 	Height 45
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -50,6 +53,7 @@ ACTOR SkullHang35 26
 	Height 35
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -65,6 +69,7 @@ ACTOR Chandelier 28
 	Height 60
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -79,6 +84,7 @@ ACTOR SerpentTorch 27
 	Radius 12
 	Height 54
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -93,6 +99,7 @@ ACTOR SmallPillar 29
 	Radius 16
 	Height 34
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -107,6 +114,7 @@ ACTOR StalagmiteSmall 37
 	Radius 8
 	Height 32
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -121,6 +129,7 @@ ACTOR StalagmiteLarge 38
 	Radius 12
 	Height 64
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -137,6 +146,7 @@ ACTOR StalactiteSmall 39
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -153,6 +163,7 @@ ACTOR StalactiteLarge 40
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -167,6 +178,7 @@ ACTOR FireBrazier 76
 	Radius 16
 	Height 44
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -181,6 +193,7 @@ ACTOR Barrel 44
 	Radius 12
 	Height 32
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -195,6 +208,7 @@ ACTOR BrownPillar 47
 	Radius 14
 	Height 128
 	+SOLID
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -210,6 +224,7 @@ ACTOR Moss1 48
 	Height 23
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -225,6 +240,7 @@ ACTOR Moss2 49
 	Height 27
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -240,6 +256,7 @@ ACTOR WallTorch 50
 	Height 16
 	+NOGRAVITY
 	+FIXMAPTHINGPOS
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
@@ -256,6 +273,7 @@ ACTOR HangingCorpse 51
 	+SOLID
 	+SPAWNCEILING
 	+NOGRAVITY
+	+FORCEYBILLBOARD
 	States
 	{
 	Spawn:
