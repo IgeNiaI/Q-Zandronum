@@ -56,6 +56,7 @@ FRenderState gl_RenderState;
 int FStateAttr::ChangeCounter;
 
 CVAR(Bool, gl_direct_state_change, true, 0)
+CVAR(Float, gl_custom_argument, 0.0, 0)
 
 
 //==========================================================================
@@ -252,6 +253,9 @@ bool FRenderState::ApplyShader()
 		if (glset.lightmode == 8)
 		{
 			glUniform3fv(activeShader->dlightcolor_index, 1, mDynLight);
+		}
+		{
+			glVertexAttrib1f(VATTR_CUSTOMARG, gl_custom_argument);
 		}
 
 		return true;

@@ -145,6 +145,7 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 		glBindAttribLocation(hShader, VATTR_GLOWDISTANCE, "glowdistance");
 		glBindAttribLocation(hShader, VATTR_FOGPARAMS, "fogparams");
 		glBindAttribLocation(hShader, VATTR_LIGHTLEVEL, "lightlevel_in"); // Korshun.
+		glBindAttribLocation(hShader, VATTR_CUSTOMARG, "customarg_in"); // geNia
 
 		glLinkProgram(hShader);
 

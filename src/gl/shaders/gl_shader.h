@@ -10,6 +10,7 @@ extern bool gl_shaderactive;
 const int VATTR_GLOWDISTANCE = 15;
 const int VATTR_FOGPARAMS = 14;
 const int VATTR_LIGHTLEVEL = 13; // Korshun.
+const int VATTR_CUSTOMARG = 12; // geNia
 
 //==========================================================================
 //

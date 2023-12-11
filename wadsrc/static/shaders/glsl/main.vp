@@ -13,11 +13,16 @@
 	varying float lightlevel;
 #endif
 
+attribute float customarg_in;
+varying float customarg;
+
 void main()
 {
 	#ifdef SOFTLIGHT
 		lightlevel = lightlevel_in;
 	#endif
+
+	customarg = customarg_in;
 
 	#ifndef NO_SM4
 		// Yes, I know... But using a texture matrix here saves me from the hassle of tracking its state across shaders. ;)
