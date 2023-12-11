@@ -534,6 +534,13 @@ void M_SetMenu(FName menu, int param)
 			M_StartMessage (GStrings("SAVEDEAD"), 1);
 			return;
 		}
+
+		// [geNia] deathmatch -> ( deathmatch || teamgame )
+		if ( deathmatch || teamgame )
+		{
+			M_StartMessage (GStrings("SAVEDM"), 1);
+			return;
+		}
 	}
 
 	// End of special checks

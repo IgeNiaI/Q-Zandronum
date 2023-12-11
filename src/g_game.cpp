@@ -4548,6 +4548,11 @@ void G_SaveGame (const char *filename, const char *description)
 		Printf ("A game save is still pending.\n");
 		return;
 	}
+	if (deathmatch || teamgame)
+	{
+		Printf("You can't save in a PvP gamemode.\n");
+		return;
+	}
 	savegamefile = filename;
 	strncpy (savedescription, description, sizeof(savedescription)-1);
 	savedescription[sizeof(savedescription)-1] = '\0';
