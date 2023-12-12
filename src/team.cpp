@@ -1103,7 +1103,6 @@ void TEAM_DoWinSequence( ULONG ulTeamIdx )
 	DHUDMessageFadeOut	*pMsg;
 
 	// Display "%s WINS!" HUD message.
-	Printf("TEAM_DoWinSequence\n");
 	if ( ulTeamIdx < teams.Size( ) )
 		sprintf( szString, "\\c%c%s WINS!", V_GetColorChar( TEAM_GetTextColor( ulTeamIdx ) ), TEAM_GetName( ulTeamIdx ) );
 	else
