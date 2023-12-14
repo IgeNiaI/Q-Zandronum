@@ -183,23 +183,23 @@ static ALvoid AL_APIENTRY _wrap_ProcessUpdatesSOFT(void)
 //
 //==========================================================================
 
-static void ParseVorbisComments(MemoryReader *mr, unsigned int *start, bool *startass, unsigned int *end, bool *endass)
+static void ParseVorbisComments(FileReader *fr, unsigned int *start, bool *startass, unsigned int *end, bool *endass)
 {
 	BYTE vc_data[4];
 
 	// The VC block starts with a 32LE integer for the vendor string length,
 	// followed by the vendor string
-	if(mr->Read(vc_data, 4) != 4)
+	if(fr->Read(vc_data, 4) != 4)
 		return;
     unsigned int vndr_len = vc_data[0] | (vc_data[1]<<8) | (vc_data[2]<<16) | (vc_data[3]<<24);
 
 	// Skip vendor string
-	if(mr->Seek(vndr_len, SEEK_CUR) == -1)
+	if(fr->Seek(vndr_len, SEEK_CUR) == -1)
 		return;
 
 	// Following the vendor string is a 32LE integer for the number of
 	// comments, followed by each comment.
-	if(mr->Read(vc_data, 4) != 4)
+	if(fr->Read(vc_data, 4) != 4)
 		return;
 	size_t count = vc_data[0] | (vc_data[1]<<8) | (vc_data[2]<<16) | (vc_data[3]<<24);
 
@@ -211,20 +211,20 @@ static void ParseVorbisComments(MemoryReader *mr, unsigned int *start, bool *sta
 	{
 		// Each comment is a 32LE integer for the comment length, followed by
 		// the comment text (not null terminated!)
-		if(mr->Read(vc_data, 4) != 4)
+		if(fr->Read(vc_data, 4) != 4)
 			return;
         unsigned int length = vc_data[0] | (vc_data[1]<<8) | (vc_data[2]<<16) | (vc_data[3]<<24);
 
 		if(length >= 128)
 		{
 			// If the comment is "big", skip it
-			if(mr->Seek(length, SEEK_CUR) == -1)
+			if(fr->Seek(length, SEEK_CUR) == -1)
 				return;
 			continue;
 		}
 
 		char strdat[128];
-		if(mr->Read(strdat, length) != (long)length)
+		if(fr->Read(strdat, length) != (long)length)
 			return;
 		strdat[length] = 0;
 
@@ -273,13 +273,13 @@ static void ParseVorbisComments(MemoryReader *mr, unsigned int *start, bool *sta
 	}
 }
 
-static void FindFlacComments(MemoryReader *mr, unsigned int *loop_start, bool *startass, unsigned int *loop_end, bool *endass)
+static void FindFlacComments(FileReader *fr, unsigned int *loop_start, bool *startass, unsigned int *loop_end, bool *endass)
 {
 	// Already verified the fLaC marker, so we're 4 bytes into the file
 	bool lastblock = false;
 	BYTE header[4];
 
-	while(!lastblock && mr->Read(header, 4) == 4)
+	while(!lastblock && fr->Read(header, 4) == 4)
 	{
 		// The first byte of the block header contains the type and a flag
 		// indicating the last metadata block
@@ -291,22 +291,22 @@ static void FindFlacComments(MemoryReader *mr, unsigned int *loop_start, bool *s
 		// FLAC__METADATA_TYPE_VORBIS_COMMENT is 4
 		if(blocktype == 4)
 		{
-			ParseVorbisComments(mr, loop_start, startass, loop_end, endass);
+			ParseVorbisComments(fr, loop_start, startass, loop_end, endass);
 			return;
 		}
 
-		if(mr->Seek(blocksize, SEEK_CUR) == -1)
+		if(fr->Seek(blocksize, SEEK_CUR) == -1)
 			break;
 	}
 }
 
-static void FindOggComments(MemoryReader *mr, unsigned int *loop_start, bool *startass, unsigned int *loop_end, bool *endass)
+static void FindOggComments(FileReader *fr, unsigned int *loop_start, bool *startass, unsigned int *loop_end, bool *endass)
 {
 	BYTE ogghead[27];
 
 	// We already read and verified the OggS marker, so skip the first 4 bytes
 	// of the Ogg page header.
-	while(mr->Read(ogghead+4, 23) == 23)
+	while(fr->Read(ogghead+4, 23) == 23)
 	{
 		// The 19th byte of the Ogg header is a 32LE integer for the page
 		// number, and the 27th is a uint8 for the number of segments in the
@@ -319,7 +319,7 @@ static void FindOggComments(MemoryReader *mr, unsigned int *loop_start, bool *st
 		// each segment in the page. The page segment data follows contiguously
 		// after.
 		BYTE segsizes[256];
-		if(mr->Read(segsizes, ogg_segments) != ogg_segments)
+		if(fr->Read(segsizes, ogg_segments) != ogg_segments)
 			break;
 
 		// Find the segment with the Vorbis Comment packet (type 3) or Opus tags.
@@ -331,13 +331,13 @@ static void FindOggComments(MemoryReader *mr, unsigned int *loop_start, bool *st
 			if(segsize > 16)
 			{
 				BYTE vorbhead[8];
-				if(mr->Read(vorbhead, 8) != 8)
+				if(fr->Read(vorbhead, 8) != 8)
 					return;
 
 				if(vorbhead[0] == 3 && memcmp(vorbhead + 1, "vorbis", 6) == 0)
 				{
 					// Seek back because the vorbis tag is only 7 bytes long.
-					if(mr->Seek(-1, SEEK_CUR) == -1)
+					if(fr->Seek(-1, SEEK_CUR) == -1)
 						return;
 					segsize++;
 
@@ -364,13 +364,13 @@ static void FindOggComments(MemoryReader *mr, unsigned int *loop_start, bool *st
 					// be broken up with non-Vorbis data in-between. For now,
 					// just handle the common case where it's all in one page.
 					if(i < ogg_segments)
-						ParseVorbisComments(mr, loop_start, startass, loop_end, endass);
+						ParseVorbisComments(fr, loop_start, startass, loop_end, endass);
 					return;
 				}
 
 				segsize -= 8;
 			}
-			if(mr->Seek(segsize, SEEK_CUR) == -1)
+			if(fr->Seek(segsize, SEEK_CUR) == -1)
 				return;
 		}
 
@@ -378,20 +378,20 @@ static void FindOggComments(MemoryReader *mr, unsigned int *loop_start, bool *st
 		if(ogg_pagenum >= 2)
 			break;
 
-		if(mr->Read(ogghead, 4) != 4 || memcmp(ogghead, "OggS", 4) != 0)
+		if(fr->Read(ogghead, 4) != 4 || memcmp(ogghead, "OggS", 4) != 0)
 			break;
 	}
 }
 
-static void FindLoopTags(MemoryReader *mr, unsigned int *start, bool *startass, unsigned int *end, bool *endass)
+static void FindLoopTags(FileReader *fr, unsigned int *start, bool *startass, unsigned int *end, bool *endass)
 {
 	BYTE signature[4];
 
-	mr->Read(signature, 4);
+	fr->Read(signature, 4);
 	if(memcmp(signature, "fLaC", 4) == 0)
-		FindFlacComments(mr, start, startass, end, endass);
+		FindFlacComments(fr, start, startass, end, endass);
 	else if(memcmp(signature, "OggS", 4) == 0)
-		FindOggComments(mr, start, startass, end, endass);
+		FindOggComments(fr, start, startass, end, endass);
 }
 
 static void FindLoopTags(const BYTE *data, size_t size, unsigned int *start, bool *startass, unsigned int *end, bool *endass)
@@ -419,6 +419,8 @@ class OpenALSoundStream : public SoundStream
 
     bool Playing;
     bool Looping;
+    unsigned int Loop_Start;
+    unsigned int Loop_End;
     ALfloat Volume;
 
 
@@ -427,17 +429,64 @@ class OpenALSoundStream : public SoundStream
     static bool DecoderCallback(SoundStream *_sstream, void *ptr, int length, void *user)
     {
         OpenALSoundStream *self = static_cast<OpenALSoundStream*>(_sstream);
-        if(length < 0) return false;
+        char *buff = (char*)ptr;
 
-        size_t got = self->Decoder->read((char*)ptr, length);
-        if(got < (unsigned int)length)
+        size_t currentpos = self->Decoder->getSampleOffset();
+        size_t framestoread = length / self->FrameSize;
+        bool err = false;
+        if (!self->Looping)
         {
-            if(!self->Looping || !self->Decoder->seek(0))
+            size_t maxpos = self->Decoder->getSampleLength();
+            if (currentpos == maxpos)
+            {
+                memset(buff, 0, length);
                 return false;
-            got += self->Decoder->read((char*)ptr+got, length-got);
+            }
+            if (currentpos + framestoread > maxpos)
+            {
+                size_t got = self->Decoder->read(buff, (maxpos - currentpos) * self->FrameSize);
+                memset(buff + got, 0, length - got);
+            }
+            else
+            {
+                size_t got = self->Decoder->read(buff, length);
+                err = (got != length);
+            }
         }
+        else
+        {
+            // This looks a bit more complicated than necessary because libmpg123 will not read the full requested length for the last block in the file.
+            if (currentpos + framestoread > self->Loop_End)
+            {
+                // Loop can be very short, make sure the current position doesn't exceed it
+                if (currentpos < self->Loop_End)
+                {
+                    size_t endblock = (self->Loop_End - currentpos) * self->FrameSize;
+                    size_t endlen = self->Decoder->read(buff, endblock);
 
-        return (got == (unsigned int)length);
+                    // Even if zero bytes was read give it a chance to start from the beginning
+                    buff += endlen;
+                    length -= endlen;
+                }
+
+                self->Decoder->seek(self->Loop_Start, false, true);
+            }
+            while (length > 0)
+            {
+                size_t readlen = self->Decoder->read(buff, length);
+                if (readlen == 0)
+                {
+                    return false;
+                }
+                buff += readlen;
+                length -= readlen;
+                if (length > 0)
+                {
+                    self->Decoder->seek(self->Loop_Start, false, true);
+                }
+            }
+        }
+        return true;
     }
 
 
@@ -581,7 +630,7 @@ public:
 
     bool SetPosition(unsigned int ms_pos)
     {
-        if(!Decoder->seek(ms_pos))
+        if(!Decoder->seek(ms_pos, true, true))
             return false;
 
         if(!Playing)
@@ -790,6 +839,13 @@ public:
         if(Decoder) delete Decoder;
         if(Reader) delete Reader;
         Reader = new FileReader(filename);
+        
+        Loop_Start = 0;
+        Loop_End = ~0u;
+        bool startass = false, endass = false;
+        FindLoopTags(Reader, &Loop_Start, &startass, &Loop_End, &endass);
+        Reader->Seek(0, SEEK_SET);
+
         Decoder = Renderer->CreateDecoder(Reader);
         if(!Decoder) return false;
 
@@ -829,6 +885,12 @@ public:
         Looping = loop;
 
         Data.Resize((SampleRate / 5) * FrameSize);
+        
+	    if (!startass) Loop_Start = Scale(Loop_Start, srate, 1000);
+	    if (!endass && Loop_End != ~0u) Loop_End = Scale(Loop_End, srate, 1000);
+        size_t samples = Decoder->getSampleLength() / FrameSize;
+	    if (Loop_Start > samples) Loop_Start = 0;
+	    if (Loop_End > samples) Loop_End = samples;
 
         return true;
     }
@@ -843,6 +905,13 @@ public:
         if(Decoder) delete Decoder;
         if(Reader) delete Reader;
         Reader = new MemoryReader((const char*)data, datalen);
+
+        Loop_Start = 0;
+        Loop_End = ~0u;
+        bool startass = false, endass = false;
+        FindLoopTags(Reader, &Loop_Start, &startass, &Loop_End, &endass);
+        Reader->Seek(0, SEEK_SET);
+
         Decoder = Renderer->CreateDecoder(Reader);
         if(!Decoder) return false;
 
@@ -882,6 +951,12 @@ public:
         Looping = loop;
 
         Data.Resize((SampleRate / 5) * FrameSize);
+        
+	    if (!startass) Loop_Start = Scale(Loop_Start, srate, 1000);
+	    if (!endass && Loop_End != ~0u) Loop_End = Scale(Loop_End, srate, 1000);
+        size_t samples = Decoder->getSampleLength();
+        if (Loop_Start > samples) Loop_Start = 0;
+        if (Loop_End > samples) Loop_End = samples;
 
         return true;
     }
