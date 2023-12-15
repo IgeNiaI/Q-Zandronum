@@ -2379,7 +2379,7 @@ void APlayerPawn::Die (AActor *source, AActor *inflictor, int dmgflags)
 	if (player != NULL && (dmflags2 & DF2_YES_WEAPONDROP))
 	{ // Voodoo dolls don't drop weapons
 		AWeapon *weap = player->ReadyWeapon;
-		if (weap != NULL)
+		if (weap != NULL && !(weap->ItemFlags & IF_UNDROPPABLE))
 		{
 			AInventory *item;
 
