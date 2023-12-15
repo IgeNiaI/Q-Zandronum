@@ -355,7 +355,7 @@ void gl_PrintStartupLog()
 	Printf ("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
 	Printf ("GL_VERSION: %s\n", glGetString(GL_VERSION));
 	Printf ("GL_SHADING_LANGUAGE_VERSION: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	Printf ("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
+	//Printf ("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 	int v;
 
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &v);
