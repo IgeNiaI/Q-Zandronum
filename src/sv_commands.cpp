@@ -4582,3 +4582,13 @@ void SERVERCOMMANDS_ReportLumps( ULONG ulPlayerExtra, ServerCommandFlags flags )
 	NetCommand command( SVC2_REPORTLUMPS );
 	command.sendCommandToClients( ulPlayerExtra, flags );
 }
+
+//*****************************************************************************
+//
+void SERVERCOMMANDS_UpdatePlayersCount( ULONG ulPlayerExtra, ServerCommandFlags flags )
+{
+	ServerCommands::UpdatePlayersCount command;
+	command.SetCurplayers ( SERVER_CalcNumNonSpectatingPlayers( MAXPLAYERS, false ) );
+	command.SetMaxplayers ( sv_maxplayers );
+	command.sendCommandToClients ( ulPlayerExtra, flags );
+}

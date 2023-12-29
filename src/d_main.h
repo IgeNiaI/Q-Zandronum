@@ -97,6 +97,7 @@ struct FStartupInfo
 	DWORD BkColor;			// Background color for title banner
 	FString Song;
 	int Type;
+	FString DiscordAppId = nullptr;
 	enum
 	{
 		DefaultStartup,

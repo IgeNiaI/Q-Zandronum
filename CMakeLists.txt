@@ -7,6 +7,7 @@ include( FindPackageHandleStandardArgs )
 
 option( NO_FMOD "Disable FMODEx sound support" OFF )
 option( NO_OPENAL "Disable OpenAL sound support" OFF )
+option( NO_DRPC "Disable Discord Rich Presence support" ON )
 
 # Generator expression are available some time in CMake 2.8. Due to
 # cmake_minimum_required, we can assume a minor version of > 7 implies major >= 2
