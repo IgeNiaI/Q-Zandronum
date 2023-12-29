@@ -425,3 +425,9 @@ Command UpdateClientNetID
 	Long netId
 	Bool force
 EndCommand
+
+Command UpdatePlayersCount
+	ExtendedCommand
+	Byte curplayers
+	Byte maxplayers
+EndCommand

@@ -936,7 +936,7 @@ ULONG SERVER_CountPlayers( bool bCountBots )
 
 //*****************************************************************************
 //
-ULONG SERVER_CalcNumNonSpectatingPlayers( ULONG ulExcludePlayer )
+ULONG SERVER_CalcNumNonSpectatingPlayers( ULONG ulExcludePlayer, bool bCountBots )
 {
 	ULONG	ulIdx;
 	ULONG	ulNumPlayers = 0;
@@ -945,6 +945,7 @@ ULONG SERVER_CalcNumNonSpectatingPlayers( ULONG ulExcludePlayer )
 	{
 		if (( playeringame[ulIdx] == false ) ||
 			( PLAYER_IsTrueSpectator( &players[ulIdx] )) ||
+			( players[ulIdx].bIsBot && !bCountBots) ||
 			( ulIdx == ulExcludePlayer ))
 		{
 			continue;
@@ -1612,6 +1613,8 @@ void SERVER_ConnectNewPlayer( BYTESTREAM_s *pByteStream )
 
 	// Tell the client that the snapshot is done.
 	SERVERCOMMANDS_EndSnapshot( g_lCurrentClient );
+
+	SERVERCOMMANDS_UpdatePlayersCount( g_lCurrentClient, SVCF_ONLYTHISCLIENT );
 
 	// [RC] Clients may wish to ignore this new player.
 	SERVERCOMMANDS_PotentiallyIgnorePlayer( g_lCurrentClient );
@@ -2933,6 +2936,7 @@ void SERVER_DisconnectClient( ULONG ulClient, bool bBroadcast, bool bSaveInfo )
 
 	// Inform the other clients that this player has been disconnected.
 	SERVERCOMMANDS_DisconnectPlayer( ulClient );
+	SERVERCOMMANDS_UpdatePlayersCount();
 
 	// Potentially back up the player's score in the game, so that if he rejoins, he hasn't
 	// lost everything.
@@ -3615,8 +3619,10 @@ void SERVER_ForceToSpectate( ULONG ulPlayer, const char *pszReason )
 	PLAYER_SetSpectator( &players[ulPlayer], true, false );
 
 	// Send the message out to all clients.
-	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+	if ( NETWORK_GetState( ) == NETSTATE_SERVER ) {
 		SERVERCOMMANDS_PlayerIsSpectator( ulPlayer );
+		SERVERCOMMANDS_UpdatePlayersCount();
+	}
 }
 
 //*****************************************************************************
@@ -5653,6 +5659,7 @@ static bool server_Spectate( BYTESTREAM_s *pByteStream )
 
 	// Tell the other players to mark this player as a spectator.
 	SERVERCOMMANDS_PlayerIsSpectator( g_lCurrentClient );
+	SERVERCOMMANDS_UpdatePlayersCount();
 
 	// Tell this player everyone's weapon.
 	for ( ulIdx = 0; ulIdx < MAXPLAYERS; ulIdx++ )
@@ -5711,6 +5718,8 @@ static bool server_RequestJoin( BYTESTREAM_s *pByteStream )
 
 	// Everything's okay! Go ahead and join!
 	PLAYER_SpectatorJoinsGame ( &players[g_lCurrentClient] );
+
+	SERVERCOMMANDS_UpdatePlayersCount();
 
 	// [BB/Spleen] Set the client's gametic so that it doesn't think it's lagging.
 	g_aClients[g_lCurrentClient].ulClientGameTic = ulGametic;

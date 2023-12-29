@@ -172,6 +172,8 @@ extern void R_ExecuteSetViewSize ();
 extern void G_NewInit ();
 extern void SetupPlayerClasses ();
 extern void HUD_InitHud();
+void I_UpdateDiscordPresence(bool SendPresence);
+void I_RunDiscordCallbacks();
 const FIWADInfo *D_FindIWAD(TArray<FString> &wadfiles, const char *iwad, const char *basewad);
 
 // PUBLIC FUNCTION PROTOTYPES ----------------------------------------------
@@ -1321,6 +1323,7 @@ void D_DoomLoop ()
 				{
 					lasttic = gametic;
 					I_StartFrame ();
+					I_RunDiscordCallbacks ();
 				}
 
 				// Run at least 1 tick.
@@ -1350,6 +1353,7 @@ void D_DoomLoop ()
 				{
 					lasttic = gametic;
 					I_StartFrame ();
+					I_RunDiscordCallbacks ();
 				}
 				
 				// process one or more tics
@@ -2301,6 +2305,11 @@ static FString ParseGameInfo(TArray<FString> &pwads, const char *fn, const char 
 		{
 			sc.MustGetString();
 			DoomStartupInfo.Song = sc.String;
+		}
+		else if (!nextKey.CompareNoCase("DISCORDAPPID"))
+		{
+			sc.MustGetString();
+			DoomStartupInfo.DiscordAppId = sc.String;
 		}
 		else
 		{
@@ -3296,6 +3305,11 @@ void D_DoomMain (void)
 			}
 		}
 
+		if (NETWORK_GetState() != NETSTATE_SERVER)
+		{
+			I_UpdateDiscordPresence(true);
+		}
+
 		try
 		{
 			D_DoomLoop ();		// never returns
@@ -3333,6 +3347,11 @@ void D_DoomMain (void)
 			PClass::ClearRuntimeData();		// clear all runtime generated class data
 			g_bCalledFromConsoleCommand = false;
 			restart++;
+		}
+
+		if (NETWORK_GetState() != NETSTATE_SERVER)
+		{
+			I_UpdateDiscordPresence(false);
 		}
 	}
 	while (1);

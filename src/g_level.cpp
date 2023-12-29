@@ -112,6 +112,7 @@
 
 void STAT_StartNewGame(const char *lev);
 void STAT_ChangeLevel(const char *newl);
+void I_UpdateDiscordPresence(bool SendPresence);
 
 
 EXTERN_CVAR (Float, sv_gravity)
@@ -1635,6 +1636,10 @@ void G_DoLoadLevel (int position, bool autosave)
 		// Also, update the level for all clients.
 		SERVER_LoadNewLevel( level.mapname );
 
+	}
+	else
+	{
+		I_UpdateDiscordPresence(true);
 	}
 }
 

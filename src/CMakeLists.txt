@@ -191,6 +191,7 @@ else( WIN32 )
 			set( NO_SOUND ON )
 			set( NO_OPENAL ON )
 			set( NO_FMOD ON )
+			set( NO_DRPC ON )
 			add_definitions ( -DSERVER_ONLY=1 )
 			set( ZDOOM_EXE_NAME ${ZDOOM_EXE_NAME}-server )
 		endif( SERVERONLY )
@@ -278,11 +279,28 @@ if( NOT NO_OPENAL )
 		else( OPENAL_LIBRARY )
 			set( NO_OPENAL ON )
 		endif( OPENAL_LIBRARY )
-	endif( OPENAL_INCLUDE_DIR )
-	else( NOT NO_OPENAL )
+	else( OPENAL_INCLUDE_DIR )
 		set( NO_OPENAL ON )
+	endif( OPENAL_INCLUDE_DIR )
 endif( NOT NO_OPENAL )
 endif( NOT NO_SOUND )
+
+if( NOT NO_DRPC )
+	find_package( DRPC )
+	mark_as_advanced(CLEAR DRPC_INCLUDE_DIR)
+	if( DRPC_INCLUDE_DIR )
+		include_directories( ${DRPC_INCLUDE_DIR} )
+		mark_as_advanced(CLEAR DRPC_LIBRARIES)
+		if( DRPC_LIBRARIES )
+			set( ZDOOM_LIBS ${DRPC_LIBRARIES} ${ZDOOM_LIBS} )
+			AUX_SOURCE_DIRECTORY(${DRPC_INCLUDE_DIR} DRPC_SOURCES)
+		else( DRPC_LIBRARIES )
+			set( NO_DRPC ON )
+		endif( DRPC_LIBRARIES )
+	else( DRPC_INCLUDE_DIR )
+		set( NO_DRPC ON )
+	endif( DRPC_INCLUDE_DIR )
+endif( NOT NO_DRPC )
 
 if( X64 )
 	set( NO_ASM ON )
@@ -373,6 +391,10 @@ if( NOT NO_SOUND )
 	find_package( MPG123 )
 	find_package( FluidSynth )
 endif( NOT NO_SOUND )
+
+if( NO_DRPC )
+	add_definitions( -DNO_DRPC=1 )
+endif( NO_DRPC )
 
 # Search for NASM
 
@@ -1107,6 +1129,8 @@ add_executable( zdoom WIN32
 	${SYSTEM_SOURCES}
 	${X86_SOURCES}
 	x86.cpp
+	${DRPC_SOURCES}
+	richpresence.cpp
 	actorptrselect.cpp
 	am_map.cpp
 	announcer.cpp #ST

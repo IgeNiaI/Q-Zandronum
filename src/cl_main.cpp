@@ -127,6 +127,9 @@
 int		D_PlayerClassToInt (const char *classname);
 void	ClientObituary (AActor *self, AActor *inflictor, AActor *attacker, int dmgflags, FName MeansOfDeath);
 void	P_CrouchMove(player_t * player, int direction);
+void	I_UpdateDiscordPresence(bool SendPresence);
+int		client_curplayers = 0;
+int		client_maxplayers = 0;
 extern	bool	SpawningMapThing;
 extern FILE *Logfile;
 void	D_ErrorCleanup ();
@@ -7767,6 +7770,15 @@ void ServerCommands::PushToJoinQueue::Execute()
 void ServerCommands::RemoveFromJoinQueue::Execute()
 {
 	JOINQUEUE_RemovePlayerAtPosition( index );
+}
+
+//*****************************************************************************
+//
+void ServerCommands::UpdatePlayersCount::Execute()
+{
+	client_curplayers = curplayers;
+	client_maxplayers = maxplayers;
+	I_UpdateDiscordPresence(true);
 }
 
 //*****************************************************************************

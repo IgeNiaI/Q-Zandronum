@@ -121,6 +121,8 @@ const char *GetVersionStringRev();
 #define DISCORD_URL "https://discord.com/invite/RN9hhmA"
 #define BUGS_URL	"https://github.com/IgeNiaI/Q-Zandronum/issues"
 
+#define DEFAULT_DISCORD_APP_ID "1190082706965545021"
+
 // [BC] This is what's displayed as the title for server windows.
 #define	SERVERCONSOLE_TITLESTRING	GAMENAME " v" DOTVERSIONSTR " Server"
 
