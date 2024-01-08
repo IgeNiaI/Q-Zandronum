@@ -4526,6 +4526,11 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 		actor->reactiontime = value;
 		break;
 
+	// [Binary] Properly set MeleeRange.
+	case APROP_MeleeRange:
+		actor->meleerange = value;
+		break;
+
 	case APROP_ViewHeight:
 		if (playerActor)
 		{
