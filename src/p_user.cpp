@@ -104,7 +104,7 @@ CUSTOM_CVAR (Float, cl_spectatormove, 1.0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG) {
 EXTERN_CVAR (Bool, cl_run)
 EXTERN_CVAR (Bool, cl_spykiller)
 
-CUSTOM_CVAR (Float, sv_headbob, 0.25f, CVAR_SERVERINFO|CVAR_NOSAVE|CVAR_GAMEMODESETTING)
+CUSTOM_CVAR (Float, sv_headbob, 0.25f, CVAR_SERVERINFO|CVAR_GAMEMODESETTING)
 {
 	// [geNia] Let the clients know about the change.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
