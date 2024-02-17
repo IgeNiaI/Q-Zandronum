@@ -2226,6 +2226,16 @@ fixed_t P_XYMovement (AActor *mo, fixed_t scrollx, fixed_t scrolly)
 					SERVERCOMMANDS_SetThingTics( mo );
 			}
 		}
+		
+		if ( NETWORK_GetState() == NETSTATE_SERVER && mo->player && mo->player->mo == mo )
+		{
+			// The server first moves the player, then calculates his friction, and then sends it to clients
+			// As a result, clients calculate further movement with velocity value lower than what the server had
+			// So save pre-friction velocity and send that instead
+			mo->player->ServerXYZVel[0] = 0;
+			mo->player->ServerXYZVel[1] = 0;
+		}
+
 		return oldfloorz;
 	}
 
@@ -2546,6 +2556,15 @@ explode:
 			}
 		}
 	} while (++step <= steps);
+	
+	if ( NETWORK_GetState() == NETSTATE_SERVER && player && player->mo == mo )
+	{
+		// The server first moves the player, then calculates his friction, and then sends it to clients
+		// As a result, clients calculate further movement with velocity value lower than what the server had
+		// So save pre-friction velocity and send that instead
+		player->ServerXYZVel[0] = mo->velx;
+		player->ServerXYZVel[1] = mo->vely;
+	}
 
 	// Friction
 
@@ -2559,13 +2578,6 @@ explode:
 	if (mo->flags & (MF_MISSILE | MF_SKULLFLY))
 	{ // no friction for missiles
 		return oldfloorz;
-	}
-
-	if ( NETWORK_GetState() == NETSTATE_SERVER && player && player->mo )
-	{
-		player->ServerXYZVel[0] = player->mo->velx;		// The server first moves the player, then calculates his friction, and then sends it to clients
-		player->ServerXYZVel[1] = player->mo->vely;		// As a result, clients calculate further movement with velocity value lower than what the server had
-		player->ServerXYZVel[2] = player->mo->velz;		// So save pre-friction velocity and send that instead
 	}
 
 	// [geNia] Don't calculate friction for other players as it was precalculated by the server
@@ -2761,6 +2773,15 @@ fixed_t P_OldXYMovement( AActor *mo )
 
 	xmove = clamp( mo->velx, -maxmove, maxmove );
 	ymove = clamp( mo->vely, -maxmove, maxmove );
+	
+	if ( NETWORK_GetState() == NETSTATE_SERVER && mo->player && mo->player->mo == mo )
+	{
+		// The server first moves the player, then calculates his friction, and then sends it to clients
+		// As a result, clients calculate further movement with velocity value lower than what the server had
+		// So save pre-friction velocity and send that instead
+		mo->player->ServerXYZVel[0] = mo->velx;
+		mo->player->ServerXYZVel[1] = mo->vely;
+	}
 
 	if (!(mo->velx | mo->vely)) // Any velocity?
 	{
@@ -3029,7 +3050,7 @@ void P_ZMovement (AActor *mo, fixed_t oldfloorz)
 	// [W] Added old ZDoom physics compatibility
 	if (!(zacompatflags & ZACOMPATF_OLD_ZDOOM_ZMOVEMENT))
 		mo->z += mo->velz;
-
+	
 //
 // apply gravity
 //
@@ -4632,6 +4653,15 @@ void AActor::Tick ()
 			}
 
 		}
+
+		if ( NETWORK_GetState() == NETSTATE_SERVER && player && player->mo == this )
+		{
+			// The server first moves the player, then calculates his friction, and then sends it to clients
+			// As a result, clients calculate further movement with velocity value lower than what the server had
+			// So save pre-friction velocity and send that instead
+			player->ServerXYZVel[2] = velz;
+		}
+
 		if (velz || BlockingMobj || z != floorz)
 		{	// Handle Z velocity and gravity
 			if (((flags2 & MF2_PASSMOBJ) || (flags & MF_SPECIAL)) && !(i_compatflags & COMPATF_NO_PASSMOBJ))
