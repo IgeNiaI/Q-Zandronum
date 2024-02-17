@@ -393,8 +393,10 @@ void SERVER_MASTER_SendServerInfo( NETADDRESS_s Address, ULONG ulFlags, ULONG ul
 	if ( ulBits & SQF_MAXCLIENTS )
 		NETWORK_WriteByte( &g_MasterServerBuffer.ByteStream, sv_maxclients );
 
-	if ( ulBits & SQF_MAXPLAYERS )
-		NETWORK_WriteByte( &g_MasterServerBuffer.ByteStream, sv_maxplayers );
+	if (ulBits & SQF_MAXPLAYERS) {
+		int maxplayers = ( GAMEMODE_GetCurrentMode() == GAMEMODE_DUEL && sv_maxplayers > 2 ) ? 2 : sv_maxplayers;
+		NETWORK_WriteByte( &g_MasterServerBuffer.ByteStream, maxplayers );
+	}
 
 	// Send out the PWAD information.
 	if ( ulBits & SQF_PWADS )
