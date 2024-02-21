@@ -1249,6 +1249,14 @@
 #define AMLS_UnexploredSecret	12
 #define AMLS_Portal		13
 
+#define SCORE_FRAGS		0
+#define SCORE_POINTS	1
+#define SCORE_WINS		2
+#define SCORE_DEATHS	3
+#define SCORE_KILLS		4
+#define SCORE_ITEMS		5
+#define SCORE_SECRETS	6
+
 #define GAMEEVENT_PLAYERFRAGS    0
 #define GAMEEVENT_MEDALS         1
 #define GAMEEVENT_CAPTURES       2
