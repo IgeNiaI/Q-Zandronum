@@ -52,13 +52,13 @@ typedef enum {
 struct FLineSpecial
 {
 	const char *name;
-	BYTE number;
+	int number;
 	SBYTE min_args;
 	SBYTE max_args;
 	BYTE map_args;
 };
 
-extern const FLineSpecial *LineSpecialsInfo[256];
+extern const FLineSpecial *LineSpecialsInfo[285];
 
 typedef enum {
 	Init_Gravity = 0,
@@ -203,7 +203,7 @@ typedef int (*lnSpecFunc)(struct line_t	*line,
 						  int			arg4,
 						  int			arg5);
 
-extern lnSpecFunc LineSpecials[256];
+extern lnSpecFunc LineSpecials[285];
 
 extern BYTE NamedACSToNormalACS[7];
 static inline bool P_IsACSSpecial(int specnum)
