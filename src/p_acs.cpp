@@ -12606,12 +12606,33 @@ scriptwait:
 			}
 			break;
 
+			
+		case PCD_LSPEC5EX:
+			P_ExecuteSpecial(NEXTWORD, activationline, activator, backSide, true, false,
+									STACK(5) & specialargmask,
+									STACK(4) & specialargmask,
+									STACK(3) & specialargmask,
+									STACK(2) & specialargmask,
+									STACK(1) & specialargmask);
+			sp -= 5;
+			break;
+
+		case PCD_LSPEC5EXRESULT:
+			STACK(5) = P_ExecuteSpecial(NEXTWORD, activationline, activator, backSide, true, false,
+									STACK(5) & specialargmask,
+									STACK(4) & specialargmask,
+									STACK(3) & specialargmask,
+									STACK(2) & specialargmask,
+									STACK(1) & specialargmask);
+			sp -= 4;
+			break;
 
 		// [CW] Begin team additions.
-		case PCD_GETTEAMPLAYERCOUNT:
+		// [geNia] Commented it out because GZDoom has different commands at this index. Not sure what to do with it now...
+		/*case PCD_GETTEAMPLAYERCOUNT:
 			STACK( 1 ) = TEAM_CountPlayers( STACK( 1 ));
 			sp--;
-			break;
+			break;*/
 		// [CW] End team additions.
  		}
  	}

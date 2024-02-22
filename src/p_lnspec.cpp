@@ -460,6 +460,12 @@ FUNC(LS_Floor_Donut)
 	return EV_DoDonut (GetInstigator(it, isFromAcs), arg0, ln, SPEED(arg1), SPEED(arg2));
 }
 
+FUNC(LS_Floor_Stop)
+// Floor_Stop (tag)
+{
+	return EV_FloorStop (arg0);
+}
+
 FUNC(LS_Generic_Floor)
 // Generic_Floor (tag, speed, height, target, change/model/direct/crush)
 {
@@ -696,6 +702,12 @@ FUNC(LS_Ceiling_LowerToFloor)
 // Ceiling_LowerToFloor (tag, speed)
 {
 	return EV_DoCeiling (GetInstigator(it, isFromAcs), DCeiling::ceilLowerToFloor, ln, arg0, SPEED(arg1), 0, 0, -1, 0, 0, false);
+}
+
+FUNC(LS_Ceiling_Stop)
+// Ceiling_Stop (tag)
+{
+	return EV_CeilingStop (arg0);
 }
 
 FUNC(LS_Generic_Ceiling)
@@ -3630,7 +3642,7 @@ FUNC(LS_Sector_SetPlaneReflection)
 }
 
 
-lnSpecFunc LineSpecials[256] =
+lnSpecFunc LineSpecials[285] =
 {
 	/*   0 */ LS_NOP,
 	/*   1 */ LS_NOP,		// Polyobj_StartLine,
@@ -3887,14 +3899,47 @@ lnSpecFunc LineSpecials[256] =
 	/* 252 */ LS_Ceiling_RaiseToNearest,
 	/* 253 */ LS_Ceiling_LowerToLowest,
 	/* 254 */ LS_Ceiling_LowerToFloor,
-	/* 255 */ LS_Ceiling_CrushRaiseAndStaySilA
+	/* 255 */ LS_Ceiling_CrushRaiseAndStaySilA,
+
+	// These are specialized versions of the Generic_* specials which are defined for EE Extradata.
+	/* 256 */ LS_NOP, // LS_Floor_LowerToHighestEE,
+	/* 257 */ LS_NOP, // LS_Floor_RaiseToLowest,
+	/* 258 */ LS_NOP, // LS_Floor_LowerToLowestCeiling,
+	/* 259 */ LS_NOP, // LS_Floor_RaiseToCeiling,
+	/* 260 */ LS_NOP, // LS_Floor_ToCeilingInstant,
+	/* 261 */ LS_NOP, // LS_Floor_LowerByTexture,
+	/* 262 */ LS_NOP, // LS_Ceiling_RaiseToHighest,
+	/* 263 */ LS_NOP, // LS_Ceiling_ToHighestInstant,
+	/* 264 */ LS_NOP, // LS_Ceiling_LowerToNearest,
+	/* 265 */ LS_NOP, // LS_Ceiling_RaiseToLowest,
+	/* 266 */ LS_NOP, // LS_Ceiling_RaiseToHighestFloor,
+	/* 267 */ LS_NOP, // LS_Ceiling_ToFloorInstant,
+	/* 268 */ LS_NOP, // LS_Ceiling_RaiseByTexture,
+	/* 269 */ LS_NOP, // LS_Ceiling_LowerByTexture,
+	/* 270 */ LS_NOP, // LS_Stairs_BuildDownDoom,
+	/* 271 */ LS_NOP, // LS_Stairs_BuildUpDoomSync,
+	/* 272 */ LS_NOP, // LS_Stairs_BuildDownDoomSync,
+
+	// New additions can go above 255 now.
+	/* 273 */ LS_NOP, // LS_Stairs_BuildUpDoomCrush,
+	/* 274 */ LS_NOP, // LS_Door_AnimatedClose,
+	/* 275 */ LS_Floor_Stop,
+	/* 276 */ LS_Ceiling_Stop,
+	/* 277 */ LS_NOP, // LS_Sector_SetFloorGlow,
+	/* 278 */ LS_NOP, // LS_Sector_SetCeilingGlow,
+	/* 279 */ LS_NOP, // LS_Floor_MoveToValueAndCrush,
+	/* 280 */ LS_NOP, // LS_Ceiling_MoveToValueAndCrush,
+	/* 281 */ LS_NOP, // LS_Line_SetAutomapFlags,
+	/* 282 */ LS_NOP, // LS_Line_SetAutomapStyle,
+	/* 283 */ LS_NOP, // LS_Polyobj_StopSound,
+	/* 284 */ LS_NOP, // LS_Generic_CrusherDist,
 };
 
 #define DEFINE_SPECIAL(name, num, min, max, mmax) {#name, num, min, max, mmax},
 static FLineSpecial LineSpecialNames[] = {
 #include "actionspecials.h"
 };
-const FLineSpecial *LineSpecialsInfo[256];
+const FLineSpecial *LineSpecialsInfo[285];
 
 static int STACK_ARGS lscmp (const void * a, const void * b)
 {
@@ -3967,7 +4012,7 @@ int P_ExecuteSpecial(int			num,
 					 int			arg4,
 					 int			arg5)
 {
-	if (num >= 0 && num <= 255)
+	if (num >= 0 && num <= 284)
 	{
 		return LineSpecials[num](line, activator, backSide, isFromAcs, isFromDecorate, arg1, arg2, arg3, arg4, arg5);
 	}

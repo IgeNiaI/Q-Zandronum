@@ -852,6 +852,7 @@ private:
 	DCeiling ();
 
 	friend bool EV_CeilingCrushStop (player_t *instigator, int tag);
+	friend bool EV_CeilingStop (int tag);
 	friend void P_ActivateInStasisCeiling (player_t *instigator, int tag);
 };
 
@@ -859,6 +860,7 @@ bool EV_DoCeiling (player_t *instigator, DCeiling::ECeiling type, line_t *line,
 	int tag, fixed_t speed, fixed_t speed2, fixed_t height,
 	int crush, int silent, int change, bool hexencrush);
 bool EV_CeilingCrushStop (player_t *instigator, int tag);
+bool EV_CeilingStop (int tag);
 void P_ActivateInStasisCeiling (player_t *instigator, int tag);
 
 
@@ -998,6 +1000,7 @@ protected:
 	friend bool EV_DoFloor (player_t *instigator, DFloor::EFloor floortype, line_t *line, int tag,
 		fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower);
 	friend bool EV_FloorCrushStop (player_t *instigator, int tag);
+	friend bool EV_FloorStop (int tag);
 	friend bool EV_DoDonut (player_t *instigator, int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
 private:
 	DFloor ();
@@ -1011,6 +1014,7 @@ bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag,
 bool EV_DoFloor(player_t *instigator, DFloor::EFloor floortype, line_t *line, int tag,
 	fixed_t speed, fixed_t height, int crush, int change, bool hexencrush, bool hereticlower=false);
 bool EV_FloorCrushStop(player_t *instigator, int tag);
+bool EV_FloorStop(int tag);
 bool EV_DoDonut(player_t *instigator, int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
 
 class DElevator : public DMover

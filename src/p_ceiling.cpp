@@ -800,6 +800,33 @@ bool EV_CeilingCrushStop (player_t *instigator, int tag)
 	return rtn;
 }
 
+//============================================================================
+//
+// EV_CeilingStop
+// Stop a ceiling
+//
+//============================================================================
+
+bool EV_CeilingStop (int tag)
+{
+	DCeiling *scan;
+	TThinkerIterator<DCeiling> iterator;
+	while ( (scan = iterator.Next ()) )
+	{
+		if (scan->m_Tag == tag)
+		{
+			SN_StopSequence (scan->m_Sector, CHAN_CEILING);
+			scan->m_Sector->ceilingdata = NULL;
+			scan->Destroy ();
+
+			// [geNia] If we are the server, update the clients
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				SERVERCOMMANDS_DoCeiling( scan );
+		}
+	}
+	return true;
+}
+
 //*****************************************************************************
 //
 DCeiling *P_GetCeilingBySectorNum( LONG sectorNum )
