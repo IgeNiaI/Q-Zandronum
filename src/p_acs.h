@@ -969,10 +969,13 @@ public:
 		PCD_PRINTSCRIPTCHARARRAY,
 		PCD_PRINTSCRIPTCHRANGE,
 /*380*/	PCD_STRCPYTOSCRIPTCHRANGE,
+		PCD_LSPEC5EX,
+		PCD_LSPEC5EXRESULT,
 
 		// [BB] We need to fix the number for the new commands!
 		// [CW] Begin team additions.
-		PCD_GETTEAMPLAYERCOUNT,
+		// [geNia] Commented it out because GZDoom has different commands at this index. Not sure what to do with it now...
+		//PCD_GETTEAMPLAYERCOUNT,
 		// [CW] End team additions.
 /*381*/	PCODE_COMMAND_COUNT
 	};
