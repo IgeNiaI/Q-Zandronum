@@ -821,6 +821,34 @@ bool EV_FloorCrushStop (player_t *instigator, int tag)
 	return true;
 }
 
+//============================================================================
+//
+// EV_FloorStop
+// Stop a floor
+//
+//============================================================================
+
+bool EV_FloorStop (int tag)
+{
+	int secnum = -1;
+
+	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
+	{
+		sector_t *sec = sectors + secnum;
+
+		if (sec->floordata && sec->floordata->IsKindOf (RUNTIME_CLASS(DFloor)))
+		{
+			SN_StopSequence (sec, CHAN_FLOOR);
+			sec->floordata->Destroy ();
+			sec->floordata = NULL;
+
+			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+				SERVERCOMMANDS_DoFloor( barrier_cast<DFloor *>( sec->floordata ) );
+		}
+	}
+	return true;
+}
+
 //==========================================================================
 //
 // Linear tag search to emulate stair building from Doom.exe

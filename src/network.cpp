@@ -1382,6 +1382,7 @@ bool NETWORK_IsClientPredictedSpecial( const int Special )
 		|| ( Special >= Elevator_RaiseToNearest && Special <= Elevator_LowerToNearest )
 		|| ( Special == Generic_Crusher ) || ( Special == Floor_TransferTrigger ) || ( Special == Floor_TransferNumeric )
 		|| ( Special == Stairs_BuildUpDoom ) || ( Special == Ceiling_LowerAndCrushDist ) || ( Special == Floor_Waggle )
+		|| ( Special >= Floor_LowerToHighestEE && Special <= Generic_CrusherDist )
 
 		// Teleports
 		|| ( Special == Teleport ) || ( Special == Teleport_NoFog ) || ( Special == Teleport_NoStop ) || ( Special == Teleport_Line )
