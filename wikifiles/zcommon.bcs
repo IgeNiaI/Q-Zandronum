@@ -1618,6 +1618,7 @@ special
 -155:UnlaggedRestore(int):void,
 -156:SyncPlayerNetwork(int):void,
 -157:InCampaign():bool,
+-158:TagActive(int):bool,
 
 -159:LumpOpen(str; int, int):int;
 -160:LumpRead(int, int; int):raw;
