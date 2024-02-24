@@ -5729,6 +5729,7 @@ enum EACSFunctions
 	ACSF_UnlaggedRestore,
 	ACSF_SyncPlayerNetwork,
 	ACSF_InCampaign,
+	ACSF_TagActive,
 
 	ACSF_LumpOpen = 159, // [TDRR] Added the LumpOpen to LumpClose set of functions.
 	ACSF_LumpRead,
@@ -8553,6 +8554,17 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 		case ACSF_InCampaign:
 			{
 				return CAMPAIGN_InCampaign();
+			}
+			
+		case ACSF_TagActive:
+			{
+				int secnum = -1;
+
+				while ((secnum = P_FindSectorFromTag (args[0], secnum)) >= 0)
+					if (sectors[secnum].floordata || sectors[secnum].ceilingdata)
+						return true;
+
+				return false;
 			}
 
 		default:
