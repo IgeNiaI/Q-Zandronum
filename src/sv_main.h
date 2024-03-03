@@ -82,6 +82,9 @@
 // Amount of time the client has to report his checksum of the level.
 #define	CLIENT_CHECKSUM_WAITTIME	( 15 * TICRATE )
 
+// [AK] Divide milliseconds by this constant to get the number of ticks.
+#define MS_PER_TIC					( 1000.0 / TICRATE )
+
 // This is for the server console, but since we normally can't include that (win32 stuff),
 // we can just put it here.
 #define	UDF_NAME					0x00000001
