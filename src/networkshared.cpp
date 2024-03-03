@@ -1493,9 +1493,9 @@ void IPList::sort()
 //
 //=============================================================================
 
-void QueryIPQueue::adjustHead( const LONG CurrentTime )
+void QueryIPQueue::adjustHead( const unsigned long currentTime )
 {
-	while (( _iQueueHead != _iQueueTail ) && ( CurrentTime >= _IPQueue[_iQueueHead].lNextAllowedTime ))
+	while (( _iQueueHead != _iQueueTail ) && ( currentTime >= _IPQueue[_iQueueHead].nextAllowedTime ))
 		_iQueueHead = ( _iQueueHead + 1 ) % MAX_QUERY_IPS;
 }
 
@@ -1542,11 +1542,11 @@ bool QueryIPQueue::isFull( ) const
 //
 //=============================================================================
 
-void QueryIPQueue::addAddress( const NETADDRESS_s AddressFrom, const LONG lCurrentTime, std::ostream *errorOut )
+void QueryIPQueue::addAddress( const NETADDRESS_s AddressFrom, const unsigned long currentTime, std::ostream *errorOut )
 {
 	// Add and advance the tail.
 	_IPQueue[_iQueueTail].Address = AddressFrom;
-	_IPQueue[_iQueueTail].lNextAllowedTime = lCurrentTime + _iEntryLength;
+	_IPQueue[_iQueueTail].nextAllowedTime = currentTime + _iEntryLength;
 	_iQueueTail = ( _iQueueTail + 1 ) % MAX_QUERY_IPS;
 
 	// Is the queue full?
