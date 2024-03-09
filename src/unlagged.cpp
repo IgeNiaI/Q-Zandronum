@@ -948,16 +948,23 @@ void UNLAGGED_UnlagActor( AActor *source, AActor *actor, bool isMissile, bool sk
 
 void UNLAGGED_UnlagAndReplicateThing( AActor *source, AActor *thing, bool bSkipOwner, bool bNoUnlagged, bool bUnlagDeath )
 {
-	if ( ( (!source || !source->player) && !UNLAGGED_IsReconciled() ) || ( zadmflags & ZADF_NOUNLAGGED ) )
+	if ( !source || !source->player )
+	{
+		SERVERCOMMANDS_SpawnThing( thing );
+		SERVER_SetThingNonZeroAngleAndVelocity( thing );
+		return;
+	}
+
+	if ( zadmflags & ZADF_NOUNLAGGED )
 		bNoUnlagged = true;
-	
+
 	player_t* player = source->player;
 
 	// We have to spawn the thing on clients every time even if it stops during unlagged
-	// Otherwise some Decorate functions will be replicated before the client spawns the thing and not work as intended
-	SERVERCOMMANDS_SpawnThing(thing, player - players, SVCF_SKIPTHISCLIENT);
+	// Otherwise some Decorate functions will be replicated before the client spawns the thing and will not work as intended
+	SERVERCOMMANDS_SpawnThing( thing, player - players, SVCF_SKIPTHISCLIENT );
 
-	if ( !source || !NETWORK_ClientsideFunctionsAllowed( player ) || bNoUnlagged || UNLAGGED_Gametic( source->player ) >= gametic || player->bIsBot ) {
+	if ( !NETWORK_ClientsideFunctionsAllowed( player ) || bNoUnlagged || UNLAGGED_Gametic( source->player ) >= gametic || player->bIsBot ) {
 		// Unlagged is disabled, so exit here
 		if ( bSkipOwner )
 			SERVERCOMMANDS_UpdateClientNetID( player - players );
@@ -972,18 +979,26 @@ void UNLAGGED_UnlagAndReplicateThing( AActor *source, AActor *thing, bool bSkipO
 
 void UNLAGGED_UnlagAndReplicateMissile( AActor *source, AActor *missile, bool bSkipOwner, bool bNoUnlagged, bool bUnlagDeath )
 {
-	if ( ( (!source || !source->player) && !UNLAGGED_IsReconciled() ) || ( zadmflags & ZADF_NOUNLAGGED ) )
+	if ( !source || !source->player )
+	{
+		SERVERCOMMANDS_SpawnMissile( missile );
+		if ( missile->Translation )
+			SERVERCOMMANDS_SetThingTranslation( missile );
+		return;
+	}
+
+	if ( zadmflags & ZADF_NOUNLAGGED )
 		bNoUnlagged = true;
 
 	player_t* player = source->player;
 
 	// We have to spawn the missile on clients every time even if it stops during unlagged
-	// Otherwise some Decorate functions will be replicated before the client spawns the missile and not work as intended
+	// Otherwise some Decorate functions will be replicated before the client spawns the missile and will not work as intended
 	SERVERCOMMANDS_SpawnMissile( missile, player - players, SVCF_SKIPTHISCLIENT );
 	if ( missile->Translation )
 		SERVERCOMMANDS_SetThingTranslation( missile, player - players, SVCF_SKIPTHISCLIENT );
 
-	if ( !source || !NETWORK_ClientsideFunctionsAllowed( player ) || bNoUnlagged || UNLAGGED_Gametic( source->player ) >= gametic || player->bIsBot ) {
+	if ( !NETWORK_ClientsideFunctionsAllowed( player ) || bNoUnlagged || UNLAGGED_Gametic( source->player ) >= gametic || player->bIsBot ) {
 		// Unlagged is disabled, so exit here
 		if ( bSkipOwner )
 		{
