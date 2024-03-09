@@ -3111,6 +3111,11 @@ void D_DoomMain (void)
 			StartScreen->LoadingStatus ("Checking network game status.", 0x3f);
 			D_CheckNetGame ();
 		}
+		else
+		{
+			// [geNia] Need to call this to repopulate user info with mod cvars after restart
+			D_SetupUserInfo ();
+		}
 
 		// [BC] 
 		Printf( "Initializing network subsystem.\n" );
