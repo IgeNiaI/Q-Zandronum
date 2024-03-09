@@ -716,7 +716,12 @@ void R_InitSkins (void)
 						for (j = 0; j < (int)PlayerClasses.Size(); j++)
 						{
 							PClass *parent = PlayerClasses[j].Type->ParentClass;
-							if (stricmp (parent->Meta.GetMetaString(APMETA_DisplayName), displayname) == 0)
+							if (parent == NULL)
+								continue;
+							const char* displayName = parent->Meta.GetMetaString(APMETA_DisplayName);
+							if (displayName == NULL)
+								continue;
+							if (stricmp (displayName, displayname) == 0)
 							{
 								basetype = transtype = parent;
 								remove = false;
