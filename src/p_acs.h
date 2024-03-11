@@ -288,6 +288,9 @@ enum
 	APROP_ViewHeight			= 39,
 	APROP_AttackZOffset			= 40,
 	APROP_StencilColor			= 41,
+	//APROP_Friction				= 42, // Q-Zandronum has APROP_GroundFriction, but it's kinda different
+	//APROP_DamageMultiplier		= 43,
+	APROP_MaxStepHeight			= 44,
 
 	APROP_CpmAirControl			= 50,
 	APROP_CrouchSlide			= 51,

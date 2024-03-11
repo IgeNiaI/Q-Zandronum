@@ -4334,7 +4334,10 @@ enum
 	APROP_MeleeRange	= 38,
 	APROP_ViewHeight	= 39,
 	APROP_AttackZOffset	= 40,
-	APROP_StencilColor	= 41
+	APROP_StencilColor	= 41,
+	APROP_Friction		= 42,
+	APROP_DamageMultiplier	= 43,
+	APROP_MaxStepHeight	= 44,
 };
 */
 
@@ -4548,6 +4551,10 @@ void P_DoSetActorProperty (AActor *actor, int property, int value)
 
 	case APROP_StencilColor:
 		actor->SetShade(value);
+		break;
+
+	case APROP_MaxStepHeight:
+		actor->MaxStepHeight = value;
 		break;
 
 	case APROP_Translation:
@@ -4938,6 +4945,7 @@ int P_DoGetActorProperty (AActor *actor, int property, const SDWORD *stack, int 
 	case APROP_ReactionTime:			return actor->reactiontime;
 	case APROP_MeleeRange:				return actor->meleerange;
 	case APROP_StencilColor:			return actor->fillcolor;
+	case APROP_MaxStepHeight:			return actor->MaxStepHeight;
 	case APROP_Translation:				return actor->Translation;
 
 	// Strings
