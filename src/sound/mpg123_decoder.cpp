@@ -7,6 +7,7 @@
 #include "mpg123_decoder.h"
 #include "files.h"
 #include "except.h"
+#include <utility>
 
 #ifdef HAVE_MPG123
 static bool inited = false;
