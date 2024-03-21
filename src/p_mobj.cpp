@@ -5424,6 +5424,11 @@ AActor *AActor::StaticSpawn (const PClass *type, fixed_t ix, fixed_t iy, fixed_t
 		if (( oneflagctf ) && ( actor->GetClass( ) == PClass::FindClass( "WhiteFlag" )))
 			TEAM_ExecuteReturnRoutine( teams.Size( ), NULL );
 	}
+	
+	// [geNia] Reset args, or else they will contain random bits from memory
+	actor->special = 0;
+	actor->wasNamedSpecial = false;
+	for(int j=0;j<5;j++) actor->args[j] = 0;
 
 	actor->SetRandomSeed(pr_actorSpawn());
 
