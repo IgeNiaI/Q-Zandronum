@@ -448,6 +448,7 @@ special
     // built-in to ACC. So 162-165 are used up function indices.
     -166:LumpGetInfo(2),
     -167:LumpClose(1),
+    -168:VelIntercept(3,4),
 
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),
