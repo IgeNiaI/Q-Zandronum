@@ -5741,6 +5741,7 @@ enum EACSFunctions
 	ACSF_LumpGetInfo,
 	ACSF_LumpClose,
 	// 166 and 167 are LumpGetInfo and LumpClose
+	ACSF_VelIntercept, // [TDRR] Expose VelIntercept to ACS.
 
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
@@ -6120,7 +6121,65 @@ static void SetActorPitch(AActor *activator, int tid, int angle, bool interpolat
 	}
 }
 
+static FRandom pr_velIntercept ("VelIntercept");
 
+// Extracted from P_Thing_Projectile, and modified to not modify self velocity.
+// Aims mobj at targ based on speed and targ's velocity.
+static void VelIntercept(AActor *targ, AActor *mobj, fixed_t speed)
+{
+	fixed_t spot[3] = { targ->x, targ->y, targ->z+targ->height/2 };
+	FVector3 aim(float(spot[0] - mobj->x), float(spot[1] - mobj->y), float(spot[2] - mobj->z));
+
+	if (speed > 0 && (targ->velx | targ->vely | targ->velz))
+	{
+		double fspeed = speed;
+
+		// Aiming at the target's position some time in the future
+		// is basically just an application of the law of sines:
+		//     a/sin(A) = b/sin(B)
+		// Thanks to all those on the notgod phorum for helping me
+		// with the math. I don't think I would have thought of using
+		// trig alone had I been left to solve it by myself.
+
+		FVector3 tvel(targ->velx, targ->vely, targ->velz);
+		if (!(targ->flags & MF_NOGRAVITY) && targ->waterlevel < 3)
+		{ // If the target is subject to gravity and not underwater,
+		  // assume that it isn't moving vertically. Thanks to gravity,
+		  // even if we did consider the vertical component of the target's
+		  // velocity, we would still miss more often than not.
+			tvel.Z = 0.0;
+			if ((targ->velx | targ->vely) == 0)
+			{
+				goto nolead;
+			}
+		}
+		double dist = aim.Length();
+		double targspeed = tvel.Length();
+		double ydotx = -aim | tvel;
+		double a = acos (clamp (ydotx / targspeed / dist, -1.0, 1.0));
+		double multiplier = double(pr_velIntercept.Random2())*0.1/255+1.1;
+		double sinb = -clamp (targspeed*multiplier * sin(a) / fspeed, -1.0, 1.0);
+
+		// Use the cross product of two of the triangle's sides to get a
+		// rotation vector.
+		FVector3 rv(tvel ^ aim);
+		// The vector must be normalized.
+		rv.MakeUnit();
+		// Now combine the rotation vector with angle b to get a rotation matrix.
+		FMatrix3x3 rm(rv, cos(asin(sinb)), sinb);
+		// And multiply the original aim vector with the matrix to get a
+		// new aim vector that leads the target.
+		FVector3 aimvec = rm * aim;
+		// And make the projectile follow that vector at the desired speed.
+		double aimscale = fspeed / dist;
+		mobj->angle = R_PointToAngle2 (0, 0, fixed_t(aimvec[0] * aimscale), fixed_t (aimvec[1] * aimscale));
+	}
+	else
+	{
+nolead:
+		mobj->angle = R_PointToAngle2 (mobj->x, mobj->y, targ->x, targ->y);
+	}
+}
 
 // [TDRR] Added "locals" parameter to allow accessing local arrays.
 int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, struct ACSLocals *locals)
@@ -8559,6 +8618,26 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 						return true;
 
 				return false;
+			}
+
+		case ACSF_VelIntercept:
+			{
+				AActor *mobj = SingleActorFromTID(args[0], activator);
+				AActor *targ;
+
+				if( !mobj )
+					return 0;
+
+				if( (argCount > 3) && args[3] )
+					targ = COPY_AAPTR(mobj, args[1]);
+				else
+					targ = SingleActorFromTID(args[1], NULL);
+
+				if( !targ )
+					return 0;
+
+				VelIntercept(targ, mobj, args[2]);
+				return 0;
 			}
 
 		default:
