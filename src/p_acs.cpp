@@ -7162,6 +7162,9 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 				caller = temp;
 			}
 
+			if (!caller)
+				return false;
+
 			fixed_t	oldx = caller->x;
 			fixed_t	oldy = caller->y;
 			fixed_t	oldz = caller->z;
