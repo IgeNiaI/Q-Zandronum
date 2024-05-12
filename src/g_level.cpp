@@ -1302,6 +1302,9 @@ void G_DoLoadLevel (int position, bool autosave)
 			Val.Bool = pInfo->bBuckshot;
 			buckshot.ForceSet( Val, CVAR_Bool );
 
+			// [geNia] Set any locked flags to what they're supposed to be in the new game mode.
+			GAMEMODE_ReconfigureGameSettings();
+
 			for ( i = 0; i < MAXPLAYERS; i++ )
 			{
 				// [BB] If this is not a team game, there is no need to check or pass ulBotTeam.
