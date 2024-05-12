@@ -115,7 +115,7 @@ void DEATHMATCH_Tick( void )
 			if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
-				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned( ) )
+				if ( (sv_deathmatchwarmup || CAMPAIGN_InCampaign()) && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned( ) )
 				{			
 					DEATHMATCH_SetState( DEATHMATCHS_WARMUP );
 					break;
@@ -137,7 +137,7 @@ void DEATHMATCH_Tick( void )
 			if ( GAME_CountActivePlayers( ) >= 2 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
-				if ( sv_deathmatchwarmup && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned( ) )
+				if ( (sv_deathmatchwarmup || CAMPAIGN_InCampaign()) && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned( ) )
 				{			
 					DEATHMATCH_SetState( DEATHMATCHS_WARMUP );
 					break;
