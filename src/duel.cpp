@@ -66,6 +66,7 @@
 #include "sv_commands.h"
 #include "team.h"
 #include "v_video.h"
+#include "campaign.h"
 
 //*****************************************************************************
 //	MISC CRAP THAT SHOULDN'T BE HERE BUT HAS TO BE BECAUSE OF SLOPPY CODING
@@ -113,7 +114,7 @@ void DUEL_Tick( void )
 		if ( DUEL_CountActiveDuelers( ) == 2 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 		{
 			// Warmup only in non lobby maps
-			if ( sv_duelwarmup && !GAMEMODE_IsLobbyMap( ) )
+			if ( (sv_duelwarmup || CAMPAIGN_InCampaign()) && !GAMEMODE_IsLobbyMap( ) )
 			{			
 				DUEL_SetState(DS_WARMUP);
 				break;
