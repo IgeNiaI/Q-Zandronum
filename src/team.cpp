@@ -170,7 +170,7 @@ void TEAM_Tick( void )
 		if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 		{
 			// Warmup only in non lobby maps
-			if ( sv_teamgamewarmup && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned() )
+			if ( (sv_teamgamewarmup || CAMPAIGN_InCampaign()) && !GAMEMODE_IsLobbyMap( ) && BOTSPAWN_AllBotsSpawned() )
 			{			
 				TEAM_SetState( TEAMS_WARMUP );
 				break;

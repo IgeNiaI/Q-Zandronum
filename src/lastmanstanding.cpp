@@ -70,6 +70,7 @@
 #include "sv_commands.h"
 #include "team.h"
 #include "v_video.h"
+#include "campaign.h"
 
 //*****************************************************************************
 //	MISC CRAP THAT SHOULDN'T BE HERE BUT HAS TO BE BECAUSE OF SLOPPY CODING
@@ -132,7 +133,7 @@ void LASTMANSTANDING_Tick( void )
 				}
 
 				// Warmup only in non lobby maps
-				if ( sv_lmswarmup && !nowarmup && BOTSPAWN_AllBotsSpawned() )
+				if ( (sv_lmswarmup || CAMPAIGN_InCampaign()) && !nowarmup && BOTSPAWN_AllBotsSpawned() )
 				{			
 					LASTMANSTANDING_SetState(LMSS_WARMUP);
 					break;
@@ -153,7 +154,7 @@ void LASTMANSTANDING_Tick( void )
 			if ( TEAM_TeamsWithPlayersOn( ) > 1 && GAMEMODE_IsNewMapStartMatchDelayOver() )
 			{
 				// Warmup only in non lobby maps
-				if ( sv_lmswarmup && TEAM_GetHighestWinCount() <= 0 && BOTSPAWN_AllBotsSpawned() )
+				if ( (sv_lmswarmup || CAMPAIGN_InCampaign()) && TEAM_GetHighestWinCount() <= 0 && BOTSPAWN_AllBotsSpawned() )
 				{			
 					LASTMANSTANDING_SetState(LMSS_WARMUP);
 					break;
