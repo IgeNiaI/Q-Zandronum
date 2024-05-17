@@ -332,6 +332,7 @@ static	const char	*g_pszEventNames[NUM_BOTEVENTS] =
 //	CONSOLE VARIABLES
 
 CVAR( Bool, bot_allowchat, true, CVAR_ARCHIVE );
+CVAR( Bool, bot_disablenodes, false, CVAR_ARCHIVE|CVAR_GAMEMODESETTING );
 CVAR( Int, botdebug_statechanges, 0, CVAR_ARCHIVE );
 CVAR( Int, botdebug_states, 0, CVAR_ARCHIVE );
 CVAR( Int, botdebug_commands, 0, CVAR_ARCHIVE );
@@ -1587,7 +1588,7 @@ CSkullBot::CSkullBot( char *pszName, char *pszTeamName, ULONG ulPlayerNum )
 	g_bBotIsInitialized[ulPlayerNum] = false;
 
 	// [BB/K6] Make sure that the bot nodes are initialized.
-	if ( ASTAR_IsInitialized( ) == false )
+	if ( ASTAR_IsInitialized( ) == false && !bot_disablenodes )
 		ASTAR_BuildNodes( );
 
 	// First, initialize all variables.
