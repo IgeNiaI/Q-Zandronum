@@ -56,6 +56,7 @@
 #include "a_hexenglobal.h"
 #include "p_local.h"
 #include "cl_demo.h"
+#include "c_console.h"
 #include "gl/gl_functions.h"
 
 #include "gl/system/gl_interface.h"
@@ -1094,7 +1095,8 @@ void FGLRenderer::RenderView (player_t* player)
 			// from scaling with the FOV scale.
 			desiredFOV *= fabsf(cameraPlayer->ReadyWeapon->FOVScale);
 		}
-		if (cameraPlayer->FOV != desiredFOV && !paused && !CLIENTDEMO_IsPaused() && (NETWORK_GetState() == NETSTATE_CLIENT || menuactive != MENU_On))
+		if (cameraPlayer->FOV != desiredFOV && !paused && !CLIENTDEMO_IsPaused()
+			&& (NETWORK_GetState() == NETSTATE_CLIENT || (menuactive == MENU_Off && ConsoleState == c_up)))
 		{
 			float fovChangeSpeed = cl_fovchangespeed;
 			if (fabsf(cameraPlayer->FOV - desiredFOV) < fovChangeSpeed)
