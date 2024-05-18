@@ -380,28 +380,20 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 
 				// [BB] To make Doom and Freedoom network compatible, substitue the Freedoom PLAYPAL/COLORMAP hash
 				// by the corresponding Doom hash.
-				// 4804c7f34b5285c334a7913dd98fae16 Doom PLAYPAL hash
-				// 061a4c0f80aa8029f2c1bc12dc2e261e Doom COLORMAP hash
-				// bb535e66cae508e3833a5d2de974267b Freedoom COLORMAP hash
-				// 4804c7f34b5285c334a7913dd98fae16 Freedoom 0.8-beta1 PLAYPAL hash
-				// 100c2c81afe87bb6dd1dbcadee9a7e58 Freedoom 0.8-beta1 COLORMAP hash
-				// 4c7d4028a88f7929d9c553f65bb265ba Freedoom 0.9 COLORMAP hash
-				// 2e01ae6258f2a0fdad32125537efe1af Freedoom 0.11.3 PLAYPAL hash
-				// 7fe3ed884aff7774526ed9b61018f6fe Freedoom 0.12.1 PLAYPAL hash
-				// 90d4527e1836e373f1cc6f2c9d5e3ba3 Freedoom 0.12.1 COLORMAP hash
 				if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "PLAYPAL" ) == 0 )
-					&& ( ( stricmp ( checksum.GetChars(), "2e01ae6258f2a0fdad32125537efe1af" ) == 0 )
-						|| ( stricmp ( checksum.GetChars(), "4804c7f34b5285c334a7913dd98fae16" ) == 0 )
-						|| ( stricmp ( checksum.GetChars(), "7fe3ed884aff7774526ed9b61018f6fe" ) == 0 )
+					&& ( ( stricmp ( checksum.GetChars(), "2e01ae6258f2a0fdad32125537efe1af" ) == 0 ) // Freedoom 0.11.3 PLAYPAL
+						|| ( stricmp ( checksum.GetChars(), "4804c7f34b5285c334a7913dd98fae16" ) == 0 ) // Freedoom 0.8-beta1 PLAYPAL
+						|| ( stricmp ( checksum.GetChars(), "7fe3ed884aff7774526ed9b61018f6fe" ) == 0 ) // Freedoom 0.12.1 PLAYPAL
+						|| ( stricmp ( checksum.GetChars(), "c7ac0dbbebc979a2c948a4c9afd6b4af" ) == 0 ) // Freedoom 0.13.0 PLAYPAL
 						) )
-					checksum = "4804c7f34b5285c334a7913dd98fae16";
+					checksum = "4804c7f34b5285c334a7913dd98fae16"; // Doom PLAYPAL
 				else if ( ( stricmp ( lumpsToAuthenticate[i].c_str(), "COLORMAP" ) == 0 )
-					&& ( ( stricmp ( checksum.GetChars(), "bb535e66cae508e3833a5d2de974267b" ) == 0 )
-						|| ( stricmp ( checksum.GetChars(), "100c2c81afe87bb6dd1dbcadee9a7e58" ) == 0 )
-						|| ( stricmp ( checksum.GetChars(), "4c7d4028a88f7929d9c553f65bb265ba" ) == 0 )
-						|| ( stricmp ( checksum.GetChars(), "90d4527e1836e373f1cc6f2c9d5e3ba3" ) == 0 )
+					&& ( ( stricmp ( checksum.GetChars(), "bb535e66cae508e3833a5d2de974267b" ) == 0 ) // Freedoom COLORMAP
+						|| ( stricmp ( checksum.GetChars(), "100c2c81afe87bb6dd1dbcadee9a7e58" ) == 0 ) // Freedoom 0.8-beta1 COLORMAP
+						|| ( stricmp ( checksum.GetChars(), "4c7d4028a88f7929d9c553f65bb265ba" ) == 0 ) // Freedoom 0.9 COLORMAP
+						|| ( stricmp ( checksum.GetChars(), "90d4527e1836e373f1cc6f2c9d5e3ba3" ) == 0 ) // Freedoom 0.12.1 COLORMAP
 						) )
-					checksum = "061a4c0f80aa8029f2c1bc12dc2e261e";
+					checksum = "061a4c0f80aa8029f2c1bc12dc2e261e"; // Doom COLORMAP
 
 				longChecksum += checksum;
 				break;
@@ -426,6 +418,9 @@ void NETWORK_Construct( USHORT usPort, bool bAllocateLANSocket )
 							|| ( stricmp ( checksum.GetChars(), "3cd7bad5ca8fd6f0a12607c9c2285c79" ) == 0 ) // Freedm 0.11.3
 							|| ( stricmp ( checksum.GetChars(), "8e65672ca454e8c3f8adc2b1a3fea7d7" ) == 0 ) // Freedm 0.12.1
 							|| ( stricmp ( checksum.GetChars(), "a87016a0610d8023e6fdae013c8c001c" ) == 0 ) // Freedoom2 0.12.1
+							|| ( stricmp ( checksum.GetChars(), "c02794bd83f5eaa66ec82995f333bf51" ) == 0 ) // Freedm 0.13.0
+							|| ( stricmp ( checksum.GetChars(), "015a23f11718e5bc2fab7f3d6f946743" ) == 0 ) // Freedoom 0.13.0
+							|| ( stricmp ( checksum.GetChars(), "0fe45773c7b9eefd1ca07f1f89d34b76" ) == 0 ) // Freedoom2 0.13.0
 							) )
 						continue;
 					// [TP] The wad that had this lump is no longer optional.
