@@ -3814,14 +3814,16 @@ void APlayerPawn::CheckJump(ticcmd_t *cmd)
 	FTraceResults secondJumpTrace;
 	if (player->mo->secondJumpState == SJ_AVAILABLE && !wasJustThrustedZ)
 	{
+		bool user4WasJustPressed = (mvFlags & MV_USER4JUMP) && (cmd->ucmd.buttons & BT_USER4) && !(player->oldbuttons & BT_USER4);
 		if (mvFlags & MV_DOUBLETAPJUMP)
 		{
-			if (DoubleTapCheck(player, cmd) || ((mvFlags & MV_USER4JUMP) && (cmd->ucmd.buttons & BT_USER4)))
+			if (DoubleTapCheck(player, cmd) || user4WasJustPressed)
 				player->mo->secondJumpState = SJ_READY;
 		}
 		else
 		{
-			if ((mvFlags & MV_USER4JUMP) ? (cmd->ucmd.buttons & BT_USER4) : (cmd->ucmd.buttons & BT_JUMP))
+			bool jumpWasJustPressed = !(mvFlags & MV_USER4JUMP) && (cmd->ucmd.buttons & BT_JUMP) && !(player->oldbuttons & BT_JUMP);
+			if (jumpWasJustPressed || user4WasJustPressed)
 				player->mo->secondJumpState = SJ_READY;
 		}
 
