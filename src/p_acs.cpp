@@ -8135,6 +8135,9 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 		case ACSF_CheckSolidFooting:
 			{
 				AActor* actor = SingleActorFromTID(args[0], activator);
+				if (actor == nullptr)
+					return 0; // 0 == CSF_INAIR
+
 				int threshold = argCount > 1 ? args[1] : 0;
 				
 				if (actor->z <= actor->floorz + threshold)
