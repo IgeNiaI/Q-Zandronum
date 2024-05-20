@@ -547,6 +547,8 @@ OptionMenu "CustomizeControls"
 	Control		"Join the game (custom)", "menu_join" // [TP]
 	Control  	"Ready to play",		"ready"
 	Control  	"Open console",			"toggleconsole"
+	Control		"Increase screen size",	"sizeup"
+	Control		"Decrease screen size",	"sizedown"
 	StaticText 	""
 	StaticText 	"Strife Popup Screens", 1
 	Control 	"Mission objectives",	"showpop 1"
