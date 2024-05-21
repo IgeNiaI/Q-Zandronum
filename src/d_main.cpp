@@ -219,7 +219,12 @@ CVAR(Bool, testpolymost, false, 0)
 #endif
 CVAR (Int, wipetype, 1, CVAR_ARCHIVE);
 CVAR (Int, snd_drawoutput, 0, 0);
+#ifdef _WIN32
 CUSTOM_CVAR (String, vid_cursor, "None", CVAR_ARCHIVE | CVAR_NOINITCALL)
+#else
+// [geNia] Some linux distros don't show any cursor but system. Can't fix it proper so instead set system as default there.
+CUSTOM_CVAR (String, vid_cursor, "-", CVAR_ARCHIVE | CVAR_NOINITCALL)
+#endif
 {
 	// [TP/BB] The server does not use cursors.
 	if ( NETWORK_GetState( ) == NETSTATE_SERVER )
