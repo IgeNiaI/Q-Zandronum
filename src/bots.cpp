@@ -332,7 +332,7 @@ static	const char	*g_pszEventNames[NUM_BOTEVENTS] =
 //	CONSOLE VARIABLES
 
 CVAR( Bool, bot_allowchat, true, CVAR_ARCHIVE );
-CVAR( Bool, bot_disablenodes, false, CVAR_ARCHIVE|CVAR_GAMEMODESETTING );
+CVAR( Bool, bot_disablenodes, false, CVAR_GAMEMODESETTING );
 CVAR( Int, botdebug_statechanges, 0, CVAR_ARCHIVE );
 CVAR( Int, botdebug_states, 0, CVAR_ARCHIVE );
 CVAR( Int, botdebug_commands, 0, CVAR_ARCHIVE );
