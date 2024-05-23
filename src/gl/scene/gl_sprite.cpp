@@ -436,7 +436,12 @@ inline void GLSprite::PutSprite(bool translucent)
 {
 	int list;
 	// [BB] Allow models to be drawn in the GLDL_TRANSLUCENT pass.
-	if (translucent || !modelframe)
+	// [geNia] Removed !modelframe check, making most sprites go to GLDL_MASKED instead of GLDL_TRANSLUCENT
+	// This breaks sprite splitting when MASKED actor is partially inside a translucent 3d floor
+	// But fixes sprites splitting when they are outside of translucent 3d floor
+	// True translucent sprites will still be rendered as TRANSLUCENT, and still get split by 3d floors
+	// GZDoom has a proper fix for this, but it's for a code base that is 3 years ahead of what we have here
+	if (translucent)
 	{
 		list = GLDL_TRANSLUCENT;
 	}
