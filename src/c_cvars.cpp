@@ -743,7 +743,7 @@ FBoolCVar::FBoolCVar (const char *name, bool def, DWORD flags, void (*callback)(
 {
 	DefaultValue = def;
 	if (Flags & CVAR_ISDEFAULT)
-		Value = def;
+		Value = PastValue = def;
 }
 
 ECVarType FBoolCVar::GetRealType () const
@@ -789,6 +789,7 @@ void FBoolCVar::SetGenericRepDefault (UCVarValue value, ECVarType type)
 
 void FBoolCVar::DoSet (UCVarValue value, ECVarType type)
 {
+	PastValue = Value; // [geNia]
 	Value = ToBool (value, type);
 }
 
@@ -860,7 +861,7 @@ FFloatCVar::FFloatCVar (const char *name, float def, DWORD flags, void (*callbac
 {
 	DefaultValue = def;
 	if (Flags & CVAR_ISDEFAULT)
-		Value = def;
+		Value = PastValue = def;
 }
 
 ECVarType FFloatCVar::GetRealType () const
@@ -906,6 +907,7 @@ void FFloatCVar::SetGenericRepDefault (UCVarValue value, ECVarType type)
 
 void FFloatCVar::DoSet (UCVarValue value, ECVarType type)
 {
+	PastValue = Value; // [geNia]
 	Value = ToFloat (value, type);
 }
 

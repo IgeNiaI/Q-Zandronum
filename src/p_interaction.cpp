@@ -1113,7 +1113,8 @@ CUSTOM_CVAR (Float, sv_coop_damagefactor, 1.0f, CVAR_SERVERINFO | CVAR_GAMEMODES
 
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
 	{
-		SERVER_Printf( "%s changed to: %.2f\n", self.GetName( ), (float)self );
+		if (self.GetPastValue() != self)
+			SERVER_Printf( "%s changed to: %.2f\n", self.GetName( ), (float)self );
 		SERVERCOMMANDS_SetGameModeLimits( );
 		SERVERCONSOLE_UpdateScoreboard();
 	}

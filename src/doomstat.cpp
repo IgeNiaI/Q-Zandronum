@@ -52,7 +52,8 @@ CUSTOM_CVAR (Bool, alwaysapplydmflags, false, CVAR_SERVERINFO)
 {
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
 	{
-		SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (bool)self );
+		if (self.GetPastValue() != self)
+			SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (bool)self );
 		SERVERCOMMANDS_SetGameModeLimits( );
 	}
 }

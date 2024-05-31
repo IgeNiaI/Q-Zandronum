@@ -819,7 +819,8 @@ CUSTOM_CVAR( Int, winlimit, 0, CVAR_SERVERINFO | CVAR_CAMPAIGNLOCK )
 
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
 	{
-		SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (int)self );
+		if (self.GetPastValue() != self)
+			SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (int)self );
 		SERVERCOMMANDS_SetGameModeLimits( );
 
 		// Update the scoreboard.
@@ -832,7 +833,8 @@ CUSTOM_CVAR( Int, lmsallowedweapons, LMS_AWF_ALLALLOWED, CVAR_SERVERINFO | CVAR_
 {
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
 	{
-		SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (int)self );
+		if (self.GetPastValue() != self)
+			SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (int)self );
 		if ( lastmanstanding || teamlms )
 			SERVERCOMMANDS_SetLMSAllowedWeapons( );
 	}
@@ -853,7 +855,8 @@ CUSTOM_CVAR( Int, lmsspectatorsettings, LMS_SPF_VIEW, CVAR_SERVERINFO | CVAR_GAM
 {
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
 	{
-		SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (int)self );
+		if (self.GetPastValue() != self)
+			SERVER_Printf( "%s changed to: %d\n", self.GetName( ), (int)self );
 		// [BB] Due to ZADF_ALWAYS_APPLY_LMS_SPECTATORSETTINGS, this is necessary in all game modes.
 		SERVERCOMMANDS_SetLMSSpectatorSettings( );
 	}

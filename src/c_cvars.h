@@ -250,11 +250,15 @@ public:
 	inline operator bool () const { return Value; }
 	inline bool operator *() const { return Value; }
 
+	// [geNia]
+	inline bool GetPastValue() const { return PastValue; }
+
 protected:
 	virtual void DoSet (UCVarValue value, ECVarType type);
 
 	bool Value;
 	bool DefaultValue;
+	bool PastValue;
 };
 
 class FIntCVar : public FBaseCVar
@@ -306,11 +310,15 @@ public:
 	inline operator float () const { return Value; }
 	inline float operator *() const { return Value; }
 
+	// [geNia]
+	inline float GetPastValue() const { return PastValue; }
+
 protected:
 	virtual void DoSet (UCVarValue value, ECVarType type);
 
 	float Value;
 	float DefaultValue;
+	float PastValue;
 };
 
 class FStringCVar : public FBaseCVar

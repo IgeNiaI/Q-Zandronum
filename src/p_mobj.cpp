@@ -154,7 +154,8 @@ CUSTOM_CVAR (Float, sv_gravity, 800.f, CVAR_SERVERINFO|CVAR_NOSAVE|CVAR_GAMEMODE
 	// [BB] Notify the clients about the change.
 	if (( NETWORK_GetState( ) == NETSTATE_SERVER ) && ( gamestate != GS_STARTUP ))
 	{
-		SERVER_Printf( "%s changed to: %f\n", self.GetName( ), self.GetGenericRep( CVAR_Float ).Float );
+		if (self.GetPastValue() != self)
+			SERVER_Printf( "%s changed to: %f\n", self.GetName( ), self.GetGenericRep( CVAR_Float ).Float );
 		SERVERCOMMANDS_SetGameModeLimits( );
 	}
 }
