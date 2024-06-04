@@ -1361,6 +1361,15 @@ void DElevator::Tick ()
 				MoveCeiling (m_Speed, oldceiling, -m_Direction);
 			}
 		}
+		else
+		{
+			// [geNia] This prevents actors from getting stuck on the moving elevator.
+			// It only works if the elevator can go m_Speed units down and makes the elevator jitter every tick.
+			// Still, it's better than getting stuck.
+			if (m_OldRes != crushed)
+				MoveFloor (m_Speed, oldfloor + m_Speed, -m_Direction);
+			MoveCeiling (m_Speed, oldceiling - m_Speed, -m_Direction);
+		}
 	}
 
 	if (res == pastdest)	// if destination height acheived
@@ -1373,6 +1382,7 @@ void DElevator::Tick ()
 		if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			SERVERCOMMANDS_DoElevator( this );
 	}
+	m_OldRes = res;
 }
 
 //==========================================================================

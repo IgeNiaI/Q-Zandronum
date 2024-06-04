@@ -1059,6 +1059,7 @@ protected:
 	fixed_t		m_FloorDestDist;
 	fixed_t		m_CeilingDestDist;
 	fixed_t		m_Speed;
+	int			m_OldRes;
 	TObjPtr<DInterpolation> m_Interp_Ceiling;
 	TObjPtr<DInterpolation> m_Interp_Floor;
 
