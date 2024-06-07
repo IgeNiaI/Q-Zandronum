@@ -2942,7 +2942,7 @@ void D_DoomMain (void)
 		GAMEMODE_ParseGamemodeInfo( );
 
 		// [RH] Initialize localizable strings.
-		GStrings.LoadStrings (false);
+		GStrings.LoadStrings (false, !!restart);
 
 		V_InitFontColors ();
 

@@ -110,12 +110,15 @@ void FStringTable::FreeNonDehackedStrings ()
 }
 
 #include "doomerrors.h"
-void FStringTable::LoadStrings (bool enuOnly)
+void FStringTable::LoadStrings (bool enuOnly, bool isRestart)
 {
 	int lastlump, lump;
 	int i, j;
 
-	FreeNonDehackedStrings ();
+	if (isRestart)
+		FreeData();
+	else
+		FreeNonDehackedStrings ();
 
 	lastlump = 0;
 

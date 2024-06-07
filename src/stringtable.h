@@ -54,7 +54,7 @@ public:
 	FStringTable ();
 	~FStringTable ();
 
-	void LoadStrings (bool enuOnly);
+	void LoadStrings (bool enuOnly, bool isRestart);
 
 	const char *operator() (const char *name) const;	// Never returns NULL
 	const char *operator[] (const char *name) const;	// Can return NULL

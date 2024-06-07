@@ -2665,7 +2665,7 @@ static bool LoadDehSupp ()
 		if (EnglishStrings == NULL)
 		{
 			EnglishStrings = new FStringTable;
-			EnglishStrings->LoadStrings (true);
+			EnglishStrings->LoadStrings (true, false);
 		}
 
 		if (UnchangedSpriteNames == NULL)
