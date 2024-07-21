@@ -52,6 +52,7 @@
 //-----------------------------------------------------------------------------
 
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 #include <stdarg.h>
 #include <time.h>
