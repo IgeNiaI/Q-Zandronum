@@ -1827,7 +1827,7 @@ static int ExecuteClientScript ( AActor* activator, int script, int client, int*
 		for ( int i = 0; i < MIN( argCount, 4 ); i++ )
 			scriptArgs[i] = args[i];
 
-		SERVERCOMMANDS_ACSScriptExecute( script, activator, NULL, NULL, NULL, scriptArgs, 4, true, client, SVCF_ONLYTHISCLIENT );
+		SERVERCOMMANDS_ACSScriptExecute( script, activator, 0, 0, false, scriptArgs, 4, true, client, SVCF_ONLYTHISCLIENT );
 		return 1;
 	}
 
@@ -3393,7 +3393,7 @@ void FBehavior::StartTypedScripts (WORD type, AActor *activator, bool always, in
 			if (( NETWORK_GetState( ) == NETSTATE_SERVER ) &&
 				ACS_IsScriptClientSide( ptr ))
 			{
-				SERVERCOMMANDS_ACSScriptExecute( ptr->Number, activator, 0, 0, 0, arg, 3, always );
+				SERVERCOMMANDS_ACSScriptExecute( ptr->Number, activator, 0, 0, false, arg, 3, always );
 				continue;
 			}
 			DLevelScript *runningScript = P_GetScriptGoing (activator, NULL, ptr->Number,
