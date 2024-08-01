@@ -51,6 +51,7 @@
 #include "botcommands.h"
 #include "botpath.h"
 #include "bots.h"
+#include "c_cvars.h"
 #include "c_console.h"
 #include "chat.h"
 #include "cl_main.h"
@@ -75,6 +76,8 @@
 #include "sv_main.h"
 #include "team.h"
 #include "p_acs.h"
+
+EXTERN_CVAR (Bool, bot_disablenodes);
 
 //*****************************************************************************
 //	PROTOTYPES
@@ -1537,6 +1540,14 @@ static void botcmd_Roam( CSkullBot *pBot )
 
 	fSpeed = (float)pBot->m_ScriptData.alStack[pBot->m_ScriptData.lStackPosition - 1];
 	pBot->PopStack( );
+	
+	if ( !ASTAR_IsInitialized() ) {
+		if (gametic % 175 == 0) {
+			Printf("Bot nodes aren't initialized, can't path\n");
+		}
+		g_iReturnInt = PATH_COMPLETE;
+		return;
+	}
 
 	if ( fSpeed < 0 )
 		fSpeed = 0;
