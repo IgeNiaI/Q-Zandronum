@@ -391,18 +391,10 @@ CCMD (centerview)
 
 CCMD(crouch)
 {
-	// [BB] The clients don't use any of the DEM stuff, so emulate the crouch toggling
-	// by executing "+crouch" or "-crouch".
-	if ( NETWORK_GetState( ) == NETSTATE_CLIENT )
-	{
-		if ( Button_Crouch.bDown )
-			C_DoCommand ( "-crouch" );
-		else
-			C_DoCommand ( "+crouch" );
-		return;
-	}
-
-	Net_WriteByte(DEM_CROUCH);
+	if ( Button_Crouch.bDown )
+		C_DoCommand ( "-crouch" );
+	else
+		C_DoCommand ( "+crouch" );
 }
 
 CCMD (land)
