@@ -2612,6 +2612,33 @@ explode:
 			player->mo->vely = FLOAT2FIXED(vel.Y);
 			player->mo->velz = FLOAT2FIXED(vel.Z);
 		}
+		
+		// [geNia] Copied this here for quake movement
+		// killough 11/98:
+		// Stop voodoo dolls that have come to rest, despite any
+		// moving corresponding player:
+		if (mo->velx > -STOPSPEED && mo->velx < STOPSPEED
+			&& mo->vely > -STOPSPEED && mo->vely < STOPSPEED
+			&& (!player || (player->mo != mo)
+				|| !(player->cmd.ucmd.forwardmove | player->cmd.ucmd.sidemove)))
+		{
+			// [geNia] Copied this here for quake movement
+			// if in a walking frame, stop moving
+			// killough 10/98:
+			// Don't affect main player when voodoo dolls stop:
+			if ((player && player->mo == mo) && ( CLIENT_PREDICT_IsPredicting( ) == false ))// && !(player->cheats & CF_PREDICTING))
+			{
+				// [geNia] Copied this here for quake movement
+				// [BC] In client mode, we don't know if other players have any forwardmove or
+				// sidemove values, so the server will tell us when to put other players in
+				// idle mode.
+				if (( NETWORK_InClientMode() == false ) ||
+					(( player - players ) == consoleplayer ))
+				{
+					player->mo->PlayIdle ();
+				}
+			}
+		}
 
 		return oldfloorz;
 	}
