@@ -36,7 +36,7 @@ Command WeaponRailgun
 	Long color1
 	Long color2
 	Float maxdiff
-	ShortByte<7> flags
+	Byte flags
 	Bool extended
 	If (extended)
 		Long angle

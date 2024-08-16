@@ -947,6 +947,9 @@ void P_DrawRailTrail (AActor *source, const FVector3 &start, const FVector3 &end
 
 		FVector3 trail_step = (step / 3) * sparsity;
 		int trail_steps = (int)((steps * 3) / sparsity);
+		if (flags & RAF_EXTRATRAIL) {
+			trail_steps++;
+		}
 		FVector3 diff(0, 0, 0);
 
 		pos = start;
