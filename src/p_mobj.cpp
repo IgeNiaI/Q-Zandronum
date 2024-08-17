@@ -2599,12 +2599,20 @@ explode:
 			player->mo->QFriction(vel, maxGroundSpeed, player->mo->WallClimbFriction);
 		else if (player->onground && player->mo->velz <= 0)
 		{
-			float floorFriction = 1.0f * P_GetMoveFactor(player->mo, 0) / 2048; // 2048 is default floor move factor
+			// [geNia] Doom and Quake movement formulas are drastically different.
+			// Quake floor friction is much higher by default, and as such custom floor friction affects it way less.
+			// As a dirty fix, pow the friction value by 16.
+			// This produces decent results on standard Heretic and Hexen ice floors.
+			float floorFriction = 59392.0f / P_GetFriction(mo, NULL); // 59392 is default floor friction
+			floorFriction = pow(floorFriction, 16.f);
 			if (player->mo->isCrouchSliding)
 				player->mo->QFriction(vel, 0.f, player->mo->CrouchSlideFriction * floorFriction);
 			else
 				player->mo->QFriction(vel, maxGroundSpeed, player->mo->GroundFriction * floorFriction);
 		}
+
+		player->velx = FixedMul(player->velx, FLOAT2FIXED(vel.X));
+		player->vely = FixedMul(player->vely, FLOAT2FIXED(vel.Y));
 
 		if ( applyFriction )
 		{
