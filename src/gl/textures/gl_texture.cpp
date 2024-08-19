@@ -59,7 +59,7 @@
 //
 //==========================================================================
 // [BB] Changed default
-CUSTOM_CVAR(Float,gl_texture_filter_anisotropic,1.0f,CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
+CUSTOM_CVAR(Float,gl_texture_filter_anisotropic,16.0f,CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
 {
 	if (GLRenderer != NULL) GLRenderer->FlushTextures();
 }
@@ -70,7 +70,7 @@ CCMD(gl_flush)
 }
 
 // [BB] Changed default
-CUSTOM_CVAR(Int, gl_texture_filter, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
+CUSTOM_CVAR(Int, gl_texture_filter, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
 {
 	if (self < 0 || self > 5) self=4;
 	if (GLRenderer != NULL) GLRenderer->FlushTextures();
@@ -775,6 +775,24 @@ void gl_ParseBrightmap(FScanner &sc, int deflump)
 		tex->gl_info.Brightmap = bmtex;
 	}	
 	tex->gl_info.bBrightmapDisablesFullbright = disable_fullbright;
+}
+
+//==========================================================================
+//
+// Parses a nofilter definition
+//
+//==========================================================================
+
+void gl_ParseNoFilter(FScanner &sc)
+{
+	sc.MustGetString();
+	FTextureID no = TexMan.CheckForTexture(sc.String, FTexture::TEX_Any);
+	FTexture *tex = TexMan[no];
+
+	if (!tex)
+		return;
+
+	tex->gl_info.bNoFilter = true;
 }
 
 //==========================================================================
