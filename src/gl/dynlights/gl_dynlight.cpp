@@ -68,6 +68,7 @@ EXTERN_CVAR (Float, gl_lights_size);
 int ScriptDepth;
 void gl_InitGlow(FScanner &sc);
 void gl_ParseBrightmap(FScanner &sc, int);
+void gl_ParseNoFilter(FScanner& sc);
 void gl_DestroyUserShaders();
 void gl_ParseHardwareShader(FScanner &sc, int deflump);
 void gl_ParseSkybox(FScanner &sc);
@@ -858,6 +859,7 @@ static const char *CoreKeywords[]=
    "skybox",
    "glow",
    "brightmap",
+   "nofilter",
    "disable_fullbright",
    "hardwareshader",
    "detail",
@@ -880,6 +882,7 @@ enum
    TAG_SKYBOX,
    TAG_GLOW,
    TAG_BRIGHTMAP,
+   TAG_NOFILTER,
    TAG_DISABLE_FB,
    TAG_HARDWARESHADER,
    TAG_DETAIL,
@@ -1285,6 +1288,9 @@ void gl_DoParseDefs(FScanner &sc, int workingLump)
 			break;
 		case TAG_BRIGHTMAP:
 			gl_ParseBrightmap(sc, workingLump);
+			break;
+		case TAG_NOFILTER:
+			gl_ParseNoFilter(sc);
 			break;
 		case TAG_HARDWARESHADER:
 			gl_ParseHardwareShader(sc, workingLump);

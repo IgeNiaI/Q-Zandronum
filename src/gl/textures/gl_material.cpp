@@ -361,7 +361,7 @@ FHardwareTexture *FGLTexture::CreateTexture(int clampmode)
 	if (tex->UseType==FTexture::TEX_Null) return NULL;		// Cannot register a NULL texture
 	if (!gltexture[clampmode]) 
 	{
-		gltexture[clampmode] = new FHardwareTexture(tex->GetWidth(), tex->GetHeight(), true, true, false, tex->gl_info.bNoCompress);
+		gltexture[clampmode] = new FHardwareTexture(tex->GetWidth(), tex->GetHeight(), true, true, tex->gl_info.bNoFilter, tex->gl_info.bNoCompress);
 	}
 	return gltexture[clampmode]; 
 }
