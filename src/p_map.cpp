@@ -68,6 +68,8 @@
 #include "v_video.h"
 #include "float.h"
 
+EXTERN_CVAR(Bool, cl_missiledecals)
+
 // [BB] Helper function to handle ZADF_UNBLOCK_PLAYERS.
 bool P_CheckUnblock ( AActor *pActor1, AActor *pActor2 )
 {
@@ -3546,6 +3548,82 @@ bool FSlide::BounceWall(AActor *mo)
 			mo->SetState(bouncestate);
 		}
 	}
+
+	if (line != NULL && cl_missiledecals)
+	{
+		int side = P_PointOnLineSide(mo->x, mo->y, line);
+		if (line->sidedef[side] == NULL)
+			side ^= 1;
+		if (line->sidedef[side] != NULL)
+		{
+			FDecalBase* base = mo->DecalGenerator;
+			if (base != NULL)
+			{
+				// Find the nearest point on the line, and stick a decal there
+				fixed_t x, y, z;
+				SQWORD num, den;
+
+				den = (SQWORD)line->dx * line->dx + (SQWORD)line->dy * line->dy;
+				if (den != 0)
+				{
+					SDWORD frac;
+
+					num = (SQWORD)(mo->x - line->v1->x) * line->dx + (SQWORD)(mo->y - line->v1->y) * line->dy;
+					if (num <= 0)
+					{
+						frac = 0;
+					}
+					else if (num >= den || den >> 30 == 0)
+					{
+						frac = 1 << 30;
+					}
+					else
+					{
+						frac = (SDWORD)(num / (den >> 30));
+					}
+
+					x = line->v1->x + MulScale30(line->dx, frac);
+					y = line->v1->y + MulScale30(line->dy, frac);
+					// [geNia] If the projectile hitbox fix is enabled, offset the decal half height up
+					if ((mo->isMissile()) && (zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX))
+						z = mo->z + mo->height / 2;
+					else
+						z = mo->z;
+
+					F3DFloor* ffloor = NULL;
+#ifdef _3DFLOORS
+					if (line->sidedef[side ^ 1] != NULL)
+					{
+						sector_t* backsector = line->sidedef[side ^ 1]->sector;
+						extsector_t::xfloor& xf = backsector->e->XFloor;
+						// find a 3D-floor to stick to
+						for (unsigned int i = 0;i < xf.ffloors.Size();i++)
+						{
+							F3DFloor* rover = xf.ffloors[i];
+
+							if ((rover->flags & (FF_EXISTS | FF_SOLID | FF_RENDERSIDES)) == (FF_EXISTS | FF_SOLID | FF_RENDERSIDES))
+							{
+								if (z <= rover->top.plane->ZatPoint(x, y) && z >= rover->bottom.plane->ZatPoint(x, y))
+								{
+									ffloor = rover;
+									break;
+								}
+							}
+						}
+					}
+#endif
+
+					// [BC] Servers don't need to spawn decals.
+					if (NETWORK_GetState() != NETSTATE_SERVER)
+					{
+						DImpactDecal::StaticCreate(base->GetDecal(),
+							x, y, z, line->sidedef[side], ffloor);
+					}
+				}
+			}
+		}
+	}
+
 	return true;
 }
 
