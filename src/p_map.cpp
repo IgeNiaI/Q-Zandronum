@@ -4047,7 +4047,13 @@ fixed_t P_AimLineAttack(AActor *t1, angle_t angle, fixed_t distance, AActor **pL
 	// [BB] In ST, right after a map change, mo apparently can be zero.
 	if ( ( t1->player != NULL ) && ( t1->player->mo != NULL ) )
 	{
-		aim.shootz += FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
+		if (t1->player->mo->AttackZOffset >= 0) {
+			aim.shootz += FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
+		}
+		else
+		{
+			aim.shootz += FixedMul(t1->player->mo->ViewHeight, t1->player->crouchfactor) - (t1->height >> 1) + FixedMul(t1->player->mo->AttackZOffset, FRACUNIT);
+		}
 	}
 	else
 	{
@@ -4240,8 +4246,14 @@ AActor *P_LineAttack(AActor *t1, angle_t angle, fixed_t distance,
 		}
 		else
 		{
-			shootz = t1->z - t1->floorclip + (t1->height >> 1) + 
-					 FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
+			shootz = t1->z - t1->floorclip + (t1->height >> 1);
+			if (t1->player->mo->AttackZOffset >= 0) {
+				shootz += FixedMul(t1->player->mo->AttackZOffset, t1->player->crouchfactor);
+			}
+			else
+			{
+				shootz += FixedMul(t1->player->mo->ViewHeight, t1->player->crouchfactor) - (t1->height >> 1) + FixedMul(t1->player->mo->AttackZOffset, FRACUNIT);
+			}
 		}
 
 		if (damageType == NAME_Melee || damageType == NAME_Hitscan)
@@ -4849,7 +4861,13 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 	{
 		if (source->player != NULL)
 		{
-			shootz += source->player->mo->AttackZOffset - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
+			if (source->player->mo->AttackZOffset >= 0) {
+				shootz += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+			}
+			else
+			{
+				shootz += FixedMul(source->player->mo->ViewHeight, source->player->crouchfactor) - (source->height >> 1) + FixedMul(source->player->mo->AttackZOffset, FRACUNIT);
+			}
 		}
 		else
 		{
@@ -4890,7 +4908,13 @@ void P_RailAttack(AActor *source, int damage, int offset_xy, fixed_t offset_z, i
 			fixed_t offset = (source->height >> 1) - source->player->viewheight;
 			if (!(railflags & RAF_CENTERZ))
 			{
-				offset += source->player->mo->AttackZOffset - FixedMul(12 * FRACUNIT, FRACUNIT - source->player->crouchfactor);
+				if (source->player->mo->AttackZOffset >= 0) {
+					offset += FixedMul(source->player->mo->AttackZOffset, source->player->crouchfactor);
+				}
+				else
+				{
+					offset += FixedMul(source->player->mo->ViewHeight, source->player->crouchfactor) - (source->height >> 1) + FixedMul(source->player->mo->AttackZOffset, FRACUNIT);
+				}
 			}
 			float zOffs = float(atan2(distance, FIXED2FLOAT(-offset_z - offset)) * 180.f / PI);
 			pitchoffset += angle_t((90.f - zOffs) * (ANGLE_MAX / 360));
