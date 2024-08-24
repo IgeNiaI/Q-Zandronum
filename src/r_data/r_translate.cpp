@@ -935,18 +935,11 @@ static void R_CreatePlayerTranslation (float h, float s, float v, const FPlayerC
 	{
 		FMemLump lump = Wads.ReadLump(lumpNum);
 		const BYTE* otherPal = (BYTE*)lump.GetMem();
+		FPalette palette = FPalette(otherPal);
+		palette.MakeGoodRemap();
 
-		BYTE			SkinRemap[256];
-		PalEntry		SkinPalette[256];
-		for (int i = 0; i < 256; ++i)
-		{
-			SkinRemap[i] = ColorMatcher.Pick(otherPal[0], otherPal[1], otherPal[2]);
-			SkinPalette[i] = PalEntry(otherPal[0], otherPal[1], otherPal[2]);
-			otherPal += 3;
-		}
-
-		memcpy (table->Remap, SkinRemap, table->NumEntries);
-		memcpy (table->Palette, SkinPalette, sizeof(*table->Palette) * table->NumEntries);
+		memcpy (table->Remap, palette.Remap, table->NumEntries);
+		memcpy (table->Palette, palette.BaseColors, sizeof(*table->Palette) * table->NumEntries);
 		table->IsCustomPalette = true;
 	}
 	else if (skin->othergame)
