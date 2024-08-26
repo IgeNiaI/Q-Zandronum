@@ -26,6 +26,8 @@ class FShader
 	unsigned int hVertProg;
 	unsigned int hFragProg;
 
+	float alpha_threshold;
+
 	int timer_index;
 	int desaturation_index;
 	int fogenabled_index;
@@ -60,6 +62,7 @@ public:
 		currentlightfactor = currentlightdist = 0.0f;
 		currentfogdensity = -1;
 		currentfogcolor = 0;
+		alpha_threshold = 0.5f;
 
 		timer_index = -1;
 		desaturation_index = -1;

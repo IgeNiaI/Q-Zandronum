@@ -395,7 +395,7 @@ void GLWall::DrawDecal(DBaseDecal *decal)
 	gl_SetRenderStyle(decal->RenderStyle, false, false);
 
 	// If srcalpha is one it looks better with a higher alpha threshold
-	if (decal->RenderStyle.SrcAlpha == STYLEALPHA_One) gl_RenderState.AlphaFunc(GL_GEQUAL, gl_mask_threshold);
+	if (decal->RenderStyle.SrcAlpha == STYLEALPHA_One) gl_RenderState.AlphaFunc(GL_GEQUAL, gl_mask_sprite_threshold);
 	else gl_RenderState.AlphaFunc(GL_GREATER, 0.f);
 
 	gl_RenderState.Apply();

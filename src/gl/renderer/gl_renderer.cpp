@@ -410,7 +410,7 @@ void FGLRenderer::DrawTexture(FTexture *img, DCanvas::DrawParms &parms)
 
 	glColor4f(r, g, b, FIXED2FLOAT(parms.alpha));
 	
-	gl_RenderState.EnableAlphaTest(false);
+	gl_RenderState.AlphaFunc(GL_GEQUAL, 0.f);
 	gl_RenderState.Apply();
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(u1, v1);
@@ -442,8 +442,6 @@ void FGLRenderer::DrawTexture(FTexture *img, DCanvas::DrawParms &parms)
 		glEnd();
 	}
 
-	gl_RenderState.EnableAlphaTest(true);
-	
 	glScissor(0, 0, screen->GetWidth(), screen->GetHeight());
 	glDisable(GL_SCISSOR_TEST);
 	gl_RenderState.SetTextureMode(TM_MODULATE);

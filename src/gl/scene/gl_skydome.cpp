@@ -58,7 +58,7 @@
 
 //-----------------------------------------------------------------------------
 //
-// Shamelessly lifted from Doomsday (written by Jaakko Keränen)
+// Shamelessly lifted from Doomsday (written by Jaakko Kerï¿½nen)
 // also shamelessly lifted from ZDoomGL! ;)
 //
 //-----------------------------------------------------------------------------
@@ -567,7 +567,7 @@ void GLSkyPortal::DrawContents()
 	}
 
 	gl_RenderState.EnableFog(false);
-	gl_RenderState.EnableAlphaTest(false);
+	gl_RenderState.AlphaFunc(GL_GEQUAL, 0.f);
 	gl_RenderState.BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -588,7 +588,6 @@ void GLSkyPortal::DrawContents()
 		else R=G=B=1.f;
 
 		RenderBox(origin->skytexno1, origin->texture[0], origin->x_offset[0], CM_Index, origin->sky2);
-		gl_RenderState.EnableAlphaTest(true);
 	}
 	else
 	{
@@ -601,8 +600,7 @@ void GLSkyPortal::DrawContents()
 			gl_RenderState.SetTextureMode(TM_MODULATE);
 		}
 		
-		gl_RenderState.EnableAlphaTest(true);
-		gl_RenderState.AlphaFunc(GL_GEQUAL,0.05f);
+		gl_RenderState.AlphaFunc(GL_GEQUAL, 0.05f);
 		
 		if (origin->doublesky && origin->texture[1])
 		{

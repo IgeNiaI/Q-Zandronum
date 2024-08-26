@@ -29,6 +29,7 @@ varying vec4 pixelpos;
 varying vec4 fogparm;
 //uniform vec2 lightparms;
 uniform float desaturation_factor;
+uniform float alpha_threshold;
 
 uniform vec4 topglowcolor;
 uniform vec4 bottomglowcolor;
@@ -183,6 +184,11 @@ vec4 applyFog(vec4 frag, float fogfactor)
 
 void main()
 {
+	vec4 frag = Process(vec4(1.0));
+
+	// alpha testing
+	if (frag.a <= alpha_threshold) discard;
+
 	float fogdist = 0.0;
 	float fogfactor = 0.0;
 	
@@ -215,9 +221,8 @@ void main()
 	}
 	#endif
 	
-	vec4 frag = getLightColor(fogdist, fogfactor);
-	
-	
+	frag = getLightColor(fogdist, fogfactor);
+
 	#ifdef DYNLIGHT
 		for(int i=0; i<lightrange.x; i+=2)
 		{

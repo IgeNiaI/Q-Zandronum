@@ -392,7 +392,7 @@ void FGLRenderer::RenderScene(int recursion)
 	glDepthFunc(GL_LESS);
 
 
-	gl_RenderState.EnableAlphaTest(false);
+	gl_RenderState.AlphaFunc(GL_GEQUAL, 0.f);
 
 	glDisable(GL_POLYGON_OFFSET_FILL);	// just in case
 
@@ -422,8 +422,6 @@ void FGLRenderer::RenderScene(int recursion)
 	gl_drawinfo->drawlists[GLDL_LIGHTFOG].Draw(pass);
 
 
-	gl_RenderState.EnableAlphaTest(true);
-
 	// Part 2: masked geometry. This is set up so that only pixels with alpha>0.5 will show
 	if (!gl_texture) 
 	{
@@ -431,7 +429,7 @@ void FGLRenderer::RenderScene(int recursion)
 		gl_RenderState.SetTextureMode(TM_MASK);
 	}
 	if (pass == GLPASS_BASE) pass = GLPASS_BASE_MASKED;
-	gl_RenderState.AlphaFunc(GL_GEQUAL,gl_mask_threshold);
+	gl_RenderState.AlphaFunc(GL_GEQUAL, gl_mask_threshold);
 	gl_RenderState.EnableBrightmap(true);
 	gl_drawinfo->drawlists[GLDL_MASKED].Sort();
 	gl_drawinfo->drawlists[GLDL_MASKED].Draw(pass);
@@ -490,10 +488,10 @@ void FGLRenderer::RenderScene(int recursion)
 		glDepthFunc(GL_LEQUAL);
 		if (gl_texture) 
 		{
-			gl_RenderState.EnableAlphaTest(false);
+			gl_RenderState.AlphaFunc(GL_GEQUAL, 0.f);
 			gl_drawinfo->drawlists[GLDL_LIGHT].Sort();
 			gl_drawinfo->drawlists[GLDL_LIGHT].Draw(GLPASS_TEXTURE);
-			gl_RenderState.EnableAlphaTest(true);
+			gl_RenderState.AlphaFunc(GL_GEQUAL, gl_mask_threshold);
 			gl_drawinfo->drawlists[GLDL_LIGHTBRIGHT].Sort();
 			gl_drawinfo->drawlists[GLDL_LIGHTBRIGHT].Draw(GLPASS_TEXTURE);
 			gl_drawinfo->drawlists[GLDL_LIGHTMASKED].Sort();
@@ -550,10 +548,9 @@ void FGLRenderer::RenderScene(int recursion)
 	{
 		glDepthMask(false);							// don't write to Z-buffer!
 		gl_RenderState.EnableFog(true);
-		gl_RenderState.EnableAlphaTest(false);
+		gl_RenderState.AlphaFunc(GL_GEQUAL, 0.f);
 		gl_RenderState.BlendFunc(GL_ONE,GL_ZERO);
 		gl_drawinfo->DrawUnhandledMissingTextures();
-		gl_RenderState.EnableAlphaTest(true);
 	}
 	glDepthMask(true);
 
@@ -579,8 +576,7 @@ void FGLRenderer::RenderTranslucent()
 	gl_RenderState.SetCameraPos(FIXED2FLOAT(viewx), FIXED2FLOAT(viewy), FIXED2FLOAT(viewz));
 
 	// final pass: translucent stuff
-	gl_RenderState.EnableAlphaTest(true);
-	gl_RenderState.AlphaFunc(GL_GEQUAL,gl_mask_sprite_threshold);
+	gl_RenderState.AlphaFunc(GL_GEQUAL, gl_mask_sprite_threshold);
 	gl_RenderState.BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	gl_RenderState.EnableBrightmap(true);
@@ -590,7 +586,7 @@ void FGLRenderer::RenderTranslucent()
 
 	glDepthMask(true);
 
-	gl_RenderState.AlphaFunc(GL_GEQUAL,0.5f);
+	gl_RenderState.AlphaFunc(GL_GEQUAL, 0.5f);
 	RenderAll.Unclock();
 }
 
@@ -718,7 +714,7 @@ void FGLRenderer::DrawBlend(sector_t * viewsector)
 		// black multiplicative blends are ignored
 		if (extra_red || extra_green || extra_blue)
 		{
-			gl_RenderState.EnableAlphaTest(false);
+			gl_RenderState.AlphaFunc(GL_GEQUAL, 0.f);
 			gl_RenderState.EnableTexture(false);
 			gl_RenderState.BlendFunc(GL_DST_COLOR,GL_ZERO);
 			glColor4f(extra_red, extra_green, extra_blue, 1.0f);
@@ -756,7 +752,7 @@ void FGLRenderer::DrawBlend(sector_t * viewsector)
 	if (blend[3]>0.0f)
 	{
 		gl_RenderState.BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		gl_RenderState.EnableAlphaTest(false);
+		gl_RenderState.AlphaFunc(GL_GEQUAL, 0.f);
 		gl_RenderState.EnableTexture(false);
 		glColor4fv(blend);
 		gl_RenderState.Apply(true);
@@ -809,7 +805,6 @@ void FGLRenderer::EndDrawScene(sector_t * viewsector)
 	gl_RenderState.BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor3f(1.0f,1.0f,1.0f);
 	gl_RenderState.EnableTexture(true);
-	gl_RenderState.EnableAlphaTest(true);
 	glDisable(GL_SCISSOR_TEST);
 }
 

@@ -77,8 +77,6 @@ void FRenderState::Reset()
 	mSrcBlend = GL_SRC_ALPHA;
 	mDstBlend = GL_ONE_MINUS_SRC_ALPHA;
 	glSrcBlend = glDstBlend = -1;
-	glAlphaFunc = -1;
-	mAlphaFunc = GL_GEQUAL;
 	mAlphaThreshold = 0.5f;
 	mBlendEquation = GL_FUNC_ADD;
 	glBlendEquation = -1;
@@ -209,6 +207,8 @@ bool FRenderState::ApplyShader()
 			}
 		}
 
+		glUniform1f(activeShader->alpha_threshold, mAlphaThreshold);
+
 		if (fogset != activeShader->currentfogenabled)
 		{
 			glUniform1i(activeShader->fogenabled_index, (activeShader->currentfogenabled = fogset)); 
@@ -279,18 +279,6 @@ void FRenderState::Apply(bool forcenoshader)
 			glSrcBlend = mSrcBlend;
 			glDstBlend = mDstBlend;
 			glBlendFunc(mSrcBlend, mDstBlend);
-		}
-		if (mAlphaFunc != glAlphaFunc || mAlphaThreshold != glAlphaThreshold)
-		{
-			glAlphaFunc = mAlphaFunc;
-			glAlphaThreshold = mAlphaThreshold;
-			::glBlendFunc(mAlphaFunc, mAlphaThreshold);
-		}
-		if (mAlphaTest != glAlphaTest)
-		{
-			glAlphaTest = mAlphaTest;
-			if (mAlphaTest) glEnable(GL_ALPHA_TEST);
-			else glDisable(GL_ALPHA_TEST);
 		}
 		if (mBlendEquation != glBlendEquation)
 		{

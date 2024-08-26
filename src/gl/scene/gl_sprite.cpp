@@ -152,11 +152,11 @@ void GLSprite::Draw(int pass)
 
 		if (hw_styleflags == STYLEHW_NoAlphaTest)
 		{
-			gl_RenderState.EnableAlphaTest(false);
+			gl_RenderState.AlphaFunc(GL_GEQUAL, 0.f);
 		}
 		else
 		{
-			gl_RenderState.AlphaFunc(GL_GEQUAL,trans*gl_mask_sprite_threshold);
+			gl_RenderState.AlphaFunc(GL_GEQUAL, gl_mask_sprite_threshold);
 		}
 
 		if (RenderStyle.BlendOp == STYLEOP_Shadow)
@@ -180,7 +180,7 @@ void GLSprite::Draw(int pass)
 				minalpha*=factor;
 			}
 
-			gl_RenderState.AlphaFunc(GL_GEQUAL,minalpha*gl_mask_sprite_threshold);
+			gl_RenderState.AlphaFunc(GL_GEQUAL, gl_mask_sprite_threshold);
 			glColor4f(0.2f,0.2f,0.2f,fuzzalpha);
 			additivefog = true;
 		}
@@ -263,7 +263,7 @@ void GLSprite::Draw(int pass)
 		const bool drawWithXYBillboard = ( (particle && gl_billboard_particles) || (!(actor && actor->renderflags & RF_FORCEYBILLBOARD)
 		                                   //&& GLRenderer->mViewActor != NULL
 		                                   && (gl_billboard_mode == 1 || (actor && actor->renderflags & RF_FORCEXYBILLBOARD ))) );
-		gl_RenderState.Apply();
+		gl_RenderState.Apply(hw_styleflags == STYLEHW_NoAlphaTest);
 
 		Vector v1;
 		Vector v2;
@@ -322,7 +322,7 @@ void GLSprite::Draw(int pass)
 			gl_RenderState.SetFixedColormap(CM_FOGLAYER);
 			gl_RenderState.BlendEquation(GL_FUNC_ADD);
 			gl_RenderState.BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			gl_RenderState.Apply();
+			gl_RenderState.Apply(hw_styleflags == STYLEHW_NoAlphaTest);
 
 			glBegin(GL_TRIANGLE_STRIP);
 			if (gltexture)
@@ -405,16 +405,6 @@ void GLSprite::Draw(int pass)
 		gl_RenderState.BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		gl_RenderState.BlendEquation(GL_FUNC_ADD);
 		gl_RenderState.SetTextureMode(TM_MODULATE);
-
-		// [BB] Restore the alpha test after drawing a smooth particle.
-		if (hw_styleflags == STYLEHW_NoAlphaTest)
-		{
-			gl_RenderState.EnableAlphaTest(true);
-		}
-		else
-		{
-			gl_RenderState.AlphaFunc(GL_GEQUAL,gl_mask_sprite_threshold);
-		}
 	}
 
 	// End of gl_sprite_brightfog hack: restore FadeColor to normalcy

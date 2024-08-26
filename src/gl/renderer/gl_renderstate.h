@@ -97,9 +97,7 @@ class FRenderState
 	int mNumLights[3];
 	float *mLightData;
 	int mSrcBlend, mDstBlend;
-	int mAlphaFunc;
 	float mAlphaThreshold;
-	bool mAlphaTest;
 	int mBlendEquation;
 	bool m2D;
 
@@ -113,9 +111,7 @@ class FRenderState
 	float mWarpTime;
 
 	int glSrcBlend, glDstBlend;
-	int glAlphaFunc;
 	float glAlphaThreshold;
-	bool glAlphaTest;
 	int glBlendEquation;
 
 	bool ffTextureEnabled;
@@ -236,28 +232,8 @@ public:
 
 	void AlphaFunc(int func, float thresh)
 	{
-		if (!gl_direct_state_change)
-		{
-			mAlphaFunc = func;
-			mAlphaThreshold = thresh;
-		}
-		else
-		{
-			::glAlphaFunc(func, thresh);
-		}
-	}
-
-	void EnableAlphaTest(bool on)
-	{
-		if (!gl_direct_state_change)
-		{
-			mAlphaTest = on;
-		}
-		else
-		{
-			if (on) glEnable(GL_ALPHA_TEST);
-			else glDisable(GL_ALPHA_TEST);
-		}
+		if (func == GL_GREATER) mAlphaThreshold = thresh;
+		else mAlphaThreshold = thresh - 0.001f;
 	}
 
 	void BlendEquation(int eq)
