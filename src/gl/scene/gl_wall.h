@@ -316,6 +316,7 @@ public:
 	float vt,vb;
 	float x1,y1,z1;
 	float x2,y2,z2;
+	float zcenter; // [geNia] to rotate XY billboard around this point in case the sprite gets split
 
 	FMaterial *gltexture;
 	float trans;

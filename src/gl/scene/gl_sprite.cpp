@@ -277,7 +277,6 @@ void GLSprite::Draw(int pass)
 			// in the x/y plane.
 			float xcenter = (x1 + x2)*0.5;
 			float ycenter = (y1 + y2)*0.5;
-			float zcenter = (z1 + z2)*0.5;
 			float angleRad = DEG2RAD(270. - float(GLRenderer->mAngles.Yaw));
 
 			Matrix3x4 mat;
@@ -718,6 +717,7 @@ void GLSprite::Process(AActor* thing,sector_t * sector)
 
 		z1=z-r.top;
 		z2=z1-r.height;
+		zcenter=(z1+z2)*0.5;
 
 		float spriteheight = FIXED2FLOAT(spritescaleY) * gltexture->GetScaledHeightFloat(GLUSE_SPRITE);
 		
