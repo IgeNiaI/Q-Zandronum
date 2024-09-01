@@ -2242,6 +2242,7 @@ void PLAYER_ResetPlayerData( player_t *pPlayer )
 	pPlayer->ulWins = 0;
 	pPlayer->pSkullBot = 0;
 	pPlayer->bIsBot = 0;
+	pPlayer->clientTicOnServerEnd = 0;
 	pPlayer->ulPing = 0;
 	pPlayer->bReadyToGoOn = 0;
 	pPlayer->bSpawnOkay = 0;
@@ -2984,6 +2985,12 @@ void ServerCommands::MovePlayer::Execute()
 		CLIENT_PrintWarning( "MovePlayer: not in a level\n" );
 		return;
 	}
+
+	// Command is same or older than what we already handled
+	if ( clientTicOnServerEnd <= player->clientTicOnServerEnd )
+		return;
+
+	player->clientTicOnServerEnd = clientTicOnServerEnd;
 
 	// If we're not allowed to know the player's location, then just make him invisible.
 	if ( isVisible == false )

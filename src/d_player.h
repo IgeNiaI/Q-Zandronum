@@ -806,6 +806,9 @@ public:
 	// True XYZ velocity as told to us by the server.
 	fixed_t		ServerXYZVel[3];
 
+	// To check if MovePlayer command from server was already handled
+	unsigned int clientTicOnServerEnd;
+
 	// Ping of the player to the server he's playing on.
 	unsigned int		ulPing;
 
