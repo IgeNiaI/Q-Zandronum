@@ -276,6 +276,8 @@ void GLSprite::Draw(int pass)
 			// in the x/y plane.
 			float xcenter = (x1 + x2)*0.5;
 			float ycenter = (y1 + y2)*0.5;
+			if (particle)
+				zcenter = (z1 + z2)*0.5;
 			float angleRad = DEG2RAD(270. - float(GLRenderer->mAngles.Yaw));
 
 			Matrix3x4 mat;
