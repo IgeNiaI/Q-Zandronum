@@ -111,7 +111,7 @@ void DIntermissionScreen::Init(FIntermissionAction *desc, bool first)
 	{
 		texname = GStrings[texname+1];
 	}
-	if (texname[0] != 0)
+	if (texname && texname[0] != 0)
 	{
 		mBackground = TexMan.CheckForTexture(texname, FTexture::TEX_MiscPatch);
 		mFlatfill = desc->mFlatfill;
