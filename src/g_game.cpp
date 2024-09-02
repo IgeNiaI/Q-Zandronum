@@ -677,15 +677,16 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	cmd->consistancy = consistancy[consoleplayer][(maketic/ticdup)%BACKUPTICS];
 
 	strafe = Button_Strafe.bDown;
+	bool crouchPressed = Button_Crouch.bDown && !players[consoleplayer].CanCrouch() && !level.IsCrouchingAllowed();
 	if (Button_Speed.bDown ^ (int)cl_run)
 	{
 		// player is running
-		speed = Button_Crouch.bDown ? 3 : 1;
+		speed = crouchPressed ? 3 : 1;
 	}
 	else
 	{
 		// player is walking
-		speed = Button_Crouch.bDown ? 2 : 0;
+		speed = crouchPressed ? 2 : 0;
 	}
 
 	forward = side = fly = 0;

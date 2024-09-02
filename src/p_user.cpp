@@ -2633,6 +2633,8 @@ void APlayerPawn::DropImportantItems( bool bLeavingGame, AActor *pSource )
 
 int APlayerPawn::WalkCrouchState (ticcmd_t *cmd, bool ignoreCrouch)
 {
+	ignoreCrouch |= !player->CanCrouch() || !level.IsCrouchingAllowed();
+
 	// [geNia] BT_SPEED is considered pressed when the player is running, regardless of whether the button is actually pressed
 	if (cmd->ucmd.buttons & BT_SPEED)
 	{
