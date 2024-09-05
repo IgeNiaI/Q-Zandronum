@@ -264,7 +264,10 @@ void SERVERCOMMANDS_MovePlayer( ULONG ulPlayer, ULONG ulPlayerExtra, ServerComma
 
 	ServerCommands::MovePlayer fullCommand;
 	fullCommand.SetPlayer ( &players[ulPlayer] );
-	fullCommand.SetClientTicOnServerEnd ( SERVER_GetClient( ulPlayer )->ulClientGameTic );
+	if ( players[ulPlayer].bIsBot )
+		fullCommand.SetClientTicOnServerEnd ( gametic );
+	else
+		fullCommand.SetClientTicOnServerEnd ( SERVER_GetClient( ulPlayer )->ulClientGameTic );
 	fullCommand.SetIsVisible( true );
 	fullCommand.SetX( players[ulPlayer].mo->x );
 	fullCommand.SetY( players[ulPlayer].mo->y );
