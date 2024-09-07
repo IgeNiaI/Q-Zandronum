@@ -2345,8 +2345,6 @@ void APlayerPawn::ActivateMorphWeapon ()
 
 void APlayerPawn::Die (AActor *source, AActor *inflictor, int dmgflags)
 {
-	Super::Die (source, inflictor, dmgflags);
-
 	if (player != NULL && player->mo == this) player->bonuscount = 0;
 
 	if ( NETWORK_GetState( ) != NETSTATE_SERVER )
@@ -2362,12 +2360,16 @@ void APlayerPawn::Die (AActor *source, AActor *inflictor, int dmgflags)
 	if ( NETWORK_InClientMode() )
 	{
 		CLIENT_PREDICT_ClearSelfThrustBonuses( );
+		Super::Die(source, inflictor, dmgflags);
 		return;
 	}
 	
 	// [BB] Drop any important items the player may be carrying before handling
 	// any other part of the death logic.
 	DropImportantItems ( false, source );
+
+	// Do general die logic after player dropped important items
+	Super::Die(source, inflictor, dmgflags);
 
 	if (player != NULL && player->mo != this)
 	{ // Make the real player die, too
