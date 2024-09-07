@@ -46,6 +46,7 @@
 #include "r_defs.h"
 #include "r_sky.h"
 #include "r_utility.h"
+#include "c_dispatch.h"
 
 #include "gl/system/gl_interface.h"
 #include "gl/system/gl_framebuffer.h"
@@ -81,8 +82,7 @@ EXTERN_CVAR(Bool, sv_cheats)
 CVAR(Float, gl_hitbox_line_width, 3.0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 CUSTOM_CVAR(Bool, gl_show_hitbox, false, CVAR_GLOBALCONFIG)
 {
-	if (self && sv_cheats == false) {
-		Printf("You can't use gl_show_hitbox when sv_cheats is false!\n");
+	if (self && CheckCheatmode()) {
 		self = false;
 	}
 }
