@@ -552,7 +552,6 @@ void R_Init ()
 	R_InitTables ();
 	R_InitTranslationTables ();
 	R_SetViewSize (screenblocks);
-	Renderer->Init();
 }
 
 //==========================================================================

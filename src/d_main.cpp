@@ -3047,7 +3047,6 @@ void D_DoomMain (void)
 
 		Printf ("R_Init: Init %s refresh subsystem.\n", gameinfo.ConfigName.GetChars());
 		StartScreen->LoadingStatus ("Loading graphics", 0x3f);
-		P_Init ();
 		R_Init ();
 
 		Printf ("DecalLibrary: Load decals.\n");
@@ -3109,6 +3108,8 @@ void D_DoomMain (void)
 		Printf ("P_Init: Init Playloop state.\n");
 		StartScreen->LoadingStatus ("Init game engine", 0x3f);
 		AM_StaticInit();
+		P_Init ();
+		Renderer->Init();
 
 		P_SetupWeapons_ntohton();
 
