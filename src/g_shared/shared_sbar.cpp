@@ -1801,7 +1801,7 @@ void DBaseStatusBar::DrawTargetName ()
 
 		// Search for a player directly in front of the camera. If none are found, exit.
 		pTargetPlayer = P_PlayerScan( camera );
-		if ( pTargetPlayer == NULL )
+		if ( pTargetPlayer == NULL || pTargetPlayer == &players[consoleplayer] )
 			return;
 
 		// [CK] If the player shouldn't be identified from decorate flags, ignore them
