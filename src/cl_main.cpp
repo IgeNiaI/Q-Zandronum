@@ -2698,6 +2698,7 @@ void ServerCommands::SpawnPlayer::Execute()
 	pPlayer->mo = pActor;
 	pActor->player = pPlayer;
 	pPlayer->playerstate = playerState;
+	pPlayer->clientTicOnServerEnd = 0;
 
 	// If we were watching through this player's eyes, reattach the camera.
 	if ( bWasWatchingPlayer )
