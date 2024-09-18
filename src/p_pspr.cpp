@@ -197,13 +197,18 @@ void P_SetPsprite (player_t *player, int position, FState *state, bool nofunctio
 //
 //---------------------------------------------------------------------------
 
-void P_BringUpWeapon (player_t *player)
+void P_BringUpWeapon (player_t *player, bool isLowering)
 {
 	FState *newstate;
 	AWeapon *weapon;
 
 	if (player->PendingWeapon == WP_NOCHANGE)
-		return;
+	{
+		if (isLowering)
+			player->PendingWeapon = player->ReadyWeapon;
+		else
+			return;
+	}
 
 	weapon = player->PendingWeapon;
 
@@ -1062,7 +1067,7 @@ DEFINE_ACTION_FUNCTION(AInventory, A_Lower)
 	}
 	// [RH] Clear the flash state. Only needed for Strife.
 	P_SetPsprite (player, ps_flash, NULL);
-	P_BringUpWeapon (player);
+	P_BringUpWeapon (player, true);
 }
 
 //---------------------------------------------------------------------------
