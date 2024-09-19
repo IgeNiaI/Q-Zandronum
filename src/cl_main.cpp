@@ -2987,12 +2987,6 @@ void ServerCommands::MovePlayer::Execute()
 		return;
 	}
 
-	// Command is same or older than what we already handled
-	if ( clientTicOnServerEnd <= player->clientTicOnServerEnd )
-		return;
-
-	player->clientTicOnServerEnd = clientTicOnServerEnd;
-
 	// If we're not allowed to know the player's location, then just make him invisible.
 	if ( isVisible == false )
 	{
@@ -3003,6 +2997,12 @@ void ServerCommands::MovePlayer::Execute()
 	}
 	else
 		player->mo->renderflags &= ~RF_INVISIBLE;
+
+	// Command is same or older than what we already handled
+	if ( clientTicOnServerEnd <= player->clientTicOnServerEnd )
+		return;
+
+	player->clientTicOnServerEnd = clientTicOnServerEnd;
 
 	// [geNia] Set the player server position, which will be actually applied on next tick
 	player->mo->serverX = x;
