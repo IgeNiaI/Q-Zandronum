@@ -3762,10 +3762,11 @@ bool SERVER_IsPlayerVisible( ULONG ulPlayer, ULONG ulPlayer2 )
 {
 	// Can ulPlayer see ulPlayer2?
 	if (( teamlms || lastmanstanding ) &&
+		( LASTMANSTANDING_GetState( ) == LMSS_INPROGRESS ) &&
 		(( lmsspectatorsettings & LMS_SPF_VIEW ) == false ) &&
-		( players[ulPlayer].bSpectating ) &&
-		( g_aClients[ulPlayer].ulDisplayPlayer == ulPlayer ) &&
-		( LASTMANSTANDING_GetState( ) == LMSS_INPROGRESS ))
+		( players[ulPlayer].bDeadSpectator ) &&
+		( players[ulPlayer].ulTeam != players[ulPlayer2].ulTeam ) &&
+		( g_aClients[ulPlayer].ulDisplayPlayer == ulPlayer ))
 	{
 		return ( false );
 	}
