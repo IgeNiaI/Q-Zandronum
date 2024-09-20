@@ -7372,6 +7372,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			{
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 					SERVERCOMMANDS_AnnouncerSound(FBehavior::StaticLookupString(args[0]));
+				ANNOUNCER_PlayEntry(cl_announcer, FBehavior::StaticLookupString(args[0]));
 			}
 			else
 			{
@@ -7380,8 +7381,9 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 					break;
 				if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 					SERVERCOMMANDS_AnnouncerSound(FBehavior::StaticLookupString(args[0]), activator->player - players, SVCF_ONLYTHISCLIENT);
+				else if (activator->player - players == consoleplayer)
+					ANNOUNCER_PlayEntry(cl_announcer, FBehavior::StaticLookupString(args[0]));
 			}
-			ANNOUNCER_PlayEntry(cl_announcer, FBehavior::StaticLookupString(args[0]));
 			return 0;
 
 		// [BB]
