@@ -975,6 +975,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 					DTA_ClipRight, clipright,
 					DTA_ClipTop, cliptop,
 					DTA_ClipBottom, clipbottom,
+					DTA_ColorOverlay, overlay,
 					DTA_Alpha, mAlpha,
 					TAG_DONE);
 				messageY += mFont->GetHeight() * CleanYfac_1;
@@ -996,6 +997,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 				DTA_ClipRight, clipright,
 				DTA_ClipTop, cliptop,
 				DTA_ClipBottom, clipbottom,
+				DTA_ColorOverlay, overlay,
 				DTA_Alpha, mAlpha,
 				TAG_DONE);
 		}
