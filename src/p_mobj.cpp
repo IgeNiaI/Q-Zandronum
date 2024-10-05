@@ -4946,7 +4946,7 @@ void AActor::CheckSectorTransition(sector_t *oldsec)
 			theFloorSector->SecActTarget->TriggerAction(this, SECSPAC_HitFloor);
 		}
 		sector_t* theCeilingSector = (zadmflags & ZADF_ELEVATED_SPECIAL_FIX) ? ceilingsector : Sector;
-		if (theCeilingSector->SecActTarget != NULL && z + height >= ceilingsector->ceilingplane.ZatPoint(x, y))
+		if (theCeilingSector->SecActTarget != NULL && z + height >= theCeilingSector->ceilingplane.ZatPoint(x, y))
 		{
 			theCeilingSector->SecActTarget->TriggerAction(this, SECSPAC_HitCeiling);
 		}
