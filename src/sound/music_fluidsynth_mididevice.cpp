@@ -97,7 +97,7 @@
 
 // PUBLIC DATA DEFINITIONS -------------------------------------------------
 
-CVAR(String, fluid_patchset, "gm.sf2", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CVAR(String, fluid_patchset, "$PROGDIR/gm.sf2", CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
 CUSTOM_CVAR(Float, fluid_gain, 0.5, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 {
@@ -301,7 +301,7 @@ FluidSynthMIDIDevice::FluidSynthMIDIDevice()
 	if (0 == LoadPatchSets(fluid_patchset))
 	{
 #if defined (__unix__) && (__APPLE__)
-		if (0 == LoadPatchSets("$PROGDIR/soundfonts/gm.sf2"))
+		if (0 == LoadPatchSets("$PROGDIR/gm.sf2"))
 		{
 #endif
 
