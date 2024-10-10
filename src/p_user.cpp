@@ -3811,7 +3811,7 @@ void APlayerPawn::CheckJump(ticcmd_t *cmd)
 			player->mo->jumpTics = JumpDelay;
 	}
 	else if (player->mo->secondJumpsRemaining != 0
-		&& player->mo->secondJumpTics <= 0 && ((mvFlags & MV_DOUBLETAPJUMP) || !(cmd->ucmd.buttons & BT_JUMP)))
+		&& player->mo->secondJumpTics <= 0 && ((mvFlags & MV_DOUBLETAPJUMP) || (mvFlags & MV_USER4JUMP) || !(cmd->ucmd.buttons & BT_JUMP)))
 	{
 		player->mo->secondJumpState = SJ_AVAILABLE;
 	}
