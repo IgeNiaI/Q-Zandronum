@@ -1030,6 +1030,10 @@ void P_ClearACSVars(bool alsoglobal)
 		// [BB] When the global vars are cleared, our query handles surely shouldn't
 		// be needed anymore. So clear them in case mods forgot to do so.
 		g_dbQueries.clear();
+
+		// [AK] Also clear any open lump handles that mods forgot to close when
+		// clearing global variables, as these aren't needed anymore either.
+		ACS_ClearLumpHandles();
 	}
 	else
 	{
