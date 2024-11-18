@@ -1190,6 +1190,7 @@ FArchive &operator<< (FArchive &arc, acsdefered_t *&defer);
 //*****************************************************************************
 //	PROTOTYPES
 
+void	ACS_ClearLumpHandles( void ); // [AK]
 bool	ACS_IsCalledFromConsoleCommand( void );
 bool	ACS_IsScriptClientSide( int script );
 bool	ACS_IsScriptClientSide( const ScriptPtr *pScriptData );
