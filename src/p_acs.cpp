@@ -2290,9 +2290,9 @@ void FBehavior::SerializeVarSet (FArchive &arc, SDWORD *vars, int max)
 	}
 }
 
-static int ParseLocalArrayChunk(BYTE *chunk, ACSLocalArrays *arrays, int offset)
+static int ParseLocalArrayChunk(void *chunk, ACSLocalArrays *arrays, int offset)
 {
-	unsigned count = (LittleShort(((unsigned char*)chunk)[1]) - 2) / 4;
+	unsigned count = (LittleShort(((unsigned *)chunk)[1]) - 2) / 4;
 	int *sizes = (int *)((BYTE *)chunk + 10);
 	arrays->Count = count;
 	if (count > 0)
@@ -2491,7 +2491,7 @@ FBehavior::FBehavior (int lumpnum, FileReader * fr, int len)
 					{
 						ScriptFunction *func = &Functions[func_num];
 						// Unlike scripts, functions do not include their arg count in their local count.
-						func->LocalCount = ParseLocalArrayChunk((BYTE *) chunk, &func->LocalArrays, func->LocalCount + func->ArgCount) - func->ArgCount;
+						func->LocalCount = ParseLocalArrayChunk(chunk, &func->LocalArrays, func->LocalCount + func->ArgCount) - func->ArgCount;
 					}
 				}
 			}
