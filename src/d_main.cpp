@@ -63,6 +63,7 @@
 #include "gstrings.h"
 #include "w_wad.h"
 #include "s_sound.h"
+#include "p_acs.h"
 #include "v_video.h"
 #include "intermission/intermission.h"
 #include "f_wipe.h"
