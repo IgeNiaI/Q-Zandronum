@@ -8333,6 +8333,9 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 					lumpNum = Wads.CheckNumForName( name );
 				}
 
+				if(lumpNum == -1)
+					return -1;
+
 				ACSLumpHandles[lumpNum].refCount++;
 
 				if(ACSLumpHandles.CheckKey( args[0] ) != NULL)
