@@ -13173,6 +13173,12 @@ CCMD(acsprofile)
 	ShowProfileData(FuncProfiles, limit, sorter, true);
 }
 
+//*****************************************************************************
+//
+void ACS_ClearLumpHandles( void )
+{
+	ACSLumpHandles.Clear( );
+}
 
 //*****************************************************************************
 //

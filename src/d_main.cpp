@@ -2451,6 +2451,11 @@ static void D_DoomInit()
 
 	atterm (C_DeinitConsole);
 
+	// [AK] When Zandronum closes, any open lump handles in ACS that mods
+	// forgot to close must be cleared before any resources are deleted.
+	atterm( ACS_ClearLumpHandles );
+
+
 	gamestate = GS_STARTUP;
 
 	// Determine if we're going to be a server, client, or local player.
