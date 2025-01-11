@@ -8105,7 +8105,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 		case ACSF_SetActionScript:
 			if (args[0] == 0)
 			{
-				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				if (activator && activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 				{
 					if (args[2])
 						static_cast<APlayerPawn *>(&*activator)->SetActionScript(args[1], FBehavior::StaticLookupString(args[2]));
@@ -8135,7 +8135,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 		case ACSF_SetPredictableValue:
 			if (args[0] == 0)
 			{
-				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				if (activator && activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 				{
 					if (args[1] >= 0 && args[1] < PREDICTABLES_SIZE)
 					{
@@ -8164,7 +8164,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 		case ACSF_GetPredictableValue:
 			{
 				AActor* actor = SingleActorFromTID(args[0], activator);
-				if (actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				if (actor && actor->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 				{
 					if (args[1] >= 0 && args[1] < PREDICTABLES_SIZE)
 					{
@@ -8177,7 +8177,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 		case ACSF_SetEffectActor:
 			if (args[0] == 0)
 			{
-				if (activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
+				if (activator && activator->IsKindOf(RUNTIME_CLASS(APlayerPawn)))
 				{
 					const PClass* pClass = PClass::FindClass(FBehavior::StaticLookupString(args[2]));
 					static_cast<APlayerPawn *>(&*activator)->SetEffectActor(args[1], pClass);
