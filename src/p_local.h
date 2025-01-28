@@ -799,7 +799,13 @@ public:
 	void Tick();
 	void UpdateToClient( ULONG ulClient );
 	void Predict();
-	
+
+	void	RecordUnlagged(LONG lTick);
+	void	ReconcileUnlagged(LONG lTick);
+	void	RestoreUnlagged();
+	void	RecordPredict(LONG lTick);
+	void	RestorePredict(LONG lTick);
+
 	fixed_t	GetXTarget( void );
 	void	SetXTarget( fixed_t lTarget );
 	
@@ -818,6 +824,13 @@ protected:
 	fixed_t m_xTarget;
 	fixed_t m_yTarget;
 	
+	fixed_t		m_unlaggedX[UNLAGGEDTICS];
+	fixed_t		m_unlaggedY[UNLAGGEDTICS];
+	fixed_t		m_restoreX;
+	fixed_t		m_restoreY;
+	fixed_t		m_predictX[CLIENT_PREDICTION_TICS];
+	fixed_t		m_predictY[CLIENT_PREDICTION_TICS];
+
 	friend bool EV_MovePolyTo (player_t *instigator, line_t *line, int polyNum, int speed, int x, int y, bool overRide);
 };
 
@@ -831,6 +844,12 @@ public:
 	void Tick ();
 	void UpdateToClient( ULONG ulClient );
 	void Predict();
+	
+	void	RecordUnlagged(LONG lTick);
+	void	ReconcileUnlagged(LONG lTick);
+	void	RestoreUnlagged();
+	void	RecordPredict(LONG lTick);
+	void	RestorePredict(LONG lTick);
 
 	podoortype_t GetType( void );
 
@@ -859,6 +878,13 @@ protected:
 	int m_WaitTics;
 	podoortype_t m_Type;
 	bool m_Close;
+	
+	fixed_t		m_unlaggedX[UNLAGGEDTICS];
+	fixed_t		m_unlaggedY[UNLAGGEDTICS];
+	fixed_t		m_restoreX;
+	fixed_t		m_restoreY;
+	fixed_t		m_predictX[CLIENT_PREDICTION_TICS];
+	fixed_t		m_predictY[CLIENT_PREDICTION_TICS];
 
 	friend bool EV_OpenPolyDoor (player_t *instigator, line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
 private:
