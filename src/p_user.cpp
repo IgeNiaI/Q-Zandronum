@@ -4167,7 +4167,7 @@ void P_MovePlayer_Quake(player_t *player, ticcmd_t *cmd)
 	int frictionFactor;
 	P_GetFriction(player->mo, &frictionFactor);
 	float floorFriction = 1.0f * frictionFactor / 2048; // 2048 is default floor move factor
-	floorFriction = pow(floorFriction, 0.125); // Modified floor friction affects Quake acceleration a lot. Power this value by 1/8 to lower the effect.
+	floorFriction = pow(floorFriction, 0.125f); // Modified floor friction affects Quake acceleration a lot. Power this value by 1/8 to lower the effect.
 	float moveFactor;
 	float maxGroundSpeed = FIXED2FLOAT(player->mo->Speed) * player->mo->QTweakSpeed();
 	FVector3 vel = { FIXED2FLOAT(player->mo->velx), FIXED2FLOAT(player->mo->vely), FIXED2FLOAT(player->mo->velz) };
