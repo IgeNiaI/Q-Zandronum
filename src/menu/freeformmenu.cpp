@@ -51,6 +51,9 @@ EXTERN_CVAR(Int, m_show_backbutton)
 
 IMPLEMENT_CLASS(DFreeformMenu)
 
+#define SCALEY(f)		(int)((f) * ScaleFac)
+#define DOWNSCALEY(f)	(int)((f) / ScaleFac)
+
 //=============================================================================
 //
 //
@@ -86,7 +89,7 @@ void DFreeformMenu::Init(DMenu* parent, FFreeformMenuDescriptor* desc)
 		int ytop = mDesc->mTopPadding;
 		if (ytop < 0)
 			ytop = -ytop;
-		int pagesize = screen->GetHeight() / CleanYfac_1 - ytop;
+		int pagesize = DOWNSCALEY(screen->GetHeight()) - ytop;
 
 		if (mDesc->mHeightOverride > 0)
 		{
@@ -101,7 +104,7 @@ void DFreeformMenu::Init(DMenu* parent, FFreeformMenuDescriptor* desc)
 				if (!mDesc->mItems[i]->IsStatic()) // you can't scroll static items
 				{
 					mDesc->mItems[i]->CalcDrawScreenPos(x, y, mDesc->mItems[i]->GetWidth(), mDesc->mItems[i]->GetHeight(), false);
-					y /= CleanYfac_1;
+					y = DOWNSCALEY(y);
 					y += mDesc->mItems[i]->GetMouseAreaHeight();
 					if (y > LowestScroll)
 						LowestScroll = y;
@@ -263,10 +266,10 @@ bool DFreeformMenu::MenuEvent(int mkey, bool fromcontroller)
 		mDesc->mItems[mDesc->mSelectedItem]->CalcDrawScreenPos(selectedX, selectedY,
 			mDesc->mItems[mDesc->mSelectedItem]->GetWidth(),
 			mDesc->mItems[mDesc->mSelectedItem]->GetHeight(), false);
-		selectedX += mDesc->mItems[mDesc->mSelectedItem]->GetWidth() * CleanXfac_1 / 2;
-		selectedY += mDesc->mItems[mDesc->mSelectedItem]->GetHeight() * CleanYfac_1 / 2;
+		selectedX += SCALEY(mDesc->mItems[mDesc->mSelectedItem]->GetWidth()) / 2;
+		selectedY += SCALEY(mDesc->mItems[mDesc->mSelectedItem]->GetHeight()) / 2;
 
-		selectedY += (mDesc->mItems[mDesc->mSelectedItem]->IsStatic() ? 0 : yOffset) * CleanYfac_1;
+		selectedY += SCALEY(mDesc->mItems[mDesc->mSelectedItem]->IsStatic() ? 0 : yOffset);
 
 		int nearestDist = INT_MAX;
 		for (unsigned int i = 0; i < mDesc->mItems.Size(); i++)
@@ -275,10 +278,10 @@ bool DFreeformMenu::MenuEvent(int mkey, bool fromcontroller)
 			{
 				int x, y;
 				mDesc->mItems[i]->CalcDrawScreenPos(x, y, mDesc->mItems[i]->GetWidth(), mDesc->mItems[i]->GetHeight(), false);
-				x += mDesc->mItems[i]->GetWidth() * CleanXfac_1 / 2;
-				y += mDesc->mItems[i]->GetHeight() * CleanYfac_1 / 2;
+				x += SCALEY(mDesc->mItems[i]->GetWidth()) / 2;
+				y += SCALEY(mDesc->mItems[i]->GetHeight()) / 2;
 
-				y += (mDesc->mItems[i]->IsStatic() ? 0 : yOffset) * CleanYfac_1;
+				y += SCALEY(mDesc->mItems[i]->IsStatic() ? 0 : yOffset);
 
 				int xDiff = x - selectedX;
 				int yDiff = y - selectedY;
@@ -316,12 +319,12 @@ bool DFreeformMenu::MenuEvent(int mkey, bool fromcontroller)
 			int ytop = mDesc->mTopPadding;
 			if (ytop < 0)
 				ytop = -ytop;
-			int pagesize = screen->GetHeight() / CleanYfac_1 - ytop;
+			int pagesize = DOWNSCALEY(screen->GetHeight()) - ytop;
 
 			int x, y;
 			mDesc->mItems[mDesc->mSelectedItem]->CalcDrawScreenPos(x, y,
 				mDesc->mItems[mDesc->mSelectedItem]->GetWidth(), mDesc->mItems[mDesc->mSelectedItem]->GetHeight(), false);
-			y /= CleanYfac_1;
+			y = DOWNSCALEY(y);
 			y += mDesc->mItems[mDesc->mSelectedItem]->GetMouseAreaHeight();
 			if (y - pagesize > mDesc->mScrollPos)
 			{
@@ -338,8 +341,8 @@ bool DFreeformMenu::MenuEvent(int mkey, bool fromcontroller)
 			int ytop = mDesc->mTopPadding;
 			if (ytop < 0)
 				ytop = -ytop;
-			ytop *= CleanYfac_1;
-			int pagesize = (screen->GetHeight() - ytop) / CleanYfac_1;
+			ytop = SCALEY(ytop);
+			int pagesize = DOWNSCALEY(screen->GetHeight() - ytop);
 
 			mDesc->mScrollPos -= pagesize;
 			CanScrollDown = true;
@@ -357,8 +360,8 @@ bool DFreeformMenu::MenuEvent(int mkey, bool fromcontroller)
 			int ytop = mDesc->mTopPadding;
 			if (ytop < 0)
 				ytop = -ytop;
-			ytop *= CleanYfac_1;
-			int pagesize = (screen->GetHeight() - ytop) / CleanYfac_1;
+			ytop = SCALEY(ytop);
+			int pagesize = DOWNSCALEY(screen->GetHeight() - ytop);
 
 			mDesc->mScrollPos += pagesize;
 			CanScrollUp = true;
@@ -419,7 +422,7 @@ bool DFreeformMenu::MouseEvent(int type, int x, int y)
 				&& mDesc->mItems[i]->Selectable()
 				&& mDesc->mItems[i]->CheckCoordinate(
 					x,
-					y - (mDesc->mItems[i]->IsStatic() ? 0 : yOffset - mDesc->mScrollPos) * CleanYfac_1)
+					y - SCALEY(mDesc->mItems[i]->IsStatic() ? 0 : yOffset - mDesc->mScrollPos))
 				)
 			{
 				mDesc->mSelectedItem = i;
@@ -481,14 +484,14 @@ void DFreeformMenu::Drawer()
 
 	if (ytop <= 0)
 		ytop = -ytop;
-	ytop *= CleanYfac_1;
+	ytop = SCALEY(ytop);
 
 	for (unsigned i = 0; i < mDesc->mItems.Size(); i++)
 	{
 		if (mDesc->mItems[i]->IsVisible())
 		{
 			bool isSelected = mDesc->mSelectedItem == (int)i;
-			mDesc->mItems[i]->Draw(mDesc, ytop - mDesc->mScrollPos * CleanYfac_1 + CenteredOffset * CleanYfac_1, isSelected);
+			mDesc->mItems[i]->Draw(mDesc, ytop - SCALEY(mDesc->mScrollPos) + SCALEY(CenteredOffset), isSelected);
 		}
 	}
 
@@ -497,39 +500,39 @@ void DFreeformMenu::Drawer()
 		if (mDesc->mShowBackButton && m_show_backbutton == 0 && TexMan.CheckForTexture(gameinfo.mBackButton, FTexture::TEX_MiscPatch).isValid())
 		{
 			FTexture* texBack = TexMan(gameinfo.mBackButton);
-			if (ytop < texBack->GetScaledHeight() * CleanYfac_1)
-				ytop = texBack->GetScaledHeight() * CleanYfac_1;
+			if (ytop < SCALEY(texBack->GetScaledHeight()))
+				ytop = SCALEY(texBack->GetScaledHeight());
 		}
-		ytop += 4 * CleanYfac_1;
+		ytop += SCALEY(4);
 		if (TexMan.CheckForTexture(gameinfo.mUpArrow, FTexture::TEX_MiscPatch).isValid())
 		{
 			FTexture* texArrow = TexMan(gameinfo.mUpArrow);
-			screen->DrawTexture(texArrow, 3 * CleanXfac_1, ytop, DTA_CleanNoMove_1, true, TAG_DONE);
+			screen->DrawTexture(texArrow, SCALEY(3), ytop, DTA_ScaleYNoMove, true, TAG_DONE);
 		}
 		else
 		{
-			M_DrawConText(CR_ORANGE, 3 * CleanXfac_1, ytop, "\x1a");
+			M_DrawConText(CR_ORANGE, SCALEY(3), ytop, "\x1a");
 		}
 	}
 	if (CanScrollDown)
 	{
-		int ybot = 8 * CleanYfac_1;
+		int ybot = SCALEY(8);
 		if (mDesc->mShowBackButton && m_show_backbutton == 2 && TexMan.CheckForTexture(gameinfo.mBackButton, FTexture::TEX_MiscPatch).isValid())
 		{
 			FTexture* texBack = TexMan(gameinfo.mBackButton);
-			if (ybot < texBack->GetScaledHeight() * CleanYfac_1)
-				ybot = texBack->GetScaledHeight() * CleanYfac_1;
+			if (ybot < SCALEY(texBack->GetScaledHeight()))
+				ybot = SCALEY(texBack->GetScaledHeight());
 		}
 		if (TexMan.CheckForTexture(gameinfo.mDownArrow, FTexture::TEX_MiscPatch).isValid())
 		{
 			FTexture* texArrow = TexMan(gameinfo.mDownArrow);
-			ybot += texArrow->GetScaledHeight() * CleanYfac_1;
-			screen->DrawTexture(texArrow, 3 * CleanXfac_1, screen->GetHeight() - ybot, DTA_CleanNoMove_1, true, TAG_DONE);
+			ybot += SCALEY(texArrow->GetScaledHeight());
+			screen->DrawTexture(texArrow, SCALEY(3), screen->GetHeight() - ybot, DTA_ScaleYNoMove, true, TAG_DONE);
 		}
 		else
 		{
-			ybot += 4 * CleanYfac_1;
-			M_DrawConText(CR_ORANGE, 3 * CleanXfac_1, screen->GetHeight() - ybot, "\x1b");
+			ybot += SCALEY(4);
+			M_DrawConText(CR_ORANGE, SCALEY(3), screen->GetHeight() - ybot, "\x1b");
 		}
 	}
 
@@ -626,8 +629,8 @@ bool FFreeformMenuItem::CheckCoordinate(int x, int y)
 
 	int xLeft, yTop;
 	CalcDrawScreenPos(xLeft, yTop, width, height, false);
-	width *= CleanXfac_1;
-	height *= CleanYfac_1;
+	width = SCALEY(width);
+	height = SCALEY(height);
 
 	return x >= xLeft && x < xLeft + width
 		&& y >= yTop  && y < yTop + height;
@@ -635,8 +638,8 @@ bool FFreeformMenuItem::CheckCoordinate(int x, int y)
 
 void FFreeformMenuItem::CalcDrawScreenPos(int &outX, int &outY, int width, int height, bool withPadding)
 {
-	outX = mXpos * CleanXfac_1;
-	outY = mYpos * CleanYfac_1;
+	outX = SCALEY(mXpos);
+	outY = SCALEY(mYpos);
 	
 	// Adjust for gravity
 	if (mGravity & GRAV_RIGHT)
@@ -651,20 +654,20 @@ void FFreeformMenuItem::CalcDrawScreenPos(int &outX, int &outY, int width, int h
 
 	// Adjust for anchor
 	if (mAnchor & GRAV_RIGHT)
-	{	outX -= width * CleanXfac_1;		}
+	{	outX -= SCALEY(width);				}
 	else if (mAnchor & GRAV_CENTER_HORIZONTAL)
-	{	outX -= width * CleanXfac_1 / 2;	}
+	{	outX -= SCALEY(width) / 2;			}
 
 	if (mAnchor & GRAV_BOTTOM)
-	{	outY -= height * CleanYfac_1;		}
+	{	outY -= SCALEY(height);				}
 	else if (mAnchor & GRAV_CENTER_VERTICAL)
-	{	outY -= height * CleanYfac_1 / 2;	}
+	{	outY -= SCALEY(height) / 2;			}
 
 	// Adjust for padding
 	if (withPadding)
 	{
-		outX += mXPadding * CleanXfac_1;
-		outY += mYPadding * CleanYfac_1;
+		outX += SCALEY(mXPadding);
+		outY += SCALEY(mYPadding);
 	}
 }
 
@@ -774,9 +777,9 @@ void FFreeformMenuItemLabel::Draw(FFreeformMenuDescriptor* desc, int yoffset, bo
 		if (!mIsStatic)
 			y += yoffset;
 		screen->DrawTexture(tex, x, y,
-			DTA_CleanNoMove_1, true,
-			DTA_DestWidth, width * CleanXfac_1,
-			DTA_DestHeight, height * CleanYfac_1,
+			DTA_ScaleYNoMove, true,
+			DTA_DestWidth, SCALEY(width),
+			DTA_DestHeight, SCALEY(height),
 			DTA_Alpha, mAlpha,
 			TAG_DONE);
 	}
@@ -802,10 +805,10 @@ void FFreeformMenuItemLabel::Draw(FFreeformMenuDescriptor* desc, int yoffset, bo
 				if (!mIsStatic)
 					y += yoffset;
 				screen->DrawText(mFont, mFontColor, x, y + messageY, lines[i].Text,
-					DTA_CleanNoMove_1, true,
+					DTA_ScaleYNoMove, true,
 					DTA_Alpha, mAlpha,
 					TAG_DONE);
-				messageY += mFont->GetHeight() * CleanYfac_1;
+				messageY += SCALEY(mFont->GetHeight());
 			}
 
 			V_FreeBrokenLines( lines );
@@ -822,7 +825,7 @@ void FFreeformMenuItemLabel::Draw(FFreeformMenuDescriptor* desc, int yoffset, bo
 			if (!mIsStatic)
 				y += yoffset;
 			screen->DrawText(mFont, mFontColor, x, y, label,
-				DTA_CleanNoMove_1, true,
+				DTA_ScaleYNoMove, true,
 				DTA_ClipLeft, clipleft,
 				DTA_ClipRight, clipright,
 				DTA_ClipTop, cliptop,
@@ -841,8 +844,8 @@ void FFreeformMenuItemLabel::CalcTextClip(int &left, int &right, int &top, int &
 		CalcDrawScreenPos(x, y, width, height, false);
 		left = x;
 		top = y + yoffset;
-		right = x + width * CleanXfac_1;
-		bottom = y + height * CleanYfac_1 + yoffset;
+		right = x + SCALEY(width);
+		bottom = y + SCALEY(height) + yoffset;
 	}
 	else
 	{
@@ -907,9 +910,9 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 		if (!mIsStatic)
 			y += yoffset;
 		screen->DrawTexture(tex, x, y,
-			DTA_CleanNoMove_1, true,
-			DTA_DestWidth, width * CleanXfac_1,
-			DTA_DestHeight, height * CleanYfac_1,
+			DTA_ScaleYNoMove, true,
+			DTA_DestWidth, SCALEY(width),
+			DTA_DestHeight, SCALEY(height),
 			DTA_ColorOverlay, overlay,
 			DTA_Alpha, mAlpha,
 			TAG_DONE);
@@ -929,21 +932,21 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 		int foregroundHeight = mForegroundHeight >= 0 ? mForegroundHeight : tex->GetScaledHeight();
 		CalcDrawScreenPos(x, y, foregroundWidth, foregroundHeight, false);
 		if (mAnchor & GRAV_LEFT)
-		{	x -= (foregroundWidth - width) * CleanXfac_1 / 2;		}
+		{	x -= SCALEY((foregroundWidth - width)) / 2;		}
 		else if (mAnchor & GRAV_RIGHT)
-		{	x += (foregroundWidth - width) * CleanXfac_1 / 2;		}
+		{	x += SCALEY((foregroundWidth - width)) / 2;		}
 
 		if (mAnchor & GRAV_TOP)
-		{	y -= (foregroundHeight - height) * CleanYfac_1 / 2;	}
+		{	y -= SCALEY((foregroundHeight - height)) / 2;	}
 		else if (mAnchor & GRAV_BOTTOM)
-		{	y += (foregroundHeight - height) * CleanYfac_1 / 2;	}
+		{	y += SCALEY((foregroundHeight - height)) / 2;	}
 		
 		if (!mIsStatic)
 			y += yoffset;
 		screen->DrawTexture(tex, x, y,
-			DTA_CleanNoMove_1, true,
-			DTA_DestWidth, foregroundWidth * CleanXfac_1,
-			DTA_DestHeight, foregroundHeight * CleanYfac_1,
+			DTA_ScaleYNoMove, true,
+			DTA_DestWidth, SCALEY(foregroundWidth),
+			DTA_DestHeight, SCALEY(foregroundHeight),
 			DTA_ColorOverlay, overlay,
 			DTA_Alpha, mAlpha,
 			TAG_DONE);
@@ -971,7 +974,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 				if (!mIsStatic)
 					y += yoffset;
 				screen->DrawText(mFont, selected ? mSelectedFontColor : mFontColor, x, y + messageY, lines[i].Text,
-					DTA_CleanNoMove_1, true,
+					DTA_ScaleYNoMove, true,
 					DTA_ClipLeft, clipleft,
 					DTA_ClipRight, clipright,
 					DTA_ClipTop, cliptop,
@@ -979,7 +982,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 					DTA_ColorOverlay, overlay,
 					DTA_Alpha, mAlpha,
 					TAG_DONE);
-				messageY += mFont->GetHeight() * CleanYfac_1;
+				messageY += SCALEY(mFont->GetHeight());
 			}
 
 			V_FreeBrokenLines( lines );
@@ -993,7 +996,7 @@ void FFreeformMenuItemActionableBase::Draw(FFreeformMenuDescriptor *desc, int yo
 			if (!mIsStatic)
 				y += yoffset;
 			screen->DrawText(mFont, selected ? mSelectedFontColor : mFontColor, x, y, label,
-				DTA_CleanNoMove_1, true,
+				DTA_ScaleYNoMove, true,
 				DTA_ClipLeft, clipleft,
 				DTA_ClipRight, clipright,
 				DTA_ClipTop, cliptop,
@@ -1389,7 +1392,7 @@ void FFreeformMenuItemColorPicker::Draw(FFreeformMenuDescriptor *desc, int yoffs
 		if (!mIsStatic)
 			y += yoffset;
 
-		screen->Clear (x, y, x + width * CleanXfac_1, y + height * CleanYfac_1,
+		screen->Clear (x, y, x + SCALEY(width), y + SCALEY(height),
 			-1, (uint32)*mCVar | 0xff000000);
 
 		FFreeformMenuItemActionableBase::Draw(desc, yoffset, selected);
@@ -1919,19 +1922,19 @@ void FFreeformMenuSliderBase::Draw(FFreeformMenuDescriptor* desc, int yoffset, b
 		if (!mIsStatic)
 			y += yoffset;
 		screen->DrawTexture(tex, x, y,
-			DTA_CleanNoMove_1, true,
-			DTA_DestWidth, width * CleanXfac_1,
-			DTA_DestHeight, height * CleanYfac_1,
+			DTA_ScaleYNoMove, true,
+			DTA_DestWidth, SCALEY(width),
+			DTA_DestHeight, SCALEY(height),
 			DTA_ColorOverlay, overlay,
 			DTA_Alpha, mAlpha,
 			TAG_DONE);
 
-		x += (int) ((width - mSliderWidth) * CleanXfac_1 * ccur / range);
-		y -= (mSliderHeight - height) * CleanYfac_1 / 2;
+		x += (int) (SCALEY((width - mSliderWidth)) * ccur / range);
+		y -= SCALEY(mSliderHeight - height) / 2;
 		screen->DrawTexture(slider, x, y,
-			DTA_CleanNoMove_1, true,
-			DTA_DestWidth, mSliderWidth * CleanXfac_1,
-			DTA_DestHeight, mSliderHeight * CleanYfac_1,
+			DTA_ScaleYNoMove, true,
+			DTA_DestWidth, SCALEY(mSliderWidth),
+			DTA_DestHeight, SCALEY(mSliderHeight),
 			DTA_ColorOverlay, overlay,
 			DTA_Alpha, mAlpha,
 			TAG_DONE);
@@ -1945,14 +1948,14 @@ void FFreeformMenuSliderBase::Draw(FFreeformMenuDescriptor* desc, int yoffset, b
 			y += yoffset;
 
 		screen->DrawText(ConFont, CR_WHITE, x, y, mSliderText,
-			DTA_CellX, 8 * CleanXfac_1,
-			DTA_CellY, 8 * CleanYfac_1,
+			DTA_CellX, SCALEY(8),
+			DTA_CellY, SCALEY(8),
 			DTA_ColorOverlay, overlay,
 			DTA_Alpha, mAlpha,
 			TAG_DONE);
-		screen->DrawText(ConFont, CR_ORANGE, x + int((5 + ((ccur * 78) / range)) * CleanXfac_1), y, "\x13",
-			DTA_CellX, 8 * CleanXfac_1,
-			DTA_CellY, 8 * CleanYfac_1,
+		screen->DrawText(ConFont, CR_ORANGE, x + SCALEY((5 + ((ccur * 78) / range))), y, "\x13",
+			DTA_CellX, SCALEY(8),
+			DTA_CellY, SCALEY(8),
 			DTA_ColorOverlay, overlay,
 			DTA_Alpha, mAlpha,
 			TAG_DONE);
@@ -2003,15 +2006,15 @@ bool FFreeformMenuSliderBase::MouseEvent(int type, int x, int y)
 		int width = GetWidth() >= 0 ? GetWidth() : tex->GetScaledWidth();
 		int height = GetHeight() >= 0 ? GetHeight() : tex->GetScaledHeight();
 		CalcDrawScreenPos(slide_left, y, width, height, false);
-		slide_left += mSliderWidth * CleanXfac_1 / 2;
-		slide_right = slide_left + width * CleanXfac_1 - mSliderWidth * CleanXfac_1;
+		slide_left += SCALEY(mSliderWidth) / 2;
+		slide_right = slide_left + SCALEY(width) - SCALEY(mSliderWidth);
 	}
 	else
 	{
 		int y; // unused, needed as parameter for CalDrawScreenPos
 		CalcDrawScreenPos(slide_left, y, ConFont->StringWidth(mSliderText), ConFont->GetHeight(), false);
-		slide_left += 8 * CleanXfac_1;
-		slide_right = slide_left + 10 * 8 * CleanXfac_1;	// 12 char cells with 8 pixels each.
+		slide_left += SCALEY(8);
+		slide_right = slide_left + 10 * SCALEY(8);	// 12 char cells with 8 pixels each.
 	}
 
 	x = clamp(x, slide_left, slide_right);
