@@ -2774,9 +2774,8 @@ void APlayerPawn::CreateEffectActor (int index)
 
 	if ( classToSpawn )
 	{
-		bool isClientside = !!( GetDefaultByType( classToSpawn )->ulNetworkFlags & NETFL_CLIENTSIDEONLY );
-		bool shouldSpawn = ( NETWORK_GetState() == NETSTATE_SERVER )
-			|| ( !isClientside && NETWORK_ClientsideFunctionsAllowed( this ) );
+		bool allowedOnClient = !!( GetDefaultByType( classToSpawn )->ulNetworkFlags & NETFL_CLIENTSIDEONLY ) || NETWORK_ClientsideFunctionsAllowed(this);
+		bool shouldSpawn = ( NETWORK_GetState() == NETSTATE_SERVER ) || allowedOnClient;
 
 		if ( shouldSpawn )
 		{
@@ -2787,7 +2786,7 @@ void APlayerPawn::CreateEffectActor (int index)
 
 			if ( NETWORK_GetState( ) == NETSTATE_SERVER )
 			{
-				UNLAGGED_UnlagAndReplicateThing( this, EffectActor, !isClientside, true, false );
+				UNLAGGED_UnlagAndReplicateThing( this, EffectActor, allowedOnClient, true, false );
 			}
 		}
 	}
