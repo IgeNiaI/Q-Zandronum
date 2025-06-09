@@ -5227,43 +5227,46 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 	fixed_t sina = finesine[reference->angle >> ANGLETOFINESHIFT];
 	fixed_t cosa = finecosine[reference->angle >> ANGLETOFINESHIFT];
 
-	if (flags & 1)	// relative axes - make x, y relative to actor's current angle
+	if (NETWORK_GetState() != NETSTATE_CLIENT || !(flags & 8)) // FORCESERVERSIDE
 	{
-		vx = DMulScale16(x, cosa, -y, sina);
-		vy = DMulScale16(x, sina,  y, cosa);
-	}
-	if (flags & 2)	// discard old velocity - replace old velocity with new velocity
-	{
-		reference->velx = vx;
-		reference->vely = vy;
-		reference->velz = vz;
-
-		if (reference->player && reference->player->mo == reference && reference->velz > 0)
+		if (flags & 1)	// relative axes - make x, y relative to actor's current angle
 		{
-			reference->player->mo->wasJustThrustedZ = true;
+			vx = DMulScale16(x, cosa, -y, sina);
+			vy = DMulScale16(x, sina,  y, cosa);
 		}
-
-		if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
+		if (flags & 2)	// discard old velocity - replace old velocity with new velocity
 		{
-			CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( vx, vy, true );
-			CLIENT_PREDICT_SaveSelfThrustBonusVertical( vz, true );
+			reference->velx = vx;
+			reference->vely = vy;
+			reference->velz = vz;
+
+			if (reference->player && reference->player->mo == reference && reference->velz > 0)
+			{
+				reference->player->mo->wasJustThrustedZ = true;
+			}
+
+			if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
+			{
+				CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( vx, vy, true );
+				CLIENT_PREDICT_SaveSelfThrustBonusVertical( vz, true );
+			}
 		}
-	}
-	else	// add new velocity to old velocity
-	{
-		reference->velx += vx;
-		reference->vely += vy;
-		reference->velz += vz;
+		else	// add new velocity to old velocity
+		{
+			reference->velx += vx;
+			reference->vely += vy;
+			reference->velz += vz;
 		
-		if (reference->player && reference->player->mo == reference && reference->velz > 0)
-		{
-			reference->player->mo->wasJustThrustedZ = true;
-		}
+			if (reference->player && reference->player->mo == reference && reference->velz > 0)
+			{
+				reference->player->mo->wasJustThrustedZ = true;
+			}
 
-		if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
-		{
-			CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( vx, vy, false );
-			CLIENT_PREDICT_SaveSelfThrustBonusVertical( vz, false );
+			if ( NETWORK_InClientMode() && reference->player == &players[consoleplayer] && reference->player->mo == reference )
+			{
+				CLIENT_PREDICT_SaveSelfThrustBonusHorizontal( vx, vy, false );
+				CLIENT_PREDICT_SaveSelfThrustBonusVertical( vz, false );
+			}
 		}
 	}
 
@@ -5274,7 +5277,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_ChangeVelocity)
 
 	// [TP] Inform the clients about the velocity change.
 	if (( NETWORK_GetState() == NETSTATE_SERVER ) && ( NETWORK_IsActorClientHandled( reference ) == false ))
-		SERVERCOMMANDS_MoveThing( reference, CM_VELXY|CM_VELZ );
+		if ( flags & 4 ) // SKIPOWNER
+			SERVERCOMMANDS_MoveThing( reference, CM_VELXY|CM_VELZ, NETWORK_GetActorsOwnerPlayer( reference ) - players, SVCF_SKIPTHISCLIENT );
+		else
+			SERVERCOMMANDS_MoveThing( reference, CM_VELXY|CM_VELZ );
 }
 
 //===========================================================================
