@@ -6001,7 +6001,7 @@ void P_DoRadiusAttack( AActor *thing, AActor *bombspot, AActor *bombsource, doub
 				// tweaked behavior rockets, only affects players
 				if ((zadmflags & ZADF_QUAKE_THRUST) && thing->player != NULL)
 				{
-					fixed_t heightOffset = thing == bombsource ? thing->player->viewheight : thing->height / 2; // facilitates rocket jumps and behaves intuitively against opponents
+					fixed_t heightOffset = thing->player && thing->player->mo == thing ? thing->player->viewheight : thing->height / 2; // facilitates rocket jumps and behaves intuitively against opponents
 					fixed_t bombspotHeightOffset = ( zadmflags & ZADF_ENABLE_PROJECTILE_HITBOX_FIX ) ? bombspot->height / 2 : 0;
 					FVector3 thingPos = { FIXED2FLOAT(thing->x), FIXED2FLOAT(thing->y) , FIXED2FLOAT(thing->z + heightOffset) };
 					FVector3 explosionToPlayer = thingPos - FVector3(FIXED2FLOAT(bombspot->x), FIXED2FLOAT(bombspot->y), FIXED2FLOAT(bombspot->z + bombspotHeightOffset));
