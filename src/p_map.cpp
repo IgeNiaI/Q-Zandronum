@@ -6091,7 +6091,8 @@ void P_DoRadiusAttack( AActor *thing, AActor *bombspot, AActor *bombsource, doub
 				{
 					// [BC] If we're the server, update the thing's velocity.
 					// [BB] Use SERVER_UpdateThingVelocity to prevent sync problems.
-					if ( NETWORK_GetState( ) == NETSTATE_SERVER )
+					// [geNia] No need to update velocity for players, they are sent every tic anyway.
+					if ( NETWORK_GetState( ) == NETSTATE_SERVER && (!thing->player || thing->player->mo != thing) )
 						SERVER_UpdateThingVelocity( thing, true );
 				}
 			}
