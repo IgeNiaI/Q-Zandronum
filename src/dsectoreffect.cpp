@@ -440,7 +440,12 @@ void P_SetFloorPlane (sector_t *sector, fixed_t dest)
 	fixed_t lastPos = sector->floorplane.d;
 
 	// Change the height.
-	sector->floorplane.ChangeHeight(-delta);
+	//sector->floorplane.ChangeHeight(-delta);
+
+	// [geNia] P_SetFloorPlane() works kinda different from MovePlane() function
+	// Because of that, floors are set to different heights from what the server tells
+	// So set the height directly as is, like MovePlane() does when reaching the end
+	sector->floorplane.d = dest;
 
 	// Call this to update various actor's within the sector.
 	P_ChangeSector(sector, false, -delta, 0, false);
@@ -461,7 +466,12 @@ void P_SetCeilingPlane(sector_t *sector, fixed_t dest)
 	fixed_t lastPos = sector->ceilingplane.d;
 
 	// Change the height.
-	sector->ceilingplane.ChangeHeight(delta);
+	//sector->ceilingplane.ChangeHeight(delta);
+
+	// [geNia] P_SetCeilingPlane() works kinda different from MovePlane() function
+	// Because of that, ceiling are set to different heights from what the server tells
+	// So set the height directly as is, like MovePlane() does when reaching the end
+	sector->ceilingplane.d = dest;
 	
 	// Call this to update various actor's within the sector.
 	P_ChangeSector(sector, false, delta, 0, false);
