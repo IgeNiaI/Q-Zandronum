@@ -462,6 +462,9 @@ void P_SetCeilingPlane(sector_t *sector, fixed_t dest)
 
 	// Change the height.
 	sector->ceilingplane.ChangeHeight(delta);
+	
+	// Call this to update various actor's within the sector.
+	P_ChangeSector(sector, false, delta, 0, false);
 
 	// Finally, adjust textures.
 	sector->SetPlaneTexZ(sector_t::ceiling, sector->GetPlaneTexZ(sector_t::ceiling) + sector->ceilingplane.HeightDiff(lastPos));
