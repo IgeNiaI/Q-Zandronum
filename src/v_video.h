@@ -47,6 +47,7 @@
 extern int CleanWidth, CleanHeight, CleanXfac, CleanYfac;
 extern int CleanWidth_1, CleanHeight_1, CleanXfac_1, CleanYfac_1;
 extern int DisplayWidth, DisplayHeight, DisplayBits;
+extern float ScaleFac;
 
 bool V_DoModeSetup (int width, int height, int bits);
 void V_CalcCleanFacs (int designwidth, int designheight, int realwidth, int realheight, int *cleanx, int *cleany, int *cx1=NULL, int *cx2=NULL);
@@ -85,6 +86,7 @@ enum
 	DTA_Bottom320x200,	// bool: same as DTA_320x200 but centers virtual screen on bottom for 1280x1024 targets
 	DTA_CleanNoMove,	// bool: like DTA_Clean but does not reposition output position
 	DTA_CleanNoMove_1,	// bool: like DTA_CleanNoMove, but uses Clean[XY]fac_1 instead
+	DTA_ScaleYNoMove,	// bool: Same as DTA_CleanNoMove, but scales using Yfac instead
 	DTA_FlipX,			// bool: flip image horizontally	//FIXME: Does not work with DTA_Window(Left|Right)
 	DTA_ShadowColor,	// color of shadow
 	DTA_ShadowAlpha,	// alpha of shadow

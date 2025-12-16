@@ -126,6 +126,8 @@ const int JLOSF_SKIPOWNER = 4096;
 // Flags for A_ChangeVelocity
 const int CVF_RELATIVE = 1;
 const int CVF_REPLACE = 2;
+const int CVF_SKIPOWNER	= 4;
+const int CVF_FORCESERVERSIDE = 8;
 
 // Flags for A_WeaponReady
 const int WRF_NOBOB = 1;

@@ -589,6 +589,7 @@ void CLIENTCOMMANDS_CallVote( LONG lVoteCommand, const char *pszArgument, const 
 	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, lVoteCommand );
 	NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, pszArgument );
 	NETWORK_WriteString( &CLIENT_GetLocalBuffer( )->ByteStream, pszReason );
+	NETWORK_WriteByte( &CLIENT_GetLocalBuffer( )->ByteStream, CLC_VOTEYES );
 }
 
 //*****************************************************************************

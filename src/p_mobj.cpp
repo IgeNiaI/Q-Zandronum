@@ -786,6 +786,7 @@ sector_t *AActor::GetSectorBelow(int flags) const
 {
 #ifdef _3DFLOORS
 	sector_t *sector = Sector;
+	fixed_t old_top = sector->floorplane.ZatPoint(x, y);
 
 	//Check 3D floors
 	if (Sector->e->XFloor.ffloors.Size())
@@ -800,8 +801,9 @@ sector_t *AActor::GetSectorBelow(int flags) const
 			{
 				fixed_t ff_top = rover->top.plane->ZatPoint(x, y);
 
-				if (z >= ff_top)
+				if (z >= ff_top && ff_top >= old_top)
 				{
+					old_top = ff_top;
 					sector = rover->top.model;
 				}
 			}

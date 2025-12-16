@@ -571,6 +571,60 @@ void DMovePolyTo::Predict()
 	}
 }
 
+// [geNia]
+void DMovePolyTo::RecordUnlagged (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_unlaggedX[lTick] = poly->StartSpot.x;
+	m_unlaggedY[lTick] = poly->StartSpot.y;
+}
+
+// [geNia]
+void DMovePolyTo::ReconcileUnlagged (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_restoreX = poly->StartSpot.x;
+	m_restoreY = poly->StartSpot.y;
+	poly->MovePolyobj(m_unlaggedX[lTick] - poly->StartSpot.x, m_unlaggedY[lTick] - poly->StartSpot.y, true);
+}
+
+// [geNia]
+void DMovePolyTo::RestoreUnlagged ()
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	poly->MovePolyobj(m_restoreX - poly->StartSpot.x, m_restoreY - poly->StartSpot.y, true);
+}
+
+// [geNia]
+void DMovePolyTo::RecordPredict (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_predictX[lTick] = poly->StartSpot.x;
+	m_predictY[lTick] = poly->StartSpot.y;
+}
+
+// [geNia]
+void DMovePolyTo::RestorePredict (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	poly->MovePolyobj(m_predictX[lTick] - poly->StartSpot.x, m_predictY[lTick] - poly->StartSpot.y, true);
+}
+
 fixed_t DMovePolyTo::GetXTarget ()
 {
 	return ( m_xTarget );
@@ -666,6 +720,60 @@ void DPolyDoor::Predict()
 		Tick();
 		TicsToPredict--;
 	}
+}
+
+// [geNia]
+void DPolyDoor::RecordUnlagged (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_unlaggedX[lTick] = poly->StartSpot.x;
+	m_unlaggedY[lTick] = poly->StartSpot.y;
+}
+
+// [geNia]
+void DPolyDoor::ReconcileUnlagged (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_restoreX = poly->StartSpot.x;
+	m_restoreY = poly->StartSpot.y;
+	poly->MovePolyobj(m_unlaggedX[lTick] - poly->StartSpot.x, m_unlaggedY[lTick] - poly->StartSpot.y, true);
+}
+
+// [geNia]
+void DPolyDoor::RestoreUnlagged ()
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	poly->MovePolyobj(m_restoreX - poly->StartSpot.x, m_restoreY - poly->StartSpot.y, true);
+}
+
+// [geNia]
+void DPolyDoor::RecordPredict (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	m_predictX[lTick] = poly->StartSpot.x;
+	m_predictY[lTick] = poly->StartSpot.y;
+}
+
+// [geNia]
+void DPolyDoor::RestorePredict (LONG lTick)
+{
+	FPolyObj *poly = PO_GetPolyobj (m_PolyObj);
+	if (poly == NULL)
+		return;
+
+	poly->MovePolyobj(m_predictX[lTick] - poly->StartSpot.x, m_predictY[lTick] - poly->StartSpot.y, true);
 }
 
 podoortype_t DPolyDoor::GetType()
