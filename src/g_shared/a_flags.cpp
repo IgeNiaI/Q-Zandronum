@@ -483,7 +483,6 @@ bool AFlag::HandlePickup( AInventory *pItem )
 			}
 
 			// [RC] Create the "scored by" and "assisted by" message.
-			Printf("Scored by\n");
 			sprintf( szString, "\\c%cScored by: %s", V_GetColorChar( TEAM_GetTextColor( Owner->player->ulTeam )), Owner->player->userinfo.GetName() );
 			const bool bAssisted = (TEAM_GetAssistPlayer(Owner->player->ulTeam) != MAXPLAYERS);
 			if ( bAssisted )
