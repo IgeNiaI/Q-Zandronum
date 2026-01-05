@@ -902,27 +902,30 @@ bool AWhiteFlag::HandlePickup( AInventory *pItem )
 			TEAM_SetAssistPlayer( Owner->player->ulTeam, MAXPLAYERS );
 		}
 
-		// Create the "captured" message.
-		sprintf( szString, "\\c%c%s team scores!", V_GetColorChar( TEAM_GetTextColor( Owner->player->ulTeam )), TEAM_GetName( Owner->player->ulTeam ));
-		V_ColorizeString( szString );
+		if (pointlimit > 0 && TEAM_GetScore(Owner->player->ulTeam) < (LONG)pointlimit)
+		{
+			// Create the "captured" message.
+			sprintf( szString, "\\c%c%s team scores!", V_GetColorChar( TEAM_GetTextColor( Owner->player->ulTeam )), TEAM_GetName( Owner->player->ulTeam ));
+			V_ColorizeString( szString );
 
-		// Now, print it.
-		if ( NETWORK_GetState( ) != NETSTATE_SERVER )
-		{
-			pMsg = new DHUDMessageFadeOut( BigFont, szString,
-				1.5f,
-				TEAM_MESSAGE_Y_AXIS,
-				0,
-				0,
-				CR_WHITE,
-				3.0f,
-				0.25f );
-			StatusBar->AttachMessage( pMsg, MAKE_ID( 'C','N','T','R' ));
-		}
-		// If necessary, send it to clients.
-		else
-		{
-			SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 1.5f, TEAM_MESSAGE_Y_AXIS, 0, 0, CR_WHITE, 3.0f, 0.25f, "BigFont", false, MAKE_ID( 'C','N','T','R' ));
+			// Now, print it.
+			if ( NETWORK_GetState( ) != NETSTATE_SERVER )
+			{
+				pMsg = new DHUDMessageFadeOut( BigFont, szString,
+					1.5f,
+					TEAM_MESSAGE_Y_AXIS,
+					0,
+					0,
+					CR_WHITE,
+					3.0f,
+					0.25f );
+				StatusBar->AttachMessage( pMsg, MAKE_ID( 'C','N','T','R' ));
+			}
+			// If necessary, send it to clients.
+			else
+			{
+				SERVERCOMMANDS_PrintHUDMessageFadeOut( szString, 1.5f, TEAM_MESSAGE_Y_AXIS, 0, 0, CR_WHITE, 3.0f, 0.25f, "BigFont", false, MAKE_ID( 'C','N','T','R' ));
+			}
 		}
 
 		// [BC] Rivecoder's "scored by" message.
