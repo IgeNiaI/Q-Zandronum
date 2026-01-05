@@ -974,6 +974,14 @@ bool AWhiteFlag::HandlePickup( AInventory *pItem )
 
 LONG AWhiteFlag::AllowFlagPickup( AActor *pToucher )
 {
+	// [BB] If a client gets here, the server already made all necessary checks. So just allow the pickup.
+	if ( NETWORK_InClientMode() )
+		return (ALLOW_PICKUP);
+
+	// [CK] Do not let pickups occur after the match has ended
+	if ( GAMEMODE_IsGameInProgress() == false )
+		return (DENY_PICKUP);
+
 	// [BB] Carrying more than one WhiteFlag is not allowed.
 	if (( pToucher == NULL ) || ( pToucher->FindInventory( PClass::FindClass( "WhiteFlag" ) ) == NULL ) )
 		return ( ALLOW_PICKUP );
