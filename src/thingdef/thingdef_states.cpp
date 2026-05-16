@@ -442,7 +442,10 @@ do_stop:
 					}
 					goto endofstate;
 				}
-				sc.ScriptError("Invalid state parameter %s\n", sc.String);
+				// Goy-Proof fix: Skip unknown action functions instead of crashing
+				Printf(PRINT_HIGH, "Warning: Unknown DECORATE action function '%s' - using TNT1 A 0 (No-Op).\n", sc.String);
+				state.SetAction(FindGlobalActionFunction("TNT1"), false);
+				goto endofstate;
 			}
 			sc.UnGet();
 endofstate:

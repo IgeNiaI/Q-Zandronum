@@ -60,9 +60,9 @@
 #include <dlfcn.h>
 
 #ifdef __APPLE__
-#define FLUIDSYNTHLIB1	"libfluidsynth.1.dylib"
+#define FLUIDSYNTHLIB1	"libfluidsynth.dylib"
 #else // !__APPLE__
-#define FLUIDSYNTHLIB1	"libfluidsynth.so.1"
+#define FLUIDSYNTHLIB1	"libfluidsynth.so"
 #endif // __APPLE__
 #endif
 
@@ -300,12 +300,16 @@ FluidSynthMIDIDevice::FluidSynthMIDIDevice()
 		fluid_chorus_speed, fluid_chorus_depth, fluid_chorus_type);
 	if (0 == LoadPatchSets(fluid_patchset))
 	{
+#if defined(__linux__)
+		if (0 == LoadPatchSets("/usr/share/sounds/sf2/default-GM.sf2"))
+		{
+#endif
+
 #if defined (__unix__) && (__APPLE__)
 		if (0 == LoadPatchSets("$PROGDIR/gm.sf2"))
 		{
 #endif
 
-            
 #ifdef _WIN32
 		// On Windows, look for the 4 megabyte patch set installed by Creative's drivers as a default.
 		char sysdir[MAX_PATH+sizeof("\\CT4MGM.SF2")];
@@ -331,7 +335,7 @@ FluidSynthMIDIDevice::FluidSynthMIDIDevice()
             }
         }
 #endif
-#if defined (__unix__) && (__APPLE__)
+#if defined (__linux__) || ((__unix__) && (__APPLE__))
 		}
 #endif
 	}
@@ -624,8 +628,8 @@ FString FluidSynthMIDIDevice::GetStats()
 	double load = fluid_synth_get_cpu_load(FluidSynth);
 	char *chorus, *reverb;
 	int maxpoly;
-	fluid_settings_getstr(FluidSettings, "synth.chorus.active", &chorus);
-	fluid_settings_getstr(FluidSettings, "synth.reverb.active", &reverb);
+	fluid_settings_getstr_default(FluidSettings, "synth.chorus.active", &chorus);
+	fluid_settings_getstr_default(FluidSettings, "synth.reverb.active", &reverb);
 	fluid_settings_getint(FluidSettings, "synth.polyphony", &maxpoly);
 	CritSec.Leave();
 
@@ -664,7 +668,7 @@ bool FluidSynthMIDIDevice::LoadFluidSynth()
 		{ (void **)&fluid_settings_setnum,				"fluid_settings_setnum" },
 		{ (void **)&fluid_settings_setstr,				"fluid_settings_setstr" },
 		{ (void **)&fluid_settings_setint,				"fluid_settings_setint" },
-		{ (void **)&fluid_settings_getstr,				"fluid_settings_getstr" },
+		{ (void **)&fluid_settings_getstr_default,			"fluid_settings_getstr_default" },
 		{ (void **)&fluid_settings_getint,				"fluid_settings_getint" },
 		{ (void **)&fluid_synth_set_reverb_on,			"fluid_synth_set_reverb_on" },
 		{ (void **)&fluid_synth_set_chorus_on,			"fluid_synth_set_chorus_on" },

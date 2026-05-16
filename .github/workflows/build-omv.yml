@@ -1,0 +1,124 @@
+name: Q-Zandronum Cooker CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-cooker:
+    runs-on: ubuntu-latest
+    # Using the official OpenMandriva Cooker container
+    container: openmandriva/cooker
+
+    steps:
+    - name: Bootstrap Git
+      run: dnf install -y --nogpgcheck git-core
+      
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Build Dependencies
+      run: |
+        dnf install -y --nogpgcheck \
+          cmake \
+          make binutils \
+          clang \
+          gcc-c++ \
+          ninja \
+          python3 \
+          glibc-devel \
+          lib64SDL-devel \
+          lib64SDL2-devel \
+          lib64SDL2_mixer-devel \
+          lib64openal-devel \
+          lib64sndfile-devel \
+          lib64mpg123-devel \
+          lib64fluidsynth-devel \
+          lib64openssl-devel \
+          lib64xcursor-devel \
+          lib64glib2.0-devel \
+          lib64pango1.0-devel \
+          libpangocairo1.0-devel \
+          lib64cairo-devel \
+          lib64atk1.0-devel \
+          lib64gdk_pixbuf2.0-devel \
+          lib64glew-devel \
+          gtk-doc automake autoconf libtool lib64gettext-devel
+
+    - name: Build gtk2-ng
+      run: |
+        git clone https://git.devuan.org/Daemonratte/gtk2-ng.git /tmp/gtk2-ng-src
+        cd /tmp/gtk2-ng-src
+        # Installing to /opt to match your local 5800X3D layout
+        ./autogen.sh
+        make -j$(nproc)
+        make install
+        
+    - name: Build fmodex-zdoom-linux64-4.26.36
+      run: |
+        git clone https://github.com/supersonic-xserver/fmodex-zdoom-linux64-4.26.36 /tmp/fmodex-zdoom-linux64-4.26.36
+        cd /tmp/fmodex-zdoom-linux64-4.26.36
+        make install
+
+    - name: Configure and Build Client
+      run: |
+        mkdir build_client && cd build_client
+        cmake .. \
+          -GNinja \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+          -DCMAKE_POLICY_DEFAULT_CMP0148=OLD \
+          -DOpenGL_GL_PREFERENCE=GLVND \
+          -DCMAKE_CXX_FLAGS="-O2 -fno-strict-aliasing -fcommon -Wno-error" \
+          -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=bfd -Wl,--no-gc-sections -Wl,--no-as-needed -Wl,--undefined=__start_yreg -Wl,--undefined=__start_areg" \
+          -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=bfd"
+          ninja
+          
+    - name: Configure and Build Server
+      run: |
+        mkdir -p build_server && cd build_server
+        cmake .. \
+          -GNinja \
+          -DSERVERONLY=ON \
+          -DNO_GUI=ON \
+          -DNO_FMOD=ON \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+          -DCMAKE_POLICY_DEFAULT_CMP0148=OLD \
+          -DCMAKE_CXX_FLAGS="-O2 -fno-strict-aliasing -fcommon -Wno-error" \
+          -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=bfd -Wl,--no-gc-sections -Wl,--no-as-needed -Wl,--undefined=__start_yreg -Wl,--undefined=__start_areg" \
+          -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=bfd"
+        ninja
+        
+    - name: Assemble Full Distribution Folder
+      run: |
+        # Create a structured distribution folder
+        DIST_DIR="q-zandronum-linux64-cooker"
+        mkdir -p $DIST_DIR
+        # Mirror the full client build tree
+        # Use -a (archive) to preserve symlinks and permissions
+        cp -a build_client/. $DIST_DIR/
+        # Mirror the full server build tree
+        # This will merge the server binaries into the same folder structure
+        cp -a build_server/. $DIST_DIR/
+        # Additionally, grab the Samsara and Map files from the root
+        cp *.pk3 $DIST_DIR/ 2>/dev/null || :
+        cp *.wad $DIST_DIR/ 2>/dev/null || :
+        # Add a simple launch script for the server
+        echo "./q-zandronum-server -iwad doom2.wad -file zddl4.wad tdbots4q-zandronum.pk3 SamsaraReincarnation_v2.2.1-PublicBeta.pk3 +set sv_maxclients 10 +set tdbots_difficulty 4 +set tdbots_precision 95 +set tdbots_reactiontime 0 +set tdb_show_nodes false +set sv_itemrespawn 1 +set sv_noexit 1 +set fraglimit 20 +set timelimit 10 +map map09 +deathmatch 1" > $DIST_DIR/start_samsara_server.sh
+        chmod +x $DIST_DIR/start_samsara_server.sh
+
+    - name: Upload Complete Distribution
+      uses: actions/upload-artifact@v4
+      with:
+        name: q-zandronum-full-dist-linux64
+        path: q-zandronum-linux64-cooker/
+
+
+

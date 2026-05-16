@@ -30,7 +30,7 @@ endif(CMAKE_CROSSCOMPILING)
 
 # Simplify pk3 building, add_pk3(filename srcdirectory)
 function( add_pk3 PK3_NAME PK3_DIR )
-	get_target_property(ZIPDIR_EXE zipdir LOCATION)
+	set(ZIPDIR_EXE zipdir)
 
 	# Generate target name. Just use "pk3" for main pk3 target.
 	string( REPLACE "." "_" PK3_TARGET ${PK3_NAME} )

@@ -287,8 +287,20 @@ static FFlagDef ActorFlags[]=
 	DEFINE_FLAG(STFL, USESTBOUNCESOUND, AActor, ulSTFlags),
 	DEFINE_FLAG(STFL, EXPLODEONDEATH, AActor, ulSTFlags),
 	DEFINE_FLAG(STFL, DONTIDENTIFYTARGET, AActor, ulSTFlags), // [CK]
+	DEFINE_FLAG(STFL, FORCEALLYCOLLISION, AActor, ulSTFlags), // [AK]
 
-	// [BB] New DECORATE network related flag defines here.
+	// [AK] Enables/disables GAMEEVENT_ACTOR_SPAWNED for the actor.
+	DEFINE_FLAG(STFL, USESPAWNEVENTSCRIPT, AActor, ulSTFlags),
+	DEFINE_FLAG(STFL, NOSPAWNEVENTSCRIPT, AActor, ulSTFlags),
+
+	// [AK] Enables/disables GAMEEVENT_ACTOR_DAMAGED for the actor.
+	DEFINE_FLAG(STFL, USEDAMAGEEVENTSCRIPT, AActor, ulSTFlags),
+	DEFINE_FLAG(STFL, NODAMAGEEVENTSCRIPT, AActor, ulSTFlags),
+
+	// [AK] This actor was spawned by a random spawner.
+	DEFINE_FLAG(STFL, RANDOMSPAWNED, AActor, ulSTFlags),
+
+// [BB] New DECORATE network related flag defines here.
 	DEFINE_FLAG(NETFL, NONETID, AActor, ulNetworkFlags),
 	DEFINE_FLAG(NETFL, ALLOWCLIENTSPAWN, AActor, ulNetworkFlags),
 	DEFINE_FLAG(NETFL, CLIENTSIDEONLY, AActor, ulNetworkFlags),

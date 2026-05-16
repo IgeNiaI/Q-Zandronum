@@ -19,7 +19,7 @@ if( NOT MSVC AND NOT APPLE )
 	if( NOT CMAKE_CROSSCOMPILING )
 		add_executable( arithchk arithchk.c )
 	endif( NOT CMAKE_CROSSCOMPILING )
-	get_target_property( ARITHCHK_EXE arithchk LOCATION )
+	set(ARITHCHK_EXE arithchk)
 	add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/arith.h 
 		COMMAND ${ARITHCHK_EXE} >${CMAKE_CURRENT_BINARY_DIR}/arith.h
 		DEPENDS arithchk )
@@ -28,7 +28,7 @@ if( NOT MSVC AND NOT APPLE )
 		add_executable( qnan qnan.c arith.h )
 		set( CROSS_EXPORTS ${CROSS_EXPORTS} arithchk qnan PARENT_SCOPE )
 	endif( NOT CMAKE_CROSSCOMPILING )
-	get_target_property( QNAN_EXE qnan LOCATION )
+	set(QNAN_EXE qnan)
 	add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gd_qnan.h
 		COMMAND ${QNAN_EXE} >${CMAKE_CURRENT_BINARY_DIR}/gd_qnan.h
 		DEPENDS qnan )
@@ -45,6 +45,7 @@ add_library( gdtoa
 	)
 target_link_libraries( gdtoa )
 if( GEN_FP_DEPS )
-	add_dependencies( gdtoa ${GEN_FP_DEPS} )
+add_custom_target(gdtoa_headers DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/arith.h" "${CMAKE_CURRENT_BINARY_DIR}/gd_qnan.h")
+add_dependencies(gdtoa gdtoa_headers)
 endif( GEN_FP_DEPS )
 

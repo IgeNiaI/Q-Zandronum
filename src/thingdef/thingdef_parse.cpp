@@ -446,15 +446,16 @@ void HandleActorFlag(FScanner &sc, Baggage &bag, const char *part1, const char *
 	}
 	else
 	{
+		// Goy-Proof fix: Skip unknown flags instead of crashing
 		if (part2 == NULL)
 		{
-			sc.ScriptMessage("\"%s\" is an unknown flag\n", part1);
+			Printf(PRINT_HIGH, "Warning: Unknown DECORATE flag '%s' ignored.\n", part1);
 		}
 		else
 		{
-			sc.ScriptMessage("\"%s.%s\" is an unknown flag\n", part1, part2);
+			Printf(PRINT_HIGH, "Warning: Unknown DECORATE flag '%s.%s' ignored.\n", part1, part2);
 		}
-		FScriptPosition::ErrorCounter++;
+		// Don't increment ErrorCounter - just warn and continue
 	}
 }
 
@@ -846,7 +847,9 @@ static void ParseActorProperty(FScanner &sc, Baggage &bag)
 	}
 	else
 	{
-		sc.ScriptError("\"%s\" is an unknown actor property\n", propname.GetChars());
+		// Goy-Proof fix: Skip unknown properties instead of crashing
+		Printf(PRINT_HIGH, "Warning: Unknown DECORATE property '%s' ignored.\n", propname.GetChars());
+		// Don't call ScriptError - just warn and continue
 	}
 }
 

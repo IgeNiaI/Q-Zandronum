@@ -630,3 +630,16 @@ void FaceMovementDirection (AActor *actor)
 	}
 }
 
+//============================================================================
+//
+// A_SetPredictable
+// [geNia] Used for netcode optimization in MM8BDM projectiles - stubbed for compatibility
+//============================================================================
+
+DEFINE_ACTION_FUNCTION(AActor, A_SetPredictable)
+{
+	// This function is used for predictable projectile handling in MM8BDM.
+	// Q-Zandronum handles this differently through its existing netcode.
+	// No-op stub to prevent "Unknown action function" warnings.
+}
+

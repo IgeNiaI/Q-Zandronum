@@ -522,7 +522,8 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc, int inser
 		}
 		else
 		{
-			sc.ScriptError("Unknown keyword '%s'", sc.String);
+			sc.ScriptMessage("Unknown keyword '%s' in list menu - skipping.\n", sc.String);
+			SkipSubBlock(sc);
 		}
 	}
 }
@@ -1541,7 +1542,8 @@ static void ParseFreeformMenuBody(FScanner &sc, FFreeformMenuDescriptor *desc, F
 		}
 		else
 		{
-			sc.ScriptError("Unknown keyword '%s'", sc.String);
+			sc.ScriptMessage("Unknown keyword '%s' in freeform menu - skipping.\n", sc.String);
+			SkipSubBlock(sc);
 		}
 
 		if (addedItem != NULL)
@@ -2192,6 +2194,11 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc, int i
 		{
 			desc->mNetgameOnly = true;
 		}
+		// [AK] This menu can only be opened by clients with RCON access.
+		else if ( sc.Compare ( "RequiresRconAccess" ))
+		{
+			desc->mRequiresRCON = true;
+		}
 		// [BB]
 		else if ( sc.Compare ( "ServerBrowserSlot" ) )
 		{
@@ -2234,6 +2241,7 @@ static void ParseOptionMenu(FScanner &sc)
 	desc->mIndent =  DefaultOptionMenuSettings.mIndent;
 	desc->mDontDim =  DefaultOptionMenuSettings.mDontDim;
 	desc->mNetgameOnly = false; // [TP]
+	desc->mRequiresRCON = false; // [AK]
 
 	ParseOptionMenuBody(sc, desc, -1);
 	bool scratch = ReplaceMenu(sc, desc);

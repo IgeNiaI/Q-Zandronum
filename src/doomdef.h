@@ -442,7 +442,8 @@ enum
 	// executed on the clients, but not on the server.
 	ZACOMPATF_NETSCRIPTS_ARE_CLIENTSIDE		= 1 << 0,
 
-	// Used to be ZACOMPATF_CLIENTS_SEND_FULL_BUTTON_INFO here, but it is no longer needed
+	// [BB] Tell the server to send us the full 32-bit buttons instead of just 8
+	ZACOMPATF_CLIENTS_SEND_FULL_BUTTON_INFO		= 1 << 1,
 
 	// [BB] Players are not allowed to use the land CCMD. Because of Skulltag's default amount
 	// of air control, flying players can get a huge speed boast with the land CCMD. Disallowing

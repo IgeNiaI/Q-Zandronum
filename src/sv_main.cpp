@@ -5306,7 +5306,7 @@ ClientMoveCommand::ClientMoveCommand ( BYTESTREAM_s *pByteStream )
 		pCmd->ucmd.roll = NETWORK_ReadLong( pByteStream );
 
 	if ( ulBits & CLIENT_UPDATE_BUTTONS )
-		pCmd->ucmd.buttons = NETWORK_ReadLong( pByteStream );
+		pCmd->ucmd.buttons = ( ulBits & CLIENT_UPDATE_BUTTONS_LONG ) ? NETWORK_ReadLong( pByteStream ) : NETWORK_ReadByte( pByteStream );
 
 	if ( ulBits & CLIENT_UPDATE_FORWARDMOVE )
 		pCmd->ucmd.forwardmove = NETWORK_ReadShort( pByteStream );

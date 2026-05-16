@@ -690,7 +690,7 @@ endif( BACKPATCH )
 
 # Update gitinfo.h
 
-get_target_property( UPDATEREVISION_EXE updaterevision LOCATION )
+set(UPDATEREVISION_EXE updaterevision)
 
 add_custom_target( revision_check ALL
 	COMMAND ${UPDATEREVISION_EXE} src/gitinfo.h
@@ -850,8 +850,8 @@ else( NO_ASM )
 	endif( X64 )
 endif( NO_ASM )
 
-get_target_property( LEMON_EXE lemon LOCATION )
-get_target_property( RE2C_EXE re2c LOCATION )
+set(LEMON_EXE lemon)
+set(RE2C_EXE re2c)
 
 add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/xlat_parser.c ${CMAKE_CURRENT_BINARY_DIR}/xlat_parser.h
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/xlat/xlat_parser.y .

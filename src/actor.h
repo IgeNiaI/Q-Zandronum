@@ -453,6 +453,21 @@ enum
 	// [BB] Hidden by HideOrDestroyIfSafe(), will be restored when the map is reset.
 	STFL_HIDDEN_INSTEAD_OF_DESTROYED		= 0x00800000,
 
+	// [AK] This actor may (not) trigger GAMEEVENT_ACTOR_SPAWNED upon spawning.
+	STFL_USESPAWNEVENTSCRIPT	= 0x01000000,
+	STFL_NOSPAWNEVENTSCRIPT		= 0x02000000,
+
+	// [AK] This actor may (not) trigger the GAMEEVENT_ACTOR_DAMAGED event type.
+	STFL_USEDAMAGEEVENTSCRIPT	= 0x04000000,
+	STFL_NODAMAGEEVENTSCRIPT	= 0x08000000,
+
+	// [AK] This projectile will always collide/push the shooter's allies, even if sv_shootthroughallies
+	// or sv_dontpushallies are enabled.
+	STFL_FORCEALLYCOLLISION		= 0x10000000,
+
+	// [AK] This actor was spawned by a random spawner.
+	STFL_RANDOMSPAWNED			= 0x20000000,
+
 // More flags for Skulltag... these having to do with the network.
 
 	// This object does not have a network ID.

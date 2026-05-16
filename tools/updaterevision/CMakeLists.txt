@@ -25,7 +25,7 @@ if( NOT CMAKE_CROSSCOMPILING )
 endif( NOT CMAKE_CROSSCOMPILING )
 
 if( MT_MERGE )
-	get_target_property( UPDATEREVISION_EXE updaterevision LOCATION )
+	set(UPDATEREVISION_EXE updaterevision)
 	add_custom_command(TARGET updaterevision POST_BUILD
 		COMMAND mt -inputresource:${UPDATEREVISION_EXE} -manifest ${CMAKE_CURRENT_SOURCE_DIR}/trustinfo.txt -outputresource:${UPDATEREVISION_EXE} -nologo
 		COMMENT "Embedding trustinfo into updaterevision" )

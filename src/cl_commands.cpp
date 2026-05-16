@@ -341,7 +341,11 @@ void CLIENTCOMMANDS_ClientMove( void )
 	if ( pCmd->ucmd.roll )
 		ulBits |= CLIENT_UPDATE_ROLL;
 	if ( pCmd->ucmd.buttons )
+	{
 		ulBits |= CLIENT_UPDATE_BUTTONS;
+		if ( zacompatflags & ZACOMPATF_CLIENTS_SEND_FULL_BUTTON_INFO )
+			ulBits |= CLIENT_UPDATE_BUTTONS_LONG;
+	}
 	if ( pCmd->ucmd.forwardmove )
 		ulBits |= CLIENT_UPDATE_FORWARDMOVE;
 	if ( pCmd->ucmd.sidemove )

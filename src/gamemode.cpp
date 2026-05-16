@@ -202,7 +202,11 @@ int GAMEMODE_ParserMustGetEnumName ( FScanner &sc, const char *EnumName, const c
 	flagname.ToUpper();
 	const int flagNum = GetValueFromName ( flagname.GetChars() );
 	if ( flagNum == -1 )
-		sc.ScriptError ( "Unknown %s '%s', on line %d in GAMEMODE.", EnumName, sc.String, sc.Line );
+	{
+		// Skip unknown flags instead of crashing - makes the engine "Goy-Proof"
+		Printf( PRINT_HIGH, "Warning: Unknown %s '%s' on line %d in GAMEMODE - ignoring.\n", EnumName, sc.String, sc.Line );
+		return 0;
+	}
 	return flagNum;
 }
 
