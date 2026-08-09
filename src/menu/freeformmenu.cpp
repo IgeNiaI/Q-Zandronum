@@ -1129,21 +1129,22 @@ bool FFreeformMenuItemOptionBase::CopyTo(FFreeformMenuItem* other)
 
 void FFreeformMenuItemOptionBase::Draw(FFreeformMenuDescriptor *desc, int yoffset, bool selected)
 {
-	int Selection = GetSelection();
+	int Selection = GetSelection(mValues);
 	FOptionValues **opt = OptionValues.CheckKey(mValues);
 	if (Selection < 0 || opt == NULL || *opt == NULL || Selection >= (*opt)->mValues.Size())
 		ReplaceString(&mLabel, mUnknownValueText);
 	else
 		ReplaceString(&mLabel, (*opt)->mValues[Selection].Text);
 
+	int BackgroundSelection = GetSelection(mBackgroundValues);
 	FOptionValues** optback = OptionValues.CheckKey(mBackgroundValues);
-	if (Selection < 0 || optback == NULL || *optback == NULL || Selection >= (*optback)->mValues.Size())
+	if (BackgroundSelection < 0 || optback == NULL || *optback == NULL || BackgroundSelection >= (*optback)->mValues.Size())
 	{
 		mBackground = mUnknownBackgroundTexture;
 	}
 	else
 	{
-		mBackground = TexMan.CheckForTexture((*optback)->mValues[Selection].Text, FTexture::TEX_MiscPatch);
+		mBackground = TexMan.CheckForTexture((*optback)->mValues[BackgroundSelection].Text, FTexture::TEX_MiscPatch);
 		if (mBackground.GetIndex() == -1 || mBackground.GetIndex() == 0)
 			mBackground = mUnknownBackgroundTexture;
 	}
@@ -1159,7 +1160,7 @@ bool FFreeformMenuItemOptionBase::SetString(int i, const char* newtext)
 		mValues = newtext;
 		if (opt != NULL && *opt != NULL)
 		{
-			int s = GetSelection();
+			int s = GetSelection(mValues);
 			if (s >= (int)(*opt)->mValues.Size()) s = 0;
 			SetSelection(s);	// readjust the CVAR if its value is outside the range now
 			return true;
@@ -1173,7 +1174,7 @@ bool FFreeformMenuItemOptionBase::MenuEvent(int mkey, bool fromcontroller)
 	FOptionValues** opt = OptionValues.CheckKey(mValues);
 	if (opt != NULL && *opt != NULL && (*opt)->mValues.Size() > 0)
 	{
-		int Selection = GetSelection();
+		int Selection = GetSelection(mValues);
 		if (mkey == MKEY_Clear)
 		{
 			if (Selection == -1) Selection = 0;
@@ -1225,10 +1226,10 @@ bool FFreeformMenuItemOption::IsOptionSelectable(double)
 	return true;
 }
 
-int FFreeformMenuItemOption::GetSelection()
+int FFreeformMenuItemOption::GetSelection(FName values)
 {
 	int Selection = -1;
-	FOptionValues** opt = OptionValues.CheckKey(mValues);
+	FOptionValues** opt = OptionValues.CheckKey(values);
 	if (opt != NULL && *opt != NULL && mCVar != NULL && (*opt)->mValues.Size() > 0)
 	{
 		if ((*opt)->mValues[0].TextValue.IsEmpty())

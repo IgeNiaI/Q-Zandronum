@@ -230,7 +230,7 @@ public:
 	bool MenuEvent(int mkey, bool fromcontroller);
 
 	//=============================================================================
-	virtual int GetSelection() = 0;
+	virtual int GetSelection(FName values) = 0;
 	virtual void SetSelection(int Selection) = 0;
 };
 
@@ -263,7 +263,7 @@ public:
 	}
 
 	//=============================================================================
-	int GetSelection();
+	int GetSelection(FName values);
 	void SetSelection(int Selection);
 	void SetCVar(FName cvar) { mCVar = FindCVar(cvar, NULL); mAction = cvar; } // Need to set mAction for AddFreeformMenu to work
 
