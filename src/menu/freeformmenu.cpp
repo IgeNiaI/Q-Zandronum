@@ -1131,13 +1131,13 @@ void FFreeformMenuItemOptionBase::Draw(FFreeformMenuDescriptor *desc, int yoffse
 {
 	int Selection = GetSelection();
 	FOptionValues **opt = OptionValues.CheckKey(mValues);
-	if (Selection < 0 || opt == NULL || *opt == NULL)
+	if (Selection < 0 || opt == NULL || *opt == NULL || Selection >= (*opt)->mValues.Size())
 		ReplaceString(&mLabel, mUnknownValueText);
 	else
 		ReplaceString(&mLabel, (*opt)->mValues[Selection].Text);
 
 	FOptionValues** optback = OptionValues.CheckKey(mBackgroundValues);
-	if (Selection < 0 || optback == NULL || *optback == NULL)
+	if (Selection < 0 || optback == NULL || *optback == NULL || Selection >= (*optback)->mValues.Size())
 	{
 		mBackground = mUnknownBackgroundTexture;
 	}
