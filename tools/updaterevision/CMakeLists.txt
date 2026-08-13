@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.4 )
+#cmake_minimum_required( VERSION 2.4 )
 
 if( WIN32 )
 	if( "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
@@ -25,8 +25,8 @@ if( NOT CMAKE_CROSSCOMPILING )
 endif( NOT CMAKE_CROSSCOMPILING )
 
 if( MT_MERGE )
-	get_target_property( UPDATEREVISION_EXE updaterevision LOCATION )
 	add_custom_command(TARGET updaterevision POST_BUILD
-		COMMAND mt -inputresource:${UPDATEREVISION_EXE} -manifest ${CMAKE_CURRENT_SOURCE_DIR}/trustinfo.txt -outputresource:${UPDATEREVISION_EXE} -nologo
+		COMMAND mt -inputresource:$<TARGET_FILE:updaterevision> -manifest ${CMAKE_CURRENT_SOURCE_DIR}/trustinfo.txt -outputresource:$<TARGET_FILE:updaterevision> -nologo
 		COMMENT "Embedding trustinfo into updaterevision" )
 endif( MT_MERGE )
+
