@@ -716,7 +716,7 @@ include_directories( ${OPENSSL_INCLUDE_DIR} )
 set ( ZDOOM_LIBS ${ZDOOM_LIBS} ${OPENSSL_LIBRARIES} )
 if( WIN32 )
 	set ( ZDOOM_LIBS ${ZDOOM_LIBS} crypt32 )
-endif ( NOT WIN32 )
+endif ( WIN32 )
 
 if( NOT NO_SOUND )
 	if( SNDFILE_FOUND )
