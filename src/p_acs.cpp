@@ -6627,7 +6627,7 @@ int DLevelScript::CallFunction(int argCount, int funcIndex, SDWORD *args, struct
 		case ACSF_SpawnForced:
 		{
 			player_t* ownerPlayer = NETWORK_GetActorsOwnerPlayer( activator );
-			return DoSpawn(args[0], args[1], args[2], args[3], args[4], args[5], true, ownerPlayer);
+			return DoSpawn(args[0], args[1], args[2], args[3], argCount > 4 ? args[4] : 0, argCount > 5 ? args[5] : 0, true, ownerPlayer);
 		}
 
 		case ACSF_ACS_NamedExecute:
